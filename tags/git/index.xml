@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Git on victoria.dev</title><link>https://victoria.dev/tags/git/</link><description>Recent content in Git on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria)</managingEditor><webMaster>hello@victoria.dev (Victoria)</webMaster><lastBuildDate>Fri, 15 Mar 2019 11:55:28 -0400</lastBuildDate><atom:link href="https://victoria.dev/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>A remote sync solution for iOS and Linux: Git and Working Copy</title><link>https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</link><pubDate>Fri, 15 Mar 2019 11:55:28 -0400</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</guid><description>How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS.</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync_hu1984111f2d75b603219adcc3d215dc57_618766_640x0_resize_box_2.png" width="640" height="418"/>
+&lt;p&gt;I previously wrote about a (hackish) way to use a &lt;a href=&#34;https://victoria.dev/verbose/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/&#34;&gt;single Dropbox folder on a dual-boot Windows and Linux machine&lt;/a&gt;. I&amp;rsquo;ve since &lt;del&gt;gained some sense&lt;/del&gt; gone full Linux with Ubuntu 18.04 LTS, but the Dropbox set up seems to have stopped being an option in any case. Fortunately, I&amp;rsquo;ve since found a much better (far less hackish) way to remote-sync files across different file systems. Reflecting my current set up, I&amp;rsquo;m talking about iOS (iPad and iPhone) and my Linux machine.&lt;/p&gt;
+&lt;p&gt;The new sync system is based on Git, very customizable, and conveniently extensible. Beyond text files, you can sync anything that Git can (which is almost everything - if you want to edit your &lt;code&gt;.gitignore&lt;/code&gt;d files on the go I&amp;rsquo;m not sure I can help). If you&amp;rsquo;re already familiar with Git, getting set up will be a walk in the park. If Git is new to you, I think these tools help make the concepts of Git cloning, pulling, and pushing straightforward to understand.&lt;/p&gt;
+&lt;h1 id=&#34;components&#34;&gt;Components&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://workingcopy.app&#34;&gt;Working Copy app&lt;/a&gt; ($15.99 one-time pro-unlock and well worth it, iOS only)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ia.net/writer&#34;&gt;iA Writer app&lt;/a&gt; ($8.99 one-time purchase for iOS, also available on Mac, Windows, and Android)&lt;/li&gt;
+&lt;li&gt;GitHub repositories (&lt;a href=&#34;https://github.blog/2019-01-07-new-year-new-github/&#34;&gt;private&lt;/a&gt; or public, both free)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I was inspired by &lt;a href=&#34;https://www.macstories.net/ios/my-markdown-writing-and-collaboration-workflow-powered-by-working-copy-3-6-icloud-drive-and-github/&#34;&gt;this article&lt;/a&gt; as well as &lt;a href=&#34;http://blog.joncairns.com/2011/10/how-to-use-git-submodules/&#34;&gt;this one&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;get-set-up&#34;&gt;Get set up&lt;/h1&gt;
+&lt;p&gt;Here are the steps to setting up that I&amp;rsquo;ll walk you through in this article.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create your remote repository&lt;/li&gt;
+&lt;li&gt;Clone repository to iPad with Working Copy&lt;/li&gt;
+&lt;li&gt;Open and edit files with iA Writer&lt;/li&gt;
+&lt;li&gt;Push changes back to remote&lt;/li&gt;
+&lt;li&gt;Pull changes from repository on your computer&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This system is straightforward to set up whether you&amp;rsquo;re a command line whiz or just getting into Git. Let&amp;rsquo;s do it!&lt;/p&gt;
+&lt;h2 id=&#34;create-your-remote-repository&#34;&gt;Create your remote repository&lt;/h2&gt;
+&lt;p&gt;GitHub now offers free &lt;a href=&#34;https://github.blog/2019-01-07-new-year-new-github/&#34;&gt;private repositories&lt;/a&gt; for up to three collaborators. Choose &amp;ldquo;Private&amp;rdquo; on GitHub&amp;rsquo;s repository creation page:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;github-private-repo.png#screenshot&#34; alt=&#34;Selection options for public and private repository&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Create the repository. If you&amp;rsquo;d like to, you can follow GitHub&amp;rsquo;s instructions to push some files to it from your computer, or you can add files later from your iPad.&lt;/p&gt;
+&lt;h2 id=&#34;clone-repository-to-ipad-with-working-copy&#34;&gt;Clone repository to iPad with Working Copy&lt;/h2&gt;
+&lt;p&gt;Download &lt;a href=&#34;https://workingcopy.app&#34;&gt;Working Copy&lt;/a&gt; from the App Store. It&amp;rsquo;s one of the more expensive apps I&amp;rsquo;ve purchased, but I think it&amp;rsquo;s well worth it. Developer &lt;a href=&#34;https://twitter.com/palmin&#34;&gt;Anders Borum&lt;/a&gt; has a steady track record of frequent updates and incorporating the latest features for iOS apps, like &lt;a href=&#34;https://workingcopy.app/manual/dragdrop&#34;&gt;drag and drop&lt;/a&gt; on iPad. I think he&amp;rsquo;s fairly priced his product in light of the work he puts into maintaining and enhancing it.&lt;/p&gt;
+&lt;p&gt;In Working Copy, find the gear icon in the top left corner and touch to open Settings.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-settings.png#screenshot&#34; alt=&#34;Settings menu in Working Copy&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Tap on SSH Keys, and you&amp;rsquo;ll see this screen:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-ssh.png#screenshot&#34; alt=&#34;SSH Key for Working Copy on iPad&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;SSH keys, or Secure Shell keys, are access credentials used in the &lt;a href=&#34;https://en.wikipedia.org/wiki/Secure_Shell&#34;&gt;SSH protocol&lt;/a&gt;. Your key is a password that your device will use to securely connect with your remote repository host - GitHub, in our example. Since anyone with your SSH keys can potentially pretend to be you and gain access to your files, it&amp;rsquo;s important not to share them accidentally, like in a screenshot on a blog post.&lt;/p&gt;
+&lt;p&gt;Tap on the second line that looks like &amp;ldquo;WorkingCopy@iPad-xxxxxxxx&amp;rdquo; to get this screen:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-ssh-connect.png#screenshot&#34; alt=&#34;Connect to GitHub or Bitbucket in Working Copy&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Working Copy supports easy connection to both BitBucket and GitHub. Tap &amp;ldquo;Connect With GitHub&amp;rdquo; or BitBucket to bring up some familiar sign-in screens that will authorize Working Copy to access your account(s).&lt;/p&gt;
+&lt;p&gt;Once connected, tap the &amp;ldquo;+&amp;rdquo; symbol in the top right of the side bar to add a new repository. Choose &amp;ldquo;Clone repository&amp;rdquo; to bring up this screen:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-read-repos.png#screenshot&#34; alt=&#34;Loading repositories from remote&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Here, you can either manually input the remote URL, or simply choose from the list of repositories that Working Copy fetches from your connected account. When you make your choice, the app clones the repository to your iPad and it will show up in the sidebar. You&amp;rsquo;re connected!&lt;/p&gt;
+&lt;h2 id=&#34;open-and-edit-files-with-ia-writer&#34;&gt;Open and edit files with iA Writer&lt;/h2&gt;
+&lt;p&gt;One of the (many) reasons I adore &lt;a href=&#34;https://ia.net/writer&#34;&gt;iA Writer&lt;/a&gt; is its ability to select your freshly cloned remote repository as a Library Location. To do this in the iA Writer app:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;From the main Library list, in the top right of the sidebar, tap &amp;ldquo;Edit&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;Tap &amp;ldquo;Add Location&amp;hellip;&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;A helpful popup appears. Tap OK.&lt;/li&gt;
+&lt;li&gt;From the Working Copy location, tap &amp;ldquo;Select&amp;rdquo; in the top right, then choose the repository folder.&lt;/li&gt;
+&lt;li&gt;Tap &amp;ldquo;Open&amp;rdquo;, then &amp;ldquo;Done&amp;rdquo;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Your remote repository now appears as a Location in the sidebar. Tap on it to work within this directory.&lt;/p&gt;
+&lt;p&gt;While inside this location, new files you create (by tapping the pencil-and-paper icon in the top right corner) will be saved to this folder locally. As you work, iA Writer automatically saves your progress. Next, we&amp;rsquo;ll look at pushing those files and changes back to your remote.&lt;/p&gt;
+&lt;h2 id=&#34;push-changes-back-to-remote&#34;&gt;Push changes back to remote&lt;/h2&gt;
+&lt;p&gt;Once you&amp;rsquo;ve made changes to your files, open Working Copy again. You should see a yellow dot on your changed repository.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-changed-repo.png#screenshot&#34; alt=&#34;Yellow dot indicating changes to repository&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Tap on your repository name, then on &amp;ldquo;Repository Status and Configuration&amp;rdquo; at the top of the sidebar. Your changed files will be indicated by yellow dots or green &amp;ldquo;+&amp;rdquo; symbols. These mean that you&amp;rsquo;ve modified or added files, respectively.&lt;/p&gt;
+&lt;p&gt;Working Copy is a sweet iOS Git client, and you can tap on your files to see additional information including a comparison of changes (&amp;ldquo;diff&amp;rdquo;) as well as status and Git history. You can even edit files right within the app, with &lt;a href=&#34;https://workingcopyapp.com/manual/edit&#34;&gt;syntax highlighting&lt;/a&gt; for its many supported languages. For now, we&amp;rsquo;ll look at how to push your changed work to your remote repository.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-changes-to-commit.png#screenshot&#34; alt=&#34;Changes to commit&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;On the &amp;ldquo;Repository Status and Configuration&amp;rdquo; page, you&amp;rsquo;ll see right at the top that there are changes to be committed. If you&amp;rsquo;re new to Git, this is like &amp;ldquo;saving your changes&amp;rdquo; to your Git history, something typically done with the terminal command &lt;a href=&#34;https://git-scm.com/docs/git-commit&#34;&gt;&lt;code&gt;git commit&lt;/code&gt;&lt;/a&gt;. You can think of this as saving the files that we&amp;rsquo;ll want to send to the GitHub repository. Tap &amp;ldquo;Commit changes.&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-commit-changes.png#screenshot&#34; alt=&#34;Add a commit message and select files to commit&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Enter your commit message, and select the files you want to add. Turn on the &amp;ldquo;Push&amp;rdquo; switch to send everything to your remote repository when you commit the files. Then tap &amp;ldquo;Commit.&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll see a progress bar as your files are uploaded, and then a confirmation message on the status screen.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-commit-success.png#screenshot&#34; alt=&#34;Commit success message&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Congratulations! Your changes are now present in your remote repository on GitHub. You&amp;rsquo;ve successfully synced your files remotely!&lt;/p&gt;
+&lt;h2 id=&#34;pull-changes-from-repository-on-your-computer&#34;&gt;Pull changes from repository on your computer&lt;/h2&gt;
+&lt;p&gt;To bring your updated files full circle to your computer, you pull them from the GitHub repository. I prefer to use the terminal for this as it&amp;rsquo;s quick and easy, but GitHub also offers a &lt;a href=&#34;https://help.github.com/en/desktop/getting-started-with-github-desktop&#34;&gt;graphical client&lt;/a&gt; if terminal commands seem a little alien for now.&lt;/p&gt;
+&lt;p&gt;If you started with the GitHub repository, you can clone it to a folder on your computer by following &lt;a href=&#34;https://help.github.com/en/articles/cloning-a-repository&#34;&gt;these instructions&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;staying-in-sync&#34;&gt;Staying in sync&lt;/h2&gt;
+&lt;p&gt;When you update your work on your computer, you&amp;rsquo;ll use Git to push your changes to the remote repository. To do this, you can use GitHub&amp;rsquo;s &lt;a href=&#34;https://help.github.com/en/desktop/getting-started-with-github-desktop&#34;&gt;graphical client&lt;/a&gt;, or follow &lt;a href=&#34;https://help.github.com/en/articles/adding-an-existing-project-to-github-using-the-command-line&#34;&gt;these instructions&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;On your iOS device, Working Copy makes pulling and pushing as simple as a single tap. On the Repository Status and Configuration page, tap on the remote name under &amp;ldquo;Remotes&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-git-remote.png#screenshot&#34; alt=&#34;List of Remotes in Working Copy&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Then tap &amp;ldquo;Synchronize&amp;rdquo;. Working Copy will take care of the details of pushing your committed changes and/or pulling any new changes it finds from the remote repository.&lt;/p&gt;
+&lt;h1 id=&#34;not-bad-right&#34;&gt;Not bad, right?&lt;/h1&gt;
+&lt;p&gt;For a Git-based developer and work-anywhere-aholic like me, this set up couldn&amp;rsquo;t be more convenient. Working Copy really makes staying in sync with my remote repositories seamless, nevermind the ability to work with any of my GitHub repos on the go.&lt;/p&gt;
+&lt;p&gt;For editing on the go, here&amp;rsquo;s a useful tip. Use &lt;code&gt;.gitignore&lt;/code&gt; in your sync repository if you don&amp;rsquo;t need to move large files, like images, around with you. This will stop the ignored files from being pushed to GitHub and pulled to your iOS device - they&amp;rsquo;ll only remain on your computer&amp;rsquo;s larger hard drive. The &lt;code&gt;.gitignore&lt;/code&gt; file of one of my sync repositories looks like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;*.png
+*.jpeg
+*.jpg
+*.mp4
+*.gif
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This means all the media files stay on my computer, and I can pull just the text file content to my iPad from GitHub to work on while I&amp;rsquo;m out and about.&lt;/p&gt;
+&lt;p&gt;I most recently used this set up to get some writing done while hanging out in the atrium of Washington DC&amp;rsquo;s National Portrait Gallery, which is pleasantly photogenic.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;washington-portrait-gallery.jpg&#34; alt=&#34;The atrium of the National Portrait Gallery&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://twitter.com/victoriadotdev&#34;&gt;I&amp;rsquo;d love to hear&lt;/a&gt; how this set up works for you and how you use it. In the meantime, happy working!&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync.png" type="image/jpg"/></item><item><title>Git commit practices your future self will thank you for</title><link>https://victoria.dev/verbose/git-commit-practices-your-future-self-will-thank-you-for/</link><pubDate>Mon, 06 Aug 2018 08:54:56 -0400</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/git-commit-practices-your-future-self-will-thank-you-for/</guid><description>How squash commits, vimrc, and git tags can help you make great Git commits.</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art_hu3c5d7a1ac69b5f3a44f90a6688078cc1_89530_640x0_resize_box_2.png" width="640" height="320"/>
+&lt;p&gt;A history of clean commits can be evidence of a lot of things: attention to detail, good work ethic, and genuine investment in the project. What do your Git commits say about you?&lt;/p&gt;
+&lt;p&gt;If, like me, there &lt;em&gt;might&lt;/em&gt; be one or two less than stellar ones, well, we&amp;rsquo;re only human. A nice part of being human is having the ability to learn new and complex things fairly quickly, and continuously improve ourselves. In that spirit, I&amp;rsquo;d like to share some things I&amp;rsquo;ve learned about creating clean, useful, and responsible Git commits.&lt;/p&gt;
+&lt;h1 id=&#34;what-does-it-mean-to-commit-responsibly&#34;&gt;What does it mean to commit responsibly?&lt;/h1&gt;
+&lt;p&gt;Whether our code will be seen by the entire open source community or just future versions of ourselves, either one will be grateful if we commit responsibly today. Being responsible can mean a lot of things to different people, so I enlisted some of &lt;a href=&#34;https://mastodon.technology/@victoria/&#34;&gt;mastodon.technology&lt;/a&gt; and &lt;a href=&#34;https://dev.to/victoria/what-does-it-mean-to-commit-responsibly-22mi&#34;&gt;dev.to&lt;/a&gt; to help round out my list. From those (really great) threads, I distilled these main points:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Committing responsibly&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Provide and/or use tests to avoid committing bugs or broken builds&lt;/li&gt;
+&lt;li&gt;Write clean code that meets style specifications&lt;/li&gt;
+&lt;li&gt;Use descriptive commit messages that reference related discussion&lt;/li&gt;
+&lt;li&gt;Make only one change per commit and avoid including unrelated changes&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Some of the above is achieved through maintaining a short feedback loop that helps you improve your code quality while staying accountable to yourself. &lt;a href=&#34;https://victoria.dev/verbose/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/&#34;&gt;I wrote another article&lt;/a&gt; that discusses this in detail, especially the part about &lt;a href=&#34;https://victoria.dev/verbose/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/#block-out-time-for-code-review&#34;&gt;code review&lt;/a&gt;. Other items on this list have to do specifically with making commits in Git. There are some features of Git that can benefit us in these areas, as can harnessing tools like Vim. I&amp;rsquo;ll cover those topics here.&lt;/p&gt;
+&lt;p&gt;If the majority of your Git commits so far have been created with something like &lt;code&gt;git commit -m &amp;quot;Bug fixes&amp;quot;&lt;/code&gt; then this is the article for you!&lt;/p&gt;
+&lt;h1 id=&#34;write-great-git-commit-messages-with-a-template&#34;&gt;Write great Git commit messages with a template&lt;/h1&gt;
+&lt;p&gt;I think &lt;a href=&#34;https://github.com/torvalds/subsurface-for-dirk/commit/b6590150d68df528efd40c889ba6eea476b39873&#34;&gt;Linus&lt;/a&gt; would be very happy if we didn&amp;rsquo;t use &lt;code&gt;git commit -m &amp;quot;Fix bug&amp;quot;&lt;/code&gt; in a public repository ever again. As very well put in &lt;a href=&#34;https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html&#34;&gt;this classic post&lt;/a&gt; and &lt;a href=&#34;https://chris.beams.io/posts/git-commit/&#34;&gt;the seven rules of a great Git commit message&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A properly formed Git commit subject line should always be able to complete the following sentence:&lt;/p&gt;
+&lt;p&gt;If applied, this commit will &lt;em&gt;your subject line here&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href=&#34;http://who-t.blogspot.com/2009/12/on-commit-messages.html&#34;&gt;This other classic post&lt;/a&gt; also discusses three questions that the body of the commit message should answer:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Why is it necessary?&lt;br /&gt;
+How does it address the issue?&lt;br /&gt;
+What effects does the patch have?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This can be a lot to remember to cover, but there&amp;rsquo;s a slick way to have these prompts at hand right when you need it. You can set up a commit message template by using the &lt;code&gt;commit.template&lt;/code&gt; &lt;a href=&#34;https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration&#34;&gt;configuration value&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To set it, configure Git to use a template file (for example, &lt;code&gt;.gitmessage&lt;/code&gt; in your home directory), then create the template file with Vim:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git config --global commit.template ~/.gitmessage
+vim ~/.gitmessage&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;When we run &lt;code&gt;git commit&lt;/code&gt; without the &lt;code&gt;-m&lt;/code&gt; message flag, the editor will open with our helpful template ready to go. Here&amp;rsquo;s my commit message template:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;# If applied, this commit will...
+# [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
+# Why is it necessary? (Bug fix, feature, improvements?)
+-
+# How does the change address the issue?
+-
+# What side effects does this change have?
+-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I&amp;rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-txt&#34; data-lang=&#34;txt&#34;&gt;Fix #16 missing CSS variables
+- Fix for unstyled elements
+- Add background color, height for code blocks
+- Only affects highlight class&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;reference-related-discussion&#34;&gt;Reference related discussion&lt;/h2&gt;
+&lt;p&gt;Issue trackers in &lt;a href=&#34;https://help.github.com/articles/closing-issues-using-keywords/&#34;&gt;GitHub&lt;/a&gt; and &lt;a href=&#34;https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html&#34;&gt;Bitbucket&lt;/a&gt; both recognize the keywords &lt;code&gt;close&lt;/code&gt;, &lt;code&gt;fix&lt;/code&gt;, and &lt;code&gt;resolve&lt;/code&gt; followed immediately by the issue or pull request number. These keywords conveniently help us close the referenced issue or pull request, and this helps maintain a clear trail of changes. &lt;a href=&#34;https://about.gitlab.com/2016/03/08/gitlab-tutorial-its-all-connected/&#34;&gt;GitLab&lt;/a&gt;, and issue trackers like &lt;a href=&#34;https://confluence.atlassian.com/jirasoftwarecloud/referencing-issues-in-your-development-work-777002789.html&#34;&gt;Jira&lt;/a&gt; offer similar functionalities.&lt;/p&gt;
+&lt;h2 id=&#34;use-helpful-vim-settings-for-git-commit-messages&#34;&gt;Use helpful Vim settings for git commit messages&lt;/h2&gt;
+&lt;p&gt;By adding a few lines to our Vim configuration, we can make writing great git commit messages easy. We can add these lines to &lt;code&gt;~/.vimrc&lt;/code&gt; to turn on syntax highlighting in general, and spell check and text wrapping for commit messages in particular:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-vimrc&#34; data-lang=&#34;vimrc&#34;&gt;&lt;span class=&#34;c&#34;&gt;&amp;#34; Filetype detection, plugins, and indent rules&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;filetype&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;plugin&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;indent&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;on&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&amp;#34; Syntax highlighting&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;syntax&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;on&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&amp;#34; Spell check and line wrap just for git commit messages&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;autocmd&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Filetype&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;gitcommit&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;setlocal&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;spell&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;textwidth&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;72&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you&amp;rsquo;re curious, &lt;a href=&#34;https://gist.github.com/victoriadotdev/81699ada73748ecf7603c7708a5385ff&#34;&gt;my full &lt;code&gt;~/.vimrc&lt;/code&gt; is on GitHub&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Other editors have settings that can help us out as well. I came across &lt;a href=&#34;https://dev.to/shreyasminocha/how-i-do-my-git-commits-34d&#34;&gt;these for Sublime Text 3&lt;/a&gt; and &lt;a href=&#34;https://github.com/Microsoft/vscode-docs/blob/master/docs/getstarted/tips-and-tricks.md#language-specific-settings&#34;&gt;language specific settings for VS Code&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;one-change-per-commit-how-to-squash-git-commits&#34;&gt;One change per commit: how to squash Git commits&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;git-commit-squash.png&#34; alt=&#34;A doodle of squash&#34; /&gt;
+&lt;p class=&#34;img-caption&#34;&gt;Still life Git&lt;/p&gt;&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s get one thing out of the way first: rewriting Git history just for the sake of having a pretty tree, especially with public repositories, is generally not advisable. It&amp;rsquo;s kind of like going back in time, where changes you make to your version of the project cause it to look completely different from a version that someone else forked from a point in history that you&amp;rsquo;ve now erased - I mean, haven&amp;rsquo;t you seen &lt;em&gt;Back to the Future Part II&lt;/em&gt;? (If you&amp;rsquo;d rather maintain that only one &lt;em&gt;Back to the Future&lt;/em&gt; movie was ever made, thus sparing your future self from having to watch the sequels, I get it.)&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s the main point. If you&amp;rsquo;ve pushed messy commits to a public repository, I say go right ahead and leave them be, instead of complicating things further. (We all learn from our embarrassments, especially the public ones - I&amp;rsquo;m looking at you, past-Vicky.) If your messy commits currently only exist on your local version, great! We can tidy them up into one clean, well-described commit that we&amp;rsquo;ll be proud to push, and no one will be the wiser.&lt;/p&gt;
+&lt;p&gt;There are a couple different ways to squash commits, and choosing the appropriate one depends on what we need to achieve.&lt;/p&gt;
+&lt;p&gt;The following examples are illustrated using &lt;code&gt;git log --graph&lt;/code&gt;, with some options for brevity. We can set a handy alias to see this log format in our terminal with:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git config --global alias.plog &lt;span class=&#34;s2&#34;&gt;&amp;#34;log --graph --pretty=format:&amp;#39;%h -%d %s %n&amp;#39; --abbrev-commit --date=relative --branches&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Then we just do &lt;code&gt;git plog&lt;/code&gt; to see the pretty log.&lt;/p&gt;
+&lt;h2 id=&#34;method-1-one-commit-to-rule-the-master-branch&#34;&gt;Method #1: one commit to rule the master branch&lt;/h2&gt;
+&lt;p&gt;This is appropriate when:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;We&amp;rsquo;re committing directly to master&lt;/li&gt;
+&lt;li&gt;We don&amp;rsquo;t intend to open a pull request to merge a feature&lt;/li&gt;
+&lt;li&gt;We don&amp;rsquo;t want to preserve history of branches or changes we haven&amp;rsquo;t yet pushed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This method takes a Git tree that looks like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;* 3e8fd79 - (HEAD -&amp;gt; master) Fix a thing
+|
+* 4f0d387 - Tweak something
+|
+* 0a6b8b3 - Merge branch &amp;#39;new-article&amp;#39;
+|\
+| * 33b5509 - (new-article) Update article again again
+| |
+| * 1782e63 - Update article again
+| |
+| * 3c5b6a8 - Update article
+| |
+* | f790737 - (master) Tweak unrelated article
+|/
+|
+* 65af7e7 Add social media link
+|
+* 0e3fa32 (origin/master, origin/HEAD) Update theme&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And makes it look like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;* 7f9a127 - (HEAD -&amp;gt; master) Add new article
+|
+* 0e3fa32 - (origin/master, origin/HEAD) Update theme&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here&amp;rsquo;s how to do it - hold on to your hoverboards, it&amp;rsquo;s super complicated:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git reset --soft origin/master
+git commit&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Yup that&amp;rsquo;s all. We can delete the unwanted branch with &lt;code&gt;git branch -D new-article&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;method-2-not-that-much&#34;&gt;Method #2: not &lt;em&gt;that&lt;/em&gt; much!&lt;/h2&gt;
+&lt;p&gt;This is appropriate when:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;We want to squash the last &lt;em&gt;x&lt;/em&gt; commits but not &lt;em&gt;all&lt;/em&gt; commits since &lt;code&gt;origin/master&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;We want to open a pull request to merge a branch&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This method takes a Git tree that looks like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;* 13a070f - (HEAD -&amp;gt; new-article) Finish new article
+|
+* 78e728a - Edit article draft
+|
+* d62603c - Add example
+|
+* 1aeb20e - Update draft
+|
+* 5a8442a - Add new article draft
+|
+| * 65af7e7 - (master) Add social media link
+|/
+|
+* 0e3fa32 - (origin/master, origin/HEAD) Update theme&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And makes it look like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;* 90da69a - (HEAD -&amp;gt; new-article) Add new article
+|
+| * 65af7e7 - (master) Add social media link
+|/
+|
+* 0e3fa32 - (origin/master, origin/HEAD) Update theme&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To squash the last five commits on branch &lt;code&gt;new-article&lt;/code&gt; into one, we use:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git reset --soft HEAD~5
+git commit -m &lt;span class=&#34;s2&#34;&gt;&amp;#34;New message for the combined commit&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Where &lt;code&gt;--soft&lt;/code&gt; leaves our files untouched and staged, and &lt;code&gt;5&lt;/code&gt; can be thought of as &amp;ldquo;the number of previous commits I want to combine.&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;We can then do &lt;code&gt;git merge master&lt;/code&gt; and create our pull request.&lt;/p&gt;
+&lt;h2 id=&#34;method-3-getting-picky&#34;&gt;Method #3: getting picky&lt;/h2&gt;
+&lt;p&gt;Say we had a really confusing afternoon and our Git tree looks like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;* dc89918 - (HEAD -&amp;gt; master) Add link
+|
+* 9b6780f - Update image asset
+|
+* 6379956 - Fix CSS bug
+|
+* 16ee1f3 - Merge master into branch
+|\
+| |
+| * ccec365 - Update list page
+| |
+* | 033dee7 - Fix typo
+| |
+* | 90da69a - Add new article
+|/
+|
+* 0e3fa32 - (origin/master, origin/HEAD) Update theme&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We want to retain some of this history, but clean up the commits. We also want to change the messages for some of the commits. To achieve this, we&amp;rsquo;ll use &lt;code&gt;git rebase&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;This is appropriate when:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;We want to squash only some commits&lt;/li&gt;
+&lt;li&gt;We want to edit previous commit messages&lt;/li&gt;
+&lt;li&gt;We want to delete or reorder specific commits&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Git &lt;code&gt;rebase&lt;/code&gt; is a powerful tool, and handy once we&amp;rsquo;ve got the hang of it. To change all the commits since &lt;code&gt;origin/master&lt;/code&gt;, we do:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git rebase -i origin/master&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Or, we can do:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git rebase -i 0e3fa32&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Where the commit hash is the last commit we want to retain as-is.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;-i&lt;/code&gt; option lets us run the interactive rebase tool, which launches our editor with, essentially, a script for us to modify. We&amp;rsquo;ll see a list of our commits in reverse order to the git log, with the oldest at the top:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;pick 90da69a Add new article
+pick 033dee7 Fix typo
+pick ccec365 Update list page
+pick 6379956 Fix CSS bug
+pick 9b6780f Update image asset
+pick dc89918 Add link
+# Rebase 0e3fa32..dc89918 onto 0e3fa32 (6 commands)
+#
+# Commands:
+# p, pick = use commit
+# r, reword = use commit, but edit the commit message
+# e, edit = use commit, but stop for amending
+# s, squash = use commit, but meld into previous commit
+# f, fixup = like &amp;#34;squash&amp;#34;, but discard this commit&amp;#39;s log message
+# x, exec = run command (the rest of the line) using shell
+# d, drop = remove commit
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+#
+# If you remove a line here THAT COMMIT WILL BE LOST.
+#
+# However, if you remove everything, the rebase will be aborted.
+#
+# Note that empty commits are commented out
+#
+~&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The comments give us a handy guide as to what we&amp;rsquo;re able to do. For now, let&amp;rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;pick 90da69a Add new article
+squash 033dee7 Fix typo
+pick ccec365 Update list page
+squash 6379956 Fix CSS bug
+squash 9b6780f Update image asset
+squash dc89918 Add link&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;# This is a combination of 2 commits.
+# This is the 1st commit message:
+Add new article
+# This is the commit message #2:
+Fix typo
+# Please enter the commit message for your changes. Lines starting
+# with &amp;#39;#&amp;#39; will be ignored, and an empty message aborts the commit.
+#
+# interactive rebase in progress; onto 0e3fa32
+# Last commands done (2 commands done):
+# pick 90da69a Add new article
+# squash 033dee7 Fix typo
+# Next commands to do (4 remaining commands):
+# pick ccec365 Update list page
+# squash 6379956 Fix CSS bug
+# You are currently rebasing branch &amp;#39;master&amp;#39; on &amp;#39;0e3fa32&amp;#39;.
+#
+# Changes to be committed:
+# modified: ...
+#
+~&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here&amp;rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&amp;hellip;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;[detached HEAD 3cbad01] Add new article
+1 file changed, 129 insertions(+), 19 deletions(-)
+Auto-merging content/dir/file.md
+CONFLICT (content): Merge conflict in content/dir/file.md
+error: could not apply ccec365... Update list page
+Resolve all conflicts manually, mark them as resolved with
+&amp;#34;git add/rm &amp;lt;conflicted_files&amp;gt;&amp;#34;, then run &amp;#34;git rebase --continue&amp;#34;.
+You can instead skip this commit: run &amp;#34;git rebase --skip&amp;#34;.
+To abort and get back to the state before &amp;#34;git rebase&amp;#34;, run &amp;#34;git rebase --abort&amp;#34;.
+Could not apply ccec365... Update list page&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with &lt;code&gt;git rebase --continue&lt;/code&gt;. Our interactive rebase picks up where it left off.&lt;/p&gt;
+&lt;p&gt;Once all the squashing is done, our Git tree looks like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;* 3564b8c - (HEAD -&amp;gt; master) Update list page
+|
+* 3cbad01 - Add new article
+|
+* 0e3fa32 - (origin/master, origin/HEAD) Update theme&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Phew, much better.&lt;/p&gt;
+&lt;h1 id=&#34;git-stash&#34;&gt;Git stash&lt;/h1&gt;
+&lt;p&gt;If we&amp;rsquo;re in the middle of some work and it&amp;rsquo;s not a good time to commit, but we need to switch branches, &lt;a href=&#34;https://git-scm.com/book/en/v1/Git-Tools-Stashing&#34;&gt;stashing&lt;/a&gt; can be a good option. Stashing lets us save our unfinished work without needing to create a half-assed commit. It&amp;rsquo;s like that pile of paper on your desk representing all the stuff you&amp;rsquo;ve been in the middle of doing since two weeks ago. Yup, that one.&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s as easy as typing &lt;code&gt;git stash&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;Saved working directory and index state WIP on master: 3564b8c Update list page&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The dirty work we&amp;rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&amp;rsquo;s in our stash stack, we do &lt;code&gt;git stash list&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;stash@{0}: WIP on master: 3564b8c Update list page
+stash@{1}: WIP on master: 90da69a Add new article
+stash@{2}: WIP on cleanup: 0e3fa32 Update theme&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To restore our work in progress, we use &lt;code&gt;git stash apply&lt;/code&gt;. Git will try and apply our most recent stashed work. To apply an older stash, we use &lt;code&gt;git stash apply stash@{1}&lt;/code&gt; where &lt;code&gt;1&lt;/code&gt; is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.&lt;/p&gt;
+&lt;p&gt;Applying a stash doesn&amp;rsquo;t remove it from our list. To remove a stash from our stack, we do &lt;code&gt;git stash drop stash@{0}&lt;/code&gt; where &lt;code&gt;0&lt;/code&gt; is the one we want to remove.&lt;/p&gt;
+&lt;p&gt;We can also use &lt;code&gt;git stash pop&lt;/code&gt; to apply the most recent stash and then immediately remove it from the stack.&lt;/p&gt;
+&lt;h1 id=&#34;tag-release-versions-using-annotated-git-tags&#34;&gt;Tag release versions using annotated Git tags&lt;/h1&gt;
+&lt;p&gt;In the spirit of having a beautiful, clean Git history, there&amp;rsquo;s one more thing we can do to help make our commit log inspire infinite joy in its viewers. If you&amp;rsquo;ve never heard of &lt;code&gt;git tag&lt;/code&gt;, your master branch history might look like this&amp;hellip;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;* 0377782 - Update theme
+|
+* ecf8128 - Add about page (#25)
+|
+* 33e432f - Fix #23 navigation bug
+|
+* 08b853b - Create blog section
+|
+* 63d18b4 - Add theme (#12)
+|
+* 233e23f - Add main content (#6)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Wouldn&amp;rsquo;t it be nice if it looked like this instead?&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-console&#34; data-lang=&#34;console&#34;&gt;* 0377782 - (tag: v2.1.0) Update theme
+|
+* ecf8128 - Add about page (#25)
+|
+* 33e432f - Fix #23 navigation bug
+|
+* 08b853b - (tag: v2.0.0) Create blog section
+|
+* 63d18b4 - Add theme (#12)
+|
+* 233e23f - (tag: v1.1.0) Add main content (#6)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We can tag Git commits with anything, but tags are especially helpful for semantic versioning of releases. Sites like &lt;a href=&#34;https://help.github.com/articles/creating-releases/&#34;&gt;GitHub&lt;/a&gt; and &lt;a href=&#34;https://docs.gitlab.com/ce/workflow/releases.html&#34;&gt;GitLab&lt;/a&gt; have pages for repositories that list tags, letting viewers of our project browse the release versions. This can be helpful for public projects to differentiate major releases, updates with bug fixes, or beta versions.&lt;/p&gt;
+&lt;p&gt;There are two types of Git tags: lightweight and annotated. For adding a version tag to commits, we use annotated Git tags.&lt;/p&gt;
+&lt;p&gt;The &lt;a href=&#34;https://git-scm.com/docs/git-tag&#34;&gt;Git tag documentation&lt;/a&gt; explains it this way:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Tag objects (created with -a, -s, or -u) are called &amp;ldquo;annotated&amp;rdquo; tags; they contain a creation date, the tagger name and e-mail, a tagging message, and an optional GnuPG signature. Whereas a &amp;ldquo;lightweight&amp;rdquo; tag is simply a name for an object (usually a commit object).&lt;/p&gt;
+&lt;p&gt;Annotated tags are meant for release while lightweight tags are meant for private or temporary object labels. For this reason, some git commands for naming objects (like git describe) will ignore lightweight tags by default.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;We can think of lightweight tags as bookmarks, and annotated tags as signed releases.&lt;/p&gt;
+&lt;p&gt;For public repositories, annotated tags allow us to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;See who tagged the commit, which may differ from the commit author&lt;/li&gt;
+&lt;li&gt;See all the tags with &lt;code&gt;git describe&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Avoid conflicting tag names&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To create an annotated Git tag and attach it to our current (last) commit, we do:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git tag -a v1.2.0 -m &lt;span class=&#34;s2&#34;&gt;&amp;#34;Clever release title&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This tags the commit on our local repository. To push all annotated tags to the remote, we do:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git push --follow-tags&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We can also set our Git configuration to push our annotated tags by default:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git config --global push.followTags true&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If we then want to skip pushing tags this time, we pass &lt;code&gt;--no-follow-tags&lt;/code&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;practice-responsible-commits&#34;&gt;Practice responsible commits&lt;/h1&gt;
+&lt;p&gt;A little time invested in getting familiar with these tools and practices can make your commits even more useful and well-crafted. With a little practice, these processes will become second nature. You can make it even easier by creating a personal commit checklist on paper to keep handy while you work - or if that isn&amp;rsquo;t fun enough, &lt;a href=&#34;https://victoria.dev/verbose/interactive-pre-commit-hook-checklist/&#34;&gt;make it an interactive pre-commit hook.&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Creating clean, useful, and responsible Git commits says a lot about you. Especially in the current climate of remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.&lt;/p&gt;
+&lt;h1 id=&#34;reference-links&#34;&gt;Reference links&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History&#34;&gt;Git Tools - Rewriting History&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&#34;https://semver.org/&#34;&gt;Semantic Versioning 2.0.0&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&#34;https://git-scm.com/docs/git-describe&#34;&gt;git-describe&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work&#34;&gt;Git Tools - Signing Your Work&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&#34;https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration&#34;&gt;Customizing Git - Git Configuration&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&#34;https://git-scm.com/book/en/v1/Git-Tools-Stashing&#34;&gt;Git Tools - Stashing&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Basics-Tagging&#34;&gt;Git Basics - Tagging&lt;/a&gt;&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png" type="image/jpg"/></item><item><title>An automatic interactive pre-commit checklist, in the style of infomercials</title><link>https://victoria.dev/verbose/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</link><pubDate>Mon, 23 Jul 2018 09:38:09 -0400</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</guid><description>How to set up an interactive checklist using a Git pre-commit hook script.</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial_hu3f89b2526dd77ee153311b13b3651634_84493_640x0_resize_box_2.png" width="640" height="320"/>
+&lt;p&gt;What&amp;rsquo;s that, you say? You&amp;rsquo;ve become tired of regular old boring &lt;em&gt;paper checklists?&lt;/em&gt; Well, my friend, today is your lucky day! You, yes, &lt;em&gt;you,&lt;/em&gt; can become the proud owner of a brand-spanking-new &lt;em&gt;automatic interactive pre-commit hook checklist!&lt;/em&gt; You&amp;rsquo;re gonna love this! Your life will be so much easier! Just wait until your friends see you.&lt;/p&gt;
+&lt;h1 id=&#34;what-s-a-pre-commit-hook&#34;&gt;What&amp;rsquo;s a pre-commit hook?&lt;/h1&gt;
+&lt;p&gt;Did you know that nearly &lt;em&gt;1 out of 5 coders&lt;/em&gt; are too embarrassed to ask this question? Don&amp;rsquo;t worry, it&amp;rsquo;s perfectly normal. In the next 60 seconds we&amp;rsquo;ll tell you all you need to know to pre-commit with confidence.&lt;/p&gt;
+&lt;p&gt;A &lt;a href=&#34;https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks&#34;&gt;Git hook&lt;/a&gt; is a feature of Git that triggers custom scripts at useful moments. They can be used for all kinds of reasons to help you automate your work, and best of all, you already have them! In every repository that you initialize with &lt;code&gt;git init&lt;/code&gt;, you&amp;rsquo;ll have a set of example scripts living in &lt;code&gt;.git/hooks&lt;/code&gt;. They all end with &lt;code&gt;.sample&lt;/code&gt; and activating them is as easy as renaming the file to remove the &lt;code&gt;.sample&lt;/code&gt; part.&lt;/p&gt;
+&lt;p&gt;Git hooks are not copied when a repository is cloned, so you can make them as personal as you like.&lt;/p&gt;
+&lt;p&gt;The useful moment in particular that we&amp;rsquo;ll talk about today is the &lt;em&gt;pre-commit&lt;/em&gt;. This hook is run after you do &lt;code&gt;git commit&lt;/code&gt;, and before you write a commit message. Exiting this hook with a non-zero status will abort the commit, which makes it extremely useful for last-minute quality checks. Or, a bit of fun. Why not both!&lt;/p&gt;
+&lt;h1 id=&#34;how-do-i-get-a-pre-commit-checklist&#34;&gt;How do I get a pre-commit checklist?&lt;/h1&gt;
+&lt;p&gt;I only want the best for my family and my commits, and that&amp;rsquo;s why I choose an interactive pre-commit checklist. Not only is it fun to use, it helps to keep my projects safe from unexpected off-spec mistakes!&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s so easy! I just write a bash script that can read user input, and plop it into &lt;code&gt;.git/hooks&lt;/code&gt; as a file named &lt;code&gt;pre-commit&lt;/code&gt;. Then I do &lt;code&gt;chmod +x .git/hooks/pre-commit&lt;/code&gt; to make it executable, and I&amp;rsquo;m done!&lt;/p&gt;
+&lt;p&gt;Oh look, here comes an example bash script now!&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Would you like to play a game?&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# Read user input, assign stdin to keyboard&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;exec&lt;/span&gt; &amp;lt; /dev/tty
+&lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;read&lt;/span&gt; -p &lt;span class=&#34;s2&#34;&gt;&amp;#34;Have you double checked that only relevant files were added? (Y/n) &amp;#34;&lt;/span&gt; yn&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;case&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$yn&lt;/span&gt; in
+&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;Yy&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; break&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt;
+&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;Nn&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Please ensure the right files were added!&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;exit&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt;
+* &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Please answer y (yes) or n (no):&amp;#34;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;continue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;esac&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;read&lt;/span&gt; -p &lt;span class=&#34;s2&#34;&gt;&amp;#34;Has the documentation been updated? (Y/n) &amp;#34;&lt;/span&gt; yn&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;case&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$yn&lt;/span&gt; in
+&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;Yy&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; break&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt;
+&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;Nn&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Please add or update the docs!&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;exit&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt;
+* &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Please answer y (yes) or n (no):&amp;#34;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;continue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;esac&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;read&lt;/span&gt; -p &lt;span class=&#34;s2&#34;&gt;&amp;#34;Do you know which issue or PR numbers to reference? (Y/n) &amp;#34;&lt;/span&gt; yn&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;case&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$yn&lt;/span&gt; in
+&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;Yy&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; break&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt;
+&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;Nn&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Better go check those tracking numbers!&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;exit&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt;
+* &lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Please answer y (yes) or n (no):&amp;#34;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;continue&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;esac&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;exec&lt;/span&gt; &amp;lt;&lt;span class=&#34;p&#34;&gt;&amp;amp;&lt;/span&gt;-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;take-my-money&#34;&gt;Take my money!&lt;/h1&gt;
+&lt;p&gt;Don&amp;rsquo;t delay! Take advantage &lt;em&gt;right now&lt;/em&gt; of this generous &lt;em&gt;one-time offer!&lt;/em&gt; An interactive pre-commit hook checklist can be yours, today, for the low, low price of&amp;hellip; free? Wait, who wrote this script?&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial.png" type="image/jpg"/></item></channel></rss>

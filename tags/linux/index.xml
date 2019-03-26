@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Linux on victoria.dev</title><link>https://victoria.dev/tags/linux/</link><description>Recent content in Linux on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria)</managingEditor><webMaster>hello@victoria.dev (Victoria)</webMaster><lastBuildDate>Fri, 15 Mar 2019 11:55:28 -0400</lastBuildDate><atom:link href="https://victoria.dev/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>A remote sync solution for iOS and Linux: Git and Working Copy</title><link>https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</link><pubDate>Fri, 15 Mar 2019 11:55:28 -0400</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</guid><description>How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS.</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync_hu1984111f2d75b603219adcc3d215dc57_618766_640x0_resize_box_2.png" width="640" height="418"/>
+&lt;p&gt;I previously wrote about a (hackish) way to use a &lt;a href=&#34;https://victoria.dev/verbose/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/&#34;&gt;single Dropbox folder on a dual-boot Windows and Linux machine&lt;/a&gt;. I&amp;rsquo;ve since &lt;del&gt;gained some sense&lt;/del&gt; gone full Linux with Ubuntu 18.04 LTS, but the Dropbox set up seems to have stopped being an option in any case. Fortunately, I&amp;rsquo;ve since found a much better (far less hackish) way to remote-sync files across different file systems. Reflecting my current set up, I&amp;rsquo;m talking about iOS (iPad and iPhone) and my Linux machine.&lt;/p&gt;
+&lt;p&gt;The new sync system is based on Git, very customizable, and conveniently extensible. Beyond text files, you can sync anything that Git can (which is almost everything - if you want to edit your &lt;code&gt;.gitignore&lt;/code&gt;d files on the go I&amp;rsquo;m not sure I can help). If you&amp;rsquo;re already familiar with Git, getting set up will be a walk in the park. If Git is new to you, I think these tools help make the concepts of Git cloning, pulling, and pushing straightforward to understand.&lt;/p&gt;
+&lt;h1 id=&#34;components&#34;&gt;Components&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://workingcopy.app&#34;&gt;Working Copy app&lt;/a&gt; ($15.99 one-time pro-unlock and well worth it, iOS only)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ia.net/writer&#34;&gt;iA Writer app&lt;/a&gt; ($8.99 one-time purchase for iOS, also available on Mac, Windows, and Android)&lt;/li&gt;
+&lt;li&gt;GitHub repositories (&lt;a href=&#34;https://github.blog/2019-01-07-new-year-new-github/&#34;&gt;private&lt;/a&gt; or public, both free)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I was inspired by &lt;a href=&#34;https://www.macstories.net/ios/my-markdown-writing-and-collaboration-workflow-powered-by-working-copy-3-6-icloud-drive-and-github/&#34;&gt;this article&lt;/a&gt; as well as &lt;a href=&#34;http://blog.joncairns.com/2011/10/how-to-use-git-submodules/&#34;&gt;this one&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;get-set-up&#34;&gt;Get set up&lt;/h1&gt;
+&lt;p&gt;Here are the steps to setting up that I&amp;rsquo;ll walk you through in this article.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create your remote repository&lt;/li&gt;
+&lt;li&gt;Clone repository to iPad with Working Copy&lt;/li&gt;
+&lt;li&gt;Open and edit files with iA Writer&lt;/li&gt;
+&lt;li&gt;Push changes back to remote&lt;/li&gt;
+&lt;li&gt;Pull changes from repository on your computer&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This system is straightforward to set up whether you&amp;rsquo;re a command line whiz or just getting into Git. Let&amp;rsquo;s do it!&lt;/p&gt;
+&lt;h2 id=&#34;create-your-remote-repository&#34;&gt;Create your remote repository&lt;/h2&gt;
+&lt;p&gt;GitHub now offers free &lt;a href=&#34;https://github.blog/2019-01-07-new-year-new-github/&#34;&gt;private repositories&lt;/a&gt; for up to three collaborators. Choose &amp;ldquo;Private&amp;rdquo; on GitHub&amp;rsquo;s repository creation page:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;github-private-repo.png#screenshot&#34; alt=&#34;Selection options for public and private repository&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Create the repository. If you&amp;rsquo;d like to, you can follow GitHub&amp;rsquo;s instructions to push some files to it from your computer, or you can add files later from your iPad.&lt;/p&gt;
+&lt;h2 id=&#34;clone-repository-to-ipad-with-working-copy&#34;&gt;Clone repository to iPad with Working Copy&lt;/h2&gt;
+&lt;p&gt;Download &lt;a href=&#34;https://workingcopy.app&#34;&gt;Working Copy&lt;/a&gt; from the App Store. It&amp;rsquo;s one of the more expensive apps I&amp;rsquo;ve purchased, but I think it&amp;rsquo;s well worth it. Developer &lt;a href=&#34;https://twitter.com/palmin&#34;&gt;Anders Borum&lt;/a&gt; has a steady track record of frequent updates and incorporating the latest features for iOS apps, like &lt;a href=&#34;https://workingcopy.app/manual/dragdrop&#34;&gt;drag and drop&lt;/a&gt; on iPad. I think he&amp;rsquo;s fairly priced his product in light of the work he puts into maintaining and enhancing it.&lt;/p&gt;
+&lt;p&gt;In Working Copy, find the gear icon in the top left corner and touch to open Settings.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-settings.png#screenshot&#34; alt=&#34;Settings menu in Working Copy&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Tap on SSH Keys, and you&amp;rsquo;ll see this screen:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-ssh.png#screenshot&#34; alt=&#34;SSH Key for Working Copy on iPad&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;SSH keys, or Secure Shell keys, are access credentials used in the &lt;a href=&#34;https://en.wikipedia.org/wiki/Secure_Shell&#34;&gt;SSH protocol&lt;/a&gt;. Your key is a password that your device will use to securely connect with your remote repository host - GitHub, in our example. Since anyone with your SSH keys can potentially pretend to be you and gain access to your files, it&amp;rsquo;s important not to share them accidentally, like in a screenshot on a blog post.&lt;/p&gt;
+&lt;p&gt;Tap on the second line that looks like &amp;ldquo;WorkingCopy@iPad-xxxxxxxx&amp;rdquo; to get this screen:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-ssh-connect.png#screenshot&#34; alt=&#34;Connect to GitHub or Bitbucket in Working Copy&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Working Copy supports easy connection to both BitBucket and GitHub. Tap &amp;ldquo;Connect With GitHub&amp;rdquo; or BitBucket to bring up some familiar sign-in screens that will authorize Working Copy to access your account(s).&lt;/p&gt;
+&lt;p&gt;Once connected, tap the &amp;ldquo;+&amp;rdquo; symbol in the top right of the side bar to add a new repository. Choose &amp;ldquo;Clone repository&amp;rdquo; to bring up this screen:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-read-repos.png#screenshot&#34; alt=&#34;Loading repositories from remote&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Here, you can either manually input the remote URL, or simply choose from the list of repositories that Working Copy fetches from your connected account. When you make your choice, the app clones the repository to your iPad and it will show up in the sidebar. You&amp;rsquo;re connected!&lt;/p&gt;
+&lt;h2 id=&#34;open-and-edit-files-with-ia-writer&#34;&gt;Open and edit files with iA Writer&lt;/h2&gt;
+&lt;p&gt;One of the (many) reasons I adore &lt;a href=&#34;https://ia.net/writer&#34;&gt;iA Writer&lt;/a&gt; is its ability to select your freshly cloned remote repository as a Library Location. To do this in the iA Writer app:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;From the main Library list, in the top right of the sidebar, tap &amp;ldquo;Edit&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;Tap &amp;ldquo;Add Location&amp;hellip;&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;A helpful popup appears. Tap OK.&lt;/li&gt;
+&lt;li&gt;From the Working Copy location, tap &amp;ldquo;Select&amp;rdquo; in the top right, then choose the repository folder.&lt;/li&gt;
+&lt;li&gt;Tap &amp;ldquo;Open&amp;rdquo;, then &amp;ldquo;Done&amp;rdquo;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Your remote repository now appears as a Location in the sidebar. Tap on it to work within this directory.&lt;/p&gt;
+&lt;p&gt;While inside this location, new files you create (by tapping the pencil-and-paper icon in the top right corner) will be saved to this folder locally. As you work, iA Writer automatically saves your progress. Next, we&amp;rsquo;ll look at pushing those files and changes back to your remote.&lt;/p&gt;
+&lt;h2 id=&#34;push-changes-back-to-remote&#34;&gt;Push changes back to remote&lt;/h2&gt;
+&lt;p&gt;Once you&amp;rsquo;ve made changes to your files, open Working Copy again. You should see a yellow dot on your changed repository.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-changed-repo.png#screenshot&#34; alt=&#34;Yellow dot indicating changes to repository&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Tap on your repository name, then on &amp;ldquo;Repository Status and Configuration&amp;rdquo; at the top of the sidebar. Your changed files will be indicated by yellow dots or green &amp;ldquo;+&amp;rdquo; symbols. These mean that you&amp;rsquo;ve modified or added files, respectively.&lt;/p&gt;
+&lt;p&gt;Working Copy is a sweet iOS Git client, and you can tap on your files to see additional information including a comparison of changes (&amp;ldquo;diff&amp;rdquo;) as well as status and Git history. You can even edit files right within the app, with &lt;a href=&#34;https://workingcopyapp.com/manual/edit&#34;&gt;syntax highlighting&lt;/a&gt; for its many supported languages. For now, we&amp;rsquo;ll look at how to push your changed work to your remote repository.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-changes-to-commit.png#screenshot&#34; alt=&#34;Changes to commit&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;On the &amp;ldquo;Repository Status and Configuration&amp;rdquo; page, you&amp;rsquo;ll see right at the top that there are changes to be committed. If you&amp;rsquo;re new to Git, this is like &amp;ldquo;saving your changes&amp;rdquo; to your Git history, something typically done with the terminal command &lt;a href=&#34;https://git-scm.com/docs/git-commit&#34;&gt;&lt;code&gt;git commit&lt;/code&gt;&lt;/a&gt;. You can think of this as saving the files that we&amp;rsquo;ll want to send to the GitHub repository. Tap &amp;ldquo;Commit changes.&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-commit-changes.png#screenshot&#34; alt=&#34;Add a commit message and select files to commit&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Enter your commit message, and select the files you want to add. Turn on the &amp;ldquo;Push&amp;rdquo; switch to send everything to your remote repository when you commit the files. Then tap &amp;ldquo;Commit.&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll see a progress bar as your files are uploaded, and then a confirmation message on the status screen.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-commit-success.png#screenshot&#34; alt=&#34;Commit success message&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Congratulations! Your changes are now present in your remote repository on GitHub. You&amp;rsquo;ve successfully synced your files remotely!&lt;/p&gt;
+&lt;h2 id=&#34;pull-changes-from-repository-on-your-computer&#34;&gt;Pull changes from repository on your computer&lt;/h2&gt;
+&lt;p&gt;To bring your updated files full circle to your computer, you pull them from the GitHub repository. I prefer to use the terminal for this as it&amp;rsquo;s quick and easy, but GitHub also offers a &lt;a href=&#34;https://help.github.com/en/desktop/getting-started-with-github-desktop&#34;&gt;graphical client&lt;/a&gt; if terminal commands seem a little alien for now.&lt;/p&gt;
+&lt;p&gt;If you started with the GitHub repository, you can clone it to a folder on your computer by following &lt;a href=&#34;https://help.github.com/en/articles/cloning-a-repository&#34;&gt;these instructions&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;staying-in-sync&#34;&gt;Staying in sync&lt;/h2&gt;
+&lt;p&gt;When you update your work on your computer, you&amp;rsquo;ll use Git to push your changes to the remote repository. To do this, you can use GitHub&amp;rsquo;s &lt;a href=&#34;https://help.github.com/en/desktop/getting-started-with-github-desktop&#34;&gt;graphical client&lt;/a&gt;, or follow &lt;a href=&#34;https://help.github.com/en/articles/adding-an-existing-project-to-github-using-the-command-line&#34;&gt;these instructions&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;On your iOS device, Working Copy makes pulling and pushing as simple as a single tap. On the Repository Status and Configuration page, tap on the remote name under &amp;ldquo;Remotes&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;workingcopy-git-remote.png#screenshot&#34; alt=&#34;List of Remotes in Working Copy&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Then tap &amp;ldquo;Synchronize&amp;rdquo;. Working Copy will take care of the details of pushing your committed changes and/or pulling any new changes it finds from the remote repository.&lt;/p&gt;
+&lt;h1 id=&#34;not-bad-right&#34;&gt;Not bad, right?&lt;/h1&gt;
+&lt;p&gt;For a Git-based developer and work-anywhere-aholic like me, this set up couldn&amp;rsquo;t be more convenient. Working Copy really makes staying in sync with my remote repositories seamless, nevermind the ability to work with any of my GitHub repos on the go.&lt;/p&gt;
+&lt;p&gt;For editing on the go, here&amp;rsquo;s a useful tip. Use &lt;code&gt;.gitignore&lt;/code&gt; in your sync repository if you don&amp;rsquo;t need to move large files, like images, around with you. This will stop the ignored files from being pushed to GitHub and pulled to your iOS device - they&amp;rsquo;ll only remain on your computer&amp;rsquo;s larger hard drive. The &lt;code&gt;.gitignore&lt;/code&gt; file of one of my sync repositories looks like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;*.png
+*.jpeg
+*.jpg
+*.mp4
+*.gif
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This means all the media files stay on my computer, and I can pull just the text file content to my iPad from GitHub to work on while I&amp;rsquo;m out and about.&lt;/p&gt;
+&lt;p&gt;I most recently used this set up to get some writing done while hanging out in the atrium of Washington DC&amp;rsquo;s National Portrait Gallery, which is pleasantly photogenic.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;washington-portrait-gallery.jpg&#34; alt=&#34;The atrium of the National Portrait Gallery&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://twitter.com/victoriadotdev&#34;&gt;I&amp;rsquo;d love to hear&lt;/a&gt; how this set up works for you and how you use it. In the meantime, happy working!&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync.png" type="image/jpg"/></item><item><title>Batch renaming images, including image resolution, with awk</title><link>https://victoria.dev/verbose/batch-renaming-images-including-image-resolution-with-awk/</link><pubDate>Mon, 20 Nov 2017 13:59:30 -0500</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/batch-renaming-images-including-image-resolution-with-awk/</guid><description>How to batch rename images with custom values using file, awk, and rename - in rainbow colors!</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/batch-renaming-images-including-image-resolution-with-awk/renaming-rainbow_hua6bda34c4dd82ff49a9f97483b0665f2_159523_640x0_resize_box_2.png" width="640" height="317"/>
+&lt;p&gt;The most recent item on my list of &amp;ldquo;Geeky things I did that made me feel pretty awesome&amp;rdquo; is an hour&amp;rsquo;s adventure that culminated in this code:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ file IMG* &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; awk &lt;span class=&#34;s1&#34;&gt;&amp;#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&amp;#34;_&amp;#34;substr($8,1, length($8)-1)}&amp;#39;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;read&lt;/span&gt; fn fr&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;rename -v &lt;span class=&#34;s2&#34;&gt;&amp;#34;s/&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$fn&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;/img_&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$fr&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;/g&amp;#34;&lt;/span&gt; *&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+IMG_20170808_172653_425.jpg renamed as img_0_4032x3024.jpg
+IMG_20170808_173020_267.jpg renamed as img_1_3024x3506.jpg
+IMG_20170808_173130_616.jpg renamed as img_2_3024x3779.jpg
+IMG_20170808_173221_425.jpg renamed as img_3_3024x3780.jpg
+IMG_20170808_173417_059.jpg renamed as img_4_2956x2980.jpg
+IMG_20170808_173450_971.jpg renamed as img_5_3024x3024.jpg
+IMG_20170808_173536_034.jpg renamed as img_6_4032x3024.jpg
+IMG_20170808_173602_732.jpg renamed as img_7_1617x1617.jpg
+IMG_20170808_173645_339.jpg renamed as img_8_3024x3780.jpg
+IMG_20170909_170146_585.jpg renamed as img_9_3036x3036.jpg
+IMG_20170911_211522_543.jpg renamed as img_10_3036x3036.jpg
+IMG_20170913_071608_288.jpg renamed as img_11_2760x2760.jpg
+IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
+// ... etc etc&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The last item on the aforementioned list is &amp;ldquo;TODO: come up with a shorter title for this list.&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;I previously wrote about the power of command line tools like &lt;a href=&#34;https://victoria.dev/verbose/when-stackoverflow-sed-saves-30mins/&#34;&gt;sed&lt;/a&gt;. This post expands on how to string all this magical functionality into one big, long, rainbow-coloured, viscous stream of awesome.&lt;/p&gt;
+&lt;h2 id=&#34;rename-files&#34;&gt;Rename files&lt;/h2&gt;
+&lt;p&gt;The tool that actually handles the renaming of our files is, appropriately enough, &lt;code&gt;rename&lt;/code&gt;. The syntax is: &lt;code&gt;rename -n &amp;quot;s/original_filename/new_filename/g&amp;quot; *&lt;/code&gt; where &lt;code&gt;-n&lt;/code&gt; does a dry-run, and substituting &lt;code&gt;-v&lt;/code&gt; would rename the files. The &lt;code&gt;s&lt;/code&gt; indicates our substitution string, and &lt;code&gt;g&lt;/code&gt; for &amp;ldquo;global&amp;rdquo; finds all occurrences of the string. The &lt;code&gt;*&lt;/code&gt; matches zero or more occurrences of our search-and-replace parameters.&lt;/p&gt;
+&lt;p&gt;We&amp;rsquo;ll come back to this later.&lt;/p&gt;
+&lt;h2 id=&#34;get-file-information&#34;&gt;Get file information&lt;/h2&gt;
+&lt;p&gt;When I run &lt;code&gt;$ file IMG_20170808_172653_425.jpg&lt;/code&gt; in the image directory, I get this output:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;IMG_20170808_172653_425.jpg: JPEG image data, baseline, precision &lt;span class=&#34;m&#34;&gt;8&lt;/span&gt;, 4032x3024, frames &lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Since we can get the image resolution (&amp;ldquo;4032x3024&amp;rdquo; above), we know that we&amp;rsquo;ll be able to use it in our new filename.&lt;/p&gt;
+&lt;h2 id=&#34;isolate-the-information-we-want&#34;&gt;Isolate the information we want&lt;/h2&gt;
+&lt;p&gt;I love &lt;code&gt;awk&lt;/code&gt; for its simplicity. It takes lines of text and makes individual bits of information available to us with built in variables that we can then refer to as column numbers denoted by &lt;code&gt;$1&lt;/code&gt;, &lt;code&gt;$2&lt;/code&gt;, etc. By default, &lt;code&gt;awk&lt;/code&gt; splits up columns on whitespace. To take the example above:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+-------------------------------------------------------------------------------------------------------------
+| IMG_20170808_172653_425.jpg: | JPEG | image | data, | baseline, | precision | 8, | 4032x3024, | frames | 3 |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can denote different values to use as a splitter with, for example, &lt;code&gt;-F&#39;,&#39;&lt;/code&gt; if we wanted to use commas as the column divisions. For our current project, spaces are fine.&lt;/p&gt;
+&lt;p&gt;There are a couple issues we need to solve before we can plug the information into our new filenames. Column &lt;code&gt;$1&lt;/code&gt; has the original filename we want, but there&amp;rsquo;s an extra &amp;ldquo;:&amp;rdquo; character on the end. We don&amp;rsquo;t need the &amp;ldquo;.jpg&amp;rdquo; either. Column &lt;code&gt;$8&lt;/code&gt; has an extra &amp;ldquo;,&amp;rdquo; that we don&amp;rsquo;t want as well. To get just to information we need, we&amp;rsquo;ll take a substring of the column with &lt;code&gt;substr()&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;substr($1, 1, length($1)-5)&lt;/code&gt; - This gives us the file name from the beginning of the string to the end of the string, minus 5 characters (&amp;ldquo;length minus 5&amp;rdquo;).
+&lt;code&gt;substr($8,1, length($8)-1)&lt;/code&gt; - This gives us the image size, without the extra comma (&amp;ldquo;length minus 1&amp;rdquo;).&lt;/p&gt;
+&lt;h2 id=&#34;avoid-duplicate-file-names&#34;&gt;Avoid duplicate file names&lt;/h2&gt;
+&lt;p&gt;To ensure that two images with the same resolutions don&amp;rsquo;t create identical, competing file names, we&amp;rsquo;ll append a unique incrementing number to the filename.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;BEGIN{a=0}&lt;/code&gt; - Using &lt;code&gt;BEGIN&lt;/code&gt; tells &lt;code&gt;awk&lt;/code&gt; to run the following code only once, at the (drumroll) beginning. Here, we&amp;rsquo;re declaring the variable &lt;code&gt;a&lt;/code&gt; to be &lt;code&gt;0&lt;/code&gt;.
+&lt;code&gt;a++&lt;/code&gt; - Later in our code, at the appropriate spot for our file name, we call &lt;code&gt;a&lt;/code&gt; and increment it.&lt;/p&gt;
+&lt;p&gt;When &lt;code&gt;awk&lt;/code&gt; prints a string, it concatenates everything that isn&amp;rsquo;t separated by a comma. &lt;code&gt;{print a b c}&lt;/code&gt; would create &amp;ldquo;abc&amp;rdquo; and &lt;code&gt;{print a,b,c}&lt;/code&gt; would create &amp;ldquo;a b c&amp;rdquo;, for example.&lt;/p&gt;
+&lt;p&gt;We can add additional characters to our file name, such as an underscore, by inserting it in quotations: &lt;code&gt;&amp;quot;_&amp;quot;&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;string-it-all-together&#34;&gt;String it all together&lt;/h2&gt;
+&lt;p&gt;To feed the output of one command into another command, we use &amp;ldquo;pipe,&amp;rdquo; written as &lt;code&gt;|&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;If we only used pipe in this instance, all our data from &lt;code&gt;file&lt;/code&gt; and &lt;code&gt;awk&lt;/code&gt; would get fed into &lt;code&gt;rename&lt;/code&gt; all at once, making for one very, very long and probably non-compiling file name. To run the &lt;code&gt;rename&lt;/code&gt; command line by line, we can use &lt;code&gt;while&lt;/code&gt; and &lt;code&gt;read&lt;/code&gt;. Similarly to &lt;code&gt;awk&lt;/code&gt;, &lt;code&gt;read&lt;/code&gt; takes input and splits it into variables we can assign and use. In our code, it takes the first bit of output from &lt;code&gt;awk&lt;/code&gt; (the original file name) and assigns that the variable name &lt;code&gt;$fn&lt;/code&gt;. It takes the second output (our incrementing number and the image resolution) and assigns that to &lt;code&gt;$fr&lt;/code&gt;. The variable names are arbitrary; you can call them whatever you want.&lt;/p&gt;
+&lt;p&gt;To run our &lt;code&gt;rename&lt;/code&gt; commands as if we&amp;rsquo;d manually entered them in the terminal one by one, we can use &lt;code&gt;echo $(some command)&lt;/code&gt;. Finally, &lt;code&gt;done&lt;/code&gt; ends our &lt;code&gt;while&lt;/code&gt; loop.&lt;/p&gt;
+&lt;h2 id=&#34;bonus-round-rainbow-output&#34;&gt;Bonus round: rainbow output!&lt;/h2&gt;
+&lt;p&gt;I wasn&amp;rsquo;t kidding with that &lt;a href=&#34;https://github.com/tehmaze/lolcat&#34;&gt;&amp;ldquo;rainbow-coloured&amp;rdquo; bit&amp;hellip;&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ pip install lolcat&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here&amp;rsquo;s our full code:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ file IMG* &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; awk &lt;span class=&#34;s1&#34;&gt;&amp;#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&amp;#34;_&amp;#34;substr($8,1, length($8)-1)}&amp;#39;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;read&lt;/span&gt; fn fs&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;do&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;rename -v &lt;span class=&#34;s2&#34;&gt;&amp;#34;s/&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$fn&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;/img_&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$fs&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;/g&amp;#34;&lt;/span&gt; *&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; lolcat&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Enjoy!&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/batch-renaming-images-including-image-resolution-with-awk/renaming-rainbow.png" type="image/jpg"/></item><item><title>How I turned Unity into a tiling window manager</title><link>https://victoria.dev/verbose/how-i-turned-unity-into-a-tiling-window-manager/</link><pubDate>Wed, 22 Mar 2017 16:10:10 +0800</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/how-i-turned-unity-into-a-tiling-window-manager/</guid><description>Love i3 but like having things easy? Me too. Here&#39;s a guide to getting (something similar to) the i3 features you love working in Unity.</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/how-i-turned-unity-into-a-tiling-window-manager/cover_tilewm-unity_hub01ec446b703502c80f144450193da7b_82141_640x0_resize_box_2.png" width="640" height="320"/>
+&lt;div id=&#34;deprecated&#34;&gt;Since Ubuntu 17.10, a default installation of Ubuntu Desktop uses GNOME instead of Unity.&lt;/div&gt;
+&lt;p&gt;After a long and loving &lt;del&gt;battle&lt;/del&gt; experience using i3 as my workhorse window manager on my old laptop, I&amp;rsquo;ve decided to mainly use Unity on my new laptop instead. I&amp;rsquo;m a huge fan of tiling window managers as a result of my i3 experience, however, the time it took to configure everything is longer than I wanted to spend getting set up before getting to work with my new laptop. (Read: just can&amp;rsquo;t resist spending hours ricing.)&lt;/p&gt;
+&lt;p&gt;I got really hooked on i3&amp;rsquo;s functionality though and needed to find ways to replicate it in Unity. Thankfully it only really took a few small adjustments. For anyone looking to use a full-featured desktop environment that comes pretty close to the functionality of a tiling window manager, I hope these tweaks are useful for you.&lt;/p&gt;
+&lt;h1 id=&#34;workspaces&#34;&gt;Workspaces&lt;/h1&gt;
+&lt;p&gt;You can create workspaces in Unity that resemble workspaces in i3.&lt;/p&gt;
+&lt;h2 id=&#34;set-up-workspaces&#34;&gt;Set up workspaces&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+Unity Tweak Tool &amp;gt; Workspace Settings&lt;/p&gt;
+&lt;p&gt;Set &amp;ldquo;Horizontal workspaces&amp;rdquo; to as many as you&amp;rsquo;d like, and &amp;ldquo;Vertical workspaces&amp;rdquo; to 1. This will allow you to access spaces by moving right and left.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-workspace-settings.png&#34; alt=&#34;Workspace Settings&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;keyboard-shortcuts&#34;&gt;Keyboard Shortcuts&lt;/h1&gt;
+&lt;h2 id=&#34;set-keyboard-shortcuts&#34;&gt;Set keyboard shortcuts&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+System Settings &amp;gt; Keyboard&lt;/p&gt;
+&lt;h2 id=&#34;switch-workspaces&#34;&gt;Switch workspaces&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+System Settings &amp;gt; Keyboard &amp;gt; Navigation&lt;/p&gt;
+&lt;p&gt;You can set keyboard shortcuts that assign numbers to your workspaces, and that let you move left and right between them.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-keyboard-shortcut-workspaces.png&#34; alt=&#34;Keyboard shortcuts for workspaces&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;move-windows-around-snap&#34;&gt;Move windows around (snap)&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+System Settings &amp;gt; Keyboard &amp;gt; Windows&lt;/p&gt;
+&lt;p&gt;You can maximize and restore windows using shortcut keys. In my case I have them set to &amp;ldquo;Ctrl+Super+Up&amp;rdquo; and &amp;ldquo;Ctrl+Super+Down&amp;rdquo; respectively.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-move-windows.png&#34; alt=&#34;Moving windows with shortcut keys&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;I discovered this by accident, and I&amp;rsquo;m not sure if it&amp;rsquo;s listed somewhere I can&amp;rsquo;t find. If I press &amp;ldquo;Ctrl+Super&amp;rdquo; and a left or right arrow key, I can snap a window to the left or right half of the screen.&lt;/p&gt;
+&lt;h2 id=&#34;custom-shortcuts&#34;&gt;Custom shortcuts&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+System Settings &amp;gt; Keyboard &amp;gt; Custom Shortcuts&lt;/p&gt;
+&lt;p&gt;&amp;ldquo;Custom Shortcuts&amp;rdquo; allows you to set any keybinds you&amp;rsquo;re missing from i3. The most important ones for me were the shortcuts to launch a terminal and to use rofi.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-custom-shortcuts.png&#34; alt=&#34;Custom Keyboard Shortcuts&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;lose-the-launcher&#34;&gt;Lose the Launcher&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+Unity Tweak Tool &amp;gt; Launcher&lt;/p&gt;
+&lt;p&gt;Turn on &amp;ldquo;Auto-hide&amp;rdquo; and set &amp;ldquo;Reveal sensitivity&amp;rdquo; to zero.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-off-launcher.png&#34; alt=&#34;Turn off launcher&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;start-programs-automatically-at-logon&#34;&gt;Start programs automatically at logon&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+Startup Applications&lt;/p&gt;
+&lt;p&gt;Similar to using &lt;code&gt;@reboot&lt;/code&gt; with Cron.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-startup-applications.png&#34; alt=&#34;Startup Applications&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;ricing&#34;&gt;Ricing&lt;/h1&gt;
+&lt;p&gt;C&amp;rsquo;mon, of course I wasn&amp;rsquo;t just going to leave it stock&amp;hellip;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-riced-unity.png&#34; alt=&#34;Riced Unity&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;unity-tweak-tool&#34;&gt;Unity Tweak Tool&lt;/h2&gt;
+&lt;p&gt;You can do a fair bit with Unity Tweak Tool. Here&amp;rsquo;s my setup:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Theme&lt;/strong&gt;: Numix&lt;br /&gt;
+&lt;strong&gt;Icons&lt;/strong&gt;: Numix-circle&lt;br /&gt;
+&lt;strong&gt;Cursor&lt;/strong&gt;: Paper&lt;br /&gt;
+&lt;strong&gt;Default font&lt;/strong&gt;: Noto Sans CJK JP Light 10&lt;br /&gt;
+&lt;strong&gt;Monospace font&lt;/strong&gt;: Ubuntu Mono Regular&lt;br /&gt;
+&lt;strong&gt;Document font&lt;/strong&gt;: Sans Regular 11&lt;br /&gt;
+&lt;strong&gt;Window title font&lt;/strong&gt;: Noto Sans CJK JP Light 10&lt;/p&gt;
+&lt;h2 id=&#34;remove-panel-top-status-bar-shadow&#34;&gt;Remove Panel (top status bar) shadow&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+Rename or delete this file: &lt;code&gt;/usr/share/unity/icons/panel_shadow.png&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Log out and in again to restart Unity.&lt;/p&gt;
+&lt;h2 id=&#34;panel-opacity&#34;&gt;Panel opacity&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+Unity Tweak Tool &amp;gt; Panel &amp;gt; Transparency level&lt;/p&gt;
+&lt;h1 id=&#34;misc-other-settings&#34;&gt;Misc other settings&lt;/h1&gt;
+&lt;h2 id=&#34;turn-off-web-apps&#34;&gt;Turn off web apps&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Where to find it:&lt;/strong&gt;&lt;br /&gt;
+Unity Tweak Tool &amp;gt; Web Apps &amp;gt; Integration prompts OFF, uncheck Preauthorized domains&lt;/p&gt;
+&lt;h2 id=&#34;autostart-open-vpn&#34;&gt;Autostart Open VPN&lt;/h2&gt;
+&lt;p&gt;Not strictly a Unity thing, but useful.&lt;/p&gt;
+&lt;p&gt;Download required packages:
+&lt;code&gt;openvpn&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;network-manager-openvpn&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;network-manager-openvpn-gnome&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Download your &lt;code&gt;client.ovpn&lt;/code&gt; file from your console page and rename it with &lt;code&gt;client.conf&lt;/code&gt;.&lt;br /&gt;
+Create a &lt;code&gt;keys.txt&lt;/code&gt; file with your username on line 1 and your password on line 2. (Yeah, it&amp;rsquo;s plain text. Ubuntu&amp;rsquo;s &lt;code&gt;.Private&lt;/code&gt; encrypted folder is a good place to store it.)&lt;/p&gt;
+&lt;p&gt;In the &lt;code&gt;client.conf&lt;/code&gt; file:
+- replace instances of &amp;ldquo;openvpn&amp;rdquo; with your actual IP address
+- add the &lt;code&gt;keys.txt&lt;/code&gt; file name directly after &lt;code&gt;auth-user-pass&lt;/code&gt;, just like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;auth-user-pass keys.txt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Add both &lt;code&gt;client.conf&lt;/code&gt; and &lt;code&gt;keys.txt&lt;/code&gt; to &lt;code&gt;/etc/openvpn&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Finally, in &lt;code&gt;/etc/default/openvpn&lt;/code&gt;, uncomment &lt;code&gt;AUTOSTART=&amp;quot;all&amp;quot;&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;display-ip-address-in-the-panel&#34;&gt;Display IP address in the Panel&lt;/h2&gt;
+&lt;p&gt;Uses a light little utility called &lt;code&gt;indicator-ip&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;From the terminal, run &lt;code&gt;sudo apt install indicator-ip&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Add it to Startup Applications to run it automatically.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-indicator-ip.png&#34; alt=&#34;indicator-ip startup&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;if-you-have-a-cat&#34;&gt;If you have a cat&lt;/h2&gt;
+&lt;p&gt;Maybe uncheck this System Settings &amp;gt; Keyboard box:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;tilewm-if-cat.png&#34; alt=&#34;Key press repeat&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Hope that was helpful! Check back for more tips later - I&amp;rsquo;ll continue to update this post as I discover them!&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/how-i-turned-unity-into-a-tiling-window-manager/cover_tilewm-unity.png" type="image/jpg"/></item><item><title>How I set up a single Dropbox folder on my dual-boot Windows and Linux system</title><link>https://victoria.dev/verbose/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/</link><pubDate>Fri, 17 Mar 2017 10:58:01 +0800</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/</guid><description>A quick guide to installing Dropbox on your dual-boot system with a central folder (instead of two)</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/cover_dropbox-sync_hu3f79c70f94fa5009fc79088f25a62e2d_73506_640x0_resize_box_2.png" width="640" height="320"/>
+&lt;div id=&#34;deprecated&#34;&gt;This article is deprecated. For an overview of an updated and truly cross-platform remote sync solution based on Git, please see this article: &lt;a href=&#34;https://victoria.dev/verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/&#34;&gt;A remote sync solution for iOS and Linux: Git and Working Copy&lt;/a&gt;.&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;June 14, 2018: &lt;a href=&#34;https://twitter.com/newhouseb&#34;&gt;Ben Newhouse&lt;/a&gt;, former head of Sync at Dropbox, was kind enough to inform me that this set up might have unintended ill effects on your Dropbox data:&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;Dropbox on Windows and Linux maintain metadata on each OS differently, so they&amp;rsquo;ll confuse each other. This will likely break things like version tracking and comments and as this isn&amp;rsquo;t a supported configuration probably worse.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;I&amp;rsquo;ve personally moved away from using Dropbox (and for that matter, dual-boot) since writing this article. My current file sync solution for my all-Linux system uses a private repository on &lt;a href=&#34;https://bitbucket.org&#34;&gt;Bitbucket&lt;/a&gt;. Still, I never noticed any problems when I used this dual-boot setup. Here&amp;rsquo;s how to do it, at your own risk.&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;the-two-os-one-dropbox-folder-setup&#34;&gt;The two OS, one Dropbox folder setup&lt;/h1&gt;
+&lt;p&gt;I&amp;rsquo;ve now set up two different laptops to dual-boot Windows 10 and different Linux distributions. Here&amp;rsquo;s how to ensure you maintain one Dropbox folder over both operating systems.&lt;/p&gt;
+&lt;p&gt;Assuming Windows was there first:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Mount the Windows drive in Linux&lt;/li&gt;
+&lt;li&gt;Install Dropbox in Linux&lt;/li&gt;
+&lt;li&gt;Sign in to link to Dropbox&lt;/li&gt;
+&lt;li&gt;Immediately change Dropbox folder location to the mounted drive (same Dropbox folder as Windows)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;get-it-right-the-first-time&#34;&gt;Get it right the first time&lt;/h1&gt;
+&lt;p&gt;Dropbox will automatically set up your Dropbox folder when you run it the first time. On Windows it&amp;rsquo;s typically located in your C:\ or D:\ drive as &lt;code&gt;D:\Dropbox&lt;/code&gt; and on Linux, it&amp;rsquo;ll go into &lt;code&gt;home/Dropbox&lt;/code&gt; by default. They key to being able to specify the folder location is to do so the &lt;em&gt;very first time&lt;/em&gt; you start Dropbox.&lt;/p&gt;
+&lt;h1 id=&#34;mount-the-windows-drive-in-linux&#34;&gt;Mount the Windows Drive in Linux&lt;/h1&gt;
+&lt;p&gt;If you started with Windows 10, you&amp;rsquo;ll need to make sure the disk that contains your Dropbox folder is mounted in Linux so that you can access it.&lt;/p&gt;
+&lt;p&gt;You can mount the Windows disk in Linux using the terminal with these steps:&lt;/p&gt;
+&lt;h2 id=&#34;1-find-the-correct-disk-partition-address&#34;&gt;1. Find the correct disk partition address&lt;/h2&gt;
+&lt;p&gt;Type &lt;code&gt;sudo fdisk -l&lt;/code&gt;. This will return a list of your partitions and information on them. Look at the &amp;ldquo;Size&amp;rdquo; and &amp;ldquo;Type&amp;rdquo; categories to determine which list item is the Windows disk partition that you wish to mount. Its address will look something like &lt;code&gt;/dev/sda2&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;2-make-a-directory-to-mount-the-drive-to&#34;&gt;2. Make a directory to mount the drive to&lt;/h2&gt;
+&lt;p&gt;Basically, this is what Linux will use to refer to your Windows drive.&lt;br /&gt;
+Type &lt;code&gt;sudo mkdir -p /mnt/winD&lt;/code&gt; (where &lt;code&gt;winD&lt;/code&gt; is whatever you want to call your Windows disk)&lt;/p&gt;
+&lt;h2 id=&#34;3-mount-the-disk&#34;&gt;3. Mount the disk&lt;/h2&gt;
+&lt;p&gt;The syntax follows the format: [mount command] [file system type] [windows disk address] [target address]&lt;br /&gt;
+&lt;code&gt;sudo mount -t ntfs /dev/sda2 /mnt/winD&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;4-mount-disk-automatically-on-boot&#34;&gt;4. Mount disk automatically on boot&lt;/h2&gt;
+&lt;p&gt;Edit your &lt;code&gt;/etc/fstab&lt;/code&gt; file to mount the disk automatically when you boot Linux.&lt;br /&gt;
+&lt;code&gt;sudo vi /etc/fstab&lt;/code&gt;&lt;br /&gt;
+Add the mount instruction to the file. The syntax is in the format: [windows disk address] [target address] [file system type] [options] [dump] [pass]&lt;br /&gt;
+&lt;code&gt;/dev/sda2 /mnt/winD fat32 defaults 0 2&lt;/code&gt;&lt;/p&gt;
+&lt;h1 id=&#34;install-dropbox-in-linux&#34;&gt;Install Dropbox in Linux&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.dropbox.com/install-linux&#34;&gt;Install Dropbox&lt;/a&gt; via package download or using the terminal. The completed installation will produce a GUI sign-in.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;dropbox-1.jpg#center&#34; alt=&#34;Aforementioned GUI&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;sign-in-to-link-to-dropbox&#34;&gt;Sign in to link to Dropbox&lt;/h1&gt;
+&lt;p&gt;Input your credentials and wait while Dropbox does its thing. Once you see the &amp;ldquo;Congratulations!&amp;rdquo; message, stop! Don&amp;rsquo;t click the big obvious button, and read on.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;dropbox-2.jpg#center&#34; alt=&#34;Congratulations screen&#34; /&gt;&lt;/p&gt;
+&lt;h1 id=&#34;immediately-change-your-dropbox-folder-location-to-the-mounted-drive&#34;&gt;Immediately change your Dropbox folder location to the mounted drive&lt;/h1&gt;
+&lt;p&gt;Click on &amp;ldquo;Advanced Settings&amp;rdquo; and change &amp;ldquo;Dropbox location&amp;rdquo; to the Dropbox folder on your mounted drive. This should be the same folder as in your Windows setup. Ok, now you can click the big obvious &amp;ldquo;Open my Dropbox folder&amp;rdquo; button. You&amp;rsquo;re done!&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;dropbox-3.jpg#center&#34; alt=&#34;Advanced settings screen&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;i-didn-t-read-your-article-before-clicking-the-big-obvious-button-and-now-i-have-two-folders&#34;&gt;I didn&amp;rsquo;t read your article before clicking the big obvious button and now I have two folders.&lt;/h2&gt;
+&lt;p&gt;Uninstall Dropbox on Linux, making sure you get all the bits at &lt;code&gt;/usr/bin/dropbox&lt;/code&gt;. Install Dropbox again and this time, read first! :)&lt;/p&gt;
+&lt;h1 id=&#34;you-re-done&#34;&gt;You&amp;rsquo;re done!&lt;/h1&gt;
+&lt;p&gt;I hope you found this helpful! If you have questions or want to bug me about using jpgs for screenshots, click that link below. :) Thanks for reading!&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/cover_dropbox-sync.png" type="image/jpg"/></item><item><title>How I created custom desktop notifications using terminal and cron</title><link>https://victoria.dev/verbose/how-i-created-custom-desktop-notifications-using-terminal-and-cron/</link><pubDate>Tue, 21 Feb 2017 10:48:38 +0700</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/how-i-created-custom-desktop-notifications-using-terminal-and-cron/</guid><description>How you can use tools your Linux system already has to create custom desktop notifications.</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/how-i-created-custom-desktop-notifications-using-terminal-and-cron/dunstnotif_hu2db72365279baf699eed9b7492972369_54170_640x0_resize_box_2.png" width="640" height="320"/>
+&lt;p&gt;In my last post I talked about moving from Windows 10 to running i3 on Linux, built up from Debian Base System. Among other things, this change has taught me about the benefits of using basic tools and running a minimal, lightweight system. You can achieve a lot of functionality with just command line tools and simple utilities. One example I&amp;rsquo;d like to illustrate in this post is setting up desktop notifications.&lt;/p&gt;
+&lt;p&gt;I use &lt;a href=&#34;http://knopwob.org/dunst/&#34;&gt;dunst&lt;/a&gt; for desktop notifications. It&amp;rsquo;s a simple, lightweight tool that is easy to configure, doesn&amp;rsquo;t have many dependencies, and can be used across various distributions.&lt;/p&gt;
+&lt;h1 id=&#34;battery-status-low-battery-notification&#34;&gt;Battery status/low battery notification&lt;/h1&gt;
+&lt;p&gt;I was looking for a simple, versatile set up to create notifications for my battery status without having to rely on separate, standalone GUI apps or services. In my search I came across a simple one-line cron task that seemed to be the perfect fit. I adapted it to my purpose and it looks like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-conf&#34; data-lang=&#34;conf&#34;&gt;# m h dom mon dow command
+*/5 * * * * acpi --battery | awk -F, &amp;#39;/Discharging/ { if (int($2) &amp;lt; 20) print }&amp;#39; | xargs -ri env DISPLAY=:0 notify-send -u critical -i &amp;#34;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&amp;#34; -t 3000 &amp;#34;{}\nBattery low!&amp;#34;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;Psst&amp;hellip; &lt;a href=&#34;https://crontab.guru/&#34;&gt;here&amp;rsquo;s a great tool&lt;/a&gt; for formatting your crontab times.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;There&amp;rsquo;s a lot going on here, so let&amp;rsquo;s break it down:&lt;br /&gt;
+&lt;code&gt;*/5 * * * *&lt;/code&gt;&lt;br /&gt;
+Every five minutes, do the following.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;acpi --battery&lt;/code&gt;&lt;br /&gt;
+Execute &lt;code&gt;acpi&lt;/code&gt; and show battery information, which on its own returns something akin to:&lt;br /&gt;
+&lt;code&gt;Battery 0: Discharging, 65%, 03:01:27 remaining&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Pretty straightforward so far. At any point you could input &lt;code&gt;acpi --battery&lt;/code&gt; in a terminal and receive the status output. Today&amp;rsquo;s post, however, is about receiving this information passively in a desktop notification. So, moving on:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;| awk -F, &#39;/Discharging/ { if (int($2) &amp;lt; 20) print }&#39;&lt;/code&gt;&lt;br /&gt;
+Pipe (&lt;code&gt;|&lt;/code&gt;) the result of the previous command to &lt;code&gt;awk&lt;/code&gt;. (If you don&amp;rsquo;t know what pipe does, here&amp;rsquo;s &lt;a href=&#34;http://superuser.com/questions/756158/what-does-the-linux-pipe-symbol-do&#34;&gt;an answer from superuser.com&lt;/a&gt; that explains it pretty well, I think.) &lt;code&gt;awk&lt;/code&gt; can do a lot of things, but in this case, we&amp;rsquo;re using it to examine the status of our battery. Let&amp;rsquo;s zoom in on the &lt;code&gt;awk&lt;/code&gt; command:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;awk -F, &#39;/Discharging/ { if (int($2) &amp;lt; 20) print }&#39;&lt;/code&gt;&lt;br /&gt;
+Basically, we&amp;rsquo;re saying, &amp;ldquo;Hey, awk, look at that input you just got and try to find the word &amp;ldquo;discharging,&amp;rdquo; then look to see if the number after the first comma is less than 20. If so, print the whole input.&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;| xargs -ri&lt;/code&gt;&lt;br /&gt;
+Pipe the result of the previous command to &lt;code&gt;xargs&lt;/code&gt;, which takes it as its input and does more stuff with it. &lt;code&gt;-ri&lt;/code&gt; is equivalent to &lt;code&gt;-r&lt;/code&gt; (run the next command only if it receives arguments) and &lt;code&gt;-i&lt;/code&gt; (look for &amp;ldquo;{}&amp;rdquo; and replace it with the input). So in this example, xargs serves as our gatekeeper and messenger for the next command.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;env DISPLAY=:0&lt;/code&gt;&lt;br /&gt;
+Run the following utility in the specified display, in this case, the first display of the local machine.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;notify-send -u critical -i &amp;quot;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&amp;quot; -t 3000 &amp;quot;{}\nLow battery!&amp;quot;&lt;/code&gt;&lt;br /&gt;
+Shows a desktop notification with &lt;code&gt;-u critical&lt;/code&gt; (critical urgency), &lt;code&gt;-i&lt;/code&gt; (the specified icon), &lt;code&gt;-t 3000&lt;/code&gt; (display time/expires after 3000 milliseconds), and finally &lt;code&gt;{}&lt;/code&gt; (the output of awk, replaced by xargs).&lt;/p&gt;
+&lt;p&gt;Not bad for a one-liner! I made a few modifications for different states of my battery. Here they all are in my crontab:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-conf&#34; data-lang=&#34;conf&#34;&gt;# m h dom mon dow command
+*/5 * * * * acpi --battery | awk -F, &amp;#39;/Discharging/ { if ( (int($2) &amp;lt; 30) &amp;amp;&amp;amp; (int($2) &amp;gt; 15) ) print }&amp;#39; | xargs -ri env DISPLAY=:0 notify-send -a &amp;#34;Battery status&amp;#34; -u normal -i &amp;#34;/usr/share/icons/Paper/16x16/status/xfce-battery-low.png&amp;#34; -t 3000 &amp;#34;{}\nBattery low!&amp;#34;
+*/5 * * * * acpi --battery | awk -F, &amp;#39;/Discharging/ { if (int($2) &amp;lt; 15) print }&amp;#39; | xargs -ri env DISPLAY=:0 notify-send -a &amp;#34;Battery status&amp;#34; -u critical -i &amp;#34;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&amp;#34; -t 3000 &amp;#34;{}\nSeriously, plug me in.&amp;#34;
+*/60 * * * * acpi --battery | awk -F, &amp;#39;/Discharging/ { if (int($2) &amp;gt; 30) print }&amp;#39; | xargs -ri env DISPLAY=:0 notify-send -a &amp;#34;Battery status&amp;#34; -u normal -i &amp;#34;/usr/share/icons/Paper/16x16/status/xfce-battery-ok.png&amp;#34; &amp;#34;{}&amp;#34;
+*/60 * * * * acpi --battery | awk -F, &amp;#39;/Charging/ { print }&amp;#39; | xargs -ri env DISPLAY=:0 notify-send -a &amp;#34;Battery status&amp;#34; -u normal -i &amp;#34;/usr/share/icons/Paper/16x16/status/xfce-battery-ok-charging.png&amp;#34; &amp;#34;{}&amp;#34;
+*/60 * * * * acpi --battery | awk -F, &amp;#39;/Charging/ { if (int($2) == 100) print }&amp;#39; | xargs -ri env DISPLAY=:0 notify-send -a &amp;#34;Battery status&amp;#34; -u normal -i &amp;#34;/usr/share/icons/Paper/16x16/status/xfce-battery-full-charging.png&amp;#34; &amp;#34;Fully charged.&amp;#34;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;By the way, you can open your crontab in the editor of your choice by accessing it as root from the &lt;code&gt;/var/spool/cron/crontabs/&lt;/code&gt; directory. It&amp;rsquo;s generally best practice however to make changes to your crontab with the command &lt;code&gt;crontab -e&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;You can see that each notification makes use of the &lt;code&gt;{}&lt;/code&gt; placeholder that tells xargs to put its input there - except for the last one. This is interesting because in this case, we&amp;rsquo;re only using &lt;code&gt;xargs -ri&lt;/code&gt; as a kind of switch to present the notification. The actual information that was the input for xargs is not needed in the output in order to create a notification.&lt;/p&gt;
+&lt;h1 id=&#34;additional-notifications-with-command-line-tools&#34;&gt;Additional notifications with command line tools&lt;/h1&gt;
+&lt;p&gt;With cron and just a few combinations of simple command line tools, you can create interesting and useful notifications. Consider the following:&lt;/p&gt;
+&lt;h2 id=&#34;periodically-check-your-dhcp-address&#34;&gt;Periodically check your dhcp address&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;*/60 * * * * journalctl | awk -F: &#39;/dhcp/ &amp;amp;&amp;amp; /address/ { print $5 }&#39; | tail -1 | xargs -ri env DISPLAY=:0 notify-send -a &amp;quot;dhcp address&amp;quot; -u normal &amp;quot;{}&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Which does the following:&lt;br /&gt;
+&lt;code&gt;*/60 * * * *&lt;/code&gt;&lt;br /&gt;
+Every 60 minutes.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;journalctl&lt;/code&gt;&lt;br /&gt;
+Take the contents of your system log.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;| awk -F: &#39;/dhcp/ &amp;amp;&amp;amp; /address/ { print $5 }&#39;&lt;/code&gt;&lt;br /&gt;
+Find logs containing both &amp;ldquo;dhcp&amp;rdquo; and &amp;ldquo;address&amp;rdquo; and output the 5th portion as separated by &amp;ldquo;:&amp;rdquo; (the time field counts).&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;| tail -1&lt;/code&gt;&lt;br /&gt;
+Take the last line of the output.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;| xargs -ri env DISPLAY=:0 notify-send -a &amp;quot;dhcp address&amp;quot; -u normal &amp;quot;{}&amp;quot;&lt;/code&gt;&lt;br /&gt;
+Create the desktop notification including the output.&lt;/p&gt;
+&lt;h2 id=&#34;periodically-display-the-time-and-date&#34;&gt;Periodically display the time and date&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;*/60 * * * * timedatectl status | awk -F\n &#39;/Local time/ { print }&#39; | xargs -ri env DISPLAY=:0 notify-send -a &amp;quot;Current Time&amp;quot; -u normal &amp;quot;{}&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;system-log-activity&#34;&gt;System log activity&lt;/h2&gt;
+&lt;p&gt;You can also search your system logs (try &lt;code&gt;journalctl&lt;/code&gt;) for any number of things using awk, enabling you to get periodic notifications of virtually any logged events.&lt;/p&gt;
+&lt;h1 id=&#34;experiment&#34;&gt;Experiment!&lt;/h1&gt;
+&lt;p&gt;As with all things, you are only limited by your imagination! I hope this post has given you some idea about the endless possibilities of these simple utilities. Thanks for reading!&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/how-i-created-custom-desktop-notifications-using-terminal-and-cron/dunstnotif.png" type="image/jpg"/></item><item><title>How a lifelong Windows user switched to Linux... the hard way</title><link>https://victoria.dev/verbose/how-a-lifelong-windows-user-switched-to-linux...-the-hard-way/</link><pubDate>Mon, 06 Feb 2017 14:23:59 +0700</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/verbose/how-a-lifelong-windows-user-switched-to-linux...-the-hard-way/</guid><description>An overview of challenges I encountered setting up Linux using a Debian base system.</description><content:encoded>
+&lt;img src="https://victoria.dev/verbose/how-a-lifelong-windows-user-switched-to-linux...-the-hard-way/screenshot-asakusa-stats_hu3aee86fbafa285b493634568840d6572_888329_640x0_resize_box_2.png" width="640" height="360"/>
+&lt;p&gt;Let me preface this by saying that I&amp;rsquo;ve always been interested in finding out how things work. If a thing does something, I want to know why, how, and if I can customize it.&lt;/p&gt;
+&lt;p&gt;It should come as no surprise that Windows 10 drove me crazy.&lt;/p&gt;
+&lt;p&gt;Seemingly arbitrary updates&lt;/p&gt;
+&lt;p&gt;that made for a long start-up process on any given day, surprise restarts that meant I&amp;rsquo;d lose my session and thus my thought process from the day before, and the worst part was I never knew what purpose they served. Windows 10 was an impenetrable mysterious hunk of blue screens and decisions I had no part in.&lt;/p&gt;
+&lt;p&gt;Thankfully for me and others like me, there is an alternative. Well, there are several - many &lt;a href=&#34;https://en.wikipedia.org/wiki/Linux_distribution&#34;&gt;Linux distros&lt;/a&gt; exist and the majority are familiar and totally usable when freshly installed. Perhaps one of the most well-known &amp;ldquo;Windows-like&amp;rdquo; distros is Ubuntu. It has a desktop similar to Windows 10 and is very graphical and geared generally towards those new to Linux.&lt;/p&gt;
+&lt;p&gt;I went with Debian, the distro that Ubuntu was forked off of. It doesn&amp;rsquo;t hold your hand as much as other feature-rich distributions, and is more customizable. I started with the &lt;a href=&#34;https://www.debian.org/distrib/&#34;&gt;small installation image found here&lt;/a&gt; which you can download and use to create a bootable USB.&lt;/p&gt;
+&lt;p&gt;Not entirely on purpose, thanks mostly to a crappy Internet connection (I&amp;rsquo;m a digital nomad in Southeast Asia - it&amp;rsquo;s par for the course) I ended up starting with Debian base system. It&amp;rsquo;s the most basic Debian install available, and excludes things that I as a previous Windows user take for granted. Among other things, I had to find and install (or at least configure):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A &lt;a href=&#34;https://wiki.debian.org/WindowManager&#34;&gt;window manager&lt;/a&gt; (i3)&lt;/li&gt;
+&lt;li&gt;An application to let me connect to the Internet (NetworkManager/nm-applet)&lt;/li&gt;
+&lt;li&gt;A program that lets me control the brightness of my screen (xrandr)&lt;/li&gt;
+&lt;li&gt;A program that handles sound, called a &lt;a href=&#34;https://en.wikipedia.org/wiki/Sound_server&#34;&gt;sound server&lt;/a&gt; (pulseaudio)&lt;/li&gt;
+&lt;li&gt;Event handlers, like telling my laptop to suspend when I close the lid&lt;/li&gt;
+&lt;li&gt;A display for basic status information (i3bar)&lt;/li&gt;
+&lt;li&gt;Desktop notifications (dunst)&lt;/li&gt;
+&lt;li&gt;Basic programs like a graphical file manager (PCmanFM), pdf viewer (Okular), and image editor (Darktable)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If unlike me you&amp;rsquo;d rather start with a more fully-featured desktop environment, Debian&amp;rsquo;s Net Install gives you a &amp;ldquo;Standard system&amp;rdquo; with the GNOME desktop environment by default. There&amp;rsquo;s a &lt;a href=&#34;https://www.debian.org/releases/stable/installmanual&#34;&gt;full installation guide&lt;/a&gt; available for Debian that walks you through the process.&lt;/p&gt;
+&lt;p&gt;I learned a lot doing it the hard way, however. After starting with the base system, I have a much better perspective on what&amp;rsquo;s going on under the surface. If in the future I run into a problem with one component, I&amp;rsquo;m much more likely to have an idea of how to begin fixing it, since I put it together in the first place.&lt;/p&gt;
+&lt;p&gt;I did hit a few potholes along the way, as well as find some things that worked better than others. I&amp;rsquo;ve discussed some of these events in this post. But first, for motivation, the fully riced screenshot:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;screenshot-asakusa-stats.png#center&#34; alt=&#34;So worth it.&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;I posted all &lt;a href=&#34;https://github.com/victoriadotdev/i3-linux-config-tokyo-rice&#34;&gt;my config files on GitHub&lt;/a&gt; in case you want to swipe my sweet, sweet rice.&lt;/p&gt;
+&lt;h1 id=&#34;topics-covered-below&#34;&gt;Topics covered below:&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;What are config files in the first place?&lt;/li&gt;
+&lt;li&gt;Where the heck do all these config files go?&lt;/li&gt;
+&lt;li&gt;I picked a stupid user name, how do I change it?&lt;/li&gt;
+&lt;li&gt;How do I get NetworkManager and Dropbox to start automatically?&lt;/li&gt;
+&lt;li&gt;How do I set up OpenVPN with NetworkManager?&lt;/li&gt;
+&lt;li&gt;How do I get my VPN status to show in i3bar?&lt;/li&gt;
+&lt;li&gt;How do I get my Print Screen/backlight control/volume keys to work?&lt;/li&gt;
+&lt;li&gt;I edited my config file, but I don&amp;rsquo;t see any changes. WTF?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;what-are-config-files-in-the-first-place&#34;&gt;What are config files in the first place?&lt;/h1&gt;
+&lt;p&gt;If you&amp;rsquo;re new to Linux or to coding, these are basically the technical user&amp;rsquo;s version of &amp;ldquo;File &amp;gt; Preferences&amp;rdquo; in &lt;a href=&#34;https://en.wikipedia.org/wiki/Graphical_user_interface&#34;&gt;GUI programs&lt;/a&gt;. Depending on the application you&amp;rsquo;re configuring, there are a few different formats and languages. Thankfully, there are ample config file samples available with a simple web search.&lt;/p&gt;
+&lt;h1 id=&#34;where-the-heck-do-all-these-config-files-go&#34;&gt;Where the heck do all these config files go?&lt;/h1&gt;
+&lt;p&gt;I found some differing file paths. The below are mine and work:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-conf&#34; data-lang=&#34;conf&#34;&gt;systemd event handlers: /etc/systemd/logind.conf
+For URxvt: ~/.Xdefaults
+For i3wm: ~/.config/i3/config
+For i3bar: ~/.config/i3status/config/i3status.conf
+For dunst: ~/.config/dunst/dunstrc
+for Compton: ~/.config/compton.conf&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&#34;i-picked-a-stupid-user-name-how-do-i-change-it&#34;&gt;I picked a stupid user name, how do I change it?&lt;/h1&gt;
+&lt;p&gt;This was a fun one. Turns out changing my user name messed up a whole bunch of stuff that I then had to go fix/reinstall, among them:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dropbox&lt;/li&gt;
+&lt;li&gt;Anaconda and pip&lt;/li&gt;
+&lt;li&gt;Filepaths written in full in config files&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To avoid the hassle I experienced, change your user name before you set up most of your programs. If it&amp;rsquo;s too late for that, just be aware that many programs involving a filepath with &lt;code&gt;/home/oldusername/...&lt;/code&gt; are affected.&lt;/p&gt;
+&lt;p&gt;To change your user name via the terminal, login as root, then:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;$ killall -u oldusername
+$ id oldusername
+&amp;gt;&amp;gt;&amp;gt; &lt;span class=&#34;nv&#34;&gt;uid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1000&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;oldusername&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;gid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1000&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;oldusername&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;groups&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1000&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;oldusername&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,24&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;cdrom&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,25&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;floppy&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,27&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;sudo&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,29&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;audio&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,30&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;dip&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,44&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;video&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,46&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;plugdev&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,108&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;netdev&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# change login name&lt;/span&gt;
+$ usermod -l newusername oldusername
+&lt;span class=&#34;c1&#34;&gt;# change group name&lt;/span&gt;
+$ groupmod -n newusername oldusername
+&lt;span class=&#34;c1&#34;&gt;# modify home directory&lt;/span&gt;
+$ usermod -d /home/newusername -m newusername
+&lt;span class=&#34;c1&#34;&gt;# add comment with full name&lt;/span&gt;
+$ usermod -c &lt;span class=&#34;s2&#34;&gt;&amp;#34;New Full Name&amp;#34;&lt;/span&gt; newusername
+&lt;span class=&#34;c1&#34;&gt;# check that &amp;#34;newusername&amp;#34; replaces &amp;#34;oldusername&amp;#34; in all fields&lt;/span&gt;
+$ id newusername
+&amp;gt;&amp;gt;&amp;gt; &lt;span class=&#34;nv&#34;&gt;uid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1000&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;newusername&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;gid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1000&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;newusername&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;groups&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1000&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;newusername&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,24&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;cdrom&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,25&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;floppy&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,27&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;sudo&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,29&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;audio&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,30&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;dip&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,44&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;video&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,46&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;plugdev&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,108&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;netdev&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you previously set your background image in i3 and it disappears, don&amp;rsquo;t forget to check the filepath in your config file.&lt;/p&gt;
+&lt;h1 id=&#34;how-do-i-get-networkmanager-and-dropbox-to-start-automatically&#34;&gt;How do I get NetworkManager and Dropbox to start automatically?&lt;/h1&gt;
+&lt;p&gt;Dropbox for Linux supposedly has an autostart setting where you can type &lt;code&gt;dropbox autostart y&lt;/code&gt; into a terminal and it&amp;rsquo;ll listen. This didn&amp;rsquo;t work for me. Instead, I added any applications I wanted to start automatically upon login to my i3 config file with this syntax:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-conf&#34; data-lang=&#34;conf&#34;&gt;# start apps automatically
+exec --no-startup-id /usr/bin/nm-applet
+exec --no-startup-id dropbox start&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In the above, &lt;code&gt;exec&lt;/code&gt; is &amp;ldquo;execute&amp;rdquo;, &lt;code&gt;--no-startup-id&lt;/code&gt; basically saves you from watching your cursor do the spinny loading thing, and the last component of the command is the filepath to the program or the syntax to start it, as if typing it into the terminal.&lt;/p&gt;
+&lt;h1 id=&#34;how-do-i-set-up-openvpn-with-networkmanager&#34;&gt;How do I set up OpenVPN with NetworkManager?&lt;/h1&gt;
+&lt;p&gt;First, make sure you&amp;rsquo;ve done &lt;code&gt;apt-get install network-manager-openvpn&lt;/code&gt; to get the plugin.&lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll need your client.ovpn file. In my case, I set up my own VPN using Amazon EC2, and downloaded the client.ovpn file from my OpenVPN console page.&lt;/p&gt;
+&lt;p&gt;Open client.ovpn with a text editor (like vim or gedit) and change any instances of &amp;ldquo;remote openvpn port xxxx&amp;rdquo; to read &amp;ldquo;remote &amp;lt; your ip address &amp;gt; port xxxx&amp;rdquo; instead.&lt;/p&gt;
+&lt;p&gt;Use nm-applet to set up a new VPN connection. If you&amp;rsquo;ve installed the OpenVPN plugin, you&amp;rsquo;ll see OpenVPN as an option in the dropdown. Choose the option to &amp;ldquo;Import a saved VPN configuration&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;Once you load up your client.ovpn file and click &amp;ldquo;Create,&amp;rdquo; all the settings will be filled out for you except for your user name and password. Plug those in and you&amp;rsquo;re good to go.&lt;/p&gt;
+&lt;h1 id=&#34;how-do-i-get-my-vpn-status-to-show-in-i3bar&#34;&gt;How do I get my VPN status to show in i3bar?&lt;/h1&gt;
+&lt;p&gt;Locate your i3status config file. If you don&amp;rsquo;t have one yet, you can use an awesome template like &lt;a href=&#34;https://github.com/victoriadotdev/i3-linux-config-tokyo-rice&#34;&gt;mine&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Edit the filepath in the following section of code:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;run_watch VPN {
+pidfile = &amp;quot;sys/class/net/yourspecialsetting0&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Where &amp;ldquo;yourspecialsetting&amp;rdquo; is any one of &lt;code&gt;tap&lt;/code&gt;/&lt;code&gt;tun&lt;/code&gt;/&lt;code&gt;tun tap&lt;/code&gt; depending on your VPN settings. If you don&amp;rsquo;t know which it is, you can find out in the VPN configuration settings under VPN &amp;gt; Advanced &amp;gt; &amp;ldquo;Set virtual device type&amp;rdquo;.&lt;/p&gt;
+&lt;h1 id=&#34;how-do-i-get-my-print-screen-backlight-control-volume-keys-to-work&#34;&gt;How do I get my Print Screen/backlight control/volume keys to work?&lt;/h1&gt;
+&lt;p&gt;I used key bindings in my i3 config file. The tricky part was finding out what controlled the particular function (and on some occassions, having to install something to control the function).&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# brightness adjustment (pre-defined levels)
+bindsym $mod+Shift+F6 exec xrandr --output eDP-1 --brightness 1
+bindsym $mod+F6 exec xrandr --output eDP-1 --brightness 0.8
+bindsym $mod+F5 exec xrandr --output eDP-1 --brightness 0.5
+bindsym $mod+F7 exec xrandr --output eDP-1 --brightness 0.1
+# volume control (increment)
+bindsym $mod+F12 exec amixer -q sset Master 3%+
+bindsym $mod+F11 exec amixer -q sset Master 3%-
+bindsym $mod+F10 exec amixer -q sset Master toggle
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As you can see, in the case of xrandr I could only find a way to set certain levels. For volume control, amixer seems to offer increments.&lt;/p&gt;
+&lt;h1 id=&#34;i-edited-my-config-file-but-i-don-t-see-any-changes-wtf&#34;&gt;I edited my config file, but I don&amp;rsquo;t see any changes. WTF?&lt;/h1&gt;
+&lt;p&gt;For some things, like the wallpaper in i3 and dunst notifications, I found I had to either reload the application (for i3, type &lt;code&gt;i3-msg restart&lt;/code&gt; in the terminal) or restart my X session (logout and log back in) to see the changes.&lt;/p&gt;
+&lt;h1 id=&#34;was-it-worth-it&#34;&gt;Was it worth it?&lt;/h1&gt;
+&lt;p&gt;The switch to Linux has definitely been worth it. Though some of the process of learning and discovery was finicky and frustrating, I honestly enjoyed every minute. Nothing beats the feeling of figuring something out and making it work!&lt;/p&gt;
+&lt;p&gt;I hope you&amp;rsquo;ve found this post useful. Thanks for reading!&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/verbose/how-a-lifelong-windows-user-switched-to-linux...-the-hard-way/screenshot-asakusa-stats.png" type="image/jpg"/></item></channel></rss>
