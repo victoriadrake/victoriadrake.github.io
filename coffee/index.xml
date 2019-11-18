@@ -1,4 +1,182 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Contribute to the caffeine fund! on victoria.dev</title><link>https://victoria.dev/coffee/</link><description>Recent content in Contribute to the caffeine fund! on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria)</managingEditor><webMaster>hello@victoria.dev (Victoria)</webMaster><lastBuildDate>Tue, 13 Aug 2019 13:53:45 -0400</lastBuildDate><atom:link href="https://victoria.dev/coffee/index.xml" rel="self" type="application/rss+xml"/><item><title>A cron job that could save you from a ransomware attack</title><link>https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/</link><pubDate>Wed, 13 Nov 2019 08:27:31 -0400</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/</guid><description>How a simple scheduled job can help you quickly recover from ransomware.</description><content:encoded>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Contribute to the caffeine fund! on victoria.dev</title><link>https://victoria.dev/coffee/</link><description>Recent content in Contribute to the caffeine fund! on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria)</managingEditor><webMaster>hello@victoria.dev (Victoria)</webMaster><lastBuildDate>Tue, 13 Aug 2019 13:53:45 -0400</lastBuildDate><atom:link href="https://victoria.dev/coffee/index.xml" rel="self" type="application/rss+xml"/><item><title>Bash and shell expansions: lazy list-making</title><link>https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/</link><pubDate>Mon, 18 Nov 2019 07:07:24 -0500</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/</guid><description>A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.</description><content:encoded>
+&lt;img src="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/cover_huef720ee54f039c06953348c1c0b1c220_391591_640x0_resize_box_2.png" width="640" height="480"/>
+&lt;p&gt;It&amp;rsquo;s that time of year again! When stores start putting up colourful sparkly lit-up plastic bits, we all begin to feel a little festive, and by festive I mean let&amp;rsquo;s go shopping. Specifically, holiday gift shopping! (Gifts for yourself are still gifts, technically.)&lt;/p&gt;
+&lt;p&gt;Just so this doesn&amp;rsquo;t all go completely madcap, you ought to make some gift lists. Bash can help.&lt;/p&gt;
+&lt;h2 id=&#34;brace-expansion&#34;&gt;Brace expansion&lt;/h2&gt;
+&lt;p&gt;These are not braces: &lt;code&gt;()&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Neither are these: &lt;code&gt;[]&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;These&lt;/em&gt; are braces: &lt;code&gt;{}&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Braces tell Bash to do something with the arbitrary string or strings it finds between them. Multiple strings are comma-separated: &lt;code&gt;{a,b,c}&lt;/code&gt;. You can also add an optional preamble and postscript to be attached to each expanded result. Mostly, this can save some typing, such as with common file paths and extensions.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s make some lists for each person we want to give stuff to. The following commands are equivalent:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;touch /home/me/gift-lists/Amy.txt /home/me/gift-lists/Bryan.txt /home/me/gift-lists/Charlie.txt&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;touch /home/me/gift-lists/&lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;Amy,Bryan,Charlie&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;.txt&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;tree gift-lists
+/home/me/gift-lists
+├── Amy.txt
+├── Bryan.txt
+└── Charlie.txt&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Oh darn, &amp;ldquo;Bryan&amp;rdquo; spells his name with an &amp;ldquo;i.&amp;rdquo; I can fix that.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;mv /home/me/gift-lists/&lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;Bryan,Brian&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;.txt
+renamed &lt;span class=&#34;s1&#34;&gt;&amp;#39;/home/me/gift-lists/Bryan.txt&amp;#39;&lt;/span&gt; -&amp;gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;/home/me/gift-lists/Brian.txt&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;shell-parameter-expansions&#34;&gt;Shell parameter expansions&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html&#34;&gt;Shell parameter expansion&lt;/a&gt; allows us to make all sorts of changes to parameters enclosed in braces, like manipulate and substitute text.&lt;/p&gt;
+&lt;p&gt;There are a few stocking stuffers that all our giftees deserve. Let&amp;rsquo;s make that a variable:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nv&#34;&gt;STUFF&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;$&amp;#39;socks\nlump of coal\nwhite chocolate&amp;#39;&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$STUFF&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+socks
+lump of coal
+white chocolate&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now to add these items to each of our lists with some help from &lt;a href=&#34;https://en.wikipedia.org/wiki/Tee_(command)&#34;&gt;the &lt;code&gt;tee&lt;/code&gt; command&lt;/a&gt; to get &lt;code&gt;echo&lt;/code&gt; and expansions to play nice.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$STUFF&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; tee &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;Amy,Brian,Charlie&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;.txt
+cat &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;Amy,Brian,Charlie&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;.txt
+socks
+lump of coal
+white chocolate
+socks
+lump of coal
+white chocolate
+socks
+lump of coal
+white chocolate&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;pattern-match-substitution&#34;&gt;Pattern match substitution&lt;/h3&gt;
+&lt;p&gt;On second thought, maybe the lump of coal isn&amp;rsquo;t such a nice gift. You can replace it with something better using a pattern match substitution in the form of &lt;code&gt;${parameter/pattern/string}&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;STUFF&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;/lump of coal/candy cane&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; tee &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;Amy,Brian,Charlie&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;.txt
+cat &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;Amy,Brian,Charlie&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;.txt
+socks
+candy cane
+white chocolate
+socks
+candy cane
+white chocolate
+socks
+candy cane
+white chocolate&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This replaces the first instance of &amp;ldquo;lump of coal&amp;rdquo; with &amp;ldquo;candy cane.&amp;rdquo; To replace all instances (if there were multiple), use &lt;code&gt;${parameter//pattern/string}&lt;/code&gt;. This doesn&amp;rsquo;t change our &lt;code&gt;$STUFF&lt;/code&gt; variable, so we can still reuse the original list for someone naughty later.&lt;/p&gt;
+&lt;h3 id=&#34;substrings&#34;&gt;Substrings&lt;/h3&gt;
+&lt;p&gt;While we&amp;rsquo;re improving things, our giftees may not all like white chocolate. We&amp;rsquo;d better add some regular chocolate to our lists just in case. Since I&amp;rsquo;m super lazy, I&amp;rsquo;m just going to hit the up arrow and modify a previous Bash command. Luckily, the last word in the &lt;code&gt;$STUFF&lt;/code&gt; variable is &amp;ldquo;chocolate,&amp;rdquo; which is nine characters long, so I&amp;rsquo;ll tell Bash to keep just that part using &lt;code&gt;${parameter:offset}&lt;/code&gt;. I&amp;rsquo;ll use &lt;code&gt;tee&lt;/code&gt;&amp;rsquo;s &lt;code&gt;-a&lt;/code&gt; flag to &lt;code&gt;a&lt;/code&gt;ppend to my existing lists:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;STUFF&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;: -9&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; tee -a &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;Amy,Brian,Charlie&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;.txt
+cat &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;Amy,Brian,Charlie&lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;.txt
+socks
+candy cane
+white chocolate
+chocolate
+socks
+candy cane
+white chocolate
+chocolate
+socks
+candy cane
+white chocolate
+chocolate&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can also:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Do this&lt;/th&gt;
+&lt;th&gt;With this&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Get substring from &lt;em&gt;n&lt;/em&gt; characters onwards&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;${parameter:n}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Get substring for &lt;em&gt;x&lt;/em&gt; characters starting at &lt;em&gt;n&lt;/em&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;${parameter:n:x}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;There! Now our base lists are finished. Let&amp;rsquo;s have some eggnog.&lt;/p&gt;
+&lt;h3 id=&#34;testing-variables&#34;&gt;Testing variables&lt;/h3&gt;
+&lt;p&gt;You know, it may be the eggnog, but I think I started a list for Amy yesterday and stored it in a variable that I might have called &lt;code&gt;amy&lt;/code&gt;. Let&amp;rsquo;s see if I did. I&amp;rsquo;ll use the &lt;code&gt;${parameter:?word}&lt;/code&gt; expansion. It&amp;rsquo;ll write &lt;code&gt;word&lt;/code&gt; to standard error and exit if there&amp;rsquo;s no &lt;code&gt;amy&lt;/code&gt; parameter.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;amy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:?no such&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+bash: amy: no such&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I guess not. Maybe it was Brian instead?&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;brian&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:?no such&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+Lederhosen&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can also:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Do this&lt;/th&gt;
+&lt;th&gt;With this&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Substitute &lt;code&gt;word&lt;/code&gt; if &lt;code&gt;parameter&lt;/code&gt; is unset or null&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;${parameter:-word}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Substitute &lt;code&gt;word&lt;/code&gt; if &lt;code&gt;parameter&lt;/code&gt; is not unset or null&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;${parameter:+word}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Assign &lt;code&gt;word&lt;/code&gt; to &lt;code&gt;parameter&lt;/code&gt; if &lt;code&gt;parameter&lt;/code&gt; is unset or null&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;${parameter:=word}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;changing-case&#34;&gt;Changing case&lt;/h3&gt;
+&lt;p&gt;That&amp;rsquo;s right! Brian said he wanted some lederhosen and so I made myself a note. This is pretty important, so I&amp;rsquo;ll add it to Brian&amp;rsquo;s list in capital letters with the &lt;code&gt;${parameter^^pattern}&lt;/code&gt; expansion. The &lt;code&gt;pattern&lt;/code&gt; part is optional. We&amp;rsquo;re only writing to Brian&amp;rsquo;s list, so I&amp;rsquo;ll just use &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; instead of &lt;code&gt;tee -a&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;brian&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;^^&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; Brian.txt
+cat Brian.txt
+socks
+candy cane
+white chocolate
+chocolate
+LEDERHOSEN&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can also:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Do this&lt;/th&gt;
+&lt;th&gt;With this&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Capitalize the first letter&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;${parameter^pattern}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Lowercase the first letter&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;${parameter,pattern}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Lowercase all letters&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;${parameter,,pattern}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;expanding-arrays&#34;&gt;Expanding arrays&lt;/h3&gt;
+&lt;p&gt;You know what, all this gift-listing business is a lot of work. I&amp;rsquo;m just going to make &lt;a href=&#34;https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Arrays&#34;&gt;an array&lt;/a&gt; of things I saw at the store:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nv&#34;&gt;gifts&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=(&lt;/span&gt;sweater gameboy wagon pillows chestnuts hairbrush&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I can use substring expansion in the form of &lt;code&gt;${parameter:offset:length}&lt;/code&gt; to make this simple. I&amp;rsquo;ll add the first two to Amy&amp;rsquo;s list, the middle two to Brian&amp;rsquo;s, and the last two to Charlie&amp;rsquo;s. I&amp;rsquo;ll use &lt;code&gt;printf&lt;/code&gt; to help with newlines.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;nb&#34;&gt;printf&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;%s\n&amp;#39;&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;gifts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[@]:&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; Amy.txt
+&lt;span class=&#34;nb&#34;&gt;printf&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;%s\n&amp;#39;&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;gifts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[@]:&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; Brian.txt
+&lt;span class=&#34;nb&#34;&gt;printf&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;%s\n&amp;#39;&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;${&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;gifts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[@]: -2&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; Charlie.txt&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;cat Amy.txt
+socks
+candy cane
+white chocolate
+chocolate
+sweater
+gameboy
+cat Brian.txt
+socks
+candy cane
+white chocolate
+chocolate
+LEDERHOSEN
+wagon
+pillows
+cat Charlie.txt
+socks
+candy cane
+white chocolate
+chocolate
+chestnuts
+hairbrush&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;There! Now we&amp;rsquo;ve got a comprehensive set of super personalized gift lists. Thanks Bash! Too bad it can&amp;rsquo;t do the shopping for us, too.&lt;/p&gt;</content:encoded><enclosure url="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/cover_huef720ee54f039c06953348c1c0b1c220_391591_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>A cron job that could save you from a ransomware attack</title><link>https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/</link><pubDate>Wed, 13 Nov 2019 08:27:31 -0400</pubDate><author>hello@victoria.dev (Victoria)</author><guid>https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/</guid><description>How a simple scheduled job can help you quickly recover from ransomware.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/cover_hue3aef3cab743e28f902a30a77ac75013_151327_640x0_resize_q75_box.jpg" width="640" height="178"/>
 &lt;p&gt;It&amp;rsquo;s 2019, and ransomware has become a thing.&lt;/p&gt;
 &lt;p&gt;Systems that interact with the public, like companies, educational institutions, and public services, are most susceptible. While delivery methods for ransomware vary from the physical realm to communication via social sites and email, all methods only require one person to make one mistake in order for ransomware to proliferate.&lt;/p&gt;
