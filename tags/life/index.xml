@@ -6,7 +6,7 @@
 &lt;p&gt;What percentage of those children are good? It&amp;rsquo;s impossible to know; however, we can work on a few assumptions. One is that Santa Claus functions more on optimism than economics and would likely have prepared for the possibility that every child is a good child in any given year. Thus, he would be prepared to give a toy to every child. Let&amp;rsquo;s assume it&amp;rsquo;s been a great year and that all 907,208,751.6 children are getting toys.&lt;/p&gt;
 &lt;p&gt;That&amp;rsquo;s a lot of presents, and, as we know, they&amp;rsquo;re all made by Santa&amp;rsquo;s elves at his North &lt;del&gt;China&lt;/del&gt; Pole workshop. Given that there are 365 days in a year and one of them is Christmas, let&amp;rsquo;s assume that Santa&amp;rsquo;s elves collectively have 364 days to create and gift wrap 907,208,752 (rounded up) presents. That works out to 2,492,331.74 presents per day.&lt;/p&gt;
 &lt;p&gt;Almost two-and-a-half million presents per day is a heavy workload for any workshop. Let&amp;rsquo;s look at two paradigms that Santa might employ to hit this goal: concurrency, and parallelism.&lt;/p&gt;
-&lt;h2 id=&#34;concurrency&#34;&gt;Concurrency&lt;/h2&gt;
+&lt;h2 id=&#34;a-sequential-process&#34;&gt;A sequential process&lt;/h2&gt;
 &lt;p&gt;Suppose that Santa&amp;rsquo;s workshop is staffed by exactly one, very hard working, very tired elf. The production of one present involves four steps:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Cutting wood&lt;/li&gt;
@@ -16,6 +16,7 @@
 &lt;/ol&gt;
 &lt;p&gt;With a single elf, only one step for one present can be happening at any instance in time. If the elf were to produce one present at a time from beginning to end, that process would be executed &lt;em&gt;sequentially&lt;/em&gt;. It&amp;rsquo;s not the most efficient method for producing two-and-a-half million presents per day; for instance, the elf would have to wait around doing nothing while the glue on the present was drying before moving on to the next step.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;sequence.png&#34; alt=&#34;Illustration of sequence&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;concurrency&#34;&gt;Concurrency&lt;/h2&gt;
 &lt;p&gt;In order to be more efficient, the elf works on all presents &lt;em&gt;concurrently&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;Instead of completing one present at a time, the elf first cuts all the wood for all the toys, one by one. When everything is cut, the elf assembles and glues the toys together, one after the other. This &lt;a href=&#34;https://en.wikipedia.org/wiki/Concurrent_computing&#34;&gt;concurrent processing&lt;/a&gt; means that the glue from the first toy has time to dry (without needing more attention from the elf) while the remaining toys are glued together. The same goes for painting, one toy at a time, and finally wrapping.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;concurrency.png&#34; alt=&#34;Illustration of concurrency&#34; /&gt;&lt;/p&gt;
@@ -26,7 +27,7 @@
 &lt;p&gt;Elves working in parallel can also employ concurrency. One elf can still tackle only one task at a time, so it&amp;rsquo;s most efficient to have multiple elves concurrently producing presents.&lt;/p&gt;
 &lt;p&gt;Of course, if Santa&amp;rsquo;s workshop has, say, two-and-a-half million elves, each elf would only need to finish a maximum of one present per day. In this case, working sequentially doesn&amp;rsquo;t detract from the workshop&amp;rsquo;s efficiency. There would still be 7,668.26 elves left over to fetch coffee and lunch.&lt;/p&gt;
 &lt;h2 id=&#34;santa-claus-and-threading&#34;&gt;Santa Claus, and threading&lt;/h2&gt;
-&lt;p&gt;After all the elves&amp;rsquo; hard work is done, it&amp;rsquo;s up to Santa Claus to deliver the presents - all 907,208,752 of them.&lt;/p&gt;
+&lt;p&gt;After all the elves&amp;rsquo; hard work is done, it&amp;rsquo;s up to Santa Claus to deliver the presents &amp;ndash; all 907,208,752 of them.&lt;/p&gt;
 &lt;p&gt;Santa doesn&amp;rsquo;t need to make a visit to every kid; just to the one household tree. So how many trees does Santa need to visit? Again with broad generalization, we&amp;rsquo;ll say that the average number of children per household worldwide is &lt;a href=&#34;https://en.wikipedia.org/wiki/Demographics_of_the_world#Total_fertility_rate&#34;&gt;2.45, based on the year&amp;rsquo;s predicted fertility rates&lt;/a&gt;. That makes 370,289,286.4 houses to visit. Let&amp;rsquo;s round that up to 370,289,287.&lt;/p&gt;
 &lt;p&gt;How long does Santa have? The lore says one night, which means one earthly rotation, and thus 24 hours. &lt;a href=&#34;https://www.noradsanta.org/&#34;&gt;NORAD confirms&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;This means Santa must visit 370,289,287 households in 24 hours (86,400 seconds), at a rate of 4,285.75 households per second, nevermind the time it takes to put presents under the tree and grab a cookie.&lt;/p&gt;
