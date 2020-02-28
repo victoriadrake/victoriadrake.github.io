@@ -1,4 +1,418 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Selected Projects on victoria.dev</title><link>https://victoria.dev/projects/</link><description>Recent content in Selected Projects on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><lastBuildDate>Sat, 19 Jan 2019 19:13:22 -0500</lastBuildDate><atom:link href="https://victoria.dev/projects/index.xml" rel="self" type="application/rss+xml"/><item><title>Command line tricks for managing your messy open source repository</title><link>https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/</link><pubDate>Mon, 17 Feb 2020 08:05:06 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/</guid><description>A handy toolbox for the terminal to help open source maintainers make their projects sparkle.</description><content:encoded>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Selected Projects on victoria.dev</title><link>https://victoria.dev/projects/</link><description>Recent content in Selected Projects on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><lastBuildDate>Sat, 19 Jan 2019 19:13:22 -0500</lastBuildDate><atom:link href="https://victoria.dev/projects/index.xml" rel="self" type="application/rss+xml"/><item><title>Multithreaded Python: slithering through an I/O bottleneck</title><link>https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/</link><pubDate>Fri, 28 Feb 2020 09:31:02 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/</guid><description>How taking advantage of parallelism in Python can make your software orders of magnitude faster.</description><content:encoded>
+&lt;img src="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/cover_hufc3f293689518f785bfb54ed57068ead_360041_640x0_resize_box_2.png" width="640" height="256"/>
+&lt;p>I recently developed a project that I called &lt;a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&lt;/a>: a multithreaded link checker written in Python. Unlike many Python site crawlers I found while researching, Hydra uses only standard libraries, with no external dependencies like BeautifulSoup. It&amp;rsquo;s intended to be run as part of a CI/CD process, so part of its success depended on being fast.&lt;/p>
+&lt;p>Multiple threads in Python is a bit of a bitey subject (not sorry) in that the Python interpreter doesn&amp;rsquo;t actually let multiple threads execute at the same time. Python&amp;rsquo;s &lt;a href="https://wiki.python.org/moin/GlobalInterpreterLock">Global Interpreter Lock&lt;/a>, or GIL, prevents multiple threads from executing Python bytecodes at once. Each thread that wants to execute must first wait for the GIL to be released by the currently executing thread. The GIL is pretty much the microphone in a low-budget conference panel, except where no one gets to shout.&lt;/p>
+&lt;p>This has the advantage of preventing &lt;a href="https://en.wikipedia.org/wiki/Race_condition">race conditions&lt;/a>. It does, however, lack the performance advantages afforded by running multiple tasks in parallel. (If you&amp;rsquo;d like a refresher on concurrency, parallelism, and multithreading, see &lt;a href="https://victoria.dev/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/">Concurrency, parallelism, and the many threads of Santa Claus&lt;/a>.) While I prefer Go for its convenient first-class primitives that support concurrency (see &lt;a href="https://tour.golang.org/concurrency/1">Goroutines&lt;/a>), this project&amp;rsquo;s recipients were more comfortable with Python. I took it as an opportunity to test and explore!&lt;/p>
+&lt;p>Simultaneously performing multiple tasks in Python isn&amp;rsquo;t impossible; it just takes a little extra work. For Hydra, the main advantage is in overcoming the input/output (I/O) bottleneck.&lt;/p>
+&lt;p>In order to get web pages to check, Hydra needs to go out to the Internet and fetch them. When compared to tasks that are performed by the CPU alone, going out over the network is comparatively slower. How slow?&lt;/p>
+&lt;p>Here are approximate timings for tasks performed on a typical PC:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;/th>
+&lt;th>Task&lt;/th>
+&lt;th>Time&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>execute typical instruction&lt;/td>
+&lt;td>1/1,000,000,000 sec = 1 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>fetch from L1 cache memory&lt;/td>
+&lt;td>0.5 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>branch misprediction&lt;/td>
+&lt;td>5 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>fetch from L2 cache memory&lt;/td>
+&lt;td>7 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>RAM&lt;/td>
+&lt;td>Mutex lock/unlock&lt;/td>
+&lt;td>25 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>RAM&lt;/td>
+&lt;td>fetch from main memory&lt;/td>
+&lt;td>100 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Network&lt;/td>
+&lt;td>send 2K bytes over 1Gbps network&lt;/td>
+&lt;td>20,000 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>RAM&lt;/td>
+&lt;td>read 1MB sequentially from memory&lt;/td>
+&lt;td>250,000 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Disk&lt;/td>
+&lt;td>fetch from new disk location (seek)&lt;/td>
+&lt;td>8,000,000 nanosec (8ms)&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Disk&lt;/td>
+&lt;td>read 1MB sequentially from disk&lt;/td>
+&lt;td>20,000,000 nanosec (20ms)&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Network&lt;/td>
+&lt;td>send packet US to Europe and back&lt;/td>
+&lt;td>150,000,000 nanosec (150ms)&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Peter Norvig first published these numbers some years ago in &lt;a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years&lt;/a>. Since computers and their components change year over year, the exact numbers shown above aren&amp;rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.&lt;/p>
+&lt;p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&amp;rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.&lt;/p>
+&lt;p>In Hydra, the task of parsing response data and assembling results into a report is relatively fast, since it all happens on the CPU. The slowest portion of the program&amp;rsquo;s execution, by over six orders of magnitude, is network latency. Not only does Hydra need to fetch packets, but whole web pages! One way of improving Hydra&amp;rsquo;s performance is to find a way for the page fetching tasks to execute without blocking the main thread.&lt;/p>
+&lt;p>Python has a couple options for doing tasks in parallel: multiple processes, or multiple threads. These methods allow you to circumvent the GIL and speed up execution in a couple different ways.&lt;/p>
+&lt;h2 id="multiple-processes">Multiple processes&lt;/h2>
+&lt;p>To execute parallel tasks using multiple processes, you can use Python&amp;rsquo;s &lt;a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor">&lt;code>ProcessPoolExecutor&lt;/code>&lt;/a>. A concrete subclass of &lt;a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor">&lt;code>Executor&lt;/code>&lt;/a> from the &lt;a href="https://docs.python.org/3/library/concurrent.futures.html">&lt;code>concurrent.futures&lt;/code> module&lt;/a>, &lt;code>ProcessPoolExecutor&lt;/code> uses a pool of processes spawned with the &lt;a href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing">&lt;code>multiprocessing&lt;/code> module&lt;/a> to avoid the GIL.&lt;/p>
+&lt;p>This option uses worker subprocesses that maximally default to the number of processors on the machine. The &lt;code>multiprocessing&lt;/code> module allows you to maximally parallelize function execution across processes, which can really speed up compute-bound (or &lt;a href="https://en.wikipedia.org/wiki/CPU-bound">CPU-bound&lt;/a>) tasks.&lt;/p>
+&lt;p>Since the main bottleneck for Hydra is I/O and not the processing to be done by the CPU, I&amp;rsquo;m better served by using multiple threads.&lt;/p>
+&lt;h2 id="multiple-threads">Multiple threads&lt;/h2>
+&lt;p>Fittingly named, Python&amp;rsquo;s &lt;a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor">&lt;code>ThreadPoolExecutor&lt;/code>&lt;/a> uses a pool of threads to execute asynchronous tasks. Also a subclass of &lt;a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor">&lt;code>Executor&lt;/code>&lt;/a>, it uses a defined number of maximum worker threads (at least five by default, according to the formula &lt;code>min(32, os.cpu_count() + 4)&lt;/code>) and reuses idle threads before starting new ones, making it pretty efficient.&lt;/p>
+&lt;p>Here is a snippet of Hydra with comments showing how Hydra uses &lt;code>ThreadPoolExecutor&lt;/code> to achieve parallel multithreaded bliss:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-py" data-lang="py">&lt;span class="c1"># Create the Checker class&lt;/span>
+&lt;span class="k">class&lt;/span> &lt;span class="nc">Checker&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="c1"># Queue of links to be checked&lt;/span>
+&lt;span class="n">TO_PROCESS&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Queue&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="c1"># Maximum workers to run&lt;/span>
+&lt;span class="n">THREADS&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">100&lt;/span>
+&lt;span class="c1"># Maximum seconds to wait for HTTP response&lt;/span>
+&lt;span class="n">TIMEOUT&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">60&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">url&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="o">.&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="o">.&lt;/span>
+&lt;span class="c1"># Create the thread pool&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">pool&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">futures&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ThreadPoolExecutor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_workers&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">THREADS&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">def&lt;/span> &lt;span class="nf">run&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="c1"># Run until the TO_PROCESS queue is empty&lt;/span>
+&lt;span class="k">while&lt;/span> &lt;span class="bp">True&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="k">try&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="n">target_url&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TO_PROCESS&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">get&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">block&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">timeout&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="c1"># If we haven&amp;#39;t already checked this link&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="n">target_url&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="sa">&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="s2">url&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">visited&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="c1"># Mark it as visited&lt;/span>
+&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">visited&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">add&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">target_url&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="sa">&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="s2">url&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="c1"># Submit the link to the pool&lt;/span>
+&lt;span class="n">job&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">pool&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">submit&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">load_url&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">target_url&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TIMEOUT&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">job&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">add_done_callback&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">handle_future&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">except&lt;/span> &lt;span class="n">Empty&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="k">return&lt;/span>
+&lt;span class="k">except&lt;/span> &lt;span class="ne">Exception&lt;/span> &lt;span class="k">as&lt;/span> &lt;span class="n">e&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;span class="k">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">e&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can view the full code in &lt;a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&amp;rsquo;s GitHub repository&lt;/a>.&lt;/p>
+&lt;h2 id="single-thread-to-multithread">Single thread to multithread&lt;/h2>
+&lt;p>If you&amp;rsquo;d like to see the full effect, I compared the run times for checking my website between a prototype single-thread program, and the &lt;del>multiheaded&lt;/del>multithreaded Hydra.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
+real 17m34.084s
+user 11m40.761s
+sys 0m5.436s
+time python3 hydra.py https://victoria.dev
+real 0m15.729s
+user 0m11.071s
+sys 0m2.526s
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The single-thread program, which blocks on I/O, ran in about seventeen minutes. When I first ran the multithreaded version, it finished in 1m13.358s - after some profiling and tuning, it took a little under sixteen seconds. Again, the exact times don&amp;rsquo;t mean all that much; they&amp;rsquo;ll vary depending on factors such as the size of the site being crawled, your network speed, and your program&amp;rsquo;s balance between the overhead of thread management and the benefits of parallelism.&lt;/p>
+&lt;p>The more important thing, and the result I&amp;rsquo;ll take any day, is a program that runs some orders of magnitude faster.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/cover_hufc3f293689518f785bfb54ed57068ead_360041_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>Breaking bottlenecks 🍾</title><link>https://victoria.dev/blog/breaking-bottlenecks/</link><pubDate>Tue, 25 Feb 2020 12:50:29 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/breaking-bottlenecks/</guid><description>A talk on the benefits of non-blocking functions for programs, developers, and organizations.</description><content:encoded>
+&lt;img src="https://victoria.dev/blog/breaking-bottlenecks/cover_hucd0e6312363c308744eec049709d6b2b_396830_640x0_resize_box_2.png" width="640" height="256"/>
+&lt;p>&lt;em>I recently gave a lecture on the benefits of building non-blocking processes. This is a write-up of the full talk, minus any &amp;ldquo;ums&amp;rdquo; that may have occurred. You can &lt;a href="https://victoria.dev/slides/bottlenecks">view the slides here&lt;/a>.&lt;/em>&lt;/p>
+&lt;p>I&amp;rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&amp;rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&amp;rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.&lt;/p>
+&lt;p>OWASP is a great group doing important work. I&amp;rsquo;ve seen this firsthand as part of the core team that produces the Web Security Testing Guide. However, while OWASP inspires in its large volunteer base, it lacks in the area of central organization.&lt;/p>
+&lt;p>This lack of organization was most recently apparent in the group&amp;rsquo;s website, &lt;a href="https://owasp.org">OWASP.org&lt;/a>. A big organization with an even bigger website to match, OWASP.org enjoys hundreds of thousands of visitors. Unfortunately, many of its pages - individually managed by disparate projects - are infrequently updated. Some are abandoned. The website as a whole lacks a centralized quality assurance process, and as a result, OWASP.org is peppered with broken links.&lt;/p>
+&lt;h2 id="the-trouble-with-broken-links">The trouble with broken links&lt;/h2>
+&lt;p>Customers don&amp;rsquo;t like broken links; attackers really do. That&amp;rsquo;s because broken links are a security vulnerability. Broken links can signal opportunities for attacks like &lt;a href="https://edoverflow.com/2017/broken-link-hijacking/">broken link hijacking&lt;/a> and &lt;a href="https://www.hackerone.com/blog/Guide-Subdomain-Takeovers">subdomain takeovers&lt;/a>. At their least effective, these attacks can be embarrassing; at their worst, severely damaging to businesses and organizations. One OWASP group, the Application Security Verification Standard (ASVS) project, writes about &lt;a href="https://github.com/OWASP/ASVS/blob/d9e0ac99828ef3c1e9233bd8a1f691f2a6958aa3/4.0/en/0x18-V10-Malicious.md#v103-deployed-application-integrity-controls">integrity controls&lt;/a> that can help to mitigate the likelihood of these attacks. This knowledge, unfortunately, has not yet propagated throughout the rest of OWASP yet.&lt;/p>
+&lt;p>This is the story of how I created a fast and efficient tool to help OWASP solve this problem.&lt;/p>
+&lt;h2 id="the-job">The job&lt;/h2>
+&lt;p>I took on the task of creating a program that could run as part of a CI/CD process to detect and report broken links. The program needed to:&lt;/p>
+&lt;ul>
+&lt;li>Find and enumerate all the broken links on OWASP.org in a report.&lt;/li>
+&lt;li>Keep track of the parent pages the broken links were on so they could be fixed.&lt;/li>
+&lt;li>Run efficiently as part of a CI/CD pipeline.&lt;/li>
+&lt;/ul>
+&lt;p>Essentially; I need to build a web crawler.&lt;/p>
+&lt;p>My original journey through this process was also in Python, as that was a comfortable language choice for everyone in the OWASP group. Personally, I prefer to use Go for higher performance as it offers more convenient concurrency primitives. Between the task and this talk, I wrote three programs: a prototype single-thread Python program, a multithreaded Python program, and a Go program using goroutines. We&amp;rsquo;ll see a comparison of how each worked out near the end of the talk - first, let&amp;rsquo;s explore how to build a web crawler.&lt;/p>
+&lt;h2 id="prototyping-a-web-crawler">Prototyping a web crawler&lt;/h2>
+&lt;p>Here&amp;rsquo;s what our web crawler will need to do:&lt;/p>
+&lt;ol>
+&lt;li>Get the HTML data of the first page of the website (for example, &lt;code>https://victoria.dev&lt;/code>)&lt;/li>
+&lt;li>Check all of the links on the page
+&lt;ol>
+&lt;li>Keep track of the links we&amp;rsquo;ve already visited so we don&amp;rsquo;t end up checking them twice&lt;/li>
+&lt;li>Record any broken links we find&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Fetch more HTML data from any valid links on the page, as long as they&amp;rsquo;re in the same domain (&lt;code>https://victoria.dev&lt;/code> and not &lt;code>https://github.com&lt;/code>, for instance)&lt;/li>
+&lt;li>Repeat step #2 until all of the links on the site have been checked&lt;/li>
+&lt;/ol>
+&lt;p>Here&amp;rsquo;s what the execution flow will look like:&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="execution_flow.png"
+alt="A flow chart showing program execution"/>
+&lt;/figure>
+&lt;p>As you can see, the nodes &amp;ldquo;GET page&amp;rdquo; -&amp;gt; &amp;ldquo;HTML&amp;rdquo; -&amp;gt; &amp;ldquo;Parse links&amp;rdquo; -&amp;gt; &amp;ldquo;Valid link&amp;rdquo; -&amp;gt; &amp;ldquo;Check visited&amp;rdquo; all form a loop. These are what enable our web crawler to continue crawling until all the links on the site have been accounted for in the &amp;ldquo;Check visited&amp;rdquo; node. When the crawler encounters links it&amp;rsquo;s already checked, it will &amp;ldquo;Stop.&amp;rdquo; This loop will become more important in a moment.&lt;/p>
+&lt;p>For now, the question on everyone&amp;rsquo;s mind (I hope): how do we make it fast?&lt;/p>
+&lt;h2 id="how-fast-can-you-do-the-thing">How fast can you do the thing?&lt;/h2>
+&lt;p>Here are some approximate timings for tasks performed on a typical PC:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;/th>
+&lt;th>Task&lt;/th>
+&lt;th>Time&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>execute typical instruction&lt;/td>
+&lt;td>1/1,000,000,000 sec = 1 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>fetch from L1 cache memory&lt;/td>
+&lt;td>0.5 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>branch misprediction&lt;/td>
+&lt;td>5 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>fetch from L2 cache memory&lt;/td>
+&lt;td>7 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>RAM&lt;/td>
+&lt;td>Mutex lock/unlock&lt;/td>
+&lt;td>25 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>RAM&lt;/td>
+&lt;td>fetch from main memory&lt;/td>
+&lt;td>100 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>RAM&lt;/td>
+&lt;td>read 1MB sequentially from memory&lt;/td>
+&lt;td>250,000 nanosec&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Disk&lt;/td>
+&lt;td>fetch from new disk location (seek)&lt;/td>
+&lt;td>8,000,000 nanosec (8ms)&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Disk&lt;/td>
+&lt;td>read 1MB sequentially from disk&lt;/td>
+&lt;td>20,000,000 nanosec (20ms)&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Network&lt;/td>
+&lt;td>send packet US to Europe and back&lt;/td>
+&lt;td>150,000,000 nanosec (150ms)&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Peter Norvig first published these numbers some years ago in &lt;a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years&lt;/a>. They typically crop up now and then in articles titled along the lines of, &amp;ldquo;Latency numbers every developer should know.&amp;rdquo;&lt;/p>
+&lt;p>Since computers and their components change year over year, the exact numbers shown above aren&amp;rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.&lt;/p>
+&lt;p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&amp;rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.&lt;/p>
+&lt;h2 id="bottleneck-network-latency">Bottleneck: network latency&lt;/h2>
+&lt;p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &amp;ldquo;GET page&amp;rdquo; node, in which our crawler fetches page data over the network, is going to be &lt;em>a million times slower&lt;/em> than the next slowest thing in the loop!&lt;/p>
+&lt;p>We don&amp;rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&amp;rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text"> 150 milliseconds
+x 12,000 links
+---------
+1,800,000 milliseconds (30 minutes)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?&lt;/p>
+&lt;h3 id="feedback-loops">Feedback loops&lt;/h3>
+&lt;p>I previously wrote about &lt;a href="https://victoria.dev/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops&lt;/a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.&lt;/p>
+&lt;p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&amp;rsquo;m waiting on a process that&amp;rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&amp;rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke &lt;code>master&lt;/code> (hopefully &lt;code>staging&lt;/code>).&lt;/p>
+&lt;p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&amp;rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&amp;rsquo;ve got a slow and inefficient company.&lt;/p>
+&lt;h3 id="the-cost-of-bottlenecks">The cost of bottlenecks&lt;/h3>
+&lt;p>To add insult to injury, not only are you waiting on a bottlenecked process to run; you&amp;rsquo;re also paying to wait. Take the serverless example - AWS Lambda, for instance. Here&amp;rsquo;s a chart showing the cost of functions by compute time and CPU usage.&lt;/p>
+&lt;figure>
+&lt;img src="lambda-chart.png"
+alt="Chart showing Total Lambda compute cost by function execution"/> &lt;figcaption>
+&lt;p>Source: &lt;a href="https://serverless.com/blog/understanding-and-controlling-aws-lambda-costs/">Understanding and Controlling AWS Lambda Costs&lt;/a>&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
+&lt;p>Again, the numbers change over the years, but the main concepts remain the same: the bigger the function and the longer its compute time, the bigger the cost. For applications taking advantage of serverless, these costs can add up dramatically.&lt;/p>
+&lt;p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.&lt;/p>
+&lt;p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&amp;rsquo;s get some tacos.&lt;/p>
+&lt;h2 id="tacos-and-threading">Tacos and threading&lt;/h2>
+&lt;p>Everyone, meet Bob. He&amp;rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &amp;ldquo;Hi,&amp;rdquo; Bob.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+🌮 🌳
+🌮
+🌮 ╔══════════════╗
+🌮 Hi I&amp;#39;m Bob 🌳
+🌮 ╚══════════════╝ \
+🌮 🐹 🌮
+🌮
+🌮
+🌮 🌳
+🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Bob works very hard at being a cashier, but he&amp;rsquo;s still just one gopher. The customers who frequent Bob&amp;rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&amp;rsquo;ve got to order them through Bob. Here&amp;rsquo;s what our bottlenecked, single-thread taco stand currently looks like:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+🌮 🌳
+🌮
+🌮
+🌮 🌳
+🌮 🐹 🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵
+🌮
+🌮
+🌮
+🌮 🌳
+🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&amp;rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?&lt;/p>
+&lt;p>We can try splitting the queue:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+🌮 🌳
+🌮
+🌮 🧑💵🧑💵🧑💵🧑💵
+🌮 🌳
+🌮 🐹
+🌮
+🌮 🧑💵🧑💵🧑💵🧑💵🧑💵
+🌮
+🌮 🌳
+🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a &lt;a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model&lt;/a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&amp;rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&amp;rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?&lt;/p>
+&lt;p>We could get two Bobs:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+🌮 🌳
+🌮
+🌮 🌳
+🌮 🐹 🧑💵🧑💵🧑💵🧑💵
+🌮 🌳
+🌮 🐹 🧑💵🧑💵🧑💵🧑💵🧑💵
+🌮 🌳
+🌮
+🌮 🌳
+🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.&lt;/p>
+&lt;p>We can do even better than that:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+🌮 🌳
+🌮 🐹 🧑💵🧑💵
+🌮 🌳
+🌮 🐹 🧑💵🧑💵
+🌮 🌳
+🌮 🐹 🧑💵🧑💵
+🌮 🌳
+🌮 🐹 🧑💵🧑💵🧑💵
+🌮 🌳
+🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called &lt;a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading&lt;/a>.&lt;/p>
+&lt;p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.&lt;/p>
+&lt;h2 id="setting-up-a-go-web-crawler">Setting up a Go web crawler&lt;/h2>
+&lt;p>In order to share data between our &lt;a href="https://tour.golang.org/concurrency/1">goroutines&lt;/a>, we&amp;rsquo;ll need to create some data structures. Our &lt;code>Checker&lt;/code> structure will be shared, so it will have a &lt;code>Mutex&lt;/code> (&lt;a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion&lt;/a>) to allow our goroutines to lock and unlock it. The &lt;code>Checker&lt;/code> structure will also hold a list of &lt;code>brokenLinks&lt;/code> results, and &lt;code>visitedLinks&lt;/code>. The latter will be a map of strings to booleans, which we&amp;rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our &lt;code>visitedLinks&lt;/code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my &lt;a href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms&lt;/a> article.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">type&lt;/span> &lt;span class="nx">Checker&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">startDomain&lt;/span> &lt;span class="kt">string&lt;/span>
+&lt;span class="nx">brokenLinks&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="nx">Result&lt;/span>
+&lt;span class="nx">visitedLinks&lt;/span> &lt;span class="kd">map&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">bool&lt;/span>
+&lt;span class="nx">workerCount&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">maxWorkers&lt;/span> &lt;span class="kt">int&lt;/span>
+&lt;span class="nx">sync&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Mutex&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="o">...&lt;/span>
+&lt;span class="c1">// Page allows us to retain parent and sublinks
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="kd">type&lt;/span> &lt;span class="nx">Page&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">parent&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">loc&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">data&lt;/span> &lt;span class="kt">string&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="c1">// Result adds error information for the report
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="kd">type&lt;/span> &lt;span class="nx">Result&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">Page&lt;/span>
+&lt;span class="nx">reason&lt;/span> &lt;span class="kt">string&lt;/span>
+&lt;span class="nx">code&lt;/span> &lt;span class="kt">int&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>To extract links from HTML data, here&amp;rsquo;s a parser I wrote on top of &lt;a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package &lt;code>html&lt;/code>&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="c1">// Extract links from HTML
+&lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="kd">func&lt;/span> &lt;span class="nf">parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">parent&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">data&lt;/span> &lt;span class="kt">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">doc&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">html&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Parse&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">strings&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">NewReader&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">data&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="kc">nil&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;Could not parse: &amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="nx">goodLinks&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="nx">badLinks&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="kd">var&lt;/span> &lt;span class="nx">f&lt;/span> &lt;span class="kd">func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="nx">html&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Node&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="nx">f&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="kd">func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">n&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="nx">html&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Node&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="nx">n&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Type&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="nx">html&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ElementNode&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="nf">checkKey&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">n&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Data&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="nx">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">a&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="k">range&lt;/span> &lt;span class="nx">n&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Attr&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="nf">checkAttr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">a&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Key&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">j&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">formatURL&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">parent&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">a&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Val&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="kc">nil&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">badLinks&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nb">append&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">badLinks&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">j&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">goodLinks&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nb">append&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">goodLinks&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">j&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="k">break&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="k">for&lt;/span> &lt;span class="nx">c&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">n&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">FirstChild&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">c&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="kc">nil&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">c&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nx">c&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">NextSibling&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">c&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">doc&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">return&lt;/span> &lt;span class="nx">goodLinks&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">badLinks&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>If you&amp;rsquo;re wondering why I didn&amp;rsquo;t use a more full-featured package for this project, I highly recommend &lt;a href="https://www.theregister.co.uk/2016/03/23/npm_left_pad_chaos/">the story of &lt;code>left-pad&lt;/code>&lt;/a>. The short of it: more dependencies, more problems.&lt;/p>
+&lt;p>Here are snippets of the &lt;code>main&lt;/code> function, where we pass in our starting URL and create a queue (or &lt;a href="https://tour.golang.org/concurrency/2">channels&lt;/a>, in Go) to be filled with links for our goroutines to process.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="o">...&lt;/span>
+&lt;span class="nx">startURL&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">flag&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">String&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;url&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;http://example.com&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;full URL of site&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="o">...&lt;/span>
+&lt;span class="nx">firstPage&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">Page&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;span class="nx">parent&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="nx">startURL&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="nx">loc&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="nx">startURL&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="nx">toProcess&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kd">chan&lt;/span> &lt;span class="nx">Page&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="nx">toProcess&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="nx">firstPage&lt;/span>
+&lt;span class="kd">var&lt;/span> &lt;span class="nx">wg&lt;/span> &lt;span class="nx">sync&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">WaitGroup&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The last significant piece of the puzzle is to create our workers, which we&amp;rsquo;ll do here:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="k">for&lt;/span> &lt;span class="nx">i&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="k">range&lt;/span> &lt;span class="nx">toProcess&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">wg&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Add&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="nx">checker&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">addWorker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="err">🐹&lt;/span> &lt;span class="k">go&lt;/span> &lt;span class="nf">worker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">i&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">checker&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">wg&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">toProcess&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="k">if&lt;/span> &lt;span class="nx">checker&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">workerCount&lt;/span> &lt;span class="p">&amp;gt;&lt;/span> &lt;span class="nx">checker&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">maxWorkers&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Sleep&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Second&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="c1">// throttle down
+&lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;span class="nx">wg&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Wait&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>A &lt;a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup&lt;/a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&amp;rsquo;ll know our Go web crawler has finished checking all the links on the site.&lt;/p>
+&lt;h2 id="did-we-do-the-thing-fast">Did we do the thing fast?&lt;/h2>
+&lt;p>Here&amp;rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
+real 17m34.084s
+user 11m40.761s
+sys 0m5.436s
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.&lt;/p>
+&lt;p>The multithreaded Python version did a bit better:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">time python3 hydra.py https://victoria.dev
+real 1m13.358s
+user 0m13.161s
+sys 0m2.826s
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>My multithreaded Python program (which I dubbed &lt;a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&lt;/a>) finished in one minute and thirteen seconds.&lt;/p>
+&lt;p>How did Go do?&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">time ./go-link-check --url=https://victoria.dev
+real 0m7.926s
+user 0m9.044s
+sys 0m0.932s
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>At just under eight seconds, I found the Go version to be extremely palatable.&lt;/p>
+&lt;h2 id="breaking-bottlenecks">Breaking bottlenecks&lt;/h2>
+&lt;p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&amp;rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!&lt;/p>
+&lt;p>A better work day for developers, and a better bottom line for companies. There&amp;rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/breaking-bottlenecks/cover_hucd0e6312363c308744eec049709d6b2b_396830_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>Command line tricks for managing your messy open source repository</title><link>https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/</link><pubDate>Mon, 17 Feb 2020 08:05:06 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/</guid><description>A handy toolbox for the terminal to help open source maintainers make their projects sparkle.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/cover_hu34a251ab6f2f701c7053eda64afcb4cd_858328_640x0_resize_box_2.png" width="640" height="320"/>
 &lt;p>Effective collaboration, especially in open source software development, starts with effective organization. To make sure that nothing gets missed, the general rule, &amp;ldquo;one issue, one pull request&amp;rdquo; is a nice rule of thumb.&lt;/p>
 &lt;p>Instead of opening an issue with a large scope like, &amp;ldquo;Fix all the broken links in the documentation,&amp;rdquo; open source projects will have more luck attracting contributors with several smaller and more manageable issues. In the preceding example, you might scope broken links by section or by page. This allows more contributors to jump in and dedicate small windows of their time, rather than waiting for one person to take on a larger and more tedious contribution effort.&lt;/p>
@@ -565,7 +979,7 @@ hairbrush
 &lt;p>For further resources on ransomware defense for users and organizations, check out &lt;a href="https://www.us-cert.gov/Ransomware">CISA&amp;rsquo;s advice on ransomware&lt;/a>.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/cover_hue3aef3cab743e28f902a30a77ac75013_151327_640x0_resize_q75_box.jpg" type="image/jpg"/></item><item><title>Publishing GitHub event data with GitHub Actions and Pages</title><link>https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/</link><pubDate>Mon, 04 Nov 2019 09:13:23 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/</guid><description>A guide to overcoming the GitHub event data horizon with a little command-line magic.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/cover_huaee6554f1e095f5c5379368e27b9bf74_24874_640x0_resize_box_2.png" width="640" height="270"/>
 &lt;p>Teams who work on GitHub rely on event data to collaborate. The data recorded as issues, pull requests, and comments, become vital to understanding the project.&lt;/p>
-&lt;p>With the general availability of GitHub Actions, we have a chance to programmatically access and preserve GitHub event data in our repository. Making the data part of the repository itself is a way of preserving it outside of GitHub, and also gives us the ability to feature the data on a front-facing website, such as with GitHub Pages.&lt;/p>
+&lt;p>With the general availability of GitHub Actions, we have a chance to programmatically access and preserve GitHub event data in our repository. Making the data part of the repository itself is a way of preserving it outside of GitHub, and also gives us the ability to feature the data on a front-facing website, such as with GitHub Pages, through an automated process that&amp;rsquo;s part of our CI/CD pipeline.&lt;/p>
 &lt;p>And, if you&amp;rsquo;re like me, you can turn &lt;a href="https://github.com/victoriadrake/github-guestbook/issues/1">GitHub issue comments&lt;/a> into an &lt;a href="https://victoria.dev/github-guestbook/">awesome 90s guestbook page&lt;/a>.&lt;/p>
 &lt;p>No matter the usage, the principle concepts are the same. We can use Actions to access, preserve, and display GitHub event data - with just one workflow file. To illustrate the process, I&amp;rsquo;ll take you through the &lt;a href="https://github.com/victoriadrake/github-guestbook/blob/master/.github/workflows/publish-comments.yml">workflow code&lt;/a> that makes my guestbook shine on.&lt;/p>
 &lt;p>For an introductory look at GitHub Actions including how workflows are triggered, see &lt;a href="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions&lt;/a>.&lt;/p>
@@ -2316,18 +2730,22 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 &lt;p>Just like writing your very first &lt;code>for&lt;/code> loop, understanding time complexity is an integral milestone to learning how to write efficient complex programs. Think of it as having a superpower that allows you to know exactly what type of program might be the most efficient in a particular situation - before even running a single line of code.&lt;/p>
 &lt;p>The fundamental concepts of complexity analysis are well worth studying. You&amp;rsquo;ll be able to better understand how the code you&amp;rsquo;re writing will interact with the program&amp;rsquo;s input, and as a result, you&amp;rsquo;ll spend a lot less wasted time writing slow and problematic code. It won&amp;rsquo;t take long to go over all you need to know in order to start writing more efficient programs - in fact, we can do it in about fifteen minutes. You can go grab a coffee right now (or tea, if that&amp;rsquo;s your thing) and I&amp;rsquo;ll take you through it before your coffee break is over. Go ahead, I&amp;rsquo;ll wait.&lt;/p>
 &lt;p>All set? Let&amp;rsquo;s do it!&lt;/p>
-&lt;h1 id="what-is-time-complexity-anyway">What is &amp;ldquo;time complexity&amp;rdquo; anyway?&lt;/h1>
+&lt;h2 id="what-is-time-complexity-anyway">What is &amp;ldquo;time complexity&amp;rdquo; anyway?&lt;/h2>
 &lt;p>The time complexity of an algorithm is an &lt;strong>approximation&lt;/strong> of how long that algorithm will take to process some input. It describes the efficiency of the algorithm by the magnitude of its operations. This is different than the number of times an operation repeats; I&amp;rsquo;ll expand on that later. Generally, the fewer operations the algorithm has, the faster it will be.&lt;/p>
 &lt;p>We write about time complexity using &lt;a href="https://en.wikipedia.org/wiki/Big_O_notation">Big O notation&lt;/a>, which looks something like &lt;em>O&lt;/em>(&lt;em>n&lt;/em>). There&amp;rsquo;s rather a lot of math involved in its formal definition, but informally we can say that Big O notation gives us our algorithm&amp;rsquo;s approximate run time in the &lt;strong>worst case&lt;/strong>, or in other words, its upper bound.&lt;!-- raw HTML omitted -->[&lt;a href="#sources">2&lt;/a>]&lt;!-- raw HTML omitted --> It is inherently relative and comparative.&lt;!-- raw HTML omitted -->[&lt;a href="#sources">3&lt;/a>]&lt;!-- raw HTML omitted --> We&amp;rsquo;re describing the algorithm&amp;rsquo;s efficiency relative to the increasing size of its input data, &lt;em>n&lt;/em>. If the input is a string, then &lt;em>n&lt;/em> is the length of the string. If it&amp;rsquo;s a list of integers, &lt;em>n&lt;/em> is the length of the list.&lt;/p>
 &lt;p>It&amp;rsquo;s easiest to picture what Big O notation represents with a graph:&lt;/p>
-&lt;p>&lt;img src="graph.png#screenshot" alt="A graph showing different classes of time complexity">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;figure class="screenshot">
+&lt;img src="graph.png"
+alt="A graph showing different classes of time complexity"/> &lt;figcaption>
+&lt;p>Lines made with the very excellent Desmos graph calculator. You can &lt;a href="https://www.desmos.com/calculator/xpfyjl1lbn">play with this graph here&lt;/a>.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>Here are the main important points to remember as you read the rest of this article:&lt;/p>
 &lt;ul>
 &lt;li>Time complexity is an approximation&lt;/li>
 &lt;li>An algorithm&amp;rsquo;s time complexity approximates its worst case run time&lt;/li>
 &lt;/ul>
-&lt;h1 id="determining-time-complexity">Determining time complexity&lt;/h1>
+&lt;h2 id="determining-time-complexity">Determining time complexity&lt;/h2>
 &lt;p>There are different classes of complexity that we can use to quickly understand an algorithm. I&amp;rsquo;ll illustrate some of these classes using nested loops and other examples.&lt;/p>
 &lt;h2 id="polynomial-time-complexity">Polynomial time complexity&lt;/h2>
 &lt;p>A &lt;strong>polynomial&lt;/strong>, from the Greek &lt;em>poly&lt;/em> meaning &amp;ldquo;many,&amp;rdquo; and Latin &lt;em>nomen&lt;/em> meaning &amp;ldquo;name,&amp;rdquo; describes an expression comprised of constant variables, and addition, multiplication, and exponentiation to a non-negative integer power.&lt;!-- raw HTML omitted -->[&lt;a href="#sources">4&lt;/a>]&lt;!-- raw HTML omitted --> That&amp;rsquo;s a super math-y way to say that it contains variables usually denoted by letters, and symbols that look like these:&lt;/p>
@@ -2335,17 +2753,27 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 &lt;p>The below classes describe polynomial algorithms. Some have food examples.&lt;/p>
 &lt;h3 id="constant">Constant&lt;/h3>
 &lt;p>A &lt;strong>constant time&lt;/strong> algorithm doesn&amp;rsquo;t change its running time in response to the input data. No matter the size of the data it receives, the algorithm takes the same amount of time to run. We denote this as a time complexity of &lt;em>O&lt;/em>(1).&lt;/p>
-&lt;p>&lt;img src="graph(1).png#screenshot" alt="A graph showing constant time complexity">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="graph%281%29.png"
+alt="A graph showing constant time complexity."/>
+&lt;/figure>
 &lt;p>Here&amp;rsquo;s one example of a constant algorithm that takes the first item in a slice.&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">takeCupcake&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">cupcakes&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="k">return&lt;/span> &lt;span class="nx">cupcakes&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">]&lt;/span>
 &lt;span class="p">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="cupcakes.png" alt="Types of cupcakes">&lt;/p>
-&lt;!-- raw HTML omitted -->
-&lt;p>With this contant-time algorithm, no matter how many cupcakes are on offer, you just get the first one. Oh well. Flavours are overrated anyway.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;figure>
+&lt;img src="cupcakes.png"
+alt="Types of cupcakes"/> &lt;figcaption>
+&lt;p>Choice of flavours are: vanilla cupcake, strawberry cupcake, mint chocolate cupcake, lemon cupcake, and wibbly wobbly, timey wimey cupcake.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
+&lt;p>With this constant-time algorithm, no matter how many cupcakes are on offer, you just get the first one. Oh well. Flavours are overrated anyway.&lt;/p>
 &lt;h3 id="linear">Linear&lt;/h3>
 &lt;p>The running duration of a &lt;strong>linear&lt;/strong> algorithm is constant. It will process the input in &lt;em>n&lt;/em> number of operations. This is often the best possible (most efficient) case for time complexity where all the data must be examined.&lt;/p>
-&lt;p>&lt;img src="graph(n).png#screenshot" alt="A graph showing linear time complexity">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="graph%28n%29.png"
+alt="A graph showing linear time complexity."/>
+&lt;/figure>
 &lt;p>Here&amp;rsquo;s an example of code with time complexity of &lt;em>O&lt;/em>(&lt;em>n&lt;/em>):&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">eatChips&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">bowlOfChips&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="k">for&lt;/span> &lt;span class="nx">chip&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">chip&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="nx">bowlOfChips&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">chip&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
@@ -2359,10 +2787,17 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 &lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="p">}&lt;/span>
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>It doesn&amp;rsquo;t matter whether the code inside the loop executes once, twice, or any number of times. Both these loops process the input by a constant factor of &lt;em>n&lt;/em>, and thus can be described as linear.&lt;/p>
-&lt;p>&lt;img src="dip.png" alt="Lifeguard MIQ says no double dipping">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;figure>
+&lt;img src="dip.png"
+alt="Lifeguard MIQ the chip says no double dipping"/> &lt;figcaption>
+&lt;p>Don&amp;rsquo;t double dip in a shared bowl.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;h3 id="quadratic">Quadratic&lt;/h3>
-&lt;p>&lt;img src="graph(n2).png#screenshot" alt="A graph showing quadratic time complexity">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="graph%28n2%29.png"
+alt="A graph showing quadratic time complexity"/>
+&lt;/figure>
 &lt;p>Now here&amp;rsquo;s an example of code with time complexity of &lt;em>O&lt;/em>(_n_&lt;!-- raw HTML omitted -->2&lt;!-- raw HTML omitted -->):&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">pizzaDelivery&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">pizzas&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="k">for&lt;/span> &lt;span class="nx">pizza&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">pizza&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="nx">pizzas&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">pizza&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
@@ -2374,7 +2809,10 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Because there are two nested loops, or nested linear operations, the algorithm process the input _n_&lt;!-- raw HTML omitted -->2&lt;!-- raw HTML omitted --> times.&lt;/p>
 &lt;h3 id="cubic">Cubic&lt;/h3>
-&lt;p>&lt;img src="graph(n3).png#screenshot" alt="A graph showing cubic time complexity">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="graph%28n3%29.png"
+alt="A graph showing cubic time complexity"/>
+&lt;/figure>
 &lt;p>Extending on the previous example, this code with three nested loops has time complexity of &lt;em>O&lt;/em>(_n_&lt;!-- raw HTML omitted -->3&lt;!-- raw HTML omitted -->):&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">pizzaDelivery&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">boxesDelivered&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="k">for&lt;/span> &lt;span class="nx">pizzaBox&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">pizzaBox&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="nx">boxesDelivered&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">pizzaBox&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
@@ -2387,12 +2825,19 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 &lt;span class="p">}&lt;/span>
 &lt;span class="p">}&lt;/span>
 &lt;span class="p">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="unsliced.png" alt="A pizza pie in a box with a pizza slicer dependency">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;/code>&lt;/pre>&lt;/div>&lt;figure>
+&lt;img src="unsliced.png"
+alt="A pizza pie in a box with a pizza slicer dependency"/> &lt;figcaption>
+&lt;p>Seriously though, who delivers unsliced pizza??&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;h3 id="logarithmic">Logarithmic&lt;/h3>
 &lt;p>A &lt;strong>logarithmic&lt;/strong> algorithm is one that reduces the size of the input at every step.
 We denote this time complexity as &lt;em>O&lt;/em>(log &lt;em>n&lt;/em>), where &lt;strong>log&lt;/strong>, the logarithm function, is this shape:&lt;/p>
-&lt;p>&lt;img src="graph(logn).png#screenshot" alt="A graph showing logarithmic time complexity">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="graph%28logn%29.png"
+alt="A graph showing logarithmic time complexity"/>
+&lt;/figure>
 &lt;p>One example of this is a &lt;a href="https://en.wikipedia.org/wiki/Binary_search_algorithm">binary search algorithm&lt;/a> that finds the position of an element within a sorted array. Here&amp;rsquo;s how it would work, assuming we&amp;rsquo;re trying to find the element &lt;em>x&lt;/em>:&lt;/p>
 &lt;ol>
 &lt;li>If &lt;em>x&lt;/em> matches the middle element &lt;em>m&lt;/em> of the array, return the position of &lt;em>m&lt;/em>&lt;/li>
@@ -2407,20 +2852,29 @@ We denote this time complexity as &lt;em>O&lt;/em>(log &lt;em>n&lt;/em>), where 
 &lt;p>I find the clearest analogy for understanding binary search is imagining the process of locating a book in a bookstore aisle. If the books are organized by author&amp;rsquo;s last name and you want to find &amp;ldquo;Terry Pratchett,&amp;rdquo; you know you need to look for the &amp;ldquo;P&amp;rdquo; section.&lt;/p>
 &lt;p>You can approach the shelf at any point along the aisle and look at the author&amp;rsquo;s last name there. If you&amp;rsquo;re looking at a book by Neil Gaiman, you know you can ignore all the rest of the books to your left, since no letters that come before &amp;ldquo;G&amp;rdquo; in the alphabet happen to be &amp;ldquo;P.&amp;rdquo; You would then move down the aisle to the right any amount, and repeat this process until you&amp;rsquo;ve found the Terry Pratchett section, which should be rather sizable if you&amp;rsquo;re at any decent bookstore because wow did he write a lot of books.&lt;/p>
 &lt;h3 id="quasilinear">Quasilinear&lt;/h3>
-&lt;p>&lt;img src="graph(nlogn).png#screenshot" alt="A graph showing quasilinear time complexity">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="graph%28nlogn%29.png"
+alt="A graph showing quasilinear time complexity"/>
+&lt;/figure>
 &lt;p>Often seen with sorting algorithms, the time complexity &lt;em>O&lt;/em>(&lt;em>n&lt;/em> log &lt;em>n&lt;/em>) can describe a data structure where each operation takes &lt;em>O&lt;/em>(log &lt;em>n&lt;/em>) time. One example of this is &lt;a href="https://en.wikipedia.org/wiki/Quicksort">quick sort&lt;/a>, a divide-and-conquer algorithm.&lt;/p>
 &lt;p>Quick sort works by dividing up an unsorted array into smaller chunks that are easier to process. It sorts the sub-arrays, and thus the whole array. Think about it like trying to put a deck of cards in order. It&amp;rsquo;s faster if you split up the cards and get five friends to help you.&lt;/p>
-&lt;h2 id="non-polynomial-time-complexity">Non-polynomial time complexity&lt;/h2>
+&lt;h3 id="non-polynomial-time-complexity">Non-polynomial time complexity&lt;/h3>
 &lt;p>The below classes of algorithms are non-polynomial.&lt;/p>
 &lt;h3 id="factorial">Factorial&lt;/h3>
-&lt;p>&lt;img src="graph(nfac).png#screenshot" alt="A graph showing factorial time complexity">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="graph%28nfac%29.png"
+alt="A graph showing factorial time complexity"/>
+&lt;/figure>
 &lt;p>An algorithm with time complexity &lt;em>O&lt;/em>(&lt;em>n&lt;/em>!) often iterates through all permutations of the input elements. One common example is a &lt;a href="https://en.wikipedia.org/wiki/Brute-force_search">brute-force search&lt;/a> seen in the &lt;a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem#Computing_a_solution">travelling salesman problem&lt;/a>. It tries to find the least costly path between a number of points by enumerating all possible permutations and finding the ones with the lowest cost.&lt;/p>
 &lt;h3 id="exponential">Exponential&lt;/h3>
 &lt;p>An &lt;strong>exponential&lt;/strong> algorithm often also iterates through all subsets of the input elements. It is denoted &lt;em>O&lt;/em>(2&lt;!-- raw HTML omitted -->_n_&lt;!-- raw HTML omitted -->) and is often seen in brute-force algorithms. It is similar to factorial time except in its rate of growth, which as you may not be surprised to hear, is exponential. The larger the data set, the more steep the curve becomes.&lt;/p>
-&lt;p>&lt;img src="graph(2n).png#screenshot" alt="A graph showing exponential time complexity">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="graph%282n%29.png"
+alt="A graph showing exponential time complexity"/>
+&lt;/figure>
 &lt;p>In cryptography, a brute-force attack may systematically check all possible elements of a password by iterating through subsets. Using an exponential algorithm to do this, it becomes incredibly resource-expensive to brute-force crack a long password versus a shorter one. This is one reason that a long password is considered more secure than a shorter one.&lt;/p>
 &lt;p>There are further time complexity classes less commonly seen that I won&amp;rsquo;t cover here, but you can read about these and find examples in &lt;a href="https://en.wikipedia.org/wiki/Time_complexity#Table_of_common_time_complexities">this handy table&lt;/a>.&lt;/p>
-&lt;h2 id="recursion-time-complexity">Recursion time complexity&lt;/h2>
+&lt;h3 id="recursion-time-complexity">Recursion time complexity&lt;/h3>
 &lt;p>As I described in my article &lt;a href="https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">explaining recursion using apple pie&lt;/a>, a recursive function calls itself under specified conditions. Its time complexity depends on how many times the function is called and the time complexity of a single function call. In other words, it&amp;rsquo;s the product of the number of times the function runs and a single execution&amp;rsquo;s time complexity.&lt;/p>
 &lt;p>Here&amp;rsquo;s a recursive function that eats pies until no pies are left:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">eatPies&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">pies&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="p">{&lt;/span>
@@ -2431,9 +2885,13 @@ We denote this time complexity as &lt;em>O&lt;/em>(log &lt;em>n&lt;/em>), where 
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The time complexity of a single execution is constant. No matter how many pies are input, the program will do the same thing: check to see if the input is 0. If so, return, and if not, call itself with one fewer pie.&lt;/p>
 &lt;p>The initial number of pies could be any number, and we need to process all of them, so we can describe the input as &lt;em>n&lt;/em>. Thus, the time complexity of this recursive function is the product &lt;em>O&lt;/em>(&lt;em>n&lt;/em>).&lt;/p>
-&lt;p>&lt;img src="piespile.png" alt="A pile of pizza boxes with pies to be eaten">&lt;/p>
-&lt;!-- raw HTML omitted -->
-&lt;h2 id="worst-case-time-complexity">Worst case time complexity&lt;/h2>
+&lt;figure>
+&lt;img src="piespile.png"
+alt="A pile of pizza boxes with pies to be eaten"/> &lt;figcaption>
+&lt;p>This function&amp;rsquo;s return value is zero, plus some indigestion.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
+&lt;h3 id="worst-case-time-complexity">Worst case time complexity&lt;/h3>
 &lt;p>So far, we&amp;rsquo;ve talked about the time complexity of a few nested loops and some code examples. Most algorithms, however, are built from many combinations of these. How do we determine the time complexity of an algorithm containing many of these elements strung together?&lt;/p>
 &lt;p>Easy. We can describe the total time complexity of the algorithm by finding the largest complexity among all of its parts. This is because the slowest part of the code is the bottleneck, and time complexity is concerned with describing the worst case for the algorithm&amp;rsquo;s run time.&lt;/p>
 &lt;p>Say we have a program for an office party. If our program looks like this:&lt;/p>
@@ -2522,13 +2980,17 @@ Eating pie...
 Eating pie...
 Someone ate all the pies!
 Food gone. Back to work!
-&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="p-vs-np-np-complete-and-np-hard">P vs NP, NP-complete, and NP-hard&lt;/h1>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="p-vs-np-np-complete-and-np-hard">P vs NP, NP-complete, and NP-hard&lt;/h2>
 &lt;p>You may come across these terms in your explorations of time complexity. Informally, &lt;strong>P&lt;/strong> (for Polynomial time), is a class of problems that is quick to solve. &lt;strong>NP&lt;/strong>, for Nondeterministic Polynomial time, is a class of problems where the answer can be quickly verified in polynomial time. NP encompasses P, but also another class of problems called &lt;strong>NP-complete&lt;/strong>, for which no fast solution is known.&lt;!-- raw HTML omitted -->[&lt;a href="#sources">5&lt;/a>]&lt;!-- raw HTML omitted --> Outside of NP but still including NP-complete is yet another class called &lt;strong>NP-hard&lt;/strong>, which includes problems that no one has been able to verifiably solve with polynomial algorithms.&lt;!-- raw HTML omitted -->[&lt;a href="#sources">6&lt;/a>]&lt;!-- raw HTML omitted -->&lt;/p>
-&lt;p>&lt;img src="pnpeuler.svg#screenshot" alt="Euler diagram, CC from Wikipedia.">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;figure class="screenshot">
+&lt;img src="pnpeuler.svg"
+alt="Euler diagram"/> &lt;figcaption>
+&lt;p>P vs NP Euler diagram, &lt;a href="https://commons.wikimedia.org/w/index.php?curid=3532181">by Behnam Esfahbod, CC BY-SA 3.0&lt;/a>&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>&lt;a href="https://en.wikipedia.org/wiki/P_versus_NP_problem">P versus NP&lt;/a> is an unsolved, open question in computer science.&lt;/p>
 &lt;p>Anyway, you don&amp;rsquo;t generally need to know about NP and NP-hard problems to begin taking advantage of understanding time complexity. They&amp;rsquo;re a whole other Pandora&amp;rsquo;s box.&lt;/p>
-&lt;h1 id="approximate-the-efficiency-of-an-algorithm-before-you-write-the-code">Approximate the efficiency of an algorithm before you write the code&lt;/h1>
+&lt;h2 id="approximate-the-efficiency-of-an-algorithm-before-you-write-the-code">Approximate the efficiency of an algorithm before you write the code&lt;/h2>
 &lt;p>So far, we&amp;rsquo;ve identified some different time complexity classes and how we might determine which one an algorithm falls into. So how does this help us before we&amp;rsquo;ve written any code to evaluate?&lt;/p>
 &lt;p>By combining a little knowledge of time complexity with an awareness of the size of our input data, we can take a guess at an efficient algorithm for processing our data within a given time constraint. We can base our estimation on the fact that a modern computer can perform some hundreds of millions of operations in a second.&lt;!-- raw HTML omitted -->[&lt;a href="#sources">1&lt;/a>]&lt;!-- raw HTML omitted --> The following table from the &lt;a href="#sources">Competitive Programmer&amp;rsquo;s Handbook&lt;/a> offers some estimates on required time complexity to process the respective input size in a time limit of one second.&lt;/p>
 &lt;table>
@@ -2582,7 +3044,7 @@ Food gone. Back to work!
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">Benchmark_makeCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.29 ns/op
 Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Our first function, &lt;code>makeCoffee&lt;/code>, completed in an average 0.29 nanoseconds. Our second function, &lt;code>makeStrongCoffee&lt;/code>, completed in an average of 0.86 nanoseconds. While those may both seem like pretty small numbers, consider that the stronger coffee took near three times longer to make. This should make sense intuitively, since we asked it to triple the scoops. Big O notation alone wouldn&amp;rsquo;t tell you this, since the constant factor of the tripled scoops isn&amp;rsquo;t accounted for.&lt;/p>
-&lt;h1 id="improve-time-complexity-of-existing-code">Improve time complexity of existing code&lt;/h1>
+&lt;h2 id="improve-time-complexity-of-existing-code">Improve time complexity of existing code&lt;/h2>
 &lt;p>Becoming familiar with time complexity gives us the opportunity to write code, or refactor code, to be more efficient. To illustrate, I&amp;rsquo;ll give a concrete example of one way we can refactor a bit of code to improve its time complexity.&lt;/p>
 &lt;p>Let&amp;rsquo;s say a bunch of people at the office want some pie. Some people want pie more than others. The amount that everyone wants some pie is represented by an &lt;code>int&lt;/code> &amp;gt; 0:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="nx">diners&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">88&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">87&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">16&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">42&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">10&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">34&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">43&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">56&lt;/span>&lt;span class="p">}&lt;/span>
@@ -2656,7 +3118,7 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>This program is much faster, and the whole epic struggle for fork domination is over in 47 nanoseconds.&lt;/p>
 &lt;p>As you can see, with a little change in perspective and some refactoring, we&amp;rsquo;ve made this simple bit of code faster and more efficient.&lt;/p>
 &lt;p>Well, it looks like our fifteen minute coffee break is up! I hope I&amp;rsquo;ve given you a comprehensive introduction to calculating time complexity. Time to get back to work, hopefully applying your new knowledge to write more effective code! Or maybe just sound smart at your next office party. :)&lt;/p>
-&lt;h1 id="sources">Sources&lt;/h1>
+&lt;h2 id="sources">Sources&lt;/h2>
 &lt;p>&amp;ldquo;If I have seen further it is by standing on the shoulders of Giants.&amp;rdquo; &amp;ndash;Isaac Newton, 1675&lt;/p>
 &lt;ol>
 &lt;li>Antti Laaksonen. &lt;em>&lt;a href="https://cses.fi/book.pdf">Competitive Programmer&amp;rsquo;s Handbook (pdf)&lt;/a>,&lt;/em> 2017&lt;/li>
@@ -2668,15 +3130,18 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;li>&lt;a href="https://www.desmos.com/">Desmos graph calculator&lt;/a>&lt;/li>
 &lt;/ol></content:encoded><enclosure url="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/cover_wibbly_hu64a4c7ed5bb41a17b8b90ed2af9d238b_2572713_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>Knapsack problem algorithms for my real-life carry-on knapsack</title><link>https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/</link><pubDate>Wed, 09 May 2018 21:00:35 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/</guid><description>Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/cover_knapsack-doodle_hu7070e09a25cc0b4f24775e27e4fe15a9_203336_640x0_resize_box_2.png" width="640" height="320"/>
-&lt;h1 id="the-knapsack-problem">The knapsack problem&lt;/h1>
 &lt;p>I&amp;rsquo;m a nomad and live out of one carry-on bag. This means that the total weight of all my worldly possessions must fall under airline cabin baggage weight limits - usually 10kg. On some smaller airlines, however, this weight limit drops to 7kg. Occasionally, I have to decide not to bring something with me to adjust to the smaller weight limit.&lt;/p>
 &lt;p>As a practical exercise, deciding what to leave behind (or get rid of altogether) entails laying out all my things and choosing which ones to keep. That decision is based on the item&amp;rsquo;s usefulness to me (its worth) and its weight.&lt;/p>
-&lt;p>&lt;img src="knapsack-stuff.jpeg" alt="All my stuff.">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;figure>
+&lt;img src="knapsack-stuff.jpeg"
+alt="All my stuff, laid out flat"/> &lt;figcaption>
+&lt;p>This is all my stuff, and my Minaal Carry-on bag.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>Being a programmer, I&amp;rsquo;m aware that decisions like this could be made more efficiently by a computer. It&amp;rsquo;s done so frequently and so ubiquitously, in fact, that many will recognize this scenario as the classic &lt;em>packing problem&lt;/em> or &lt;em>knapsack problem.&lt;/em> How do I go about telling a computer to put as many important items in my bag as possible while coming in at or under a weight limit of 7kg? With algorithms! Yay!&lt;/p>
 &lt;p>I&amp;rsquo;ll discuss two common approaches to solving the knapsack problem: one called a &lt;em>greedy algorithm,&lt;/em> and another called &lt;em>dynamic programming&lt;/em> (a little harder, but better, faster, stronger&amp;hellip;).&lt;/p>
 &lt;p>Let&amp;rsquo;s get to it.&lt;/p>
-&lt;h1 id="the-set-up">The set up&lt;/h1>
+&lt;h2 id="the-set-up">The set up&lt;/h2>
 &lt;p>I prepared my data in the form of a CSV file with three columns: the item&amp;rsquo;s name (a string), a representation of its worth (an integer), and its weight in grams (an integer). There are 40 items in total. I represented worth by ranking each item from 40 to 1, with 40 being the most important and 1 equating with something like &amp;ldquo;why do I even have this again?&amp;rdquo; (If you&amp;rsquo;ve never listed out all your possessions and ranked them by order of how useful they are to you, I highly recommend you try it. It can be a very revealing exercise.)&lt;/p>
 &lt;p>&lt;strong>Total weight of all items and bag:&lt;/strong> 9003g&lt;/p>
 &lt;p>&lt;strong>Bag weight:&lt;/strong> 1415g&lt;/p>
@@ -2684,8 +3149,8 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;p>&lt;strong>Maximum weight of items I can pack:&lt;/strong> 5585g&lt;/p>
 &lt;p>&lt;strong>Total possible worth of items:&lt;/strong> 820&lt;/p>
 &lt;p>&lt;strong>The challenge:&lt;/strong> Pack as many items as the limit allows while maximizing the total worth.&lt;/p>
-&lt;h1 id="data-structures">Data structures&lt;/h1>
-&lt;h2 id="reading-in-a-file">Reading in a file&lt;/h2>
+&lt;h2 id="data-structures">Data structures&lt;/h2>
+&lt;h3 id="reading-in-a-file">Reading in a file&lt;/h3>
 &lt;p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&amp;rsquo;s &lt;code>io/ioutil&lt;/code> package makes the first part straightforward.&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kn">package&lt;/span> &lt;span class="nx">main&lt;/span>
 &lt;span class="kn">import&lt;/span> &lt;span class="p">(&lt;/span>
@@ -2703,7 +3168,7 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">dat&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The &lt;code>ReadFile()&lt;/code> function takes a file path and returns the file&amp;rsquo;s contents and an error (&lt;code>nil&lt;/code> if the call is successful) so we&amp;rsquo;ve also created a &lt;code>check()&lt;/code> function to handle any errors that might be returned. In a real-world application we probably would want to do something more sophisticated than &lt;code>panic&lt;/code>, but that&amp;rsquo;s not important right now.&lt;/p>
-&lt;h2 id="creating-a-struct">Creating a struct&lt;/h2>
+&lt;h3 id="creating-a-struct">Creating a struct&lt;/h3>
 &lt;p>Now that we&amp;rsquo;ve got our data, we should probably do something with it. Since we&amp;rsquo;re working with real-life items and a real-life bag, let&amp;rsquo;s create some types to represent them and make it easier to conceptualize our program. A &lt;code>struct&lt;/code> in Go is a typed collection of fields. Here are our two types:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">type&lt;/span> &lt;span class="nx">item&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="nx">name&lt;/span> &lt;span class="kt">string&lt;/span>
@@ -2714,7 +3179,7 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;span class="nx">items&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="nx">item&lt;/span>
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>It is helpful to use field names that are very descriptive. You can see that the structs are set up just as we&amp;rsquo;ve described the things they represent. An &lt;code>item&lt;/code> has a &lt;code>name&lt;/code> (string), and a &lt;code>worth&lt;/code> and &lt;code>weight&lt;/code> (integers). A &lt;code>bag&lt;/code> has several fields of type &lt;code>int&lt;/code> representing its attributes, and also has the ability to hold &lt;code>items&lt;/code>, represented in the struct as a slice of &lt;code>item&lt;/code> type thingamabobbers.&lt;/p>
-&lt;h2 id="parsing-and-storing-our-data">Parsing and storing our data&lt;/h2>
+&lt;h3 id="parsing-and-storing-our-data">Parsing and storing our data&lt;/h3>
 &lt;p>Several comprehensive Go packages exist that we could use to parse our CSV data&amp;hellip; but where&amp;rsquo;s the fun in that? Let&amp;rsquo;s go basic with some string splitting and a for loop. Here&amp;rsquo;s our updated &lt;code>readItems()&lt;/code> function:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">readItems&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">path&lt;/span> &lt;span class="kt">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="nx">item&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="nx">dat&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">ioutil&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">ReadFile&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">path&lt;/span>&lt;span class="p">)&lt;/span>
@@ -2773,9 +3238,9 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;span class="k">return&lt;/span> &lt;span class="nx">itemList&lt;/span>
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Now that we&amp;rsquo;ve got our data structures set up, let&amp;rsquo;s get packing (🥁) on the first approach.&lt;/p>
-&lt;h1 id="greedy-algorithm">Greedy algorithm&lt;/h1>
+&lt;h2 id="greedy-algorithm">Greedy algorithm&lt;/h2>
 &lt;p>A greedy algorithm is the most straightforward approach to solving the knapsack problem, in that it is a one-pass algorithm that constructs a single final solution. At each stage of the problem, the greedy algorithm picks the option that is locally optimal, meaning it looks like the most suitable option right now. It does not revise its previous choices as it progresses through our data set.&lt;/p>
-&lt;h2 id="building-our-greedy-algorithm">Building our greedy algorithm&lt;/h2>
+&lt;h3 id="building-our-greedy-algorithm">Building our greedy algorithm&lt;/h3>
 &lt;p>The steps of the algorithm we&amp;rsquo;ll use to solve our knapsack problem are:&lt;/p>
 &lt;ol>
 &lt;li>Sort items by worth, in descending order.&lt;/li>
@@ -2826,7 +3291,7 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;span class="nx">itemList&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">readItems&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;objects.csv&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;span class="nf">greedy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">itemList&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">minaal&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;span class="p">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="greedy-algorithm-results">Greedy algorithm results&lt;/h2>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="greedy-algorithm-results">Greedy algorithm results&lt;/h3>
 &lt;p>So how does this algorithm do when it comes to efficiently packing our bag to maximize its total worth? Here&amp;rsquo;s the result:&lt;/p>
 &lt;p>&lt;strong>Total weight of bag and items:&lt;/strong> 6987g&lt;/p>
 &lt;p>&lt;strong>Total worth of packed items:&lt;/strong> 716&lt;/p>
@@ -2980,11 +3445,11 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;p>It&amp;rsquo;s clear that the greedy algorithm is a straightforward way to quickly find a feasible solution. For small data sets, it will probably be close to the optimal solution. The algorithm packed a total item worth of 716 (104 points less than the maximum possible value), while filling the bag with just 13g left over.&lt;/p>
 &lt;p>As we learned earlier, the greedy algorithm doesn&amp;rsquo;t improve upon the solution it returns. It simply adds the next highest worth item it can to the bag.&lt;/p>
 &lt;p>Let&amp;rsquo;s look at another method for solving the knapsack problem that will give us the optimal solution - the highest possible total worth under the weight limit.&lt;/p>
-&lt;h1 id="dynamic-programming">Dynamic programming&lt;/h1>
+&lt;h2 id="dynamic-programming">Dynamic programming&lt;/h2>
 &lt;p>The name &amp;ldquo;dynamic programming&amp;rdquo; can be a bit misleading. It&amp;rsquo;s not a style of programming, as the name might cause you to infer, but simply another approach.&lt;/p>
 &lt;p>Dynamic programming differs from the straightforward greedy algorithm in a few key ways. Firstly, a dynamic programming bag packing solution enumerates the entire solution space with all possibilities of item combinations that could be used to pack our bag. Where a greedy algorithm chooses the most optimal &lt;em>local&lt;/em> solution, dynamic programming algorithms are able to find the most optimal &lt;em>global&lt;/em> solution.&lt;/p>
 &lt;p>Secondly, dynamic programming uses memoization to store the results of previously computed operations and returns the cached result when the operation occurs again. This allows it to &amp;ldquo;remember&amp;rdquo; previous combinations. This takes less time than it would to re-compute the answer again.&lt;/p>
-&lt;h2 id="building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm&lt;/h2>
+&lt;h3 id="building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm&lt;/h3>
 &lt;p>To use dynamic programming to find the optimal recipe for packing our bag, we&amp;rsquo;ll need to:&lt;/p>
 &lt;ol>
 &lt;li>Create a matrix representing all subsets of the items (the solution space) with rows representing items and columns representing the bag&amp;rsquo;s remaining weight capacity&lt;/li>
@@ -2992,8 +3457,12 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;li>Examine the completed matrix to determine which items to add to the bag in order to produce the maximum possible worth for the bag in total&lt;/li>
 &lt;/ol>
 &lt;p>It will be most helpful to visualize our solution space. Here&amp;rsquo;s a representation of what we&amp;rsquo;re building with our code:&lt;/p>
-&lt;p>&lt;img src="knapsack-matrix.jpg" alt="A sketch of the matrix with rows for items and columns for grams of weight.">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;figure>
+&lt;img src="knapsack-matrix.jpg"
+alt="A sketch of the matrix with rows for items and columns for grams of weight."/> &lt;figcaption>
+&lt;p>The empty knapsackian multiverse.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>In Go, we can create this matrix as a slice of slices.&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="nx">matrix&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">numItems&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="c1">// rows representing items
 &lt;/span>&lt;span class="c1">&lt;/span>&lt;span class="k">for&lt;/span> &lt;span class="nx">i&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="k">range&lt;/span> &lt;span class="nx">matrix&lt;/span> &lt;span class="p">{&lt;/span>
@@ -3034,10 +3503,14 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>This process of comparing item combinations will continue until every item has been considered at every possible stage of the bag&amp;rsquo;s increasing total weight. When all the above have been considered, we&amp;rsquo;ll have enumerated the solution space - filled the matrix - with all possible total worth values.&lt;/p>
 &lt;p>We&amp;rsquo;ll have a big chart of numbers, and in the last column at the last row we&amp;rsquo;ll have our highest possible value.&lt;/p>
-&lt;p>&lt;img src="knapsack-matrix-filled.jpg" alt="A strictly representative representation of the filled matrix.">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;figure>
+&lt;img src="knapsack-matrix-filled.jpg"
+alt="A strictly representative representation of the filled matrix."/> &lt;figcaption>
+&lt;p>A strictly representative representation of the filled matrix.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>That&amp;rsquo;s great, but how do we find out which combination of items were put in the bag to achieve that worth?&lt;/p>
-&lt;h2 id="getting-our-optimized-item-list">Getting our optimized item list&lt;/h2>
+&lt;h3 id="getting-our-optimized-item-list">Getting our optimized item list&lt;/h3>
 &lt;p>To see which items combine to create our optimal packing list, we&amp;rsquo;ll need to examine our matrix in reverse to the way we created it. Since we know the highest possible value is in the last row in the last column, we&amp;rsquo;ll start there. To find the items, we:&lt;/p>
 &lt;ol>
 &lt;li>Get the value of the current cell&lt;/li>
@@ -3106,7 +3579,7 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;span class="nx">b&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">totalWeight&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nx">b&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">bagWeight&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="nx">b&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">currItemsWeight&lt;/span>
 &lt;span class="k">return&lt;/span> &lt;span class="nx">b&lt;/span>
 &lt;span class="p">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="dynamic-programming-results">Dynamic programming results&lt;/h2>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dynamic-programming-results">Dynamic programming results&lt;/h3>
 &lt;p>We expect that the dynamic programming approach will give us a more optimized solution than the greedy algorithm. So did it? Here are the results:&lt;/p>
 &lt;p>&lt;strong>Total weight of bag and items:&lt;/strong> 6982g&lt;/p>
 &lt;p>&lt;strong>Total worth of packed items:&lt;/strong> 757&lt;/p>
@@ -3293,7 +3766,7 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;/tbody>
 &lt;/table>
 &lt;p>There&amp;rsquo;s an obvious improvement to our dynamic programming solution over what the greedy algorithm gave us. Our total worth of 757 is 41 points greater than the greedy algorithm&amp;rsquo;s solution of 716, and for a few grams less weight too!&lt;/p>
-&lt;h2 id="input-sort-order">Input sort order&lt;/h2>
+&lt;h3 id="input-sort-order">Input sort order&lt;/h3>
 &lt;p>While testing my dynamic programming solution, I implemented the &lt;a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffle algorithm&lt;/a> on the input before passing it into my function, just to ensure that the answer wasn&amp;rsquo;t somehow dependent on the sort order of the input. Here&amp;rsquo;s what the shuffle looks like in Go:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="nx">rand&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Seed&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Now&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">UnixNano&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;span class="k">for&lt;/span> &lt;span class="nx">i&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="k">range&lt;/span> &lt;span class="nx">itemList&lt;/span> &lt;span class="p">{&lt;/span>
@@ -3305,7 +3778,7 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;span class="nx">itemList&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">i&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">itemList&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">j&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nx">itemList&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">j&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">itemList&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">i&lt;/span>&lt;span class="p">]&lt;/span>
 &lt;span class="p">}&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>So did the order in which the items were processed affect the outcome? Well&amp;hellip;&lt;/p>
-&lt;h3 id="suddenly-a-rogue-weight-appears">Suddenly&amp;hellip; a rogue weight appears!&lt;/h3>
+&lt;h4 id="suddenly-a-rogue-weight-appears">Suddenly&amp;hellip; a rogue weight appears!&lt;/h4>
 &lt;p>As it turns out, in a way, the answer did depend on the order of the input. When I ran my dynamic programming algorithm several times, I sometimes saw a different total weight for the bag, though the total worth remained at 757. I initially thought this was a bug before examining the two sets of items that accompanied the two different total weight values. Everything was the same except for a few changes that collectively added up to a different item subset accounting for 14 of the 757 worth points.&lt;/p>
 &lt;p>In this case, there were two equally optimal solutions based only on the success metric of the highest total possible worth. Shuffling the input seemed to affect the placement of the items in the matrix and thus, the path that the &lt;code>checkItem()&lt;/code> function took as it went through the matrix to find the chosen items. Since the success metric of having the highest possible worth was the same in both item sets, we don&amp;rsquo;t have a single unique solution - there&amp;rsquo;s two!&lt;/p>
 &lt;p>As an academic exercise, both these sets of items are correct answers. We may choose to optimize further by another metric, say, the total weight of all the items. The highest possible worth at the least possible weight could be seen as an ideal solution.&lt;/p>
@@ -3503,8 +3976,8 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
-&lt;h1 id="which-approach-is-better">Which approach is better?&lt;/h1>
-&lt;h2 id="go-benchmarking">Go benchmarking&lt;/h2>
+&lt;h2 id="which-approach-is-better">Which approach is better?&lt;/h2>
+&lt;h3 id="go-benchmarking">Go benchmarking&lt;/h3>
 &lt;p>The Go standard library&amp;rsquo;s &lt;code>testing&lt;/code> package makes it straightforward for us to &lt;a href="https://golang.org/pkg/testing/#hdr-Benchmarks">benchmark&lt;/a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&amp;rsquo;s a simple &lt;code>main_test.go&lt;/code> file:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kn">package&lt;/span> &lt;span class="nx">main&lt;/span>
 &lt;span class="kn">import&lt;/span> &lt;span class="p">(&lt;/span>
@@ -3527,11 +4000,11 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>We can run &lt;code>go test -bench=. -benchmem&lt;/code> to see these results:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">Benchmark_greedy-4 &lt;span class="m">1000000&lt;/span> &lt;span class="m">1619&lt;/span> ns/op &lt;span class="m">2128&lt;/span> B/op &lt;span class="m">9&lt;/span> allocs/op
 Benchmark_dynamic-4 &lt;span class="m">1000&lt;/span> &lt;span class="m">1545322&lt;/span> ns/op &lt;span class="m">2020332&lt;/span> B/op &lt;span class="m">49&lt;/span> allocs/op
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="greedy-algorithm-performance">Greedy algorithm performance&lt;/h3>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="greedy-algorithm-performance">Greedy algorithm performance&lt;/h4>
 &lt;p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.&lt;/p>
-&lt;h3 id="dynamic-programming-performance">Dynamic programming performance&lt;/h3>
+&lt;h4 id="dynamic-programming-performance">Dynamic programming performance&lt;/h4>
 &lt;p>The dynamic programming algorithm was run 1,000 times. Its speed was measured to be 1.545322 milliseconds or 0.001545322 seconds (translation: still pretty fast). It required 2,020,332 Bytes or 2-ish Megabytes, and 49 distinct memory allocations per iteration.&lt;/p>
-&lt;h2 id="the-verdict">The verdict&lt;/h2>
+&lt;h3 id="the-verdict">The verdict&lt;/h3>
 &lt;p>Part of choosing the right approach to solving any programming problem is taking into account the size of the input data set. In this case, it&amp;rsquo;s a small one. In this scenario, a one-pass greedy algorithm will always be faster and less resource-needy than dynamic programming, simply because it has fewer steps. Our greedy algorithm was almost two orders of magnitude faster and less memory-hungry than our dynamic programming algorithm.&lt;/p>
 &lt;p>Not having those extra steps, however, means that getting the best possible solution from the greedy algorithm is unlikely.&lt;/p>
 &lt;p>It&amp;rsquo;s clear that the dynamic programming algorithm gave us better numbers: a lower weight, and higher overall worth.&lt;/p>
@@ -3558,7 +4031,7 @@ Benchmark_dynamic-4 &lt;span class="m">1000&lt;/span> &lt;span class="m">1545322
 &lt;/table>
 &lt;p>Where dynamic programming on small data sets lacks in performance, it makes up in optimization. The question then becomes whether that additional optimization is worth the performance cost.&lt;/p>
 &lt;p>&amp;ldquo;Better,&amp;rdquo; of course, is a subjective judgement. If speed and low resource usage is our success metric, then the greedy algorithm is clearly better. If the total worth of items in the bag is our success metric, then dynamic programming is clearly better. However, our scenario is a practical one, and only one of these algorithm designs returned an answer I&amp;rsquo;d choose. In optimizing for the overall greatest possible total worth of the items in the bag, the dynamic programming algorithm left out my highest-worth, but also heaviest, item: my laptop. The chargers and cables, Roost stand, and keyboard that were included aren&amp;rsquo;t much use without it.&lt;/p>
-&lt;h2 id="better-algorithm-design">Better algorithm design&lt;/h2>
+&lt;h3 id="better-algorithm-design">Better algorithm design&lt;/h3>
 &lt;p>There&amp;rsquo;s a simple way to alter the dynamic programming approach so that the laptop is always included: we can modify the data so that the worth of the laptop is greater than the sum of the worth of all the other items. (Try it out!)&lt;/p>
 &lt;p>Perhaps in re-designing the dynamic programming algorithm to be more practical, we might choose another success metric that better reflects an item&amp;rsquo;s importance, instead of a subjective worth value. There are many possible metrics we can use to represent the value of an item. Here are a few examples of a good proxy:&lt;/p>
 &lt;ul>
@@ -3950,11 +4423,15 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 &lt;p>Okay, how about this: I&amp;rsquo;m going to teach you how to make paella!&lt;/p>
 &lt;p>&lt;em>And&lt;/em> you&amp;rsquo;ll have written a function that does &lt;em>the stuff I mentioned above&lt;/em>, just like I did for this &lt;a href="https://www.freecodecamp.org/challenges/map-the-debris">freeCodeCamp challenge&lt;/a>.&lt;/p>
 &lt;p>I promise there&amp;rsquo;s an overarching moral lesson that will benefit you every day for the rest of your life. Or at least, feed you for one night. Let&amp;rsquo;s get started.&lt;/p>
-&lt;h1 id="the-only-thing-i-know-about-paella-is-that-its-an-emoticon">The only thing I know about paella is that it&amp;rsquo;s an emoticon&lt;/h1>
-&lt;p>&lt;img src="solve-unicode-paella.jpg#center" alt="Unicode paella emoji.">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;h2 id="the-only-thing-i-know-about-paella-is-that-its-an-emoticon">The only thing I know about paella is that it&amp;rsquo;s an emoticon&lt;/h2>
+&lt;figure>
+&lt;img src="solve-unicode-paella.jpg"
+alt="Unicode paella emoji."/> &lt;figcaption>
+&lt;p>Unless you&amp;rsquo;re reading this on a Samsung phone, in which case you&amp;rsquo;re looking at a Korean hotpot.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>One of my favorite things about living in the world today is that it&amp;rsquo;s &lt;em>totally fine&lt;/em> to know next-to-nothing about something. A hundred years ago you might have gone your whole life not knowing anything more about paella other than that it&amp;rsquo;s an emoticon.* But today? You can simply &lt;a href="https://en.wikipedia.org/wiki/Paella">look it up&lt;/a>.&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;p>*That was a joke.&lt;/p>
 &lt;p>As with all things in life, when we are unsure, we turn to the internet - in this case, the entry for &lt;em>paella&lt;/em> on Wikipedia, which reads:&lt;/p>
 &lt;blockquote>
 &lt;p>Paella &amp;hellip;is a Valencian rice dish. Paella has ancient roots, but its modern form originated in the mid-19th century near the Albufera lagoon on the east coast of Spain adjacent to the city of Valencia. Many non-Spaniards view paella as Spain&amp;rsquo;s national dish, but most Spaniards consider it to be a regional Valencian dish. Valencians, in turn, regard paella as one of their identifying symbols.&lt;/p>
@@ -3964,7 +4441,7 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 &lt;/blockquote>
 &lt;p>At this point, you&amp;rsquo;re probably full of questions. Do I need to talk to a Valencian? Should I take an online course on the history of Spain? What type of paella should I try to make? What is the common opinion of modern chefs when it comes to paella types?&lt;/p>
 &lt;p>If you set out with the intention of answering all these questions, one thing is certain: you&amp;rsquo;ll never end up actually making paella. You&amp;rsquo;ll spend hours upon hours typing questions into search engines and years later wake up with a Masters in Valencian Cuisine.&lt;/p>
-&lt;h1 id="the-most-important-question-method">The &amp;ldquo;Most Important Question&amp;rdquo; method&lt;/h1>
+&lt;h2 id="the-most-important-question-method">The &amp;ldquo;Most Important Question&amp;rdquo; method&lt;/h2>
 &lt;p>When I talk to myself out loud in public (doesn&amp;rsquo;t everyone?) I refer to this as &amp;ldquo;MIQ&amp;rdquo; (rhymes with &amp;ldquo;Nick&amp;rdquo;). I also imagine MIQ to be a rather crunchy and quite adorable anthropomorphized tortilla chip. Couldn&amp;rsquo;t tell you why.&lt;/p>
 &lt;p>&lt;img src="solve-miq.png#center" alt="MIQ the chip.">&lt;/p>
 &lt;p>MIQ swings his crunchy triangular body around to point me in the right direction, and the right direction always takes the form of the most important question that you need to ask yourself at any stage of problem solving. The first most important question is always this:&lt;/p>
@@ -3975,32 +4452,22 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 &lt;p>In the case of making paella, we need a recipe. That&amp;rsquo;s a bite-size problem that a search engine can solve for us:&lt;/p>
 &lt;blockquote>
 &lt;p>&lt;strong>Simple Paella Recipe&lt;/strong>&lt;/p>
-&lt;/blockquote>
-&lt;blockquote>
 &lt;ol>
 &lt;li>In a medium bowl, mix together 2 tablespoons olive oil, paprika, oregano, and salt and pepper. Stir in chicken pieces to coat. Cover, and refrigerate.&lt;/li>
-&lt;/ol>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;ol>
 &lt;li>Heat 2 tablespoons olive oil in a large skillet or paella pan over medium heat. Stir in garlic, red pepper flakes, and rice. Cook, stirring, to coat rice with oil, about 3 minutes. Stir in saffron threads, bay leaf, parsley, chicken stock, and lemon zest. Bring to a boil, cover, and reduce heat to medium low. Simmer 20 minutes.&lt;/li>
-&lt;/ol>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;ol>
 &lt;li>Meanwhile, heat 2 tablespoons olive oil in a separate skillet over medium heat. Stir in marinated chicken and onion; cook 5 minutes. Stir in bell pepper and sausage; cook 5 minutes. Stir in shrimp; cook, turning the shrimp, until both sides are pink.&lt;/li>
-&lt;/ol>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;ol>
 &lt;li>Spread rice mixture onto a serving tray. Top with meat and seafood mixture. (&lt;a href="http://allrecipes.com/recipe/84137/easy-paella/">allrecipes.com&lt;/a>)&lt;/li>
 &lt;/ol>
 &lt;/blockquote>
 &lt;p>And &lt;em>voila&lt;/em>! Believe it or not, we&amp;rsquo;re &lt;em>most of the way&lt;/em> there already.&lt;/p>
 &lt;p>Having a set of step-by-step instructions that are easy to understand is really most of the work done. All that&amp;rsquo;s left is to go through the motions of gathering the ingredients and then making paella. From this point on, your MIQs may become fewer and far between, and they may slowly decrease in importance in relation to the overall problem. (Where do I buy paprika? How do I know when sausage is cooked? How do I set the timer on my phone for 20 minutes? How do I stop thinking about this delicious smell? Which Instagram filter best captures the ecstacy of this paella right now?)&lt;/p>
-&lt;p>&lt;img src="solve-insta-paella.jpg#center" alt="Paella in Nashville.">&lt;/p>
-&lt;!-- raw HTML omitted -->
-&lt;h1 id="i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites">I still know nothing about calculating the orbital periods of satellites&lt;/h1>
+&lt;figure>
+&lt;img src="solve-insta-paella.jpg"
+alt="The answer to that last one is Nashville"/> &lt;figcaption>
+&lt;p>The answer to that last one is Nashville&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
+&lt;h2 id="i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites">I still know nothing about calculating the orbital periods of satellites&lt;/h2>
 &lt;p>Okay. Let&amp;rsquo;s examine the problem:&lt;/p>
 &lt;blockquote>
 &lt;p>Return a new array that transforms the element&amp;rsquo;s average altitude into their orbital periods.&lt;/p>
@@ -4022,8 +4489,12 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 &lt;/blockquote>
 &lt;p>Well, as it turns out, in order to calculate the orbital period of satellites, we also need a recipe. Amazing, the things you can find on the internet these days.&lt;/p>
 &lt;p>Courtesy of &lt;a href="http://www.dummies.com/education/science/physics/how-to-calculate-the-period-and-orbiting-radius-of-a-geosynchronous-satellite/">dummies.com&lt;/a> (yup! #noshame), here&amp;rsquo;s our recipe:&lt;/p>
-&lt;p>&lt;img src="solve-orbital-period.png#center" alt="Orbital period formula">&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;figure>
+&lt;img src="solve-orbital-period.png"
+alt="Orbital period formula"/> &lt;figcaption>
+&lt;p>It&amp;rsquo;s kind of cute, in a way.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>That might look pretty complicated, but as we&amp;rsquo;ve already seen, we just need to answer the next MIQ: how much do I actually need to know about this formula in order to start using it?&lt;/p>
 &lt;p>In the case of this challenge, not too much. We&amp;rsquo;re already given &lt;code>earthRadius&lt;/code>, and &lt;code>avgAlt&lt;/code> is part of our arguments object. Together, they form the radius, &lt;em>r&lt;/em>. With a couple search queries and some mental time-travel to your elementary math class, we can describe this formula in a smattering of English:&lt;/p>
 &lt;p>&lt;strong>&lt;em>T&lt;/em>, the orbital period, equals 2 multiplied by Pi, in turn multiplied by the square root of the radius, &lt;em>r&lt;/em> cubed, divided by the gravitational mass, &lt;em>GM&lt;/em>.&lt;/strong>&lt;/p>
@@ -4058,10 +4529,9 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>If you need a refresher on iterating through arrays, have a look at my &lt;a href="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/">article on iterating, featuring breakfast arrays&lt;/a>! (5 minutes read)&lt;/p>
 &lt;p>Don&amp;rsquo;t look now, but you just gained the ability to calculate the orbital period of satellites. You could even do it &lt;em>while&lt;/em> making paella, if you wanted to. Seriously. Put it on your resume.&lt;/p>
-&lt;h1 id="tldr-the-overarching-moral-lesson">Tl;dr: the overarching moral lesson&lt;/h1>
+&lt;h2 id="tldr-the-overarching-moral-lesson">Tl;dr: the overarching moral lesson&lt;/h2>
 &lt;p>Whether it&amp;rsquo;s cooking, coding, or anything else, problems may at first seem confusing, insurmountable, or downright boring. If you&amp;rsquo;re faced with such a challenge, just remember: they&amp;rsquo;re a lot more digestible with a side of bite-sized MIQ chips.&lt;/p>
-&lt;p>&lt;img src="solve-miq-bowl.png#center" alt="Bowl of MIQs.">&lt;/p>
-&lt;p>Thanks for reading!&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/cover_solve-paella_hu7c9f995cc962a3f8b743096a43864b63_232134_640x0_resize_q75_box.jpg" type="image/jpg"/></item><item><title>Making sandwiches with closures in JavaScript</title><link>https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/</link><pubDate>Sun, 28 May 2017 09:16:35 +0700</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/</guid><description>An explanation of closures and how they can emulate private methods in JavaScript.</description><content:encoded>
+&lt;p>&lt;img src="solve-miq-bowl.png#center" alt="Bowl of MIQs.">&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/cover_solve-paella_hu7c9f995cc962a3f8b743096a43864b63_232134_640x0_resize_q75_box.jpg" type="image/jpg"/></item><item><title>Making sandwiches with closures in JavaScript</title><link>https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/</link><pubDate>Sun, 28 May 2017 09:16:35 +0700</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/</guid><description>An explanation of closures and how they can emulate private methods in JavaScript.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/cover_closures-sandwich_hud81d1fec4fb76eb8b9cdb31f41b7a4aa_32752_640x0_resize_q75_box.jpg" width="640" height="320"/>
 &lt;p>Say you&amp;rsquo;re having a little coding get-together, and you need some sandwiches. You happen to know that everyone prefers a different type of sandwich, like chicken, ham, or peanut butter and mayo. You could make all these sandwiches yourself, but that would be tedious and boring.&lt;/p>
 &lt;p>Luckily, you know of a nearby sandwich shop that delivers. They have the ability and ingredients to make any kind of sandwich in the world, and all you have to do is order through their app.&lt;/p>
@@ -4627,7 +5097,7 @@ $ git push origin master
 &lt;span class="nb">window&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">location&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">protocol&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s2">&amp;#34;https&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
 &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="p">/&lt;/span>&lt;span class="nt">script&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>That&amp;rsquo;s pretty much it! In a couple hours or so, your site will be up and running at &lt;code>https://yourname.com&lt;/code>.&lt;/p>
-&lt;p>Thanks for reading!&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/cover_free-https_hu8673880aabf7986b54167d322ecde323_1104421_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>Iterations in Python: for loop, list comprehension, and map</title><link>https://victoria.dev/blog/iterations-in-python-for-loop-list-comprehension-and-map/</link><pubDate>Wed, 18 Jan 2017 21:58:28 +0700</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/iterations-in-python-for-loop-list-comprehension-and-map/</guid><description>An overview of writing effective iterations in Python using for loops, list comprehensions, and map.</description><content:encoded>
+&lt;p>Thanks for reading!&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/cover_free-https_hu8673880aabf7986b54167d322ecde323_1104421_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>Basics of Iteration in Python</title><link>https://victoria.dev/blog/basics-of-iteration-in-python/</link><pubDate>Wed, 18 Jan 2017 21:58:28 +0700</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/basics-of-iteration-in-python/</guid><description>A basic overview of writing effective iterations in Python using for loops, list comprehensions, and map.</description><content:encoded>
 &lt;p>I&amp;rsquo;ve been working in Python 3 for about a week, and so far greatly enjoy it. To me, learning code syntax (and programming in general) is similar to an amalgamation of Lego blocks: once it&amp;rsquo;s understood what a certain color of block does, it&amp;rsquo;s straightforward to combine them to create the structure you&amp;rsquo;re looking for.&lt;/p>
 &lt;p>That said, some blocks can be a little confusing at first. I found documentation relating to iteration in Python to be a little hard to digest, mostly because of subtle differences in terminology: iteration, iterator, iterating, iterable&amp;hellip; it&amp;rsquo;s enough to make your eyes glaze over. I found concrete examples to be most useful in learning these concepts; this post aims to summarize what I&amp;rsquo;ve learned.&lt;/p>
 &lt;p>There are a few different ways to achieve iterations in Python. I&amp;rsquo;ll present some of these ways in this post and discuss appropriate situations for each.&lt;/p>
