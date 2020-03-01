@@ -1495,10 +1495,18 @@ ProxyPassReverse &amp;quot;/requested/path/&amp;quot; &amp;quot;http://www.examp
 &lt;h2 id="pastebin">Pastebin&lt;/h2>
 &lt;p>The self-declared &amp;ldquo;#1 paste tool since 2002,&amp;rdquo; &lt;a href="https://pastebin.com">Pastebin&lt;/a> allows users to temporarily store any kind of text. It&amp;rsquo;s mostly used for sharing information with others, or retrieving your own &amp;ldquo;paste&amp;rdquo; on another machine, perhaps in another location. Pastebin makes it easy to share large amounts of complicated text, like error logs, source code, configuration files, tokens, api keys&amp;hellip; what&amp;rsquo;s that? Oh, yes, it&amp;rsquo;s public by default.&lt;/p>
 &lt;p>Here are some screenshots of a little dorking I did for a public bug bounty program.&lt;/p>
-&lt;p>&lt;img src="pastebin_apikey.png#screenshot" alt="A screenshot of exposed api key in Google search">
-&lt;p class="img-caption">API keys in plain view.&lt;/p>&lt;/p>
-&lt;p>&lt;img src="pastebin_pass.png#screenshot" alt="A screenshot of exposed username and password in Google search">
-&lt;p class="img-caption">Log-in details out in the open.&lt;/p>&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="pastebin_apikey.png"
+alt="A screenshot of exposed api key in Google search"/> &lt;figcaption>
+&lt;p>API keys in plain view.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
+&lt;figure class="screenshot">
+&lt;img src="pastebin_pass.png"
+alt="A screenshot of exposed username and password in Google search"/> &lt;figcaption>
+&lt;p>Log-in details out in the open.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>Thanks in part to the convenience of using Pastebin and similar websites, it would appear that some people fail to think twice before making sensitive data publicly available.&lt;/p>
 &lt;h3 id="but-why">But why?&lt;/h3>
 &lt;p>Granted, non-technical employees with access to the application may not have an understanding of which items should or should not be freely shared. Someone unfamiliar with what encrypted data is or what it looks like may not realize the difference between an encrypted string and an unencrypted token made up of many random letters and numbers. Even technical staff can miss things, make mistakes, or act carelessly after a hard day at work. It may be easy to call this a training problem and move on; however, none of these rationalizations address the root cause of the issue.&lt;/p>
@@ -1513,7 +1521,10 @@ ProxyPassReverse &amp;quot;/requested/path/&amp;quot; &amp;quot;http://www.examp
 &lt;p>When it comes to third-party services, ensure people are aware that some transmission may not be encrypted, or may be publicly searchable. If there is no system currently in place for safely sharing and storing sensitive data internally, this is a good place to start. The security of application data is in the hands of everyone on the team, from administrative staff to C-level executives. Ensure people have the tools they need to work securely.&lt;/p>
 &lt;h2 id="public-repositories">Public repositories&lt;/h2>
 &lt;p>Developers are notorious for leaving sensitive information hanging out where it doesn&amp;rsquo;t belong (yes, I&amp;rsquo;ve done it too!). Without a strong push-left approach in place for handling tokens, secrets, and keys, these little gems can end up in full public view on sites like GitHub, GitLab, and Bitbucket (to name a few). &lt;a href="https://www.ndss-symposium.org/wp-content/uploads/2019/02/ndss2019_04B-3_Meli_paper.pdf">A 2019 study&lt;/a> found that thousands of new, unique secrets are leaked every day on GitHub alone.&lt;/p>
-&lt;p>&lt;img src="github_tok.png#screenshot" alt="A screenshot of a Google search for tokens on GitHub">&lt;/p>
+&lt;figure class="screenshot">
+&lt;img src="github_tok.png"
+alt="A screenshot of a Google search for tokens on GitHub"/>
+&lt;/figure>
 &lt;p>GitHub has implemented measures like &lt;a href="https://github.blog/2018-10-17-behind-the-scenes-of-github-token-scanning/">token scanning&lt;/a>, and GitLab 11.9 &lt;a href="https://about.gitlab.com/2019/03/22/gitlab-11-9-released/">introduced secret detection&lt;/a>. While these tools aim to reduce the chances that a secret might accidentally be committed, to put it bluntly, it&amp;rsquo;s really not their job. Secret scanning won&amp;rsquo;t stop developers from committing the data in the first place.&lt;/p>
 &lt;h3 id="but-why-1">But why?&lt;/h3>
 &lt;p>Without an obvious process in place for managing secrets, developers may tend too much towards their innate sense of just-get-it-done-ness. Sometimes this leads to the expedient but irresponsible practice of storing keys as unencrypted variables within the program, perhaps with the intention of it being temporary. Nonetheless, these variables inevitably fall from front of mind and end up in a commit.&lt;/p>
@@ -1547,8 +1558,12 @@ ing rookie mistakes. Usually, the weakest point in the security of your software
 &lt;p>You may be familiar with the catchphrase, &amp;ldquo;sanitize your inputs!&amp;rdquo; However, as I hope this post demonstrates, developing an application with robust security isn&amp;rsquo;t quite so straightforward. I suggest an alternate phrase: pay attention to your inputs. Let&amp;rsquo;s elaborate by examining the most common attacks that take advantage of vulnerabilities in this area: SQL injection and cross site scripting.&lt;/p>
 &lt;h2 id="sql-injection-attacks">SQL injection attacks&lt;/h2>
 &lt;p>If you&amp;rsquo;re not yet familiar with SQL (Structured Query Language) injection attacks, or SQLi, here is a great &lt;a href="https://www.youtube.com/watch?v=_jKylhJtPmI">explain-like-I&amp;rsquo;m-five video on SQLi&lt;/a>. You may already know of this attack from &lt;a href="https://xkcd.com/327/">xkcd&amp;rsquo;s Little Bobby Tables&lt;/a>. Essentially, malicious actors may be able to send SQL commands that affect your application through some input on your site, like a search box that pulls results from your database. Sites coded in PHP can be especially susceptible to these, and a successful SQL attack can be devastating for software that relies on a database (as in, your Users table is now a pot of petunias).&lt;/p>
-&lt;p>&lt;img src="sqli.png#center" alt="A monitor with an SQL Select command that gets all your base">
-&lt;p class="img-caption">You have no chance to survive make your time.&lt;/p>&lt;/p>
+&lt;figure class="center">
+&lt;img src="sqli.png"
+alt="A monitor with an SQL Select command that gets all your base"/> &lt;figcaption>
+&lt;p>You have no chance to survive make your time.&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>You can test your own site to see if you&amp;rsquo;re susceptible to this kind of attack. (Please only test sites that you own, since running SQL injections where you don&amp;rsquo;t have permission to be doing so is, possibly, illegal in your locality; and definitely, universally, not very funny.) The following payloads can be used to test inputs:&lt;/p>
 &lt;ul>
 &lt;li>&lt;code>' OR 1='1&lt;/code> evaluates to a constant true, and when successful, returns all rows in the table.&lt;/li>
@@ -1569,8 +1584,12 @@ ing rookie mistakes. Usually, the weakest point in the security of your software
 &lt;p>The battle, however, is only half won&amp;hellip;&lt;/p>
 &lt;h2 id="cross-site-scripting-xss-attacks">Cross Site Scripting (XSS) attacks&lt;/h2>
 &lt;p>If you&amp;rsquo;re a malicious coder, JavaScript is pretty much your best friend. The right commands will do anything a legitimate user could do (and even some things they aren&amp;rsquo;t supposed to be able to) on a web page, sometimes without any interaction on the part of an actual user. &lt;a href="https://en.wikipedia.org/wiki/Cross-site_scripting">Cross Site Scripting&lt;/a> attacks, or XSS, occur when JavaScript code is injected into a web page and changes that page&amp;rsquo;s behavior. Its effects can range from prank nuisance occurrences to more severe authentication bypasses or credential stealing. &lt;a href="https://blogs.apache.org/infra/entry/apache_org_04_09_2010">This incident report from Apache in 2010&lt;/a> is a good example of how XSS can be chained in a larger attack to take over accounts and machines.&lt;/p>
-&lt;p>&lt;img src="xss.png" alt="An HTML dance party with a little JS cutting in">
-&lt;p class="img-caption">The annual DOM dance-off receives an unexpected guest);&lt;/p>&lt;/p>
+&lt;figure>
+&lt;img src="xss.png"
+alt="An HTML dance party with a little JS cutting in"/> &lt;figcaption>
+&lt;p>The annual DOM dance-off receives an unexpected guest);&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>XSS can occur on the server or on the client side, and generally comes in three flavors: DOM (&lt;a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction">Document Object Model&lt;/a>) based, stored, and reflected XSS. The differences amount to where the attack payload is injected into the application.&lt;/p>
 &lt;h3 id="dom-based-xss">DOM based XSS&lt;/h3>
 &lt;p>&lt;a href="https://www.owasp.org/index.php/DOM_Based_XSS">DOM based XSS&lt;/a> occurs when a JavaScript payload affects the structure, behavior, or content of the web page the user has loaded in their browser. These are most commonly executed through modified URLs, such as in &lt;a href="https://www.owasp.org/index.php/Phishing">phishing emails&lt;/a>.&lt;/p>
@@ -2050,8 +2069,12 @@ origin git@gitlab.com:username/first-repository.git &lt;span class="o">(&lt;/spa
 &lt;p>I wrote another article a little while back about &lt;a href="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy&lt;/a> to make changes to my repositories on my iPad whenever I&amp;rsquo;m out and about. It seemed off to me that I could do everything except deploy my site from my iPad, so I set out to change that.&lt;/p>
 &lt;p>A couple three-in-the-morning bright ideas and a revoked access token later (oops), I now have not one but &lt;em>two&lt;/em> ways to deploy to my public GitHub Pages repository from an entirely separated, private GitHub repository. In this post, I&amp;rsquo;ll take you through achieving this with &lt;a href="https://travis-ci.com/">Travis CI&lt;/a> or using &lt;a href="http://netlify.com/">Netlify&lt;/a> and &lt;a href="https://www.gnu.org/software/make/">Make&lt;/a>.&lt;/p>
 &lt;p>There&amp;rsquo;s nothing hackish about it - my public GitHub Pages repository still looks the same as it does when I pushed to it locally from my terminal. Only now, I&amp;rsquo;m able to take advantage of a couple great deployment tools to have the site update whenever I push to my private repo, whether I&amp;rsquo;m on my laptop or out and about with my iPad.&lt;/p>
-&lt;p>&lt;img src="im-on-a-bridge.jpg#center" alt="Hashtag: you did not push from there">
-&lt;p class="img-caption">#YouDidNotPushFromThere&lt;/p>&lt;/p>
+&lt;figure>
+&lt;img src="im-on-a-bridge.jpg"
+alt="Hashtag: you did not push from there"/> &lt;figcaption>
+&lt;p>#YouDidNotPushFromThere&lt;/p>
+&lt;/figcaption>
+&lt;/figure>
 &lt;p>This article assumes you have working knowledge of Git and GitHub Pages. If not, you may like to spin off some browser tabs from my articles on &lt;a href="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy&lt;/a> and &lt;a href="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/">building a site with Hugo and GitHub Pages&lt;/a> first.&lt;/p>
 &lt;p>Let&amp;rsquo;s do it!&lt;/p>
 &lt;h1 id="private-to-public-github-pages-deployment-with-travis-ci">Private-to-public GitHub Pages deployment with Travis CI&lt;/h1>
@@ -2152,8 +2175,12 @@ hugo --gc --minify
 &lt;p>The main point is that your GitHub Pages site is now updated in your public repo. Yay!&lt;/p>
 &lt;h1 id="go-forth-and-deploy-fearlessly">Go forth and deploy fearlessly&lt;/h1>
 &lt;p>I hope the effect of this new information is that you feel more able to update your sites, wherever you happen to be. The possibilities are endless - at home on your couch with your laptop, out cafe-hopping with your iPad, or in the middle of a first date on your phone. Endless!&lt;/p>
-&lt;p>&lt;img src="date-deploy.png" alt="Don&amp;rsquo;t update your site from your phone on a date">
-&lt;p class="img-caption">Don&amp;rsquo;t do stuff on your phone when you&amp;rsquo;re on a date. Not if you want a second one, anyway.&lt;/p>&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover_hua0c104d819921f3f45be661545f8932d_2244173_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>A remote sync solution for iOS and Linux: Git and Working Copy</title><link>https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</link><pubDate>Fri, 15 Mar 2019 11:55:28 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</guid><description>How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS.</description><content:encoded>
+&lt;figure>
+&lt;img src="date-deploy.png"
+alt="Don&amp;#39;t update your site from your phone on a date"/> &lt;figcaption>
+&lt;p>Don&amp;rsquo;t do stuff on your phone when you&amp;rsquo;re on a date. Not if you want a second one, anyway.&lt;/p>
+&lt;/figcaption>
+&lt;/figure></content:encoded><enclosure url="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover_hua0c104d819921f3f45be661545f8932d_2244173_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>A remote sync solution for iOS and Linux: Git and Working Copy</title><link>https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</link><pubDate>Fri, 15 Mar 2019 11:55:28 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</guid><description>How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync_hu1984111f2d75b603219adcc3d215dc57_618766_640x0_resize_box_2.png" width="640" height="418"/>
 &lt;p>I previously wrote about a (hackish) way to use a &lt;a href="https://victoria.dev/blog/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/">single Dropbox folder on a dual-boot Windows and Linux machine&lt;/a>. I&amp;rsquo;ve since &lt;del>gained some sense&lt;/del> gone full Linux with Ubuntu 18.04 LTS, but the Dropbox set up seems to have stopped being an option in any case. Fortunately, I&amp;rsquo;ve since found a much better (far less hackish) way to remote-sync files across different file systems. Reflecting my current set up, I&amp;rsquo;m talking about iOS (iPad and iPhone) and my Linux machine.&lt;/p>
 &lt;p>The new sync system is based on Git, very customizable, and conveniently extensible. Beyond text files, you can sync anything that Git can (which is almost everything - if you want to edit your &lt;code>.gitignore&lt;/code>d files on the go I&amp;rsquo;m not sure I can help). If you&amp;rsquo;re already familiar with Git, getting set up will be a walk in the park. If Git is new to you, I think these tools help make the concepts of Git cloning, pulling, and pushing straightforward to understand.&lt;/p>
