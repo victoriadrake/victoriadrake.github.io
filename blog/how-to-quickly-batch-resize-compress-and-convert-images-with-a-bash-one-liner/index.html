@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake is a security-focused senior software developer. She builds open source automation tools, and tech that helps humans stay safe on the Internet.">
+<title>
+    How to quickly batch resize, compress, and convert images with a Bash one-liner | victoria.dev
+</title>
+
+
+    <meta property="og:title" content="How to quickly batch resize, compress, and convert images with a Bash one-liner - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="A fast command line interface solution for batch image processing." />
+<meta property="og:url" content="https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/cover.png"/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How to quickly batch resize, compress, and convert images with a Bash one-liner" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/cover.png"/>
+
+<meta name="twitter:description"
+    content="A fast command line interface solution for batch image processing." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.6fba7ba34f252c577af84a20e07445bfccd4eb80b23580d4bdfcb959c7de5d9e.css" integrity="sha256-b7p7o08lLFd6&#43;Eog4HRFv8zU64CyNYDUvfy5WcfeXZ4=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/cover.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        How to quickly batch resize, compress, and convert images with a Bash one-liner
+    </h1>
+    
+    <p class="subtitle">A fast command line interface solution for batch image processing.</p>
+    <p class="metadata" id="date">
+        October 14, 2019
+        ☕️&nbsp;
+        2 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/terminal/">
+            terminal
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/ci/cd/">
+            ci/cd
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>Part of my Hugo site continuous deployment workflow is the processing of 210 images, at time of writing.</p>
+<p>Here&rsquo;s my one-liner:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find public/ -not -path <span class="s2">&#34;*/static/*&#34;</span> <span class="se">\(</span> -name <span class="s1">&#39;*.png&#39;</span> -o -name <span class="s1">&#39;*.jpg&#39;</span> -o -name <span class="s1">&#39;*.jpeg&#39;</span> <span class="se">\)</span> -print0 <span class="p">|</span> xargs -0 -P8 -n2 mogrify -strip -thumbnail <span class="s1">&#39;1000&gt;&#39;</span> -format jpg
+</code></pre></div><p>I use <code>find</code> to target only certain image file formats in certain directories. With <a href="https://www.imagemagick.org/script/mogrify.php"><code>mogrify</code>, part of ImageMagick</a>, I resize only the images that are larger than a certain dimension, compress them, and strip the metadata. I tack on the <code>format</code> flag to create jpg copies of the images.</p>
+<p>Here&rsquo;s the one-liner again (broken up for better reading):</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Look in the public/ directory</span>
+find public/ <span class="se">\
+</span><span class="se"></span><span class="c1"># Ignore directories called &#34;static&#34; regardless of location</span>
+-not -path <span class="s2">&#34;*/static/*&#34;</span> <span class="se">\
+</span><span class="se"></span><span class="c1"># Print the file paths of all files ending with any of these extensions</span>
+<span class="se">\(</span> -name <span class="s1">&#39;*.png&#39;</span> -o -name <span class="s1">&#39;*.jpg&#39;</span> -o -name <span class="s1">&#39;*.jpeg&#39;</span> <span class="se">\)</span> -print0 <span class="se">\
+</span><span class="se"></span><span class="c1"># Pipe the file paths to xargs and use 8 parallel workers to process 2 arguments</span>
+<span class="p">|</span> xargs -0 -P8 -n2 <span class="se">\
+</span><span class="se"></span><span class="c1"># Tell mogrify to strip metadata, and...</span>
+mogrify -strip <span class="se">\
+</span><span class="se"></span><span class="c1"># ...compress and resize any images larger than the target size (1000px in either dimension)</span>
+-thumbnail <span class="s1">&#39;1000&gt;&#39;</span> <span class="se">\
+</span><span class="se"></span><span class="c1"># Convert the files to jpg format</span>
+-format jpg
+</code></pre></div><p>That&rsquo;s it. That&rsquo;s the post.</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>
+        <p class="li-brief">
+            How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">A portable Makefile for continuous delivery with Hugo and GitHub Pages</a>
+        <p class="li-brief">
+            My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/">Batch renaming images, including image resolution, with awk</a>
+        <p class="li-brief">
+            How to batch rename images with custom values using file, awk, and rename - in rainbow colors!
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/terminal/">terminal</a>
+            
+            ☕️&nbsp;
+            4 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a security-focused senior software developer in Washington, DC. She writes about software development, cybersecurity, and information security awareness. She is a co-author and maintainer of the OWASP Web Security Testing Guide, and a twice-awarded top annual contributor to freeCodeCamp.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>
