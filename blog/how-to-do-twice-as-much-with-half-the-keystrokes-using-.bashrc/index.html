@@ -1,428 +1,92 @@
-<!DOCTYPE html>
-<html lang="en-us">
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a security-focused senior software developer. She builds open source automation tools, and tech that helps humans stay safe on the Internet."><title>How to do twice as much with half the keystrokes using `.bashrc` | victoria.dev</title><meta property="og:title" content="How to do twice as much with half the keystrokes using `.bashrc` - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="An overview of time-saving aliases, functions, and creating a useful Bash prompt."><meta property="og:url" content="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="How to do twice as much with half the keystrokes using `.bashrc`"><meta name=twitter:image content="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/cover.png"><meta name=twitter:description content="An overview of time-saving aliases, functions, and creating a useful Bash prompt."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
+<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/cover.png alt="cover image"></div><div class=markdown><h1>How to do twice as much with half the keystrokes using `.bashrc`</h1><p class=subtitle>An overview of time-saving aliases, functions, and creating a useful Bash prompt.</p><p class=metadata id=date>August 21, 2019
+☕️☕️&nbsp;
+7 min read
+&nbsp;
+<a class=li-tag href=/tags/linux/>linux
+</a>&nbsp;
+<a class=li-tag href=/tags/terminal/>terminal
+</a>&nbsp;
+<a class=li-tag href=/tags/git/>git
+</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>In my <a href=/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/>recent post about setting up Ubuntu with Bash scripts</a>, I briefly alluded to the magic of <code>.bashrc</code>. This didn&rsquo;t really do it justice, so here&rsquo;s a quick post that offers a bit more detail about what the Bash configuration file can do.</p><p>My current configuration hugely improves my workflow, and saves me well over 50% of the keystrokes I would have to employ without it! Let&rsquo;s look at some examples of aliases, functions, and prompt configurations that can improve our workflow by helping us be more efficient with fewer key presses.</p><h1 id=bash-aliases>Bash aliases</h1><p>A smartly written <code>.bashrc</code> can save a whole lot of keystrokes. We can take advantage of this in the literal sense by using <a href=https://www.gnu.org/software/bash/manual/html_node/Aliases.html>bash aliases</a>, or strings that expand to larger commands. For an indicative example, here is a Bash alias for copying files in the terminal:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=c1># Always copy contents of directories (r)ecursively and explain (v) what was done</span>
+<span class=nb>alias</span> <span class=nv>cp</span><span class=o>=</span><span class=s1>&#39;cp -rv&#39;</span>
+</code></pre></div><p>The <code>alias</code> command defines the string we&rsquo;ll type, followed by what that string will expand to. We can override existing commands like <code>cp</code> above. On its own, the <code>cp</code> command will only copy files, not directories, and succeeds silently. With this alias, we need not remember to pass those two flags, nor <code>cd</code> or <code>ls</code> the location of our copied file to confirm that it&rsquo;s there! Now, just those two key presses (for <code>c</code> and <code>d</code>) will do all of that for us.</p><p>Here are a few more <code>.bashrc</code> aliases for passing flags with common functions.</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=c1># List contents with colors for file types, (A)lmost all hidden files (without . and ..), in (C)olumns, with class indicators (F)</span>
+<span class=nb>alias</span> <span class=nv>ls</span><span class=o>=</span><span class=s1>&#39;ls --color=auto -ACF&#39;</span>
+<span class=c1># List contents with colors for file types, (a)ll hidden entries (including . and ..), use (l)ong listing format, with class indicators (F)</span>
+<span class=nb>alias</span> <span class=nv>ll</span><span class=o>=</span><span class=s1>&#39;ls --color=auto -alF&#39;</span>
 
-<head>
-    
-    <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer">
-
-<meta name="description" content="Victoria Drake is a security-focused senior software developer. She builds open source automation tools, and tech that helps humans stay safe on the Internet.">
-<title>
-    How to do twice as much with half the keystrokes using `.bashrc` | victoria.dev
-</title>
-
-
-    <meta property="og:title" content="How to do twice as much with half the keystrokes using `.bashrc` - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="An overview of time-saving aliases, functions, and creating a useful Bash prompt." />
-<meta property="og:url" content="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/cover.png"/>
-
-    <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="How to do twice as much with half the keystrokes using `.bashrc`" />
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/cover.png"/>
-
-<meta name="twitter:description"
-    content="An overview of time-saving aliases, functions, and creating a useful Bash prompt." />
-
-    
-<link rel="shortcut icon" href="/img/logo.ico">
-
-
-    
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.6fba7ba34f252c577af84a20e07445bfccd4eb80b23580d4bdfcb959c7de5d9e.css" integrity="sha256-b7p7o08lLFd6&#43;Eog4HRFv8zU64CyNYDUvfy5WcfeXZ4=" media="screen">
-
-
-
-
-
-    
-    
-    
-    
-</head>
-
-<body>
-    <section id="main">
-
-        
-        <div class="header">
-
-    <div class="toggle">
-        <input type="checkbox" />
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <div id="mobile-menu">
-            
-            
-            <span class="menu-item">
-                <a href="/">
-                    👩🏻‍💻 hi</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/blog/">
-                    📰 blog</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/about/">
-                    📖 readme</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/coffee/">
-                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-            </span>
-            
-            
-            
-            
-        </div>
-    </div>
-    <div id="menu">
-        
-        
-        <span class="menu-item">
-            <a href="/">
-                👩🏻‍💻 hi</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/blog/">
-                📰 blog</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/about/">
-                📖 readme</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/coffee/">
-                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-        </span>
-        
-        
-        
-        
-    </div>
-
-    <div id="logo">
-        <img id="up" alt="site logo" src="/img/logo.png" />
-    </div>
-
-</div>
-        
-
-        <div class="container">
-            
-
-
-
-<div id="images">
-    <img src="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/cover.png" alt="cover image" />
-</div>
-
-
-            
-
-
-<div class="markdown">
-    <h1>
-        How to do twice as much with half the keystrokes using `.bashrc`
-    </h1>
-    
-    <p class="subtitle">An overview of time-saving aliases, functions, and creating a useful Bash prompt.</p>
-    <p class="metadata" id="date">
-        August 21, 2019
-        ☕️☕️&nbsp;
-        7 min read
-
-        
-        &nbsp;
-        
-        <a class="li-tag" href="/tags/linux/">
-            linux
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/terminal/">
-            terminal
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/git/">
-            git
-        </a>&nbsp;
-        
-        
-    </p>
-
-    
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-<div class="markdown">
-    
-    <p>In my <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">recent post about setting up Ubuntu with Bash scripts</a>, I briefly alluded to the magic of <code>.bashrc</code>. This didn&rsquo;t really do it justice, so here&rsquo;s a quick post that offers a bit more detail about what the Bash configuration file can do.</p>
-<p>My current configuration hugely improves my workflow, and saves me well over 50% of the keystrokes I would have to employ without it! Let&rsquo;s look at some examples of aliases, functions, and prompt configurations that can improve our workflow by helping us be more efficient with fewer key presses.</p>
-<h1 id="bash-aliases">Bash aliases</h1>
-<p>A smartly written <code>.bashrc</code> can save a whole lot of keystrokes. We can take advantage of this in the literal sense by using <a href="https://www.gnu.org/software/bash/manual/html_node/Aliases.html">bash aliases</a>, or strings that expand to larger commands. For an indicative example, here is a Bash alias for copying files in the terminal:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Always copy contents of directories (r)ecursively and explain (v) what was done</span>
-<span class="nb">alias</span> <span class="nv">cp</span><span class="o">=</span><span class="s1">&#39;cp -rv&#39;</span>
-</code></pre></div><p>The <code>alias</code> command defines the string we&rsquo;ll type, followed by what that string will expand to. We can override existing commands like <code>cp</code> above. On its own, the <code>cp</code> command will only copy files, not directories, and succeeds silently. With this alias, we need not remember to pass those two flags, nor <code>cd</code> or <code>ls</code> the location of our copied file to confirm that it&rsquo;s there! Now, just those two key presses (for <code>c</code> and <code>d</code>) will do all of that for us.</p>
-<p>Here are a few more <code>.bashrc</code> aliases for passing flags with common functions.</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># List contents with colors for file types, (A)lmost all hidden files (without . and ..), in (C)olumns, with class indicators (F)</span>
-<span class="nb">alias</span> <span class="nv">ls</span><span class="o">=</span><span class="s1">&#39;ls --color=auto -ACF&#39;</span>
-<span class="c1"># List contents with colors for file types, (a)ll hidden entries (including . and ..), use (l)ong listing format, with class indicators (F)</span>
-<span class="nb">alias</span> <span class="nv">ll</span><span class="o">=</span><span class="s1">&#39;ls --color=auto -alF&#39;</span>
-
-<span class="c1"># Explain (v) what was done when moving a file</span>
-<span class="nb">alias</span> <span class="nv">mv</span><span class="o">=</span><span class="s1">&#39;mv -v&#39;</span>
-<span class="c1"># Create any non-existent (p)arent directories and explain (v) what was done</span>
-<span class="nb">alias</span> <span class="nv">mkdir</span><span class="o">=</span><span class="s1">&#39;mkdir -pv&#39;</span>
-<span class="c1"># Always try to (c)ontinue getting a partially-downloaded file</span>
-<span class="nb">alias</span> <span class="nv">wget</span><span class="o">=</span><span class="s1">&#39;wget -c&#39;</span>
-</code></pre></div><p>Aliases come in handy when we want to avoid typing long commands, too. Here are a few I use when working with Python environments:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">alias</span> <span class="nv">pym</span><span class="o">=</span><span class="s1">&#39;python3 manage.py&#39;</span>
-<span class="nb">alias</span> <span class="nv">mkenv</span><span class="o">=</span><span class="s1">&#39;python3 -m venv env&#39;</span>
-<span class="nb">alias</span> <span class="nv">startenv</span><span class="o">=</span><span class="s1">&#39;source env/bin/activate &amp;&amp; which python3&#39;</span>
-<span class="nb">alias</span> <span class="nv">stopenv</span><span class="o">=</span><span class="s1">&#39;deactivate&#39;</span>
-</code></pre></div><p>For further inspiration on ways Bash aliases can save time, I highly recommend <a href="https://www.digitalocean.com/community/tutorials/an-introduction-to-useful-bash-aliases-and-functions">the examples in this article</a>.</p>
-<h1 id="bash-functions">Bash functions</h1>
-<p>One downside of the aliases above is that they&rsquo;re rather static - they&rsquo;ll always expand to exactly the text declared. For a Bash alias that takes arguments, we&rsquo;ll need to create a function. We can do this like so:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Show contents of the directory after changing to it</span>
-<span class="k">function</span> <span class="nb">cd</span> <span class="o">()</span> <span class="o">{</span>
-    <span class="nb">builtin</span> <span class="nb">cd</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span>
+<span class=c1># Explain (v) what was done when moving a file</span>
+<span class=nb>alias</span> <span class=nv>mv</span><span class=o>=</span><span class=s1>&#39;mv -v&#39;</span>
+<span class=c1># Create any non-existent (p)arent directories and explain (v) what was done</span>
+<span class=nb>alias</span> <span class=nv>mkdir</span><span class=o>=</span><span class=s1>&#39;mkdir -pv&#39;</span>
+<span class=c1># Always try to (c)ontinue getting a partially-downloaded file</span>
+<span class=nb>alias</span> <span class=nv>wget</span><span class=o>=</span><span class=s1>&#39;wget -c&#39;</span>
+</code></pre></div><p>Aliases come in handy when we want to avoid typing long commands, too. Here are a few I use when working with Python environments:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=nb>alias</span> <span class=nv>pym</span><span class=o>=</span><span class=s1>&#39;python3 manage.py&#39;</span>
+<span class=nb>alias</span> <span class=nv>mkenv</span><span class=o>=</span><span class=s1>&#39;python3 -m venv env&#39;</span>
+<span class=nb>alias</span> <span class=nv>startenv</span><span class=o>=</span><span class=s1>&#39;source env/bin/activate &amp;&amp; which python3&#39;</span>
+<span class=nb>alias</span> <span class=nv>stopenv</span><span class=o>=</span><span class=s1>&#39;deactivate&#39;</span>
+</code></pre></div><p>For further inspiration on ways Bash aliases can save time, I highly recommend <a href=https://www.digitalocean.com/community/tutorials/an-introduction-to-useful-bash-aliases-and-functions>the examples in this article</a>.</p><h1 id=bash-functions>Bash functions</h1><p>One downside of the aliases above is that they&rsquo;re rather static - they&rsquo;ll always expand to exactly the text declared. For a Bash alias that takes arguments, we&rsquo;ll need to create a function. We can do this like so:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=c1># Show contents of the directory after changing to it</span>
+<span class=k>function</span> <span class=nb>cd</span> <span class=o>(</span><span class=o>)</span> <span class=o>{</span>
+    <span class=nb>builtin</span> <span class=nb>cd</span> <span class=s2>&#34;</span><span class=nv>$1</span><span class=s2>&#34;</span>
     ls -ACF
-<span class="o">}</span>
-</code></pre></div><p>I can&rsquo;t begin to tally how many times I&rsquo;ve typed <code>cd</code> and then <code>ls</code> immediately after to see the contents of the directory I&rsquo;m now in. With this function set up, it all happens with just those two letters! The function takes the first argument, <code>$1</code>, as the location to change directory to, then prints the contents of that directory in nicely formatted columns with file type indicators. The <code>builtin</code> part is necessary to get Bash to allow us to override this default command.</p>
-<p>Bash functions are very useful when it comes to downloading or upgrading software, too. I previously spent at least a few minutes every couple weeks downloading the new extended version of the <a href="https://gohugo.io/categories/releases">static site generator Hugo</a>, thanks to their excellent shipping frequency. With a function, I only need to pass in the version, and the upgrade happens in a few seconds.</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Hugo install or upgrade</span>
-<span class="k">function</span> gethugo <span class="o">()</span> <span class="o">{</span>
-    wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>/hugo_extended_<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>_Linux-64bit.tar.gz
-    tar xf tmp/hugo_extended_<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>_Linux-64bit.tar.gz -C tmp/
+<span class=o>}</span>
+</code></pre></div><p>I can&rsquo;t begin to tally how many times I&rsquo;ve typed <code>cd</code> and then <code>ls</code> immediately after to see the contents of the directory I&rsquo;m now in. With this function set up, it all happens with just those two letters! The function takes the first argument, <code>$1</code>, as the location to change directory to, then prints the contents of that directory in nicely formatted columns with file type indicators. The <code>builtin</code> part is necessary to get Bash to allow us to override this default command.</p><p>Bash functions are very useful when it comes to downloading or upgrading software, too. I previously spent at least a few minutes every couple weeks downloading the new extended version of the <a href=https://gohugo.io/categories/releases>static site generator Hugo</a>, thanks to their excellent shipping frequency. With a function, I only need to pass in the version, and the upgrade happens in a few seconds.</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=c1># Hugo install or upgrade</span>
+<span class=k>function</span> gethugo <span class=o>(</span><span class=o>)</span> <span class=o>{</span>
+    wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span class=s2>&#34;</span><span class=nv>$@</span><span class=s2>&#34;</span>/hugo_extended_<span class=s2>&#34;</span><span class=nv>$@</span><span class=s2>&#34;</span>_Linux-64bit.tar.gz
+    tar xf tmp/hugo_extended_<span class=s2>&#34;</span><span class=nv>$@</span><span class=s2>&#34;</span>_Linux-64bit.tar.gz -C tmp/
     sudo mv -f tmp/hugo /usr/local/bin/
     rm -rf tmp/
     hugo version
-<span class="o">}</span>
-</code></pre></div><p>The <code>$@</code> notation simply takes all the arguments given, replacing its spot in the function. To run the above function and download Hugo version 0.57.2, we use the command <code>gethugo 0.57.2</code>.</p>
-<p>I&rsquo;ve got one for <a href="https://golang.org/">Golang</a>, too:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="k">function</span> getgolang <span class="o">()</span> <span class="o">{</span>
+<span class=o>}</span>
+</code></pre></div><p>The <code>$@</code> notation simply takes all the arguments given, replacing its spot in the function. To run the above function and download Hugo version 0.57.2, we use the command <code>gethugo 0.57.2</code>.</p><p>I&rsquo;ve got one for <a href=https://golang.org/>Golang</a>, too:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=k>function</span> getgolang <span class=o>(</span><span class=o>)</span> <span class=o>{</span>
     sudo rm -rf /usr/local/go
-    wget -q -P tmp/ https://dl.google.com/go/go<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>.linux-amd64.tar.gz
-    sudo tar -C /usr/local -xzf tmp/go<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>.linux-amd64.tar.gz
+    wget -q -P tmp/ https://dl.google.com/go/go<span class=s2>&#34;</span><span class=nv>$@</span><span class=s2>&#34;</span>.linux-amd64.tar.gz
+    sudo tar -C /usr/local -xzf tmp/go<span class=s2>&#34;</span><span class=nv>$@</span><span class=s2>&#34;</span>.linux-amd64.tar.gz
     rm -rf tmp/
     go version
-<span class="o">}</span>
-</code></pre></div><p>Or how about a function that adds a remote origin URL for GitLab to the current repository?</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="k">function</span> glab <span class="o">()</span> <span class="o">{</span>
-    git remote set-url origin --add git@gitlab.com:<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>/<span class="s2">&#34;</span><span class="si">${</span><span class="nv">PWD</span><span class="p">##*/</span><span class="si">}</span><span class="s2">&#34;</span>.git
+<span class=o>}</span>
+</code></pre></div><p>Or how about a function that adds a remote origin URL for GitLab to the current repository?</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=k>function</span> glab <span class=o>(</span><span class=o>)</span> <span class=o>{</span>
+    git remote set-url origin --add git@gitlab.com:<span class=s2>&#34;</span><span class=nv>$@</span><span class=s2>&#34;</span>/<span class=s2>&#34;</span><span class=si>${</span><span class=nv>PWD</span><span class=p>##*/</span><span class=si>}</span><span class=s2>&#34;</span>.git
     git remote -v
-<span class="o">}</span>
-</code></pre></div><p>With <code>glab username</code>, we can create a new <code>origin</code> URL for the current Git repository with our <code>username</code> on GitLab.com. Pushing to a new remote URL <a href="/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/#a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab">automatically creates a new private GitLab repository</a>, so this is a useful shortcut for creating backups!</p>
-<p>Bash functions are really only limited by the possibilities of scripting, of which there are, practically, few limits. If there&rsquo;s anything we do on a frequent basis that requires typing a few lines into a terminal, we can probably create a Bash function for it!</p>
-<h1 id="bash-prompt">Bash prompt</h1>
-<p>Besides directory contents, it&rsquo;s also useful to see the full path of the directory we&rsquo;re in. The Bash prompt can show us this path, along with other useful information like our current Git branch. To make it more readable, we can define colours for each part of the prompt. Here&rsquo;s how we can set up our prompt in <code>.bashrc</code> to accomplish this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Colour codes are cumbersome, so let&#39;s name them</span>
-<span class="nv">txtcyn</span><span class="o">=</span><span class="s1">&#39;\[\e[0;96m\]&#39;</span> <span class="c1"># Cyan</span>
-<span class="nv">txtpur</span><span class="o">=</span><span class="s1">&#39;\[\e[0;35m\]&#39;</span> <span class="c1"># Purple</span>
-<span class="nv">txtwht</span><span class="o">=</span><span class="s1">&#39;\[\e[0;37m\]&#39;</span> <span class="c1"># White</span>
-<span class="nv">txtrst</span><span class="o">=</span><span class="s1">&#39;\[\e[0m\]&#39;</span>    <span class="c1"># Text Reset</span>
+<span class=o>}</span>
+</code></pre></div><p>With <code>glab username</code>, we can create a new <code>origin</code> URL for the current Git repository with our <code>username</code> on GitLab.com. Pushing to a new remote URL <a href=/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/#a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab>automatically creates a new private GitLab repository</a>, so this is a useful shortcut for creating backups!</p><p>Bash functions are really only limited by the possibilities of scripting, of which there are, practically, few limits. If there&rsquo;s anything we do on a frequent basis that requires typing a few lines into a terminal, we can probably create a Bash function for it!</p><h1 id=bash-prompt>Bash prompt</h1><p>Besides directory contents, it&rsquo;s also useful to see the full path of the directory we&rsquo;re in. The Bash prompt can show us this path, along with other useful information like our current Git branch. To make it more readable, we can define colours for each part of the prompt. Here&rsquo;s how we can set up our prompt in <code>.bashrc</code> to accomplish this:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=c1># Colour codes are cumbersome, so let&#39;s name them</span>
+<span class=nv>txtcyn</span><span class=o>=</span><span class=s1>&#39;\[\e[0;96m\]&#39;</span> <span class=c1># Cyan</span>
+<span class=nv>txtpur</span><span class=o>=</span><span class=s1>&#39;\[\e[0;35m\]&#39;</span> <span class=c1># Purple</span>
+<span class=nv>txtwht</span><span class=o>=</span><span class=s1>&#39;\[\e[0;37m\]&#39;</span> <span class=c1># White</span>
+<span class=nv>txtrst</span><span class=o>=</span><span class=s1>&#39;\[\e[0m\]&#39;</span>    <span class=c1># Text Reset</span>
 
-<span class="c1"># Which (C)olour for what part of the prompt?</span>
-<span class="nv">pathC</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">txtcyn</span><span class="si">}</span><span class="s2">&#34;</span>
-<span class="nv">gitC</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">txtpur</span><span class="si">}</span><span class="s2">&#34;</span>
-<span class="nv">pointerC</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">txtwht</span><span class="si">}</span><span class="s2">&#34;</span>
-<span class="nv">normalC</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">txtrst</span><span class="si">}</span><span class="s2">&#34;</span>
+<span class=c1># Which (C)olour for what part of the prompt?</span>
+<span class=nv>pathC</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>txtcyn</span><span class=si>}</span><span class=s2>&#34;</span>
+<span class=nv>gitC</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>txtpur</span><span class=si>}</span><span class=s2>&#34;</span>
+<span class=nv>pointerC</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>txtwht</span><span class=si>}</span><span class=s2>&#34;</span>
+<span class=nv>normalC</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>txtrst</span><span class=si>}</span><span class=s2>&#34;</span>
 
-<span class="c1"># Get the name of our branch and put parenthesis around it</span>
-gitBranch<span class="o">()</span> <span class="o">{</span>
-    git branch 2&gt; /dev/null <span class="p">|</span> sed -e <span class="s1">&#39;/^[^*]/d&#39;</span> -e <span class="s1">&#39;s/* \(.*\)/(\1)/&#39;</span>
-<span class="o">}</span>
+<span class=c1># Get the name of our branch and put parenthesis around it</span>
+gitBranch<span class=o>(</span><span class=o>)</span> <span class=o>{</span>
+    git branch 2&gt; /dev/null <span class=p>|</span> sed -e <span class=s1>&#39;/^[^*]/d&#39;</span> -e <span class=s1>&#39;s/* \(.*\)/(\1)/&#39;</span>
+<span class=o>}</span>
 
-<span class="c1"># Build the prompt</span>
-<span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">pathC</span><span class="si">}</span><span class="s2">\w </span><span class="si">${</span><span class="nv">gitC</span><span class="si">}</span><span class="s2">\$(gitBranch) </span><span class="si">${</span><span class="nv">pointerC</span><span class="si">}</span><span class="s2">\$</span><span class="si">${</span><span class="nv">normalC</span><span class="si">}</span><span class="s2"> &#34;</span>
-</code></pre></div><p>Result:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">~/github/myrepo <span class="o">(</span>master<span class="o">)</span> $
-</code></pre></div><p>Naming the colours helps to easily identify where one colour starts and stops, and where the next one begins. The prompt that we see in our terminal is defined by the string following <code>export PS1</code>, with each component of the prompt set with an <a href="https://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/bash-prompt-escape-sequences.html">escape sequence</a>. Let&rsquo;s break that down:</p>
-<ul>
-<li><code>\w</code> displays the current working directory,</li>
-<li><code>\$(gitBranch)</code> calls the <code>gitBranch</code> function defined above, which displays the current Git branch,</li>
-<li><code>\$</code> will display a &ldquo;$&rdquo; if you are a normal user or in normal user mode, and a &ldquo;#&rdquo; if you are root.</li>
-</ul>
-<p>The <a href="https://www.gnu.org/software/bash/manual/html_node/Controlling-the-Prompt.html">full list of Bash escape sequences</a> can help us display many more bits of information, including even the time and date! Bash prompts are highly customizable and individual, so feel free to set it up any way you please.</p>
-<p>Here are a few options that put information front and centre and can help us to work more efficiently.</p>
-<h2 id="for-the-procrastination-averse">For the procrastination-averse</h2>
-<p>Username and current time with seconds, in 24-hour HH:MM:SS format:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">userC</span><span class="si">}</span><span class="s2">\u </span><span class="si">${</span><span class="nv">normalC</span><span class="si">}</span><span class="s2">at \t &gt;&#34;</span>
+<span class=c1># Build the prompt</span>
+<span class=nb>export</span> <span class=nv>PS1</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>pathC</span><span class=si>}</span><span class=s2>\w </span><span class=si>${</span><span class=nv>gitC</span><span class=si>}</span><span class=s2>\$(gitBranch) </span><span class=si>${</span><span class=nv>pointerC</span><span class=si>}</span><span class=s2>\$</span><span class=si>${</span><span class=nv>normalC</span><span class=si>}</span><span class=s2> </span><span class=s2>&#34;</span>
+</code></pre></div><p>Result:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash>~/github/myrepo <span class=o>(</span>master<span class=o>)</span> $
+</code></pre></div><p>Naming the colours helps to easily identify where one colour starts and stops, and where the next one begins. The prompt that we see in our terminal is defined by the string following <code>export PS1</code>, with each component of the prompt set with an <a href=https://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/bash-prompt-escape-sequences.html>escape sequence</a>. Let&rsquo;s break that down:</p><ul><li><code>\w</code> displays the current working directory,</li><li><code>\$(gitBranch)</code> calls the <code>gitBranch</code> function defined above, which displays the current Git branch,</li><li><code>\$</code> will display a &ldquo;$&rdquo; if you are a normal user or in normal user mode, and a &ldquo;#&rdquo; if you are root.</li></ul><p>The <a href=https://www.gnu.org/software/bash/manual/html_node/Controlling-the-Prompt.html>full list of Bash escape sequences</a> can help us display many more bits of information, including even the time and date! Bash prompts are highly customizable and individual, so feel free to set it up any way you please.</p><p>Here are a few options that put information front and centre and can help us to work more efficiently.</p><h2 id=for-the-procrastination-averse>For the procrastination-averse</h2><p>Username and current time with seconds, in 24-hour HH:MM:SS format:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=nb>export</span> <span class=nv>PS1</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>userC</span><span class=si>}</span><span class=s2>\u </span><span class=si>${</span><span class=nv>normalC</span><span class=si>}</span><span class=s2>at \t &gt;</span><span class=s2>&#34;</span>
 </code></pre></div><pre><code>user at 09:35:55 &gt;
-</code></pre><h2 id="for-those-who-always-like-to-know-where-they-stand">For those who always like to know where they stand</h2>
-<p>Full file path on a separate line, and username:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">pathC</span><span class="si">}</span><span class="s2">\w</span><span class="si">${</span><span class="nv">normalC</span><span class="si">}</span><span class="s2">\n\u:&#34;</span>
+</code></pre><h2 id=for-those-who-always-like-to-know-where-they-stand>For those who always like to know where they stand</h2><p>Full file path on a separate line, and username:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=nb>export</span> <span class=nv>PS1</span><span class=o>=</span><span class=s2>&#34;</span><span class=si>${</span><span class=nv>pathC</span><span class=si>}</span><span class=s2>\w</span><span class=si>${</span><span class=nv>normalC</span><span class=si>}</span><span class=s2>\n\u:</span><span class=s2>&#34;</span>
 </code></pre></div><pre><code>~/github/myrepo
 user:
-</code></pre><h2 id="for-the-minimalist">For the minimalist</h2>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;&gt;&#34;</span>
+</code></pre><h2 id=for-the-minimalist>For the minimalist</h2><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=nb>export</span> <span class=nv>PS1</span><span class=o>=</span><span class=s2>&#34;&gt;&#34;</span>
 </code></pre></div><pre><code>&gt;
-</code></pre><p>We can build many practical prompts with just the basic escape sequences; once we start to integrate functions with prompts, as in the Git branch example, things can get really complicated. Whether this amount of complication is an addition or a detriment to your productivity, only you can know for sure!</p>
-<p>Many fancy Bash prompts are possible with programs readily available with a quick search. I&rsquo;ve intentionally not provided samples here because, well, if you can tend to get as excited about this stuff as I can, it might be a couple hours before you get back to what you were doing before you started reading this post, and I just can&rsquo;t have that on my conscience. 🥺</p>
-<p>We&rsquo;ve hopefully struck a nice balance now between time invested and usefulness gained from our Bash configuration file! I hope you use your newly-recovered keystroke capacity for good.</p>
-
-
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-<div class="related">
-    
-    <div class="markdown highlight">
-        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM related;</code></pre>
-    </div>
-    <ul id="list-items">
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/">How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</a>
-        <p class="li-brief">
-            Using xargs and awk in Bash to automate managing remote-hosted repositories.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/terminal/">terminal</a>
-            
-            ☕️☕️&nbsp;
-            8 min read
-        </p>
-        
-        
-    </li>
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/">Bash and shell expansions: lazy list-making</a>
-        <p class="li-brief">
-            A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/terminal/">terminal</a>
-            
-            ☕️&nbsp;
-            5 min read
-        </p>
-        
-        
-    </li>
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">A portable Makefile for continuous delivery with Hugo and GitHub Pages</a>
-        <p class="li-brief">
-            My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
-            
-            ☕️&nbsp;
-            5 min read
-        </p>
-        
-        
-    </li>
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a> </p> </div> </div> 
-        </div>
-
-        <div class="container">
-            
-            <footer>
-    
-    
-    
-    
-    
-    <div class="markdown">
-        
-        <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a security-focused senior software developer in Washington, DC. She writes about software development, cybersecurity, and information security awareness. She is a co-author and maintainer of the OWASP Web Security Testing Guide, and a twice-awarded top annual contributor to freeCodeCamp.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-    </div>
-    
-    
-</footer>
-            
-        </div>
-    </section>
-
-    
-    
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-98623582-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-
-<script>
-    scrollTo = (element) => {
-        window.scroll({
-            behavior: 'smooth',
-            left: 0,
-            top: element.offsetTop
-        });
-    }
-
-    document.getElementById("up").addEventListener('click', () => {
-        scrollTo(document.getElementById("main"));
-    });
-</script>
-    
-
-    
-    
-    
-
-</body>
-
-</html>
+</code></pre><p>We can build many practical prompts with just the basic escape sequences; once we start to integrate functions with prompts, as in the Git branch example, things can get really complicated. Whether this amount of complication is an addition or a detriment to your productivity, only you can know for sure!</p><p>Many fancy Bash prompts are possible with programs readily available with a quick search. I&rsquo;ve intentionally not provided samples here because, well, if you can tend to get as excited about this stuff as I can, it might be a couple hours before you get back to what you were doing before you started reading this post, and I just can&rsquo;t have that on my conscience. 🥺</p><p>We&rsquo;ve hopefully struck a nice balance now between time invested and usefulness gained from our Bash configuration file! I hope you use your newly-recovered keystroke capacity for good.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/>How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</a><p class=li-brief>Using xargs and awk in Bash to automate managing remote-hosted repositories.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
+☕️☕️&nbsp;
+8 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/>Bash and shell expansions: lazy list-making</a><p class=li-brief>A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
+☕️&nbsp;
+5 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>A portable Makefile for continuous delivery with Hugo and GitHub Pages</a><p class=li-brief>My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.</p><p class=metadata><a class=li-tag href=/tags/ci/cd/>ci/cd</a>
+☕️&nbsp;
+5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a security-focused senior software developer in Washington, DC. She writes about software development, cybersecurity, and information security awareness. She is a co-author and maintainer of the OWASP Web Security Testing Guide, and a twice-awarded top annual contributor to freeCodeCamp.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
+document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
