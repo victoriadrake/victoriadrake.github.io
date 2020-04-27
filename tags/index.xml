@@ -7,9 +7,430 @@
     <language>en-us</language>
     <managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor>
     <webMaster>hello@victoria.dev (Victoria Drake)</webMaster>
-    <lastBuildDate>Mon, 16 Mar 2020 08:12:32 -0400</lastBuildDate>
+    <lastBuildDate>Mon, 27 Apr 2020 06:34:41 -0400</lastBuildDate>
     
         <atom:link href="https://victoria.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+    <item>
+      <title>Hugo vs Jekyll: an epic battle of static site generator themes</title>
+      <link>https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/</link>
+      <pubDate>Mon, 27 Apr 2020 06:34:41 -0400</pubDate>
+      <author>hello@victoria.dev (Victoria Drake)</author>
+      <guid>https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/</guid>
+      <description>A comparison of nuances of creating themes for the top two static site generators.</description>
+      <content:encoded>
+        
+        
+        
+        <![CDATA[<img src="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/cover_hu4062a8088076745a0cbb2c0ac38fd85a_2115819_640x0_resize_box_2.png" width="640" height="256"/>]]>
+        
+        &lt;p&gt;I recently took on the task of creating a documentation site theme for two projects. Both projects needed the same basic features, but one uses Jekyll while the other uses Hugo.&lt;/p&gt;
+&lt;p&gt;In typical developer rationality, there was clearly only one option. I decided to create the same theme in both frameworks, and to give you, dear reader, a side-by-side comparison.&lt;/p&gt;
+&lt;p&gt;This post isn&amp;rsquo;t a comprehensive theme-building guide, but intended to familiarize you with the process of building a theme in either generator. Here&amp;rsquo;s what we&amp;rsquo;ll cover:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#how-theme-files-are-organized&#34;&gt;How theme files are organized&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#where-to-put-content&#34;&gt;Where to put content&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#how-templating-works&#34;&gt;How templating works&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#creating-a-top-level-menu-with-the-pages-object&#34;&gt;Creating a top-level menu with the &lt;code&gt;pages&lt;/code&gt; object&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#creating-a-menu-with-nested-links-from-a-data-list&#34;&gt;Creating a menu with nested links from a data list&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#putting-the-template-together&#34;&gt;Putting the template together&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#create-a-stylesheet&#34;&gt;Create a stylesheet&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#sass-and-css-in-jekyll&#34;&gt;Sass and CSS in Jekyll&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#sass-and-hugo-pipes-in-hugo&#34;&gt;Sass and Hugo Pipes in Hugo&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#configure-and-deploy-to-github-pages&#34;&gt;Configure and deploy to GitHub Pages&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#configure-jekyll&#34;&gt;Configure Jekyll&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#configure-hugo&#34;&gt;Configure Hugo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#deploy-to-github-pages&#34;&gt;Deploy to GitHub Pages&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#showtime&#34;&gt;Showtime!&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#wait-who-won&#34;&gt;Wait who won?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here&amp;rsquo;s a crappy wireframe of the theme I&amp;rsquo;m going to create.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;wireframe.jpg&#34; alt=&#34;A sketch of the finished page&#34;&gt;&lt;/p&gt;
+&lt;p&gt;If you&amp;rsquo;re planning to build-along, it may be helpful to serve the theme locally as you build it; both generators offer this functionality. For Jekyll, run &lt;code&gt;jekyll serve&lt;/code&gt;, and for Hugo, &lt;code&gt;hugo serve&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;There are two main elements: the main content area, and the all-important sidebar menu. To create them, you&amp;rsquo;ll need template files that tell the site generator how to generate the HTML page. To organize theme template files in a sensible way, you first need to know what directory structure the site generator expects.&lt;/p&gt;
+&lt;h2 id=&#34;how-theme-files-are-organized&#34;&gt;How theme files are organized&lt;/h2&gt;
+&lt;p&gt;Jekyll supports gem-based themes, which users can install like any other Ruby gems. This method hides theme files in the gem, so for the purposes of this comparison, we aren&amp;rsquo;t using gem-based themes.&lt;/p&gt;
+&lt;p&gt;When you run &lt;code&gt;jekyll new-theme &amp;lt;name&amp;gt;&lt;/code&gt;, Jekyll will scaffold a new theme for you. Here&amp;rsquo;s what those files look like:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;.
+├── assets
+├── Gemfile
+├── _includes
+├── _layouts
+│   ├── default.html
+│   ├── page.html
+│   └── post.html
+├── LICENSE.txt
+├── README.md
+├── _sass
+└── &amp;lt;name&amp;gt;.gemspec
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The directory names are appropriately descriptive. The &lt;code&gt;_includes&lt;/code&gt; directory is for small bits of code that you reuse in different places, in much the same way you&amp;rsquo;d put butter on everything. (Just me?) The &lt;code&gt;_layouts&lt;/code&gt; directory contains templates for different types of pages on your site. The &lt;code&gt;_sass&lt;/code&gt; folder is for &lt;a href=&#34;https://sass-lang.com/documentation/syntax&#34;&gt;Sass&lt;/a&gt; files used to build your site&amp;rsquo;s stylesheet.&lt;/p&gt;
+&lt;p&gt;You can scaffold a new Hugo theme by running &lt;code&gt;hugo new theme &amp;lt;name&amp;gt;&lt;/code&gt;. It has these files:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;.
+├── archetypes
+│   └── default.md
+├── layouts
+│   ├── 404.html
+│   ├── _default
+│   │   ├── baseof.html
+│   │   ├── list.html
+│   │   └── single.html
+│   ├── index.html
+│   └── partials
+│       ├── footer.html
+│       ├── header.html
+│       └── head.html
+├── LICENSE
+├── static
+│   ├── css
+│   └── js
+└── theme.toml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You can see some similarities. Hugo&amp;rsquo;s page template files are tucked into &lt;code&gt;layouts/&lt;/code&gt;. Note that the &lt;code&gt;_default&lt;/code&gt; page type has files for a &lt;code&gt;list.html&lt;/code&gt; and a &lt;code&gt;single.html&lt;/code&gt;. Unlike Jekyll, Hugo uses these specific file names to distinguish between &lt;a href=&#34;https://gohugo.io/templates/lists/&#34;&gt;list pages&lt;/a&gt; (like a page with links to all your blog posts on it) and &lt;a href=&#34;https://gohugo.io/templates/single-page-templates/&#34;&gt;single pages&lt;/a&gt; (like one of your blog posts). The &lt;code&gt;layouts/partials/&lt;/code&gt; directory contains the buttery reusable bits, and stylesheet files have a spot picked out in &lt;code&gt;static/css/&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These directory structures aren&amp;rsquo;t set in stone, as both site generators allow some measure of customization. For example, Jekyll lets you define &lt;a href=&#34;https://jekyllrb.com/docs/collections/&#34;&gt;collections&lt;/a&gt;, and Hugo makes use of &lt;a href=&#34;https://gohugo.io/content-management/page-bundles/&#34;&gt;page bundles&lt;/a&gt;. These features let you organize your content multiple ways, but for now, lets look at where to put some simple pages.&lt;/p&gt;
+&lt;h2 id=&#34;where-to-put-content&#34;&gt;Where to put content&lt;/h2&gt;
+&lt;p&gt;To create a site menu that looks like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-md&#34; data-lang=&#34;md&#34;&gt;Introduction
+    Getting Started
+    Configuration
+    Deploying
+Advanced Usage
+    All Configuration Settings
+    Customizing
+    Help and Support
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You&amp;rsquo;ll need two sections (&amp;ldquo;Introduction&amp;rdquo; and &amp;ldquo;Advanced Usage&amp;rdquo;) containing their respective subsections.&lt;/p&gt;
+&lt;p&gt;Jekyll isn&amp;rsquo;t strict with its content location. It expects pages in the root of your site, and will build whatever&amp;rsquo;s there. Here&amp;rsquo;s how you might organize these pages in your Jekyll site root:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;.
+├── 404.html
+├── assets
+├── Gemfile
+├── _includes
+├── index.markdown
+├── intro
+│   ├── config.md
+│   ├── deploy.md
+│   ├── index.md
+│   └── quickstart.md
+├── _layouts
+│   ├── default.html
+│   ├── page.html
+│   └── post.html
+├── LICENSE.txt
+├── README.md
+├── _sass
+├── &amp;lt;name&amp;gt;.gemspec
+└── usage
+    ├── customizing.md
+    ├── index.md
+    ├── settings.md
+    └── support.md
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You can change the location of the site source in your &lt;a href=&#34;https://jekyllrb.com/docs/configuration/default/&#34;&gt;Jekyll configuration&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In Hugo, all rendered content is expected in the &lt;code&gt;content/&lt;/code&gt; folder. This prevents Hugo from trying to render pages you don&amp;rsquo;t want, such as &lt;code&gt;404.html&lt;/code&gt;, as site content. Here&amp;rsquo;s how you might organize your &lt;code&gt;content/&lt;/code&gt; directory in Hugo:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;.
+├── _index.md
+├── intro
+│   ├── config.md
+│   ├── deploy.md
+│   ├── _index.md
+│   └── quickstart.md
+└── usage
+    ├── customizing.md
+    ├── _index.md
+    ├── settings.md
+    └── support.md
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;To Hugo, &lt;code&gt;_index.md&lt;/code&gt; and &lt;code&gt;index.md&lt;/code&gt; mean different things. It can be helpful to know what kind of &lt;a href=&#34;https://gohugo.io/content-management/page-bundles/&#34;&gt;Page Bundle&lt;/a&gt; you want for each section: Leaf, which has no children, or Branch.&lt;/p&gt;
+&lt;p&gt;Now that you have some idea of where to put things, let&amp;rsquo;s look at how to build a page template.&lt;/p&gt;
+&lt;h2 id=&#34;how-templating-works&#34;&gt;How templating works&lt;/h2&gt;
+&lt;p&gt;Jekyll page templates are built with the &lt;a href=&#34;https://jekyllrb.com/docs/liquid/&#34;&gt;Liquid templating language&lt;/a&gt;. It uses braces to output variable content to a page, such as the page&amp;rsquo;s title: &lt;code&gt;{{ page.title }}&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Hugo&amp;rsquo;s templates also use braces, but they&amp;rsquo;re built with &lt;a href=&#34;https://gohugo.io/templates/introduction/&#34;&gt;Go Templates&lt;/a&gt;. The syntax is similar, but different: &lt;code&gt;{{ .Title }}&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Both Liquid and Go Templates can handle logic. Liquid uses &lt;em&gt;tags&lt;/em&gt; syntax to denote logic operations:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-liquid&#34; data-lang=&#34;liquid&#34;&gt;{% if user %}
+  Hello {{ user.name }}!
+{% endif %}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;And Go Templates places its functions and arguments in its braces syntax:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;User&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;Hello&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;User&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}}!&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;end&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Templating languages allow you to build one skeleton HTML page, then tell the site generator to put variable content in areas you define. Let&amp;rsquo;s compare two possible &lt;code&gt;default&lt;/code&gt; page templates for Jekyll and Hugo.&lt;/p&gt;
+&lt;p&gt;Jekyll&amp;rsquo;s scaffold &lt;code&gt;default&lt;/code&gt; theme is bare, so we&amp;rsquo;ll look at their starter theme &lt;a href=&#34;https://github.com/jekyll/minima&#34;&gt;Minima&lt;/a&gt;. Here&amp;rsquo;s &lt;code&gt;_layouts/default.html&lt;/code&gt; in Jekyll (Liquid):&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;html&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;lang&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ page.lang | default: site.lang | default: &amp;#34;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;en&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;}}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+  {%- include head.html -%}
+
+  &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+    {%- include header.html -%}
+
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;main&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;class&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;page-content&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;aria-label&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Content&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;div&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;class&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;wrapper&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        {{ content }}
+      &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;div&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+    {%- include footer.html -%}
+
+  &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Here&amp;rsquo;s Hugo&amp;rsquo;s scaffold theme &lt;code&gt;layouts/_default/baseof.html&lt;/code&gt; (Go Templates):&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {{- partial &amp;#34;head.html&amp;#34; . -}}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        {{- partial &amp;#34;header.html&amp;#34; . -}}
+        &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;div&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;content&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        {{- block &amp;#34;main&amp;#34; . }}{{- end }}
+        &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;div&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        {{- partial &amp;#34;footer.html&amp;#34; . -}}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Different syntax, same idea. Both templates pull in reusable bits for &lt;code&gt;head.html&lt;/code&gt;, &lt;code&gt;header.html&lt;/code&gt;, and &lt;code&gt;footer.html&lt;/code&gt;. These show up on a lot of pages, so it makes sense not to have to repeat yourself. Both templates also have a spot for the main content, though the Jekyll template uses a variable (&lt;code&gt;{{ content }}&lt;/code&gt;) while Hugo uses a block (&lt;code&gt;{{- block &amp;quot;main&amp;quot; . }}{{- end }}&lt;/code&gt;). &lt;a href=&#34;https://gohugo.io/templates/base/#readout&#34;&gt;Blocks&lt;/a&gt; are just another way Hugo lets you define reusable bits.&lt;/p&gt;
+&lt;p&gt;Now that you know how templating works, you can build the sidebar menu for the theme.&lt;/p&gt;
+&lt;h2 id=&#34;creating-a-top-level-menu-with-the-pages-object&#34;&gt;Creating a top-level menu with the &lt;code&gt;pages&lt;/code&gt; object&lt;/h2&gt;
+&lt;p&gt;You can programatically create a top-level menu from your pages. It will look like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-md&#34; data-lang=&#34;md&#34;&gt;Introduction
+Advanced Usage
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Let&amp;rsquo;s start with Jekyll. You can display links to site pages in your Liquid template by iterating through the &lt;code&gt;site.pages&lt;/code&gt; object that Jekyll provides and building a list:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {% for page in site.pages %}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ page.url | absolute_url }}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;{{ page.title }}&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {% endfor %}
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This returns all of the site&amp;rsquo;s pages, including all the ones that you might not want, like &lt;code&gt;404.html&lt;/code&gt;. You can filter for the pages you actually want with a couple more tags, such as conditionally including pages if they have a &lt;code&gt;section: true&lt;/code&gt; parameter set:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {% for page in site.pages %}
+    {%- if page.section -%}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ page.url | absolute_url }}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;{{ page.title }}&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {%- endif -%}
+    {% endfor %}
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You can achieve the same effect with slightly less code in Hugo. Loop through Hugo&amp;rsquo;s &lt;code&gt;.Pages&lt;/code&gt; object using Go Template&amp;rsquo;s &lt;a href=&#34;https://golang.org/pkg/text/template/#hdr-Actions&#34;&gt;&lt;code&gt;range&lt;/code&gt; action&lt;/a&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+{{ range .Pages }}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{.Permalink}}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;{{.Title}}&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+{{ end }}
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This template uses the &lt;code&gt;.Pages&lt;/code&gt; object to return all the top-level pages in &lt;code&gt;content/&lt;/code&gt; of your Hugo site. Since Hugo uses a specific folder for the site content you want rendered, there&amp;rsquo;s no additional filtering necessary to build a simple menu of site pages.&lt;/p&gt;
+&lt;h2 id=&#34;creating-a-menu-with-nested-links-from-a-data-list&#34;&gt;Creating a menu with nested links from a data list&lt;/h2&gt;
+&lt;p&gt;Both site generators can use a separately defined data list of links to render a menu in your template. This is more suitable for creating nested links, like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-md&#34; data-lang=&#34;md&#34;&gt;Introduction
+    Getting Started
+    Configuration
+    Deploying
+Advanced Usage
+    All Configuration Settings
+    Customizing
+    Help and Support
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Jekyll supports &lt;a href=&#34;https://jekyllrb.com/docs/datafiles/&#34;&gt;data files&lt;/a&gt; in a few formats, including YAML. Here&amp;rsquo;s the definition for the menu above in &lt;code&gt;_data/menu.yml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yml&#34; data-lang=&#34;yml&#34;&gt;&lt;span class=&#34;k&#34;&gt;section&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;page&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Introduction&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/intro&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;subsection&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;page&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Getting&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Started&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/intro/quickstart&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;page&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Configuration&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/intro/config&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;page&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Deploying&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/intro/deploy&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;page&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Advanced&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Usage&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/usage&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;subsection&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;page&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Customizing&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/usage/customizing&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;page&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;All&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Configuration&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Settings&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/usage/settings&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;page&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Help&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;and&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Support&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/usage/support&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Here&amp;rsquo;s how to render the data in the sidebar template:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;{% for a in site.data.menu.section %}
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ a.url }}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;{{ a.page }}&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {% for b in a.subsection %}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ b.url }}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;{{ b.page }}&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {% endfor %}
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+{% endfor %}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This method allows you to build a custom menu, two nesting levels deep. The nesting levels are limited by the &lt;code&gt;for&lt;/code&gt; loops in the template. For a recursive version that handles further levels of nesting, see &lt;a href=&#34;https://jekyllrb.com/tutorials/navigation/#scenario-9-nested-tree-navigation-with-recursion&#34;&gt;Nested tree navigation with recursion&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Hugo does something similar with its &lt;a href=&#34;https://gohugo.io/templates/menu-templates/#section-menu-for-lazy-bloggers&#34;&gt;menu templates&lt;/a&gt;. You can define menu links in your &lt;a href=&#34;https://gohugo.io/getting-started/configuration/&#34;&gt;Hugo site config&lt;/a&gt;, and even add useful properties that Hugo understands, like weighting. Here&amp;rsquo;s a definition of the menu above in &lt;code&gt;config.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yml&#34; data-lang=&#34;yml&#34;&gt;&lt;span class=&#34;k&#34;&gt;sectionPagesMenu&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;main&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;menu&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;identifier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;intro&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Introduction&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/intro/&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;weight&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Getting&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Started&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;parent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;intro&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/intro/quickstart/&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;weight&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Configuration&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;parent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;intro&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/intro/config/&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;weight&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Deploying&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;parent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;intro&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/intro/deploy/&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;weight&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;identifier&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;usage&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Advanced&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Usage&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/usage/&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Customizing&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;parent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;usage&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/usage/customizing/&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;weight&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;All&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Configuration&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Settings&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;parent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;usage&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/usage/settings/&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;weight&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Help&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;and&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Support&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;parent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;usage&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;/usage/support/&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;weight&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Hugo uses the &lt;code&gt;identifier&lt;/code&gt;, which must match the section name, along with the &lt;code&gt;parent&lt;/code&gt; variable to handle nesting. Here&amp;rsquo;s how to render the menu in the sidebar template:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {{ range .Site.Menus.main }}
+    {{ if .HasChildren }}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ .URL }}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;{{ .Name }}&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;class&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;sub-menu&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        {{ range .Children }}
+        &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ .URL }}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;{{ .Name }}&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        {{ end }}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {{ else }}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ .URL }}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;{{ .Name }}&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;li&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {{ end }}
+    {{ end }}
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ul&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;range&lt;/code&gt; function iterates over the menu data, and Hugo&amp;rsquo;s &lt;code&gt;.Children&lt;/code&gt; variable handles nested pages for you.&lt;/p&gt;
+&lt;h2 id=&#34;putting-the-template-together&#34;&gt;Putting the template together&lt;/h2&gt;
+&lt;p&gt;With your menu in your reusable sidebar bit (&lt;code&gt;_includes/sidebar.html&lt;/code&gt; for Jekyll and &lt;code&gt;partials/sidebar.html&lt;/code&gt; for Hugo), you can add it to the &lt;code&gt;default.html&lt;/code&gt; template.&lt;/p&gt;
+&lt;p&gt;In Jekyll:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;html&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;lang&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ page.lang | default: site.lang | default: &amp;#34;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;en&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;}}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+{%- include head.html -%}
+
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {%- include sidebar.html -%}
+
+    {%- include header.html -%}
+
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;div&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;content&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;class&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;page-content&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;aria-label&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Content&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        {{ content }}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;div&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+    {%- include footer.html -%}
+
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In Hugo:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+{{- partial &amp;#34;head.html&amp;#34; . -}}
+
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {{- partial &amp;#34;sidebar.html&amp;#34; . -}}
+
+    {{- partial &amp;#34;header.html&amp;#34; . -}}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;div&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;content&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;class&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;page-content&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;aria-label&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Content&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+        {{- block &amp;#34;main&amp;#34; . }}{{- end }}
+    &lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;div&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+    {{- partial &amp;#34;footer.html&amp;#34; . -}}
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;html&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When the site is generated, each page will contain all the code from your &lt;code&gt;sidebar.html&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;create-a-stylesheet&#34;&gt;Create a stylesheet&lt;/h2&gt;
+&lt;p&gt;Both site generators accept Sass for creating CSS stylesheets. Jekyll &lt;a href=&#34;https://jekyllrb.com/docs/assets/&#34;&gt;has Sass processing built in&lt;/a&gt;, and Hugo uses &lt;a href=&#34;https://gohugo.io/hugo-pipes/scss-sass/&#34;&gt;Hugo Pipes&lt;/a&gt;. Both options have some quirks.&lt;/p&gt;
+&lt;h3 id=&#34;sass-and-css-in-jekyll&#34;&gt;Sass and CSS in Jekyll&lt;/h3&gt;
+&lt;p&gt;To process a Sass file in Jekyll, create your style definitions in the &lt;code&gt;_sass&lt;/code&gt; directory. For example, in a file at &lt;code&gt;_sass/style-definitions.scss&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-scss&#34; data-lang=&#34;scss&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$background-color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;#eef&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;!default&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;$text-color&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;#111&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;!default&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;nt&#34;&gt;body&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+  &lt;span class=&#34;nt&#34;&gt;background-color&lt;/span&gt;&lt;span class=&#34;nd&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;$&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;background-color&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+  &lt;span class=&#34;nt&#34;&gt;color&lt;/span&gt;&lt;span class=&#34;nd&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;$&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;text-color&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Jekyll won&amp;rsquo;t generate this file directly, as it only processes files with front matter. To create the end-result filepath for your site&amp;rsquo;s stylesheet, use a placeholder with empty front matter where you want the &lt;code&gt;.css&lt;/code&gt; file to appear. For example, &lt;code&gt;assets/css/style.scss&lt;/code&gt;. In this file, simply import your styles:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-scss&#34; data-lang=&#34;scss&#34;&gt;&lt;span class=&#34;nt&#34;&gt;---&lt;/span&gt;
+&lt;span class=&#34;nt&#34;&gt;---&lt;/span&gt;
+
+&lt;span class=&#34;o&#34;&gt;@&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;style-definitions&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This rather hackish configuration has an upside: you can use Liquid template tags and variables in your placeholder file. This is a nice way to allow users to set variables from the site &lt;code&gt;_config.yml&lt;/code&gt;, for example.&lt;/p&gt;
+&lt;p&gt;The resulting CSS stylesheet in your generated site has the path &lt;code&gt;/assets/css/style.css&lt;/code&gt;. You can link to it in your site&amp;rsquo;s &lt;code&gt;head.html&lt;/code&gt; using:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;link&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;rel&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;stylesheet&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ &amp;#34;&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;assets&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;css&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;style&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;css&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;|&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;relative_url&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;}}&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;media&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;screen&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;sass-and-hugo-pipes-in-hugo&#34;&gt;Sass and Hugo Pipes in Hugo&lt;/h3&gt;
+&lt;p&gt;Hugo uses &lt;a href=&#34;https://gohugo.io/hugo-pipes/scss-sass/&#34;&gt;Hugo Pipes&lt;/a&gt; to process Sass to CSS. You can achieve this by using Hugo&amp;rsquo;s asset processing function, &lt;code&gt;resources.ToCSS&lt;/code&gt;, which expects a source in the &lt;code&gt;assets/&lt;/code&gt; directory. It takes the SCSS file as an argument. With your style definitions in a Sass file at &lt;code&gt;assets/sass/style.scss&lt;/code&gt;, here&amp;rsquo;s how to get, process, and link your Sass in your theme&amp;rsquo;s &lt;code&gt;head.html&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;{{ $style := resources.Get &amp;#34;/sass/style.scss&amp;#34; | resources.ToCSS }}
+&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;link&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;rel&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;stylesheet&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;{{ $style.RelPermalink }}&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;media&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;screen&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Hugo asset processing &lt;a href=&#34;https://gohugo.io/troubleshooting/faq/#i-get-tocss--this-feature-is-not-available-in-your-current-hugo-version&#34;&gt;requires extended Hugo&lt;/a&gt;, which you may not have by default. You can get extended Hugo from the &lt;a href=&#34;https://github.com/gohugoio/hugo/releases&#34;&gt;releases page&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;configure-and-deploy-to-github-pages&#34;&gt;Configure and deploy to GitHub Pages&lt;/h2&gt;
+&lt;p&gt;Before your site generator can build your site, it needs a configuration file to set some necessary parameters. Configuration files live in the site root directory. Among other settings, you can declare the name of the theme to use when building the site.&lt;/p&gt;
+&lt;h3 id=&#34;configure-jekyll&#34;&gt;Configure Jekyll&lt;/h3&gt;
+&lt;p&gt;Here&amp;rsquo;s a minimal &lt;code&gt;_config.yml&lt;/code&gt; for Jekyll:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yml&#34; data-lang=&#34;yml&#34;&gt;&lt;span class=&#34;k&#34;&gt;title&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Your&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;awesome&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;title&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;description&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&amp;gt;- &lt;span class=&#34;c&#34;&gt;# this means to ignore newlines until &amp;#34;baseurl:&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;Write&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;an&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;awesome&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;description&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;for&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;your&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;new&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;site&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;here.&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;You&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;can&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;edit&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;this&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;line&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;in&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;_config.yml.&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;It&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;will&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;appear&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;in&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;your&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;document&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;head&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;meta&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;(for&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;Google&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;search&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;results)&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;and&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;in&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;your&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;feed.xml&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;site&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;description.&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;baseurl&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# the subpath of your site, e.g. /blog&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# the base hostname &amp;amp; protocol for your site, e.g. http://example.com&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;theme&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# for gem-based themes&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;remote_theme&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# for themes hosted on GitHub, when used with GitHub Pages&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With &lt;code&gt;remote_theme&lt;/code&gt;, any &lt;a href=&#34;https://help.github.com/en/github/working-with-github-pages/adding-a-theme-to-your-github-pages-site-using-jekyll#adding-a-jekyll-theme-in-your-sites-_configyml-file&#34;&gt;Jekyll theme hosted on GitHub can be used&lt;/a&gt; with sites hosted on GitHub Pages.&lt;/p&gt;
+&lt;p&gt;Jekyll has a &lt;a href=&#34;https://jekyllrb.com/docs/configuration/default/&#34;&gt;default configuration&lt;/a&gt;, so any parameters added to your configuration file will override the defaults. Here are &lt;a href=&#34;https://jekyllrb.com/docs/configuration/options/&#34;&gt;additional configuration settings&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;configure-hugo&#34;&gt;Configure Hugo&lt;/h3&gt;
+&lt;p&gt;Here&amp;rsquo;s a minimal example of Hugo&amp;rsquo;s &lt;code&gt;config.yml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yml&#34; data-lang=&#34;yml&#34;&gt;&lt;span class=&#34;k&#34;&gt;baseURL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;https&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;//example.com/&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# The full domain your site will live at&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;languageCode&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;en-us&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;title&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Hugo&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Docs&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Site&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;theme&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;# theme name&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Hugo makes no assumptions, so if a necessary parameter is missing, you&amp;rsquo;ll see a warning when building or serving your site. Here are &lt;a href=&#34;https://gohugo.io/getting-started/configuration/#all-configuration-settings&#34;&gt;all configuration settings for Hugo&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;deploy-to-github-pages&#34;&gt;Deploy to GitHub Pages&lt;/h3&gt;
+&lt;p&gt;Both generators build your site with a command.&lt;/p&gt;
+&lt;p&gt;For Jekyll, use &lt;code&gt;jekyll build&lt;/code&gt;. See &lt;a href=&#34;https://jekyllrb.com/docs/configuration/options/#build-command-options&#34;&gt;further build options here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;For Hugo, use &lt;code&gt;hugo&lt;/code&gt;. You can run &lt;code&gt;hugo help&lt;/code&gt; or see &lt;a href=&#34;https://gohugo.io/getting-started/usage/#test-installation&#34;&gt;further build options here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll have to choose the source for your GitHub Pages site; once done, your site will update each time you push a new build. Of course, you can also automate your GitHub Pages build using GitHub Actions. Here&amp;rsquo;s one for &lt;a href=&#34;https://github.com/victoriadrake/hugo-latest-cd&#34;&gt;building and deploying with Hugo&lt;/a&gt;, and one for &lt;a href=&#34;https://github.com/victoriadrake/jekyll-cd&#34;&gt;building and deploying Jekyll&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;showtime&#34;&gt;Showtime!&lt;/h2&gt;
+&lt;p&gt;All the substantial differences between these two generators are under the hood; all the same, let&amp;rsquo;s take a look at the finished themes, in two color variations.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s Hugo:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ogd_hugo.png&#34; alt=&#34;OpenGitDocs theme for Hugo&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s Jekyll:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ogd_jekyll.png&#34; alt=&#34;OpenGitDocs theme for Jekyll&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Spiffy!&lt;/p&gt;
+&lt;h2 id=&#34;wait-who-won&#34;&gt;Wait who won?&lt;/h2&gt;
+&lt;p&gt;🤷&lt;/p&gt;
+&lt;p&gt;Both Hugo and Jekyll have their quirks and conveniences.&lt;/p&gt;
+&lt;p&gt;From this developer&amp;rsquo;s perspective, Jekyll is a workable choice for simple sites without complicated organizational needs. If you&amp;rsquo;re looking to render some one-page posts in an &lt;a href=&#34;https://jekyllrb.com/docs/themes/&#34;&gt;available theme&lt;/a&gt; and host with GitHub Pages, Jekyll will get you up and running fairly quickly.&lt;/p&gt;
+&lt;p&gt;Personally, I use Hugo. I like the organizational capabilities of its Page Bundles, and it&amp;rsquo;s backed by a dedicated and conscientious team that really seems to strive to facilitate convenience for their users. This is evident in Hugo&amp;rsquo;s many functions, and handy tricks like &lt;a href=&#34;https://gohugo.io/content-management/image-processing/&#34;&gt;Image Processing&lt;/a&gt; and &lt;a href=&#34;https://gohugo.io/content-management/shortcodes/&#34;&gt;Shortcodes&lt;/a&gt;. They seem to release new fixes and versions about as often as I make a new cup of coffee - which, depending on your use case, may be fantastic, or annoying.&lt;/p&gt;
+&lt;p&gt;If you still can&amp;rsquo;t decide, don&amp;rsquo;t worry. The &lt;a href=&#34;https://github.com/opengitdocs&#34;&gt;OpenGitDocs documentation theme&lt;/a&gt; I created is available for both Hugo and Jekyll. Start with one, switch later if you want. That&amp;rsquo;s the benefit of having options.&lt;/p&gt;
+
+      </content:encoded>
+        
+        
+        
+      <enclosure url="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/cover_hu4062a8088076745a0cbb2c0ac38fd85a_2115819_640x0_resize_box_2.png" type="image/jpg" />
+      
+    </item>
     
     
     
