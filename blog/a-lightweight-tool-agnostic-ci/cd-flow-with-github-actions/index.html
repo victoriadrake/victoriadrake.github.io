@@ -1,40 +1,231 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a security-focused senior software developer. She builds open source automation tools, and tech that helps humans stay safe on the Internet."><title>A lightweight, tool-agnostic CI/CD flow with GitHub Actions | victoria.dev</title><meta property="og:title" content="A lightweight, tool-agnostic CI/CD flow with GitHub Actions - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling."><meta property="og:url" content="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="A lightweight, tool-agnostic CI/CD flow with GitHub Actions"><meta name=twitter:image content="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/cover.png"><meta name=twitter:description content="How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/cover.png alt="cover image"></div><div class=markdown><h1>A lightweight, tool-agnostic CI/CD flow with GitHub Actions</h1><p class=subtitle>How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.</p><p class=metadata id=date>October 28, 2019
-☕️&nbsp;
-5 min read
-&nbsp;
-<a class=li-tag href=/tags/ci/cd/>ci/cd
-</a>&nbsp;
-<a class=li-tag href=/tags/terminal/>terminal
-</a>&nbsp;
-<a class=li-tag href=/tags/websites/>websites
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>Agnostic tooling is the clever notion that you should be able to run your code in various environments. With many continuous integration and continuous development (CI/CD) apps available, agnostic tooling gives developers a big advantage: portability.</p><p>Of course, having your CI/CD work <em>everywhere</em> is a tall order. Popular <a href=https://github.com/marketplace/category/continuous-integration>CI apps for GitHub repositories</a> alone use a multitude of configuration languages spanning <a href=https://groovy-lang.org/syntax.html>Groovy</a>, <a href=https://yaml.org/>YAML</a>, <a href=https://github.com/toml-lang/toml>TOML</a>, <a href=https://json.org/>JSON</a>, and more&mldr; all with differing syntax, of course. Porting workflows from one tool to another is more than a one-cup-of-coffee process.</p><p>The introduction of <a href=https://github.com/features/actions>GitHub Actions</a> has the potential to add yet another tool to the mix; or, for the right set up, greatly simplify a CI/CD workflow.</p><p>Prior to this article, I accomplished my CD flow with several lashed-together apps. I used AWS Lambda to trigger site builds on a schedule. I had Netlify build on push triggers, as well as run image optimization, and then push my site to the public Pages repository. I used Travis CI in the public repository to test the HTML. All this worked in conjunction with GitHub Pages, which actually hosts the site.</p><p>I&rsquo;m now using the GitHub Actions beta to accomplish all the same tasks, with one <a href=/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>portable Makefile</a> of build instructions, and without any other CI/CD apps.</p><h2 id=appreciating-the-shell>Appreciating the shell</h2><p>What do most CI/CD tools have in common? They run your workflow instructions in a shell environment! This is wonderful, because that means that most CI/CD tools can do anything that you can do in a terminal&mldr; and you can do pretty much <em>anything</em> in a terminal.</p><p>Especially for a contained use case like building my static site with a generator like Hugo, running it all in a shell is a no-brainer. To tell the magic box what to do, we just need to write instructions.</p><p>While a shell script is certainly the most portable option, I use the still-very-portable <a href=https://en.wikipedia.org/wiki/Make_(software)>Make</a> to write my process instructions. This provides me with some advantages over simple shell scripting, like the use of variables and <a href=https://en.wikipedia.org/wiki/Make_(software)#Macros>macros</a>, and the modularity of <a href=https://en.wikipedia.org/wiki/Makefile#Rules>rules</a>.</p><p>I got into the <a href=/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>nitty-gritty of my Makefile in my last post</a>. Let&rsquo;s look at how to get GitHub Actions to run it.</p><h2 id=using-a-makefile-with-github-actions>Using a Makefile with GitHub Actions</h2><p>To our point on portability, my magic Makefile is stored right in the repository root. Since it&rsquo;s included with the code, I can run the Makefile locally on any system where I can clone the repository, provided I set the environment variables. Using GitHub Actions as my CI/CD tool is as straightforward as making Make go worky-worky.</p><p>I found the <a href=https://help.github.com/en/articles/workflow-syntax-for-github-actions>GitHub Actions workflow syntax guide</a> to be pretty straightforward, though also lengthy on options. Here&rsquo;s the necessary set up for getting the Makefile to run.</p><p>The workflow file at <code>.github/workflow.yml</code> contains the following:</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml><span class=k>name</span><span class=p>:</span><span class=w> </span>make-master<span class=w>
-</span><span class=w>
-</span><span class=w></span><span class=k>on</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>  </span><span class=k>push</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>    </span><span class=k>branches</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>      </span>- master<span class=w>
-</span><span class=w>  </span><span class=k>schedule</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>    </span>- <span class=k>cron</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;20 13 * * *&#39;</span><span class=w>
-</span><span class=w>
-</span><span class=w></span><span class=k>jobs</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>  </span><span class=k>build</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>    </span><span class=k>runs-on</span><span class=p>:</span><span class=w> </span>ubuntu-latest<span class=w>
-</span><span class=w>    </span><span class=k>steps</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>      </span>- <span class=k>uses</span><span class=p>:</span><span class=w> </span>actions/checkout@master<span class=w>
-</span><span class=w>        </span><span class=k>with</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>          </span><span class=k>fetch-depth</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
-</span><span class=w>      </span>- <span class=k>name</span><span class=p>:</span><span class=w> </span>Run<span class=w> </span>Makefile<span class=w>
-</span><span class=w>        </span><span class=k>env</span><span class=p>:</span><span class=w>
-</span><span class=w></span><span class=w>          </span><span class=k>TOKEN</span><span class=p>:</span><span class=w> </span>${{<span class=w> </span>secrets.TOKEN<span class=w> </span>}}<span class=w>
-</span><span class=w>        </span><span class=k>run</span><span class=p>:</span><span class=w> </span>make<span class=w> </span>all<span class=w>
-</span></code></pre></div><p>I&rsquo;ll explain the components that make this work.</p><h2 id=triggering-the-workflow>Triggering the workflow</h2><p>Actions support multiple <a href=https://help.github.com/en/articles/events-that-trigger-workflows>triggers for a workflow</a>. Using the <code>on</code> syntax, I&rsquo;ve defined two triggers for mine: a <a href=https://help.github.com/en/articles/workflow-syntax-for-github-actions#onpushpull_requestbranchestags>push event</a> to the <code>master</code> branch only, and a <a href=https://help.github.com/en/articles/events-that-trigger-workflows#scheduled-events-schedule>scheduled</a> <code>cron</code> job.</p><p>Once the <code>workflow.yml</code> file is in your repository, either of your triggers will cause Actions to run your Makefile. To see how the last run went, you can also <a href=https://help.github.com/en/articles/configuring-a-workflow#adding-a-workflow-status-badge-to-your-repository>add a fun badge</a> to the README.</p><h3 id=one-hacky-thing>One hacky thing</h3><p>Because the Makefile runs on every push to <code>master</code>, I sometimes would get errors when the site build had no changes. When Git, via <a href=/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>my Makefile</a>, attempted to commit to the Pages repository, no changes were detected and the commit would fail annoyingly:</p><div class=highlight><pre class=chroma><code class=language-txt data-lang=txt>nothing to commit, working tree clean
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
+<title>
+    A lightweight, tool-agnostic CI/CD flow with GitHub Actions | victoria.dev
+</title>
+
+
+    <meta
+  name="monetization"
+  content="$twitter.xrptipbot.com/victoriadotdev">
+    <meta property="og:title" content="A lightweight, tool-agnostic CI/CD flow with GitHub Actions - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling." />
+<meta property="og:url" content="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/cover.png"/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A lightweight, tool-agnostic CI/CD flow with GitHub Actions" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/cover.png"/>
+
+<meta name="twitter:description"
+    content="How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.d67d1c24b87a58bdda5c9cf5442b0537e1e60ce7ca5b01e237c55b3bcaada7ad.css" integrity="sha256-1n0cJLh6WL3aXJz1RCsFN&#43;HmDOfKWwHiN8VbO8qtp60=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/cover.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        A lightweight, tool-agnostic CI/CD flow with GitHub Actions
+    </h1>
+    
+    <p class="subtitle">How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.</p>
+    <p class="metadata" id="date">
+        October 28, 2019
+        ☕️&nbsp;
+        5 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/ci/cd/">
+            ci/cd
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/terminal/">
+            terminal
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/websites/">
+            websites
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>Agnostic tooling is the clever notion that you should be able to run your code in various environments. With many continuous integration and continuous development (CI/CD) apps available, agnostic tooling gives developers a big advantage: portability.</p>
+<p>Of course, having your CI/CD work <em>everywhere</em> is a tall order. Popular <a href="https://github.com/marketplace/category/continuous-integration">CI apps for GitHub repositories</a> alone use a multitude of configuration languages spanning <a href="https://groovy-lang.org/syntax.html">Groovy</a>, <a href="https://yaml.org/">YAML</a>, <a href="https://github.com/toml-lang/toml">TOML</a>, <a href="https://json.org/">JSON</a>, and more&hellip; all with differing syntax, of course. Porting workflows from one tool to another is more than a one-cup-of-coffee process.</p>
+<p>The introduction of <a href="https://github.com/features/actions">GitHub Actions</a> has the potential to add yet another tool to the mix; or, for the right set up, greatly simplify a CI/CD workflow.</p>
+<p>Prior to this article, I accomplished my CD flow with several lashed-together apps. I used AWS Lambda to trigger site builds on a schedule. I had Netlify build on push triggers, as well as run image optimization, and then push my site to the public Pages repository. I used Travis CI in the public repository to test the HTML. All this worked in conjunction with GitHub Pages, which actually hosts the site.</p>
+<p>I&rsquo;m now using the GitHub Actions beta to accomplish all the same tasks, with one <a href="/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">portable Makefile</a> of build instructions, and without any other CI/CD apps.</p>
+<h2 id="appreciating-the-shell">Appreciating the shell</h2>
+<p>What do most CI/CD tools have in common? They run your workflow instructions in a shell environment! This is wonderful, because that means that most CI/CD tools can do anything that you can do in a terminal&hellip; and you can do pretty much <em>anything</em> in a terminal.</p>
+<p>Especially for a contained use case like building my static site with a generator like Hugo, running it all in a shell is a no-brainer. To tell the magic box what to do, we just need to write instructions.</p>
+<p>While a shell script is certainly the most portable option, I use the still-very-portable <a href="https://en.wikipedia.org/wiki/Make_(software)">Make</a> to write my process instructions. This provides me with some advantages over simple shell scripting, like the use of variables and <a href="https://en.wikipedia.org/wiki/Make_(software)#Macros">macros</a>, and the modularity of <a href="https://en.wikipedia.org/wiki/Makefile#Rules">rules</a>.</p>
+<p>I got into the <a href="/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">nitty-gritty of my Makefile in my last post</a>. Let&rsquo;s look at how to get GitHub Actions to run it.</p>
+<h2 id="using-a-makefile-with-github-actions">Using a Makefile with GitHub Actions</h2>
+<p>To our point on portability, my magic Makefile is stored right in the repository root. Since it&rsquo;s included with the code, I can run the Makefile locally on any system where I can clone the repository, provided I set the environment variables. Using GitHub Actions as my CI/CD tool is as straightforward as making Make go worky-worky.</p>
+<p>I found the <a href="https://help.github.com/en/articles/workflow-syntax-for-github-actions">GitHub Actions workflow syntax guide</a> to be pretty straightforward, though also lengthy on options. Here&rsquo;s the necessary set up for getting the Makefile to run.</p>
+<p>The workflow file at <code>.github/workflow.yml</code> contains the following:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="k">name</span><span class="p">:</span><span class="w"> </span>make-master<span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">on</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="k">push</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="k">branches</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- master<span class="w">
+</span><span class="w">  </span><span class="k">schedule</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="k">cron</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;20 13 * * *&#39;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">jobs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="k">build</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="k">runs-on</span><span class="p">:</span><span class="w"> </span>ubuntu-latest<span class="w">
+</span><span class="w">    </span><span class="k">steps</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="k">uses</span><span class="p">:</span><span class="w"> </span>actions/checkout@master<span class="w">
+</span><span class="w">        </span><span class="k">with</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="k">fetch-depth</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
+</span><span class="w">      </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Run<span class="w"> </span>Makefile<span class="w">
+</span><span class="w">        </span><span class="k">env</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="k">TOKEN</span><span class="p">:</span><span class="w"> </span>${{<span class="w"> </span>secrets.TOKEN<span class="w"> </span>}}<span class="w">
+</span><span class="w">        </span><span class="k">run</span><span class="p">:</span><span class="w"> </span>make<span class="w"> </span>all<span class="w">
+</span></code></pre></div><p>I&rsquo;ll explain the components that make this work.</p>
+<h2 id="triggering-the-workflow">Triggering the workflow</h2>
+<p>Actions support multiple <a href="https://help.github.com/en/articles/events-that-trigger-workflows">triggers for a workflow</a>. Using the <code>on</code> syntax, I&rsquo;ve defined two triggers for mine: a <a href="https://help.github.com/en/articles/workflow-syntax-for-github-actions#onpushpull_requestbranchestags">push event</a> to the <code>master</code> branch only, and a <a href="https://help.github.com/en/articles/events-that-trigger-workflows#scheduled-events-schedule">scheduled</a> <code>cron</code> job.</p>
+<p>Once the <code>workflow.yml</code> file is in your repository, either of your triggers will cause Actions to run your Makefile. To see how the last run went, you can also <a href="https://help.github.com/en/articles/configuring-a-workflow#adding-a-workflow-status-badge-to-your-repository">add a fun badge</a> to the README.</p>
+<h3 id="one-hacky-thing">One hacky thing</h3>
+<p>Because the Makefile runs on every push to <code>master</code>, I sometimes would get errors when the site build had no changes. When Git, via <a href="/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">my Makefile</a>, attempted to commit to the Pages repository, no changes were detected and the commit would fail annoyingly:</p>
+<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">nothing to commit, working tree clean
 On branch master
 Your branch is up to date with &#39;origin/master&#39;.
 
@@ -42,14 +233,154 @@ nothing to commit, working tree clean
 Makefile:62: recipe for target &#39;deploy&#39; failed
 make: *** [deploy] Error 1
 ##[error]Process completed with exit code 2.
-</code></pre></div><p>I came across some solutions that proposed using <code>diff</code> to check if a commit should be made, but this may not work for <a href=https://github.com/benmatselby/hugo-deploy-gh-pages/issues/4>reasons</a>. As a workaround, I simply added the <a href=https://gohugo.io/functions/format/#use-local-and-utc>current UTC time</a> to my index page so that every build would contain a change to be committed.</p><h2 id=environment-and-variables>Environment and variables</h2><p>You can define the <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources>virtual environment</a> for your workflow to run in using the <code>runs-on</code> syntax. The <del>obvious best choice</del> one I chose is Ubuntu. Using <code>ubuntu-latest</code> gets me the most updated version, whatever that happens to be when you&rsquo;re reading this.</p><p>GitHub sets some <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables>default environment variables</a> for workflows. The <a href=https://github.com/actions/checkout><code>actions/checkout</code> action</a> with <code>fetch-depth: 1</code> creates a copy of just the most recent commit your repository in the <code>GITHUB_WORKSPACE</code> variable. This allows the workflow to access the Makefile at <code>GITHUB_WORKSPACE/Makefile</code>. Without using the checkout action, the Makefile won&rsquo;t be found, and I get an error that looks like this:</p><div class=highlight><pre class=chroma><code class=language-txt data-lang=txt>make: *** No rule to make target &#39;all&#39;.  Stop.
+</code></pre></div><p>I came across some solutions that proposed using <code>diff</code> to check if a commit should be made, but this may not work for <a href="https://github.com/benmatselby/hugo-deploy-gh-pages/issues/4">reasons</a>. As a workaround, I simply added the <a href="https://gohugo.io/functions/format/#use-local-and-utc">current UTC time</a> to my index page so that every build would contain a change to be committed.</p>
+<h2 id="environment-and-variables">Environment and variables</h2>
+<p>You can define the <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources">virtual environment</a> for your workflow to run in using the <code>runs-on</code> syntax. The <del>obvious best choice</del> one I chose is Ubuntu. Using <code>ubuntu-latest</code> gets me the most updated version, whatever that happens to be when you&rsquo;re reading this.</p>
+<p>GitHub sets some <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables">default environment variables</a> for workflows. The <a href="https://github.com/actions/checkout"><code>actions/checkout</code> action</a> with <code>fetch-depth: 1</code> creates a copy of just the most recent commit your repository in the <code>GITHUB_WORKSPACE</code> variable. This allows the workflow to access the Makefile at <code>GITHUB_WORKSPACE/Makefile</code>. Without using the checkout action, the Makefile won&rsquo;t be found, and I get an error that looks like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">make: *** No rule to make target &#39;all&#39;.  Stop.
 Running Makefile
 ##[error]Process completed with exit code 2.
-</code></pre></div><p>While there is a <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/authenticating-with-the-github_token>default <code>GITHUB_TOKEN</code> secret</a>, this is not the one I used. The default is only locally scoped to the current repository. To be able to push to my separate GitHub Pages repository, I created a <a href=https://github.com/settings/tokens>personal access token</a> scoped to <code>public_repo</code> and pass it in as the <code>secrets.TOKEN</code> encrypted variable. For a step-by-step, see <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets>Creating and using encrypted secrets</a>.</p><h2 id=portable-tooling>Portable tooling</h2><p>The nice thing about using a simple Makefile to define the bulk of my CI/CD process is that it&rsquo;s completely portable. I can run a Makefile anywhere I have access to an environment, which is most CI/CD apps, virtual instances, and, of course, on my local machine.</p><p>One of the reasons I like GitHub Actions is that getting my Makefile to run was pretty straightforward. I think the syntax is well done - easy to read, and intuitive when it comes to finding an option you&rsquo;re looking for. For someone already using GitHub Pages, Actions provides a pretty seamless CD experience; and if that should ever change, I can run my Makefile elsewhere. ¯\_(ツ)_/¯</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>A portable Makefile for continuous delivery with Hugo and GitHub Pages</a><p class=li-brief>My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.</p><p class=metadata><a class=li-tag href=/tags/ci/cd/>ci/cd</a>
-☕️&nbsp;
-5 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/>Publishing GitHub event data with GitHub Actions and Pages</a><p class=li-brief>A guide to overcoming the GitHub event data horizon with a little command-line magic.</p><p class=metadata><a class=li-tag href=/tags/data/>data</a>
-☕️☕️&nbsp;
-8 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/>How to quickly batch resize, compress, and convert images with a Bash one-liner</a><p class=li-brief>A fast command line interface solution for batch image processing.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
-☕️&nbsp;
-2 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a security-focused senior software developer in Washington, DC. She writes about software development, cybersecurity, and information security awareness. She is a co-author and maintainer of the OWASP Web Security Testing Guide, and a twice-awarded top annual contributor to freeCodeCamp.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
-document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
+</code></pre></div><p>While there is a <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/authenticating-with-the-github_token">default <code>GITHUB_TOKEN</code> secret</a>, this is not the one I used. The default is only locally scoped to the current repository. To be able to push to my separate GitHub Pages repository, I created a <a href="https://github.com/settings/tokens">personal access token</a> scoped to <code>public_repo</code> and pass it in as the <code>secrets.TOKEN</code> encrypted variable. For a step-by-step, see <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets">Creating and using encrypted secrets</a>.</p>
+<h2 id="portable-tooling">Portable tooling</h2>
+<p>The nice thing about using a simple Makefile to define the bulk of my CI/CD process is that it&rsquo;s completely portable. I can run a Makefile anywhere I have access to an environment, which is most CI/CD apps, virtual instances, and, of course, on my local machine.</p>
+<p>One of the reasons I like GitHub Actions is that getting my Makefile to run was pretty straightforward. I think the syntax is well done - easy to read, and intuitive when it comes to finding an option you&rsquo;re looking for. For someone already using GitHub Pages, Actions provides a pretty seamless CD experience; and if that should ever change, I can run my Makefile elsewhere. ¯\_(ツ)_/¯</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">A portable Makefile for continuous delivery with Hugo and GitHub Pages</a>
+        <p class="li-brief">
+            My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/">Publishing GitHub event data with GitHub Actions and Pages</a>
+        <p class="li-brief">
+            A guide to overcoming the GitHub event data horizon with a little command-line magic.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/data/">data</a>
+            
+            ☕️☕️&nbsp;
+            8 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/">How to quickly batch resize, compress, and convert images with a Bash one-liner</a>
+        <p class="li-brief">
+            A fast command line interface solution for batch image processing.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/terminal/">terminal</a>
+            
+            ☕️&nbsp;
+            2 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a senior software developer in Washington, DC. She is a twice-awarded annual Top Contributor to the freeCodeCamp non-profit, and a recognized Distinguished Author on the DEV.to developer platform. She currently contributes to the Open Web Application Security Project as a core maintainer and co-author for the Web Security Testing Guide. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>

@@ -1,27 +1,372 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a security-focused senior software developer. She builds open source automation tools, and tech that helps humans stay safe on the Internet."><title>How users and applications stay safe on the Internet: it's proxy servers all the way down | victoria.dev</title><meta property="og:title" content="How users and applications stay safe on the Internet: it's proxy servers all the way down - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="An overview of how proxy servers form the basis of online anonymity, and how their use in various forms helps both users and web applications."><meta property="og:url" content="https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="How users and applications stay safe on the Internet: it's proxy servers all the way down"><meta name=twitter:image content="https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/cover.png"><meta name=twitter:description content="An overview of how proxy servers form the basis of online anonymity, and how their use in various forms helps both users and web applications."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/cover.png alt="cover image"></div><div class=markdown><h1>How users and applications stay safe on the Internet: it's proxy servers all the way down</h1><p class=subtitle>An overview of how proxy servers form the basis of online anonymity, and how their use in various forms helps both users and web applications.</p><p class=metadata id=date>September 16, 2019
-☕️☕️&nbsp;
-9 min read
-&nbsp;
-<a class=li-tag href=/tags/cybersecurity/>cybersecurity
-</a>&nbsp;
-<a class=li-tag href=/tags/websites/>websites
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>Both Internet users and Internet-connected applications can benefit from investing in cybersecurity. One core aspect of online privacy is the use of a proxy server, though this basic building block may not be initially visible underneath its more recognizable forms. Proxy servers are a useful thing to know about nowadays, for developers, software product owners, as well as the average dog on the Internet. Let&rsquo;s explore what makes proxy servers an important piece of cybersecurity support.</p><blockquote><p>&ldquo;On the Internet, nobody knows you&rsquo;re a dog.&rdquo;</p></blockquote><p>When <a href=https://en.wikipedia.org/wiki/On_the_Internet,_nobody_knows_you%27re_a_dog>Peter Steiner&rsquo;s caption</a> was first published in The New Yorker in 1993, it reportedly went largely unnoticed. Only later did the ominous and slightly frightening allusion to online anonymity touch the public consciousness with the icy fingers of the unknown. As Internet usage became more popular, users became concerned that other people could represent themselves online in any manner they chose, without anyone else knowing who they truly were.</p><p>This, to make a gross understatement, is no longer the case. Thanks to <a href=https://support.mozilla.org/en-US/kb/enable-and-disable-cookies-website-preferences>tracking cookies</a>, <a href=https://robertheaton.com/2017/10/17/we-see-you-democratizing-de-anonymization/>browser fingerprinting</a>, <a href=https://www.privacypolicies.com/blog/isp-tracking-you/>Internet Service Providers (ISPs) selling our browsing logs to advertisers</a>, and our own inexplicable inclination to put our names and faces on social networks, online anonymity is out like last year&rsquo;s LaCroix flavours. While your next-door neighbor may not know how to find you online (well, except for through that location-based secondhand marketplace app you&rsquo;re using), you can be certain that at least one large advertising company has a series of zeroes and ones somewhere that represent you, the specific details of your market demographic, and all your online habits, including your preferred flavour of LaCroix.</p><p>There are ways to add <em>some</em> layers of obscurity, like using a corporate firewall that hides your IP, or <a href=https://www.torproject.org/>using Tor</a>. The underlying mechanism of both these methods is the same. Like being enshrouded in the layers of an onion, we&rsquo;re using one or more <a href=https://en.wikipedia.org/wiki/Proxy_server>proxy servers</a> to shield our slightly sulfuric selves from third-party tracking.</p><h2 id=whats-a-proxy-server-anyway>What&rsquo;s a proxy server, anyway?</h2><p>A proxy, in the traditional English definition, is the &ldquo;authority or power to act for another.&rdquo; (<a href=https://www.merriam-webster.com/dictionary/proxy>Merriam-Webster</a>) A proxy server, in the computing context, is a server that acts on behalf of another server, or a user&rsquo;s machine.</p><p>By using a proxy to browse the Internet, for example, a user can defer being personally identifiable. All of the user&rsquo;s Internet traffic appears to come from the proxy server instead of their machine.</p><h2 id=proxy-servers-are-for-users>Proxy servers are for users</h2><p>There are a few ways that we, as the client, can use a proxy server to conceal our identity when we go online. It&rsquo;s important to know that these methods offer differing levels of anonymity, and that no single method will really provide <em>true</em> anonymity; if others are actively seeking to find you on the Internet, for whatever reason, further steps should be taken to make your activity truly difficult to identify. (Those steps are beyond the scope of this article, but you can get started with the <a href=https://ssd.eff.org/>Electronic Frontier Foundation&rsquo;s (EFF) Surveillance Self-Defense</a> resource.) For the average user, however, here is a small menu of options ranging from least to most anonymous.</p><h3 id=use-a-proxy-in-your-web-browser>Use a proxy in your web browser</h3><p>Certain web browsers, including Firefox and Safari on Mac, allow us to configure them to send our Internet traffic through a proxy server. The proxy server attempts to <a href=https://en.wikipedia.org/wiki/Anonymizer>anonymize</a> our requests by replacing our originating IP address with the proxy server&rsquo;s own IP. This provides us with some anonymity, as the website we&rsquo;re trying to reach will not see our originating IP address; however, the proxy server that we choose to use will know exactly who originated the request. This method also doesn&rsquo;t necessarily encrypt traffic, block cookies, or stop social media and cross-site trackers from following us around; on the upside, it&rsquo;s the method least likely to prevent websites that use cookies from functioning properly.</p><p><img src=browser-proxy.png alt="A cartoon of a proxy server guarding a browser"></p><p>Public proxy servers are out there, and deciding whether or not we should use any one of them is on par with deciding whether we should eat a piece of candy handed to us by a smiling stranger. If your academic institution or company provides a proxy server address, it is (hopefully) a private server with some security in place. My preferred method, if we have a little time and a few monthly dollars to invest in our security, is to set up our own virtual instance with a company such as <a href=https://aws.amazon.com/ec2/>Amazon Web Services</a> or <a href=https://www.digitalocean.com/products/droplets/>Digital Ocean</a> and use this as our proxy server.</p><p>To use a proxy through our browser, we can <a href=https://support.mozilla.org/en-US/kb/connection-settings-firefox>edit our Connection Settings in Firefox</a>, or <a href=https://support.apple.com/guide/safari/set-up-a-proxy-server-ibrw1053/mac>set up a proxy server using Safari on Mac</a>.</p><p>In regards to choosing a browser, I would happily recommend <a href=https://www.mozilla.org/en-US/firefox/new/>Firefox</a> to any Internet user who wants to beef up the security of their browsing experience right out of the box. Mozilla has been a champion of privacy-first since I&rsquo;ve heard of them, and recently made some well-received changes to <a href=https://blog.mozilla.org/blog/2019/06/04/firefox-now-available-with-enhanced-tracking-protection-by-default/>Enhanced Tracking Protection in Firefox Browser</a> that blocks social media trackers, cross-site tracking cookies, fingerprinters, and cryptominers by default.</p><h3 id=use-a-vpn-on-your-device>Use a VPN on your device</h3><p>In order to take advantage of a proxy server for all our Internet usage instead of just through one browser, we can use a Virtual Private Network (VPN). A VPN is a service, usually paid, that sends our Internet traffic through their servers, thus acting as a proxy. A VPN can be used on our laptop as well as phone and tablet devices, and since it encompasses all our Internet traffic, it doesn&rsquo;t require much extra effort to use other than ensuring our device is connected. Using a VPN is an effective way to keep nosy ISPs from snooping on our requests.</p><p><img src=vpn.png alt="A cartoon depicting a private VPN"></p><p>To use a paid, third-party VPN service, we&rsquo;d usually sign up on their website and download their app. It&rsquo;s important to keep in mind that whichever provider we choose, we&rsquo;re entrusting them with our data. VPN providers anonymize our activity from the Internet, but can themselves see all our requests. Providers vary in terms of their privacy policies and the data they choose to log, so a little research may be necessary to determine which, if any, we are comfortable trusting.</p><p>We can also roll our own VPN service by using a virtual instance and <a href=https://openvpn.net/>OpenVPN</a>. OpenVPN is an open source VPN protocol, and can be used with a few virtual instance providers, such as <a href=https://openvpn.net/amazon-cloud/>Amazon VPC</a>, <a href=https://openvpn.net/microsoft-azure/>Microsoft Azure</a>, <a href=https://openvpn.net/google-cloud-vpn/>Google Cloud</a>, and <a href=https://openvpn.net/digital-ocean-vpn/>Digital Ocean Droplets</a>. I previously wrote a tutorial on <a href=/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/>setting up your own personal VPN service with AWS</a> using an EC2 instance. I&rsquo;ve been running this solution personally for about a month, and it&rsquo;s cost me almost $4 USD in total, which is a price I&rsquo;m quite comfortable paying for some peace of mind.</p><h3 id=use-tor>Use Tor</h3><p>Tor takes the anonymity offered by a proxy server and compounds it by forwarding our requests through a <a href=https://en.wikipedia.org/wiki/Relay_network>relay network</a> of other servers, each called a &ldquo;node.&rdquo; Our traffic passes through three nodes on its way to a destination: the <em>guard</em>, <em>middle</em>, and <em>exit</em> nodes. At each step, the request is encrypted and anonymized such that the current node only knows where to send it, and nothing more about what the request contains. This separation of knowledge means that, of the options discussed, Tor provides the most complete version of anonymity. (For a more complete explanation, see <a href=https://robertheaton.com/2019/04/06/how-does-tor-work/>Robert Heaton&rsquo;s article on how Tor works</a>, which is so excellently done that I wish I&rsquo;d written it myself.)</p><p><img src=tor.png alt="Tor onion holding a Free Hugs sign"></p><p>That said, this level of anonymity comes with its own cost. Not monetary, as <a href=https://www.torproject.org/download/>Tor Browser</a> is free to download and use. It is, however, slower than using a VPN or simple proxy server through a browser, due to the circuitous route our requests take.</p><h2 id=proxy-servers-are-for-servers-too>Proxy servers are for servers too</h2><p>We&rsquo;re now familiar with proxy servers in the context of protecting users as they surf the web, but proxies aren&rsquo;t just for clients. Websites and Internet-connected applications can use <a href=https://en.wikipedia.org/wiki/Reverse_proxy>reverse proxy servers</a> for obfuscation too. The &ldquo;reverse&rdquo; part just means that the proxy is acting on behalf of the server, instead of the client.</p><p>Why would a web server care about anonymity? Generally, they don&rsquo;t, at least not in the same way some users do. Web servers can benefit from using a proxy for a few different reasons; for example, they typically offer faster service to users by <a href=https://en.wikipedia.org/wiki/Web_cache>caching</a> or <a href=https://en.wikipedia.org/wiki/HTTP_compression>compressing</a> content to optimize delivery. From a cybersecurity perspective, however, a reverse proxy can improve an application&rsquo;s security posture by obfuscating the underlying infrastructure.</p><p><img src=syllables.png alt="A cartoon making fun of the big words I used"></p><p>Basically, by placing another web server (the &ldquo;proxy&rdquo;) in front of the web server that directly accesses all the files and assets, we make it more difficult for an attacker to pinpoint our &ldquo;real&rdquo; web server and mess with our stuff. Like when you want to see the store manager and the clerk you&rsquo;re talking to says, &ldquo;I speak for the manager,&rdquo; and you&rsquo;re not really sure there even <em>is</em> a manager, anyway, but you successfully exchange the hot pink My Little Pony they sold you for a <em>fuchsia</em> one, thankyouverymuch, so now you&rsquo;re no longer concerned with who the manager is and whether or not they really exist, and if you passed them on the street you would not be able to stop them and call them out for passing off hot pink as fuchsia, and the manager is just fine with that.</p><p>Some common web servers can also act as reverse proxies, often with just a minimal and straightforward configuration change. While the best choice for your particular architecture is unknown to me, I will offer a couple common examples here.</p><h3 id=using-nginx-as-a-reverse-proxy>Using NGINX as a reverse proxy</h3><p>NGINX uses the <code>proxy_pass</code> directive in its <a href=https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/>configuration file</a> (<code>nginx.conf</code> by default) to turn itself into a reverse proxy server. The set up requires the following lines to be placed in the configuration file:</p><pre><code>location /requested/path/ {
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
+<title>
+    How users and applications stay safe on the Internet: it&#39;s proxy servers all the way down | victoria.dev
+</title>
+
+
+    <meta
+  name="monetization"
+  content="$twitter.xrptipbot.com/victoriadotdev">
+    <meta property="og:title" content="How users and applications stay safe on the Internet: it&#39;s proxy servers all the way down - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="An overview of how proxy servers form the basis of online anonymity, and how their use in various forms helps both users and web applications." />
+<meta property="og:url" content="https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/cover.png"/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How users and applications stay safe on the Internet: it&#39;s proxy servers all the way down" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/cover.png"/>
+
+<meta name="twitter:description"
+    content="An overview of how proxy servers form the basis of online anonymity, and how their use in various forms helps both users and web applications." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.d67d1c24b87a58bdda5c9cf5442b0537e1e60ce7ca5b01e237c55b3bcaada7ad.css" integrity="sha256-1n0cJLh6WL3aXJz1RCsFN&#43;HmDOfKWwHiN8VbO8qtp60=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/cover.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        How users and applications stay safe on the Internet: it&#39;s proxy servers all the way down
+    </h1>
+    
+    <p class="subtitle">An overview of how proxy servers form the basis of online anonymity, and how their use in various forms helps both users and web applications.</p>
+    <p class="metadata" id="date">
+        September 16, 2019
+        ☕️☕️&nbsp;
+        9 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/cybersecurity/">
+            cybersecurity
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/websites/">
+            websites
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>Both Internet users and Internet-connected applications can benefit from investing in cybersecurity. One core aspect of online privacy is the use of a proxy server, though this basic building block may not be initially visible underneath its more recognizable forms. Proxy servers are a useful thing to know about nowadays, for developers, software product owners, as well as the average dog on the Internet. Let&rsquo;s explore what makes proxy servers an important piece of cybersecurity support.</p>
+<blockquote>
+<p>&ldquo;On the Internet, nobody knows you&rsquo;re a dog.&rdquo;</p>
+</blockquote>
+<p>When <a href="https://en.wikipedia.org/wiki/On_the_Internet,_nobody_knows_you%27re_a_dog">Peter Steiner&rsquo;s caption</a> was first published in The New Yorker in 1993, it reportedly went largely unnoticed. Only later did the ominous and slightly frightening allusion to online anonymity touch the public consciousness with the icy fingers of the unknown. As Internet usage became more popular, users became concerned that other people could represent themselves online in any manner they chose, without anyone else knowing who they truly were.</p>
+<p>This, to make a gross understatement, is no longer the case. Thanks to <a href="https://support.mozilla.org/en-US/kb/enable-and-disable-cookies-website-preferences">tracking cookies</a>, <a href="https://robertheaton.com/2017/10/17/we-see-you-democratizing-de-anonymization/">browser fingerprinting</a>, <a href="https://www.privacypolicies.com/blog/isp-tracking-you/">Internet Service Providers (ISPs) selling our browsing logs to advertisers</a>, and our own inexplicable inclination to put our names and faces on social networks, online anonymity is out like last year&rsquo;s LaCroix flavours. While your next-door neighbor may not know how to find you online (well, except for through that location-based secondhand marketplace app you&rsquo;re using), you can be certain that at least one large advertising company has a series of zeroes and ones somewhere that represent you, the specific details of your market demographic, and all your online habits, including your preferred flavour of LaCroix.</p>
+<p>There are ways to add <em>some</em> layers of obscurity, like using a corporate firewall that hides your IP, or <a href="https://www.torproject.org/">using Tor</a>. The underlying mechanism of both these methods is the same. Like being enshrouded in the layers of an onion, we&rsquo;re using one or more <a href="https://en.wikipedia.org/wiki/Proxy_server">proxy servers</a> to shield our slightly sulfuric selves from third-party tracking.</p>
+<h2 id="whats-a-proxy-server-anyway">What&rsquo;s a proxy server, anyway?</h2>
+<p>A proxy, in the traditional English definition, is the &ldquo;authority or power to act for another.&rdquo; (<a href="https://www.merriam-webster.com/dictionary/proxy">Merriam-Webster</a>) A proxy server, in the computing context, is a server that acts on behalf of another server, or a user&rsquo;s machine.</p>
+<p>By using a proxy to browse the Internet, for example, a user can defer being personally identifiable. All of the user&rsquo;s Internet traffic appears to come from the proxy server instead of their machine.</p>
+<h2 id="proxy-servers-are-for-users">Proxy servers are for users</h2>
+<p>There are a few ways that we, as the client, can use a proxy server to conceal our identity when we go online. It&rsquo;s important to know that these methods offer differing levels of anonymity, and that no single method will really provide <em>true</em> anonymity; if others are actively seeking to find you on the Internet, for whatever reason, further steps should be taken to make your activity truly difficult to identify. (Those steps are beyond the scope of this article, but you can get started with the <a href="https://ssd.eff.org/">Electronic Frontier Foundation&rsquo;s (EFF) Surveillance Self-Defense</a> resource.) For the average user, however, here is a small menu of options ranging from least to most anonymous.</p>
+<h3 id="use-a-proxy-in-your-web-browser">Use a proxy in your web browser</h3>
+<p>Certain web browsers, including Firefox and Safari on Mac, allow us to configure them to send our Internet traffic through a proxy server. The proxy server attempts to <a href="https://en.wikipedia.org/wiki/Anonymizer">anonymize</a> our requests by replacing our originating IP address with the proxy server&rsquo;s own IP. This provides us with some anonymity, as the website we&rsquo;re trying to reach will not see our originating IP address; however, the proxy server that we choose to use will know exactly who originated the request. This method also doesn&rsquo;t necessarily encrypt traffic, block cookies, or stop social media and cross-site trackers from following us around; on the upside, it&rsquo;s the method least likely to prevent websites that use cookies from functioning properly.</p>
+<p><img src="browser-proxy.png" alt="A cartoon of a proxy server guarding a browser"></p>
+<p>Public proxy servers are out there, and deciding whether or not we should use any one of them is on par with deciding whether we should eat a piece of candy handed to us by a smiling stranger. If your academic institution or company provides a proxy server address, it is (hopefully) a private server with some security in place. My preferred method, if we have a little time and a few monthly dollars to invest in our security, is to set up our own virtual instance with a company such as <a href="https://aws.amazon.com/ec2/">Amazon Web Services</a> or <a href="https://www.digitalocean.com/products/droplets/">Digital Ocean</a> and use this as our proxy server.</p>
+<p>To use a proxy through our browser, we can <a href="https://support.mozilla.org/en-US/kb/connection-settings-firefox">edit our Connection Settings in Firefox</a>, or <a href="https://support.apple.com/guide/safari/set-up-a-proxy-server-ibrw1053/mac">set up a proxy server using Safari on Mac</a>.</p>
+<p>In regards to choosing a browser, I would happily recommend <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a> to any Internet user who wants to beef up the security of their browsing experience right out of the box. Mozilla has been a champion of privacy-first since I&rsquo;ve heard of them, and recently made some well-received changes to <a href="https://blog.mozilla.org/blog/2019/06/04/firefox-now-available-with-enhanced-tracking-protection-by-default/">Enhanced Tracking Protection in Firefox Browser</a> that blocks social media trackers, cross-site tracking cookies, fingerprinters, and cryptominers by default.</p>
+<h3 id="use-a-vpn-on-your-device">Use a VPN on your device</h3>
+<p>In order to take advantage of a proxy server for all our Internet usage instead of just through one browser, we can use a Virtual Private Network (VPN). A VPN is a service, usually paid, that sends our Internet traffic through their servers, thus acting as a proxy. A VPN can be used on our laptop as well as phone and tablet devices, and since it encompasses all our Internet traffic, it doesn&rsquo;t require much extra effort to use other than ensuring our device is connected. Using a VPN is an effective way to keep nosy ISPs from snooping on our requests.</p>
+<p><img src="vpn.png" alt="A cartoon depicting a private VPN"></p>
+<p>To use a paid, third-party VPN service, we&rsquo;d usually sign up on their website and download their app. It&rsquo;s important to keep in mind that whichever provider we choose, we&rsquo;re entrusting them with our data. VPN providers anonymize our activity from the Internet, but can themselves see all our requests. Providers vary in terms of their privacy policies and the data they choose to log, so a little research may be necessary to determine which, if any, we are comfortable trusting.</p>
+<p>We can also roll our own VPN service by using a virtual instance and <a href="https://openvpn.net/">OpenVPN</a>. OpenVPN is an open source VPN protocol, and can be used with a few virtual instance providers, such as <a href="https://openvpn.net/amazon-cloud/">Amazon VPC</a>, <a href="https://openvpn.net/microsoft-azure/">Microsoft Azure</a>, <a href="https://openvpn.net/google-cloud-vpn/">Google Cloud</a>, and <a href="https://openvpn.net/digital-ocean-vpn/">Digital Ocean Droplets</a>. I previously wrote a tutorial on <a href="/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/">setting up your own personal VPN service with AWS</a> using an EC2 instance. I&rsquo;ve been running this solution personally for about a month, and it&rsquo;s cost me almost $4 USD in total, which is a price I&rsquo;m quite comfortable paying for some peace of mind.</p>
+<h3 id="use-tor">Use Tor</h3>
+<p>Tor takes the anonymity offered by a proxy server and compounds it by forwarding our requests through a <a href="https://en.wikipedia.org/wiki/Relay_network">relay network</a> of other servers, each called a &ldquo;node.&rdquo; Our traffic passes through three nodes on its way to a destination: the <em>guard</em>, <em>middle</em>, and <em>exit</em> nodes. At each step, the request is encrypted and anonymized such that the current node only knows where to send it, and nothing more about what the request contains. This separation of knowledge means that, of the options discussed, Tor provides the most complete version of anonymity. (For a more complete explanation, see <a href="https://robertheaton.com/2019/04/06/how-does-tor-work/">Robert Heaton&rsquo;s article on how Tor works</a>, which is so excellently done that I wish I&rsquo;d written it myself.)</p>
+<p><img src="tor.png" alt="Tor onion holding a Free Hugs sign"></p>
+<p>That said, this level of anonymity comes with its own cost. Not monetary, as <a href="https://www.torproject.org/download/">Tor Browser</a> is free to download and use. It is, however, slower than using a VPN or simple proxy server through a browser, due to the circuitous route our requests take.</p>
+<h2 id="proxy-servers-are-for-servers-too">Proxy servers are for servers too</h2>
+<p>We&rsquo;re now familiar with proxy servers in the context of protecting users as they surf the web, but proxies aren&rsquo;t just for clients. Websites and Internet-connected applications can use <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy servers</a> for obfuscation too. The &ldquo;reverse&rdquo; part just means that the proxy is acting on behalf of the server, instead of the client.</p>
+<p>Why would a web server care about anonymity? Generally, they don&rsquo;t, at least not in the same way some users do. Web servers can benefit from using a proxy for a few different reasons; for example, they typically offer faster service to users by <a href="https://en.wikipedia.org/wiki/Web_cache">caching</a> or <a href="https://en.wikipedia.org/wiki/HTTP_compression">compressing</a> content to optimize delivery. From a cybersecurity perspective, however, a reverse proxy can improve an application&rsquo;s security posture by obfuscating the underlying infrastructure.</p>
+<p><img src="syllables.png" alt="A cartoon making fun of the big words I used"></p>
+<p>Basically, by placing another web server (the &ldquo;proxy&rdquo;) in front of the web server that directly accesses all the files and assets, we make it more difficult for an attacker to pinpoint our &ldquo;real&rdquo; web server and mess with our stuff. Like when you want to see the store manager and the clerk you&rsquo;re talking to says, &ldquo;I speak for the manager,&rdquo; and you&rsquo;re not really sure there even <em>is</em> a manager, anyway, but you successfully exchange the hot pink My Little Pony they sold you for a <em>fuchsia</em> one, thankyouverymuch, so now you&rsquo;re no longer concerned with who the manager is and whether or not they really exist, and if you passed them on the street you would not be able to stop them and call them out for passing off hot pink as fuchsia, and the manager is just fine with that.</p>
+<p>Some common web servers can also act as reverse proxies, often with just a minimal and straightforward configuration change. While the best choice for your particular architecture is unknown to me, I will offer a couple common examples here.</p>
+<h3 id="using-nginx-as-a-reverse-proxy">Using NGINX as a reverse proxy</h3>
+<p>NGINX uses the <code>proxy_pass</code> directive in its <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/">configuration file</a> (<code>nginx.conf</code> by default) to turn itself into a reverse proxy server. The set up requires the following lines to be placed in the configuration file:</p>
+<pre><code>location /requested/path/ {
     proxy_pass http://www.example.com/target/path/;
 }
-</code></pre><p>This specifies that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The target can be a domain name or an IP address, the latter with or without a port.</p><p>The full <a href=https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/>guide to using NGINX as a reverse proxy</a> is part of the NGINX documentation.</p><h3 id=using-apache-httpd-as-a-reverse-proxy>Using Apache httpd as a reverse proxy</h3><p>Apache httpd similarly requires some straightforward configuration to act as a reverse proxy server. In the <a href=https://httpd.apache.org/docs/current/configuring.html>configuration file</a>, usually <code>httpd.conf</code>, set the following directives:</p><pre><code>ProxyPass &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
+</code></pre><p>This specifies that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The target can be a domain name or an IP address, the latter with or without a port.</p>
+<p>The full <a href="https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/">guide to using NGINX as a reverse proxy</a> is part of the NGINX documentation.</p>
+<h3 id="using-apache-httpd-as-a-reverse-proxy">Using Apache httpd as a reverse proxy</h3>
+<p>Apache httpd similarly requires some straightforward configuration to act as a reverse proxy server. In the <a href="https://httpd.apache.org/docs/current/configuring.html">configuration file</a>, usually <code>httpd.conf</code>, set the following directives:</p>
+<pre><code>ProxyPass &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
 ProxyPassReverse &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
-</code></pre><p>The <code>ProxyPass</code> directive ensures that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The <code>ProxyPassReverse</code> directive ensures that the headers sent by the web server are modified to point to the reverse proxy server instead.</p><p>The full <a href=https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html>reverse proxy guide for Apache HTTP server</a> is available in their documentation.</p><h2 id=proxy-servers-_most-of_-the-way-down>Proxy servers <em>most of</em> the way down</h2><p>I concede that my title is a little facetious, as cybersecurity best practices aren&rsquo;t really some eternal infinite-regression mystery (though they may sometimes seem to be). Regardless, I hope this post has helped in your understanding of what proxy servers are, how they contribute to online anonymity for both clients and servers, and that they are an integral building block of cybersecurity practices.</p><p>If you&rsquo;d like to learn more about personal best practices for online security, I highly recommend exploring the articles and resources provided by <a href=https://www.eff.org/>EFF</a>. For a guide to securing web sites and applications, the <a href=https://github.com/OWASP/CheatSheetSeries>OWASP Cheat Sheet Series</a> is a fantastic resource.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/>Hackers are Googling your plain text passwords: preventing sensitive data exposure</a><p class=li-brief>Why sensitive data controls need to be established long before you think you need them, as demonstrated by Google dorking.</p><p class=metadata><a class=li-tag href=/tags/cybersecurity/>cybersecurity</a>
-☕️☕️&nbsp;
-8 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/>SQL injection and XSS: what white hat hackers know about trusting user input</a><p class=li-brief>A primer on SQL injection and cross site scripting, and how to handle user input in software development.</p><p class=metadata><a class=li-tag href=/tags/cybersecurity/>cybersecurity</a>
-☕️☕️&nbsp;
-11 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/healthy-habits-for-good-cybersecurity/>Healthy habits for good cybersecurity</a><p class=li-brief>A few helpful cybersecurity resolutions to take into the new year. Happy holidays!</p><p class=metadata><a class=li-tag href=/tags/cybersecurity/>cybersecurity</a>
-☕️&nbsp;
-4 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a security-focused senior software developer in Washington, DC. She writes about software development, cybersecurity, and information security awareness. She is a co-author and maintainer of the OWASP Web Security Testing Guide, and a twice-awarded top annual contributor to freeCodeCamp.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
-document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
+</code></pre><p>The <code>ProxyPass</code> directive ensures that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The <code>ProxyPassReverse</code> directive ensures that the headers sent by the web server are modified to point to the reverse proxy server instead.</p>
+<p>The full <a href="https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html">reverse proxy guide for Apache HTTP server</a> is available in their documentation.</p>
+<h2 id="proxy-servers-_most-of_-the-way-down">Proxy servers <em>most of</em> the way down</h2>
+<p>I concede that my title is a little facetious, as cybersecurity best practices aren&rsquo;t really some eternal infinite-regression mystery (though they may sometimes seem to be). Regardless, I hope this post has helped in your understanding of what proxy servers are, how they contribute to online anonymity for both clients and servers, and that they are an integral building block of cybersecurity practices.</p>
+<p>If you&rsquo;d like to learn more about personal best practices for online security, I highly recommend exploring the articles and resources provided by <a href="https://www.eff.org/">EFF</a>. For a guide to securing web sites and applications, the <a href="https://github.com/OWASP/CheatSheetSeries">OWASP Cheat Sheet Series</a> is a fantastic resource.</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/">Hackers are Googling your plain text passwords: preventing sensitive data exposure</a>
+        <p class="li-brief">
+            Why sensitive data controls need to be established long before you think you need them, as demonstrated by Google dorking.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/cybersecurity/">cybersecurity</a>
+            
+            ☕️☕️&nbsp;
+            8 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">SQL injection and XSS: what white hat hackers know about trusting user input</a>
+        <p class="li-brief">
+            A primer on SQL injection and cross site scripting, and how to handle user input in software development.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/cybersecurity/">cybersecurity</a>
+            
+            ☕️☕️&nbsp;
+            11 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/healthy-habits-for-good-cybersecurity/">Healthy habits for good cybersecurity</a>
+        <p class="li-brief">
+            A few helpful cybersecurity resolutions to take into the new year. Happy holidays!
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/cybersecurity/">cybersecurity</a>
+            
+            ☕️&nbsp;
+            4 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a senior software developer in Washington, DC. She is a twice-awarded annual Top Contributor to the freeCodeCamp non-profit, and a recognized Distinguished Author on the DEV.to developer platform. She currently contributes to the Open Web Application Security Project as a core maintainer and co-author for the Web Security Testing Guide. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>
