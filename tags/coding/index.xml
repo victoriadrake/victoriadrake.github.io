@@ -7,9 +7,56 @@
     <language>en-us</language>
     <managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor>
     <webMaster>hello@victoria.dev (Victoria Drake)</webMaster>
-    <lastBuildDate>Mon, 27 Apr 2020 06:34:41 -0400</lastBuildDate>
+    <lastBuildDate>Mon, 11 May 2020 05:46:47 -0400</lastBuildDate>
     
         <atom:link href="https://victoria.dev/tags/coding/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+    <item>
+      <title>Foundations of secure software</title>
+      <link>https://victoria.dev/blog/foundations-of-secure-software/</link>
+      <pubDate>Mon, 11 May 2020 05:46:47 -0400</pubDate>
+      <author>hello@victoria.dev (Victoria Drake)</author>
+      <guid>https://victoria.dev/blog/foundations-of-secure-software/</guid>
+      <description>How threat modeling and pushing left help prevent you from building your treehouse from top-to-bottom.</description>
+      <content:encoded>
+        
+        
+        &lt;p&gt;If you&amp;rsquo;ve ever watched a kid draw a treehouse, you have some idea of how applications are built when security isn&amp;rsquo;t made a priority. It&amp;rsquo;s far more fun to draw the tire swing, front porch, and swimming pool than to worry about how a ten-thousand-gallon bucket of water stays suspended in midair. With too much attention spent on fun and flashy features, foundations suffer.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;for-the-turrets.png&#34; alt=&#34;A comic I drew about building castles with poor foundations. It&amp;rsquo;s not that funny.&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Of course, spending undue hours building a back end like Fort Knox may not be necessary for your application, either. Being an advocate for security doesn&amp;rsquo;t mean always wearing your tinfoil hat (although you do look dashing in it) but does mean building in an appropriate amount of security.&lt;/p&gt;
+&lt;p&gt;How much security is appropriate? The answer, frustratingly, is, &amp;ldquo;it depends.&amp;rdquo; The right amount of security for your application depends on who&amp;rsquo;s using it, what it does, and most importantly, what undesirable things it could be made to do. It takes some analysis to make decisions about the kinds of risks your application faces and how you&amp;rsquo;ll prepare to handle them. Okay, now&amp;rsquo;s a good time to don your tinfoil hat. Let&amp;rsquo;s imagine the worst.&lt;/p&gt;
+&lt;h2 id=&#34;threat-modeling-whats-the-worst-that-could-happen&#34;&gt;Threat modeling: what&amp;rsquo;s the worst that could happen&lt;/h2&gt;
+&lt;p&gt;A &lt;em&gt;threat model&lt;/em&gt; is a stuffy term for the result of trying to imagine the worst things that could happen to an application. Using your imagination to assess risks (fittingly called &lt;em&gt;risk assessment&lt;/em&gt;) is a conveniently non-destructive method for finding ways an application can be attacked. You won&amp;rsquo;t need any tools; just an understanding of how the application might work, and a little imagination. You&amp;rsquo;ll want to record your results with pen and paper. For the younger folks, that means the notes app on your phone.&lt;/p&gt;
+&lt;p&gt;A few different methodologies for application risk assessment can be found in the software world, including the in-depth &lt;a href=&#34;https://csrc.nist.gov/publications/detail/sp/800-30/rev-1/final&#34;&gt;NIST Special Publication 800-30&lt;/a&gt;. Each method&amp;rsquo;s framework has specific steps and output, and will go into various levels of detail when it comes to defining threats. If following a framework, first choose the one you&amp;rsquo;re most likely to complete. You can always add more depth and detail from there.&lt;/p&gt;
+&lt;p&gt;Even informal risk assessments are beneficial. Typically taking the form of a set of questions, they may be oriented around possible threats, the impact to assets, or ways a vulnerability could be exploited. Here are some examples of questions addressing each orientation:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;What kind of adversary would want to break my app? What would they be after?&lt;/li&gt;
+&lt;li&gt;If the control of &lt;em&gt;x&lt;/em&gt; fell into the wrong hands, what could an attacker do with it?&lt;/li&gt;
+&lt;li&gt;Where could a &lt;em&gt;x&lt;/em&gt; vulnerability occur in my app?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A basic threat model explains the technical, business, and human considerations for each risk. It will typically detail:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The vulnerabilities or components that can cause the risk&lt;/li&gt;
+&lt;li&gt;The impact that a successful execution of the risk would have on the application&lt;/li&gt;
+&lt;li&gt;The consequences for the application&amp;rsquo;s users or organization&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The result of a risk assessment exercise is your threat model; in other words, a list of things you would very much like not to occur. It is usually sorted in a hierarchy of risks, from the worst to the mildest. The worst risks have the most negative impact, and are most important to protect against. The mildest risks are the most acceptable - while still an undesirable outcome, they have the least negative impact on the application and users.&lt;/p&gt;
+&lt;p&gt;You can use this resulting hierarchy as a guide to determine how much of your cybersecurity efforts to apply to each risk area. An appropriate amount of security for your application will eliminate (where possible) or mitigate the worst risks.&lt;/p&gt;
+&lt;h2 id=&#34;pushing-left&#34;&gt;Pushing left&lt;/h2&gt;
+&lt;p&gt;Although it sounds like a dance move meme, &lt;em&gt;pushing left&lt;/em&gt; refers instead to building in as much of your planned security as possible in the early stages of software development.&lt;/p&gt;
+&lt;p&gt;Building software is a lot like building a treehouse, just without the pleasant fresh air. You start with the basic supporting components, such as attaching a platform to a tree. Then comes the framing, walls, and roof, and finally, your rustic-modern Instagram-worthy wall hangings and deer bust.&lt;/p&gt;
+&lt;p&gt;The further along in the build process you are, the harder and more costly it becomes to make changes to a component that you&amp;rsquo;ve already installed. If you discover a problem with the walls only after the roof is put in place, you may need to change or remove the roof in order to fix it. Similar parallels can be drawn for software components, only without similar ease in detangling the attached parts.&lt;/p&gt;
+&lt;p&gt;In the case of a treehouse, it&amp;rsquo;s rather impossible to start with decorations or even a roof, since you can&amp;rsquo;t really suspend them in midair. In the case of software development, it is, unfortunately, possible to build many top-layer components and abstractions without a sufficient supporting architecture. A push-left approach views each additional layer as adding cost and complication. Pushing left means attempting to mitigate security risks as much as possible at each development stage before proceeding to the next.&lt;/p&gt;
+&lt;h2 id=&#34;building-bottom-to-top&#34;&gt;Building bottom-to-top&lt;/h2&gt;
+&lt;p&gt;By considering your threat model in the early stages of developing your application, you reduce the chances of necessitating a costly remodel later on. You can make choices about architecture, components, and code that support the main security goals of your particular application.&lt;/p&gt;
+&lt;p&gt;While it&amp;rsquo;s not possible to foresee all the functionality your application may one day need to support, it is possible to prepare a solid foundation that allows additional functionality to be added more securely. Building in appropriate security from the bottom to the top will help make mitigating security risks much easier in the future.&lt;/p&gt;
+
+      </content:encoded>
+        
+        
+    </item>
     
     
     
