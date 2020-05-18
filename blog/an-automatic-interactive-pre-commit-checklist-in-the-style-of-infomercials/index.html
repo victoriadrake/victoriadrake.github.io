@@ -1,54 +1,378 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>An automatic interactive pre-commit checklist, in the style of infomercials | victoria.dev</title><meta name=monetization content="$twitter.xrptipbot.com/victoriadotdev"><meta property="og:title" content="An automatic interactive pre-commit checklist, in the style of infomercials - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How to set up an interactive checklist using a Git pre-commit hook script."><meta property="og:url" content="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="An automatic interactive pre-commit checklist, in the style of infomercials"><meta name=twitter:image content="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial.png"><meta name=twitter:description content="How to set up an interactive checklist using a Git pre-commit hook script."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial.png alt="cover image"></div><div class=markdown><h1>An automatic interactive pre-commit checklist, in the style of infomercials</h1><p class=subtitle>How to set up an interactive checklist using a Git pre-commit hook script.</p><p class=metadata id=date>July 23, 2018
-☕️&nbsp;
-3 min read
-&nbsp;
-<a class=li-tag href=/tags/git/>git
-</a>&nbsp;
-<a class=li-tag href=/tags/coding/>coding
-</a>&nbsp;
-<a class=li-tag href=/tags/terminal/>terminal
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>What&rsquo;s that, you say? You&rsquo;ve become tired of regular old boring <em>paper checklists?</em> Well, my friend, today is your lucky day! You, yes, <em>you,</em> can become the proud owner of a brand-spanking-new <em>automatic interactive pre-commit hook checklist!</em> You&rsquo;re gonna love this! Your life will be so much easier! Just wait until your friends see you.</p><h1 id=whats-a-pre-commit-hook>What&rsquo;s a pre-commit hook?</h1><p>Did you know that nearly <em>1 out of 5 coders</em> are too embarrassed to ask this question? Don&rsquo;t worry, it&rsquo;s perfectly normal. In the next 60 seconds we&rsquo;ll tell you all you need to know to pre-commit with confidence.</p><p>A <a href=https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks>Git hook</a> is a feature of Git that triggers custom scripts at useful moments. They can be used for all kinds of reasons to help you automate your work, and best of all, you already have them! In every repository that you initialize with <code>git init</code>, you&rsquo;ll have a set of example scripts living in <code>.git/hooks</code>. They all end with <code>.sample</code> and activating them is as easy as renaming the file to remove the <code>.sample</code> part.</p><p>Git hooks are not copied when a repository is cloned, so you can make them as personal as you like.</p><p>The useful moment in particular that we&rsquo;ll talk about today is the <em>pre-commit</em>. This hook is run after you do <code>git commit</code>, and before you write a commit message. Exiting this hook with a non-zero status will abort the commit, which makes it extremely useful for last-minute quality checks. Or, a bit of fun. Why not both!</p><h1 id=how-do-i-get-a-pre-commit-checklist>How do I get a pre-commit checklist?</h1><p>I only want the best for my family and my commits, and that&rsquo;s why I choose an interactive pre-commit checklist. Not only is it fun to use, it helps to keep my projects safe from unexpected off-spec mistakes!</p><p>It&rsquo;s so easy! I just write a bash script that can read user input, and plop it into <code>.git/hooks</code> as a file named <code>pre-commit</code>. Then I do <code>chmod +x .git/hooks/pre-commit</code> to make it executable, and I&rsquo;m done!</p><p>Oh look, here comes an example bash script now!</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=cp>#!/bin/sh
-</span><span class=cp></span>  
-<span class=nb>echo</span> <span class=s2>&#34;Would you like to play a game?&#34;</span>
+<!DOCTYPE html>
+<html lang="en-us">
 
-<span class=c1># Read user input, assign stdin to keyboard</span>
-<span class=nb>exec</span> &lt; /dev/tty
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 
-<span class=k>while</span> <span class=nb>read</span> -p <span class=s2>&#34;Have you double checked that only relevant files were added? (Y/n) &#34;</span> yn<span class=p>;</span> <span class=k>do</span>
-    <span class=k>case</span> <span class=nv>$yn</span> in
-        <span class=o>[</span>Yy<span class=o>]</span> <span class=o>)</span> break<span class=p>;</span><span class=p>;</span>
-        <span class=o>[</span>Nn<span class=o>]</span> <span class=o>)</span> <span class=nb>echo</span> <span class=s2>&#34;Please ensure the right files were added!&#34;</span><span class=p>;</span> <span class=nb>exit</span> 1<span class=p>;</span><span class=p>;</span>
-        * <span class=o>)</span> <span class=nb>echo</span> <span class=s2>&#34;Please answer y (yes) or n (no):&#34;</span> <span class=o>&amp;&amp;</span> <span class=k>continue</span><span class=p>;</span>
-    <span class=k>esac</span>
-<span class=k>done</span>
-<span class=k>while</span> <span class=nb>read</span> -p <span class=s2>&#34;Has the documentation been updated? (Y/n) &#34;</span> yn<span class=p>;</span> <span class=k>do</span>
-    <span class=k>case</span> <span class=nv>$yn</span> in
-        <span class=o>[</span>Yy<span class=o>]</span> <span class=o>)</span> break<span class=p>;</span><span class=p>;</span>
-        <span class=o>[</span>Nn<span class=o>]</span> <span class=o>)</span> <span class=nb>echo</span> <span class=s2>&#34;Please add or update the docs!&#34;</span><span class=p>;</span> <span class=nb>exit</span> 1<span class=p>;</span><span class=p>;</span>
-        * <span class=o>)</span> <span class=nb>echo</span> <span class=s2>&#34;Please answer y (yes) or n (no):&#34;</span> <span class=o>&amp;&amp;</span> <span class=k>continue</span><span class=p>;</span>
-    <span class=k>esac</span>
-<span class=k>done</span>
-<span class=k>while</span> <span class=nb>read</span> -p <span class=s2>&#34;Do you know which issue or PR numbers to reference? (Y/n) &#34;</span> yn<span class=p>;</span> <span class=k>do</span>
-    <span class=k>case</span> <span class=nv>$yn</span> in
-        <span class=o>[</span>Yy<span class=o>]</span> <span class=o>)</span> break<span class=p>;</span><span class=p>;</span>
-        <span class=o>[</span>Nn<span class=o>]</span> <span class=o>)</span> <span class=nb>echo</span> <span class=s2>&#34;Better go check those tracking numbers!&#34;</span><span class=p>;</span> <span class=nb>exit</span> 1<span class=p>;</span><span class=p>;</span>
-        * <span class=o>)</span> <span class=nb>echo</span> <span class=s2>&#34;Please answer y (yes) or n (no):&#34;</span> <span class=o>&amp;&amp;</span> <span class=k>continue</span><span class=p>;</span>
-    <span class=k>esac</span>
-<span class=k>done</span>
+<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
+<title>
+    An automatic interactive pre-commit checklist, in the style of infomercials | victoria.dev
+</title>
 
-<span class=nb>exec</span> &lt;<span class=p>&amp;</span>-
-</code></pre></div><h1 id=take-my-money>Take my money!</h1><p>Don&rsquo;t delay! Take advantage <em>right now</em> of this generous <em>one-time offer!</em> An interactive pre-commit hook checklist can be yours, today, for the low, low price of&mldr; free? Wait, who wrote this script?</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/>Git commit practices your future self will thank you for</a><p class=li-brief>How squash commits, vimrc, and git tags can help you make great Git commits.</p><p class=metadata><a class=li-tag href=/tags/git/>git</a>
-☕️☕️☕️&nbsp;
-15 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/>How to do twice as much with half the keystrokes using `.bashrc`</a><p class=li-brief>An overview of time-saving aliases, functions, and creating a useful Bash prompt.</p><p class=metadata><a class=li-tag href=/tags/linux/>linux</a>
-☕️☕️&nbsp;
-7 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/>How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</a><p class=li-brief>Using xargs and awk in Bash to automate managing remote-hosted repositories.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
-☕️☕️&nbsp;
-8 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She is a twice-awarded annual Top Contributor to the freeCodeCamp non-profit, and a recognized Distinguished Author on the DEV.to developer platform. She currently contributes to the Open Web Application Security Project as a core maintainer and co-author for the Web Security Testing Guide. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
-document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
+
+    <meta
+  name="monetization"
+  content="$twitter.xrptipbot.com/victoriadotdev">
+    <meta property="og:title" content="An automatic interactive pre-commit checklist, in the style of infomercials - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How to set up an interactive checklist using a Git pre-commit hook script." />
+<meta property="og:url" content="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+
+
+<meta property="og:image" content="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial.png"/>
+
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="An automatic interactive pre-commit checklist, in the style of infomercials" />
+
+
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial.png"/>
+
+
+<meta name="twitter:description"
+    content="How to set up an interactive checklist using a Git pre-commit hook script." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.d67d1c24b87a58bdda5c9cf5442b0537e1e60ce7ca5b01e237c55b3bcaada7ad.css" integrity="sha256-1n0cJLh6WL3aXJz1RCsFN&#43;HmDOfKWwHiN8VbO8qtp60=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial.png" alt="cover image" />
+</div>
+
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        An automatic interactive pre-commit checklist, in the style of infomercials
+    </h1>
+    
+    <p class="subtitle">How to set up an interactive checklist using a Git pre-commit hook script.</p>
+    <p class="metadata" id="date">
+        July 23, 2018
+        ☕️&nbsp;
+        3 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/git/">
+            git
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/coding/">
+            coding
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/terminal/">
+            terminal
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>What&rsquo;s that, you say? You&rsquo;ve become tired of regular old boring <em>paper checklists?</em> Well, my friend, today is your lucky day! You, yes, <em>you,</em> can become the proud owner of a brand-spanking-new <em>automatic interactive pre-commit hook checklist!</em> You&rsquo;re gonna love this! Your life will be so much easier! Just wait until your friends see you.</p>
+<h1 id="whats-a-pre-commit-hook">What&rsquo;s a pre-commit hook?</h1>
+<p>Did you know that nearly <em>1 out of 5 coders</em> are too embarrassed to ask this question? Don&rsquo;t worry, it&rsquo;s perfectly normal. In the next 60 seconds we&rsquo;ll tell you all you need to know to pre-commit with confidence.</p>
+<p>A <a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks">Git hook</a> is a feature of Git that triggers custom scripts at useful moments. They can be used for all kinds of reasons to help you automate your work, and best of all, you already have them! In every repository that you initialize with <code>git init</code>, you&rsquo;ll have a set of example scripts living in <code>.git/hooks</code>. They all end with <code>.sample</code> and activating them is as easy as renaming the file to remove the <code>.sample</code> part.</p>
+<p>Git hooks are not copied when a repository is cloned, so you can make them as personal as you like.</p>
+<p>The useful moment in particular that we&rsquo;ll talk about today is the <em>pre-commit</em>. This hook is run after you do <code>git commit</code>, and before you write a commit message. Exiting this hook with a non-zero status will abort the commit, which makes it extremely useful for last-minute quality checks. Or, a bit of fun. Why not both!</p>
+<h1 id="how-do-i-get-a-pre-commit-checklist">How do I get a pre-commit checklist?</h1>
+<p>I only want the best for my family and my commits, and that&rsquo;s why I choose an interactive pre-commit checklist. Not only is it fun to use, it helps to keep my projects safe from unexpected off-spec mistakes!</p>
+<p>It&rsquo;s so easy! I just write a bash script that can read user input, and plop it into <code>.git/hooks</code> as a file named <code>pre-commit</code>. Then I do <code>chmod +x .git/hooks/pre-commit</code> to make it executable, and I&rsquo;m done!</p>
+<p>Oh look, here comes an example bash script now!</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="cp">#!/bin/sh
+</span><span class="cp"></span>  
+<span class="nb">echo</span> <span class="s2">&#34;Would you like to play a game?&#34;</span>
+
+<span class="c1"># Read user input, assign stdin to keyboard</span>
+<span class="nb">exec</span> &lt; /dev/tty
+
+<span class="k">while</span> <span class="nb">read</span> -p <span class="s2">&#34;Have you double checked that only relevant files were added? (Y/n) &#34;</span> yn<span class="p">;</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="nv">$yn</span> in
+        <span class="o">[</span>Yy<span class="o">]</span> <span class="o">)</span> break<span class="p">;;</span>
+        <span class="o">[</span>Nn<span class="o">]</span> <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&#34;Please ensure the right files were added!&#34;</span><span class="p">;</span> <span class="nb">exit</span> 1<span class="p">;;</span>
+        * <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&#34;Please answer y (yes) or n (no):&#34;</span> <span class="o">&amp;&amp;</span> <span class="k">continue</span><span class="p">;</span>
+    <span class="k">esac</span>
+<span class="k">done</span>
+<span class="k">while</span> <span class="nb">read</span> -p <span class="s2">&#34;Has the documentation been updated? (Y/n) &#34;</span> yn<span class="p">;</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="nv">$yn</span> in
+        <span class="o">[</span>Yy<span class="o">]</span> <span class="o">)</span> break<span class="p">;;</span>
+        <span class="o">[</span>Nn<span class="o">]</span> <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&#34;Please add or update the docs!&#34;</span><span class="p">;</span> <span class="nb">exit</span> 1<span class="p">;;</span>
+        * <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&#34;Please answer y (yes) or n (no):&#34;</span> <span class="o">&amp;&amp;</span> <span class="k">continue</span><span class="p">;</span>
+    <span class="k">esac</span>
+<span class="k">done</span>
+<span class="k">while</span> <span class="nb">read</span> -p <span class="s2">&#34;Do you know which issue or PR numbers to reference? (Y/n) &#34;</span> yn<span class="p">;</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="nv">$yn</span> in
+        <span class="o">[</span>Yy<span class="o">]</span> <span class="o">)</span> break<span class="p">;;</span>
+        <span class="o">[</span>Nn<span class="o">]</span> <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&#34;Better go check those tracking numbers!&#34;</span><span class="p">;</span> <span class="nb">exit</span> 1<span class="p">;;</span>
+        * <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&#34;Please answer y (yes) or n (no):&#34;</span> <span class="o">&amp;&amp;</span> <span class="k">continue</span><span class="p">;</span>
+    <span class="k">esac</span>
+<span class="k">done</span>
+
+<span class="nb">exec</span> &lt;<span class="p">&amp;</span>-
+</code></pre></div><h1 id="take-my-money">Take my money!</h1>
+<p>Don&rsquo;t delay! Take advantage <em>right now</em> of this generous <em>one-time offer!</em> An interactive pre-commit hook checklist can be yours, today, for the low, low price of&hellip; free? Wait, who wrote this script?</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/">Git commit practices your future self will thank you for</a>
+        <p class="li-brief">
+            How squash commits, vimrc, and git tags can help you make great Git commits.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/git/">git</a>
+            
+            ☕️☕️☕️&nbsp;
+            15 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/">How to do twice as much with half the keystrokes using `.bashrc`</a>
+        <p class="li-brief">
+            An overview of time-saving aliases, functions, and creating a useful Bash prompt.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/linux/">linux</a>
+            
+            ☕️☕️&nbsp;
+            7 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/">How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</a>
+        <p class="li-brief">
+            Using xargs and awk in Bash to automate managing remote-hosted repositories.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/terminal/">terminal</a>
+            
+            ☕️☕️&nbsp;
+            8 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a senior software developer in Washington, DC. She is a twice-awarded annual Top Contributor to the freeCodeCamp non-profit, and a recognized Distinguished Author on the DEV.to developer platform. She currently contributes to the Open Web Application Security Project as a core maintainer and co-author for the Web Security Testing Guide. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>
