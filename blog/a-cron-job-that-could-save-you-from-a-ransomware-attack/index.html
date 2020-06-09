@@ -1,389 +1,43 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-<head>
-    
-    <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer">
-
-<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
-<title>
-    A cron job that could save you from a ransomware attack | victoria.dev
-</title>
-
-
-    <meta
-  name="monetization"
-  content="$twitter.xrptipbot.com/victoriadotdev">
-    <meta property="og:title" content="A cron job that could save you from a ransomware attack - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="How a simple scheduled job can help you quickly recover from ransomware." />
-<meta property="og:url" content="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/cover.jpg"/>
-
-    <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="A cron job that could save you from a ransomware attack" />
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/cover.jpg"/>
-
-<meta name="twitter:description"
-    content="How a simple scheduled job can help you quickly recover from ransomware." />
-
-    
-<link rel="shortcut icon" href="/img/logo.ico">
-
-
-    
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.ca1ab789213db28d077b1100bd25923f68866e53acc96682ab8c8d7a0656e512.css" integrity="sha256-yhq3iSE9so0HexEAvSWSP2iGblOsyWaCq4yNegZW5RI=" media="screen">
-
-
-
-
-
-    
-    
-    
-    
-</head>
-
-<body>
-    <section id="main">
-
-        
-        <div class="header">
-
-    <div class="toggle">
-        <input type="checkbox" />
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <div id="mobile-menu">
-            
-            
-            <span class="menu-item">
-                <a href="/">
-                    👩🏻‍💻 hi</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/blog/">
-                    📰 blog</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/about/">
-                    📖 readme</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/coffee/">
-                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-            </span>
-            
-            
-            
-            
-        </div>
-    </div>
-    <div id="menu">
-        
-        
-        <span class="menu-item">
-            <a href="/">
-                👩🏻‍💻 hi</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/blog/">
-                📰 blog</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/about/">
-                📖 readme</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/coffee/">
-                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-        </span>
-        
-        
-        
-        
-    </div>
-
-    <div id="logo">
-        <img id="up" alt="site logo" src="/img/logo.png" />
-    </div>
-
-</div>
-        
-
-        <div class="container">
-            
-
-
-
-<div id="images">
-    <img src="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/cover.jpg" alt="cover image" />
-</div>
-
-
-            
-
-
-<div class="markdown">
-    <h1>
-        A cron job that could save you from a ransomware attack
-    </h1>
-    
-    <p class="subtitle">How a simple scheduled job can help you quickly recover from ransomware.</p>
-    <p class="metadata" id="date">
-        November 13, 2019
-        ☕️☕️&nbsp;
-        7 min read
-
-        
-        &nbsp;
-        
-        <a class="li-tag" href="/tags/cybersecurity/">
-            cybersecurity
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/data/">
-            data
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/terminal/">
-            terminal
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/aws/">
-            aws
-        </a>&nbsp;
-        
-        
-    </p>
-
-    
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-<div class="markdown">
-    
-    <p>It&rsquo;s 2019, and ransomware has become a thing.</p>
-<p>Systems that interact with the public, like companies, educational institutions, and public services, are most susceptible. While delivery methods for ransomware vary from the physical realm to communication via social sites and email, all methods only require one person to make one mistake in order for ransomware to proliferate.</p>
-<p>Ransomware, as you may have heard, is a malicious program that encrypts your files, rendering them unreadable and useless to you. It can include instructions for paying a ransom, usually by sending cryptocurrency, in order to obtain the decryption key. Successful ransomware attacks typically exploit vital, time-sensitive systems. Victims like public services and medical facilities are more likely to have poor or zero recovery processes, leaving governments or insurance providers to reward attackers with ransom payments.</p>
-<p>Individuals, especially less-than-tech-savvy ones, are no less at risk. Ransomware can occlude personal documents and family photos that may only exist on one machine.</p>
-<p>Thankfully, a fairly low-tech solution exists for rendering ransomware inept: back up your data!</p>
-<p>You could achieve this with a straightforward system like plugging in an external hard drive and dragging files over once a day, but this method has a few hurdles. Manually transferring files may be slow or incomplete, and besides, you&rsquo;ll first have to remember to do it.</p>
-<p>In my constant pursuit of automating all the things, there&rsquo;s one tool I often return to for its simplicity and reliability: <code>cron</code>. Cron does one thing, and does it well: it runs commands on a schedule.</p>
-<p>I first used it a few months shy of three years ago (Have I really been blogging that long?!) to create <a href="/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/">custom desktop notifications on Linux</a>. Using the crontab configuration file, which you can edit by running <code>crontab -e</code>, you can specify a schedule for running any commands you like. Here&rsquo;s what the scheduling syntax looks like, from the <a href="https://en.wikipedia.org/wiki/Cron">Wikipedia cron page</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># ┌───────────── minute (0 - 59)</span>
-<span class="c1"># │ ┌───────────── hour (0 - 23)</span>
-<span class="c1"># │ │ ┌───────────── day of the month (1 - 31)</span>
-<span class="c1"># │ │ │ ┌───────────── month (1 - 12)</span>
-<span class="c1"># │ │ │ │ ┌───────────── day of the week (0 - 6)</span> 
-<span class="c1"># │ │ │ │ │</span>
-<span class="c1"># │ │ │ │ │</span>
-<span class="c1"># │ │ │ │ │</span>
-<span class="c1"># * * * * * command to execute</span>
-</code></pre></div><p>For example, a cron job that runs every day at 00:00 would look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> * * *
-</code></pre></div><p>To run a job every twelve hours, the syntax is:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> */12 * * *
-</code></pre></div><p>This <a href="https://crontab.guru/">great tool</a> can help you wrap your head around the cron scheduling syntax.</p>
-<p>What&rsquo;s a scheduler have to do with backing up? By itself, not much. The simple beauty of cron is that it runs commands - any shell commands, and any scripts that you&rsquo;d normally run on the command line. As you may have gleaned from my other posts, I&rsquo;m of the strong opinion that you can do just about anything on the command line, including backing up your files. Options for storage in this area are plentiful, from near-to-free local and cloud options, as well as paid managed services too numerous to list. For CLI tooling, we have utilitarian classics like <code>rsync</code>, and CLI tools for specific cloud providers like AWS.</p>
-<h2 id="backing-up-with-rsync">Backing up with <code>rsync</code></h2>
-<p><a href="https://en.wikipedia.org/wiki/Rsync">The <code>rsync</code> utility</a> is a classic choice, and can back up your files to an external hard drive or remote server while making intelligent determinations about which files to update. It uses file size and modification times to recognize file changes, and then only transfers changed files, saving time and bandwidth.</p>
-<p>The <a href="https://download.samba.org/pub/rsync/rsync.html"><code>rsync</code> syntax</a> can be a little nuanced; for example, a trailing forward slash will copy just the contents of the directory, instead of the directory itself. I found examples to be helpful in understanding the usage and syntax.</p>
-<p>Here&rsquo;s one for backing up a local directory to a local destination, such as an external hard drive:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rsync -a /home/user/directory /media/user/destination
-</code></pre></div><p>The first argument is the source, and the second is the destination. Reversing these in the above example would copy files from the mounted drive to the local home directory.</p>
-<p>The <code>a</code> flag for archive mode is one of <code>rsync</code>'s superpowers. Equivalent to flags <code>-rlptgoD</code>, it:</p>
-<ul>
-<li>Syncs files recursively through directories (<code>r</code>);</li>
-<li>Preserves symlinks (<code>l</code>), permissions (<code>p</code>), modification times (<code>t</code>), groups (<code>g</code>), and owner (<code>o</code>); and</li>
-<li>Copies device and special files (<code>D</code>).</li>
-</ul>
-<p>Here&rsquo;s another example, this time for backing up the contents of a local directory to a directory on a remote server using SSH:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
-</code></pre></div><p>The <code>v</code> flag turns on verbose output, which is helpful if you like realtime feedback on which files are being transferred. During large transfers, however, it can tend to slow things down. The <code>z</code> flag can help with that, as it indicates that files should be compressed during transfer.</p>
-<p>The <code>e</code> flag, followed by <code>ssh</code>, tells <code>rsync</code> to use SSH according to the destination instructions provided in the final argument.</p>
-<h2 id="backing-up-with-aws-cli">Backing up with AWS CLI</h2>
-<p>Amazon Web Services offers a command line interface tool for doing just about everything with your AWS set up, including a straightforward <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/sync.html"><code>s3 sync</code> command</a> for recursively copying new and updated files to your S3 storage buckets. As a storage method for back up data, S3 is a stable and inexpensive choice. You can even <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html">turn on versioning in your bucket</a>.</p>
-<p>The <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/index.html#directory-and-s3-prefix-operations">syntax for interacting with directories</a> is fairly straightforward, and you can directly indicate your S3 bucket as an <code>S3Uri</code> argument in the form of <code>s3://mybucket/mykey</code>. To back up a local directory to your S3 bucket, the command is:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">aws s3 sync /home/user/directory s3://mybucket
-</code></pre></div><p>Similar to <code>rsync</code>, reversing the source and destination would download files from the S3 bucket.</p>
-<p>The <code>sync</code> command is intuitive by default. It will guess the mime type of uploaded files, as well as include files discovered by following symlinks. A variety of options exist to control these and other defaults, even including flags to specify the server-side encryption to be used.</p>
-<h2 id="setting-up-your-cronjob-back-up">Setting up your cronjob back up</h2>
-<p>You can edit your machine&rsquo;s cron file by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">crontab -e
-</code></pre></div><p>Intuitive as it may be, it&rsquo;s worth mentioning that your back up commands will only run when your computer is turned on and the cron daemon is running. With this in mind, choose a schedule for your cronjob that aligns with times when your machine is powered on, and maybe not overloaded with other work.</p>
-<p>To back up to an S3 bucket every day at 8AM, for example, you&rsquo;d put a line in your crontab that looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">8</span> * * * aws s3 sync /home/user/directory s3://mybucket
-</code></pre></div><p>If you&rsquo;re curious whether your cron job is currently running, find the PID of cron with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">pstree -ap <span class="p">|</span> grep cron
-</code></pre></div><p>Then run <code>pstree -ap &lt;PID&gt;</code>.</p>
-<p>This rabbit hole goes deeper; a quick search can reveal different ways of organizing and scheduling cronjobs, or help you find different utilities to run cronjobs when your computer is asleep. To protect against the possibility of ransomware-affected files being transferred to your back up, incrementally separated archives are a good idea. In essence, however, this basic set up is all you really need to create a reliable, automatic back up system.</p>
-<h2 id="dont-feed-the-trolls">Don&rsquo;t feed the trolls</h2>
-<p>Humans are fallible; that&rsquo;s why cyberattacks work. The success of a ransomware attack depends on the victim having no choice but to pay up in order to return to business as usual. A highly accessible recent back up undermines attackers who depend on us being unprepared. By blowing away a system and restoring from yesterday&rsquo;s back up, we may lose a day of progress; ransomers, however, gain nothing at all.</p>
-<p>For further resources on ransomware defense for users and organizations, check out <a href="https://www.us-cert.gov/Ransomware">CISA&rsquo;s advice on ransomware</a>.</p>
-
-
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-<div class="related">
-    
-    <div class="markdown highlight">
-        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
-    </div>
-    <ul id="list-items">
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/">The surprisingly difficult task of printing newlines in a terminal</a>
-        <p class="li-brief">
-            Your guide to string interpolation quirks that confound the best of us.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/terminal/">terminal</a>
-            
-            ☕️&nbsp;
-            4 min read
-        </p>
-        
-        
-    </li>
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/">Secure application architecture basics: separation, configuration, and access</a>
-        <p class="li-brief">
-            A starting point for building secure application architecture, for busy developers.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/cybersecurity/">cybersecurity</a>
-            
-            ☕️☕️&nbsp;
-            8 min read
-        </p>
-        
-        
-    </li>
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/">Migrating to the cloud but without screwing it up, or how to move house</a>
-        <p class="li-brief">
-            A practical guide to moving to cloud services with minimal downtime, using AWS examples.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/aws/">aws</a>
-            
-            ☕️☕️&nbsp;
-            11 min read
-        </p>
-        
-        
-    </li>
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a> </p> </div> </div> 
-        </div>
-
-        <div class="container">
-            
-            <footer>
-    
-    
-    
-    
-    
-    <div class="markdown">
-        
-        <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a senior software developer in Washington, DC. She is a twice-awarded annual Top Contributor to the freeCodeCamp non-profit, and a recognized Distinguished Author on the DEV.to developer platform. She currently contributes to the Open Web Application Security Project as a core maintainer and co-author for the Web Security Testing Guide. She writes about software development, cybersecurity, and information security awareness.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-    </div>
-    
-    
-</footer>
-            
-        </div>
-    </section>
-
-    
-    
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-98623582-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-
-<script>
-    scrollTo = (element) => {
-        window.scroll({
-            behavior: 'smooth',
-            left: 0,
-            top: element.offsetTop
-        });
-    }
-
-    document.getElementById("up").addEventListener('click', () => {
-        scrollTo(document.getElementById("main"));
-    });
-</script>
-    
-
-    
-    
-    
-
-</body>
-
-</html>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>A cron job that could save you from a ransomware attack | victoria.dev</title><meta name=monetization content="$twitter.xrptipbot.com/victoriadotdev"><meta property="og:title" content="A cron job that could save you from a ransomware attack - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How a simple scheduled job can help you quickly recover from ransomware."><meta property="og:url" content="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/cover.jpg"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="A cron job that could save you from a ransomware attack"><meta name=twitter:image content="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/cover.jpg"><meta name=twitter:description content="How a simple scheduled job can help you quickly recover from ransomware."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
+<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/cover.jpg alt="cover image"></div><div class=markdown><h1>A cron job that could save you from a ransomware attack</h1><p class=subtitle>How a simple scheduled job can help you quickly recover from ransomware.</p><p class=metadata id=date>November 13, 2019
+☕️☕️&nbsp;
+7 min read
+&nbsp;
+<a class=li-tag href=/tags/cybersecurity/>cybersecurity
+</a>&nbsp;
+<a class=li-tag href=/tags/data/>data
+</a>&nbsp;
+<a class=li-tag href=/tags/terminal/>terminal
+</a>&nbsp;
+<a class=li-tag href=/tags/aws/>aws
+</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>It&rsquo;s 2019, and ransomware has become a thing.</p><p>Systems that interact with the public, like companies, educational institutions, and public services, are most susceptible. While delivery methods for ransomware vary from the physical realm to communication via social sites and email, all methods only require one person to make one mistake in order for ransomware to proliferate.</p><p>Ransomware, as you may have heard, is a malicious program that encrypts your files, rendering them unreadable and useless to you. It can include instructions for paying a ransom, usually by sending cryptocurrency, in order to obtain the decryption key. Successful ransomware attacks typically exploit vital, time-sensitive systems. Victims like public services and medical facilities are more likely to have poor or zero recovery processes, leaving governments or insurance providers to reward attackers with ransom payments.</p><p>Individuals, especially less-than-tech-savvy ones, are no less at risk. Ransomware can occlude personal documents and family photos that may only exist on one machine.</p><p>Thankfully, a fairly low-tech solution exists for rendering ransomware inept: back up your data!</p><p>You could achieve this with a straightforward system like plugging in an external hard drive and dragging files over once a day, but this method has a few hurdles. Manually transferring files may be slow or incomplete, and besides, you&rsquo;ll first have to remember to do it.</p><p>In my constant pursuit of automating all the things, there&rsquo;s one tool I often return to for its simplicity and reliability: <code>cron</code>. Cron does one thing, and does it well: it runs commands on a schedule.</p><p>I first used it a few months shy of three years ago (Have I really been blogging that long?!) to create <a href=/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/>custom desktop notifications on Linux</a>. Using the crontab configuration file, which you can edit by running <code>crontab -e</code>, you can specify a schedule for running any commands you like. Here&rsquo;s what the scheduling syntax looks like, from the <a href=https://en.wikipedia.org/wiki/Cron>Wikipedia cron page</a>:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=c1># ┌───────────── minute (0 - 59)</span>
+<span class=c1># │ ┌───────────── hour (0 - 23)</span>
+<span class=c1># │ │ ┌───────────── day of the month (1 - 31)</span>
+<span class=c1># │ │ │ ┌───────────── month (1 - 12)</span>
+<span class=c1># │ │ │ │ ┌───────────── day of the week (0 - 6)</span> 
+<span class=c1># │ │ │ │ │</span>
+<span class=c1># │ │ │ │ │</span>
+<span class=c1># │ │ │ │ │</span>
+<span class=c1># * * * * * command to execute</span>
+</code></pre></div><p>For example, a cron job that runs every day at 00:00 would look like:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=m>0</span> <span class=m>0</span> * * *
+</code></pre></div><p>To run a job every twelve hours, the syntax is:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=m>0</span> */12 * * *
+</code></pre></div><p>This <a href=https://crontab.guru/>great tool</a> can help you wrap your head around the cron scheduling syntax.</p><p>What&rsquo;s a scheduler have to do with backing up? By itself, not much. The simple beauty of cron is that it runs commands - any shell commands, and any scripts that you&rsquo;d normally run on the command line. As you may have gleaned from my other posts, I&rsquo;m of the strong opinion that you can do just about anything on the command line, including backing up your files. Options for storage in this area are plentiful, from near-to-free local and cloud options, as well as paid managed services too numerous to list. For CLI tooling, we have utilitarian classics like <code>rsync</code>, and CLI tools for specific cloud providers like AWS.</p><h2 id=backing-up-with-rsync>Backing up with <code>rsync</code></h2><p><a href=https://en.wikipedia.org/wiki/Rsync>The <code>rsync</code> utility</a> is a classic choice, and can back up your files to an external hard drive or remote server while making intelligent determinations about which files to update. It uses file size and modification times to recognize file changes, and then only transfers changed files, saving time and bandwidth.</p><p>The <a href=https://download.samba.org/pub/rsync/rsync.html><code>rsync</code> syntax</a> can be a little nuanced; for example, a trailing forward slash will copy just the contents of the directory, instead of the directory itself. I found examples to be helpful in understanding the usage and syntax.</p><p>Here&rsquo;s one for backing up a local directory to a local destination, such as an external hard drive:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>rsync -a /home/user/directory /media/user/destination
+</code></pre></div><p>The first argument is the source, and the second is the destination. Reversing these in the above example would copy files from the mounted drive to the local home directory.</p><p>The <code>a</code> flag for archive mode is one of <code>rsync</code>'s superpowers. Equivalent to flags <code>-rlptgoD</code>, it:</p><ul><li>Syncs files recursively through directories (<code>r</code>);</li><li>Preserves symlinks (<code>l</code>), permissions (<code>p</code>), modification times (<code>t</code>), groups (<code>g</code>), and owner (<code>o</code>); and</li><li>Copies device and special files (<code>D</code>).</li></ul><p>Here&rsquo;s another example, this time for backing up the contents of a local directory to a directory on a remote server using SSH:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
+</code></pre></div><p>The <code>v</code> flag turns on verbose output, which is helpful if you like realtime feedback on which files are being transferred. During large transfers, however, it can tend to slow things down. The <code>z</code> flag can help with that, as it indicates that files should be compressed during transfer.</p><p>The <code>e</code> flag, followed by <code>ssh</code>, tells <code>rsync</code> to use SSH according to the destination instructions provided in the final argument.</p><h2 id=backing-up-with-aws-cli>Backing up with AWS CLI</h2><p>Amazon Web Services offers a command line interface tool for doing just about everything with your AWS set up, including a straightforward <a href=https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/sync.html><code>s3 sync</code> command</a> for recursively copying new and updated files to your S3 storage buckets. As a storage method for back up data, S3 is a stable and inexpensive choice. You can even <a href=https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html>turn on versioning in your bucket</a>.</p><p>The <a href=https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/index.html#directory-and-s3-prefix-operations>syntax for interacting with directories</a> is fairly straightforward, and you can directly indicate your S3 bucket as an <code>S3Uri</code> argument in the form of <code>s3://mybucket/mykey</code>. To back up a local directory to your S3 bucket, the command is:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>aws s3 sync /home/user/directory s3://mybucket
+</code></pre></div><p>Similar to <code>rsync</code>, reversing the source and destination would download files from the S3 bucket.</p><p>The <code>sync</code> command is intuitive by default. It will guess the mime type of uploaded files, as well as include files discovered by following symlinks. A variety of options exist to control these and other defaults, even including flags to specify the server-side encryption to be used.</p><h2 id=setting-up-your-cronjob-back-up>Setting up your cronjob back up</h2><p>You can edit your machine&rsquo;s cron file by running:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>crontab -e
+</code></pre></div><p>Intuitive as it may be, it&rsquo;s worth mentioning that your back up commands will only run when your computer is turned on and the cron daemon is running. With this in mind, choose a schedule for your cronjob that aligns with times when your machine is powered on, and maybe not overloaded with other work.</p><p>To back up to an S3 bucket every day at 8AM, for example, you&rsquo;d put a line in your crontab that looks like:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=m>0</span> <span class=m>8</span> * * * aws s3 sync /home/user/directory s3://mybucket
+</code></pre></div><p>If you&rsquo;re curious whether your cron job is currently running, find the PID of cron with:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>pstree -ap <span class=p>|</span> grep cron
+</code></pre></div><p>Then run <code>pstree -ap &lt;PID></code>.</p><p>This rabbit hole goes deeper; a quick search can reveal different ways of organizing and scheduling cronjobs, or help you find different utilities to run cronjobs when your computer is asleep. To protect against the possibility of ransomware-affected files being transferred to your back up, incrementally separated archives are a good idea. In essence, however, this basic set up is all you really need to create a reliable, automatic back up system.</p><h2 id=dont-feed-the-trolls>Don&rsquo;t feed the trolls</h2><p>Humans are fallible; that&rsquo;s why cyberattacks work. The success of a ransomware attack depends on the victim having no choice but to pay up in order to return to business as usual. A highly accessible recent back up undermines attackers who depend on us being unprepared. By blowing away a system and restoring from yesterday&rsquo;s back up, we may lose a day of progress; ransomers, however, gain nothing at all.</p><p>For further resources on ransomware defense for users and organizations, check out <a href=https://www.us-cert.gov/Ransomware>CISA&rsquo;s advice on ransomware</a>.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/>The surprisingly difficult task of printing newlines in a terminal</a><p class=li-brief>Your guide to string interpolation quirks that confound the best of us.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
+☕️&nbsp;
+4 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/>Secure application architecture basics: separation, configuration, and access</a><p class=li-brief>A starting point for building secure application architecture, for busy developers.</p><p class=metadata><a class=li-tag href=/tags/cybersecurity/>cybersecurity</a>
+☕️☕️&nbsp;
+8 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/>Migrating to the cloud but without screwing it up, or how to move house</a><p class=li-brief>A practical guide to moving to cloud services with minimal downtime, using AWS examples.</p><p class=metadata><a class=li-tag href=/tags/aws/>aws</a>
+☕️☕️&nbsp;
+11 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She is a twice-awarded annual Top Contributor to the freeCodeCamp non-profit, and a recognized Distinguished Author on the DEV.to developer platform. She currently contributes to the Open Web Application Security Project as a core maintainer and co-author for the Web Security Testing Guide. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
+document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
