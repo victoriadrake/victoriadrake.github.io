@@ -1,27 +1,402 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>A remote sync solution for iOS and Linux: Git and Working Copy | victoria.dev</title><meta name=monetization content="$twitter.xrptipbot.com/victoriadotdev"><meta property="og:title" content="A remote sync solution for iOS and Linux: Git and Working Copy - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS."><meta property="og:url" content="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="A remote sync solution for iOS and Linux: Git and Working Copy"><meta name=twitter:image content="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync.png"><meta name=twitter:description content="How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync.png alt="cover image"></div><div class=markdown><h1>A remote sync solution for iOS and Linux: Git and Working Copy</h1><p class=subtitle>How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS.</p><p class=metadata id=date>March 15, 2019
-☕️☕️&nbsp;
-7 min read
-&nbsp;
-<a class=li-tag href=/tags/linux/>linux
-</a>&nbsp;
-<a class=li-tag href=/tags/git/>git
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>I previously wrote about a (hackish) way to use a <a href=/blog/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/>single Dropbox folder on a dual-boot Windows and Linux machine</a>. I&rsquo;ve since <del>gained some sense</del> gone full Linux with Ubuntu 18.04 LTS, but the Dropbox set up seems to have stopped being an option in any case. Fortunately, I&rsquo;ve since found a much better (far less hackish) way to remote-sync files across different file systems. Reflecting my current set up, I&rsquo;m talking about iOS (iPad and iPhone) and my Linux machine.</p><p>The new sync system is based on Git, very customizable, and conveniently extensible. Beyond text files, you can sync anything that Git can (which is almost everything - if you want to edit your <code>.gitignore</code>d files on the go I&rsquo;m not sure I can help). If you&rsquo;re already familiar with Git, getting set up will be a walk in the park. If Git is new to you, I think these tools help make the concepts of Git cloning, pulling, and pushing straightforward to understand.</p><h1 id=components>Components</h1><ul><li><a href=https://workingcopy.app>Working Copy app</a> ($15.99 one-time pro-unlock and well worth it, iOS only)</li><li><a href=https://ia.net/writer>iA Writer app</a> ($8.99 one-time purchase for iOS, also available on Mac, Windows, and Android)</li><li>GitHub repositories (<a href=https://github.blog/2019-01-07-new-year-new-github/>private</a> or public, both free)</li></ul><p>I was inspired by <a href=https://www.macstories.net/ios/my-markdown-writing-and-collaboration-workflow-powered-by-working-copy-3-6-icloud-drive-and-github/>this article</a> as well as <a href=http://blog.joncairns.com/2011/10/how-to-use-git-submodules/>this one</a>.</p><h1 id=get-set-up>Get set up</h1><p>Here are the steps to setting up that I&rsquo;ll walk you through in this article.</p><ol><li>Create your remote repository</li><li>Clone repository to iPad with Working Copy</li><li>Open and edit files with iA Writer</li><li>Push changes back to remote</li><li>Pull changes from repository on your computer</li></ol><p>This system is straightforward to set up whether you&rsquo;re a command line whiz or just getting into Git. Let&rsquo;s do it!</p><h2 id=create-your-remote-repository>Create your remote repository</h2><p>GitHub now offers free <a href=https://github.blog/2019-01-07-new-year-new-github/>private repositories</a> for up to three collaborators. Choose &ldquo;Private&rdquo; on GitHub&rsquo;s repository creation page:</p><p><img src=github-private-repo.png#screenshot alt="Selection options for public and private repository"></p><p>Create the repository. If you&rsquo;d like to, you can follow GitHub&rsquo;s instructions to push some files to it from your computer, or you can add files later from your iPad.</p><h2 id=clone-repository-to-ipad-with-working-copy>Clone repository to iPad with Working Copy</h2><p>Download <a href=https://workingcopy.app>Working Copy</a> from the App Store. It&rsquo;s one of the more expensive apps I&rsquo;ve purchased, but I think it&rsquo;s well worth it. Developer <a href=https://twitter.com/palmin>Anders Borum</a> has a steady track record of frequent updates and incorporating the latest features for iOS apps, like <a href=https://workingcopy.app/manual/dragdrop>drag and drop</a> on iPad. I think he&rsquo;s fairly priced his product in light of the work he puts into maintaining and enhancing it.</p><p>In Working Copy, find the gear icon in the top left corner and touch to open Settings.</p><p><img src=workingcopy-settings.png#screenshot alt="Settings menu in Working Copy"></p><p>Tap on SSH Keys, and you&rsquo;ll see this screen:</p><p><img src=workingcopy-ssh.png#screenshot alt="SSH Key for Working Copy on iPad"></p><p>SSH keys, or Secure Shell keys, are access credentials used in the <a href=https://en.wikipedia.org/wiki/Secure_Shell>SSH protocol</a>. Your key is a password that your device will use to securely connect with your remote repository host - GitHub, in our example. Since anyone with your SSH keys can potentially pretend to be you and gain access to your files, it&rsquo;s important not to share them accidentally, like in a screenshot on a blog post.</p><p>Tap on the second line that looks like &ldquo;WorkingCopy@iPad-xxxxxxxx&rdquo; to get this screen:</p><p><img src=workingcopy-ssh-connect.png#screenshot alt="Connect to GitHub or Bitbucket in Working Copy"></p><p>Working Copy supports easy connection to both BitBucket and GitHub. Tap &ldquo;Connect With GitHub&rdquo; or BitBucket to bring up some familiar sign-in screens that will authorize Working Copy to access your account(s).</p><p>Once connected, tap the &ldquo;+&rdquo; symbol in the top right of the side bar to add a new repository. Choose &ldquo;Clone repository&rdquo; to bring up this screen:</p><p><img src=workingcopy-read-repos.png#screenshot alt="Loading repositories from remote"></p><p>Here, you can either manually input the remote URL, or simply choose from the list of repositories that Working Copy fetches from your connected account. When you make your choice, the app clones the repository to your iPad and it will show up in the sidebar. You&rsquo;re connected!</p><h2 id=open-and-edit-files-with-ia-writer>Open and edit files with iA Writer</h2><p>One of the (many) reasons I adore <a href=https://ia.net/writer>iA Writer</a> is its ability to select your freshly cloned remote repository as a Library Location. To do this in the iA Writer app:</p><ol><li>From the main Library list, in the top right of the sidebar, tap &ldquo;Edit&rdquo;</li><li>Tap &ldquo;Add Location&mldr;&rdquo;</li><li>A helpful popup appears. Tap OK.</li><li>From the Working Copy location, tap &ldquo;Select&rdquo; in the top right, then choose the repository folder.</li><li>Tap &ldquo;Open&rdquo;, then &ldquo;Done&rdquo;</li></ol><p>Your remote repository now appears as a Location in the sidebar. Tap on it to work within this directory.</p><p>While inside this location, new files you create (by tapping the pencil-and-paper icon in the top right corner) will be saved to this folder locally. As you work, iA Writer automatically saves your progress. Next, we&rsquo;ll look at pushing those files and changes back to your remote.</p><h2 id=push-changes-back-to-remote>Push changes back to remote</h2><p>Once you&rsquo;ve made changes to your files, open Working Copy again. You should see a yellow dot on your changed repository.</p><p><img src=workingcopy-changed-repo.png#screenshot alt="Yellow dot indicating changes to repository"></p><p>Tap on your repository name, then on &ldquo;Repository Status and Configuration&rdquo; at the top of the sidebar. Your changed files will be indicated by yellow dots or green &ldquo;+&rdquo; symbols. These mean that you&rsquo;ve modified or added files, respectively.</p><p>Working Copy is a sweet iOS Git client, and you can tap on your files to see additional information including a comparison of changes (&ldquo;diff&rdquo;) as well as status and Git history. You can even edit files right within the app, with <a href=https://workingcopyapp.com/manual/edit>syntax highlighting</a> for its many supported languages. For now, we&rsquo;ll look at how to push your changed work to your remote repository.</p><p><img src=workingcopy-changes-to-commit.png#screenshot alt="Changes to commit"></p><p>On the &ldquo;Repository Status and Configuration&rdquo; page, you&rsquo;ll see right at the top that there are changes to be committed. If you&rsquo;re new to Git, this is like &ldquo;saving your changes&rdquo; to your Git history, something typically done with the terminal command <a href=https://git-scm.com/docs/git-commit><code>git commit</code></a>. You can think of this as saving the files that we&rsquo;ll want to send to the GitHub repository. Tap &ldquo;Commit changes.&rdquo;</p><p><img src=workingcopy-commit-changes.png#screenshot alt="Add a commit message and select files to commit"></p><p>Enter your commit message, and select the files you want to add. Turn on the &ldquo;Push&rdquo; switch to send everything to your remote repository when you commit the files. Then tap &ldquo;Commit.&rdquo;</p><p>You&rsquo;ll see a progress bar as your files are uploaded, and then a confirmation message on the status screen.</p><p><img src=workingcopy-commit-success.png#screenshot alt="Commit success message"></p><p>Congratulations! Your changes are now present in your remote repository on GitHub. You&rsquo;ve successfully synced your files remotely!</p><h2 id=pull-changes-from-repository-on-your-computer>Pull changes from repository on your computer</h2><p>To bring your updated files full circle to your computer, you pull them from the GitHub repository. I prefer to use the terminal for this as it&rsquo;s quick and easy, but GitHub also offers a <a href=https://help.github.com/en/desktop/getting-started-with-github-desktop>graphical client</a> if terminal commands seem a little alien for now.</p><p>If you started with the GitHub repository, you can clone it to a folder on your computer by following <a href=https://help.github.com/en/articles/cloning-a-repository>these instructions</a>.</p><h2 id=staying-in-sync>Staying in sync</h2><p>When you update your work on your computer, you&rsquo;ll use Git to push your changes to the remote repository. To do this, you can use GitHub&rsquo;s <a href=https://help.github.com/en/desktop/getting-started-with-github-desktop>graphical client</a>, or follow <a href=https://help.github.com/en/articles/adding-an-existing-project-to-github-using-the-command-line>these instructions</a>.</p><p>On your iOS device, Working Copy makes pulling and pushing as simple as a single tap. On the Repository Status and Configuration page, tap on the remote name under &ldquo;Remotes&rdquo;.</p><p><img src=workingcopy-git-remote.png#screenshot alt="List of Remotes in Working Copy"></p><p>Then tap &ldquo;Synchronize&rdquo;. Working Copy will take care of the details of pushing your committed changes and/or pulling any new changes it finds from the remote repository.</p><h1 id=not-bad-right>Not bad, right?</h1><p>For a Git-based developer and work-anywhere-aholic like me, this set up couldn&rsquo;t be more convenient. Working Copy really makes staying in sync with my remote repositories seamless, nevermind the ability to work with any of my GitHub repos on the go.</p><p>For editing on the go, here&rsquo;s a useful tip. Use <code>.gitignore</code> in your sync repository if you don&rsquo;t need to move large files, like images, around with you. This will stop the ignored files from being pushed to GitHub and pulled to your iOS device - they&rsquo;ll only remain on your computer&rsquo;s larger hard drive. The <code>.gitignore</code> file of one of my sync repositories looks like this:</p><pre><code>*.png
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
+<title>
+    A remote sync solution for iOS and Linux: Git and Working Copy | victoria.dev
+</title>
+
+
+    <meta
+  name="monetization"
+  content="$twitter.xrptipbot.com/victoriadotdev">
+    <meta property="og:title" content="A remote sync solution for iOS and Linux: Git and Working Copy - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS." />
+<meta property="og:url" content="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync.png"/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A remote sync solution for iOS and Linux: Git and Working Copy" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync.png"/>
+
+<meta name="twitter:description"
+    content="How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.ca1ab789213db28d077b1100bd25923f68866e53acc96682ab8c8d7a0656e512.css" integrity="sha256-yhq3iSE9so0HexEAvSWSP2iGblOsyWaCq4yNegZW5RI=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/cover_remote-sync.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        A remote sync solution for iOS and Linux: Git and Working Copy
+    </h1>
+    
+    <p class="subtitle">How to set up a cross-platform cloud sync solution for working anywhere using Git on iOS.</p>
+    <p class="metadata" id="date">
+        March 15, 2019
+        ☕️☕️&nbsp;
+        7 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/linux/">
+            linux
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/git/">
+            git
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>I previously wrote about a (hackish) way to use a <a href="/blog/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/">single Dropbox folder on a dual-boot Windows and Linux machine</a>. I&rsquo;ve since <del>gained some sense</del> gone full Linux with Ubuntu 18.04 LTS, but the Dropbox set up seems to have stopped being an option in any case. Fortunately, I&rsquo;ve since found a much better (far less hackish) way to remote-sync files across different file systems. Reflecting my current set up, I&rsquo;m talking about iOS (iPad and iPhone) and my Linux machine.</p>
+<p>The new sync system is based on Git, very customizable, and conveniently extensible. Beyond text files, you can sync anything that Git can (which is almost everything - if you want to edit your <code>.gitignore</code>d files on the go I&rsquo;m not sure I can help). If you&rsquo;re already familiar with Git, getting set up will be a walk in the park. If Git is new to you, I think these tools help make the concepts of Git cloning, pulling, and pushing straightforward to understand.</p>
+<h1 id="components">Components</h1>
+<ul>
+<li><a href="https://workingcopy.app">Working Copy app</a> ($15.99 one-time pro-unlock and well worth it, iOS only)</li>
+<li><a href="https://ia.net/writer">iA Writer app</a> ($8.99 one-time purchase for iOS, also available on Mac, Windows, and Android)</li>
+<li>GitHub repositories (<a href="https://github.blog/2019-01-07-new-year-new-github/">private</a> or public, both free)</li>
+</ul>
+<p>I was inspired by <a href="https://www.macstories.net/ios/my-markdown-writing-and-collaboration-workflow-powered-by-working-copy-3-6-icloud-drive-and-github/">this article</a> as well as <a href="http://blog.joncairns.com/2011/10/how-to-use-git-submodules/">this one</a>.</p>
+<h1 id="get-set-up">Get set up</h1>
+<p>Here are the steps to setting up that I&rsquo;ll walk you through in this article.</p>
+<ol>
+<li>Create your remote repository</li>
+<li>Clone repository to iPad with Working Copy</li>
+<li>Open and edit files with iA Writer</li>
+<li>Push changes back to remote</li>
+<li>Pull changes from repository on your computer</li>
+</ol>
+<p>This system is straightforward to set up whether you&rsquo;re a command line whiz or just getting into Git. Let&rsquo;s do it!</p>
+<h2 id="create-your-remote-repository">Create your remote repository</h2>
+<p>GitHub now offers free <a href="https://github.blog/2019-01-07-new-year-new-github/">private repositories</a> for up to three collaborators. Choose &ldquo;Private&rdquo; on GitHub&rsquo;s repository creation page:</p>
+<p><img src="github-private-repo.png#screenshot" alt="Selection options for public and private repository"></p>
+<p>Create the repository. If you&rsquo;d like to, you can follow GitHub&rsquo;s instructions to push some files to it from your computer, or you can add files later from your iPad.</p>
+<h2 id="clone-repository-to-ipad-with-working-copy">Clone repository to iPad with Working Copy</h2>
+<p>Download <a href="https://workingcopy.app">Working Copy</a> from the App Store. It&rsquo;s one of the more expensive apps I&rsquo;ve purchased, but I think it&rsquo;s well worth it. Developer <a href="https://twitter.com/palmin">Anders Borum</a> has a steady track record of frequent updates and incorporating the latest features for iOS apps, like <a href="https://workingcopy.app/manual/dragdrop">drag and drop</a> on iPad. I think he&rsquo;s fairly priced his product in light of the work he puts into maintaining and enhancing it.</p>
+<p>In Working Copy, find the gear icon in the top left corner and touch to open Settings.</p>
+<p><img src="workingcopy-settings.png#screenshot" alt="Settings menu in Working Copy"></p>
+<p>Tap on SSH Keys, and you&rsquo;ll see this screen:</p>
+<p><img src="workingcopy-ssh.png#screenshot" alt="SSH Key for Working Copy on iPad"></p>
+<p>SSH keys, or Secure Shell keys, are access credentials used in the <a href="https://en.wikipedia.org/wiki/Secure_Shell">SSH protocol</a>. Your key is a password that your device will use to securely connect with your remote repository host - GitHub, in our example. Since anyone with your SSH keys can potentially pretend to be you and gain access to your files, it&rsquo;s important not to share them accidentally, like in a screenshot on a blog post.</p>
+<p>Tap on the second line that looks like &ldquo;WorkingCopy@iPad-xxxxxxxx&rdquo; to get this screen:</p>
+<p><img src="workingcopy-ssh-connect.png#screenshot" alt="Connect to GitHub or Bitbucket in Working Copy"></p>
+<p>Working Copy supports easy connection to both BitBucket and GitHub. Tap &ldquo;Connect With GitHub&rdquo; or BitBucket to bring up some familiar sign-in screens that will authorize Working Copy to access your account(s).</p>
+<p>Once connected, tap the &ldquo;+&rdquo; symbol in the top right of the side bar to add a new repository. Choose &ldquo;Clone repository&rdquo; to bring up this screen:</p>
+<p><img src="workingcopy-read-repos.png#screenshot" alt="Loading repositories from remote"></p>
+<p>Here, you can either manually input the remote URL, or simply choose from the list of repositories that Working Copy fetches from your connected account. When you make your choice, the app clones the repository to your iPad and it will show up in the sidebar. You&rsquo;re connected!</p>
+<h2 id="open-and-edit-files-with-ia-writer">Open and edit files with iA Writer</h2>
+<p>One of the (many) reasons I adore <a href="https://ia.net/writer">iA Writer</a> is its ability to select your freshly cloned remote repository as a Library Location. To do this in the iA Writer app:</p>
+<ol>
+<li>From the main Library list, in the top right of the sidebar, tap &ldquo;Edit&rdquo;</li>
+<li>Tap &ldquo;Add Location&hellip;&rdquo;</li>
+<li>A helpful popup appears. Tap OK.</li>
+<li>From the Working Copy location, tap &ldquo;Select&rdquo; in the top right, then choose the repository folder.</li>
+<li>Tap &ldquo;Open&rdquo;, then &ldquo;Done&rdquo;</li>
+</ol>
+<p>Your remote repository now appears as a Location in the sidebar. Tap on it to work within this directory.</p>
+<p>While inside this location, new files you create (by tapping the pencil-and-paper icon in the top right corner) will be saved to this folder locally. As you work, iA Writer automatically saves your progress. Next, we&rsquo;ll look at pushing those files and changes back to your remote.</p>
+<h2 id="push-changes-back-to-remote">Push changes back to remote</h2>
+<p>Once you&rsquo;ve made changes to your files, open Working Copy again. You should see a yellow dot on your changed repository.</p>
+<p><img src="workingcopy-changed-repo.png#screenshot" alt="Yellow dot indicating changes to repository"></p>
+<p>Tap on your repository name, then on &ldquo;Repository Status and Configuration&rdquo; at the top of the sidebar. Your changed files will be indicated by yellow dots or green &ldquo;+&rdquo; symbols. These mean that you&rsquo;ve modified or added files, respectively.</p>
+<p>Working Copy is a sweet iOS Git client, and you can tap on your files to see additional information including a comparison of changes (&ldquo;diff&rdquo;) as well as status and Git history. You can even edit files right within the app, with <a href="https://workingcopyapp.com/manual/edit">syntax highlighting</a> for its many supported languages. For now, we&rsquo;ll look at how to push your changed work to your remote repository.</p>
+<p><img src="workingcopy-changes-to-commit.png#screenshot" alt="Changes to commit"></p>
+<p>On the &ldquo;Repository Status and Configuration&rdquo; page, you&rsquo;ll see right at the top that there are changes to be committed. If you&rsquo;re new to Git, this is like &ldquo;saving your changes&rdquo; to your Git history, something typically done with the terminal command <a href="https://git-scm.com/docs/git-commit"><code>git commit</code></a>. You can think of this as saving the files that we&rsquo;ll want to send to the GitHub repository. Tap &ldquo;Commit changes.&rdquo;</p>
+<p><img src="workingcopy-commit-changes.png#screenshot" alt="Add a commit message and select files to commit"></p>
+<p>Enter your commit message, and select the files you want to add. Turn on the &ldquo;Push&rdquo; switch to send everything to your remote repository when you commit the files. Then tap &ldquo;Commit.&rdquo;</p>
+<p>You&rsquo;ll see a progress bar as your files are uploaded, and then a confirmation message on the status screen.</p>
+<p><img src="workingcopy-commit-success.png#screenshot" alt="Commit success message"></p>
+<p>Congratulations! Your changes are now present in your remote repository on GitHub. You&rsquo;ve successfully synced your files remotely!</p>
+<h2 id="pull-changes-from-repository-on-your-computer">Pull changes from repository on your computer</h2>
+<p>To bring your updated files full circle to your computer, you pull them from the GitHub repository. I prefer to use the terminal for this as it&rsquo;s quick and easy, but GitHub also offers a <a href="https://help.github.com/en/desktop/getting-started-with-github-desktop">graphical client</a> if terminal commands seem a little alien for now.</p>
+<p>If you started with the GitHub repository, you can clone it to a folder on your computer by following <a href="https://help.github.com/en/articles/cloning-a-repository">these instructions</a>.</p>
+<h2 id="staying-in-sync">Staying in sync</h2>
+<p>When you update your work on your computer, you&rsquo;ll use Git to push your changes to the remote repository. To do this, you can use GitHub&rsquo;s <a href="https://help.github.com/en/desktop/getting-started-with-github-desktop">graphical client</a>, or follow <a href="https://help.github.com/en/articles/adding-an-existing-project-to-github-using-the-command-line">these instructions</a>.</p>
+<p>On your iOS device, Working Copy makes pulling and pushing as simple as a single tap. On the Repository Status and Configuration page, tap on the remote name under &ldquo;Remotes&rdquo;.</p>
+<p><img src="workingcopy-git-remote.png#screenshot" alt="List of Remotes in Working Copy"></p>
+<p>Then tap &ldquo;Synchronize&rdquo;. Working Copy will take care of the details of pushing your committed changes and/or pulling any new changes it finds from the remote repository.</p>
+<h1 id="not-bad-right">Not bad, right?</h1>
+<p>For a Git-based developer and work-anywhere-aholic like me, this set up couldn&rsquo;t be more convenient. Working Copy really makes staying in sync with my remote repositories seamless, nevermind the ability to work with any of my GitHub repos on the go.</p>
+<p>For editing on the go, here&rsquo;s a useful tip. Use <code>.gitignore</code> in your sync repository if you don&rsquo;t need to move large files, like images, around with you. This will stop the ignored files from being pushed to GitHub and pulled to your iOS device - they&rsquo;ll only remain on your computer&rsquo;s larger hard drive. The <code>.gitignore</code> file of one of my sync repositories looks like this:</p>
+<pre><code>*.png
 *.jpeg
 *.jpg
 *.mp4
 *.gif
-</code></pre><p>This means all the media files stay on my computer, and I can pull just the text file content to my iPad from GitHub to work on while I&rsquo;m out and about.</p><p>I most recently used this set up to get some writing done while hanging out in the atrium of Washington DC&rsquo;s National Portrait Gallery, which is pleasantly photogenic.</p><p><img src=washington-portrait-gallery.jpg alt="The atrium of the National Portrait Gallery"></p><p><a href=https://twitter.com/victoriadotdev>I&rsquo;d love to hear</a> how this set up works for you and how you use it. In the meantime, happy working!</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/>How to do twice as much with half the keystrokes using `.bashrc`</a><p class=li-brief>An overview of time-saving aliases, functions, and creating a useful Bash prompt.</p><p class=metadata><a class=li-tag href=/tags/linux/>linux</a>
-☕️☕️&nbsp;
-7 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/>How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</a><p class=li-brief>Using xargs and awk in Bash to automate managing remote-hosted repositories.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
-☕️☕️&nbsp;
-8 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/>Bash and shell expansions: lazy list-making</a><p class=li-brief>A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
-☕️&nbsp;
-5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She is a twice-awarded annual Top Contributor to the freeCodeCamp non-profit, and a recognized Distinguished Author on the DEV.to developer platform. She currently contributes to the Open Web Application Security Project as a core maintainer and co-author for the Web Security Testing Guide. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
-document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
+</code></pre><p>This means all the media files stay on my computer, and I can pull just the text file content to my iPad from GitHub to work on while I&rsquo;m out and about.</p>
+<p>I most recently used this set up to get some writing done while hanging out in the atrium of Washington DC&rsquo;s National Portrait Gallery, which is pleasantly photogenic.</p>
+<p><img src="washington-portrait-gallery.jpg" alt="The atrium of the National Portrait Gallery"></p>
+<p><a href="https://twitter.com/victoriadotdev">I&rsquo;d love to hear</a> how this set up works for you and how you use it. In the meantime, happy working!</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/">How to do twice as much with half the keystrokes using `.bashrc`</a>
+        <p class="li-brief">
+            An overview of time-saving aliases, functions, and creating a useful Bash prompt.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/linux/">linux</a>
+            
+            ☕️☕️&nbsp;
+            7 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/">How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</a>
+        <p class="li-brief">
+            Using xargs and awk in Bash to automate managing remote-hosted repositories.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/terminal/">terminal</a>
+            
+            ☕️☕️&nbsp;
+            8 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/">Bash and shell expansions: lazy list-making</a>
+        <p class="li-brief">
+            A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/terminal/">terminal</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a senior software developer in Washington, DC. She is a twice-awarded annual Top Contributor to the freeCodeCamp non-profit, and a recognized Distinguished Author on the DEV.to developer platform. She currently contributes to the Open Web Application Security Project as a core maintainer and co-author for the Web Security Testing Guide. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>
