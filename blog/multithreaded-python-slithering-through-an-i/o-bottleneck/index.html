@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -269,11 +269,13 @@
 <p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
 <p>In Hydra, the task of parsing response data and assembling results into a report is relatively fast, since it all happens on the CPU. The slowest portion of the program&rsquo;s execution, by over six orders of magnitude, is network latency. Not only does Hydra need to fetch packets, but whole web pages! One way of improving Hydra&rsquo;s performance is to find a way for the page fetching tasks to execute without blocking the main thread.</p>
 <p>Python has a couple options for doing tasks in parallel: multiple processes, or multiple threads. These methods allow you to circumvent the GIL and speed up execution in a couple different ways.</p>
-<h2 id="multiple-processes">Multiple processes</h2>
+
+<h2 id="multiple-processes" class="anchor-link"><a href="#multiple-processes">Multiple processes</a></h2>
 <p>To execute parallel tasks using multiple processes, you can use Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor"><code>ProcessPoolExecutor</code></a>. A concrete subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a> from the <a href="https://docs.python.org/3/library/concurrent.futures.html"><code>concurrent.futures</code> module</a>, <code>ProcessPoolExecutor</code> uses a pool of processes spawned with the <a href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing"><code>multiprocessing</code> module</a> to avoid the GIL.</p>
 <p>This option uses worker subprocesses that maximally default to the number of processors on the machine. The <code>multiprocessing</code> module allows you to maximally parallelize function execution across processes, which can really speed up compute-bound (or <a href="https://en.wikipedia.org/wiki/CPU-bound">CPU-bound</a>) tasks.</p>
 <p>Since the main bottleneck for Hydra is I/O and not the processing to be done by the CPU, I&rsquo;m better served by using multiple threads.</p>
-<h2 id="multiple-threads">Multiple threads</h2>
+
+<h2 id="multiple-threads" class="anchor-link"><a href="#multiple-threads">Multiple threads</a></h2>
 <p>Fittingly named, Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor"><code>ThreadPoolExecutor</code></a> uses a pool of threads to execute asynchronous tasks. Also a subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a>, it uses a defined number of maximum worker threads (at least five by default, according to the formula <code>min(32, os.cpu_count() + 4)</code>) and reuses idle threads before starting new ones, making it pretty efficient.</p>
 <p>Here is a snippet of Hydra with comments showing how Hydra uses <code>ThreadPoolExecutor</code> to achieve parallel multithreaded bliss:</p>
 <div class="highlight"><pre class="chroma"><code class="language-py" data-lang="py"><span class="c1"># Create the Checker class</span>
@@ -308,7 +310,8 @@
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 </code></pre></div><p>You can view the full code in <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&rsquo;s GitHub repository</a>.</p>
-<h2 id="single-thread-to-multithread">Single thread to multithread</h2>
+
+<h2 id="single-thread-to-multithread" class="anchor-link"><a href="#single-thread-to-multithread">Single thread to multithread</a></h2>
 <p>If you&rsquo;d like to see the full effect, I compared the run times for checking my website between a prototype single-thread program, and the <del>multiheaded</del>multithreaded Hydra.</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
 

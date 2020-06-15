@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -197,9 +197,12 @@
 <li>Controlled access and user scope</li>
 </ol>
 <p>This is only a jumping-off point meant to get us started on the right foot; a complete picture of a fully-realized application&rsquo;s security posture includes areas outside the scope of this post, including authentication, logging and monitoring, integration, and sometimes compliance.</p>
-<h2 id="1-separated-storage">1. Separated storage</h2>
+
+<h2 id="1-separated-storage" class="anchor-link"><a href="#1-separated-storage">1. Separated storage</a></h2>
 <p>From a security standpoint, the concept of separation refers to storing files that serve different purposes in different places. When we&rsquo;re constructing our building and deciding where all the rooms go, we similarly create the lobby on the ground floor and place administrative offices on higher floors, perhaps off the main path. While both are rooms, we understand that they serve different purposes, have different functional needs, and possibly very different security requirements.</p>
-<p><img src="separation.png" alt="Separation of building floors"></p>
+<p>
+<img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/separation.png" alt="Separation of building floors"  />
+</p>
 <p>When it comes to our files, the benefit is perhaps easiest for us to understand if we consider a simple file structure:</p>
 <div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">application/
  ├───html/
@@ -216,9 +219,12 @@
 <p>While the dot syntax saves us some typing, it also introduces the interesting advantage of not actually needing to know what the parent directory is called in order to go to it. Consider an attack payload script, delivered into the <code>images/</code> folder of our insecure application, that went up one directory using <code>cd ../</code> and then sent everything it found to the attacker, on repeat. Eventually, it would reach the root application directory and access the <code>super-secret-configurations/</code> folder. Not good.</p>
 <p>While other measures should be in place to prevent path traversal and related user upload vulnerabilities, the simplest prevention by far is a separation of storage. Core application files and assets should not be combined with other data, and especially not with <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">user input</a>. It&rsquo;s best to keep user-uploaded files and activity logs (which may contain juicy data and can be vulnerable to injection attacks) separate from the main application.</p>
 <p>Separation can be achieved in a few ways, such as by using a different server, different instance, separate IP range, or separate domain.</p>
-<h2 id="2-customized-configuration">2. Customized configuration</h2>
+
+<h2 id="2-customized-configuration" class="anchor-link"><a href="#2-customized-configuration">2. Customized configuration</a></h2>
 <p>While wasting time on customization can hinder productivity, one area that we definitely want to customize is configuration settings. <a href="https://github.com/OWASP/Top10/blob/cb5f8967bba106e14a350761ac4f93b8aec7f8fa/2017/en/0xa6-security-misconfiguration.md">Security misconfiguration</a> is listed in the OWASP Top 10. A significant number of security incidents occur because a server, firewall, or administrative account is running in production with default settings. Upon the opening of our new building, we&rsquo;d hopefully be more careful to ensure we haven&rsquo;t left any keys in the locks.</p>
-<p><img src="defaultkey.png" alt="Three keys"></p>
+<p>
+<img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/defaultkey.png" alt="Three keys"  />
+</p>
 <p>Usually, the victims of attacks related to default settings aren&rsquo;t specifically targeted. Rather, they are found by automated scanning tools that attackers run over many possible targets, effectively prodding at many different systems to see if any roll over and expose some useful exploit. The automated nature of this attack means that it&rsquo;s important for us to review settings for every piece of our architecture. Even if an individual piece doesn&rsquo;t seem significant, it may provide a vulnerability that allows an attacker to use it as a gateway to our larger application.</p>
 <p>In particular, examine architecture components for unattended areas such as:</p>
 <ul>
@@ -231,13 +237,17 @@
 <li>Directory listings, or sensitive file types, left accessible by default.</li>
 </ul>
 <p>This list isn&rsquo;t exhaustive. Specific architecture components, such as cloud storage or web servers, will have other configurable features that should be reviewed. In general, reduce the application&rsquo;s attack surface by using minimal architecture components. If we use fewer components or don&rsquo;t install modules we don&rsquo;t need, we&rsquo;ll have fewer possible attack entry points to configure and safeguard.</p>
-<h2 id="3-controlled-access-and-user-scope">3. Controlled access and user scope</h2>
+
+<h2 id="3-controlled-access-and-user-scope" class="anchor-link"><a href="#3-controlled-access-and-user-scope">3. Controlled access and user scope</a></h2>
 <p>One of the more difficult security problems to test in an application is misconfigured access control. Automated testing tools have limited capability to find areas of an application that one user shouldn&rsquo;t be able to access. Thus, this is often left to manual testing or source code review to discover. By considering this vulnerability early on in the software development lifecycle when architectural decisions are being made, we reduce the risk that it becomes a problem that&rsquo;s harder to fix later. After all, we wouldn&rsquo;t simply leave our master keys out of reach on a high ledge and hope no one comes along with a ladder.</p>
-<p><img src="access.png" alt="A cartoon of a user attempting to elevate privilege"></p>
+<p>
+<img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/access.png" alt="A cartoon of a user attempting to elevate privilege"  />
+</p>
 <p><a href="https://github.com/OWASP/Top10/blob/master/2017/en/0xa5-broken-access-control.md">Broken access control</a> is listed in the OWASP Top 10, which goes into more detail on its various forms. As a simple example, consider an application with two levels of access: administrators, and users. We want to build a new feature - the ability to moderate or ban users - with the intention that only administrators would be allowed to use it.</p>
 <p>If we&rsquo;re aware of the possibility of access control misconfigurations or exploits, we may decide to build the moderation feature in a completely separate area from the user-accessible space, such as on a different domain, or as part of a model that users don&rsquo;t share. This greatly reduces the risk that an access control misconfiguration or elevation of privilege vulnerability might allow a user to improperly access the moderation feature later on.</p>
 <p>Of course, robust access control in our application needs more support to be effective. Consider factors such as sensitive tokens, or keys passed as URL parameters, or whether a control fails securely or insecurely. Nevertheless, by considering authorization at the architectural stage, we can set ourselves up to make further reinforcements easier to implement.</p>
-<h2 id="security-basics-for-maximum-benefit">Security basics for maximum benefit</h2>
+
+<h2 id="security-basics-for-maximum-benefit" class="anchor-link"><a href="#security-basics-for-maximum-benefit">Security basics for maximum benefit</a></h2>
 <p>Similar to avoiding racking up technical debt by choosing a well-vetted framework, developers can avoid security debt by becoming aware of common vulnerabilities and the simple architectural decisions we can make to help mitigate them. For a much more detailed resource on how to bake security into our applications from the start, the <a href="https://github.com/OWASP/ASVS">OWASP Application Security Verification Standard</a> is a robust guide.</p>
 
 

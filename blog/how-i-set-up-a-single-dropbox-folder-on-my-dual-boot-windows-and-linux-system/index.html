@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -183,7 +183,8 @@
 <p><em>Dropbox on Windows and Linux maintain metadata on each OS differently, so they&rsquo;ll confuse each other. This will likely break things like version tracking and comments and as this isn&rsquo;t a supported configuration probably worse.</em></p>
 </blockquote>
 <p><em>I&rsquo;ve personally moved away from using Dropbox (and for that matter, dual-boot) since writing this article. My current file sync solution for my all-Linux system uses a private repository on <a href="https://bitbucket.org">Bitbucket</a>. Still, I never noticed any problems when I used this dual-boot setup. Here&rsquo;s how to do it, at your own risk.</em></p>
-<h1 id="the-two-os-one-dropbox-folder-setup">The two OS, one Dropbox folder setup</h1>
+
+<h1 id="the-two-os-one-dropbox-folder-setup" class="anchor-link"><a href="#the-two-os-one-dropbox-folder-setup">The two OS, one Dropbox folder setup</a></h1>
 <p>I&rsquo;ve now set up two different laptops to dual-boot Windows 10 and different Linux distributions. Here&rsquo;s how to ensure you maintain one Dropbox folder over both operating systems.</p>
 <p>Assuming Windows was there first:</p>
 <ol>
@@ -192,36 +193,53 @@
 <li>Sign in to link to Dropbox</li>
 <li>Immediately change Dropbox folder location to the mounted drive (same Dropbox folder as Windows)</li>
 </ol>
-<h1 id="get-it-right-the-first-time">Get it right the first time</h1>
+
+<h1 id="get-it-right-the-first-time" class="anchor-link"><a href="#get-it-right-the-first-time">Get it right the first time</a></h1>
 <p>Dropbox will automatically set up your Dropbox folder when you run it the first time. On Windows it&rsquo;s typically located in your C:\ or D:\ drive as <code>D:\Dropbox</code> and on Linux, it&rsquo;ll go into <code>home/Dropbox</code> by default. They key to being able to specify the folder location is to do so the <em>very first time</em> you start Dropbox.</p>
-<h1 id="mount-the-windows-drive-in-linux">Mount the Windows Drive in Linux</h1>
+
+<h1 id="mount-the-windows-drive-in-linux" class="anchor-link"><a href="#mount-the-windows-drive-in-linux">Mount the Windows Drive in Linux</a></h1>
 <p>If you started with Windows 10, you&rsquo;ll need to make sure the disk that contains your Dropbox folder is mounted in Linux so that you can access it.</p>
 <p>You can mount the Windows disk in Linux using the terminal with these steps:</p>
-<h2 id="1-find-the-correct-disk-partition-address">1. Find the correct disk partition address</h2>
+
+<h2 id="1-find-the-correct-disk-partition-address" class="anchor-link"><a href="#1-find-the-correct-disk-partition-address">1. Find the correct disk partition address</a></h2>
 <p>Type <code>sudo fdisk -l</code>. This will return a list of your partitions and information on them. Look at the &ldquo;Size&rdquo; and &ldquo;Type&rdquo; categories to determine which list item is the Windows disk partition that you wish to mount. Its address will look something like <code>/dev/sda2</code>.</p>
-<h2 id="2-make-a-directory-to-mount-the-drive-to">2. Make a directory to mount the drive to</h2>
+
+<h2 id="2-make-a-directory-to-mount-the-drive-to" class="anchor-link"><a href="#2-make-a-directory-to-mount-the-drive-to">2. Make a directory to mount the drive to</a></h2>
 <p>Basically, this is what Linux will use to refer to your Windows drive.<br>
 Type <code>sudo mkdir -p /mnt/winD</code> (where <code>winD</code> is whatever you want to call your Windows disk)</p>
-<h2 id="3-mount-the-disk">3. Mount the disk</h2>
+
+<h2 id="3-mount-the-disk" class="anchor-link"><a href="#3-mount-the-disk">3. Mount the disk</a></h2>
 <p>The syntax follows the format: [mount command] [file system type] [windows disk address] [target address]<br>
 <code>sudo mount -t ntfs /dev/sda2 /mnt/winD</code></p>
-<h2 id="4-mount-disk-automatically-on-boot">4. Mount disk automatically on boot</h2>
+
+<h2 id="4-mount-disk-automatically-on-boot" class="anchor-link"><a href="#4-mount-disk-automatically-on-boot">4. Mount disk automatically on boot</a></h2>
 <p>Edit your <code>/etc/fstab</code> file to mount the disk automatically when you boot Linux.<br>
 <code>sudo vi /etc/fstab</code><br>
 Add the mount instruction to the file. The syntax is in the format: [windows disk address] [target address] [file system type] [options] [dump] [pass]<br>
 <code>/dev/sda2 /mnt/winD fat32 defaults 0 2</code></p>
-<h1 id="install-dropbox-in-linux">Install Dropbox in Linux</h1>
+
+<h1 id="install-dropbox-in-linux" class="anchor-link"><a href="#install-dropbox-in-linux">Install Dropbox in Linux</a></h1>
 <p><a href="https://www.dropbox.com/install-linux">Install Dropbox</a> via package download or using the terminal. The completed installation will produce a GUI sign-in.</p>
-<p><img src="dropbox-1.jpg#center" alt="Aforementioned GUI"></p>
-<h1 id="sign-in-to-link-to-dropbox">Sign in to link to Dropbox</h1>
+<p>
+<img src="https://victoria.dev/blog/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/dropbox-1.jpg#center" alt="Aforementioned GUI"  />
+</p>
+
+<h1 id="sign-in-to-link-to-dropbox" class="anchor-link"><a href="#sign-in-to-link-to-dropbox">Sign in to link to Dropbox</a></h1>
 <p>Input your credentials and wait while Dropbox does its thing. Once you see the &ldquo;Congratulations!&rdquo; message, stop! Don&rsquo;t click the big obvious button, and read on.</p>
-<p><img src="dropbox-2.jpg#center" alt="Congratulations screen"></p>
-<h1 id="immediately-change-your-dropbox-folder-location-to-the-mounted-drive">Immediately change your Dropbox folder location to the mounted drive</h1>
+<p>
+<img src="https://victoria.dev/blog/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/dropbox-2.jpg#center" alt="Congratulations screen"  />
+</p>
+
+<h1 id="immediately-change-your-dropbox-folder-location-to-the-mounted-drive" class="anchor-link"><a href="#immediately-change-your-dropbox-folder-location-to-the-mounted-drive">Immediately change your Dropbox folder location to the mounted drive</a></h1>
 <p>Click on &ldquo;Advanced Settings&rdquo; and change &ldquo;Dropbox location&rdquo; to the Dropbox folder on your mounted drive. This should be the same folder as in your Windows setup. Ok, now you can click the big obvious &ldquo;Open my Dropbox folder&rdquo; button. You&rsquo;re done!</p>
-<p><img src="dropbox-3.jpg#center" alt="Advanced settings screen"></p>
-<h2 id="i-didnt-read-your-article-before-clicking-the-big-obvious-button-and-now-i-have-two-folders">I didn&rsquo;t read your article before clicking the big obvious button and now I have two folders.</h2>
+<p>
+<img src="https://victoria.dev/blog/how-i-set-up-a-single-dropbox-folder-on-my-dual-boot-windows-and-linux-system/dropbox-3.jpg#center" alt="Advanced settings screen"  />
+</p>
+
+<h2 id="i-didnt-read-your-article-before-clicking-the-big-obvious-button-and-now-i-have-two-folders" class="anchor-link"><a href="#i-didnt-read-your-article-before-clicking-the-big-obvious-button-and-now-i-have-two-folders">I didn&rsquo;t read your article before clicking the big obvious button and now I have two folders.</a></h2>
 <p>Uninstall Dropbox on Linux, making sure you get all the bits at <code>/usr/bin/dropbox</code>. Install Dropbox again and this time, read first! :)</p>
-<h1 id="youre-done">You&rsquo;re done!</h1>
+
+<h1 id="youre-done" class="anchor-link"><a href="#youre-done">You&rsquo;re done!</a></h1>
 <p>I hope you found this helpful! If you have questions or want to bug me about using jpgs for screenshots, click that link below. :) Thanks for reading!</p>
 
 

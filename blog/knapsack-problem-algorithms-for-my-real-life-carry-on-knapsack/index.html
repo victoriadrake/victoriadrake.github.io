@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -243,7 +243,8 @@
 <p>Being a programmer, I&rsquo;m aware that decisions like this could be made more efficiently by a computer. It&rsquo;s done so frequently and so ubiquitously, in fact, that many will recognize this scenario as the classic <em>packing problem</em> or <em>knapsack problem.</em> How do I go about telling a computer to put as many important items in my bag as possible while coming in at or under a weight limit of 7kg? With algorithms! Yay!</p>
 <p>I&rsquo;ll discuss two common approaches to solving the knapsack problem: one called a <em>greedy algorithm,</em> and another called <em>dynamic programming</em> (a little harder, but better, faster, stronger&hellip;).</p>
 <p>Let&rsquo;s get to it.</p>
-<h2 id="the-set-up">The set up</h2>
+
+<h2 id="the-set-up" class="anchor-link"><a href="#the-set-up">The set up</a></h2>
 <p>I prepared my data in the form of a CSV file with three columns: the item&rsquo;s name (a string), a representation of its worth (an integer), and its weight in grams (an integer). There are 40 items in total. I represented worth by ranking each item from 40 to 1, with 40 being the most important and 1 equating with something like &ldquo;why do I even have this again?&rdquo; (If you&rsquo;ve never listed out all your possessions and ranked them by order of how useful they are to you, I highly recommend you try it. It can be a very revealing exercise.)</p>
 <p><strong>Total weight of all items and bag:</strong> 9003g</p>
 <p><strong>Bag weight:</strong> 1415g</p>
@@ -251,8 +252,10 @@
 <p><strong>Maximum weight of items I can pack:</strong> 5585g</p>
 <p><strong>Total possible worth of items:</strong> 820</p>
 <p><strong>The challenge:</strong> Pack as many items as the limit allows while maximizing the total worth.</p>
-<h2 id="data-structures">Data structures</h2>
-<h3 id="reading-in-a-file">Reading in a file</h3>
+
+<h2 id="data-structures" class="anchor-link"><a href="#data-structures">Data structures</a></h2>
+
+<h3 id="reading-in-a-file" class="anchor-link"><a href="#reading-in-a-file">Reading in a file</a></h3>
 <p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&rsquo;s <code>io/ioutil</code> package makes the first part straightforward.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
@@ -273,7 +276,8 @@
     <span class="nx">fmt</span><span class="p">.</span><span class="nf">Print</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">dat</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div><p>The <code>ReadFile()</code> function takes a file path and returns the file&rsquo;s contents and an error (<code>nil</code> if the call is successful) so we&rsquo;ve also created a <code>check()</code> function to handle any errors that might be returned. In a real-world application we probably would want to do something more sophisticated than <code>panic</code>, but that&rsquo;s not important right now.</p>
-<h3 id="creating-a-struct">Creating a struct</h3>
+
+<h3 id="creating-a-struct" class="anchor-link"><a href="#creating-a-struct">Creating a struct</a></h3>
 <p>Now that we&rsquo;ve got our data, we should probably do something with it. Since we&rsquo;re working with real-life items and a real-life bag, let&rsquo;s create some types to represent them and make it easier to conceptualize our program. A <code>struct</code> in Go is a typed collection of fields. Here are our two types:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">item</span> <span class="kd">struct</span> <span class="p">{</span>
 	<span class="nx">name</span>          <span class="kt">string</span>
@@ -285,7 +289,8 @@
 	<span class="nx">items</span>                                                   <span class="p">[]</span><span class="nx">item</span>
 <span class="p">}</span>
 </code></pre></div><p>It is helpful to use field names that are very descriptive. You can see that the structs are set up just as we&rsquo;ve described the things they represent. An <code>item</code> has a <code>name</code> (string), and a <code>worth</code> and <code>weight</code> (integers). A <code>bag</code> has several fields of type <code>int</code> representing its attributes, and also has the ability to hold <code>items</code>, represented in the struct as a slice of <code>item</code> type thingamabobbers.</p>
-<h3 id="parsing-and-storing-our-data">Parsing and storing our data</h3>
+
+<h3 id="parsing-and-storing-our-data" class="anchor-link"><a href="#parsing-and-storing-our-data">Parsing and storing our data</a></h3>
 <p>Several comprehensive Go packages exist that we could use to parse our CSV data&hellip; but where&rsquo;s the fun in that? Let&rsquo;s go basic with some string splitting and a for loop. Here&rsquo;s our updated <code>readItems()</code> function:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">readItems</span><span class="p">(</span><span class="nx">path</span> <span class="kt">string</span><span class="p">)</span> <span class="p">[]</span><span class="nx">item</span> <span class="p">{</span>
 	
@@ -358,9 +363,11 @@
 	<span class="k">return</span> <span class="nx">itemList</span>
 <span class="p">}</span>
 </code></pre></div><p>Now that we&rsquo;ve got our data structures set up, let&rsquo;s get packing (🥁) on the first approach.</p>
-<h2 id="greedy-algorithm">Greedy algorithm</h2>
+
+<h2 id="greedy-algorithm" class="anchor-link"><a href="#greedy-algorithm">Greedy algorithm</a></h2>
 <p>A greedy algorithm is the most straightforward approach to solving the knapsack problem, in that it is a one-pass algorithm that constructs a single final solution. At each stage of the problem, the greedy algorithm picks the option that is locally optimal, meaning it looks like the most suitable option right now. It does not revise its previous choices as it progresses through our data set.</p>
-<h3 id="building-our-greedy-algorithm">Building our greedy algorithm</h3>
+
+<h3 id="building-our-greedy-algorithm" class="anchor-link"><a href="#building-our-greedy-algorithm">Building our greedy algorithm</a></h3>
 <p>The steps of the algorithm we&rsquo;ll use to solve our knapsack problem are:</p>
 <ol>
 <li>Sort items by worth, in descending order.</li>
@@ -416,7 +423,8 @@
 
 	<span class="nf">greedy</span><span class="p">(</span><span class="nx">itemList</span><span class="p">,</span> <span class="nx">minaal</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre></div><h3 id="greedy-algorithm-results">Greedy algorithm results</h3>
+</code></pre></div>
+<h3 id="greedy-algorithm-results" class="anchor-link"><a href="#greedy-algorithm-results">Greedy algorithm results</a></h3>
 <p>So how does this algorithm do when it comes to efficiently packing our bag to maximize its total worth? Here&rsquo;s the result:</p>
 <p><strong>Total weight of bag and items:</strong> 6987g</p>
 <p><strong>Total worth of packed items:</strong> 716</p>
@@ -570,11 +578,13 @@
 <p>It&rsquo;s clear that the greedy algorithm is a straightforward way to quickly find a feasible solution. For small data sets, it will probably be close to the optimal solution. The algorithm packed a total item worth of 716 (104 points less than the maximum possible value), while filling the bag with just 13g left over.</p>
 <p>As we learned earlier, the greedy algorithm doesn&rsquo;t improve upon the solution it returns. It simply adds the next highest worth item it can to the bag.</p>
 <p>Let&rsquo;s look at another method for solving the knapsack problem that will give us the optimal solution - the highest possible total worth under the weight limit.</p>
-<h2 id="dynamic-programming">Dynamic programming</h2>
+
+<h2 id="dynamic-programming" class="anchor-link"><a href="#dynamic-programming">Dynamic programming</a></h2>
 <p>The name &ldquo;dynamic programming&rdquo; can be a bit misleading. It&rsquo;s not a style of programming, as the name might cause you to infer, but simply another approach.</p>
 <p>Dynamic programming differs from the straightforward greedy algorithm in a few key ways. Firstly, a dynamic programming bag packing solution enumerates the entire solution space with all possibilities of item combinations that could be used to pack our bag. Where a greedy algorithm chooses the most optimal <em>local</em> solution, dynamic programming algorithms are able to find the most optimal <em>global</em> solution.</p>
 <p>Secondly, dynamic programming uses memoization to store the results of previously computed operations and returns the cached result when the operation occurs again. This allows it to &ldquo;remember&rdquo; previous combinations. This takes less time than it would to re-compute the answer again.</p>
-<h3 id="building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm</h3>
+
+<h3 id="building-our-dynamic-programming-algorithm" class="anchor-link"><a href="#building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm</a></h3>
 <p>To use dynamic programming to find the optimal recipe for packing our bag, we&rsquo;ll need to:</p>
 <ol>
 <li>Create a matrix representing all subsets of the items (the solution space) with rows representing items and columns representing the bag&rsquo;s remaining weight capacity</li>
@@ -637,7 +647,8 @@
 </figure>
 
 <p>That&rsquo;s great, but how do we find out which combination of items were put in the bag to achieve that worth?</p>
-<h3 id="getting-our-optimized-item-list">Getting our optimized item list</h3>
+
+<h3 id="getting-our-optimized-item-list" class="anchor-link"><a href="#getting-our-optimized-item-list">Getting our optimized item list</a></h3>
 <p>To see which items combine to create our optimal packing list, we&rsquo;ll need to examine our matrix in reverse to the way we created it. Since we know the highest possible value is in the last row in the last column, we&rsquo;ll start there. To find the items, we:</p>
 <ol>
 <li>Get the value of the current cell</li>
@@ -714,7 +725,8 @@
 
 	<span class="k">return</span> <span class="nx">b</span>
 <span class="p">}</span>
-</code></pre></div><h3 id="dynamic-programming-results">Dynamic programming results</h3>
+</code></pre></div>
+<h3 id="dynamic-programming-results" class="anchor-link"><a href="#dynamic-programming-results">Dynamic programming results</a></h3>
 <p>We expect that the dynamic programming approach will give us a more optimized solution than the greedy algorithm. So did it? Here are the results:</p>
 <p><strong>Total weight of bag and items:</strong> 6982g</p>
 <p><strong>Total worth of packed items:</strong> 757</p>
@@ -901,7 +913,8 @@
 </tbody>
 </table>
 <p>There&rsquo;s an obvious improvement to our dynamic programming solution over what the greedy algorithm gave us. Our total worth of 757 is 41 points greater than the greedy algorithm&rsquo;s solution of 716, and for a few grams less weight too!</p>
-<h3 id="input-sort-order">Input sort order</h3>
+
+<h3 id="input-sort-order" class="anchor-link"><a href="#input-sort-order">Input sort order</a></h3>
 <p>While testing my dynamic programming solution, I implemented the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffle algorithm</a> on the input before passing it into my function, just to ensure that the answer wasn&rsquo;t somehow dependent on the sort order of the input. Here&rsquo;s what the shuffle looks like in Go:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Seed</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">UnixNano</span><span class="p">())</span>
 
@@ -914,7 +927,8 @@
 	<span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
 <span class="p">})</span>
 </code></pre></div><p>So did the order in which the items were processed affect the outcome? Well&hellip;</p>
-<h4 id="suddenly-a-rogue-weight-appears">Suddenly&hellip; a rogue weight appears!</h4>
+
+<h4 id="suddenly-a-rogue-weight-appears" class="anchor-link"><a href="#suddenly-a-rogue-weight-appears">Suddenly&hellip; a rogue weight appears!</a></h4>
 <p>As it turns out, in a way, the answer did depend on the order of the input. When I ran my dynamic programming algorithm several times, I sometimes saw a different total weight for the bag, though the total worth remained at 757. I initially thought this was a bug before examining the two sets of items that accompanied the two different total weight values. Everything was the same except for a few changes that collectively added up to a different item subset accounting for 14 of the 757 worth points.</p>
 <p>In this case, there were two equally optimal solutions based only on the success metric of the highest total possible worth. Shuffling the input seemed to affect the placement of the items in the matrix and thus, the path that the <code>checkItem()</code> function took as it went through the matrix to find the chosen items. Since the success metric of having the highest possible worth was the same in both item sets, we don&rsquo;t have a single unique solution - there&rsquo;s two!</p>
 <p>As an academic exercise, both these sets of items are correct answers. We may choose to optimize further by another metric, say, the total weight of all the items. The highest possible worth at the least possible weight could be seen as an ideal solution.</p>
@@ -1112,8 +1126,10 @@
 </tr>
 </tbody>
 </table>
-<h2 id="which-approach-is-better">Which approach is better?</h2>
-<h3 id="go-benchmarking">Go benchmarking</h3>
+
+<h2 id="which-approach-is-better" class="anchor-link"><a href="#which-approach-is-better">Which approach is better?</a></h2>
+
+<h3 id="go-benchmarking" class="anchor-link"><a href="#go-benchmarking">Go benchmarking</a></h3>
 <p>The Go standard library&rsquo;s <code>testing</code> package makes it straightforward for us to <a href="https://golang.org/pkg/testing/#hdr-Benchmarks">benchmark</a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&rsquo;s a simple <code>main_test.go</code> file:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
@@ -1139,11 +1155,14 @@
 </code></pre></div><p>We can run <code>go test -bench=. -benchmem</code> to see these results:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Benchmark_greedy-4       <span class="m">1000000</span>              <span class="m">1619</span> ns/op            <span class="m">2128</span> B/op          <span class="m">9</span> allocs/op
 Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m">1545322</span> ns/op         <span class="m">2020332</span> B/op         <span class="m">49</span> allocs/op
-</code></pre></div><h4 id="greedy-algorithm-performance">Greedy algorithm performance</h4>
+</code></pre></div>
+<h4 id="greedy-algorithm-performance" class="anchor-link"><a href="#greedy-algorithm-performance">Greedy algorithm performance</a></h4>
 <p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.</p>
-<h4 id="dynamic-programming-performance">Dynamic programming performance</h4>
+
+<h4 id="dynamic-programming-performance" class="anchor-link"><a href="#dynamic-programming-performance">Dynamic programming performance</a></h4>
 <p>The dynamic programming algorithm was run 1,000 times. Its speed was measured to be 1.545322 milliseconds or 0.001545322 seconds (translation: still pretty fast). It required 2,020,332 Bytes or 2-ish Megabytes, and 49 distinct memory allocations per iteration.</p>
-<h3 id="the-verdict">The verdict</h3>
+
+<h3 id="the-verdict" class="anchor-link"><a href="#the-verdict">The verdict</a></h3>
 <p>Part of choosing the right approach to solving any programming problem is taking into account the size of the input data set. In this case, it&rsquo;s a small one. In this scenario, a one-pass greedy algorithm will always be faster and less resource-needy than dynamic programming, simply because it has fewer steps. Our greedy algorithm was almost two orders of magnitude faster and less memory-hungry than our dynamic programming algorithm.</p>
 <p>Not having those extra steps, however, means that getting the best possible solution from the greedy algorithm is unlikely.</p>
 <p>It&rsquo;s clear that the dynamic programming algorithm gave us better numbers: a lower weight, and higher overall worth.</p>
@@ -1170,7 +1189,8 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 </table>
 <p>Where dynamic programming on small data sets lacks in performance, it makes up in optimization. The question then becomes whether that additional optimization is worth the performance cost.</p>
 <p>&ldquo;Better,&rdquo; of course, is a subjective judgement. If speed and low resource usage is our success metric, then the greedy algorithm is clearly better. If the total worth of items in the bag is our success metric, then dynamic programming is clearly better. However, our scenario is a practical one, and only one of these algorithm designs returned an answer I&rsquo;d choose. In optimizing for the overall greatest possible total worth of the items in the bag, the dynamic programming algorithm left out my highest-worth, but also heaviest, item: my laptop. The chargers and cables, Roost stand, and keyboard that were included aren&rsquo;t much use without it.</p>
-<h3 id="better-algorithm-design">Better algorithm design</h3>
+
+<h3 id="better-algorithm-design" class="anchor-link"><a href="#better-algorithm-design">Better algorithm design</a></h3>
 <p>There&rsquo;s a simple way to alter the dynamic programming approach so that the laptop is always included: we can modify the data so that the worth of the laptop is greater than the sum of the worth of all the other items. (Try it out!)</p>
 <p>Perhaps in re-designing the dynamic programming algorithm to be more practical, we might choose another success metric that better reflects an item&rsquo;s importance, instead of a subjective worth value. There are many possible metrics we can use to represent the value of an item. Here are a few examples of a good proxy:</p>
 <ul>

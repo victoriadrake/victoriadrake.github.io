@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -183,7 +183,8 @@
     
     <p>Surprisingly, getting computers to give humans readable output is no easy feat. With the introduction of <a href="https://en.wikipedia.org/wiki/Standard_streams">standard streams</a> and specifically standard output, programs gained a way to talk to each other using plain text streams; humanizing and displaying stdout is another matter. Technology throughout the computing age has tried to solve this problem, from the use of <a href="https://en.wikipedia.org/wiki/Computer_terminal#Early_VDUs">ASCII characters in video computer displays</a> to modern shell commands like <code>echo</code> and <code>printf</code>.</p>
 <p>These advancements have not been seamless. The job of printing output to a terminal is fraught with quirks for programmers to navigate, as exemplified by the deceptively nontrivial task of expanding an <a href="https://en.wikipedia.org/wiki/Escape_sequence">escape sequence</a> to print newlines. The expansion of the placeholder <code>\n</code> can be accomplished in a multitude of ways, each with its own unique history and complications.</p>
-<h2 id="using-echo">Using <code>echo</code></h2>
+
+<h2 id="using-echo" class="anchor-link"><a href="#using-echo">Using <code>echo</code></a></h2>
 <p>From its appearance in <a href="https://en.wikipedia.org/wiki/Multics">Multics</a> to its modern-day Unix-like system ubiquity, <code>echo</code> remains a familiar tool for getting your terminal to say &ldquo;Hello world!&rdquo; Unfortunately, inconsistent implementations across operating systems make its usage tricky. Where <code>echo</code> on some systems will automatically expand escape sequences, <a href="https://man.cat-v.org/unix_8th/1/echo">others</a> require the <code>-e</code> option to do the same:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;the study of European nerves is \neurology&#34;</span>
 <span class="c1"># the study of European nerves is \neurology</span>
@@ -193,13 +194,15 @@
 <span class="c1"># eurology</span>
 </code></pre></div><p>Because of these inconsistencies in implementations, <code>echo</code> is considered non-portable. Additionally, its usage in conjunction with user input is relatively easy to corrupt through <a href="https://en.wikipedia.org/wiki/Code_injection#Shell_injection">shell injection attack</a> using command substitutions.</p>
 <p>In modern systems, it is retained only to provide compatibility with the many programs that still use it. The <a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/echo.html#tag_20_37_16">POSIX specification recommends</a> the use of <code>printf</code> in new programs.</p>
-<h2 id="using-printf">Using <code>printf</code></h2>
+
+<h2 id="using-printf" class="anchor-link"><a href="#using-printf">Using <code>printf</code></a></h2>
 <p>Since 4th <a href="https://en.wikipedia.org/wiki/Research_Unix#Versions">Edition</a> Unix, the portable <a href="https://en.wikipedia.org/wiki/Printf_(Unix)"><code>printf</code> command</a> has essentially been the new and better <code>echo</code>. It allows you to use <a href="https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholder_specification">format specifiers</a> to humanize input. To interpret backslash escape sequences, use <code>%b</code>. The character sequence <code>\n</code> ensures the output ends with a newline:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s2">&#34;%b\n&#34;</span> <span class="s2">&#34;Many females in Oble are \noblewomen&#34;</span>
 <span class="c1"># Many females in Oble are</span> 
 <span class="c1"># oblewomen</span>
 </code></pre></div><p>Though <code>printf</code> has further options that make it a far more powerful replacement of <code>echo</code>, this utility is not foolproof and can be vulnerable to an <a href="https://en.wikipedia.org/wiki/Uncontrolled_format_string">uncontrolled format string</a> attack. It&rsquo;s important for programmers to ensure they <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">carefully handle user input</a>.</p>
-<h2 id="putting-newlines-in-variables">Putting newlines in variables</h2>
+
+<h2 id="putting-newlines-in-variables" class="anchor-link"><a href="#putting-newlines-in-variables">Putting newlines in variables</a></h2>
 <p>In an effort to improve portability amongst compilers, the <a href="https://en.wikipedia.org/wiki/ANSI_C">ANSI C Standard</a> was established in 1983. With <a href="https://www.gnu.org/software/bash/manual/html_node/ANSI_002dC-Quoting.html#ANSI_002dC-Quoting">ANSI-C quoting</a> using <code>$'...'</code>, <a href="https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences">escape sequences</a> are replaced in output according to the standard.</p>
 <p>This allows us to store strings with newlines in variables that are printed with the newlines interpreted. You can do this by setting the variable, then calling it with <code>printf</code> using <code>$</code>:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">puns</span><span class="o">=</span><span class="s1">$&#39;\number\narrow\nether\nice&#39;</span>
@@ -212,7 +215,8 @@
 <span class="c1"># ether</span>
 <span class="c1"># ice</span>
 </code></pre></div><p>The expanded variable is single-quoted, which is passed literally to <code>printf</code>. As always, it is important to properly handle the input.</p>
-<h2 id="bonus-round-shell-parameter-expansion">Bonus round: shell parameter expansion</h2>
+
+<h2 id="bonus-round-shell-parameter-expansion" class="anchor-link"><a href="#bonus-round-shell-parameter-expansion">Bonus round: shell parameter expansion</a></h2>
 <p>In my article explaining <a href="/blog/bash-and-shell-expansions-lazy-list-making/">Bash and braces</a>, I covered the magic of <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion</a>. We can use one expansion, <code>${parameter@operator}</code>, to interpret escape sequences, too. We use <code>printf</code>'s <code>%s</code> specifier to print as a string, and the <code>E</code> operator will properly expand the escape sequences in our variable:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s2">&#34;%s\n&#34;</span> <span class="si">${</span><span class="nv">puns</span><span class="p">@E</span><span class="si">}</span>
 
@@ -220,7 +224,8 @@
 <span class="c1"># arrow</span>
 <span class="c1"># ether</span>
 <span class="c1"># ice</span>
-</code></pre></div><h2 id="the-ongoing-challenge-of-humanizing-output">The ongoing challenge of humanizing output</h2>
+</code></pre></div>
+<h2 id="the-ongoing-challenge-of-humanizing-output" class="anchor-link"><a href="#the-ongoing-challenge-of-humanizing-output">The ongoing challenge of humanizing output</a></h2>
 <p><a href="https://en.wikipedia.org/wiki/String_interpolation">String interpolation</a> continues to be a chewy problem for programmers. Besides getting languages and shells to agree on what certain placeholders mean, properly using the correct escape sequences requires an eye for detail.</p>
 <p>Poor string interpolation can lead to silly-looking output, as well as introduce security vulnerabilities, such as from <a href="https://en.wikipedia.org/wiki/Code_injection">injection attacks</a>. Until the next evolution of the terminal has us talking in emojis, we&rsquo;d best pay attention when printing output for humans.</p>
 

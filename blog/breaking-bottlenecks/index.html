@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -201,10 +201,12 @@
 <p>I&rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.</p>
 <p>OWASP is a great group doing important work. I&rsquo;ve seen this firsthand as part of the core team that produces the Web Security Testing Guide. However, while OWASP inspires in its large volunteer base, it lacks in the area of central organization.</p>
 <p>This lack of organization was most recently apparent in the group&rsquo;s website, <a href="https://owasp.org">OWASP.org</a>. A big organization with an even bigger website to match, OWASP.org enjoys hundreds of thousands of visitors. Unfortunately, many of its pages - individually managed by disparate projects - are infrequently updated. Some are abandoned. The website as a whole lacks a centralized quality assurance process, and as a result, OWASP.org is peppered with broken links.</p>
-<h2 id="the-trouble-with-broken-links">The trouble with broken links</h2>
+
+<h2 id="the-trouble-with-broken-links" class="anchor-link"><a href="#the-trouble-with-broken-links">The trouble with broken links</a></h2>
 <p>Customers don&rsquo;t like broken links; attackers really do. That&rsquo;s because broken links are a security vulnerability. Broken links can signal opportunities for attacks like <a href="https://edoverflow.com/2017/broken-link-hijacking/">broken link hijacking</a> and <a href="https://www.hackerone.com/blog/Guide-Subdomain-Takeovers">subdomain takeovers</a>. At their least effective, these attacks can be embarrassing; at their worst, severely damaging to businesses and organizations. One OWASP group, the Application Security Verification Standard (ASVS) project, writes about <a href="https://github.com/OWASP/ASVS/blob/d9e0ac99828ef3c1e9233bd8a1f691f2a6958aa3/4.0/en/0x18-V10-Malicious.md#v103-deployed-application-integrity-controls">integrity controls</a> that can help to mitigate the likelihood of these attacks. This knowledge, unfortunately, has not yet propagated throughout the rest of OWASP yet.</p>
 <p>This is the story of how I created a fast and efficient tool to help OWASP solve this problem.</p>
-<h2 id="the-job">The job</h2>
+
+<h2 id="the-job" class="anchor-link"><a href="#the-job">The job</a></h2>
 <p>I took on the task of creating a program that could run as part of a CI/CD process to detect and report broken links. The program needed to:</p>
 <ul>
 <li>Find and enumerate all the broken links on OWASP.org in a report.</li>
@@ -213,7 +215,8 @@
 </ul>
 <p>Essentially; I need to build a web crawler.</p>
 <p>My original journey through this process was also in Python, as that was a comfortable language choice for everyone in the OWASP group. Personally, I prefer to use Go for higher performance as it offers more convenient concurrency primitives. Between the task and this talk, I wrote three programs: a prototype single-thread Python program, a multithreaded Python program, and a Go program using goroutines. We&rsquo;ll see a comparison of how each worked out near the end of the talk - first, let&rsquo;s explore how to build a web crawler.</p>
-<h2 id="prototyping-a-web-crawler">Prototyping a web crawler</h2>
+
+<h2 id="prototyping-a-web-crawler" class="anchor-link"><a href="#prototyping-a-web-crawler">Prototyping a web crawler</a></h2>
 <p>Here&rsquo;s what our web crawler will need to do:</p>
 <ol>
 <li>Get the HTML data of the first page of the website (for example, <code>https://victoria.dev</code>)</li>
@@ -234,7 +237,8 @@
 
 <p>As you can see, the nodes &ldquo;GET page&rdquo; -&gt; &ldquo;HTML&rdquo; -&gt; &ldquo;Parse links&rdquo; -&gt; &ldquo;Valid link&rdquo; -&gt; &ldquo;Check visited&rdquo; all form a loop. These are what enable our web crawler to continue crawling until all the links on the site have been accounted for in the &ldquo;Check visited&rdquo; node. When the crawler encounters links it&rsquo;s already checked, it will &ldquo;Stop.&rdquo; This loop will become more important in a moment.</p>
 <p>For now, the question on everyone&rsquo;s mind (I hope): how do we make it fast?</p>
-<h2 id="how-fast-can-you-do-the-thing">How fast can you do the thing?</h2>
+
+<h2 id="how-fast-can-you-do-the-thing" class="anchor-link"><a href="#how-fast-can-you-do-the-thing">How fast can you do the thing?</a></h2>
 <p>Here are some approximate timings for tasks performed on a typical PC:</p>
 <table>
 <thead>
@@ -300,7 +304,8 @@
 <p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. They typically crop up now and then in articles titled along the lines of, &ldquo;Latency numbers every developer should know.&rdquo;</p>
 <p>Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
 <p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
-<h2 id="bottleneck-network-latency">Bottleneck: network latency</h2>
+
+<h2 id="bottleneck-network-latency" class="anchor-link"><a href="#bottleneck-network-latency">Bottleneck: network latency</a></h2>
 <p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
 <p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">      150 milliseconds
@@ -308,11 +313,13 @@
 ---------
 1,800,000 milliseconds (30 minutes)
 </code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
-<h3 id="feedback-loops">Feedback loops</h3>
+
+<h3 id="feedback-loops" class="anchor-link"><a href="#feedback-loops">Feedback loops</a></h3>
 <p>I previously wrote about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p>
 <p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&rsquo;m waiting on a process that&rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke <code>master</code> (hopefully <code>staging</code>).</p>
 <p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&rsquo;ve got a slow and inefficient company.</p>
-<h3 id="the-cost-of-bottlenecks">The cost of bottlenecks</h3>
+
+<h3 id="the-cost-of-bottlenecks" class="anchor-link"><a href="#the-cost-of-bottlenecks">The cost of bottlenecks</a></h3>
 <p>To add insult to injury, not only are you waiting on a bottlenecked process to run; you&rsquo;re also paying to wait. Take the serverless example - AWS Lambda, for instance. Here&rsquo;s a chart showing the cost of functions by compute time and CPU usage.</p>
 <figure>
     <img src="lambda-chart.png"
@@ -324,7 +331,8 @@
 <p>Again, the numbers change over the years, but the main concepts remain the same: the bigger the function and the longer its compute time, the bigger the cost. For applications taking advantage of serverless, these costs can add up dramatically.</p>
 <p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.</p>
 <p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p>
-<h2 id="tacos-and-threading">Tacos and threading</h2>
+
+<h2 id="tacos-and-threading" class="anchor-link"><a href="#tacos-and-threading">Tacos and threading</a></h2>
 <p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
@@ -390,7 +398,8 @@
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 </code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
 <p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p>
-<h2 id="setting-up-a-go-web-crawler">Setting up a Go web crawler</h2>
+
+<h2 id="setting-up-a-go-web-crawler" class="anchor-link"><a href="#setting-up-a-go-web-crawler">Setting up a Go web crawler</a></h2>
 <p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">startDomain</span>             <span class="kt">string</span>
@@ -471,7 +480,8 @@
 <span class="p">}</span>
 <span class="nx">wg</span><span class="p">.</span><span class="nf">Wait</span><span class="p">()</span>
 </code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
-<h2 id="did-we-do-the-thing-fast">Did we do the thing fast?</h2>
+
+<h2 id="did-we-do-the-thing-fast" class="anchor-link"><a href="#did-we-do-the-thing-fast">Did we do the thing fast?</a></h2>
 <p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
 
@@ -493,7 +503,8 @@ real	0m7.926s
 user	0m9.044s
 sys     0m0.932s
 </code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
-<h2 id="breaking-bottlenecks">Breaking bottlenecks</h2>
+
+<h2 id="breaking-bottlenecks" class="anchor-link"><a href="#breaking-bottlenecks">Breaking bottlenecks</a></h2>
 <p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
 <p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p>
 

@@ -54,7 +54,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -192,7 +192,8 @@
     
     <p>In my last post I talked about moving from Windows 10 to running i3 on Linux, built up from Debian Base System. Among other things, this change has taught me about the benefits of using basic tools and running a minimal, lightweight system. You can achieve a lot of functionality with just command line tools and simple utilities. One example I&rsquo;d like to illustrate in this post is setting up desktop notifications.</p>
 <p>I use <a href="http://knopwob.org/dunst/">dunst</a> for desktop notifications. It&rsquo;s a simple, lightweight tool that is easy to configure, doesn&rsquo;t have many dependencies, and can be used across various distributions.</p>
-<h1 id="battery-statuslow-battery-notification">Battery status/low battery notification</h1>
+
+<h1 id="battery-statuslow-battery-notification" class="anchor-link"><a href="#battery-statuslow-battery-notification">Battery status/low battery notification</a></h1>
 <p>I was looking for a simple, versatile set up to create notifications for my battery status without having to rely on separate, standalone GUI apps or services. In my search I came across a simple one-line cron task that seemed to be the perfect fit. I adapted it to my purpose and it looks like this:</p>
 <pre><code class="language-conf" data-lang="conf"># m h  dom mon dow   command
 */5 * * * * acpi --battery | awk -F, '/Discharging/ { if (int($2) &lt; 20) print }' | xargs -ri env DISPLAY=:0 notify-send -u critical -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&quot; -t 3000 &quot;{}\nBattery low!&quot;
@@ -225,9 +226,11 @@ Shows a desktop notification with <code>-u critical</code> (critical urgency), <
 */60 * * * * acpi --battery | awk -F, '/Charging/ { if (int($2) == 100) print }' | xargs -ri env DISPLAY=:0 notify-send -a &quot;Battery status&quot; -u normal -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-full-charging.png&quot; &quot;Fully charged.&quot;
 </code></pre><p>By the way, you can open your crontab in the editor of your choice by accessing it as root from the <code>/var/spool/cron/crontabs/</code> directory. It&rsquo;s generally best practice however to make changes to your crontab with the command <code>crontab -e</code>.</p>
 <p>You can see that each notification makes use of the <code>{}</code> placeholder that tells xargs to put its input there - except for the last one. This is interesting because in this case, we&rsquo;re only using <code>xargs -ri</code> as a kind of switch to present the notification. The actual information that was the input for xargs is not needed in the output in order to create a notification.</p>
-<h1 id="additional-notifications-with-command-line-tools">Additional notifications with command line tools</h1>
+
+<h1 id="additional-notifications-with-command-line-tools" class="anchor-link"><a href="#additional-notifications-with-command-line-tools">Additional notifications with command line tools</a></h1>
 <p>With cron and just a few combinations of simple command line tools, you can create interesting and useful notifications. Consider the following:</p>
-<h2 id="periodically-check-your-dhcp-address">Periodically check your dhcp address</h2>
+
+<h2 id="periodically-check-your-dhcp-address" class="anchor-link"><a href="#periodically-check-your-dhcp-address">Periodically check your dhcp address</a></h2>
 <pre><code>*/60 * * * * journalctl | awk -F: '/dhcp/ &amp;&amp; /address/ { print $5 }' | tail -1 | xargs -ri env DISPLAY=:0 notify-send -a &quot;dhcp address&quot; -u normal &quot;{}&quot;
 </code></pre><p>Which does the following:<br>
 <code>*/60 * * * *</code><br>
@@ -240,11 +243,14 @@ Find logs containing both &ldquo;dhcp&rdquo; and &ldquo;address&rdquo; and outpu
 Take the last line of the output.</p>
 <p><code>| xargs -ri env DISPLAY=:0 notify-send -a &quot;dhcp address&quot; -u normal &quot;{}&quot;</code><br>
 Create the desktop notification including the output.</p>
-<h2 id="periodically-display-the-time-and-date">Periodically display the time and date</h2>
+
+<h2 id="periodically-display-the-time-and-date" class="anchor-link"><a href="#periodically-display-the-time-and-date">Periodically display the time and date</a></h2>
 <pre><code>*/60 * * * * timedatectl status | awk -F\n '/Local time/ { print }' | xargs -ri env DISPLAY=:0 notify-send -a &quot;Current Time&quot; -u normal &quot;{}&quot;
-</code></pre><h2 id="system-log-activity">System log activity</h2>
+</code></pre>
+<h2 id="system-log-activity" class="anchor-link"><a href="#system-log-activity">System log activity</a></h2>
 <p>You can also search your system logs (try <code>journalctl</code>) for any number of things using awk, enabling you to get periodic notifications of virtually any logged events.</p>
-<h1 id="experiment">Experiment!</h1>
+
+<h1 id="experiment" class="anchor-link"><a href="#experiment">Experiment!</a></h1>
 <p>As with all things, you are only limited by your imagination! I hope this post has given you some idea about the endless possibilities of these simple utilities. Thanks for reading!</p>
 
 

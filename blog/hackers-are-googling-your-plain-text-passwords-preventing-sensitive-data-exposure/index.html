@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -195,7 +195,8 @@
 <p>Unfortunately, a good amount of security testing often seems to occur much farther to the right side of the SDLC; too late for some security issues, such as sensitive data leakage, to be prevented.</p>
 <p>I&rsquo;m one of the authors contributing to the upcoming <a href="https://github.com/OWASP/OWASP-Testing-Guide-v5">OWASP Testing Guide</a> and recently expanded a section on search engine discovery reconnaissance, or what the kids these days call &ldquo;Google dorking.&rdquo; This is one method, and arguably the most accessible method, by which a security tester (or black hat hacker) could find exposed sensitive data on the Internet. Here&rsquo;s an excerpt from that section (currently a work in progress on GitHub, to be released in v5):</p>
 <blockquote>
-<h3 id="search-operators">Search Operators</h3>
+
+<h3 id="search-operators" class="anchor-link"><a href="#search-operators">Search Operators</a></h3>
 <p>A search operator is a special keyword that extends the capabilities of regular search queries, and can help obtain more specific results. They generally take the form of <code>operator:query</code>. Here are some commonly supported search operators:</p>
 <ul>
 <li><code>site:</code> will limit the search to the provided URL.</li>
@@ -207,12 +208,14 @@
 <p>For example, to find the web content of owasp.org as indexed by a typical search engine, the syntax required is:</p>
 <p><code>site:owasp.org</code></p>
 <p>&hellip;</p>
-<h3 id="google-hacking-or-dorking">Google Hacking, or Dorking</h3>
+
+<h3 id="google-hacking-or-dorking" class="anchor-link"><a href="#google-hacking-or-dorking">Google Hacking, or Dorking</a></h3>
 <p>Searching with operators can be a very effective discovery reconnaissance technique when combined with the creativity of the tester. Operators can be chained to effectively discover specific kinds of sensitive files and information. This technique, called <a href="https://en.wikipedia.org/wiki/Google_hacking">Google hacking</a> or Google dorking, is also possible using other search engines, as long as the search operators are supported.</p>
 <p>A database of dorks, such as <a href="https://www.exploit-db.com/google-hacking-database">Google Hacking Database</a>, is a useful resource that can help uncover specific information.</p>
 </blockquote>
 <p>Regularly reviewing search engine results can be a fruitful task for security testers. However, when a search for <code>site:myapp.com passwords</code> turns up no results, it may still be a little too early to break for lunch. Here are a couple other places a security tester might like to look for sensitive data exposed in the wild.</p>
-<h2 id="pastebin">Pastebin</h2>
+
+<h2 id="pastebin" class="anchor-link"><a href="#pastebin">Pastebin</a></h2>
 <p>The self-declared &ldquo;#1 paste tool since 2002,&rdquo; <a href="https://pastebin.com">Pastebin</a> allows users to temporarily store any kind of text. It&rsquo;s mostly used for sharing information with others, or retrieving your own &ldquo;paste&rdquo; on another machine, perhaps in another location. Pastebin makes it easy to share large amounts of complicated text, like error logs, source code, configuration files, tokens, api keys&hellip; what&rsquo;s that? Oh, yes, it&rsquo;s public by default.</p>
 <p>Here are some screenshots of a little dorking I did for a public bug bounty program.</p>
 <figure class="screenshot">
@@ -230,10 +233,12 @@
 </figure>
 
 <p>Thanks in part to the convenience of using Pastebin and similar websites, it would appear that some people fail to think twice before making sensitive data publicly available.</p>
-<h3 id="but-why">But why?</h3>
+
+<h3 id="but-why" class="anchor-link"><a href="#but-why">But why?</a></h3>
 <p>Granted, non-technical employees with access to the application may not have an understanding of which items should or should not be freely shared. Someone unfamiliar with what encrypted data is or what it looks like may not realize the difference between an encrypted string and an unencrypted token made up of many random letters and numbers. Even technical staff can miss things, make mistakes, or act carelessly after a hard day at work. It may be easy to call this a training problem and move on; however, none of these rationalizations address the root cause of the issue.</p>
 <p>When people turn to outside solutions for an issue they face, it&rsquo;s usually because they haven&rsquo;t been provided with an equally-appealing internal solution, or are unaware that one exists. Employees using pastes to share or move sensitive data do so because they don&rsquo;t have an easier, more convenient, and secure internal solution to use instead.</p>
-<h3 id="mitigation">Mitigation</h3>
+
+<h3 id="mitigation" class="anchor-link"><a href="#mitigation">Mitigation</a></h3>
 <p>Everyone involved in the creation and maintenance of a web application should be briefed on a few basic things in regards to sensitive data protection:</p>
 <ol>
 <li>what constitutes sensitive data,</li>
@@ -241,7 +246,8 @@
 <li>how to properly transmit and store sensitive data.</li>
 </ol>
 <p>When it comes to third-party services, ensure people are aware that some transmission may not be encrypted, or may be publicly searchable. If there is no system currently in place for safely sharing and storing sensitive data internally, this is a good place to start. The security of application data is in the hands of everyone on the team, from administrative staff to C-level executives. Ensure people have the tools they need to work securely.</p>
-<h2 id="public-repositories">Public repositories</h2>
+
+<h2 id="public-repositories" class="anchor-link"><a href="#public-repositories">Public repositories</a></h2>
 <p>Developers are notorious for leaving sensitive information hanging out where it doesn&rsquo;t belong (yes, I&rsquo;ve done it too!). Without a strong push-left approach in place for handling tokens, secrets, and keys, these little gems can end up in full public view on sites like GitHub, GitLab, and Bitbucket (to name a few). <a href="https://www.ndss-symposium.org/wp-content/uploads/2019/02/ndss2019_04B-3_Meli_paper.pdf">A 2019 study</a> found that thousands of new, unique secrets are leaked every day on GitHub alone.</p>
 <figure class="screenshot">
     <img src="github_tok.png"
@@ -249,9 +255,11 @@
 </figure>
 
 <p>GitHub has implemented measures like <a href="https://github.blog/2018-10-17-behind-the-scenes-of-github-token-scanning/">token scanning</a>, and GitLab 11.9 <a href="https://about.gitlab.com/2019/03/22/gitlab-11-9-released/">introduced secret detection</a>. While these tools aim to reduce the chances that a secret might accidentally be committed, to put it bluntly, it&rsquo;s really not their job. Secret scanning won&rsquo;t stop developers from committing the data in the first place.</p>
-<h3 id="but-why-1">But why?</h3>
+
+<h3 id="but-why-1" class="anchor-link"><a href="#but-why-1">But why?</a></h3>
 <p>Without an obvious process in place for managing secrets, developers may tend too much towards their innate sense of just-get-it-done-ness. Sometimes this leads to the expedient but irresponsible practice of storing keys as unencrypted variables within the program, perhaps with the intention of it being temporary. Nonetheless, these variables inevitably fall from front of mind and end up in a commit.</p>
-<h3 id="mitigation-1">Mitigation</h3>
+
+<h3 id="mitigation-1" class="anchor-link"><a href="#mitigation-1">Mitigation</a></h3>
 <p>Having a strong push-left culture means ensuring that sensitive data is properly stored and can be securely retrieved long before anyone is ready to make a commit. Tools and strategies for doing so are readily available for those who seek them. Here are some examples of tools that can support a push-left approach:</p>
 <ul>
 <li>Use a management tool to store and control access to keys and secrets, such as <a href="https://aws.amazon.com/kms/">Amazon Key Management Service</a> or Microsoft&rsquo;s <a href="https://azure.microsoft.com/en-us/services/key-vault/">Azure Key Vault</a>.</li>
@@ -259,9 +267,12 @@
 <li>Craft a robust <code>.gitignore</code> file that everyone on the team can contribute to and use.</li>
 </ul>
 <p>We also need not rely entirely on the public repository to catch those mistakes that may still slip through. It&rsquo;s possible to set up Git pre-commit hooks that scan for committed secrets using <a href="https://en.wikipedia.org/wiki/Regular_expression">regular expressions</a>. There are some open-source programs available for this, such as <a href="https://github.com/thoughtworks/talisman">Talisman from ThoughtWorks</a> and <a href="https://github.com/awslabs/git-secrets">git-secrets from AWS Labs</a>.</p>
-<h2 id="pushing-left-to-prevent-sensitive-data-exposure">Pushing left to prevent sensitive data exposure</h2>
+
+<h2 id="pushing-left-to-prevent-sensitive-data-exposure" class="anchor-link"><a href="#pushing-left-to-prevent-sensitive-data-exposure">Pushing left to prevent sensitive data exposure</a></h2>
 <p>A little perspective can go a long way in demonstrating why it&rsquo;s important to begin managing sensitive data even before any sensitive data exists. By establishing security best practices on the left of the SDLC, we give our people the best chance to increase the odds that any future dorking on our software product looks more like this.</p>
-<p><img src="no_results.png#screenshot" alt="No results found in Google Search"></p>
+<p>
+<img src="https://victoria.dev/blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/no_results.png#screenshot" alt="No results found in Google Search"  />
+</p>
 <p>Another great resource for checking up on the security of our data is Troy Hunt&rsquo;s <a href="https://haveibeenpwned.com/">Have I Been Pwned</a>, a service that compares your data (such as your email) to data that has been leaked in previous data breaches.</p>
 <p>To learn about more ways we can be proactive with our application security, the <a href="https://www.owasp.org/index.php/OWASP_Proactive_Controls">OWASP Proactive Controls</a> publication is a great resource. There&rsquo;s also more about creating a push-left approach to security in the upcoming <a href="https://github.com/OWASP/OWASP-Testing-Guide-v5">OWASP Testing Guide</a>. If these topics interest you, I encourage you to read, learn, and contribute so more people will make it harder for sensitive data to be found.</p>
 

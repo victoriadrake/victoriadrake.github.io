@@ -54,7 +54,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -200,7 +200,8 @@
 <li>Refining the search function</li>
 </ul>
 <p>You can follow along with <a href="https://github.com/victoriadrake/twitter-stream-template">my template on Github</a>.</p>
-<h1 id="1-getting-started">1. Getting started</h1>
+
+<h1 id="1-getting-started" class="anchor-link"><a href="#1-getting-started">1. Getting started</a></h1>
 <p>If you&rsquo;re new to Twitter&rsquo;s Streaming API like I was this morning, here it is from the top.</p>
 <p>Twitter&rsquo;s <a href="https://dev.twitter.com/streaming/public">Streaming API</a> basically enables you to continually load a stream of tweets based on search parameters of your choosing, as they&rsquo;re created in real time. Using a little Python script run from the Windows 10 command line, you can have these tweets display (print) as they&rsquo;re retrieved, while your script is running. The stream will continually update until you stop the script, which from the terminal is achieved with <code>ctrl+c</code>.</p>
 <p>I started with <a href="https://github.com/adamdrake/twitterstreamtemplate">@adamdrake&rsquo;s twitterstreamtemplate on Github</a>, which makes use of queuing in Python (still a concept I&rsquo;m just getting familiar with, but <a href="https://www.troyfawkes.com/learn-python-multithreading-queues-basics/">this article</a> has a nice basic overview of it). <a href="https://twython.readthedocs.io/en/latest/usage/starting_out.html#starting-out">The Twython 3.4.0 documentation</a> was also very helpful.</p>
@@ -215,7 +216,8 @@
 <div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># stream.statuses.filter(track=&#39;twitter&#39;, language=&#39;en&#39;)  </span>
 <span class="n">stream</span><span class="o">.</span><span class="n">statuses</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="s1">&#39;en&#39;</span><span class="p">)</span>  
 </code></pre></div><p>As written, it&rsquo;ll show you the sample stream. Switch the commented lines if you want to set your own search parameters. (More on that below.)</p>
-<h1 id="2-hiccups-windows-10-python-and-unicode">2. Hiccups: Windows 10, Python, and Unicode</h1>
+
+<h1 id="2-hiccups-windows-10-python-and-unicode" class="anchor-link"><a href="#2-hiccups-windows-10-python-and-unicode">2. Hiccups: Windows 10, Python, and Unicode</a></h1>
 <p>My first pass at this program consisted of two goals: 1) successfully pull up a stream of tweets based on my search parameters, and 2) print them. The relevant line for achieving the second goal is:</p>
 <div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">print</span><span class="p">(</span><span class="n">tweet</span><span class="p">)</span>  
 </code></pre></div><p>I opened up the terminal and typed <code>python tweet_stream.py</code> to run the program. After a brief pause it returned this error:</p>
@@ -237,7 +239,8 @@ UnicodeEncodeError: 'charmap' codec can't encode characters in position 1270-127
 <span class="o">&gt;&gt;&gt;</span> <span class="n">u</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;namereplace&#39;</span><span class="p">)</span> <span class="c1"># inserts a \N{...} escape sequence  </span>
 <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">N{YI SYLLABLE IT}abcd</span><span class="se">\\</span><span class="s1">u07b4&#39;</span>  
 </code></pre></div><p>Now running the program with the Windows 10 terminal should give you&hellip; a <em>lot</em> of tweets. (It&rsquo;ll keep going until you stop the program using <code>ctrl+c</code>. On a couple occassions when my program wasn&rsquo;t finding many tweets, <code>ctrl+c</code> didn&rsquo;t seem to work. I hit it a few more times in succession before it seemed to sync up with the program actually doing something, and stopped the operation.)</p>
-<h1 id="3-refining-the-search-function">3. Refining the search function</h1>
+
+<h1 id="3-refining-the-search-function" class="anchor-link"><a href="#3-refining-the-search-function">3. Refining the search function</a></h1>
 <p>To retrieve a stream of tweets filtered by your search parameters, you&rsquo;ll want to alter this line of code:</p>
 <div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">stream</span><span class="o">.</span><span class="n">statuses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">track</span><span class="o">=</span><span class="s1">&#39;twitter&#39;</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s1">&#39;en&#39;</span><span class="p">)</span>
 </code></pre></div><p>The <code>track</code> parameter is what lets you filter your tweets by keywords, hashtags, user mentions, and urls. In the above example, it will search for tweets containing the keyword &ldquo;twitter&rdquo;. You can find its accepted phrases <a href="https://dev.twitter.com/streaming/overview/request-parameters#track">here</a>. Note that the phrases don&rsquo;t work like search engine phrases - characters in the tweet must exactly match the search phrase, and punctuation within the quotes will be considered part of the phrase. For example, &ldquo;café&rdquo; will not find &ldquo;cafe&rdquo; or vice versa, and &ldquo;hello,&rdquo; is a different phrase than &ldquo;hello&rdquo;.</p>

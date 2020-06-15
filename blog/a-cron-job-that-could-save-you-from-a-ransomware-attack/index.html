@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -212,7 +212,8 @@
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> */12 * * *
 </code></pre></div><p>This <a href="https://crontab.guru/">great tool</a> can help you wrap your head around the cron scheduling syntax.</p>
 <p>What&rsquo;s a scheduler have to do with backing up? By itself, not much. The simple beauty of cron is that it runs commands - any shell commands, and any scripts that you&rsquo;d normally run on the command line. As you may have gleaned from my other posts, I&rsquo;m of the strong opinion that you can do just about anything on the command line, including backing up your files. Options for storage in this area are plentiful, from near-to-free local and cloud options, as well as paid managed services too numerous to list. For CLI tooling, we have utilitarian classics like <code>rsync</code>, and CLI tools for specific cloud providers like AWS.</p>
-<h2 id="backing-up-with-rsync">Backing up with <code>rsync</code></h2>
+
+<h2 id="backing-up-with-rsync" class="anchor-link"><a href="#backing-up-with-rsync">Backing up with <code>rsync</code></a></h2>
 <p><a href="https://en.wikipedia.org/wiki/Rsync">The <code>rsync</code> utility</a> is a classic choice, and can back up your files to an external hard drive or remote server while making intelligent determinations about which files to update. It uses file size and modification times to recognize file changes, and then only transfers changed files, saving time and bandwidth.</p>
 <p>The <a href="https://download.samba.org/pub/rsync/rsync.html"><code>rsync</code> syntax</a> can be a little nuanced; for example, a trailing forward slash will copy just the contents of the directory, instead of the directory itself. I found examples to be helpful in understanding the usage and syntax.</p>
 <p>Here&rsquo;s one for backing up a local directory to a local destination, such as an external hard drive:</p>
@@ -228,13 +229,15 @@
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
 </code></pre></div><p>The <code>v</code> flag turns on verbose output, which is helpful if you like realtime feedback on which files are being transferred. During large transfers, however, it can tend to slow things down. The <code>z</code> flag can help with that, as it indicates that files should be compressed during transfer.</p>
 <p>The <code>e</code> flag, followed by <code>ssh</code>, tells <code>rsync</code> to use SSH according to the destination instructions provided in the final argument.</p>
-<h2 id="backing-up-with-aws-cli">Backing up with AWS CLI</h2>
+
+<h2 id="backing-up-with-aws-cli" class="anchor-link"><a href="#backing-up-with-aws-cli">Backing up with AWS CLI</a></h2>
 <p>Amazon Web Services offers a command line interface tool for doing just about everything with your AWS set up, including a straightforward <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/sync.html"><code>s3 sync</code> command</a> for recursively copying new and updated files to your S3 storage buckets. As a storage method for back up data, S3 is a stable and inexpensive choice. You can even <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html">turn on versioning in your bucket</a>.</p>
 <p>The <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/index.html#directory-and-s3-prefix-operations">syntax for interacting with directories</a> is fairly straightforward, and you can directly indicate your S3 bucket as an <code>S3Uri</code> argument in the form of <code>s3://mybucket/mykey</code>. To back up a local directory to your S3 bucket, the command is:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">aws s3 sync /home/user/directory s3://mybucket
 </code></pre></div><p>Similar to <code>rsync</code>, reversing the source and destination would download files from the S3 bucket.</p>
 <p>The <code>sync</code> command is intuitive by default. It will guess the mime type of uploaded files, as well as include files discovered by following symlinks. A variety of options exist to control these and other defaults, even including flags to specify the server-side encryption to be used.</p>
-<h2 id="setting-up-your-cronjob-back-up">Setting up your cronjob back up</h2>
+
+<h2 id="setting-up-your-cronjob-back-up" class="anchor-link"><a href="#setting-up-your-cronjob-back-up">Setting up your cronjob back up</a></h2>
 <p>You can edit your machine&rsquo;s cron file by running:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">crontab -e
 </code></pre></div><p>Intuitive as it may be, it&rsquo;s worth mentioning that your back up commands will only run when your computer is turned on and the cron daemon is running. With this in mind, choose a schedule for your cronjob that aligns with times when your machine is powered on, and maybe not overloaded with other work.</p>
@@ -244,7 +247,8 @@
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">pstree -ap <span class="p">|</span> grep cron
 </code></pre></div><p>Then run <code>pstree -ap &lt;PID&gt;</code>.</p>
 <p>This rabbit hole goes deeper; a quick search can reveal different ways of organizing and scheduling cronjobs, or help you find different utilities to run cronjobs when your computer is asleep. To protect against the possibility of ransomware-affected files being transferred to your back up, incrementally separated archives are a good idea. In essence, however, this basic set up is all you really need to create a reliable, automatic back up system.</p>
-<h2 id="dont-feed-the-trolls">Don&rsquo;t feed the trolls</h2>
+
+<h2 id="dont-feed-the-trolls" class="anchor-link"><a href="#dont-feed-the-trolls">Don&rsquo;t feed the trolls</a></h2>
 <p>Humans are fallible; that&rsquo;s why cyberattacks work. The success of a ransomware attack depends on the victim having no choice but to pay up in order to return to business as usual. A highly accessible recent back up undermines attackers who depend on us being unprepared. By blowing away a system and restoring from yesterday&rsquo;s back up, we may lose a day of progress; ransomers, however, gain nothing at all.</p>
 <p>For further resources on ransomware defense for users and organizations, check out <a href="https://www.us-cert.gov/Ransomware">CISA&rsquo;s advice on ransomware</a>.</p>
 

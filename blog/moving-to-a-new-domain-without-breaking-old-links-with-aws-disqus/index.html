@@ -48,7 +48,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.36d6691f048199fc4e196b50b468570af3eb8b280bba1c5886f23179ed2736ce.css" integrity="sha256-NtZpHwSBmfxOGWtQtGhXCvPriygLuhxYhvIxee0nNs4=" media="screen">
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
 
 
 
@@ -201,13 +201,16 @@
 <li>Disqus for comments</li>
 </ul>
 <p>If you&rsquo;d like a walk-through for how to set up a new domain with this structure, it&rsquo;s over here: <a href="https://victoria.dev/verbose/aws-static-site/">Hosting your static site with AWS S3, Route 53, and CloudFront</a>. In this post, I&rsquo;ll just detail how I managed to move my blog to the new site without breaking the old links or losing any comments.</p>
-<h1 id="preserve-old-links-with-redirection-rules">Preserve old links with redirection rules</h1>
+
+<h1 id="preserve-old-links-with-redirection-rules" class="anchor-link"><a href="#preserve-old-links-with-redirection-rules">Preserve old links with redirection rules</a></h1>
 <p>I wanted to avoid breaking links that have been posted around the web by forwarding visitors to the new URL. The change looks like this:</p>
 <p>Old URL: <code>https://victoria.dev/meta/5-bag-lessons/</code><br>
 New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
 <p>You can see that the domain name as well as the subdirectory have changed, but the slug for the blog post remains the same. (I love static sites.)</p>
 <p>To redirect links from the old site, we&rsquo;ll need to set redirection rules in the old site&rsquo;s S3 bucket. AWS provides a way to set up a conditional redirect. This is set in the &ldquo;Redirection rules&rdquo; section of your S3 bucket&rsquo;s properties, under &ldquo;Static website hosting.&rdquo; You can <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html#advanced-conditional-redirects">find the documentation here.</a></p>
-<p><img src="aws-redirect.png#screenshot" alt="Redirection rules placement"></p>
+<p>
+<img src="https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/aws-redirect.png#screenshot" alt="Redirection rules placement"  />
+</p>
 <p>There are a few examples given, but none that represent the redirect I want. In addition to changing the prefix of the object key, we&rsquo;re also changing the domain. The latter is achieved with the <code>&lt;HostName&gt;</code> tag.</p>
 <p>To redirect requests for the old blog URL to the new top level domain, we&rsquo;ll use the code below.</p>
 <div class="highlight"><pre class="chroma"><code class="language-xml" data-lang="xml"><span class="nt">&lt;RoutingRules&gt;</span>
@@ -222,13 +225,17 @@ New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
   <span class="nt">&lt;/RoutingRule&gt;</span>
 <span class="nt">&lt;/RoutingRules&gt;</span>
 </code></pre></div><p>This rule ensures that requests for <code>olddomain.com/oldblog/specific-blog-post</code> will redirect to <code>newdomain.com/newblog/specific-blog-post</code>.</p>
-<h1 id="migrate-disqus-comments">Migrate Disqus comments</h1>
+
+<h1 id="migrate-disqus-comments" class="anchor-link"><a href="#migrate-disqus-comments">Migrate Disqus comments</a></h1>
 <p>Disqus provides a tool for migrating the comment threads from your old blog site to the new one. You can find it in your Disqus admin tools at <code>your-short-name.disqus.com/admin/discussions/migrate/</code>.</p>
 <p>To migrate posts from the old blog address to the new one, we&rsquo;ll use the URL mapper tool. Click &ldquo;Start URL mapper,&rdquo; then &ldquo;you can download a CSV here.&rdquo;</p>
-<p><img src="aws-disqus.png#screenshot" alt="URL mapping for Disqus."></p>
+<p>
+<img src="https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/aws-disqus.png#screenshot" alt="URL mapping for Disqus."  />
+</p>
 <p>Disqus has decent instructions for how this tool works, and you can <a href="https://help.disqus.com/customer/en/portal/articles/912757-url-mapper">read them here.</a> Basically, you&rsquo;ll input the new blog URLs into the second column of the CSV file you downloaded, then pass it back to Disqus to process. If you&rsquo;re using a program to edit the CSV, be sure to save the resulting file in CSV format.</p>
 <p>Unless you have a bazillion URLs, the tool works pretty quickly, and you&rsquo;ll get an email when it&rsquo;s finished. Don&rsquo;t forget to update the name of your site in the Disqus admin, too.</p>
-<h1 id="transfer-other-settings">Transfer other settings</h1>
+
+<h1 id="transfer-other-settings" class="anchor-link"><a href="#transfer-other-settings">Transfer other settings</a></h1>
 <p>Update links in your social profiles and any other sites you may have around the web. If you&rsquo;re using other services attached to your website like Google Analytics or IFTTT, don&rsquo;t forget to update those details too!</p>
 
 
