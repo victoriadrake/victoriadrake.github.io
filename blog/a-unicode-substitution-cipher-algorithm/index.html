@@ -1,53 +1,373 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>A Unicode substitution cipher algorithm | victoria.dev</title><meta name=monetization content="$twitter.xrptipbot.com/victoriadotdev"><meta property="og:title" content="A Unicode substitution cipher algorithm - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How a fun but useless project turned into a Unicode substitution cipher algorithm."><meta property="og:url" content="https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/cover_unicode-secret.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="A Unicode substitution cipher algorithm"><meta name=twitter:image content="https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/cover_unicode-secret.png"><meta name=twitter:description content="How a fun but useless project turned into a Unicode substitution cipher algorithm."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/cover_unicode-secret.png alt="cover image"></div><div class=markdown><h1>A Unicode substitution cipher algorithm</h1><p class=subtitle>How a fun but useless project turned into a Unicode substitution cipher algorithm.</p><p class=metadata id=date>January 6, 2018
-☕️&nbsp;
-5 min read
-&nbsp;
-<a class=li-tag href=/tags/algorithms/>algorithms
-</a>&nbsp;
-<a class=li-tag href=/tags/javascript/>javascript
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>Full transparency: I occasionally waste time messing around on Twitter. <em>(Gasp! Shock!)</em> One of the ways I waste time messing around on Twitter is by writing my name in my profile with different Unicode character &ldquo;fonts,&rdquo; 𝖑𝖎𝖐𝖊 𝖙𝖍𝖎𝖘 𝖔𝖓𝖊. I previously did this by searching for different Unicode characters on Google, then one-by-one copying and pasting them into the &ldquo;Name&rdquo; field on my Twitter profile. Since this method of wasting time was a bit of a time waster, I decided (in true programmer fashion) to write a tool that would help me save some time while wasting it.</p><p>I originally dubbed the tool &ldquo;uni-pretty,&rdquo; (a pun on LEGO&rsquo;s <a href=https://www.lego.com/en-us/themes/unikitty/characters/unikitty-84aef06dc1164a718aded854976efeeb>Unikitty</a> from a movie I&rsquo;d just watched that absolutely no one found funny) but have since renamed it <a href=https://fancyunicode.com>fancy unicode</a>. It builds from <a href=https://github.com/victoriadrake/fancy-unicode>this GitHub repo</a>. It lets you type any characters into a field and then converts them into Unicode characters that also represent letters, giving you fancy &ldquo;fonts&rdquo; that override a website&rsquo;s CSS, like in your Twitter profile. (Sorry, Internet.)</p><p><img src=https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/screenshot.png#screenshot alt="fancy-unicode screenshot"></p><p>The tool&rsquo;s first naive iteration existed for about twenty minutes while I copy-pasted Unicode characters into a data structure. This approach of storing the characters in the JavaScript file, called hard-coding, is fraught with issues. Besides having to store every character from every font style, it&rsquo;s painstaking to build, hard to update, and more code means it&rsquo;s susceptible to more possible errors.</p><p>Fortunately, working with Unicode means that there&rsquo;s a way to avoid the whole mess of having to store all the font characters: Unicode numbers are sequential. More importantly, the special characters in Unicode that could be used as fonts (meaning that there&rsquo;s a matching character for most or all of the letters of the alphabet) are always in the following sequence: capital A-Z, lowercase a-z.</p><p>For example, in the fancy Unicode above, the lowercase letter &ldquo;L&rdquo; character has the Unicode number <code>U+1D591</code> and HTML code <code>&amp;#120209;</code>. The next letter in the sequence, a lowercase letter &ldquo;M,&rdquo; has the Unicode number <code>U+1D592</code> and HTML code <code>&amp;#120210;</code>. Notice how the numbers in those codes increment by one.</p><p>Why&rsquo;s this relevant? Since each special character can be referenced by a number, and we know that the order of the sequence is always the same (capital A-Z, lowercase a-z), we&rsquo;re able to produce any character simply by knowing the first number of its font sequence (the capital &ldquo;A&rdquo;). If this reminds you of anything, you can borrow my decoder pin.</p><p>In cryptography, the Caesar cipher (or shift cipher) is a simple method of encryption that utilizes substitution of one character for another in order to encode a message. This is typically done using the alphabet and a shift &ldquo;key&rdquo; that tells you which letter to substitute for the original one. For example, if I were trying to encode the word &ldquo;cat&rdquo; with a right shift of 3, it would look like this:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash>c a t
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
+<title>
+    A Unicode substitution cipher algorithm | victoria.dev
+</title>
+
+
+    <meta
+  name="monetization"
+  content="$twitter.xrptipbot.com/victoriadotdev">
+    <meta property="og:title" content="A Unicode substitution cipher algorithm - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How a fun but useless project turned into a Unicode substitution cipher algorithm." />
+<meta property="og:url" content="https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/cover_unicode-secret.png"/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A Unicode substitution cipher algorithm" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/cover_unicode-secret.png"/>
+
+<meta name="twitter:description"
+    content="How a fun but useless project turned into a Unicode substitution cipher algorithm." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/cover_unicode-secret.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        A Unicode substitution cipher algorithm
+    </h1>
+    
+    <p class="subtitle">How a fun but useless project turned into a Unicode substitution cipher algorithm.</p>
+    <p class="metadata" id="date">
+        January 6, 2018
+        ☕️&nbsp;
+        5 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/algorithms/">
+            algorithms
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/javascript/">
+            javascript
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>Full transparency: I occasionally waste time messing around on Twitter. <em>(Gasp! Shock!)</em> One of the ways I waste time messing around on Twitter is by writing my name in my profile with different Unicode character &ldquo;fonts,&rdquo; 𝖑𝖎𝖐𝖊 𝖙𝖍𝖎𝖘 𝖔𝖓𝖊. I previously did this by searching for different Unicode characters on Google, then one-by-one copying and pasting them into the &ldquo;Name&rdquo; field on my Twitter profile. Since this method of wasting time was a bit of a time waster, I decided (in true programmer fashion) to write a tool that would help me save some time while wasting it.</p>
+<p>I originally dubbed the tool &ldquo;uni-pretty,&rdquo; (a pun on LEGO&rsquo;s <a href="https://www.lego.com/en-us/themes/unikitty/characters/unikitty-84aef06dc1164a718aded854976efeeb">Unikitty</a> from a movie I&rsquo;d just watched that absolutely no one found funny) but have since renamed it <a href="https://fancyunicode.com">fancy unicode</a>. It builds from <a href="https://github.com/victoriadrake/fancy-unicode">this GitHub repo</a>. It lets you type any characters into a field and then converts them into Unicode characters that also represent letters, giving you fancy &ldquo;fonts&rdquo; that override a website&rsquo;s CSS, like in your Twitter profile. (Sorry, Internet.)</p>
+<p>
+<img src="https://victoria.dev/blog/a-unicode-substitution-cipher-algorithm/screenshot.png#screenshot" alt="fancy-unicode screenshot"  />
+</p>
+<p>The tool&rsquo;s first naive iteration existed for about twenty minutes while I copy-pasted Unicode characters into a data structure. This approach of storing the characters in the JavaScript file, called hard-coding, is fraught with issues. Besides having to store every character from every font style, it&rsquo;s painstaking to build, hard to update, and more code means it&rsquo;s susceptible to more possible errors.</p>
+<p>Fortunately, working with Unicode means that there&rsquo;s a way to avoid the whole mess of having to store all the font characters: Unicode numbers are sequential. More importantly, the special characters in Unicode that could be used as fonts (meaning that there&rsquo;s a matching character for most or all of the letters of the alphabet) are always in the following sequence: capital A-Z, lowercase a-z.</p>
+<p>For example, in the fancy Unicode above, the lowercase letter &ldquo;L&rdquo; character has the Unicode number <code>U+1D591</code> and HTML code <code>&amp;#120209;</code>. The next letter in the sequence, a lowercase letter &ldquo;M,&rdquo; has the Unicode number <code>U+1D592</code> and HTML code <code>&amp;#120210;</code>. Notice how the numbers in those codes increment by one.</p>
+<p>Why&rsquo;s this relevant? Since each special character can be referenced by a number, and we know that the order of the sequence is always the same (capital A-Z, lowercase a-z), we&rsquo;re able to produce any character simply by knowing the first number of its font sequence (the capital &ldquo;A&rdquo;). If this reminds you of anything, you can borrow my decoder pin.</p>
+<p>In cryptography, the Caesar cipher (or shift cipher) is a simple method of encryption that utilizes substitution of one character for another in order to encode a message. This is typically done using the alphabet and a shift &ldquo;key&rdquo; that tells you which letter to substitute for the original one. For example, if I were trying to encode the word &ldquo;cat&rdquo; with a right shift of 3, it would look like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">c a t
 f d w
-</code></pre></div><p>With this concept, encoding our plain text letters as a Unicode &ldquo;font&rdquo; is a simple process. All we need is an array to reference our plain text letters with, and the first index of our Unicode capital &ldquo;A&rdquo; representation. Since some Unicode numbers also include letters (which are sequential, but an unnecessary complication) and since the intent is to display the page in HTML, we&rsquo;ll use the HTML code number <code>&amp;#120172;</code>, with the extra bits removed for brevity.</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>var</span> <span class=nx>plain</span> <span class=o>=</span> <span class=p>[</span><span class=s1>&#39;A&#39;</span><span class=p>,</span> <span class=s1>&#39;B&#39;</span><span class=p>,</span> <span class=s1>&#39;C&#39;</span><span class=p>,</span> <span class=s1>&#39;D&#39;</span><span class=p>,</span> <span class=s1>&#39;E&#39;</span><span class=p>,</span> <span class=s1>&#39;F&#39;</span><span class=p>,</span> <span class=s1>&#39;G&#39;</span><span class=p>,</span> <span class=s1>&#39;H&#39;</span><span class=p>,</span> <span class=s1>&#39;I&#39;</span><span class=p>,</span> <span class=s1>&#39;J&#39;</span><span class=p>,</span> <span class=s1>&#39;K&#39;</span><span class=p>,</span> <span class=s1>&#39;L&#39;</span><span class=p>,</span> <span class=s1>&#39;M&#39;</span><span class=p>,</span> <span class=s1>&#39;N&#39;</span><span class=p>,</span> <span class=s1>&#39;O&#39;</span><span class=p>,</span> <span class=s1>&#39;P&#39;</span><span class=p>,</span> <span class=s1>&#39;Q&#39;</span><span class=p>,</span> <span class=s1>&#39;R&#39;</span><span class=p>,</span> <span class=s1>&#39;S&#39;</span><span class=p>,</span> <span class=s1>&#39;T&#39;</span><span class=p>,</span> <span class=s1>&#39;U&#39;</span><span class=p>,</span> <span class=s1>&#39;V&#39;</span><span class=p>,</span> <span class=s1>&#39;W&#39;</span><span class=p>,</span> <span class=s1>&#39;X&#39;</span><span class=p>,</span> <span class=s1>&#39;Y&#39;</span><span class=p>,</span> <span class=s1>&#39;Z&#39;</span><span class=p>,</span> <span class=s1>&#39;a&#39;</span><span class=p>,</span> <span class=s1>&#39;b&#39;</span><span class=p>,</span> <span class=s1>&#39;c&#39;</span><span class=p>,</span> <span class=s1>&#39;d&#39;</span><span class=p>,</span> <span class=s1>&#39;e&#39;</span><span class=p>,</span> <span class=s1>&#39;f&#39;</span><span class=p>,</span> <span class=s1>&#39;g&#39;</span><span class=p>,</span> <span class=s1>&#39;h&#39;</span><span class=p>,</span> <span class=s1>&#39;i&#39;</span><span class=p>,</span> <span class=s1>&#39;j&#39;</span><span class=p>,</span> <span class=s1>&#39;k&#39;</span><span class=p>,</span> <span class=s1>&#39;l&#39;</span><span class=p>,</span> <span class=s1>&#39;m&#39;</span><span class=p>,</span> <span class=s1>&#39;n&#39;</span><span class=p>,</span> <span class=s1>&#39;o&#39;</span><span class=p>,</span> <span class=s1>&#39;p&#39;</span><span class=p>,</span> <span class=s1>&#39;q&#39;</span><span class=p>,</span> <span class=s1>&#39;r&#39;</span><span class=p>,</span> <span class=s1>&#39;s&#39;</span><span class=p>,</span> <span class=s1>&#39;t&#39;</span><span class=p>,</span> <span class=s1>&#39;u&#39;</span><span class=p>,</span> <span class=s1>&#39;v&#39;</span><span class=p>,</span> <span class=s1>&#39;w&#39;</span><span class=p>,</span> <span class=s1>&#39;x&#39;</span><span class=p>,</span> <span class=s1>&#39;y&#39;</span><span class=p>,</span> <span class=s1>&#39;z&#39;</span><span class=p>]</span><span class=p>;</span>
+</code></pre></div><p>With this concept, encoding our plain text letters as a Unicode &ldquo;font&rdquo; is a simple process. All we need is an array to reference our plain text letters with, and the first index of our Unicode capital &ldquo;A&rdquo; representation. Since some Unicode numbers also include letters (which are sequential, but an unnecessary complication) and since the intent is to display the page in HTML, we&rsquo;ll use the HTML code number <code>&amp;#120172;</code>, with the extra bits removed for brevity.</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">plain</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">];</span>
 
-<span class=kd>var</span> <span class=nx>fancyA</span> <span class=o>=</span> <span class=mi>120172</span><span class=p>;</span>
-</code></pre></div><p>Since we know that the letter sequence of the fancy Unicode is the same as our plain text array, any letter can be found by using its index in the plain text array as an offset from the fancy capital &ldquo;A&rdquo; number. For example, capital &ldquo;B&rdquo; in fancy Unicode is the capital &ldquo;A&rdquo; number, <code>120172</code> plus B&rsquo;s index, which is <code>1</code>: <code>120173</code>.</p><p>Here&rsquo;s our conversion function:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>function</span> <span class=nx>convert</span><span class=p>(</span><span class=nx>string</span><span class=p>)</span> <span class=p>{</span>
-    <span class=c1>// Create a variable to store our converted letters
-</span><span class=c1></span>    <span class=kd>let</span> <span class=nx>converted</span> <span class=o>=</span> <span class=p>[</span><span class=p>]</span><span class=p>;</span>
-    <span class=c1>// Break string into substrings (letters)
-</span><span class=c1></span>    <span class=kd>let</span> <span class=nx>arr</span> <span class=o>=</span> <span class=nx>string</span><span class=p>.</span><span class=nx>split</span><span class=p>(</span><span class=s1>&#39;&#39;</span><span class=p>)</span><span class=p>;</span>
-    <span class=c1>// Search plain array for indexes of letters
-</span><span class=c1></span>    <span class=nx>arr</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=nx>element</span> <span class=p>=&gt;</span> <span class=p>{</span>
-        <span class=kd>let</span> <span class=nx>i</span> <span class=o>=</span> <span class=nx>plain</span><span class=p>.</span><span class=nx>indexOf</span><span class=p>(</span><span class=nx>element</span><span class=p>)</span><span class=p>;</span>
-        <span class=c1>// If the letter isn&#39;t a letter (not found in the plain array)
-</span><span class=c1></span>        <span class=k>if</span> <span class=p>(</span><span class=nx>i</span> <span class=o>==</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
-            <span class=c1>// Return as a whitespace
-</span><span class=c1></span>            <span class=nx>converted</span><span class=p>.</span><span class=nx>push</span><span class=p>(</span><span class=s1>&#39; &#39;</span><span class=p>)</span><span class=p>;</span>
-        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
-            <span class=c1>// Get relevant character from fancy number + index
-</span><span class=c1></span>            <span class=kd>let</span> <span class=nx>unicode</span> <span class=o>=</span> <span class=nx>fancyA</span> <span class=o>+</span> <span class=nx>i</span><span class=p>;</span>
-            <span class=c1>// Return as HTML code
-</span><span class=c1></span>            <span class=nx>converted</span><span class=p>.</span><span class=nx>push</span><span class=p>(</span><span class=s1>&#39;&amp;#&#39;</span> <span class=o>+</span> <span class=nx>unicode</span> <span class=o>+</span> <span class=s1>&#39;;&#39;</span><span class=p>)</span><span class=p>;</span>
-        <span class=p>}</span>
+<span class="kd">var</span> <span class="nx">fancyA</span> <span class="o">=</span> <span class="mi">120172</span><span class="p">;</span>
+</code></pre></div><p>Since we know that the letter sequence of the fancy Unicode is the same as our plain text array, any letter can be found by using its index in the plain text array as an offset from the fancy capital &ldquo;A&rdquo; number. For example, capital &ldquo;B&rdquo; in fancy Unicode is the capital &ldquo;A&rdquo; number, <code>120172</code> plus B&rsquo;s index, which is <code>1</code>: <code>120173</code>.</p>
+<p>Here&rsquo;s our conversion function:</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">convert</span><span class="p">(</span><span class="nx">string</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Create a variable to store our converted letters
+</span><span class="c1"></span>    <span class="kd">let</span> <span class="nx">converted</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="c1">// Break string into substrings (letters)
+</span><span class="c1"></span>    <span class="kd">let</span> <span class="nx">arr</span> <span class="o">=</span> <span class="nx">string</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+    <span class="c1">// Search plain array for indexes of letters
+</span><span class="c1"></span>    <span class="nx">arr</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">element</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">plain</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
+        <span class="c1">// If the letter isn&#39;t a letter (not found in the plain array)
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Return as a whitespace
+</span><span class="c1"></span>            <span class="nx">converted</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// Get relevant character from fancy number + index
+</span><span class="c1"></span>            <span class="kd">let</span> <span class="nx">unicode</span> <span class="o">=</span> <span class="nx">fancyA</span> <span class="o">+</span> <span class="nx">i</span><span class="p">;</span>
+            <span class="c1">// Return as HTML code
+</span><span class="c1"></span>            <span class="nx">converted</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;&amp;#&#39;</span> <span class="o">+</span> <span class="nx">unicode</span> <span class="o">+</span> <span class="s1">&#39;;&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
 
-    <span class=p>}</span><span class=p>)</span><span class=p>;</span>
-    <span class=c1>// Print the converted letters as a string
-</span><span class=c1></span>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>converted</span><span class=p>.</span><span class=nx>join</span><span class=p>(</span><span class=s1>&#39;&#39;</span><span class=p>)</span><span class=p>)</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div><p>A neat possibility for this method of encoding requires a departure from my original purpose, which was to create a human-readable representation of the original string. If the purpose was instead to produce a cipher, this could be done by using any Unicode index in place of <code>fancyA</code> as long as the character indexed isn&rsquo;t a representation of a capital &ldquo;A.&rdquo;</p><p>Here&rsquo;s the same code set up with a simplified plain text array, and a non-letter-representation Unicode key:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>var</span> <span class=nx>plain</span> <span class=o>=</span> <span class=p>[</span><span class=s1>&#39;a&#39;</span><span class=p>,</span> <span class=s1>&#39;b&#39;</span><span class=p>,</span> <span class=s1>&#39;c&#39;</span><span class=p>,</span> <span class=s1>&#39;d&#39;</span><span class=p>,</span> <span class=s1>&#39;e&#39;</span><span class=p>,</span> <span class=s1>&#39;f&#39;</span><span class=p>,</span> <span class=s1>&#39;g&#39;</span><span class=p>,</span> <span class=s1>&#39;h&#39;</span><span class=p>,</span> <span class=s1>&#39;i&#39;</span><span class=p>,</span> <span class=s1>&#39;j&#39;</span><span class=p>,</span> <span class=s1>&#39;k&#39;</span><span class=p>,</span> <span class=s1>&#39;l&#39;</span><span class=p>,</span> <span class=s1>&#39;m&#39;</span><span class=p>,</span> <span class=s1>&#39;n&#39;</span><span class=p>,</span> <span class=s1>&#39;o&#39;</span><span class=p>,</span> <span class=s1>&#39;p&#39;</span><span class=p>,</span> <span class=s1>&#39;q&#39;</span><span class=p>,</span> <span class=s1>&#39;r&#39;</span><span class=p>,</span> <span class=s1>&#39;s&#39;</span><span class=p>,</span> <span class=s1>&#39;t&#39;</span><span class=p>,</span> <span class=s1>&#39;u&#39;</span><span class=p>,</span> <span class=s1>&#39;v&#39;</span><span class=p>,</span> <span class=s1>&#39;w&#39;</span><span class=p>,</span> <span class=s1>&#39;x&#39;</span><span class=p>,</span> <span class=s1>&#39;y&#39;</span><span class=p>,</span> <span class=s1>&#39;z&#39;</span><span class=p>]</span><span class=p>;</span>
+    <span class="p">});</span>
+    <span class="c1">// Print the converted letters as a string
+</span><span class="c1"></span>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">converted</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div><p>A neat possibility for this method of encoding requires a departure from my original purpose, which was to create a human-readable representation of the original string. If the purpose was instead to produce a cipher, this could be done by using any Unicode index in place of <code>fancyA</code> as long as the character indexed isn&rsquo;t a representation of a capital &ldquo;A.&rdquo;</p>
+<p>Here&rsquo;s the same code set up with a simplified plain text array, and a non-letter-representation Unicode key:</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">plain</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">];</span>
 
-<span class=kd>var</span> <span class=nx>key</span> <span class=o>=</span> <span class=mi>9016</span><span class=p>;</span>
-</code></pre></div><p>You might be able to imagine that decoding a cipher produced by this method would be relatively straightforward, once you knew the encoding secret. You&rsquo;d simply need to subtract the key from the HTML code numbers of the encoded characters, then find the relevant plain text letters at the remaining indexes.</p><p>Well, that&rsquo;s it for today. Be sure to drink your Ovaltine and we&rsquo;ll see you right here next Monday at 5:45!</p><p>Oh, and&mldr; ⍔⍠⍟⍘⍣⍒⍥⍦⍝⍒⍥⍚⍠⍟⍤ ⍒⍟⍕ ⍨⍖⍝⍔⍠⍞⍖ ⍥⍠ ⍥⍙⍖ ⍔⍣⍪⍡⍥⍚⍔ ⍦⍟⍚⍔⍠⍕⍖ ⍤⍖⍔⍣⍖⍥ ⍤⍠⍔⍚⍖⍥⍪</p><p>:)</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/>How to code a satellite algorithm and cook paella from scratch</a><p class=li-brief>A guide to expertly tackling seemingly complicated problems that you'd rather never tackle in the first place.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
-☕️☕️&nbsp;
-7 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/adorable-bookmarklets-want-to-help-delete-your-social-media-data/>Adorable bookmarklets want to help delete your social media data</a><p class=li-brief>Bookmarklets you can use in your browser to help clean up your social media data.</p><p class=metadata><a class=li-tag href=/tags/javascript/>javascript</a>
-☕️&nbsp;
-2 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/>A coffee-break introduction to time complexity of algorithms</a><p class=li-brief>A groundwork understanding of algorithm time complexity in about fifteen minutes.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
-☕️☕️☕️&nbsp;
-16 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
-document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
+<span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="mi">9016</span><span class="p">;</span>
+</code></pre></div><p>You might be able to imagine that decoding a cipher produced by this method would be relatively straightforward, once you knew the encoding secret. You&rsquo;d simply need to subtract the key from the HTML code numbers of the encoded characters, then find the relevant plain text letters at the remaining indexes.</p>
+<p>Well, that&rsquo;s it for today. Be sure to drink your Ovaltine and we&rsquo;ll see you right here next Monday at 5:45!</p>
+<p>Oh, and&hellip; ⍔⍠⍟⍘⍣⍒⍥⍦⍝⍒⍥⍚⍠⍟⍤ ⍒⍟⍕ ⍨⍖⍝⍔⍠⍞⍖ ⍥⍠ ⍥⍙⍖ ⍔⍣⍪⍡⍥⍚⍔ ⍦⍟⍚⍔⍠⍕⍖ ⍤⍖⍔⍣⍖⍥ ⍤⍠⍔⍚⍖⍥⍪</p>
+<p>:)</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/">How to code a satellite algorithm and cook paella from scratch</a>
+        <p class="li-brief">
+            A guide to expertly tackling seemingly complicated problems that you&#39;d rather never tackle in the first place.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
+            
+            ☕️☕️&nbsp;
+            7 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/adorable-bookmarklets-want-to-help-delete-your-social-media-data/">Adorable bookmarklets want to help delete your social media data</a>
+        <p class="li-brief">
+            Bookmarklets you can use in your browser to help clean up your social media data.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/javascript/">javascript</a>
+            
+            ☕️&nbsp;
+            2 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">A coffee-break introduction to time complexity of algorithms</a>
+        <p class="li-brief">
+            A groundwork understanding of algorithm time complexity in about fifteen minutes.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
+            
+            ☕️☕️☕️&nbsp;
+            16 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>

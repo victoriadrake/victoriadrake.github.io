@@ -1,28 +1,364 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>How to replace a string in a dozen old blog posts with one sed terminal command | victoria.dev</title><meta name=monetization content="$twitter.xrptipbot.com/victoriadotdev"><meta property="og:title" content="How to replace a string in a dozen old blog posts with one sed terminal command - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How to use sed to update a URL in all your old blog posts with simple find and replace."><meta property="og:url" content="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/cover_sed.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="How to replace a string in a dozen old blog posts with one sed terminal command"><meta name=twitter:image content="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/cover_sed.png"><meta name=twitter:description content="How to use sed to update a URL in all your old blog posts with simple find and replace."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/cover_sed.png alt="cover image"></div><div class=markdown><h1>How to replace a string in a dozen old blog posts with one sed terminal command</h1><p class=subtitle>How to use sed to update a URL in all your old blog posts with simple find and replace.</p><p class=metadata id=date>May 6, 2017
-☕️&nbsp;
-4 min read
-&nbsp;
-<a class=li-tag href=/tags/terminal/>terminal
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p><em>June 1, 2018: This post was previously titled &ldquo;That time 30 seconds, StackOverflow, and sed saved me 30 minutes&rdquo; and has since been revised and updated with more examples and a couple new doodles. It&rsquo;s better now.</em></p><p>I&rsquo;ve had more than a few usernames, URLs, and Twitter handles over the years. Whether it was changing to something that better reflected my current interests or briefly getting caught up in the &ldquo;.io&rdquo; domain craze, there always seemed to be a great reason for an Internet presence refresh. The downside to all this fresh rebranding is that it often means needing to update a lot of links. (If you want to redirect an old blog post URL, check out <a href=/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/>this article</a> too!)</p><p>This week, I launched my new website and changed my Twitter username to match. I was about to spend time manually going through all my old blog posts to find and update the URLs when this very future blog post popped up on my screen like <a href=http://knowyourmeme.com/memes/clippy>Clippy</a> and shook its pixelated head disapprovingly.</p><p>Here&rsquo;s a worthwhile new habit for you: anytime you find yourself going &ldquo;Ughhh I have to do <em>that?</em> It&rsquo;ll take forever!&rdquo; head on over to <a href=https://duckduckgo.com/>DuckDuckGo</a> and search for &ldquo;terminal command (the thing you&rsquo;re trying to do)”.</p><p><img src=https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/sed-duck.png alt="Superhero DuckDuckGo doodle"></p><p>Here&rsquo;s what I found to save myself a whole bunch of mindless tedium.</p><h1 id=update-a-string-in-dozens-of-blog-posts-using-sed>Update a string in dozens of blog posts using sed</h1><p>Meet your new friend <code>sed</code>. This amazingly powerful tool lives in your terminal and is available to be totally underused for things like finding and replacing strings in files. (I seem to have a habit of suggesting ways to totally underuse powerful tools, as in my exploration of how to <a href=/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/>use cron to create desktop notifications</a>, but I digress.)</p><h2 id=current-directory-non-recursive>Current directory, non-recursive</h2><p><strong>Non-recursive</strong> means sed won&rsquo;t change files in any subdirectories of the current folder.</p><p>Run this command to search all the files in your current directory and replace a given string.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>// to replace <span class=s1>&#39;foo&#39;</span> with <span class=s1>&#39;bar&#39;</span>
-$ sed -i -- <span class=s1>&#39;s/foo/bar/g&#39;</span> *
-</code></pre></div><p>Here&rsquo;s what each component of the command does:</p><p><code>-i</code> will change the original, and stands for &ldquo;in-place.&rdquo;<br><code>s</code> is for substitute, so we can find and replace.<br><code>foo</code> is the string we&rsquo;ll be taking away,<br><code>bar</code> is the string we&rsquo;ll use instead today.<br><code>g</code> as in &ldquo;global&rdquo; means &ldquo;all occurrences, please.&rdquo;<br><code>*</code> denotes all file types. (No more rhymes. What a tease.)</p><p>You can limit the operation to one file type, such as <code>txt</code>, by using:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>sed -i -- <span class=s1>&#39;s/foo/bar/g&#39;</span> *.txt
-</code></pre></div><h2 id=current-directory-and-subdirectories-recursive>Current directory and subdirectories, recursive</h2><p>We can supplement <code>sed</code> with <code>find</code> to expand our scope to all the current folder&rsquo;s subdirectories. This will include any hidden files.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{</span><span class=o>}</span> +
-</code></pre></div><p>To ignore hidden files (such as <code>.git</code>) you can pass the negation modifier <code>-not -path '*/\.*'</code>.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -not -path <span class=s1>&#39;*/\.*&#39;</span> -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{</span><span class=o>}</span> +
-</code></pre></div><p>This will exclude any file that has the string <code>/.</code> in its path.</p><p>Alternatively, you can limit the operation to file names that end in a certain extension, like Markdown:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -name <span class=s2>&#34;*.md&#34;</span> -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{</span><span class=o>}</span> +
-</code></pre></div><h2 id=working-with-urls-change-the-separator>Working with URLs: change the separator</h2><p>In the case of needing to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&mldr;</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=s1>&#39;s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g&#39;</span> <span class=o>{</span><span class=o>}</span> +
-</code></pre></div><p>You can avoid some confusion and mistakes by changing the separator to any non-conflicting character. The character that follows the <code>s</code> will be treated as the separator. In our case, using a <code>,</code> or <code>_</code> would do. This doesn&rsquo;t require escaping and is much more readable:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=s1>&#39;s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g&#39;</span> <span class=o>{</span><span class=o>}</span> +
-</code></pre></div><h1 id=maybe-endless-possibilities>(Maybe) endless possibilities!</h1><p>There&rsquo;s a lot more that <code>sed</code> can do. I&rsquo;ll be adding to this living post as I find more examples that are useful. For now, <a href=http://www.folkstalk.com/2012/01/sed-command-in-unix-examples.html>here are some other use cases</a> that you may find handy.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/>Batch renaming images, including image resolution, with awk</a><p class=li-brief>How to batch rename images with custom values using file, awk, and rename - in rainbow colors!</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
-☕️&nbsp;
-4 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/>How I created custom desktop notifications using terminal and cron</a><p class=li-brief>How you can use tools your Linux system already has to create custom desktop notifications.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
-☕️☕️&nbsp;
-6 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/>Command line tricks for managing your messy open source repository</a><p class=li-brief>A handy toolbox for the terminal to help open source maintainers make their projects sparkle.</p><p class=metadata><a class=li-tag href=/tags/terminal/>terminal</a>
-☕️&nbsp;
-5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
-document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
+<title>
+    How to replace a string in a dozen old blog posts with one sed terminal command | victoria.dev
+</title>
+
+
+    <meta
+  name="monetization"
+  content="$twitter.xrptipbot.com/victoriadotdev">
+    <meta property="og:title" content="How to replace a string in a dozen old blog posts with one sed terminal command - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How to use sed to update a URL in all your old blog posts with simple find and replace." />
+<meta property="og:url" content="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/cover_sed.png"/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How to replace a string in a dozen old blog posts with one sed terminal command" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/cover_sed.png"/>
+
+<meta name="twitter:description"
+    content="How to use sed to update a URL in all your old blog posts with simple find and replace." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/cover_sed.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        How to replace a string in a dozen old blog posts with one sed terminal command
+    </h1>
+    
+    <p class="subtitle">How to use sed to update a URL in all your old blog posts with simple find and replace.</p>
+    <p class="metadata" id="date">
+        May 6, 2017
+        ☕️&nbsp;
+        4 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/terminal/">
+            terminal
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p><em>June 1, 2018: This post was previously titled &ldquo;That time 30 seconds, StackOverflow, and sed saved me 30 minutes&rdquo; and has since been revised and updated with more examples and a couple new doodles. It&rsquo;s better now.</em></p>
+<p>I&rsquo;ve had more than a few usernames, URLs, and Twitter handles over the years. Whether it was changing to something that better reflected my current interests or briefly getting caught up in the &ldquo;.io&rdquo; domain craze, there always seemed to be a great reason for an Internet presence refresh. The downside to all this fresh rebranding is that it often means needing to update a lot of links. (If you want to redirect an old blog post URL, check out <a href="/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/">this article</a> too!)</p>
+<p>This week, I launched my new website and changed my Twitter username to match. I was about to spend time manually going through all my old blog posts to find and update the URLs when this very future blog post popped up on my screen like <a href="http://knowyourmeme.com/memes/clippy">Clippy</a> and shook its pixelated head disapprovingly.</p>
+<p>Here&rsquo;s a worthwhile new habit for you: anytime you find yourself going &ldquo;Ughhh I have to do <em>that?</em> It&rsquo;ll take forever!&rdquo; head on over to <a href="https://duckduckgo.com/">DuckDuckGo</a> and search for &ldquo;terminal command (the thing you&rsquo;re trying to do)”.</p>
+<p>
+<img src="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/sed-duck.png" alt="Superhero DuckDuckGo doodle"  />
+</p>
+<!-- raw HTML omitted -->
+<p>Here&rsquo;s what I found to save myself a whole bunch of mindless tedium.</p>
+
+<h1 id="update-a-string-in-dozens-of-blog-posts-using-sed" class="anchor-link"><a href="#update-a-string-in-dozens-of-blog-posts-using-sed">Update a string in dozens of blog posts using sed</a></h1>
+<p>Meet your new friend <code>sed</code>. This amazingly powerful tool lives in your terminal and is available to be totally underused for things like finding and replacing strings in files. (I seem to have a habit of suggesting ways to totally underuse powerful tools, as in my exploration of how to <a href="/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/">use cron to create desktop notifications</a>, but I digress.)</p>
+
+<h2 id="current-directory-non-recursive" class="anchor-link"><a href="#current-directory-non-recursive">Current directory, non-recursive</a></h2>
+<p><strong>Non-recursive</strong> means sed won&rsquo;t change files in any subdirectories of the current folder.</p>
+<p>Run this command to search all the files in your current directory and replace a given string.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">// to replace <span class="s1">&#39;foo&#39;</span> with <span class="s1">&#39;bar&#39;</span>
+$ sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
+</code></pre></div><p>Here&rsquo;s what each component of the command does:</p>
+<p><code>-i</code> will change the original, and stands for &ldquo;in-place.&rdquo;<br>
+<code>s</code> is for substitute, so we can find and replace.<br>
+<code>foo</code> is the string we&rsquo;ll be taking away,<br>
+<code>bar</code> is the string we&rsquo;ll use instead today.<br>
+<code>g</code> as in &ldquo;global&rdquo; means &ldquo;all occurrences, please.&rdquo;<br>
+<code>*</code> denotes all file types. (No more rhymes. What a tease.)</p>
+<p>You can limit the operation to one file type, such as <code>txt</code>, by using:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *.txt
+</code></pre></div>
+<h2 id="current-directory-and-subdirectories-recursive" class="anchor-link"><a href="#current-directory-and-subdirectories-recursive">Current directory and subdirectories, recursive</a></h2>
+<p>We can supplement <code>sed</code> with <code>find</code> to expand our scope to all the current folder&rsquo;s subdirectories. This will include any hidden files.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+</code></pre></div><p>To ignore hidden files (such as <code>.git</code>) you can pass the negation modifier <code>-not -path '*/\.*'</code>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -not -path <span class="s1">&#39;*/\.*&#39;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+</code></pre></div><p>This will exclude any file that has the string <code>/.</code> in its path.</p>
+<p>Alternatively, you can limit the operation to file names that end in a certain extension, like Markdown:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -name <span class="s2">&#34;*.md&#34;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+</code></pre></div>
+<h2 id="working-with-urls-change-the-separator" class="anchor-link"><a href="#working-with-urls-change-the-separator">Working with URLs: change the separator</a></h2>
+<p>In the case of needing to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&hellip;</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g&#39;</span> <span class="o">{}</span> +
+</code></pre></div><p>You can avoid some confusion and mistakes by changing the separator to any non-conflicting character. The character that follows the <code>s</code> will be treated as the separator. In our case, using a <code>,</code> or <code>_</code> would do. This doesn&rsquo;t require escaping and is much more readable:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g&#39;</span> <span class="o">{}</span> +
+</code></pre></div>
+<h1 id="maybe-endless-possibilities" class="anchor-link"><a href="#maybe-endless-possibilities">(Maybe) endless possibilities!</a></h1>
+<p>There&rsquo;s a lot more that <code>sed</code> can do. I&rsquo;ll be adding to this living post as I find more examples that are useful. For now, <a href="http://www.folkstalk.com/2012/01/sed-command-in-unix-examples.html">here are some other use cases</a> that you may find handy.</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/">Batch renaming images, including image resolution, with awk</a>
+        <p class="li-brief">
+            How to batch rename images with custom values using file, awk, and rename - in rainbow colors!
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/terminal/">terminal</a>
+            
+            ☕️&nbsp;
+            4 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/">How I created custom desktop notifications using terminal and cron</a>
+        <p class="li-brief">
+            How you can use tools your Linux system already has to create custom desktop notifications.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/terminal/">terminal</a>
+            
+            ☕️☕️&nbsp;
+            6 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/">Command line tricks for managing your messy open source repository</a>
+        <p class="li-brief">
+            A handy toolbox for the terminal to help open source maintainers make their projects sparkle.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/terminal/">terminal</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>
