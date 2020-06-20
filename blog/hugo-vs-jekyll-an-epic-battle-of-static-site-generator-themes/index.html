@@ -1,231 +1,22 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-<head>
-    
-    <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer">
-
-<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
-<title>
-    Hugo vs Jekyll: an epic battle of static site generator themes | victoria.dev
-</title>
-
-
-    <meta
-  name="monetization"
-  content="$twitter.xrptipbot.com/victoriadotdev">
-    <meta property="og:title" content="Hugo vs Jekyll: an epic battle of static site generator themes - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="A comparison of nuances of creating themes for the top two static site generators." />
-<meta property="og:url" content="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/cover.png"/>
-
-    <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Hugo vs Jekyll: an epic battle of static site generator themes" />
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/cover.png"/>
-
-<meta name="twitter:description"
-    content="A comparison of nuances of creating themes for the top two static site generators." />
-
-    
-<link rel="shortcut icon" href="/img/logo.ico">
-
-
-    
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.ef168402136fae07bd3842106ed714b09d10bc319dd2f598838450daefd56078.css" integrity="sha256-7xaEAhNvrge9OEIQbtcUsJ0QvDGd0vWYg4RQ2u/VYHg=" media="screen">
-
-
-
-
-
-    
-    
-    
-    
-</head>
-
-<body>
-    <section id="main">
-
-        
-        <div class="header">
-
-    <div class="toggle">
-        <input type="checkbox" />
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <div id="mobile-menu">
-            
-            
-            <span class="menu-item">
-                <a href="/">
-                    👩🏻‍💻 hi</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/blog/">
-                    📰 blog</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/about/">
-                    📖 readme</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/coffee/">
-                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-            </span>
-            
-            
-            
-            
-        </div>
-    </div>
-    <div id="menu">
-        
-        
-        <span class="menu-item">
-            <a href="/">
-                👩🏻‍💻 hi</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/blog/">
-                📰 blog</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/about/">
-                📖 readme</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/coffee/">
-                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-        </span>
-        
-        
-        
-        
-    </div>
-
-    <div id="logo">
-        <img id="up" alt="site logo" src="/img/logo.png" />
-    </div>
-
-</div>
-        
-
-        <div class="container">
-            
-
-
-
-<div id="images">
-    <img src="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/cover.png" alt="cover image" />
-</div>
-
-
-            
-
-
-<div class="markdown">
-    <h1>
-        Hugo vs Jekyll: an epic battle of static site generator themes
-    </h1>
-    
-    <p class="subtitle">A comparison of nuances of creating themes for the top two static site generators.</p>
-    <p class="metadata" id="date">
-        April 27, 2020
-        ☕️☕️☕️&nbsp;
-        13 min read
-
-        
-        &nbsp;
-        
-        <a class="li-tag" href="/tags/websites/">
-            websites
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/coding/">
-            coding
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/go/">
-            go
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/open-source/">
-            open-source
-        </a>&nbsp;
-        
-        
-    </p>
-
-    
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-<div class="markdown">
-    
-    <p>I recently took on the task of creating a documentation site theme for two projects. Both projects needed the same basic features, but one uses Jekyll while the other uses Hugo.</p>
-<p>In typical developer rationality, there was clearly only one option. I decided to create the same theme in both frameworks, and to give you, dear reader, a side-by-side comparison.</p>
-<p>This post isn&rsquo;t a comprehensive theme-building guide, but intended to familiarize you with the process of building a theme in either generator. Here&rsquo;s what we&rsquo;ll cover:</p>
-<ul>
-<li><a href="#how-theme-files-are-organized">How theme files are organized</a></li>
-<li><a href="#where-to-put-content">Where to put content</a></li>
-<li><a href="#how-templating-works">How templating works</a></li>
-<li><a href="#creating-a-top-level-menu-with-the-pages-object">Creating a top-level menu with the <code>pages</code> object</a></li>
-<li><a href="#creating-a-menu-with-nested-links-from-a-data-list">Creating a menu with nested links from a data list</a></li>
-<li><a href="#putting-the-template-together">Putting the template together</a></li>
-<li><a href="#create-a-stylesheet">Create a stylesheet</a>
-<ul>
-<li><a href="#sass-and-css-in-jekyll">Sass and CSS in Jekyll</a></li>
-<li><a href="#sass-and-hugo-pipes-in-hugo">Sass and Hugo Pipes in Hugo</a></li>
-</ul>
-</li>
-<li><a href="#configure-and-deploy-to-github-pages">Configure and deploy to GitHub Pages</a>
-<ul>
-<li><a href="#configure-jekyll">Configure Jekyll</a></li>
-<li><a href="#configure-hugo">Configure Hugo</a></li>
-<li><a href="#deploy-to-github-pages">Deploy to GitHub Pages</a></li>
-</ul>
-</li>
-<li><a href="#showtime">Showtime!</a></li>
-<li><a href="#wait-who-won">Wait who won?</a></li>
-</ul>
-<p>Here&rsquo;s a crappy wireframe of the theme I&rsquo;m going to create.</p>
-<p>
-<img src="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/wireframe.jpg" alt="A sketch of the finished page"  />
-</p>
-<p>If you&rsquo;re planning to build-along, it may be helpful to serve the theme locally as you build it; both generators offer this functionality. For Jekyll, run <code>jekyll serve</code>, and for Hugo, <code>hugo serve</code>.</p>
-<p>There are two main elements: the main content area, and the all-important sidebar menu. To create them, you&rsquo;ll need template files that tell the site generator how to generate the HTML page. To organize theme template files in a sensible way, you first need to know what directory structure the site generator expects.</p>
-
-<h2 id="how-theme-files-are-organized" class="anchor-link"><a href="#how-theme-files-are-organized">How theme files are organized</a></h2>
-<p>Jekyll supports gem-based themes, which users can install like any other Ruby gems. This method hides theme files in the gem, so for the purposes of this comparison, we aren&rsquo;t using gem-based themes.</p>
-<p>When you run <code>jekyll new-theme &lt;name&gt;</code>, Jekyll will scaffold a new theme for you. Here&rsquo;s what those files look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">.
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>Hugo vs Jekyll: an epic battle of static site generator themes | victoria.dev</title><meta name=monetization content="$twitter.xrptipbot.com/victoriadotdev"><meta property="og:title" content="Hugo vs Jekyll: an epic battle of static site generator themes - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A comparison of nuances of creating themes for the top two static site generators."><meta property="og:url" content="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Hugo vs Jekyll: an epic battle of static site generator themes"><meta name=twitter:image content="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/cover.png"><meta name=twitter:description content="A comparison of nuances of creating themes for the top two static site generators."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
+<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/cover.png alt="cover image"></div><div class=markdown><h1>Hugo vs Jekyll: an epic battle of static site generator themes</h1><p class=subtitle>A comparison of nuances of creating themes for the top two static site generators.</p><p class=metadata id=date>April 27, 2020
+☕️☕️☕️&nbsp;
+13 min read
+&nbsp;
+<a class=li-tag href=/tags/websites/>websites
+</a>&nbsp;
+<a class=li-tag href=/tags/coding/>coding
+</a>&nbsp;
+<a class=li-tag href=/tags/go/>go
+</a>&nbsp;
+<a class=li-tag href=/tags/open-source/>open-source
+</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>I recently took on the task of creating a documentation site theme for two projects. Both projects needed the same basic features, but one uses Jekyll while the other uses Hugo.</p><p>In typical developer rationality, there was clearly only one option. I decided to create the same theme in both frameworks, and to give you, dear reader, a side-by-side comparison.</p><p>This post isn&rsquo;t a comprehensive theme-building guide, but intended to familiarize you with the process of building a theme in either generator. Here&rsquo;s what we&rsquo;ll cover:</p><ul><li><a href=#how-theme-files-are-organized>How theme files are organized</a></li><li><a href=#where-to-put-content>Where to put content</a></li><li><a href=#how-templating-works>How templating works</a></li><li><a href=#creating-a-top-level-menu-with-the-pages-object>Creating a top-level menu with the <code>pages</code> object</a></li><li><a href=#creating-a-menu-with-nested-links-from-a-data-list>Creating a menu with nested links from a data list</a></li><li><a href=#putting-the-template-together>Putting the template together</a></li><li><a href=#create-a-stylesheet>Create a stylesheet</a><ul><li><a href=#sass-and-css-in-jekyll>Sass and CSS in Jekyll</a></li><li><a href=#sass-and-hugo-pipes-in-hugo>Sass and Hugo Pipes in Hugo</a></li></ul></li><li><a href=#configure-and-deploy-to-github-pages>Configure and deploy to GitHub Pages</a><ul><li><a href=#configure-jekyll>Configure Jekyll</a></li><li><a href=#configure-hugo>Configure Hugo</a></li><li><a href=#deploy-to-github-pages>Deploy to GitHub Pages</a></li></ul></li><li><a href=#showtime>Showtime!</a></li><li><a href=#wait-who-won>Wait who won?</a></li></ul><p>Here&rsquo;s a crappy wireframe of the theme I&rsquo;m going to create.</p><p><img src=https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/wireframe.jpg alt="A sketch of the finished page"></p><p>If you&rsquo;re planning to build-along, it may be helpful to serve the theme locally as you build it; both generators offer this functionality. For Jekyll, run <code>jekyll serve</code>, and for Hugo, <code>hugo serve</code>.</p><p>There are two main elements: the main content area, and the all-important sidebar menu. To create them, you&rsquo;ll need template files that tell the site generator how to generate the HTML page. To organize theme template files in a sensible way, you first need to know what directory structure the site generator expects.</p><h2 id=how-theme-files-are-organized>How theme files are organized</h2><p>Jekyll supports gem-based themes, which users can install like any other Ruby gems. This method hides theme files in the gem, so for the purposes of this comparison, we aren&rsquo;t using gem-based themes.</p><p>When you run <code>jekyll new-theme &lt;name></code>, Jekyll will scaffold a new theme for you. Here&rsquo;s what those files look like:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>.
 ├── assets
 ├── Gemfile
 ├── _includes
@@ -237,9 +28,7 @@
 ├── README.md
 ├── _sass
 └── &lt;name&gt;.gemspec
-</code></pre></div><p>The directory names are appropriately descriptive. The <code>_includes</code> directory is for small bits of code that you reuse in different places, in much the same way you&rsquo;d put butter on everything. (Just me?) The <code>_layouts</code> directory contains templates for different types of pages on your site. The <code>_sass</code> folder is for <a href="https://sass-lang.com/documentation/syntax">Sass</a> files used to build your site&rsquo;s stylesheet.</p>
-<p>You can scaffold a new Hugo theme by running <code>hugo new theme &lt;name&gt;</code>. It has these files:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">.
+</code></pre></div><p>The directory names are appropriately descriptive. The <code>_includes</code> directory is for small bits of code that you reuse in different places, in much the same way you&rsquo;d put butter on everything. (Just me?) The <code>_layouts</code> directory contains templates for different types of pages on your site. The <code>_sass</code> folder is for <a href=https://sass-lang.com/documentation/syntax>Sass</a> files used to build your site&rsquo;s stylesheet.</p><p>You can scaffold a new Hugo theme by running <code>hugo new theme &lt;name></code>. It has these files:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>.
 ├── archetypes
 │   └── default.md
 ├── layouts
@@ -258,12 +47,7 @@
 │   ├── css
 │   └── js
 └── theme.toml
-</code></pre></div><p>You can see some similarities. Hugo&rsquo;s page template files are tucked into <code>layouts/</code>. Note that the <code>_default</code> page type has files for a <code>list.html</code> and a <code>single.html</code>. Unlike Jekyll, Hugo uses these specific file names to distinguish between <a href="https://gohugo.io/templates/lists/">list pages</a> (like a page with links to all your blog posts on it) and <a href="https://gohugo.io/templates/single-page-templates/">single pages</a> (like one of your blog posts). The <code>layouts/partials/</code> directory contains the buttery reusable bits, and stylesheet files have a spot picked out in <code>static/css/</code>.</p>
-<p>These directory structures aren&rsquo;t set in stone, as both site generators allow some measure of customization. For example, Jekyll lets you define <a href="https://jekyllrb.com/docs/collections/">collections</a>, and Hugo makes use of <a href="https://gohugo.io/content-management/page-bundles/">page bundles</a>. These features let you organize your content multiple ways, but for now, lets look at where to put some simple pages.</p>
-
-<h2 id="where-to-put-content" class="anchor-link"><a href="#where-to-put-content">Where to put content</a></h2>
-<p>To create a site menu that looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md">Introduction
+</code></pre></div><p>You can see some similarities. Hugo&rsquo;s page template files are tucked into <code>layouts/</code>. Note that the <code>_default</code> page type has files for a <code>list.html</code> and a <code>single.html</code>. Unlike Jekyll, Hugo uses these specific file names to distinguish between <a href=https://gohugo.io/templates/lists/>list pages</a> (like a page with links to all your blog posts on it) and <a href=https://gohugo.io/templates/single-page-templates/>single pages</a> (like one of your blog posts). The <code>layouts/partials/</code> directory contains the buttery reusable bits, and stylesheet files have a spot picked out in <code>static/css/</code>.</p><p>These directory structures aren&rsquo;t set in stone, as both site generators allow some measure of customization. For example, Jekyll lets you define <a href=https://jekyllrb.com/docs/collections/>collections</a>, and Hugo makes use of <a href=https://gohugo.io/content-management/page-bundles/>page bundles</a>. These features let you organize your content multiple ways, but for now, lets look at where to put some simple pages.</p><h2 id=where-to-put-content>Where to put content</h2><p>To create a site menu that looks like this:</p><div class=highlight><pre class=chroma><code class=language-md data-lang=md>Introduction
     Getting Started
     Configuration
     Deploying
@@ -271,9 +55,7 @@ Advanced Usage
     All Configuration Settings
     Customizing
     Help and Support
-</code></pre></div><p>You&rsquo;ll need two sections (&ldquo;Introduction&rdquo; and &ldquo;Advanced Usage&rdquo;) containing their respective subsections.</p>
-<p>Jekyll isn&rsquo;t strict with its content location. It expects pages in the root of your site, and will build whatever&rsquo;s there. Here&rsquo;s how you might organize these pages in your Jekyll site root:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">.
+</code></pre></div><p>You&rsquo;ll need two sections (&ldquo;Introduction&rdquo; and &ldquo;Advanced Usage&rdquo;) containing their respective subsections.</p><p>Jekyll isn&rsquo;t strict with its content location. It expects pages in the root of your site, and will build whatever&rsquo;s there. Here&rsquo;s how you might organize these pages in your Jekyll site root:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>.
 ├── 404.html
 ├── assets
 ├── Gemfile
@@ -298,9 +80,7 @@ Advanced Usage
     ├── settings.md
     └── support.md
 
-</code></pre></div><p>You can change the location of the site source in your <a href="https://jekyllrb.com/docs/configuration/default/">Jekyll configuration</a>.</p>
-<p>In Hugo, all rendered content is expected in the <code>content/</code> folder. This prevents Hugo from trying to render pages you don&rsquo;t want, such as <code>404.html</code>, as site content. Here&rsquo;s how you might organize your <code>content/</code> directory in Hugo:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">.
+</code></pre></div><p>You can change the location of the site source in your <a href=https://jekyllrb.com/docs/configuration/default/>Jekyll configuration</a>.</p><p>In Hugo, all rendered content is expected in the <code>content/</code> folder. This prevents Hugo from trying to render pages you don&rsquo;t want, such as <code>404.html</code>, as site content. Here&rsquo;s how you might organize your <code>content/</code> directory in Hugo:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>.
 ├── _index.md
 ├── intro
 │   ├── config.md
@@ -312,89 +92,66 @@ Advanced Usage
     ├── _index.md
     ├── settings.md
     └── support.md
-</code></pre></div><p>To Hugo, <code>_index.md</code> and <code>index.md</code> mean different things. It can be helpful to know what kind of <a href="https://gohugo.io/content-management/page-bundles/">Page Bundle</a> you want for each section: Leaf, which has no children, or Branch.</p>
-<p>Now that you have some idea of where to put things, let&rsquo;s look at how to build a page template.</p>
-
-<h2 id="how-templating-works" class="anchor-link"><a href="#how-templating-works">How templating works</a></h2>
-<p>Jekyll page templates are built with the <a href="https://jekyllrb.com/docs/liquid/">Liquid templating language</a>. It uses braces to output variable content to a page, such as the page&rsquo;s title: <code>{{ page.title }}</code>.</p>
-<p>Hugo&rsquo;s templates also use braces, but they&rsquo;re built with <a href="https://gohugo.io/templates/introduction/">Go Templates</a>. The syntax is similar, but different: <code>{{ .Title }}</code>.</p>
-<p>Both Liquid and Go Templates can handle logic. Liquid uses <em>tags</em> syntax to denote logic operations:</p>
-<pre><code class="language-liquid" data-lang="liquid">{% if user %}
+</code></pre></div><p>To Hugo, <code>_index.md</code> and <code>index.md</code> mean different things. It can be helpful to know what kind of <a href=https://gohugo.io/content-management/page-bundles/>Page Bundle</a> you want for each section: Leaf, which has no children, or Branch.</p><p>Now that you have some idea of where to put things, let&rsquo;s look at how to build a page template.</p><h2 id=how-templating-works>How templating works</h2><p>Jekyll page templates are built with the <a href=https://jekyllrb.com/docs/liquid/>Liquid templating language</a>. It uses braces to output variable content to a page, such as the page&rsquo;s title: <code>{{ page.title }}</code>.</p><p>Hugo&rsquo;s templates also use braces, but they&rsquo;re built with <a href=https://gohugo.io/templates/introduction/>Go Templates</a>. The syntax is similar, but different: <code>{{ .Title }}</code>.</p><p>Both Liquid and Go Templates can handle logic. Liquid uses <em>tags</em> syntax to denote logic operations:</p><pre><code class=language-liquid data-lang=liquid>{% if user %}
   Hello {{ user.name }}!
 {% endif %}
-</code></pre><p>And Go Templates places its functions and arguments in its braces syntax:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="p">{{</span> <span class="k">if</span> <span class="p">.</span><span class="nx">User</span> <span class="p">}}</span>
-    <span class="nx">Hello</span> <span class="p">{{</span> <span class="p">.</span><span class="nx">User</span> <span class="p">}}!</span>
-<span class="p">{{</span> <span class="nx">end</span> <span class="p">}}</span>
-</code></pre></div><p>Templating languages allow you to build one skeleton HTML page, then tell the site generator to put variable content in areas you define. Let&rsquo;s compare two possible <code>default</code> page templates for Jekyll and Hugo.</p>
-<p>Jekyll&rsquo;s scaffold <code>default</code> theme is bare, so we&rsquo;ll look at their starter theme <a href="https://github.com/jekyll/minima">Minima</a>. Here&rsquo;s <code>_layouts/default.html</code> in Jekyll (Liquid):</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&#34;{{ page.lang | default: site.lang | default: &#34;</span><span class="na">en</span><span class="err">&#34;</span> <span class="err">}}&#34;</span><span class="p">&gt;</span>
+</code></pre><p>And Go Templates places its functions and arguments in its braces syntax:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=p>{</span><span class=p>{</span> <span class=k>if</span> <span class=p>.</span><span class=nx>User</span> <span class=p>}</span><span class=p>}</span>
+    <span class=nx>Hello</span> <span class=p>{</span><span class=p>{</span> <span class=p>.</span><span class=nx>User</span> <span class=p>}</span><span class=p>}</span><span class=p>!</span>
+<span class=p>{</span><span class=p>{</span> <span class=nx>end</span> <span class=p>}</span><span class=p>}</span>
+</code></pre></div><p>Templating languages allow you to build one skeleton HTML page, then tell the site generator to put variable content in areas you define. Let&rsquo;s compare two possible <code>default</code> page templates for Jekyll and Hugo.</p><p>Jekyll&rsquo;s scaffold <code>default</code> theme is bare, so we&rsquo;ll look at their starter theme <a href=https://github.com/jekyll/minima>Minima</a>. Here&rsquo;s <code>_layouts/default.html</code> in Jekyll (Liquid):</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=cp>&lt;!DOCTYPE html&gt;</span>
+<span class=p>&lt;</span><span class=nt>html</span> <span class=na>lang</span><span class=o>=</span><span class=s>&#34;{{ page.lang | default: site.lang | default: &#34;</span><span class=na>en</span><span class=err>&#34;</span> <span class=err>}</span><span class=err>}</span><span class=err>&#34;</span><span class=p></span><span class=p>&gt;</span>
 
   {%- include head.html -%}
 
-  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class=p>&lt;</span><span class=nt>body</span><span class=p></span><span class=p>&gt;</span>
 
     {%- include header.html -%}
 
-    <span class="p">&lt;</span><span class="nt">main</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;page-content&#34;</span> <span class="na">aria-label</span><span class="o">=</span><span class="s">&#34;Content&#34;</span><span class="p">&gt;</span>
-      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;wrapper&#34;</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>main</span> <span class=na>class</span><span class=o>=</span><span class=s>&#34;page-content&#34;</span> <span class=na>aria-label</span><span class=o>=</span><span class=s>&#34;Content&#34;</span><span class=p></span><span class=p>&gt;</span>
+      <span class=p>&lt;</span><span class=nt>div</span> <span class=na>class</span><span class=o>=</span><span class=s>&#34;wrapper&#34;</span><span class=p></span><span class=p>&gt;</span>
         {{ content }}
-      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">main</span><span class="p">&gt;</span>
+      <span class=p>&lt;</span><span class=p>/</span><span class=nt>div</span><span class=p>&gt;</span>
+    <span class=p>&lt;</span><span class=p>/</span><span class=nt>main</span><span class=p>&gt;</span>
 
     {%- include footer.html -%}
 
-  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class=p>&lt;</span><span class=p>/</span><span class=nt>body</span><span class=p>&gt;</span>
 
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>html</span><span class=p>&gt;</span>
 
-</code></pre></div><p>Here&rsquo;s Hugo&rsquo;s scaffold theme <code>layouts/_default/baseof.html</code> (Go Templates):</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div><p>Here&rsquo;s Hugo&rsquo;s scaffold theme <code>layouts/_default/baseof.html</code> (Go Templates):</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=cp>&lt;!DOCTYPE html&gt;</span>
+<span class=p>&lt;</span><span class=nt>html</span><span class=p></span><span class=p>&gt;</span>
     {{- partial &#34;head.html&#34; . -}}
-    <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>body</span><span class=p></span><span class=p>&gt;</span>
         {{- partial &#34;header.html&#34; . -}}
-        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;content&#34;</span><span class="p">&gt;</span>
+        <span class=p>&lt;</span><span class=nt>div</span> <span class=na>id</span><span class=o>=</span><span class=s>&#34;content&#34;</span><span class=p></span><span class=p>&gt;</span>
         {{- block &#34;main&#34; . }}{{- end }}
-        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class=p>&lt;</span><span class=p>/</span><span class=nt>div</span><span class=p>&gt;</span>
         {{- partial &#34;footer.html&#34; . -}}
-    <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div><p>Different syntax, same idea. Both templates pull in reusable bits for <code>head.html</code>, <code>header.html</code>, and <code>footer.html</code>. These show up on a lot of pages, so it makes sense not to have to repeat yourself. Both templates also have a spot for the main content, though the Jekyll template uses a variable (<code>{{ content }}</code>) while Hugo uses a block (<code>{{- block &quot;main&quot; . }}{{- end }}</code>). <a href="https://gohugo.io/templates/base/#readout">Blocks</a> are just another way Hugo lets you define reusable bits.</p>
-<p>Now that you know how templating works, you can build the sidebar menu for the theme.</p>
-
-<h2 id="creating-a-top-level-menu-with-the-pages-object" class="anchor-link"><a href="#creating-a-top-level-menu-with-the-pages-object">Creating a top-level menu with the <code>pages</code> object</a></h2>
-<p>You can programmatically create a top-level menu from your pages. It will look like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md">Introduction
+    <span class=p>&lt;</span><span class=p>/</span><span class=nt>body</span><span class=p>&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>html</span><span class=p>&gt;</span>
+</code></pre></div><p>Different syntax, same idea. Both templates pull in reusable bits for <code>head.html</code>, <code>header.html</code>, and <code>footer.html</code>. These show up on a lot of pages, so it makes sense not to have to repeat yourself. Both templates also have a spot for the main content, though the Jekyll template uses a variable (<code>{{ content }}</code>) while Hugo uses a block (<code>{{- block "main" . }}{{- end }}</code>). <a href=https://gohugo.io/templates/base/#readout>Blocks</a> are just another way Hugo lets you define reusable bits.</p><p>Now that you know how templating works, you can build the sidebar menu for the theme.</p><h2 id=creating-a-top-level-menu-with-the-pages-object>Creating a top-level menu with the <code>pages</code> object</h2><p>You can programmatically create a top-level menu from your pages. It will look like this:</p><div class=highlight><pre class=chroma><code class=language-md data-lang=md>Introduction
 Advanced Usage
-</code></pre></div><p>Let&rsquo;s start with Jekyll. You can display links to site pages in your Liquid template by iterating through the <code>site.pages</code> object that Jekyll provides and building a list:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+</code></pre></div><p>Let&rsquo;s start with Jekyll. You can display links to site pages in your Liquid template by iterating through the <code>site.pages</code> object that Jekyll provides and building a list:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>ul</span><span class=p></span><span class=p>&gt;</span>
     {% for page in site.pages %}
-    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ page.url | absolute_url }}&#34;</span><span class="p">&gt;</span>{{ page.title }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>li</span><span class=p></span><span class=p>&gt;</span><span class=p>&lt;</span><span class=nt>a</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ page.url | absolute_url }}&#34;</span><span class=p></span><span class=p>&gt;</span>{{ page.title }}<span class=p>&lt;</span><span class=p>/</span><span class=nt>a</span><span class=p>&gt;</span><span class=p>&lt;</span><span class=p>/</span><span class=nt>li</span><span class=p>&gt;</span>
     {% endfor %}
-<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
-</code></pre></div><p>This returns all of the site&rsquo;s pages, including all the ones that you might not want, like <code>404.html</code>. You can filter for the pages you actually want with a couple more tags, such as conditionally including pages if they have a <code>section: true</code> parameter set:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>ul</span><span class=p>&gt;</span>
+</code></pre></div><p>This returns all of the site&rsquo;s pages, including all the ones that you might not want, like <code>404.html</code>. You can filter for the pages you actually want with a couple more tags, such as conditionally including pages if they have a <code>section: true</code> parameter set:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>ul</span><span class=p></span><span class=p>&gt;</span>
     {% for page in site.pages %}
     {%- if page.section -%}
-    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ page.url | absolute_url }}&#34;</span><span class="p">&gt;</span>{{ page.title }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>li</span><span class=p></span><span class=p>&gt;</span><span class=p>&lt;</span><span class=nt>a</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ page.url | absolute_url }}&#34;</span><span class=p></span><span class=p>&gt;</span>{{ page.title }}<span class=p>&lt;</span><span class=p>/</span><span class=nt>a</span><span class=p>&gt;</span><span class=p>&lt;</span><span class=p>/</span><span class=nt>li</span><span class=p>&gt;</span>
     {%- endif -%}
     {% endfor %}
-<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
-</code></pre></div><p>You can achieve the same effect with slightly less code in Hugo. Loop through Hugo&rsquo;s <code>.Pages</code> object using Go Template&rsquo;s <a href="https://golang.org/pkg/text/template/#hdr-Actions"><code>range</code> action</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>ul</span><span class=p>&gt;</span>
+</code></pre></div><p>You can achieve the same effect with slightly less code in Hugo. Loop through Hugo&rsquo;s <code>.Pages</code> object using Go Template&rsquo;s <a href=https://golang.org/pkg/text/template/#hdr-Actions><code>range</code> action</a>:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>ul</span><span class=p></span><span class=p>&gt;</span>
 {{ range .Pages }}
-    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{.Permalink}}&#34;</span><span class="p">&gt;</span>{{.Title}}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>li</span><span class=p></span><span class=p>&gt;</span>
+        <span class=p>&lt;</span><span class=nt>a</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{.Permalink}}&#34;</span><span class=p></span><span class=p>&gt;</span>{{.Title}}<span class=p>&lt;</span><span class=p>/</span><span class=nt>a</span><span class=p>&gt;</span>
+    <span class=p>&lt;</span><span class=p>/</span><span class=nt>li</span><span class=p>&gt;</span>
 {{ end }}
-<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
-</code></pre></div><p>This template uses the <code>.Pages</code> object to return all the top-level pages in <code>content/</code> of your Hugo site. Since Hugo uses a specific folder for the site content you want rendered, there&rsquo;s no additional filtering necessary to build a simple menu of site pages.</p>
-
-<h2 id="creating-a-menu-with-nested-links-from-a-data-list" class="anchor-link"><a href="#creating-a-menu-with-nested-links-from-a-data-list">Creating a menu with nested links from a data list</a></h2>
-<p>Both site generators can use a separately defined data list of links to render a menu in your template. This is more suitable for creating nested links, like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md">Introduction
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>ul</span><span class=p>&gt;</span>
+</code></pre></div><p>This template uses the <code>.Pages</code> object to return all the top-level pages in <code>content/</code> of your Hugo site. Since Hugo uses a specific folder for the site content you want rendered, there&rsquo;s no additional filtering necessary to build a simple menu of site pages.</p><h2 id=creating-a-menu-with-nested-links-from-a-data-list>Creating a menu with nested links from a data list</h2><p>Both site generators can use a separately defined data list of links to render a menu in your template. This is more suitable for creating nested links, like this:</p><div class=highlight><pre class=chroma><code class=language-md data-lang=md>Introduction
     Getting Started
     Configuration
     Deploying
@@ -402,348 +159,154 @@ Advanced Usage
     All Configuration Settings
     Customizing
     Help and Support
-</code></pre></div><p>Jekyll supports <a href="https://jekyllrb.com/docs/datafiles/">data files</a> in a few formats, including YAML. Here&rsquo;s the definition for the menu above in <code>_data/menu.yml</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="k">section</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="k">page</span><span class="p">:</span><span class="w"> </span>Introduction<span class="w">
-</span><span class="w">    </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/intro<span class="w">
-</span><span class="w">    </span><span class="k">subsection</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="k">page</span><span class="p">:</span><span class="w"> </span>Getting<span class="w"> </span>Started<span class="w">
-</span><span class="w">        </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/intro/quickstart<span class="w">
-</span><span class="w">      </span>- <span class="k">page</span><span class="p">:</span><span class="w"> </span>Configuration<span class="w">
-</span><span class="w">        </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/intro/config<span class="w">
-</span><span class="w">      </span>- <span class="k">page</span><span class="p">:</span><span class="w"> </span>Deploying<span class="w">
-</span><span class="w">        </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/intro/deploy<span class="w">
-</span><span class="w">  </span>- <span class="k">page</span><span class="p">:</span><span class="w"> </span>Advanced<span class="w"> </span>Usage<span class="w">
-</span><span class="w">    </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/usage<span class="w">
-</span><span class="w">    </span><span class="k">subsection</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="k">page</span><span class="p">:</span><span class="w"> </span>Customizing<span class="w">
-</span><span class="w">        </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/usage/customizing<span class="w">
-</span><span class="w">      </span>- <span class="k">page</span><span class="p">:</span><span class="w"> </span>All<span class="w"> </span>Configuration<span class="w"> </span>Settings<span class="w">
-</span><span class="w">        </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/usage/settings<span class="w">
-</span><span class="w">      </span>- <span class="k">page</span><span class="p">:</span><span class="w"> </span>Help<span class="w"> </span>and<span class="w"> </span>Support<span class="w">
-</span><span class="w">        </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/usage/support<span class="w">
-</span></code></pre></div><p>Here&rsquo;s how to render the data in the sidebar template:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html">{% for a in site.data.menu.section %}
-<span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ a.url }}&#34;</span><span class="p">&gt;</span>{{ a.page }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+</code></pre></div><p>Jekyll supports <a href=https://jekyllrb.com/docs/datafiles/>data files</a> in a few formats, including YAML. Here&rsquo;s the definition for the menu above in <code>_data/menu.yml</code>:</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml><span class=k>section</span><span class=p>:</span><span class=w>
+</span><span class=w></span><span class=w>  </span>- <span class=k>page</span><span class=p>:</span><span class=w> </span>Introduction<span class=w>
+</span><span class=w>    </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/intro<span class=w>
+</span><span class=w>    </span><span class=k>subsection</span><span class=p>:</span><span class=w>
+</span><span class=w></span><span class=w>      </span>- <span class=k>page</span><span class=p>:</span><span class=w> </span>Getting<span class=w> </span>Started<span class=w>
+</span><span class=w>        </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/intro/quickstart<span class=w>
+</span><span class=w>      </span>- <span class=k>page</span><span class=p>:</span><span class=w> </span>Configuration<span class=w>
+</span><span class=w>        </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/intro/config<span class=w>
+</span><span class=w>      </span>- <span class=k>page</span><span class=p>:</span><span class=w> </span>Deploying<span class=w>
+</span><span class=w>        </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/intro/deploy<span class=w>
+</span><span class=w>  </span>- <span class=k>page</span><span class=p>:</span><span class=w> </span>Advanced<span class=w> </span>Usage<span class=w>
+</span><span class=w>    </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/usage<span class=w>
+</span><span class=w>    </span><span class=k>subsection</span><span class=p>:</span><span class=w>
+</span><span class=w></span><span class=w>      </span>- <span class=k>page</span><span class=p>:</span><span class=w> </span>Customizing<span class=w>
+</span><span class=w>        </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/usage/customizing<span class=w>
+</span><span class=w>      </span>- <span class=k>page</span><span class=p>:</span><span class=w> </span>All<span class=w> </span>Configuration<span class=w> </span>Settings<span class=w>
+</span><span class=w>        </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/usage/settings<span class=w>
+</span><span class=w>      </span>- <span class=k>page</span><span class=p>:</span><span class=w> </span>Help<span class=w> </span>and<span class=w> </span>Support<span class=w>
+</span><span class=w>        </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/usage/support<span class=w>
+</span></code></pre></div><p>Here&rsquo;s how to render the data in the sidebar template:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html>{% for a in site.data.menu.section %}
+<span class=p>&lt;</span><span class=nt>a</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ a.url }}&#34;</span><span class=p></span><span class=p>&gt;</span>{{ a.page }}<span class=p>&lt;</span><span class=p>/</span><span class=nt>a</span><span class=p>&gt;</span>
+<span class=p>&lt;</span><span class=nt>ul</span><span class=p></span><span class=p>&gt;</span>
     {% for b in a.subsection %}
-    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ b.url }}&#34;</span><span class="p">&gt;</span>{{ b.page }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>li</span><span class=p></span><span class=p>&gt;</span><span class=p>&lt;</span><span class=nt>a</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ b.url }}&#34;</span><span class=p></span><span class=p>&gt;</span>{{ b.page }}<span class=p>&lt;</span><span class=p>/</span><span class=nt>a</span><span class=p>&gt;</span><span class=p>&lt;</span><span class=p>/</span><span class=nt>li</span><span class=p>&gt;</span>
     {% endfor %}
-<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>ul</span><span class=p>&gt;</span>
 {% endfor %}
-</code></pre></div><p>This method allows you to build a custom menu, two nesting levels deep. The nesting levels are limited by the <code>for</code> loops in the template. For a recursive version that handles further levels of nesting, see <a href="https://jekyllrb.com/tutorials/navigation/#scenario-9-nested-tree-navigation-with-recursion">Nested tree navigation with recursion</a>.</p>
-<p>Hugo does something similar with its <a href="https://gohugo.io/templates/menu-templates/#section-menu-for-lazy-bloggers">menu templates</a>. You can define menu links in your <a href="https://gohugo.io/getting-started/configuration/">Hugo site config</a>, and even add useful properties that Hugo understands, like weighting. Here&rsquo;s a definition of the menu above in <code>config.yaml</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="k">sectionPagesMenu</span><span class="p">:</span><span class="w"> </span>main<span class="w">
-</span><span class="w">
-</span><span class="w"></span><span class="k">menu</span><span class="p">:</span><span class="w">  
-</span><span class="w">  </span><span class="k">main</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span>- <span class="k">identifier</span><span class="p">:</span><span class="w"> </span>intro<span class="w">
-</span><span class="w">      </span><span class="k">name</span><span class="p">:</span><span class="w"> </span>Introduction<span class="w">
-</span><span class="w">      </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/intro/<span class="w">
-</span><span class="w">      </span><span class="k">weight</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Getting<span class="w"> </span>Started<span class="w">
-</span><span class="w">      </span><span class="k">parent</span><span class="p">:</span><span class="w"> </span>intro<span class="w">
-</span><span class="w">      </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/intro/quickstart/<span class="w">
-</span><span class="w">      </span><span class="k">weight</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Configuration<span class="w">
-</span><span class="w">      </span><span class="k">parent</span><span class="p">:</span><span class="w"> </span>intro<span class="w">
-</span><span class="w">      </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/intro/config/<span class="w">
-</span><span class="w">      </span><span class="k">weight</span><span class="p">:</span><span class="w"> </span><span class="m">2</span><span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Deploying<span class="w">
-</span><span class="w">      </span><span class="k">parent</span><span class="p">:</span><span class="w"> </span>intro<span class="w">
-</span><span class="w">      </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/intro/deploy/<span class="w">
-</span><span class="w">      </span><span class="k">weight</span><span class="p">:</span><span class="w"> </span><span class="m">3</span><span class="w">
-</span><span class="w">    </span>- <span class="k">identifier</span><span class="p">:</span><span class="w"> </span>usage<span class="w">
-</span><span class="w">      </span><span class="k">name</span><span class="p">:</span><span class="w"> </span>Advanced<span class="w"> </span>Usage<span class="w">
-</span><span class="w">      </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/usage/<span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Customizing<span class="w">
-</span><span class="w">      </span><span class="k">parent</span><span class="p">:</span><span class="w"> </span>usage<span class="w">
-</span><span class="w">      </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/usage/customizing/<span class="w">
-</span><span class="w">      </span><span class="k">weight</span><span class="p">:</span><span class="w"> </span><span class="m">2</span><span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>All<span class="w"> </span>Configuration<span class="w"> </span>Settings<span class="w">
-</span><span class="w">      </span><span class="k">parent</span><span class="p">:</span><span class="w"> </span>usage<span class="w">
-</span><span class="w">      </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/usage/settings/<span class="w">
-</span><span class="w">      </span><span class="k">weight</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Help<span class="w"> </span>and<span class="w"> </span>Support<span class="w">
-</span><span class="w">      </span><span class="k">parent</span><span class="p">:</span><span class="w"> </span>usage<span class="w">
-</span><span class="w">      </span><span class="k">url</span><span class="p">:</span><span class="w"> </span>/usage/support/<span class="w">
-</span><span class="w">      </span><span class="k">weight</span><span class="p">:</span><span class="w"> </span><span class="m">3</span><span class="w">
-</span></code></pre></div><p>Hugo uses the <code>identifier</code>, which must match the section name, along with the <code>parent</code> variable to handle nesting. Here&rsquo;s how to render the menu in the sidebar template:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+</code></pre></div><p>This method allows you to build a custom menu, two nesting levels deep. The nesting levels are limited by the <code>for</code> loops in the template. For a recursive version that handles further levels of nesting, see <a href=https://jekyllrb.com/tutorials/navigation/#scenario-9-nested-tree-navigation-with-recursion>Nested tree navigation with recursion</a>.</p><p>Hugo does something similar with its <a href=https://gohugo.io/templates/menu-templates/#section-menu-for-lazy-bloggers>menu templates</a>. You can define menu links in your <a href=https://gohugo.io/getting-started/configuration/>Hugo site config</a>, and even add useful properties that Hugo understands, like weighting. Here&rsquo;s a definition of the menu above in <code>config.yaml</code>:</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml><span class=k>sectionPagesMenu</span><span class=p>:</span><span class=w> </span>main<span class=w>
+</span><span class=w>
+</span><span class=w></span><span class=k>menu</span><span class=p>:</span><span class=w> </span><span class=w> 
+</span><span class=w>  </span><span class=k>main</span><span class=p>:</span><span class=w>
+</span><span class=w></span><span class=w>    </span>- <span class=k>identifier</span><span class=p>:</span><span class=w> </span>intro<span class=w>
+</span><span class=w>      </span><span class=k>name</span><span class=p>:</span><span class=w> </span>Introduction<span class=w>
+</span><span class=w>      </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/intro/<span class=w>
+</span><span class=w>      </span><span class=k>weight</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span><span class=w>    </span>- <span class=k>name</span><span class=p>:</span><span class=w> </span>Getting<span class=w> </span>Started<span class=w>
+</span><span class=w>      </span><span class=k>parent</span><span class=p>:</span><span class=w> </span>intro<span class=w>
+</span><span class=w>      </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/intro/quickstart/<span class=w>
+</span><span class=w>      </span><span class=k>weight</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span><span class=w>    </span>- <span class=k>name</span><span class=p>:</span><span class=w> </span>Configuration<span class=w>
+</span><span class=w>      </span><span class=k>parent</span><span class=p>:</span><span class=w> </span>intro<span class=w>
+</span><span class=w>      </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/intro/config/<span class=w>
+</span><span class=w>      </span><span class=k>weight</span><span class=p>:</span><span class=w> </span><span class=m>2</span><span class=w>
+</span><span class=w>    </span>- <span class=k>name</span><span class=p>:</span><span class=w> </span>Deploying<span class=w>
+</span><span class=w>      </span><span class=k>parent</span><span class=p>:</span><span class=w> </span>intro<span class=w>
+</span><span class=w>      </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/intro/deploy/<span class=w>
+</span><span class=w>      </span><span class=k>weight</span><span class=p>:</span><span class=w> </span><span class=m>3</span><span class=w>
+</span><span class=w>    </span>- <span class=k>identifier</span><span class=p>:</span><span class=w> </span>usage<span class=w>
+</span><span class=w>      </span><span class=k>name</span><span class=p>:</span><span class=w> </span>Advanced<span class=w> </span>Usage<span class=w>
+</span><span class=w>      </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/usage/<span class=w>
+</span><span class=w>    </span>- <span class=k>name</span><span class=p>:</span><span class=w> </span>Customizing<span class=w>
+</span><span class=w>      </span><span class=k>parent</span><span class=p>:</span><span class=w> </span>usage<span class=w>
+</span><span class=w>      </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/usage/customizing/<span class=w>
+</span><span class=w>      </span><span class=k>weight</span><span class=p>:</span><span class=w> </span><span class=m>2</span><span class=w>
+</span><span class=w>    </span>- <span class=k>name</span><span class=p>:</span><span class=w> </span>All<span class=w> </span>Configuration<span class=w> </span>Settings<span class=w>
+</span><span class=w>      </span><span class=k>parent</span><span class=p>:</span><span class=w> </span>usage<span class=w>
+</span><span class=w>      </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/usage/settings/<span class=w>
+</span><span class=w>      </span><span class=k>weight</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span><span class=w>    </span>- <span class=k>name</span><span class=p>:</span><span class=w> </span>Help<span class=w> </span>and<span class=w> </span>Support<span class=w>
+</span><span class=w>      </span><span class=k>parent</span><span class=p>:</span><span class=w> </span>usage<span class=w>
+</span><span class=w>      </span><span class=k>url</span><span class=p>:</span><span class=w> </span>/usage/support/<span class=w>
+</span><span class=w>      </span><span class=k>weight</span><span class=p>:</span><span class=w> </span><span class=m>3</span><span class=w>
+</span></code></pre></div><p>Hugo uses the <code>identifier</code>, which must match the section name, along with the <code>parent</code> variable to handle nesting. Here&rsquo;s how to render the menu in the sidebar template:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>ul</span><span class=p></span><span class=p>&gt;</span>
     {{ range .Site.Menus.main }}
     {{ if .HasChildren }}
-    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ .URL }}&#34;</span><span class="p">&gt;</span>{{ .Name }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">ul</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;sub-menu&#34;</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>li</span><span class=p></span><span class=p>&gt;</span>
+        <span class=p>&lt;</span><span class=nt>a</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ .URL }}&#34;</span><span class=p></span><span class=p>&gt;</span>{{ .Name }}<span class=p>&lt;</span><span class=p>/</span><span class=nt>a</span><span class=p>&gt;</span>
+    <span class=p>&lt;</span><span class=p>/</span><span class=nt>li</span><span class=p>&gt;</span>
+    <span class=p>&lt;</span><span class=nt>ul</span> <span class=na>class</span><span class=o>=</span><span class=s>&#34;sub-menu&#34;</span><span class=p></span><span class=p>&gt;</span>
         {{ range .Children }}
-        <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ .URL }}&#34;</span><span class="p">&gt;</span>{{ .Name }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-        <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+        <span class=p>&lt;</span><span class=nt>li</span><span class=p></span><span class=p>&gt;</span>
+            <span class=p>&lt;</span><span class=nt>a</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ .URL }}&#34;</span><span class=p></span><span class=p>&gt;</span>{{ .Name }}<span class=p>&lt;</span><span class=p>/</span><span class=nt>a</span><span class=p>&gt;</span>
+        <span class=p>&lt;</span><span class=p>/</span><span class=nt>li</span><span class=p>&gt;</span>
         {{ end }}
-    <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=p>/</span><span class=nt>ul</span><span class=p>&gt;</span>
     {{ else }}
-    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ .URL }}&#34;</span><span class="p">&gt;</span>{{ .Name }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>li</span><span class=p></span><span class=p>&gt;</span>
+        <span class=p>&lt;</span><span class=nt>a</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ .URL }}&#34;</span><span class=p></span><span class=p>&gt;</span>{{ .Name }}<span class=p>&lt;</span><span class=p>/</span><span class=nt>a</span><span class=p>&gt;</span>
+    <span class=p>&lt;</span><span class=p>/</span><span class=nt>li</span><span class=p>&gt;</span>
     {{ end }}
     {{ end }}
-<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
-</code></pre></div><p>The <code>range</code> function iterates over the menu data, and Hugo&rsquo;s <code>.Children</code> variable handles nested pages for you.</p>
-
-<h2 id="putting-the-template-together" class="anchor-link"><a href="#putting-the-template-together">Putting the template together</a></h2>
-<p>With your menu in your reusable sidebar bit (<code>_includes/sidebar.html</code> for Jekyll and <code>partials/sidebar.html</code> for Hugo), you can add it to the <code>default.html</code> template.</p>
-<p>In Jekyll:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&#34;{{ page.lang | default: site.lang | default: &#34;</span><span class="na">en</span><span class="err">&#34;</span> <span class="err">}}&#34;</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>ul</span><span class=p>&gt;</span>
+</code></pre></div><p>The <code>range</code> function iterates over the menu data, and Hugo&rsquo;s <code>.Children</code> variable handles nested pages for you.</p><h2 id=putting-the-template-together>Putting the template together</h2><p>With your menu in your reusable sidebar bit (<code>_includes/sidebar.html</code> for Jekyll and <code>partials/sidebar.html</code> for Hugo), you can add it to the <code>default.html</code> template.</p><p>In Jekyll:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=cp>&lt;!DOCTYPE html&gt;</span>
+<span class=p>&lt;</span><span class=nt>html</span> <span class=na>lang</span><span class=o>=</span><span class=s>&#34;{{ page.lang | default: site.lang | default: &#34;</span><span class=na>en</span><span class=err>&#34;</span> <span class=err>}</span><span class=err>}</span><span class=err>&#34;</span><span class=p></span><span class=p>&gt;</span>
 
 {%- include head.html -%}
 
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=nt>body</span><span class=p></span><span class=p>&gt;</span>
     {%- include sidebar.html -%}
 
     {%- include header.html -%}
 
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;content&#34;</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;page-content&#34;</span> <span class="na">aria-label</span><span class="o">=</span><span class="s">&#34;Content&#34;</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>div</span> <span class=na>id</span><span class=o>=</span><span class=s>&#34;content&#34;</span> <span class=na>class</span><span class=o>=</span><span class=s>&#34;page-content&#34;</span> <span class=na>aria-label</span><span class=o>=</span><span class=s>&#34;Content&#34;</span><span class=p></span><span class=p>&gt;</span>
         {{ content }}
-    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=p>/</span><span class=nt>div</span><span class=p>&gt;</span>
 
     {%- include footer.html -%}
 
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>body</span><span class=p>&gt;</span>
 
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div><p>In Hugo:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>html</span><span class=p>&gt;</span>
+</code></pre></div><p>In Hugo:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=cp>&lt;!DOCTYPE html&gt;</span>
+<span class=p>&lt;</span><span class=nt>html</span><span class=p></span><span class=p>&gt;</span>
 {{- partial &#34;head.html&#34; . -}}
 
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=nt>body</span><span class=p></span><span class=p>&gt;</span>
     {{- partial &#34;sidebar.html&#34; . -}}
 
     {{- partial &#34;header.html&#34; . -}}
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;content&#34;</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;page-content&#34;</span> <span class="na">aria-label</span><span class="o">=</span><span class="s">&#34;Content&#34;</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=nt>div</span> <span class=na>id</span><span class=o>=</span><span class=s>&#34;content&#34;</span> <span class=na>class</span><span class=o>=</span><span class=s>&#34;page-content&#34;</span> <span class=na>aria-label</span><span class=o>=</span><span class=s>&#34;Content&#34;</span><span class=p></span><span class=p>&gt;</span>
         {{- block &#34;main&#34; . }}{{- end }}
-    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class=p>&lt;</span><span class=p>/</span><span class=nt>div</span><span class=p>&gt;</span>
     {{- partial &#34;footer.html&#34; . -}}
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>body</span><span class=p>&gt;</span>
 
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div><p>When the site is generated, each page will contain all the code from your <code>sidebar.html</code>.</p>
+<span class=p>&lt;</span><span class=p>/</span><span class=nt>html</span><span class=p>&gt;</span>
+</code></pre></div><p>When the site is generated, each page will contain all the code from your <code>sidebar.html</code>.</p><h2 id=create-a-stylesheet>Create a stylesheet</h2><p>Both site generators accept Sass for creating CSS stylesheets. Jekyll <a href=https://jekyllrb.com/docs/assets/>has Sass processing built in</a>, and Hugo uses <a href=https://gohugo.io/hugo-pipes/scss-sass/>Hugo Pipes</a>. Both options have some quirks.</p><h3 id=sass-and-css-in-jekyll>Sass and CSS in Jekyll</h3><p>To process a Sass file in Jekyll, create your style definitions in the <code>_sass</code> directory. For example, in a file at <code>_sass/style-definitions.scss</code>:</p><div class=highlight><pre class=chroma><code class=language-scss data-lang=scss><span class=nv>$background-color</span><span class=o>:</span> <span class=mh>#eef</span> <span class=nv>!default</span><span class=p>;</span>
+<span class=nv>$text-color</span><span class=o>:</span> <span class=mh>#111</span> <span class=nv>!default</span><span class=p>;</span>
 
-<h2 id="create-a-stylesheet" class="anchor-link"><a href="#create-a-stylesheet">Create a stylesheet</a></h2>
-<p>Both site generators accept Sass for creating CSS stylesheets. Jekyll <a href="https://jekyllrb.com/docs/assets/">has Sass processing built in</a>, and Hugo uses <a href="https://gohugo.io/hugo-pipes/scss-sass/">Hugo Pipes</a>. Both options have some quirks.</p>
+<span class=nt>body</span> <span class=p>{</span>
+  <span class=nt>background-color</span><span class=nd>:</span> <span class=err>$</span><span class=nt>background-color</span><span class=p>;</span>
+  <span class=nt>color</span><span class=nd>:</span> <span class=err>$</span><span class=nt>text-color</span><span class=p>;</span>
+<span class=p>}</span>
+</code></pre></div><p>Jekyll won&rsquo;t generate this file directly, as it only processes files with front matter. To create the end-result filepath for your site&rsquo;s stylesheet, use a placeholder with empty front matter where you want the <code>.css</code> file to appear. For example, <code>assets/css/style.scss</code>. In this file, simply import your styles:</p><div class=highlight><pre class=chroma><code class=language-scss data-lang=scss><span class=nt>---</span>
+<span class=nt>---</span>
 
-<h3 id="sass-and-css-in-jekyll" class="anchor-link"><a href="#sass-and-css-in-jekyll">Sass and CSS in Jekyll</a></h3>
-<p>To process a Sass file in Jekyll, create your style definitions in the <code>_sass</code> directory. For example, in a file at <code>_sass/style-definitions.scss</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-scss" data-lang="scss"><span class="nv">$background-color</span><span class="o">:</span> <span class="mh">#eef</span> <span class="nv">!default</span><span class="p">;</span>
-<span class="nv">$text-color</span><span class="o">:</span> <span class="mh">#111</span> <span class="nv">!default</span><span class="p">;</span>
-
-<span class="nt">body</span> <span class="p">{</span>
-  <span class="nt">background-color</span><span class="nd">:</span> <span class="err">$</span><span class="nt">background-color</span><span class="p">;</span>
-  <span class="nt">color</span><span class="nd">:</span> <span class="err">$</span><span class="nt">text-color</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div><p>Jekyll won&rsquo;t generate this file directly, as it only processes files with front matter. To create the end-result filepath for your site&rsquo;s stylesheet, use a placeholder with empty front matter where you want the <code>.css</code> file to appear. For example, <code>assets/css/style.scss</code>. In this file, simply import your styles:</p>
-<div class="highlight"><pre class="chroma"><code class="language-scss" data-lang="scss"><span class="nt">---</span>
-<span class="nt">---</span>
-
-<span class="o">@</span><span class="nt">import</span> <span class="s2">&#34;style-definitions&#34;</span><span class="p">;</span>
-</code></pre></div><p>This rather hackish configuration has an upside: you can use Liquid template tags and variables in your placeholder file. This is a nice way to allow users to set variables from the site <code>_config.yml</code>, for example.</p>
-<p>The resulting CSS stylesheet in your generated site has the path <code>/assets/css/style.css</code>. You can link to it in your site&rsquo;s <code>head.html</code> using:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&#34;stylesheet&#34;</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ &#34;</span><span class="err">/</span><span class="na">assets</span><span class="err">/</span><span class="na">css</span><span class="err">/</span><span class="na">style</span><span class="err">.</span><span class="na">css</span><span class="err">&#34;</span> <span class="err">|</span> <span class="na">relative_url</span> <span class="err">}}&#34;</span> <span class="na">media</span><span class="o">=</span><span class="s">&#34;screen&#34;</span><span class="p">&gt;</span>
-</code></pre></div>
-<h3 id="sass-and-hugo-pipes-in-hugo" class="anchor-link"><a href="#sass-and-hugo-pipes-in-hugo">Sass and Hugo Pipes in Hugo</a></h3>
-<p>Hugo uses <a href="https://gohugo.io/hugo-pipes/scss-sass/">Hugo Pipes</a> to process Sass to CSS. You can achieve this by using Hugo&rsquo;s asset processing function, <code>resources.ToCSS</code>, which expects a source in the <code>assets/</code> directory. It takes the SCSS file as an argument. With your style definitions in a Sass file at <code>assets/sass/style.scss</code>, here&rsquo;s how to get, process, and link your Sass in your theme&rsquo;s <code>head.html</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html">{{ $style := resources.Get &#34;/sass/style.scss&#34; | resources.ToCSS }}
-<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&#34;stylesheet&#34;</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ $style.RelPermalink }}&#34;</span> <span class="na">media</span><span class="o">=</span><span class="s">&#34;screen&#34;</span><span class="p">&gt;</span>
-</code></pre></div><p>Hugo asset processing <a href="https://gohugo.io/troubleshooting/faq/#i-get-tocss--this-feature-is-not-available-in-your-current-hugo-version">requires extended Hugo</a>, which you may not have by default. You can get extended Hugo from the <a href="https://github.com/gohugoio/hugo/releases">releases page</a>.</p>
-
-<h2 id="configure-and-deploy-to-github-pages" class="anchor-link"><a href="#configure-and-deploy-to-github-pages">Configure and deploy to GitHub Pages</a></h2>
-<p>Before your site generator can build your site, it needs a configuration file to set some necessary parameters. Configuration files live in the site root directory. Among other settings, you can declare the name of the theme to use when building the site.</p>
-
-<h3 id="configure-jekyll" class="anchor-link"><a href="#configure-jekyll">Configure Jekyll</a></h3>
-<p>Here&rsquo;s a minimal <code>_config.yml</code> for Jekyll:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="k">title</span><span class="p">:</span><span class="w"> </span>Your<span class="w"> </span>awesome<span class="w"> </span>title<span class="w">
-</span><span class="w"></span><span class="k">description</span><span class="p">:</span><span class="w"> </span>&gt;- <span class="c"># this means to ignore newlines until &#34;baseurl:&#34;</span><span class="w">
-</span><span class="w">  </span>Write<span class="w"> </span>an<span class="w"> </span>awesome<span class="w"> </span>description<span class="w"> </span>for<span class="w"> </span>your<span class="w"> </span>new<span class="w"> </span>site<span class="w"> </span>here.<span class="w"> </span>You<span class="w"> </span>can<span class="w"> </span>edit<span class="w"> </span>this<span class="w">
-</span><span class="w">  </span>line<span class="w"> </span>in<span class="w"> </span>_config.yml.<span class="w"> </span>It<span class="w"> </span>will<span class="w"> </span>appear<span class="w"> </span>in<span class="w"> </span>your<span class="w"> </span>document<span class="w"> </span>head<span class="w"> </span>meta<span class="w"> </span>(for<span class="w">
-</span><span class="w">  </span>Google<span class="w"> </span>search<span class="w"> </span>results)<span class="w"> </span>and<span class="w"> </span>in<span class="w"> </span>your<span class="w"> </span>feed.xml<span class="w"> </span>site<span class="w"> </span>description.<span class="w">
-</span><span class="w"></span><span class="k">baseurl</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w"> </span><span class="c"># the subpath of your site, e.g. /blog</span><span class="w">
-</span><span class="w"></span><span class="k">url</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w"> </span><span class="c"># the base hostname &amp; protocol for your site, e.g. http://example.com</span><span class="w">
-</span><span class="w"></span><span class="k">theme</span><span class="p">:</span><span class="w"> </span><span class="c"># for gem-based themes</span><span class="w">
-</span><span class="w"></span><span class="k">remote_theme</span><span class="p">:</span><span class="w"> </span><span class="c"># for themes hosted on GitHub, when used with GitHub Pages</span><span class="w">
-</span></code></pre></div><p>With <code>remote_theme</code>, any <a href="https://help.github.com/en/github/working-with-github-pages/adding-a-theme-to-your-github-pages-site-using-jekyll#adding-a-jekyll-theme-in-your-sites-_configyml-file">Jekyll theme hosted on GitHub can be used</a> with sites hosted on GitHub Pages.</p>
-<p>Jekyll has a <a href="https://jekyllrb.com/docs/configuration/default/">default configuration</a>, so any parameters added to your configuration file will override the defaults. Here are <a href="https://jekyllrb.com/docs/configuration/options/">additional configuration settings</a>.</p>
-
-<h3 id="configure-hugo" class="anchor-link"><a href="#configure-hugo">Configure Hugo</a></h3>
-<p>Here&rsquo;s a minimal example of Hugo&rsquo;s <code>config.yml</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="k">baseURL</span><span class="p">:</span><span class="w"> </span>https<span class="p">:</span>//example.com/<span class="w"> </span><span class="c"># The full domain your site will live at</span><span class="w">
-</span><span class="w"></span><span class="k">languageCode</span><span class="p">:</span><span class="w"> </span>en-us<span class="w">
-</span><span class="w"></span><span class="k">title</span><span class="p">:</span><span class="w"> </span>Hugo<span class="w"> </span>Docs<span class="w"> </span>Site<span class="w">
-</span><span class="w"></span><span class="k">theme</span><span class="p">:</span><span class="w"> </span><span class="c"># theme name</span><span class="w">
-</span></code></pre></div><p>Hugo makes no assumptions, so if a necessary parameter is missing, you&rsquo;ll see a warning when building or serving your site. Here are <a href="https://gohugo.io/getting-started/configuration/#all-configuration-settings">all configuration settings for Hugo</a>.</p>
-
-<h3 id="deploy-to-github-pages" class="anchor-link"><a href="#deploy-to-github-pages">Deploy to GitHub Pages</a></h3>
-<p>Both generators build your site with a command.</p>
-<p>For Jekyll, use <code>jekyll build</code>. See <a href="https://jekyllrb.com/docs/configuration/options/#build-command-options">further build options here</a>.</p>
-<p>For Hugo, use <code>hugo</code>. You can run <code>hugo help</code> or see <a href="https://gohugo.io/getting-started/usage/#test-installation">further build options here</a>.</p>
-<p>You&rsquo;ll have to choose the source for your GitHub Pages site; once done, your site will update each time you push a new build. Of course, you can also automate your GitHub Pages build using GitHub Actions. Here&rsquo;s one for <a href="https://github.com/victoriadrake/hugo-latest-cd">building and deploying with Hugo</a>, and one for <a href="https://github.com/victoriadrake/jekyll-cd">building and deploying Jekyll</a>.</p>
-
-<h2 id="showtime" class="anchor-link"><a href="#showtime">Showtime!</a></h2>
-<p>All the substantial differences between these two generators are under the hood; all the same, let&rsquo;s take a look at the finished themes, in two color variations.</p>
-<p>Here&rsquo;s Hugo:</p>
-<p>
-<img src="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/ogd_hugo.png" alt="OpenGitDocs theme for Hugo"  />
-</p>
-<p>Here&rsquo;s Jekyll:</p>
-<p>
-<img src="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/ogd_jekyll.png" alt="OpenGitDocs theme for Jekyll"  />
-</p>
-<p>Spiffy!</p>
-
-<h2 id="wait-who-won" class="anchor-link"><a href="#wait-who-won">Wait who won?</a></h2>
-<p>🤷</p>
-<p>Both Hugo and Jekyll have their quirks and conveniences.</p>
-<p>From this developer&rsquo;s perspective, Jekyll is a workable choice for simple sites without complicated organizational needs. If you&rsquo;re looking to render some one-page posts in an <a href="https://jekyllrb.com/docs/themes/">available theme</a> and host with GitHub Pages, Jekyll will get you up and running fairly quickly.</p>
-<p>Personally, I use Hugo. I like the organizational capabilities of its Page Bundles, and it&rsquo;s backed by a dedicated and conscientious team that really seems to strive to facilitate convenience for their users. This is evident in Hugo&rsquo;s many functions, and handy tricks like <a href="https://gohugo.io/content-management/image-processing/">Image Processing</a> and <a href="https://gohugo.io/content-management/shortcodes/">Shortcodes</a>. They seem to release new fixes and versions about as often as I make a new cup of coffee - which, depending on your use case, may be fantastic, or annoying.</p>
-<p>If you still can&rsquo;t decide, don&rsquo;t worry. The <a href="https://github.com/opengitdocs">OpenGitDocs documentation theme</a> I created is available for both Hugo and Jekyll. Start with one, switch later if you want. That&rsquo;s the benefit of having options.</p>
-
-
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-<div class="related">
-    
-    <div class="markdown highlight">
-        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
-    </div>
-    <ul id="list-items">
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/breaking-bottlenecks/">Breaking bottlenecks 🍾</a>
-        <p class="li-brief">
-            A talk on the benefits of non-blocking functions for programs, developers, and organizations.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/computing/">computing</a>
-            
-            ☕️☕️☕️&nbsp;
-            12 min read
-        </p>
-        
-        
-    </li>
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/">Migrating to the cloud but without screwing it up, or how to move house</a>
-        <p class="li-brief">
-            A practical guide to moving to cloud services with minimal downtime, using AWS examples.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/aws/">aws</a>
-            
-            ☕️☕️&nbsp;
-            11 min read
-        </p>
-        
-        
-    </li>
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/how-to-choose-and-care-for-a-secure-open-source-project/">How to choose and care for a secure open source project</a>
-        <p class="li-brief">
-            A few tricks for assessing the security of an open source project.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/open-source/">open-source</a>
-            
-            ☕️☕️&nbsp;
-            8 min read
-        </p>
-        
-        
-    </li>
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a> </p> </div> </div> 
-        </div>
-
-        <div class="container">
-            
-            <footer>
-    
-    
-    
-    
-    
-    <div class="markdown">
-        
-        <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-    </div>
-    
-    
-</footer>
-            
-        </div>
-    </section>
-
-    
-    
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-98623582-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-
-<script>
-    scrollTo = (element) => {
-        window.scroll({
-            behavior: 'smooth',
-            left: 0,
-            top: element.offsetTop
-        });
-    }
-
-    document.getElementById("up").addEventListener('click', () => {
-        scrollTo(document.getElementById("main"));
-    });
-</script>
-    
-
-    
-    
-    
-
-</body>
-
-</html>
+<span class=o>@</span><span class=nt>import</span> <span class=s2>&#34;</span><span class=s2>style-definitions</span><span class=s2>&#34;</span><span class=p>;</span>
+</code></pre></div><p>This rather hackish configuration has an upside: you can use Liquid template tags and variables in your placeholder file. This is a nice way to allow users to set variables from the site <code>_config.yml</code>, for example.</p><p>The resulting CSS stylesheet in your generated site has the path <code>/assets/css/style.css</code>. You can link to it in your site&rsquo;s <code>head.html</code> using:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>link</span> <span class=na>rel</span><span class=o>=</span><span class=s>&#34;stylesheet&#34;</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ &#34;</span><span class=err>/</span><span class=na>assets</span><span class=err>/</span><span class=na>css</span><span class=err>/</span><span class=na>style</span><span class=err>.</span><span class=na>css</span><span class=err>&#34;</span> <span class=err>|</span> <span class=na>relative_url</span> <span class=err>}</span><span class=err>}</span><span class=err>&#34;</span> <span class=na>media</span><span class=o>=</span><span class=s>&#34;screen&#34;</span><span class=p></span><span class=p>&gt;</span>
+</code></pre></div><h3 id=sass-and-hugo-pipes-in-hugo>Sass and Hugo Pipes in Hugo</h3><p>Hugo uses <a href=https://gohugo.io/hugo-pipes/scss-sass/>Hugo Pipes</a> to process Sass to CSS. You can achieve this by using Hugo&rsquo;s asset processing function, <code>resources.ToCSS</code>, which expects a source in the <code>assets/</code> directory. It takes the SCSS file as an argument. With your style definitions in a Sass file at <code>assets/sass/style.scss</code>, here&rsquo;s how to get, process, and link your Sass in your theme&rsquo;s <code>head.html</code>:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html>{{ $style := resources.Get &#34;/sass/style.scss&#34; | resources.ToCSS }}
+<span class=p>&lt;</span><span class=nt>link</span> <span class=na>rel</span><span class=o>=</span><span class=s>&#34;stylesheet&#34;</span> <span class=na>href</span><span class=o>=</span><span class=s>&#34;{{ $style.RelPermalink }}&#34;</span> <span class=na>media</span><span class=o>=</span><span class=s>&#34;screen&#34;</span><span class=p></span><span class=p>&gt;</span>
+</code></pre></div><p>Hugo asset processing <a href=https://gohugo.io/troubleshooting/faq/#i-get-tocss--this-feature-is-not-available-in-your-current-hugo-version>requires extended Hugo</a>, which you may not have by default. You can get extended Hugo from the <a href=https://github.com/gohugoio/hugo/releases>releases page</a>.</p><h2 id=configure-and-deploy-to-github-pages>Configure and deploy to GitHub Pages</h2><p>Before your site generator can build your site, it needs a configuration file to set some necessary parameters. Configuration files live in the site root directory. Among other settings, you can declare the name of the theme to use when building the site.</p><h3 id=configure-jekyll>Configure Jekyll</h3><p>Here&rsquo;s a minimal <code>_config.yml</code> for Jekyll:</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml><span class=k>title</span><span class=p>:</span><span class=w> </span>Your<span class=w> </span>awesome<span class=w> </span>title<span class=w>
+</span><span class=w></span><span class=k>description</span><span class=p>:</span><span class=w> </span>&gt;- <span class=c># this means to ignore newlines until &#34;baseurl:&#34;</span><span class=w>
+</span><span class=w>  </span>Write<span class=w> </span>an<span class=w> </span>awesome<span class=w> </span>description<span class=w> </span>for<span class=w> </span>your<span class=w> </span>new<span class=w> </span>site<span class=w> </span>here.<span class=w> </span>You<span class=w> </span>can<span class=w> </span>edit<span class=w> </span>this<span class=w>
+</span><span class=w>  </span>line<span class=w> </span>in<span class=w> </span>_config.yml.<span class=w> </span>It<span class=w> </span>will<span class=w> </span>appear<span class=w> </span>in<span class=w> </span>your<span class=w> </span>document<span class=w> </span>head<span class=w> </span>meta<span class=w> </span>(for<span class=w>
+</span><span class=w>  </span>Google<span class=w> </span>search<span class=w> </span>results)<span class=w> </span>and<span class=w> </span>in<span class=w> </span>your<span class=w> </span>feed.xml<span class=w> </span>site<span class=w> </span>description.<span class=w>
+</span><span class=w></span><span class=k>baseurl</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;&#34;</span><span class=w> </span><span class=c># the subpath of your site, e.g. /blog</span><span class=w>
+</span><span class=w></span><span class=k>url</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;&#34;</span><span class=w> </span><span class=c># the base hostname &amp; protocol for your site, e.g. http://example.com</span><span class=w>
+</span><span class=w></span><span class=k>theme</span><span class=p>:</span><span class=w> </span><span class=c># for gem-based themes</span><span class=w>
+</span><span class=w></span><span class=k>remote_theme</span><span class=p>:</span><span class=w> </span><span class=c># for themes hosted on GitHub, when used with GitHub Pages</span><span class=w>
+</span></code></pre></div><p>With <code>remote_theme</code>, any <a href=https://help.github.com/en/github/working-with-github-pages/adding-a-theme-to-your-github-pages-site-using-jekyll#adding-a-jekyll-theme-in-your-sites-_configyml-file>Jekyll theme hosted on GitHub can be used</a> with sites hosted on GitHub Pages.</p><p>Jekyll has a <a href=https://jekyllrb.com/docs/configuration/default/>default configuration</a>, so any parameters added to your configuration file will override the defaults. Here are <a href=https://jekyllrb.com/docs/configuration/options/>additional configuration settings</a>.</p><h3 id=configure-hugo>Configure Hugo</h3><p>Here&rsquo;s a minimal example of Hugo&rsquo;s <code>config.yml</code>:</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml><span class=k>baseURL</span><span class=p>:</span><span class=w> </span>https<span class=p>:</span>//example.com/<span class=w> </span><span class=c># The full domain your site will live at</span><span class=w>
+</span><span class=w></span><span class=k>languageCode</span><span class=p>:</span><span class=w> </span>en-us<span class=w>
+</span><span class=w></span><span class=k>title</span><span class=p>:</span><span class=w> </span>Hugo<span class=w> </span>Docs<span class=w> </span>Site<span class=w>
+</span><span class=w></span><span class=k>theme</span><span class=p>:</span><span class=w> </span><span class=c># theme name</span><span class=w>
+</span></code></pre></div><p>Hugo makes no assumptions, so if a necessary parameter is missing, you&rsquo;ll see a warning when building or serving your site. Here are <a href=https://gohugo.io/getting-started/configuration/#all-configuration-settings>all configuration settings for Hugo</a>.</p><h3 id=deploy-to-github-pages>Deploy to GitHub Pages</h3><p>Both generators build your site with a command.</p><p>For Jekyll, use <code>jekyll build</code>. See <a href=https://jekyllrb.com/docs/configuration/options/#build-command-options>further build options here</a>.</p><p>For Hugo, use <code>hugo</code>. You can run <code>hugo help</code> or see <a href=https://gohugo.io/getting-started/usage/#test-installation>further build options here</a>.</p><p>You&rsquo;ll have to choose the source for your GitHub Pages site; once done, your site will update each time you push a new build. Of course, you can also automate your GitHub Pages build using GitHub Actions. Here&rsquo;s one for <a href=https://github.com/victoriadrake/hugo-latest-cd>building and deploying with Hugo</a>, and one for <a href=https://github.com/victoriadrake/jekyll-cd>building and deploying Jekyll</a>.</p><h2 id=showtime>Showtime!</h2><p>All the substantial differences between these two generators are under the hood; all the same, let&rsquo;s take a look at the finished themes, in two color variations.</p><p>Here&rsquo;s Hugo:</p><p><img src=https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/ogd_hugo.png alt="OpenGitDocs theme for Hugo"></p><p>Here&rsquo;s Jekyll:</p><p><img src=https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/ogd_jekyll.png alt="OpenGitDocs theme for Jekyll"></p><p>Spiffy!</p><h2 id=wait-who-won>Wait who won?</h2><p>🤷</p><p>Both Hugo and Jekyll have their quirks and conveniences.</p><p>From this developer&rsquo;s perspective, Jekyll is a workable choice for simple sites without complicated organizational needs. If you&rsquo;re looking to render some one-page posts in an <a href=https://jekyllrb.com/docs/themes/>available theme</a> and host with GitHub Pages, Jekyll will get you up and running fairly quickly.</p><p>Personally, I use Hugo. I like the organizational capabilities of its Page Bundles, and it&rsquo;s backed by a dedicated and conscientious team that really seems to strive to facilitate convenience for their users. This is evident in Hugo&rsquo;s many functions, and handy tricks like <a href=https://gohugo.io/content-management/image-processing/>Image Processing</a> and <a href=https://gohugo.io/content-management/shortcodes/>Shortcodes</a>. They seem to release new fixes and versions about as often as I make a new cup of coffee - which, depending on your use case, may be fantastic, or annoying.</p><p>If you still can&rsquo;t decide, don&rsquo;t worry. The <a href=https://github.com/opengitdocs>OpenGitDocs documentation theme</a> I created is available for both Hugo and Jekyll. Start with one, switch later if you want. That&rsquo;s the benefit of having options.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/breaking-bottlenecks/>Breaking bottlenecks 🍾</a><p class=li-brief>A talk on the benefits of non-blocking functions for programs, developers, and organizations.</p><p class=metadata><a class=li-tag href=/tags/computing/>computing</a>
+☕️☕️☕️&nbsp;
+12 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/>Migrating to the cloud but without screwing it up, or how to move house</a><p class=li-brief>A practical guide to moving to cloud services with minimal downtime, using AWS examples.</p><p class=metadata><a class=li-tag href=/tags/aws/>aws</a>
+☕️☕️&nbsp;
+11 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-to-choose-and-care-for-a-secure-open-source-project/>How to choose and care for a secure open source project</a><p class=li-brief>A few tricks for assessing the security of an open source project.</p><p class=metadata><a class=li-tag href=/tags/open-source/>open-source</a>
+☕️☕️&nbsp;
+8 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
+document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
