@@ -194,6 +194,7 @@
 </ol>
 <p>With a single elf, only one step for one present can be happening at any instance in time. If the elf were to produce one present at a time from beginning to end, that process would be executed <em>sequentially</em>. It&rsquo;s not the most efficient method for producing two-and-a-half million presents per day; for instance, the elf would have to wait around doing nothing while the glue on the present was drying before moving on to the next step.</p>
 <p>
+
 <img src="https://victoria.dev/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/sequence.png" alt="Illustration of sequence"  />
 </p>
 
@@ -201,6 +202,7 @@
 <p>In order to be more efficient, the elf works on all presents <em>concurrently</em>.</p>
 <p>Instead of completing one present at a time, the elf first cuts all the wood for all the toys, one by one. When everything is cut, the elf assembles and glues the toys together, one after the other. This <a href="https://en.wikipedia.org/wiki/Concurrent_computing">concurrent processing</a> means that the glue from the first toy has time to dry (without needing more attention from the elf) while the remaining toys are glued together. The same goes for painting, one toy at a time, and finally wrapping.</p>
 <p>
+
 <img src="https://victoria.dev/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/concurrency.png" alt="Illustration of concurrency"  />
 </p>
 <p>Since one elf can only do one task at a time, a single elf is using the day as efficiently as possible by concurrently producing presents.</p>
@@ -208,6 +210,7 @@
 <h2 id="parallelism" class="anchor-link"><a href="#parallelism">Parallelism</a></h2>
 <p>Hopefully, Santa&rsquo;s workshop has more than just one elf. With more elves, more toys can be built simultaneously over the course of a day. This simultaneous work means that the presents are being produced in <em>parallel</em>. <a href="https://en.wikipedia.org/wiki/Parallel_computing">Parallel processing</a> carried out by multiple elves means more work happens at the same time.</p>
 <p>
+
 <img src="https://victoria.dev/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/parallel.png" alt="Illustration of parallel processes"  />
 </p>
 <p>Elves working in parallel can also employ concurrency. One elf can still tackle only one task at a time, so it&rsquo;s most efficient to have multiple elves concurrently producing presents.</p>
@@ -227,6 +230,7 @@
 <p>Let&rsquo;s work outward. Think of a <a href="https://en.wikipedia.org/wiki/Thread_(computing)">thread</a> as one particular task, or the most granular sequence of instructions that Santa might execute. One thread might execute the task, <code>put present under tree</code>. A thread is a component of a process, in this case, Santa&rsquo;s process of delivering presents.</p>
 <p>If Santa Claus is <a href="https://en.wikipedia.org/wiki/Thread_(computing)#Single_threading">single-threaded</a>, he, as a process, would only be able to accomplish one task at a time. Since he&rsquo;s old and a bit forgetful, he probably has a set of instructions for delivering presents, as well as a schedule to abide by. These two things guide Santa&rsquo;s thread until his process is complete.</p>
 <p>
+
 <img src="https://victoria.dev/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/single.png" alt="A single Santa Claus emoji"  />
 </p>
 <p>Single-threaded Santa Claus might work something like this:</p>
@@ -244,6 +248,7 @@
 <h2 id="multithreading" class="anchor-link"><a href="#multithreading">Multithreading</a></h2>
 <p><a href="https://en.wikipedia.org/wiki/Thread_(computing)#Multithreading">Multithreaded</a> Santa Claus, by contrast, is the <a href="https://dc.fandom.com/wiki/Jonathan_Osterman_(Watchmen)">Doctor Manhattan</a> of the North Pole. There&rsquo;s still only one Santa Claus in the world; however, he has the amazing ability to multiply his consciousness and accomplish multiple instruction sets of tasks simultaneously. These additional task workers, or worker threads, are created and controlled by the main process of Santa delivering presents.</p>
 <p>
+
 <img src="https://victoria.dev/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/cover.png" alt="Multiple Santa threads"  />
 </p>
 <p>Each worker thread acts independently to complete its instructions. Since they all belong to Santa&rsquo;s consciousness, they share Santa&rsquo;s memory and know everything that Santa knows, including what planet they&rsquo;re running around on, and where to get the presents from.</p>

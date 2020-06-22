@@ -200,6 +200,7 @@
 <h1 id="set-up-route-53" class="anchor-link"><a href="#set-up-route-53">Set up Route 53</a></h1>
 <p>The majority of the work in this section amounts to creating the correct record sets for your custom domain. If you&rsquo;re already familiar with how record sets work, the documentation is a bit of a slog. Here&rsquo;s how it should look when you&rsquo;re finished:</p>
 <p>
+
 <img src="https://victoria.dev/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/aws-recordsets.png#screenshot" alt="Route 53 record sets."  />
 </p>
 <p>The &ldquo;NS&rdquo; and &ldquo;SOA&rdquo; records are created automatically for you. The only records you need to create are the &ldquo;A&rdquo; records.</p>
@@ -207,6 +208,7 @@
 <p>If you created two buckets in the first section (one for <code>yourdomain.com</code> and one for <code>www.yourdomain.com</code>), you&rsquo;ll need two separate A records in Route 53. Initially, these have the value of the endpoints for your matching S3 buckets (looks like <code>s3-website.us-east-2.amazonaws.com</code>). Later, you&rsquo;ll change them to your CloudFront domain name.</p>
 <p>If you went with Namecheap as your registrar, <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-custom-domain-walkthrough.html#root-domain-walkthrough-update-ns-record">Step 4</a> looks like this:</p>
 <p>
+
 <img src="https://victoria.dev/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/aws-namecheapdns.png#screenshot" alt="Namecheap&amp;rsquo;s Custom DNS settings."  />
 </p>
 <p>Waiting is the hardest part&hellip; I&rsquo;ve gotten into the habit of working on another project or setting up the DNS change before going to bed so that changes have time to propagate without me feeling like I need to fiddle with it. ^^;</p>
@@ -227,16 +229,19 @@
 <p><a href="http://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request.html">Here are instructions for setting up a certificate.</a> I don&rsquo;t think they&rsquo;re very good, personally. Don&rsquo;t worry, I got you.</p>
 <p>To account for &ldquo;<a href="http://www.yourdomain.com">www.yourdomain.com</a>&rdquo; as well as any subdomains, you&rsquo;ll want to add two domain names to the certificate, like so:</p>
 <p>
+
 <img src="https://victoria.dev/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/aws-acmdomains.png#screenshot" alt="Adding domain names to ACM."  />
 </p>
 <p>Click &ldquo;Next.&rdquo; You&rsquo;ll be asked to choose a validation method. Choose &ldquo;DNS validation&rdquo; and click &ldquo;Review.&rdquo; If everything is as it should be, click &ldquo;Confirm and request.&rdquo;</p>
 <p>You&rsquo;ll see a page, &ldquo;Validation&rdquo; that looks like this. You&rsquo;ll have to click the little arrow next to both domain names to get the important information to show:</p>
 <p>
+
 <img src="https://victoria.dev/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/aws-acmvalidation.png#screenshot" alt="Validation instructions for ACM."  />
 </p>
 <p>Under both domain names, click the button for &ldquo;Create record in Route 53.&rdquo; This will automatically create a CNAME record set in Route 53 with the given values, which ACM will then check in order to validate that you own those domains. You could create the records manually, if you wanted to for some reason. I don&rsquo;t know, maybe you&rsquo;re killing time. ¯\_(ツ)_/¯</p>
 <p>Click &ldquo;Continue.&rdquo; You&rsquo;ll see a console that looks like this:</p>
 <p>
+
 <img src="https://victoria.dev/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/aws-acmcertificates.png#screenshot" alt="List of certificates you own."  />
 </p>
 <p>It may take some time for the validation to complete, at which point the &ldquo;Pending validation&rdquo; status will change to &ldquo;Issued.&rdquo; Again with the waiting. You can close this window to return to the CloudFront set up. Once the certificate is validated, you&rsquo;ll see it in the dropdown menu under &ldquo;Custom SSL Certificate.&rdquo; You can click &ldquo;Create Distribution&rdquo; to finish setting up CloudFront.</p>

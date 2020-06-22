@@ -201,6 +201,7 @@
 <h2 id="1-separated-storage" class="anchor-link"><a href="#1-separated-storage">1. Separated storage</a></h2>
 <p>From a security standpoint, the concept of separation refers to storing files that serve different purposes in different places. When we&rsquo;re constructing our building and deciding where all the rooms go, we similarly create the lobby on the ground floor and place administrative offices on higher floors, perhaps off the main path. While both are rooms, we understand that they serve different purposes, have different functional needs, and possibly very different security requirements.</p>
 <p>
+
 <img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/separation.png" alt="Separation of building floors"  />
 </p>
 <p>When it comes to our files, the benefit is perhaps easiest for us to understand if we consider a simple file structure:</p>
@@ -223,6 +224,7 @@
 <h2 id="2-customized-configuration" class="anchor-link"><a href="#2-customized-configuration">2. Customized configuration</a></h2>
 <p>While wasting time on customization can hinder productivity, one area that we definitely want to customize is configuration settings. <a href="https://github.com/OWASP/Top10/blob/cb5f8967bba106e14a350761ac4f93b8aec7f8fa/2017/en/0xa6-security-misconfiguration.md">Security misconfiguration</a> is listed in the OWASP Top 10. A significant number of security incidents occur because a server, firewall, or administrative account is running in production with default settings. Upon the opening of our new building, we&rsquo;d hopefully be more careful to ensure we haven&rsquo;t left any keys in the locks.</p>
 <p>
+
 <img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/defaultkey.png" alt="Three keys"  />
 </p>
 <p>Usually, the victims of attacks related to default settings aren&rsquo;t specifically targeted. Rather, they are found by automated scanning tools that attackers run over many possible targets, effectively prodding at many different systems to see if any roll over and expose some useful exploit. The automated nature of this attack means that it&rsquo;s important for us to review settings for every piece of our architecture. Even if an individual piece doesn&rsquo;t seem significant, it may provide a vulnerability that allows an attacker to use it as a gateway to our larger application.</p>
@@ -241,6 +243,7 @@
 <h2 id="3-controlled-access-and-user-scope" class="anchor-link"><a href="#3-controlled-access-and-user-scope">3. Controlled access and user scope</a></h2>
 <p>One of the more difficult security problems to test in an application is misconfigured access control. Automated testing tools have limited capability to find areas of an application that one user shouldn&rsquo;t be able to access. Thus, this is often left to manual testing or source code review to discover. By considering this vulnerability early on in the software development lifecycle when architectural decisions are being made, we reduce the risk that it becomes a problem that&rsquo;s harder to fix later. After all, we wouldn&rsquo;t simply leave our master keys out of reach on a high ledge and hope no one comes along with a ladder.</p>
 <p>
+
 <img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/access.png" alt="A cartoon of a user attempting to elevate privilege"  />
 </p>
 <p><a href="https://github.com/OWASP/Top10/blob/master/2017/en/0xa5-broken-access-control.md">Broken access control</a> is listed in the OWASP Top 10, which goes into more detail on its various forms. As a simple example, consider an application with two levels of access: administrators, and users. We want to build a new feature - the ability to moderate or ban users - with the intention that only administrators would be allowed to use it.</p>

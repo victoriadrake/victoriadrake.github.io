@@ -236,14 +236,17 @@
 <p>The <a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE">OpenVPN Access Server</a> is available on AWS Marketplace. The Bring Your Own License (BYOL) model doesn&rsquo;t actually require a license for up to two connected devices; to connect more clients, you can get <a href="https://aws.amazon.com/marketplace/seller-profile/ref=srh_res_product_vendor?ie=UTF8&amp;id=aac3a8a3-2823-483c-b5aa-60022894b89d">bundled billing</a> for five, ten, or twenty-five clients, or <a href="https://openvpn.net/pricing/">purchase a minimum of ten OpenVPN licenses a la carte</a> for $15/device/year. For most of us, the two free connected devices will suffice; and if using an EC2 Micro instance, our set up will be <a href="https://aws.amazon.com/free/">AWS Free Tier eligible</a> as well.</p>
 <p>Start by clicking &ldquo;Continue to Subscribe&rdquo; for the <a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE">OpenVPN Access Server</a>, which will bring you to a page that looks like this:</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/1-subscribe.jpg#screenshot" alt="Subscription details page for OpenVPN Access Server"  />
 </p>
 <p>Click &ldquo;Continue to Configuration.&rdquo;</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/2-configure.jpg#screenshot" alt="Configure this software page for OpenVPN Access Server"  />
 </p>
 <p>You may notice that the EC2 instance type in the right side bar (and consequently, the Monthly Estimate) isn&rsquo;t the one we want - that&rsquo;s okay, we can change it soon. Just ensure that the &ldquo;Region&rdquo; chosen is where we want the instance to be located. Generally, the closer it is to the physical location of your client (your laptop, in this case), the faster your VPN will be. Click &ldquo;Continue to Launch.&rdquo;</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/3-launch.jpg#screenshot" alt="Launch this software page"  />
 </p>
 <p>On this page, we&rsquo;ll change three things:</p>
@@ -256,6 +259,7 @@
 <p>A <a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html">Security Group</a> is a profile, or collection of settings, that Amazon uses to control access to our instance. If you&rsquo;ve set up other AWS products before, you may already have some groups with their own rules defined. We should be careful to understand the reasons for our Security Group settings, as these define how public or private our instance is, and consequently, who has access to it.</p>
 <p>If we click &ldquo;Create New Based on Seller Settings,&rdquo; the OpenVPN server defines some recommended settings for a default Security Group.</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/4-security-group.jpg#screenshot" alt="Security group settings"  />
 </p>
 <p>The default recommended settings are all <code>0.0.0.0/0</code> for TCP ports 22, 943, 443, and 945, and UDP port 1194. OpenVPN offers an <a href="https://openvpn.net/vpn-server-resources/amazon-web-services-ec2-byol-appliance-quick-start-guide/#Instance_Launch_Options">explanation of how the ports are used</a> on their website. With the default settings, all these ports are left open to support various features of the OpenVPN server. We may wish to restrict access to these ports to a specific IP address or block of addresses (like that of your own ISP) to increase the security of our instance. However, if your IP address frequently changes (like when you travel and connect to a different WiFi network), restricting the ports may not be as helpful as we hope.</p>
@@ -265,12 +269,14 @@
 <h3 id="3-the-key-pair-settings" class="anchor-link"><a href="#3-the-key-pair-settings">3. The Key Pair settings</a></h3>
 <p>The aforementioned SSH keys are access credentials that we&rsquo;ll use to connect to our instance. We can <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair">create a key pair</a> in this section, or you can choose a key pair you may already be using with AWS.</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/5-keys.jpg#screenshot" alt="Key Pair Settings link"  />
 </p>
 <p>To create a new set of access credentials, click &ldquo;Create a key pair in EC2&rdquo; to open a new window. Then, click the &ldquo;Create Key Pair&rdquo; blue button. Once you give your key pair a name, it will be created and the private key will automatically download to your machine. It&rsquo;s a file ending with the extension <code>.pem</code>. Store this key in a secure place on your computer. We&rsquo;ll need to refer to it when we connect to our new EC2 instance.</p>
 <p>We can return to the previous window to select the key pair we just created. If it doesn&rsquo;t show up, hit the little &ldquo;refresh&rdquo; icon next to the drop-down. Once it&rsquo;s selected, hit the shiny yellow &ldquo;Launch&rdquo; button.</p>
 <p>We should see a message like this:</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/6-launched.jpg#screenshot" alt="Launch success message"  />
 </p>
 <p>Great stuff! Now that our instance exists, let&rsquo;s make sure we can access it and start up our VPN. For a shortcut to the next step, click on the &ldquo;EC2 Console&rdquo; link in the success message.</p>
@@ -279,27 +285,33 @@
 <p>Amazon&rsquo;s <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html">Elastic IP Addresses</a> provides us with a public IPv4 address controlled by our account, unlike the public IP address tied to our EC2 instance. It&rsquo;s considered a best practice to create one and associate it with our VPN instance. If anything should go wrong with our instance, or if we want to use a new instance for our VPN in the future, the Elastic IP can be disassociated from the current instance and reassociated with our new one. This makes the transition seamless for our connected clients. Think of the Elastic IP like a web domain address that we register - we can point it at whatever we choose.</p>
 <p>We can create a new Elastic IP address on the <a href="https://console.aws.amazon.com/ec2/">Amazon EC2 Console</a>. If you clicked the link from the success message above, we&rsquo;re already there.</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/7-ec2.jpg#screenshot" alt="EC2 console"  />
 </p>
 <p>If you have more than one instance, take note of the Instance ID of the one we&rsquo;ve just launched.</p>
 <p>In the left sidebar under &ldquo;Network &amp; Security,&rdquo; choose &ldquo;Elastic IPs.&rdquo; Then click the blue &ldquo;Allocate new address&rdquo; button.</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/8-elasticip.jpg#screenshot" alt="Allocate new address page"  />
 </p>
 <p>Choose &ldquo;Amazon Pool,&rdquo; then click &ldquo;Allocate.&rdquo;</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/9-elasticip.jpg#screenshot" alt="Allocate elastic IP success message"  />
 </p>
 <p>Success! We can click &ldquo;Close&rdquo; to return to the Elastic IP console.</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/10-associateip.jpg#screenshot" alt="Associate elastic IP"  />
 </p>
 <p>Now that we have an Elastic IP, let&rsquo;s associate it with our instance. Select the IP address, then click &ldquo;Actions,&rdquo; and choose &ldquo;Associate address.&rdquo;</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/11-associateip.jpg#screenshot" alt="Associate elastic IP with instance"  />
 </p>
 <p>Ensure the &ldquo;Instance&rdquo; option is selected, then click the drop-down menu. We should see our EC2 instance ID there. Select it, then click &ldquo;Associate.&rdquo;</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/12-associateip.jpg#screenshot" alt="Associate elastic IP success message"  />
 </p>
 <p>Success! Now that we&rsquo;ll be able to access our VPN instance, let&rsquo;s get our VPN service up and running.</p>
@@ -343,10 +355,12 @@
 </code></pre><p>The <code>https</code> part is important; without it, the instance won&rsquo;t send any data.</p>
 <p>When we go to this URL, we may see a page warning us that this site&rsquo;s certificate issuer is unknown or invalid. As long as we&rsquo;ve typed our Elastic IP correctly, it&rsquo;s safe to proceed. If you&rsquo;re using Firefox, click &ldquo;Advanced,&rdquo; and then &ldquo;Accept the Risk and Continue.&rdquo; In Chrome, click &ldquo;Advanced,&rdquo; then &ldquo;Proceed to &hellip;&rdquo; the elastic IP.</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/13-warning.jpg#screenshot" alt="Security warning page"  />
 </p>
 <p>Log in with the username <code>openvpn</code> and the password we just set. We&rsquo;ll now be presented with a link to download our user-locked connection profile:</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/14-profile.jpg#screenshot" alt="Connection profile download page"  />
 </p>
 <p>When we click the link, a file named <code>client.ovpn</code> will download.</p>
@@ -411,14 +425,17 @@ down-pre
 <h2 id="3-set-up-openvpn-as-networkmanager-system-connection" class="anchor-link"><a href="#3-set-up-openvpn-as-networkmanager-system-connection">3. Set up OpenVPN as NetworkManager system connection</a></h2>
 <p>We&rsquo;ll use the GUI to set up our VPN with NetworkManager. Open up Network Settings, which should look something like this:</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/15-networksettings.png#screenshot" alt="Network Settings window on Ubuntu 18.04"  />
 </p>
 <p>Then click the &ldquo;+&rdquo; button. On the window that pops up, counterintuitively, choose &ldquo;Import from file&hellip;&rdquo; instead of the OpenVPN option.</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/16-importvpn.jpg#screenshot" alt="Add VPN window"  />
 </p>
 <p>Navigate to, and then select, your <code>.ovpn</code> file. We should now see something like this:</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/17-vpnsettings.png#screenshot" alt="The filled VPN connection settings"  />
 </p>
 <p>Add your username and password for the server (<code>openvpn</code> and the password we set in <a href="#3-initialize-openvpn-on-the-ec2-server">the first section&rsquo;s Step 3</a>), and your user key password (the same one again, if you&rsquo;ve followed this tutorial), then click the &ldquo;Add&rdquo; button.</p>
@@ -430,6 +447,7 @@ down-pre
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/NetworkManager/system-connections/openvpn
 </code></pre></div><p>Under <code>[ipv4]</code>, we&rsquo;ll need to add the line <code>dns-priority=-42</code>. It should end up looking like this:</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/18-connsettings.jpg#screenshot" alt="Connection settings for ipv4"  />
 </p>
 <p>Setting a negative number is a workaround that prioritizes this DNS server. The actual number is arbitrary (<code>-1</code> should also work) but I like 42. ¯\_(ツ)_/¯</p>
@@ -439,10 +457,12 @@ down-pre
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo service network-manager restart
 </code></pre></div><p>Then in the Network Settings, click the magic button that turns on the VPN:</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/19-vpnon.jpg#screenshot" alt="Network Settings window"  />
 </p>
 <p>Finally, visit <a href="https://www.dnsleaktest.com/">the DNS leak test website</a> and click on &ldquo;Extended test&rdquo; to verify the fix. If everything&rsquo;s working properly, we should now see a list containing only our VPN ISP.</p>
 <p>
+
 <img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/20-noleaks.png#screenshot" alt="Successful DNS leak test results"  />
 </p>
 <p>And we&rsquo;re done! Congratulations on rolling your very own VPN server and stopping DNS leaks with OpenVPN. Enjoy surfing in (relative) privacy. Now your only worry at the local coffeeshop is who&rsquo;s watching you surf from the seat behind you.</p>
