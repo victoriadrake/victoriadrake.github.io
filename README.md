@@ -1,8 +1,8 @@
-# Victoria.dev
+# [Victoria.dev](https://victoria.dev)
 
 Oh, hello there!
 
-This is the source code repository for my personal website and technical blog. You can get to the front door by visiting [victoria.dev](https://victoria.dev).
+This repository serves my personal website and technical blog via GitHub Pages. It's deployed using [hugo-remote](https://github.com/victoriadrake/hugo-remote). You can get to the front door by visiting [victoria.dev](https://victoria.dev).
 
 ## Contributions
 
