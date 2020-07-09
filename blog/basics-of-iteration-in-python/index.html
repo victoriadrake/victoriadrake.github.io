@@ -1,380 +1,47 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-<head>
-    
-    <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer">
-
-<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
-<title>
-    Basics of Iteration in Python | victoria.dev
-</title>
-
-
-    <meta
-  name="monetization"
-  content="$ilp.uphold.com/pBRfRwg2EJAe">
-    <meta property="og:title" content="Basics of Iteration in Python - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="A basic overview of writing effective iterations in Python using for loops, list comprehensions, and map." />
-<meta property="og:url" content="https://victoria.dev/blog/basics-of-iteration-in-python/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-
-
-<meta property="og:image" content="https://victoria.dev/blog/basics-of-iteration-in-python/python-iterations.png"/>
-
-
-    <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Basics of Iteration in Python" />
-
-
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/basics-of-iteration-in-python/python-iterations.png"/>
-
-
-<meta name="twitter:description"
-    content="A basic overview of writing effective iterations in Python using for loops, list comprehensions, and map." />
-
-    
-<link rel="shortcut icon" href="/img/logo.ico">
-
-
-    
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.37d2c032e134e0af3a44f3851230a98e8bb25db2802e3e64adc927ed2107dcba.css" integrity="sha256-N9LAMuE04K86RPOFEjCpjouyXbKALj5krckn7SEH3Lo=" media="screen">
-
-
-
-
-
-    
-    
-    
-    
-</head>
-
-<body>
-    <section id="main">
-
-        
-        <div class="header">
-
-    <div class="toggle">
-        <input type="checkbox" />
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <div id="mobile-menu">
-            
-            
-            <span class="menu-item">
-                <a href="/">
-                    👩🏻‍💻 hi</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/blog/">
-                    📰 blog</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/about/">
-                    📖 readme</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/coffee/">
-                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-            </span>
-            
-            
-            
-            
-        </div>
-    </div>
-    <div id="menu">
-        
-        
-        <span class="menu-item">
-            <a href="/">
-                👩🏻‍💻 hi</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/blog/">
-                📰 blog</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/about/">
-                📖 readme</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/coffee/">
-                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-        </span>
-        
-        
-        
-        
-    </div>
-
-    <div id="logo">
-        <img id="up" alt="site logo" src="/img/logo.png" />
-    </div>
-
-</div>
-        
-
-        <div class="container">
-            
-
-
-
-
-
-<div id="images">
-    <img src="https://victoria.dev/blog/basics-of-iteration-in-python/python-iterations.png" alt="cover image" />
-</div>
-
-
-
-            
-
-
-<div class="markdown">
-    <h1>
-        Basics of Iteration in Python
-    </h1>
-    
-    <p class="subtitle">A basic overview of writing effective iterations in Python using for loops, list comprehensions, and map.</p>
-    <p class="metadata" id="date">
-        January 18, 2017
-        ☕️&nbsp;
-        4 min read
-
-        
-        &nbsp;
-        
-        <a class="li-tag" href="/tags/python/">
-            python
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/coding/">
-            coding
-        </a>&nbsp;
-        
-        
-    </p>
-
-    
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-<div class="markdown">
-    
-    <p>I&rsquo;ve been working in Python 3 for about a week, and so far greatly enjoy it. To me, learning code syntax (and programming in general) is similar to an amalgamation of Lego blocks: once it&rsquo;s understood what a certain color of block does, it&rsquo;s straightforward to combine them to create the structure you&rsquo;re looking for.</p>
-<p>That said, some blocks can be a little confusing at first. I found documentation relating to iteration in Python to be a little hard to digest, mostly because of subtle differences in terminology: iteration, iterator, iterating, iterable&hellip; it&rsquo;s enough to make your eyes glaze over. I found concrete examples to be most useful in learning these concepts; this post aims to summarize what I&rsquo;ve learned.</p>
-<p>There are a few different ways to achieve iterations in Python. I&rsquo;ll present some of these ways in this post and discuss appropriate situations for each.</p>
-
-<h1 id="for-loop" class="anchor-link"><a href="#for-loop">For loop</a></h1>
-<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">for</span> <span class="n">iterating_var</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
-    <span class="n">statement</span><span class="o">/</span><span class="n">statements</span>
-</code></pre></div><p>For loops are handy things. They&rsquo;re straightforward to understand, which is especially helpful if you&rsquo;re reading someone else&rsquo;s code and trying to follow their thought process. They can achieve as much or as little as you need, and each operation can be clearly written out.</p>
-<p>An <code>iterating_var</code> can be any of Python&rsquo;s data types: a letter in a string, an item from a list, an index from a list, integers, etc. An <code>iterable</code> can also take different forms: a string of word(s), a range of numbers, a list, and so on. A <code>statement</code> or multiple <code>statements</code> indicates <em>doing something:</em> anything from mathematical expressions to simply printing a result. Check out the following examples, which simply print each <code>iterating_var</code> of an <code>iterable</code> on a new line:</p>
-<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">for</span> <span class="n">letter</span> <span class="ow">in</span> <span class="s1">&#39;Hello world&#39;</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">letter</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-<span class="n">breakfastmenu</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;toast&#39;</span><span class="p">,</span><span class="s1">&#39;eggs&#39;</span><span class="p">,</span><span class="s1">&#39;waffles&#39;</span><span class="p">,</span><span class="s1">&#39;coffee&#39;</span><span class="p">]</span>
-<span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">breakfastmenu</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span>
-</code></pre></div><p>You can even use a for loop in a more compact situation, such as I did in <a href="https://github.com/victoriadrake/30-days-of-code/blob/master/day7_arrays.py">my solution</a> to HackerRank&rsquo;s <a href="https://www.hackerrank.com/challenges/30-arrays">30 Days of Code - Day 7: Arrays</a> challenge:</p>
-<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">arrstring</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">)</span>
-</code></pre></div><p>The downside to for loops is that they can be a bit verbose, depending on how much you&rsquo;re trying to achieve. Still, for anyone learning Python or hoping to make their code as easily understood as possible, for loops are still the most straightforward choice for iterations.</p>
-
-<h1 id="list-comprehensions" class="anchor-link"><a href="#list-comprehensions">List comprehensions</a></h1>
-<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">newlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">statement</span><span class="o">/</span><span class="n">statements</span> <span class="k">for</span> <span class="n">iterating_var</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">]</span>
-</code></pre></div><p>In my opinion, list comprehensions are the most elegant of the solutions discussed in this post. Once you have a grasp of how they work, you can perform concise and effective iterations with very little code.</p>
-<p>List comprehensions will always return a list, which may or may not be appropriate for your situation. If appropriate, however, simply defining the variable name of the list can often help you skip some steps.</p>
-<p>For example, I can use list comprehension to quickly calculate and print tip percentage on a few bar tabs at once:</p>
-<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">tabs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">23.60</span><span class="p">,</span> <span class="mf">42.10</span><span class="p">,</span> <span class="mf">17.50</span><span class="p">]</span>
-<span class="n">tabsplustips</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">tab</span><span class="o">*</span><span class="mf">1.15</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">tab</span> <span class="ow">in</span> <span class="n">tabs</span><span class="p">]</span>
-<span class="k">print</span><span class="p">(</span><span class="n">tabsplustips</span><span class="p">)</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="mf">27.14</span><span class="p">,</span> <span class="mf">48.41</span><span class="p">,</span> <span class="mf">20.12</span><span class="p">]</span>
-</code></pre></div><p>In one concise line, we&rsquo;ve taken each tab amount, added 15% tip, rounded it to the nearest cent, and made a new list of the tabs plus the tip values.</p>
-<p>List comprehensions can be an elegant tool, depending on the variety of statements you want to iterate through, and whether or not output to a list is useful to you. The more statements you add, the more complicated your list comprehension begins to look, especially once you get into nested list comprehensions. If your code isn&rsquo;t well annotated, it may become difficult for another reader to figure out.</p>
-
-<h1 id="map" class="anchor-link"><a href="#map">Map</a></h1>
-<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="nb">map</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">iterable</span><span class="p">)</span>
-</code></pre></div><p>Map is, in many ways, a non-idiomatic function for iteration in Python. It&rsquo;s pretty compact, which can make it easy to write improperly with a missing comma or parenthesis, and it&rsquo;s more limited than for loops or list comprehensions in its usage. Basically, it applies your <code>statement</code> (in this case, your <code>function</code>) to every instance of your defined <code>iterable</code>.</p>
-<p>I used the map function in <a href="https://github.com/victoriadrake/simple-statistics/blob/master/weighted_mean.py">my solution</a> to HackerRank&rsquo;s <a href="https://www.hackerrank.com/challenges/s10-weighted-mean">10 Days of Statistics - Day 0: Weighted Mean</a> challenge. In this example, it&rsquo;s casting each element of <code>input()</code> (the iterable) from string representation to integer representation.</p>
-<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">input</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
-<span class="n">weights</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">input</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
-
-<span class="n">output</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">weights</span><span class="p">)])</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</code></pre></div><p>It&rsquo;s worthwhile to note that map by itself returns an iterator; if it&rsquo;s a list you want, it&rsquo;s an extra step to get the list representation, as in the example above.</p>
-<p>In truth, I&rsquo;ve had a hard time coming up with appropriate situations for the use of map over simply using a list comprehension. Aside from situations similar to the above, it seems to me to be a rather un-Pythonic way to iterate. It can be advantageous as a concise method of doing simple, sort of &lsquo;on-the-spot&rsquo; iterations; otherwise, my preference would be to use a list comprehension instead.</p>
-<p>I hope these examples have been useful to you in your understanding of iterations with Python 3. Thanks for reading!</p>
-
-
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-<div class="related">
-    
-    <div class="markdown highlight">
-        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
-    </div>
-    <ul id="list-items">
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/writing-efficient-django/">Writing efficient Django</a>
-        <p class="li-brief">
-            How to use Django&#39;s views, models, and queries to build a better application.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/coding/">coding</a>
-            
-            ☕️☕️&nbsp;
-            6 min read
-        </p>
-        
-        
-    </li>
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/breaking-bottlenecks/">Breaking bottlenecks 🍾</a>
-        <p class="li-brief">
-            A talk on the benefits of non-blocking functions for programs, developers, and organizations.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/computing/">computing</a>
-            
-            ☕️☕️☕️&nbsp;
-            12 min read
-        </p>
-        
-        
-    </li>
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/">How to code a satellite algorithm and cook paella from scratch</a>
-        <p class="li-brief">
-            A guide to expertly tackling seemingly complicated problems that you&#39;d rather never tackle in the first place.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
-            
-            ☕️☕️&nbsp;
-            7 min read
-        </p>
-        
-        
-    </li>
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a> </p> </div> </div> 
-        </div>
-
-        <div class="container">
-            
-            <footer>
-    
-    
-    
-    
-    
-    <div class="markdown">
-        
-        <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-    </div>
-    
-    
-</footer>
-            
-        </div>
-    </section>
-
-    
-    
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-98623582-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-
-<script>
-    scrollTo = (element) => {
-        window.scroll({
-            behavior: 'smooth',
-            left: 0,
-            top: element.offsetTop
-        });
-    }
-
-    document.getElementById("up").addEventListener('click', () => {
-        scrollTo(document.getElementById("main"));
-    });
-</script>
-    
-
-    
-    
-    
-
-</body>
-
-</html>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>Basics of Iteration in Python | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Basics of Iteration in Python - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A basic overview of writing effective iterations in Python using for loops, list comprehensions, and map."><meta property="og:url" content="https://victoria.dev/blog/basics-of-iteration-in-python/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/basics-of-iteration-in-python/python-iterations.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Basics of Iteration in Python"><meta name=twitter:image content="https://victoria.dev/blog/basics-of-iteration-in-python/python-iterations.png"><meta name=twitter:description content="A basic overview of writing effective iterations in Python using for loops, list comprehensions, and map."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
+<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/basics-of-iteration-in-python/python-iterations.png alt="cover image"></div><div class=markdown><h1>Basics of Iteration in Python</h1><p class=subtitle>A basic overview of writing effective iterations in Python using for loops, list comprehensions, and map.</p><p class=metadata id=date>January 18, 2017
+☕️&nbsp;
+4 min read
+&nbsp;
+<a class=li-tag href=/tags/python/>python
+</a>&nbsp;
+<a class=li-tag href=/tags/coding/>coding
+</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>I&rsquo;ve been working in Python 3 for about a week, and so far greatly enjoy it. To me, learning code syntax (and programming in general) is similar to an amalgamation of Lego blocks: once it&rsquo;s understood what a certain color of block does, it&rsquo;s straightforward to combine them to create the structure you&rsquo;re looking for.</p><p>That said, some blocks can be a little confusing at first. I found documentation relating to iteration in Python to be a little hard to digest, mostly because of subtle differences in terminology: iteration, iterator, iterating, iterable&mldr; it&rsquo;s enough to make your eyes glaze over. I found concrete examples to be most useful in learning these concepts; this post aims to summarize what I&rsquo;ve learned.</p><p>There are a few different ways to achieve iterations in Python. I&rsquo;ll present some of these ways in this post and discuss appropriate situations for each.</p><h1 id=for-loop>For loop</h1><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>for</span> <span class=n>iterating_var</span> <span class=ow>in</span> <span class=n>iterable</span><span class=p>:</span>
+    <span class=n>statement</span><span class=o>/</span><span class=n>statements</span>
+</code></pre></div><p>For loops are handy things. They&rsquo;re straightforward to understand, which is especially helpful if you&rsquo;re reading someone else&rsquo;s code and trying to follow their thought process. They can achieve as much or as little as you need, and each operation can be clearly written out.</p><p>An <code>iterating_var</code> can be any of Python&rsquo;s data types: a letter in a string, an item from a list, an index from a list, integers, etc. An <code>iterable</code> can also take different forms: a string of word(s), a range of numbers, a list, and so on. A <code>statement</code> or multiple <code>statements</code> indicates <em>doing something:</em> anything from mathematical expressions to simply printing a result. Check out the following examples, which simply print each <code>iterating_var</code> of an <code>iterable</code> on a new line:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>for</span> <span class=n>letter</span> <span class=ow>in</span> <span class=sa></span><span class=s1>&#39;</span><span class=s1>Hello world</span><span class=s1>&#39;</span><span class=p>:</span>
+    <span class=k>print</span><span class=p>(</span><span class=n>letter</span><span class=p>)</span>
+
+<span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>10</span><span class=p>)</span><span class=p>:</span>
+    <span class=k>print</span><span class=p>(</span><span class=n>i</span><span class=p>)</span>
+
+<span class=n>breakfastmenu</span> <span class=o>=</span> <span class=p>[</span><span class=sa></span><span class=s1>&#39;</span><span class=s1>toast</span><span class=s1>&#39;</span><span class=p>,</span><span class=sa></span><span class=s1>&#39;</span><span class=s1>eggs</span><span class=s1>&#39;</span><span class=p>,</span><span class=sa></span><span class=s1>&#39;</span><span class=s1>waffles</span><span class=s1>&#39;</span><span class=p>,</span><span class=sa></span><span class=s1>&#39;</span><span class=s1>coffee</span><span class=s1>&#39;</span><span class=p>]</span>
+<span class=k>for</span> <span class=n>choice</span> <span class=ow>in</span> <span class=n>breakfastmenu</span><span class=p>:</span>
+    <span class=k>print</span><span class=p>(</span><span class=n>choice</span><span class=p>)</span>
+</code></pre></div><p>You can even use a for loop in a more compact situation, such as I did in <a href=https://github.com/victoriadrake/30-days-of-code/blob/master/day7_arrays.py>my solution</a> to HackerRank&rsquo;s <a href=https://www.hackerrank.com/challenges/30-arrays>30 Days of Code - Day 7: Arrays</a> challenge:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>arrstring</span> <span class=o>=</span> <span class=sa></span><span class=s1>&#39;</span><span class=s1> </span><span class=s1>&#39;</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=nb>str</span><span class=p>(</span><span class=n>e</span><span class=p>)</span> <span class=k>for</span> <span class=n>e</span> <span class=ow>in</span> <span class=n>arr</span><span class=p>)</span>
+</code></pre></div><p>The downside to for loops is that they can be a bit verbose, depending on how much you&rsquo;re trying to achieve. Still, for anyone learning Python or hoping to make their code as easily understood as possible, for loops are still the most straightforward choice for iterations.</p><h1 id=list-comprehensions>List comprehensions</h1><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>newlist</span> <span class=o>=</span> <span class=p>[</span><span class=n>statement</span><span class=o>/</span><span class=n>statements</span> <span class=k>for</span> <span class=n>iterating_var</span> <span class=ow>in</span> <span class=n>iterable</span><span class=p>]</span>
+</code></pre></div><p>In my opinion, list comprehensions are the most elegant of the solutions discussed in this post. Once you have a grasp of how they work, you can perform concise and effective iterations with very little code.</p><p>List comprehensions will always return a list, which may or may not be appropriate for your situation. If appropriate, however, simply defining the variable name of the list can often help you skip some steps.</p><p>For example, I can use list comprehension to quickly calculate and print tip percentage on a few bar tabs at once:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>tabs</span> <span class=o>=</span> <span class=p>[</span><span class=mf>23.60</span><span class=p>,</span> <span class=mf>42.10</span><span class=p>,</span> <span class=mf>17.50</span><span class=p>]</span>
+<span class=n>tabsplustips</span> <span class=o>=</span> <span class=p>[</span><span class=nb>round</span><span class=p>(</span><span class=n>tab</span><span class=o>*</span><span class=mf>1.15</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span> <span class=k>for</span> <span class=n>tab</span> <span class=ow>in</span> <span class=n>tabs</span><span class=p>]</span>
+<span class=k>print</span><span class=p>(</span><span class=n>tabsplustips</span><span class=p>)</span>
+
+<span class=o>&gt;&gt;</span><span class=o>&gt;</span> <span class=p>[</span><span class=mf>27.14</span><span class=p>,</span> <span class=mf>48.41</span><span class=p>,</span> <span class=mf>20.12</span><span class=p>]</span>
+</code></pre></div><p>In one concise line, we&rsquo;ve taken each tab amount, added 15% tip, rounded it to the nearest cent, and made a new list of the tabs plus the tip values.</p><p>List comprehensions can be an elegant tool, depending on the variety of statements you want to iterate through, and whether or not output to a list is useful to you. The more statements you add, the more complicated your list comprehension begins to look, especially once you get into nested list comprehensions. If your code isn&rsquo;t well annotated, it may become difficult for another reader to figure out.</p><h1 id=map>Map</h1><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=nb>map</span><span class=p>(</span><span class=n>function</span><span class=p>,</span> <span class=n>iterable</span><span class=p>)</span>
+</code></pre></div><p>Map is, in many ways, a non-idiomatic function for iteration in Python. It&rsquo;s pretty compact, which can make it easy to write improperly with a missing comma or parenthesis, and it&rsquo;s more limited than for loops or list comprehensions in its usage. Basically, it applies your <code>statement</code> (in this case, your <code>function</code>) to every instance of your defined <code>iterable</code>.</p><p>I used the map function in <a href=https://github.com/victoriadrake/simple-statistics/blob/master/weighted_mean.py>my solution</a> to HackerRank&rsquo;s <a href=https://www.hackerrank.com/challenges/s10-weighted-mean>10 Days of Statistics - Day 0: Weighted Mean</a> challenge. In this example, it&rsquo;s casting each element of <code>input()</code> (the iterable) from string representation to integer representation.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>values</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=nb>map</span><span class=p>(</span><span class=nb>int</span><span class=p>,</span> <span class=nb>input</span><span class=p>(</span><span class=p>)</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=p>)</span><span class=p>)</span><span class=p>)</span>
+<span class=n>weights</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=nb>map</span><span class=p>(</span><span class=nb>int</span><span class=p>,</span> <span class=nb>input</span><span class=p>(</span><span class=p>)</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=p>)</span><span class=p>)</span><span class=p>)</span>
+
+<span class=n>output</span> <span class=o>=</span> <span class=nb>sum</span><span class=p>(</span><span class=p>[</span><span class=n>x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>*</span> <span class=n>x</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>zip</span><span class=p>(</span><span class=n>values</span><span class=p>,</span> <span class=n>weights</span><span class=p>)</span><span class=p>]</span><span class=p>)</span> <span class=o>/</span> <span class=nb>sum</span><span class=p>(</span><span class=n>weights</span><span class=p>)</span>
+
+<span class=k>print</span><span class=p>(</span><span class=nb>round</span><span class=p>(</span><span class=n>output</span><span class=p>,</span> <span class=mi>1</span><span class=p>)</span><span class=p>)</span>
+</code></pre></div><p>It&rsquo;s worthwhile to note that map by itself returns an iterator; if it&rsquo;s a list you want, it&rsquo;s an extra step to get the list representation, as in the example above.</p><p>In truth, I&rsquo;ve had a hard time coming up with appropriate situations for the use of map over simply using a list comprehension. Aside from situations similar to the above, it seems to me to be a rather un-Pythonic way to iterate. It can be advantageous as a concise method of doing simple, sort of &lsquo;on-the-spot&rsquo; iterations; otherwise, my preference would be to use a list comprehension instead.</p><p>I hope these examples have been useful to you in your understanding of iterations with Python 3. Thanks for reading!</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/writing-efficient-django/>Writing efficient Django</a><p class=li-brief>How to use Django's views, models, and queries to build a better application.</p><p class=metadata><a class=li-tag href=/tags/coding/>coding</a>
+☕️☕️&nbsp;
+6 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/breaking-bottlenecks/>Breaking bottlenecks 🍾</a><p class=li-brief>A talk on the benefits of non-blocking functions for programs, developers, and organizations.</p><p class=metadata><a class=li-tag href=/tags/computing/>computing</a>
+☕️☕️☕️&nbsp;
+12 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/>How to code a satellite algorithm and cook paella from scratch</a><p class=li-brief>A guide to expertly tackling seemingly complicated problems that you'd rather never tackle in the first place.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
+☕️☕️&nbsp;
+7 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
+document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
