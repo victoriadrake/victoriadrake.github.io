@@ -1,39 +1,441 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>SQL injection and XSS: what white hat hackers know about trusting user input | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="SQL injection and XSS: what white hat hackers know about trusting user input - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A primer on SQL injection and cross site scripting, and how to handle user input in software development."><meta property="og:url" content="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="SQL injection and XSS: what white hat hackers know about trusting user input"><meta name=twitter:image content="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/cover.png"><meta name=twitter:description content="A primer on SQL injection and cross site scripting, and how to handle user input in software development."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/cover.png alt="cover image"></div><div class=markdown><h1>SQL injection and XSS: what white hat hackers know about trusting user input</h1><p class=subtitle>A primer on SQL injection and cross site scripting, and how to handle user input in software development.</p><p class=metadata id=date>September 2, 2019
-☕️☕️&nbsp;
-11 min read
-&nbsp;
-<a class=li-tag href=/tags/cybersecurity/>cybersecurity
-</a>&nbsp;
-<a class=li-tag href=/tags/data/>data
-</a>&nbsp;
-<a class=li-tag href=/tags/websites/>websites
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>Software developers have a lot on their minds. There are are myriad of questions to ask when it comes to creating a website or application: <em>What technologies will we use? How will the architecture be set up? What functions do we need? What will the UI look like?</em> Especially in a software market where shipping new apps seems more like a race for reputation than a well-considered process, one of the most important questions often falls to the bottom of the &ldquo;Urgent&rdquo; column: how will our product be secured?</p><p>If you&rsquo;re using a robust, open-source framework for building your product (and if one is applicable and available, why wouldn&rsquo;t you?) then some basic security concerns, like CSRF tokens and password encryption, may already be handled for you. Still, fast-moving developers would be well served to brush up on their knowledge of common threats and pitfalls, if only to avoid some embarrass
-ing rookie mistakes. Usually, the weakest point in the security of your software is <em>you.</em></p><p>I&rsquo;ve recently become more interested in information security in general, and practicing ethical hacking in particular. An ethical hacker, sometimes called &ldquo;white hat&rdquo; hacker, and sometimes just &ldquo;hacker,&rdquo; is someone who searches for possible security vulnerabilities and responsibly (privately) reports them to project owners. By contrast, a malicious or &ldquo;black hat&rdquo; hacker, also called a &ldquo;cracker,&rdquo; is someone who exploits these vulnerabilities for amusement or personal gain. Both white hat and black hat hackers might use the same tools and resources, and generally try to get into places they aren&rsquo;t supposed to be; however, white hats do this with permission, and with the intention of fortifying defences instead of destroying them. Black hats are the bad guys.</p><p>When it comes to learning how to find security vulnerabilities, it should come as no surprise that I&rsquo;ve been devouring whatever information I can get my hands on; this post is a distillation of some key areas that are specifically helpful to developers when handling user input. These lessons have been collectively gleaned from these excellent resources:</p><ul><li>The <a href=https://www.owasp.org/index.php/Main_Page>Open Web Application Security Project</a> guides</li><li>The Hacker101 playlist from <a href=https://www.youtube.com/channel/UCsgzmECky2Q9lQMWzDwMhYw/>HackerOne&rsquo;s YouTube channel</a></li><li><a href=https://leanpub.com/web-hacking-101>Web Hacking 101</a> by Peter Yaworski</li><li><a href=https://brutelogic.com.br/blog/>Brute Logic&rsquo;s blog</a></li><li>The <a href=https://www.youtube.com/channel/UC9-y-6csu5WGm29I7JiwpnA>Computerphile</a> YouTube channel</li><li>Videos featuring Jason Haddix (<a href=https://github.com/jhaddix/>@jhaddix</a>) and Tom Hudson (<a href=https://github.com/tomnomnom/>@tomnomnom</a>) (two accomplished ethical hackers with different, but both effective, methodologies)</li></ul><p>You may be familiar with the catchphrase, &ldquo;sanitize your inputs!&rdquo; However, as I hope this post demonstrates, developing an application with robust security isn&rsquo;t quite so straightforward. I suggest an alternate phrase: pay attention to your inputs. Let&rsquo;s elaborate by examining the most common attacks that take advantage of vulnerabilities in this area: SQL injection and cross site scripting.</p><h2 id=sql-injection-attacks>SQL injection attacks</h2><p>If you&rsquo;re not yet familiar with SQL (Structured Query Language) injection attacks, or SQLi, here is a great <a href="https://www.youtube.com/watch?v=_jKylhJtPmI">explain-like-I&rsquo;m-five video on SQLi</a>. You may already know of this attack from <a href=https://xkcd.com/327/>xkcd&rsquo;s Little Bobby Tables</a>. Essentially, malicious actors may be able to send SQL commands that affect your application through some input on your site, like a search box that pulls results from your database. Sites coded in PHP can be especially susceptible to these, and a successful SQL attack can be devastating for software that relies on a database (as in, your Users table is now a pot of petunias).</p><figure class=center><img src=sqli.png alt="A monitor with an SQL Select command that gets all your base"><figcaption><p>You have no chance to survive make your time.</p></figcaption></figure><p>You can test your own site to see if you&rsquo;re susceptible to this kind of attack. (Please only test sites that you own, since running SQL injections where you don&rsquo;t have permission to be doing so is, possibly, illegal in your locality; and definitely, universally, not very funny.) The following payloads can be used to test inputs:</p><ul><li><code>' OR 1='1</code> evaluates to a constant true, and when successful, returns all rows in the table.</li><li><code>' AND 0='1</code> evaluates to a constant false, and when successful, returns no rows.</li></ul><p><a href="https://www.youtube.com/watch?v=ciNHn38EyRc">This video demonstrates the above tests</a>, and does a great job of showing how impactful an SQL injection attack can be.</p><p>Thankfully, there are ways to mitigate SQL injection attacks, and they all boil down to one basic concept: don&rsquo;t trust user input.</p><h2 id=sql-injection-mitigation>SQL injection mitigation</h2><p>In order to effectively mitigate SQL injections, developers must prevent users from being able to successfully submit raw SQL commands to any part of the site.</p><p>Some frameworks will do most of the heavy lifting for you. For example, Django implements the concept of <a href=https://en.wikipedia.org/wiki/Object-relational_mapping>Object-Relational Mapping</a>, or ORM, with its use of <a href=https://docs.djangoproject.com/en/2.2/topics/db/queries/>QuerySets</a>. We can think of these as wrapper functions that help your application query the database using pre-defined methods that avoid the use of raw SQL.</p><p>Being able to use a framework, however, is never a guarantee. When dealing directly with a database, there are other methods we can use to safely abstract our SQL queries from user input, though they vary in efficacy. These are, by order of most to least preferred, and with links to relevant examples:</p><ol><li>Prepared statements with variable binding (or <a href=https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html>parameterized queries</a>),</li><li><a href=https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#defense-option-2-stored-procedures>Stored procedures</a>; and</li><li><a href=https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#defense-option-3-whitelist-input-validation>Whitelisting</a> or <a href=https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#defense-option-4-escaping-all-user-supplied-input>escaping</a> user input.</li></ol><p>If you want to implement the above techniques, the linked cheatsheets are a great starting point for digging deeper. Suffice to say, the use of these techniques to obtain data instead of using raw SQL queries helps to minimize the chances that SQL will be processed by any part of your application that takes input from users, thus mitigating SQL injection attacks.</p><p>The battle, however, is only half won&mldr;</p><h2 id=cross-site-scripting-xss-attacks>Cross Site Scripting (XSS) attacks</h2><p>If you&rsquo;re a malicious coder, JavaScript is pretty much your best friend. The right commands will do anything a legitimate user could do (and even some things they aren&rsquo;t supposed to be able to) on a web page, sometimes without any interaction on the part of an actual user. <a href=https://en.wikipedia.org/wiki/Cross-site_scripting>Cross Site Scripting</a> attacks, or XSS, occur when JavaScript code is injected into a web page and changes that page&rsquo;s behavior. Its effects can range from prank nuisance occurrences to more severe authentication bypasses or credential stealing. <a href=https://blogs.apache.org/infra/entry/apache_org_04_09_2010>This incident report from Apache in 2010</a> is a good example of how XSS can be chained in a larger attack to take over accounts and machines.</p><figure><img src=xss.png alt="An HTML dance party with a little JS cutting in"><figcaption><p>The annual DOM dance-off receives an unexpected guest);</p></figcaption></figure><p>XSS can occur on the server or on the client side, and generally comes in three flavors: DOM (<a href=https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction>Document Object Model</a>) based, stored, and reflected XSS. The differences amount to where the attack payload is injected into the application.</p><h3 id=dom-based-xss>DOM based XSS</h3><p><a href=https://www.owasp.org/index.php/DOM_Based_XSS>DOM based XSS</a> occurs when a JavaScript payload affects the structure, behavior, or content of the web page the user has loaded in their browser. These are most commonly executed through modified URLs, such as in <a href=https://www.owasp.org/index.php/Phishing>phishing emails</a>.</p><p>To see how easy it would be for injected JavaScript to manipulate a page, we can create a working example with an HTML web page. Try creating a file on your local system called <code>xss-test.html</code> (or whatever you like) with the following HTML and JavaScript code:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>html</span><span class=p></span><span class=p>&gt;</span>
-    <span class=p>&lt;</span><span class=nt>head</span><span class=p></span><span class=p>&gt;</span>
-        <span class=p>&lt;</span><span class=nt>title</span><span class=p></span><span class=p>&gt;</span>My XSS Example<span class=p>&lt;</span><span class=p>/</span><span class=nt>title</span><span class=p>&gt;</span>
-    <span class=p>&lt;</span><span class=p>/</span><span class=nt>head</span><span class=p>&gt;</span>
-    <span class=p>&lt;</span><span class=nt>body</span><span class=p></span><span class=p>&gt;</span>
-        <span class=p>&lt;</span><span class=nt>h1</span> <span class=na>id</span><span class=o>=</span><span class=s>&#34;greeting&#34;</span><span class=p></span><span class=p>&gt;</span>Hello there!<span class=p>&lt;</span><span class=p>/</span><span class=nt>h1</span><span class=p>&gt;</span>
-            <span class=p>&lt;</span><span class=nt>script</span><span class=p></span><span class=p>&gt;</span>
-                <span class=kd>var</span> <span class=nx>name</span> <span class=o>=</span> <span class=k>new</span> <span class=nx>URLSearchParams</span><span class=p>(</span><span class=nb>document</span><span class=p>.</span><span class=nx>location</span><span class=p>.</span><span class=nx>search</span><span class=p>)</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;name&#39;</span><span class=p>)</span><span class=p>;</span>
-                <span class=k>if</span> <span class=p>(</span><span class=nx>name</span> <span class=o>!==</span> <span class=s1>&#39;null&#39;</span><span class=p>)</span> <span class=p>{</span>
-                    <span class=nb>document</span><span class=p>.</span><span class=nx>getElementById</span><span class=p>(</span><span class=s1>&#39;greeting&#39;</span><span class=p>)</span><span class=p>.</span><span class=nx>innerHTML</span> <span class=o>=</span> <span class=s1>&#39;Hello &#39;</span> <span class=o>+</span> <span class=nx>name</span> <span class=o>+</span> <span class=s1>&#39;!&#39;</span><span class=p>;</span>
-                <span class=p>}</span>
-            <span class=p>&lt;</span><span class=p>/</span><span class=nt>script</span><span class=p>&gt;</span>
-        <span class=p>&lt;</span><span class=p>/</span><span class=nt>h1</span><span class=p>&gt;</span>
-<span class=p>&lt;</span><span class=p>/</span><span class=nt>html</span><span class=p>&gt;</span>
-</code></pre></div><p>This web page will display the title &ldquo;Hello there!&rdquo; unless it receives a <a href=https://en.wikipedia.org/wiki/Query_string>URL parameter from a query string</a> with a value for <code>name</code>. To see the script work, open the page in a browser with an appended URL parameter, like so:</p><p><code>file:///path/to/file/xss-test.html?name=Victoria</code></p><p>Fun, right? Our insecure (in the safety sense, not the emotional one) page takes the URL parameter value for <code>name</code> and displays it in the DOM. The page is expecting the value to be a nice friendly string, but what if we change it to something else? Since the page is owned by us and only exists on our local system, we can test it all we like. What happens if we change the <code>name</code> parameter to, say, <code>&lt;img+src+onerror=alert("pwned")></code>?</p><p><img src=https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/pwned.png#screenshot alt="A screenshot of the XSS page example"></p><p>This is just one example, largely based on one from <a href=https://brutelogic.com.br/blog/dom-based-xss-the-3-sinks/>Brute&rsquo;s post</a>, that demonstrates how an XSS attack could be executed. Funny pop-up alerts may be amusing, but JavaScript can do a lot of harm, including helping malicious attackers steal passwords and personal information.</p><h3 id=stored-and-reflected-xss>Stored and reflected XSS</h3><p><a href=https://en.wikipedia.org/wiki/Cross-site_scripting#Persistent_(or_stored)>Stored XSS</a> occurs when the attack payload is stored on the server, such as in a database. The attack affects a victim whenever that stored data is retrieved and rendered in the browser. For example, instead of using a URL query string, an attacker might update their profile page on a social site to include a hidden script in, say, their &ldquo;About Me&rdquo; section. The script, improperly stored on the site&rsquo;s server, would successfully execute at a later time when another user views the attacker&rsquo;s profile.</p><p>One of the most famous examples of this is the <a href=https://en.wikipedia.org/wiki/Samy_(computer_worm)>Samy worm</a> that all but took over MySpace in 2005. It propagated by sending HTTP requests that replicated it onto a victim&rsquo;s profile page whenever an infected profile was viewed. Within just 20 hours, it had spread to over a million users.</p><p><a href=https://en.wikipedia.org/wiki/Cross-site_scripting#Non-persistent_(reflected)>Reflected XSS</a> similarly occurs when the injected payload travels to the server, however, the malicious code does not end up stored in a database. It is instead immediately returned to the browser by the web application. An attack like this might be executed by luring the victim to click a malicious link that sends a request to the vulnerable website&rsquo;s server. The server would then send a response to the attacker as well as the victim, which may result in the attacker being able to obtain passwords, or perpetrate actions that appear to originate from the victim.</p><h2 id=xss-attack-mitigation>XSS attack mitigation</h2><p>In all of these cases, XSS attacks can be mitigated with two key strategies: validating form fields, and avoiding the direct injection of user input on the web page.</p><h3 id=validating-form-fields>Validating form fields</h3><p>Frameworks can again help us out when it comes to making sure that user-submitted forms are on the up-and-up. One example is <a href=https://docs.djangoproject.com/en/2.2/ref/forms/fields/#built-in-field-classes>Django&rsquo;s built-in <code>Field</code> classes</a>, which provide fields that validate to some commonly used types and also specify sane defaults. Django&rsquo;s <code>EmailField</code>, for instance, uses a set of rules to determine if the input provided is a valid email. If the submitted string has characters in it that are not typically present in email addresses, or if it doesn&rsquo;t imitate the common format of an email address, then Django won&rsquo;t consider the field valid and the form will not be submitted.</p><p>If relying on a framework isn&rsquo;t an option, we can implement our own input validation. This can be accomplished with a few different techniques, including <a href=https://en.wikipedia.org/wiki/Type_conversion>type conversion</a>, for example, ensuring that a number is of type <code>int()</code>; checking minimum and maximum range values for numbers and lengths for strings; using a pre-defined array of choices that avoids arbitrary input, for example, months of the year; and checking data against strict <a href=https://en.wikipedia.org/wiki/Regular_expression>regular expressions</a>.</p><p>Thankfully, we needn&rsquo;t start from scratch. Open source resources are available to help, such as the <a href=https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository>OWASP Validation Regex Repository</a>, which provides patterns to match against for some common forms of data. Many programming languages offer validation libraries specific to their syntax, and we can find <a href="https://github.com/search?q=validation+library">plenty of these on GitHub</a>. Additionally, the <a href=https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet>XSS Filter Evasion Cheat Sheet</a> has a couple suggestions for test payloads we can use to test our existing applications.</p><p>While it may seem tedious, properly implemented input validation can protect our application from being susceptible to XSS.</p><h3 id=avoiding-direct-injection>Avoiding direct injection</h3><p>Elements of an application that directly return user input to the browser may not, on a casual inspection, be obvious. We can determine areas of our application that may be at risk by exploring a few questions:</p><ul><li>How does data flow through our application?</li><li>What does a user expect to happen when they interact with this input?</li><li>Where on our page does data appear? Does it become embedded in a string or an attribute?</li></ul><p>Here are some sample payloads that we can play with in order to test inputs on our site (again, only our own site!) courtesy of <a href=https://www.hacker101.com/>Hacker101</a>. The successful execution of any of these samples can indicate a possible XSS vulnerability due to direct injection.</p><ul><li><code>">&lt;h1>test&lt;/h1></code></li><li><code>'+alert(1)+'</code></li><li><code>"onmouserover="alert(1)</code></li><li><code>http://"onmouseover="alert(1)</code></li></ul><p>As a general rule, if you are able to design around directly injecting input, do so. Alternatively, be sure to completely understand the effect of the methods you choose; for example, using <code>innerText</code> instead of <code>innerHTML</code> in JavaScript will ensure that content will be set as plain text instead of (potentially vulnerable) HTML.</p><h2 id=pay-attention-to-your-inputs>Pay attention to your inputs</h2><p>Software developers are at a marked disadvantage when it comes to competing with black hat, or malicious, hackers. For all the work we do to secure each and every input that could potentially compromise our application, an attacker need only find the one we missed. It&rsquo;s like installing deadbolts on all the doors, but leaving a window open!</p><p>By learning to think along the same lines as an attacker, however, we can better prepare our software to stand up against bad actors. Exciting as it may be to ship features as quickly as possible, we&rsquo;ll avoid racking up a lot of security debt if we take the time beforehand to think through our application&rsquo;s flow, follow the data, and pay attention to our inputs.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/>Hackers are Googling your plain text passwords: preventing sensitive data exposure</a><p class=li-brief>Why sensitive data controls need to be established long before you think you need them, as demonstrated by Google dorking.</p><p class=metadata><a class=li-tag href=/tags/cybersecurity/>cybersecurity</a>
-☕️☕️&nbsp;
-8 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/>A cron job that could save you from a ransomware attack</a><p class=li-brief>How a simple scheduled job can help you quickly recover from ransomware.</p><p class=metadata><a class=li-tag href=/tags/cybersecurity/>cybersecurity</a>
-☕️☕️&nbsp;
-7 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/>Publishing GitHub event data with GitHub Actions and Pages</a><p class=li-brief>A guide to overcoming the GitHub event data horizon with a little command-line magic.</p><p class=metadata><a class=li-tag href=/tags/data/>data</a>
-☕️☕️&nbsp;
-8 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
-document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
+<title>
+    SQL injection and XSS: what white hat hackers know about trusting user input | victoria.dev
+</title>
+
+
+    <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+    <meta property="og:title" content="SQL injection and XSS: what white hat hackers know about trusting user input - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="A primer on SQL injection and cross site scripting, and how to handle user input in software development." />
+<meta property="og:url" content="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/cover.png"/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="SQL injection and XSS: what white hat hackers know about trusting user input" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/cover.png"/>
+
+<meta name="twitter:description"
+    content="A primer on SQL injection and cross site scripting, and how to handle user input in software development." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.37d2c032e134e0af3a44f3851230a98e8bb25db2802e3e64adc927ed2107dcba.css" integrity="sha256-N9LAMuE04K86RPOFEjCpjouyXbKALj5krckn7SEH3Lo=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/cover.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        SQL injection and XSS: what white hat hackers know about trusting user input
+    </h1>
+    
+    <p class="subtitle">A primer on SQL injection and cross site scripting, and how to handle user input in software development.</p>
+    <p class="metadata" id="date">
+        September 2, 2019
+        ☕️☕️&nbsp;
+        11 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/cybersecurity/">
+            cybersecurity
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/data/">
+            data
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/websites/">
+            websites
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>Software developers have a lot on their minds. There are are myriad of questions to ask when it comes to creating a website or application: <em>What technologies will we use? How will the architecture be set up? What functions do we need? What will the UI look like?</em> Especially in a software market where shipping new apps seems more like a race for reputation than a well-considered process, one of the most important questions often falls to the bottom of the &ldquo;Urgent&rdquo; column: how will our product be secured?</p>
+<p>If you&rsquo;re using a robust, open-source framework for building your product (and if one is applicable and available, why wouldn&rsquo;t you?) then some basic security concerns, like CSRF tokens and password encryption, may already be handled for you. Still, fast-moving developers would be well served to brush up on their knowledge of common threats and pitfalls, if only to avoid some embarrass
+ing rookie mistakes. Usually, the weakest point in the security of your software is <em>you.</em></p>
+<p>I&rsquo;ve recently become more interested in information security in general, and practicing ethical hacking in particular. An ethical hacker, sometimes called &ldquo;white hat&rdquo; hacker, and sometimes just &ldquo;hacker,&rdquo; is someone who searches for possible security vulnerabilities and responsibly (privately) reports them to project owners. By contrast, a malicious or &ldquo;black hat&rdquo; hacker, also called a &ldquo;cracker,&rdquo; is someone who exploits these vulnerabilities for amusement or personal gain. Both white hat and black hat hackers might use the same tools and resources, and generally try to get into places they aren&rsquo;t supposed to be; however, white hats do this with permission, and with the intention of fortifying defences instead of destroying them. Black hats are the bad guys.</p>
+<p>When it comes to learning how to find security vulnerabilities, it should come as no surprise that I&rsquo;ve been devouring whatever information I can get my hands on; this post is a distillation of some key areas that are specifically helpful to developers when handling user input. These lessons have been collectively gleaned from these excellent resources:</p>
+<ul>
+<li>The <a href="https://www.owasp.org/index.php/Main_Page">Open Web Application Security Project</a> guides</li>
+<li>The Hacker101 playlist from <a href="https://www.youtube.com/channel/UCsgzmECky2Q9lQMWzDwMhYw/">HackerOne&rsquo;s YouTube channel</a></li>
+<li><a href="https://leanpub.com/web-hacking-101">Web Hacking 101</a> by Peter Yaworski</li>
+<li><a href="https://brutelogic.com.br/blog/">Brute Logic&rsquo;s blog</a></li>
+<li>The <a href="https://www.youtube.com/channel/UC9-y-6csu5WGm29I7JiwpnA">Computerphile</a> YouTube channel</li>
+<li>Videos featuring Jason Haddix (<a href="https://github.com/jhaddix/">@jhaddix</a>) and Tom Hudson (<a href="https://github.com/tomnomnom/">@tomnomnom</a>) (two accomplished ethical hackers with different, but both effective, methodologies)</li>
+</ul>
+<p>You may be familiar with the catchphrase, &ldquo;sanitize your inputs!&rdquo; However, as I hope this post demonstrates, developing an application with robust security isn&rsquo;t quite so straightforward. I suggest an alternate phrase: pay attention to your inputs. Let&rsquo;s elaborate by examining the most common attacks that take advantage of vulnerabilities in this area: SQL injection and cross site scripting.</p>
+
+<h2 id="sql-injection-attacks" class="anchor-link"><a href="#sql-injection-attacks">SQL injection attacks</a></h2>
+<p>If you&rsquo;re not yet familiar with SQL (Structured Query Language) injection attacks, or SQLi, here is a great <a href="https://www.youtube.com/watch?v=_jKylhJtPmI">explain-like-I&rsquo;m-five video on SQLi</a>. You may already know of this attack from <a href="https://xkcd.com/327/">xkcd&rsquo;s Little Bobby Tables</a>. Essentially, malicious actors may be able to send SQL commands that affect your application through some input on your site, like a search box that pulls results from your database. Sites coded in PHP can be especially susceptible to these, and a successful SQL attack can be devastating for software that relies on a database (as in, your Users table is now a pot of petunias).</p>
+<figure class="center">
+    <img src="sqli.png"
+         alt="A monitor with an SQL Select command that gets all your base"/> <figcaption>
+            <p>You have no chance to survive make your time.</p>
+        </figcaption>
+</figure>
+
+<p>You can test your own site to see if you&rsquo;re susceptible to this kind of attack. (Please only test sites that you own, since running SQL injections where you don&rsquo;t have permission to be doing so is, possibly, illegal in your locality; and definitely, universally, not very funny.) The following payloads can be used to test inputs:</p>
+<ul>
+<li><code>' OR 1='1</code> evaluates to a constant true, and when successful, returns all rows in the table.</li>
+<li><code>' AND 0='1</code> evaluates to a constant false, and when successful, returns no rows.</li>
+</ul>
+<p><a href="https://www.youtube.com/watch?v=ciNHn38EyRc">This video demonstrates the above tests</a>, and does a great job of showing how impactful an SQL injection attack can be.</p>
+<p>Thankfully, there are ways to mitigate SQL injection attacks, and they all boil down to one basic concept: don&rsquo;t trust user input.</p>
+
+<h2 id="sql-injection-mitigation" class="anchor-link"><a href="#sql-injection-mitigation">SQL injection mitigation</a></h2>
+<p>In order to effectively mitigate SQL injections, developers must prevent users from being able to successfully submit raw SQL commands to any part of the site.</p>
+<p>Some frameworks will do most of the heavy lifting for you. For example, Django implements the concept of <a href="https://en.wikipedia.org/wiki/Object-relational_mapping">Object-Relational Mapping</a>, or ORM, with its use of <a href="https://docs.djangoproject.com/en/2.2/topics/db/queries/">QuerySets</a>. We can think of these as wrapper functions that help your application query the database using pre-defined methods that avoid the use of raw SQL.</p>
+<p>Being able to use a framework, however, is never a guarantee. When dealing directly with a database, there are other methods we can use to safely abstract our SQL queries from user input, though they vary in efficacy. These are, by order of most to least preferred, and with links to relevant examples:</p>
+<ol>
+<li>Prepared statements with variable binding (or <a href="https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html">parameterized queries</a>),</li>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#defense-option-2-stored-procedures">Stored procedures</a>; and</li>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#defense-option-3-whitelist-input-validation">Whitelisting</a> or <a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#defense-option-4-escaping-all-user-supplied-input">escaping</a> user input.</li>
+</ol>
+<p>If you want to implement the above techniques, the linked cheatsheets are a great starting point for digging deeper. Suffice to say, the use of these techniques to obtain data instead of using raw SQL queries helps to minimize the chances that SQL will be processed by any part of your application that takes input from users, thus mitigating SQL injection attacks.</p>
+<p>The battle, however, is only half won&hellip;</p>
+
+<h2 id="cross-site-scripting-xss-attacks" class="anchor-link"><a href="#cross-site-scripting-xss-attacks">Cross Site Scripting (XSS) attacks</a></h2>
+<p>If you&rsquo;re a malicious coder, JavaScript is pretty much your best friend. The right commands will do anything a legitimate user could do (and even some things they aren&rsquo;t supposed to be able to) on a web page, sometimes without any interaction on the part of an actual user. <a href="https://en.wikipedia.org/wiki/Cross-site_scripting">Cross Site Scripting</a> attacks, or XSS, occur when JavaScript code is injected into a web page and changes that page&rsquo;s behavior. Its effects can range from prank nuisance occurrences to more severe authentication bypasses or credential stealing. <a href="https://blogs.apache.org/infra/entry/apache_org_04_09_2010">This incident report from Apache in 2010</a> is a good example of how XSS can be chained in a larger attack to take over accounts and machines.</p>
+<figure>
+    <img src="xss.png"
+         alt="An HTML dance party with a little JS cutting in"/> <figcaption>
+            <p>The annual DOM dance-off receives an unexpected guest);</p>
+        </figcaption>
+</figure>
+
+<p>XSS can occur on the server or on the client side, and generally comes in three flavors: DOM (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction">Document Object Model</a>) based, stored, and reflected XSS. The differences amount to where the attack payload is injected into the application.</p>
+
+<h3 id="dom-based-xss" class="anchor-link"><a href="#dom-based-xss">DOM based XSS</a></h3>
+<p><a href="https://www.owasp.org/index.php/DOM_Based_XSS">DOM based XSS</a> occurs when a JavaScript payload affects the structure, behavior, or content of the web page the user has loaded in their browser. These are most commonly executed through modified URLs, such as in <a href="https://www.owasp.org/index.php/Phishing">phishing emails</a>.</p>
+<p>To see how easy it would be for injected JavaScript to manipulate a page, we can create a working example with an HTML web page. Try creating a file on your local system called <code>xss-test.html</code> (or whatever you like) with the following HTML and JavaScript code:</p>
+<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>My XSS Example<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">h1</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;greeting&#34;</span><span class="p">&gt;</span>Hello there!<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+                <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">URLSearchParams</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">search</span><span class="p">).</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">name</span> <span class="o">!==</span> <span class="s1">&#39;null&#39;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;greeting&#39;</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s1">&#39;Hello &#39;</span> <span class="o">+</span> <span class="nx">name</span> <span class="o">+</span> <span class="s1">&#39;!&#39;</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div><p>This web page will display the title &ldquo;Hello there!&rdquo; unless it receives a <a href="https://en.wikipedia.org/wiki/Query_string">URL parameter from a query string</a> with a value for <code>name</code>. To see the script work, open the page in a browser with an appended URL parameter, like so:</p>
+<p><code>file:///path/to/file/xss-test.html?name=Victoria</code></p>
+<p>Fun, right? Our insecure (in the safety sense, not the emotional one) page takes the URL parameter value for <code>name</code> and displays it in the DOM. The page is expecting the value to be a nice friendly string, but what if we change it to something else? Since the page is owned by us and only exists on our local system, we can test it all we like. What happens if we change the <code>name</code> parameter to, say, <code>&lt;img+src+onerror=alert(&quot;pwned&quot;)&gt;</code>?</p>
+<p>
+
+<img src="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/pwned.png#screenshot" alt="A screenshot of the XSS page example"  />
+</p>
+<p>This is just one example, largely based on one from <a href="https://brutelogic.com.br/blog/dom-based-xss-the-3-sinks/">Brute&rsquo;s post</a>, that demonstrates how an XSS attack could be executed. Funny pop-up alerts may be amusing, but JavaScript can do a lot of harm, including helping malicious attackers steal passwords and personal information.</p>
+
+<h3 id="stored-and-reflected-xss" class="anchor-link"><a href="#stored-and-reflected-xss">Stored and reflected XSS</a></h3>
+<p><a href="https://en.wikipedia.org/wiki/Cross-site_scripting#Persistent_(or_stored)">Stored XSS</a> occurs when the attack payload is stored on the server, such as in a database. The attack affects a victim whenever that stored data is retrieved and rendered in the browser. For example, instead of using a URL query string, an attacker might update their profile page on a social site to include a hidden script in, say, their &ldquo;About Me&rdquo; section. The script, improperly stored on the site&rsquo;s server, would successfully execute at a later time when another user views the attacker&rsquo;s profile.</p>
+<p>One of the most famous examples of this is the <a href="https://en.wikipedia.org/wiki/Samy_(computer_worm)">Samy worm</a> that all but took over MySpace in 2005. It propagated by sending HTTP requests that replicated it onto a victim&rsquo;s profile page whenever an infected profile was viewed. Within just 20 hours, it had spread to over a million users.</p>
+<p><a href="https://en.wikipedia.org/wiki/Cross-site_scripting#Non-persistent_(reflected)">Reflected XSS</a> similarly occurs when the injected payload travels to the server, however, the malicious code does not end up stored in a database. It is instead immediately returned to the browser by the web application. An attack like this might be executed by luring the victim to click a malicious link that sends a request to the vulnerable website&rsquo;s server. The server would then send a response to the attacker as well as the victim, which may result in the attacker being able to obtain passwords, or perpetrate actions that appear to originate from the victim.</p>
+
+<h2 id="xss-attack-mitigation" class="anchor-link"><a href="#xss-attack-mitigation">XSS attack mitigation</a></h2>
+<p>In all of these cases, XSS attacks can be mitigated with two key strategies: validating form fields, and avoiding the direct injection of user input on the web page.</p>
+
+<h3 id="validating-form-fields" class="anchor-link"><a href="#validating-form-fields">Validating form fields</a></h3>
+<p>Frameworks can again help us out when it comes to making sure that user-submitted forms are on the up-and-up. One example is <a href="https://docs.djangoproject.com/en/2.2/ref/forms/fields/#built-in-field-classes">Django&rsquo;s built-in <code>Field</code> classes</a>, which provide fields that validate to some commonly used types and also specify sane defaults. Django&rsquo;s <code>EmailField</code>, for instance, uses a set of rules to determine if the input provided is a valid email. If the submitted string has characters in it that are not typically present in email addresses, or if it doesn&rsquo;t imitate the common format of an email address, then Django won&rsquo;t consider the field valid and the form will not be submitted.</p>
+<p>If relying on a framework isn&rsquo;t an option, we can implement our own input validation. This can be accomplished with a few different techniques, including <a href="https://en.wikipedia.org/wiki/Type_conversion">type conversion</a>, for example, ensuring that a number is of type <code>int()</code>; checking minimum and maximum range values for numbers and lengths for strings; using a pre-defined array of choices that avoids arbitrary input, for example, months of the year; and checking data against strict <a href="https://en.wikipedia.org/wiki/Regular_expression">regular expressions</a>.</p>
+<p>Thankfully, we needn&rsquo;t start from scratch. Open source resources are available to help, such as the <a href="https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository">OWASP Validation Regex Repository</a>, which provides patterns to match against for some common forms of data. Many programming languages offer validation libraries specific to their syntax, and we can find <a href="https://github.com/search?q=validation+library">plenty of these on GitHub</a>. Additionally, the <a href="https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet">XSS Filter Evasion Cheat Sheet</a> has a couple suggestions for test payloads we can use to test our existing applications.</p>
+<p>While it may seem tedious, properly implemented input validation can protect our application from being susceptible to XSS.</p>
+
+<h3 id="avoiding-direct-injection" class="anchor-link"><a href="#avoiding-direct-injection">Avoiding direct injection</a></h3>
+<p>Elements of an application that directly return user input to the browser may not, on a casual inspection, be obvious. We can determine areas of our application that may be at risk by exploring a few questions:</p>
+<ul>
+<li>How does data flow through our application?</li>
+<li>What does a user expect to happen when they interact with this input?</li>
+<li>Where on our page does data appear? Does it become embedded in a string or an attribute?</li>
+</ul>
+<p>Here are some sample payloads that we can play with in order to test inputs on our site (again, only our own site!) courtesy of <a href="https://www.hacker101.com/">Hacker101</a>. The successful execution of any of these samples can indicate a possible XSS vulnerability due to direct injection.</p>
+<ul>
+<li><code>&quot;&gt;&lt;h1&gt;test&lt;/h1&gt;</code></li>
+<li><code>'+alert(1)+'</code></li>
+<li><code>&quot;onmouserover=&quot;alert(1)</code></li>
+<li><code>http://&quot;onmouseover=&quot;alert(1)</code></li>
+</ul>
+<p>As a general rule, if you are able to design around directly injecting input, do so. Alternatively, be sure to completely understand the effect of the methods you choose; for example, using <code>innerText</code> instead of <code>innerHTML</code> in JavaScript will ensure that content will be set as plain text instead of (potentially vulnerable) HTML.</p>
+
+<h2 id="pay-attention-to-your-inputs" class="anchor-link"><a href="#pay-attention-to-your-inputs">Pay attention to your inputs</a></h2>
+<p>Software developers are at a marked disadvantage when it comes to competing with black hat, or malicious, hackers. For all the work we do to secure each and every input that could potentially compromise our application, an attacker need only find the one we missed. It&rsquo;s like installing deadbolts on all the doors, but leaving a window open!</p>
+<p>By learning to think along the same lines as an attacker, however, we can better prepare our software to stand up against bad actors. Exciting as it may be to ship features as quickly as possible, we&rsquo;ll avoid racking up a lot of security debt if we take the time beforehand to think through our application&rsquo;s flow, follow the data, and pay attention to our inputs.</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/">Hackers are Googling your plain text passwords: preventing sensitive data exposure</a>
+        <p class="li-brief">
+            Why sensitive data controls need to be established long before you think you need them, as demonstrated by Google dorking.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/cybersecurity/">cybersecurity</a>
+            
+            ☕️☕️&nbsp;
+            8 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/">A cron job that could save you from a ransomware attack</a>
+        <p class="li-brief">
+            How a simple scheduled job can help you quickly recover from ransomware.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/cybersecurity/">cybersecurity</a>
+            
+            ☕️☕️&nbsp;
+            7 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/">Publishing GitHub event data with GitHub Actions and Pages</a>
+        <p class="li-brief">
+            A guide to overcoming the GitHub event data horizon with a little command-line magic.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/data/">data</a>
+            
+            ☕️☕️&nbsp;
+            8 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>

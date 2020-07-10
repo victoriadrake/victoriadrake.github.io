@@ -1,63 +1,403 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education."><title>Why I'm automatically deleting my old tweets using AWS Lambda | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Why I'm automatically deleting my old tweets using AWS Lambda - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free."><meta property="og:url" content="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/ephemeral.jpg"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Why I'm automatically deleting my old tweets using AWS Lambda"><meta name=twitter:image content="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/ephemeral.jpg"><meta name=twitter:description content="From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free."><link rel="shortcut icon" href=/img/logo.ico><link rel=stylesheet href=/css/main.min.0b87a409f53cbfbdb4ec5068e3e24320e7f7f690331bd1b4d0b4a058c421dbad.css integrity="sha256-C4ekCfU8v7207FBo4+JDIOf39pAzG9G00LSgWMQh260=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><img id=up alt="site logo" src=/img/logo.png></div></div><div class=container><div id=images><img src=https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/ephemeral.jpg alt="cover image"></div><div class=markdown><h1>Why I'm automatically deleting my old tweets using AWS Lambda</h1><p class=subtitle>From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p><p class=metadata id=date>April 12, 2018
-☕️☕️&nbsp;
-7 min read
-&nbsp;
-<a class=li-tag href=/tags/life/>life
-</a>&nbsp;
-<a class=li-tag href=/tags/aws/>aws
-</a>&nbsp;
-<a class=li-tag href=/tags/go/>go
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p><p><a href=/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/#ephemeral-tweets><em>Click here to skip to the code part.</em></a></p><h1 id=stuff-and-opinions>Stuff and opinions</h1><p>I&rsquo;ve only been a one-bag nomad for a little over a year and a half. Before that, I lived as most people do in an apartment or a house. I owned furniture, more clothing than I strictly needed, and enough &ldquo;stuff&rdquo; to fill at least a few moving boxes. If I went to live somewhere else, moving for school or family or work, I packed up all my things and brought them with me. Over the years, I accumulated more and more stuff.</p><p>Adopting what many would call a minimalist lifestyle has rapidly changed a lot of my longstanding views. Giving away all my stuff (an idea I once thought to be interesting in principle but practically a little bit ridiculous) has become normal. It&rsquo;s normal for me, now, to not own things that I don&rsquo;t use on a regular basis. I don&rsquo;t keep wall shelves packed with old books or dishes or clothing or childhood toys because those items aren&rsquo;t relevant to me anymore. I just keep fond memories, instead.</p><p>Imagine, for a moment, that I still lived in a house. Imagine that in that house, on the fridge, is a drawing I made when I was six-years-old. In the bottom right corner of that drawing scribbled in green crayon are the words &ldquo;broccoli is dumb - Victoria, Age 6.&rdquo;</p><p>If you were in my house and saw that drawing on the fridge, would you assume that the statement &ldquo;broccoli is dumb&rdquo; comprised an accurate and current account of my opinions on broccoli? Of course not. I was six when I wrote that. I&rsquo;ve had plenty of time to change my mind.</p><h1 id=social-media-isnt-social>Social media isn&rsquo;t social</h1><p>I have a friend whom I&rsquo;ve known since we were both in kindergarten. We went through grade school together, then spoke to and saw each other on infrequent occasions across the years. We&rsquo;re both adults now. Sometimes when we chat, we&rsquo;ll recall some amusing memory from when we were younger. The nature of memory being what it is, I have no illusion that what we recall is recounted with much accuracy. Our impressions of things that happened - mistakes we made and moments of victory alike - are coloured by the experiences we&rsquo;ve had since then, and all the things we&rsquo;ve learned. An awkward moment at a school colleague&rsquo;s birthday party becomes an example of a child learning to socialize, instead of the world-ending moment of embarrassment it probably felt like at the time.</p><p>This is how memory works. In a sense, it gets updated, as well it should. People living in small communities remember things that their neighbour did many years ago, but recall them in the context of who their neighbour is now, and what their current relationship is like. This re-colouring of history is an important part of how people <a href=https://www.smithsonianmag.com/science-nature/how-our-brains-make-memories-14466850/>heal</a>, <a href=http://news.feinberg.northwestern.edu/2014/02/memory_rewrite/>make good decisions</a>, and <a href=https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3709095/>socialize</a>.</p><p>Social media does not do this. Your perfectly preserved tweet from five days or five years ago can be recalled with absolute accuracy. For most people, this is not particularly worrying. We tend to tweet about pretty mundane things - things that pop into mind when we&rsquo;re bored and want someone to notice us. Individually, usually, our old tweets are pretty insignificant. In aggregate, however, they paint a pretty complete picture of a person&rsquo;s random, unintentionally telling thoughts. This is the problem.</p><p>The assumption made of things written in social media and on Twitter specifically is a very different assumption than you might make about someone&rsquo;s notepad scribble from last week. I&rsquo;m not endeavoring to speculate why - I&rsquo;ve just seen enough cases of someone getting publicly flogged for something they posted years ago to know that it does happen. This is weird. If you wouldn&rsquo;t assume that a notepad scribble from last week or a crayon drawing from decades ago reflects the essence of who someone is <em>now,</em> why would you assume that an old tweet does?</p><p>You are not the same person you were last month - you&rsquo;ve seen things, read things, understood and learned things that have, in some small way, changed you. While a person may have the same sense of self and identity through most of their life, even this grows and changes over the years. We change our opinions, our desires, our habits. We are not stagnant beings, and we should not let ourselves be represented as such, however unintentionally.</p><h1 id=ephemeral-tweets>Ephemeral tweets</h1><p>If you look at my Twitter profile page today, you&rsquo;ll see fewer tweets there than you have fingers (I hope). I&rsquo;m using <a href=https://github.com/victoriadrake/ephemeral>ephemeral</a> - a lightweight utility I wrote for use on <a href=https://aws.amazon.com/lambda/>AWS Lambda</a> - to delete all my tweets older than a few days. I&rsquo;m doing this for the same reason that I don&rsquo;t hang on to stuff that I no longer use - that stuff isn&rsquo;t relevant to me anymore. It doesn&rsquo;t represent me, either.</p><p>The code that makes up ephemeral is written in Go. AWS Lambda creates an environment for each Lambda function, so ephemeral utilizes environment variables for your private Twitter API keys and the maximum age of the tweets you want to keep, represented in hours, like <code>72h</code>.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>var</span> <span class=p>(</span>
-	<span class=nx>consumerKey</span>       <span class=p>=</span> <span class=nf>getenv</span><span class=p>(</span><span class=s>&#34;TWITTER_CONSUMER_KEY&#34;</span><span class=p>)</span>
-	<span class=nx>consumerSecret</span>    <span class=p>=</span> <span class=nf>getenv</span><span class=p>(</span><span class=s>&#34;TWITTER_CONSUMER_SECRET&#34;</span><span class=p>)</span>
-	<span class=nx>accessToken</span>       <span class=p>=</span> <span class=nf>getenv</span><span class=p>(</span><span class=s>&#34;TWITTER_ACCESS_TOKEN&#34;</span><span class=p>)</span>
-	<span class=nx>accessTokenSecret</span> <span class=p>=</span> <span class=nf>getenv</span><span class=p>(</span><span class=s>&#34;TWITTER_ACCESS_TOKEN_SECRET&#34;</span><span class=p>)</span>
-	<span class=nx>maxTweetAge</span>       <span class=p>=</span> <span class=nf>getenv</span><span class=p>(</span><span class=s>&#34;MAX_TWEET_AGE&#34;</span><span class=p>)</span>
-	<span class=nx>logger</span>            <span class=p>=</span> <span class=nx>log</span><span class=p>.</span><span class=nf>New</span><span class=p>(</span><span class=p>)</span>
-<span class=p>)</span>
+<!DOCTYPE html>
+<html lang="en-us">
 
-<span class=kd>func</span> <span class=nf>getenv</span><span class=p>(</span><span class=nx>name</span> <span class=kt>string</span><span class=p>)</span> <span class=kt>string</span> <span class=p>{</span>
-	<span class=nx>v</span> <span class=o>:=</span> <span class=nx>os</span><span class=p>.</span><span class=nf>Getenv</span><span class=p>(</span><span class=nx>name</span><span class=p>)</span>
-	<span class=k>if</span> <span class=nx>v</span> <span class=o>==</span> <span class=s>&#34;&#34;</span> <span class=p>{</span>
-		<span class=nb>panic</span><span class=p>(</span><span class=s>&#34;missing required environment variable &#34;</span> <span class=o>+</span> <span class=nx>name</span><span class=p>)</span>
-	<span class=p>}</span>
-	<span class=k>return</span> <span class=nx>v</span>
-<span class=p>}</span>
-</code></pre></div><p>The program uses the <a href=https://github.com/ChimeraCoder/anaconda>anaconda</a> library. It fetches your timeline up to the Twitter API&rsquo;s limit of 200 tweets per request, then compares each tweet&rsquo;s date of creation to your <code>MAX_TWEET_AGE</code> variable to decide whether it&rsquo;s old enough to be deleted. After deleting all the expired tweets, the Lambda function terminates.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=nf>deleteFromTimeline</span><span class=p>(</span><span class=nx>api</span> <span class=o>*</span><span class=nx>anaconda</span><span class=p>.</span><span class=nx>TwitterApi</span><span class=p>,</span> <span class=nx>ageLimit</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Duration</span><span class=p>)</span> <span class=p>{</span>
-	<span class=nx>timeline</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nf>getTimeline</span><span class=p>(</span><span class=nx>api</span><span class=p>)</span>
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 
-	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
-		<span class=nx>log</span><span class=p>.</span><span class=nf>Error</span><span class=p>(</span><span class=s>&#34;Could not get timeline&#34;</span><span class=p>)</span>
-	<span class=p>}</span>
-	<span class=k>for</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>t</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>timeline</span> <span class=p>{</span>
-		<span class=nx>createdTime</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>t</span><span class=p>.</span><span class=nf>CreatedAtTime</span><span class=p>(</span><span class=p>)</span>
-		<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
-			<span class=nx>log</span><span class=p>.</span><span class=nf>Error</span><span class=p>(</span><span class=s>&#34;Couldn&#39;t parse time &#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
-		<span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
-			<span class=k>if</span> <span class=nx>time</span><span class=p>.</span><span class=nf>Since</span><span class=p>(</span><span class=nx>createdTime</span><span class=p>)</span> <span class=p>&gt;</span> <span class=nx>ageLimit</span> <span class=p>{</span>
-				<span class=nx>_</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>api</span><span class=p>.</span><span class=nf>DeleteTweet</span><span class=p>(</span><span class=nx>t</span><span class=p>.</span><span class=nx>Id</span><span class=p>,</span> <span class=kc>true</span><span class=p>)</span>
-				<span class=nx>log</span><span class=p>.</span><span class=nf>Info</span><span class=p>(</span><span class=s>&#34;DELETED: Age - &#34;</span><span class=p>,</span> <span class=nx>time</span><span class=p>.</span><span class=nf>Since</span><span class=p>(</span><span class=nx>createdTime</span><span class=p>)</span><span class=p>.</span><span class=nf>Round</span><span class=p>(</span><span class=mi>1</span><span class=o>*</span><span class=nx>time</span><span class=p>.</span><span class=nx>Minute</span><span class=p>)</span><span class=p>,</span> <span class=s>&#34; - &#34;</span><span class=p>,</span> <span class=nx>t</span><span class=p>.</span><span class=nx>Text</span><span class=p>)</span>
-				<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
-					<span class=nx>log</span><span class=p>.</span><span class=nf>Error</span><span class=p>(</span><span class=s>&#34;Failed to delete! &#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
-				<span class=p>}</span>
-			<span class=p>}</span>
-		<span class=p>}</span>
-	<span class=p>}</span>
-	<span class=nx>log</span><span class=p>.</span><span class=nf>Info</span><span class=p>(</span><span class=s>&#34;No more tweets to delete.&#34;</span><span class=p>)</span>
+<meta name="description" content="Victoria Drake is a senior software developer. She writes about software engineering, information security, and cybersecurity through education.">
+<title>
+    Why I&#39;m automatically deleting my old tweets using AWS Lambda | victoria.dev
+</title>
 
-<span class=p>}</span>
-</code></pre></div><p>Read the full code <a href=https://github.com/victoriadrake/ephemeral/blob/master/main.go>here</a>.</p><p>For a use case like this, AWS Lambda has a free tier that costs nothing. If you&rsquo;re any level of developer, it&rsquo;s an extremely useful tool to become familiar with. For a full walkthrough with screenshots of how to set up a Lambda function that tweets for you, you can read <a href=/blog/running-a-free-twitter-bot-on-aws-lambda/>this article</a>. The set up for ephemeral is the same, it just has an opposite function. :)</p><p>I forked ephemeral from Adam Drake&rsquo;s <a href=https://github.com/adamdrake/harold>Harold</a>, a Twitter tool that has many useful functions beyond keeping your timeline trimmed. If you have more than 200 tweets to delete at first pass, please use Harold to do that first. You can run Harold with the <code>deletetimeline</code> flag from your terminal.</p><p>You may like to first <a href=https://twitter.com/settings/your_twitter_data>download all your tweets before deleting them</a> for sentimental value.</p><h1 id=why-use-twitter-at-all>Why use Twitter at all?</h1><p>In anticipation of the question, let me say that yes, I do use Twitter besides just as a bucket for my Lambda functions to fill and empty. It has its benefits, most related to what I perceive to be its original intended purpose: to be a means of near-instant communication for short, digestible pieces of information reaching a widespread pool of people.</p><p>I use it as a way to keep tabs on what&rsquo;s happening <em>right now.</em> I use it to comment on, joke about, and commiserate with things tweeted by the people I follow <em>right now.</em> By keeping my timeline restricted to only the most recent few days, I feel like I&rsquo;m using Twitter more like it was meant to be used: a way to join the conversation and see what&rsquo;s happening in the world <em>right now</em> - instead of just another place to amass more &ldquo;stuff.&rdquo;</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/>Running a free Twitter bot on AWS Lambda</a><p class=li-brief>How to save some time with automated link sharing on Twitter - for free!</p><p class=metadata><a class=li-tag href=/tags/aws/>aws</a>
-☕️☕️&nbsp;
-6 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/>How to set up a short feedback loop as a solo coder</a><p class=li-brief>Strategies for continuous improvement when you're a freelance developer.</p><p class=metadata><a class=li-tag href=/tags/coding/>coding</a>
-☕️☕️&nbsp;
-10 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/>A coffee-break introduction to time complexity of algorithms</a><p class=li-brief>A groundwork understanding of algorithm time complexity in about fifteen minutes.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
-☕️☕️☕️&nbsp;
-16 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><script>scrollTo=(element)=>{window.scroll({behavior:'smooth',left:0,top:element.offsetTop});}
-document.getElementById("up").addEventListener('click',()=>{scrollTo(document.getElementById("main"));});</script></body></html>
+
+    <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+    <meta property="og:title" content="Why I&#39;m automatically deleting my old tweets using AWS Lambda - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free." />
+<meta property="og:url" content="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+
+
+<meta property="og:image" content="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/ephemeral.jpg"/>
+
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Why I&#39;m automatically deleting my old tweets using AWS Lambda" />
+
+
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/ephemeral.jpg"/>
+
+
+<meta name="twitter:description"
+    content="From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free." />
+
+    
+<link rel="shortcut icon" href="/img/logo.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.37d2c032e134e0af3a44f3851230a98e8bb25db2802e3e64adc927ed2107dcba.css" integrity="sha256-N9LAMuE04K86RPOFEjCpjouyXbKALj5krckn7SEH3Lo=" media="screen">
+
+
+
+
+
+    
+    
+    
+    
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <img id="up" alt="site logo" src="/img/logo.png" />
+    </div>
+
+</div>
+        
+
+        <div class="container">
+            
+
+
+
+
+
+<div id="images">
+    <img src="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/ephemeral.jpg" alt="cover image" />
+</div>
+
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        Why I&#39;m automatically deleting my old tweets using AWS Lambda
+    </h1>
+    
+    <p class="subtitle">From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p>
+    <p class="metadata" id="date">
+        April 12, 2018
+        ☕️☕️&nbsp;
+        7 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/life/">
+            life
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/aws/">
+            aws
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/go/">
+            go
+        </a>&nbsp;
+        
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p>
+<p><a href="/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/#ephemeral-tweets"><em>Click here to skip to the code part.</em></a></p>
+
+<h1 id="stuff-and-opinions" class="anchor-link"><a href="#stuff-and-opinions">Stuff and opinions</a></h1>
+<p>I&rsquo;ve only been a one-bag nomad for a little over a year and a half. Before that, I lived as most people do in an apartment or a house. I owned furniture, more clothing than I strictly needed, and enough &ldquo;stuff&rdquo; to fill at least a few moving boxes. If I went to live somewhere else, moving for school or family or work, I packed up all my things and brought them with me. Over the years, I accumulated more and more stuff.</p>
+<p>Adopting what many would call a minimalist lifestyle has rapidly changed a lot of my longstanding views. Giving away all my stuff (an idea I once thought to be interesting in principle but practically a little bit ridiculous) has become normal. It&rsquo;s normal for me, now, to not own things that I don&rsquo;t use on a regular basis. I don&rsquo;t keep wall shelves packed with old books or dishes or clothing or childhood toys because those items aren&rsquo;t relevant to me anymore. I just keep fond memories, instead.</p>
+<p>Imagine, for a moment, that I still lived in a house. Imagine that in that house, on the fridge, is a drawing I made when I was six-years-old. In the bottom right corner of that drawing scribbled in green crayon are the words &ldquo;broccoli is dumb - Victoria, Age 6.&rdquo;</p>
+<p>If you were in my house and saw that drawing on the fridge, would you assume that the statement &ldquo;broccoli is dumb&rdquo; comprised an accurate and current account of my opinions on broccoli? Of course not. I was six when I wrote that. I&rsquo;ve had plenty of time to change my mind.</p>
+
+<h1 id="social-media-isnt-social" class="anchor-link"><a href="#social-media-isnt-social">Social media isn&rsquo;t social</a></h1>
+<p>I have a friend whom I&rsquo;ve known since we were both in kindergarten. We went through grade school together, then spoke to and saw each other on infrequent occasions across the years. We&rsquo;re both adults now. Sometimes when we chat, we&rsquo;ll recall some amusing memory from when we were younger. The nature of memory being what it is, I have no illusion that what we recall is recounted with much accuracy. Our impressions of things that happened - mistakes we made and moments of victory alike - are coloured by the experiences we&rsquo;ve had since then, and all the things we&rsquo;ve learned. An awkward moment at a school colleague&rsquo;s birthday party becomes an example of a child learning to socialize, instead of the world-ending moment of embarrassment it probably felt like at the time.</p>
+<p>This is how memory works. In a sense, it gets updated, as well it should. People living in small communities remember things that their neighbour did many years ago, but recall them in the context of who their neighbour is now, and what their current relationship is like. This re-colouring of history is an important part of how people <a href="https://www.smithsonianmag.com/science-nature/how-our-brains-make-memories-14466850/">heal</a>, <a href="http://news.feinberg.northwestern.edu/2014/02/memory_rewrite/">make good decisions</a>, and <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3709095/">socialize</a>.</p>
+<p>Social media does not do this. Your perfectly preserved tweet from five days or five years ago can be recalled with absolute accuracy. For most people, this is not particularly worrying. We tend to tweet about pretty mundane things - things that pop into mind when we&rsquo;re bored and want someone to notice us. Individually, usually, our old tweets are pretty insignificant. In aggregate, however, they paint a pretty complete picture of a person&rsquo;s random, unintentionally telling thoughts. This is the problem.</p>
+<p>The assumption made of things written in social media and on Twitter specifically is a very different assumption than you might make about someone&rsquo;s notepad scribble from last week. I&rsquo;m not endeavoring to speculate why - I&rsquo;ve just seen enough cases of someone getting publicly flogged for something they posted years ago to know that it does happen. This is weird. If you wouldn&rsquo;t assume that a notepad scribble from last week or a crayon drawing from decades ago reflects the essence of who someone is <em>now,</em> why would you assume that an old tweet does?</p>
+<p>You are not the same person you were last month - you&rsquo;ve seen things, read things, understood and learned things that have, in some small way, changed you. While a person may have the same sense of self and identity through most of their life, even this grows and changes over the years. We change our opinions, our desires, our habits. We are not stagnant beings, and we should not let ourselves be represented as such, however unintentionally.</p>
+
+<h1 id="ephemeral-tweets" class="anchor-link"><a href="#ephemeral-tweets">Ephemeral tweets</a></h1>
+<p>If you look at my Twitter profile page today, you&rsquo;ll see fewer tweets there than you have fingers (I hope). I&rsquo;m using <a href="https://github.com/victoriadrake/ephemeral">ephemeral</a> - a lightweight utility I wrote for use on <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> - to delete all my tweets older than a few days. I&rsquo;m doing this for the same reason that I don&rsquo;t hang on to stuff that I no longer use - that stuff isn&rsquo;t relevant to me anymore. It doesn&rsquo;t represent me, either.</p>
+<p>The code that makes up ephemeral is written in Go. AWS Lambda creates an environment for each Lambda function, so ephemeral utilizes environment variables for your private Twitter API keys and the maximum age of the tweets you want to keep, represented in hours, like <code>72h</code>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="p">(</span>
+	<span class="nx">consumerKey</span>       <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_CONSUMER_KEY&#34;</span><span class="p">)</span>
+	<span class="nx">consumerSecret</span>    <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_CONSUMER_SECRET&#34;</span><span class="p">)</span>
+	<span class="nx">accessToken</span>       <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_ACCESS_TOKEN&#34;</span><span class="p">)</span>
+	<span class="nx">accessTokenSecret</span> <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_ACCESS_TOKEN_SECRET&#34;</span><span class="p">)</span>
+	<span class="nx">maxTweetAge</span>       <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;MAX_TWEET_AGE&#34;</span><span class="p">)</span>
+	<span class="nx">logger</span>            <span class="p">=</span> <span class="nx">log</span><span class="p">.</span><span class="nf">New</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">getenv</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="nx">v</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">v</span> <span class="o">==</span> <span class="s">&#34;&#34;</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;missing required environment variable &#34;</span> <span class="o">+</span> <span class="nx">name</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">v</span>
+<span class="p">}</span>
+</code></pre></div><p>The program uses the <a href="https://github.com/ChimeraCoder/anaconda">anaconda</a> library. It fetches your timeline up to the Twitter API&rsquo;s limit of 200 tweets per request, then compares each tweet&rsquo;s date of creation to your <code>MAX_TWEET_AGE</code> variable to decide whether it&rsquo;s old enough to be deleted. After deleting all the expired tweets, the Lambda function terminates.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">deleteFromTimeline</span><span class="p">(</span><span class="nx">api</span> <span class="o">*</span><span class="nx">anaconda</span><span class="p">.</span><span class="nx">TwitterApi</span><span class="p">,</span> <span class="nx">ageLimit</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">timeline</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">getTimeline</span><span class="p">(</span><span class="nx">api</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nf">Error</span><span class="p">(</span><span class="s">&#34;Could not get timeline&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">t</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">timeline</span> <span class="p">{</span>
+		<span class="nx">createdTime</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">t</span><span class="p">.</span><span class="nf">CreatedAtTime</span><span class="p">()</span>
+		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="nx">log</span><span class="p">.</span><span class="nf">Error</span><span class="p">(</span><span class="s">&#34;Couldn&#39;t parse time &#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+		<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+			<span class="k">if</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Since</span><span class="p">(</span><span class="nx">createdTime</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nx">ageLimit</span> <span class="p">{</span>
+				<span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">api</span><span class="p">.</span><span class="nf">DeleteTweet</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">Id</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+				<span class="nx">log</span><span class="p">.</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;DELETED: Age - &#34;</span><span class="p">,</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Since</span><span class="p">(</span><span class="nx">createdTime</span><span class="p">).</span><span class="nf">Round</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Minute</span><span class="p">),</span> <span class="s">&#34; - &#34;</span><span class="p">,</span> <span class="nx">t</span><span class="p">.</span><span class="nx">Text</span><span class="p">)</span>
+				<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+					<span class="nx">log</span><span class="p">.</span><span class="nf">Error</span><span class="p">(</span><span class="s">&#34;Failed to delete! &#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="nx">log</span><span class="p">.</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;No more tweets to delete.&#34;</span><span class="p">)</span>
+
+<span class="p">}</span>
+</code></pre></div><p>Read the full code <a href="https://github.com/victoriadrake/ephemeral/blob/master/main.go">here</a>.</p>
+<p>For a use case like this, AWS Lambda has a free tier that costs nothing. If you&rsquo;re any level of developer, it&rsquo;s an extremely useful tool to become familiar with. For a full walkthrough with screenshots of how to set up a Lambda function that tweets for you, you can read <a href="/blog/running-a-free-twitter-bot-on-aws-lambda/">this article</a>. The set up for ephemeral is the same, it just has an opposite function. :)</p>
+<p>I forked ephemeral from Adam Drake&rsquo;s <a href="https://github.com/adamdrake/harold">Harold</a>, a Twitter tool that has many useful functions beyond keeping your timeline trimmed. If you have more than 200 tweets to delete at first pass, please use Harold to do that first. You can run Harold with the <code>deletetimeline</code> flag from your terminal.</p>
+<p>You may like to first <a href="https://twitter.com/settings/your_twitter_data">download all your tweets before deleting them</a> for sentimental value.</p>
+
+<h1 id="why-use-twitter-at-all" class="anchor-link"><a href="#why-use-twitter-at-all">Why use Twitter at all?</a></h1>
+<p>In anticipation of the question, let me say that yes, I do use Twitter besides just as a bucket for my Lambda functions to fill and empty. It has its benefits, most related to what I perceive to be its original intended purpose: to be a means of near-instant communication for short, digestible pieces of information reaching a widespread pool of people.</p>
+<p>I use it as a way to keep tabs on what&rsquo;s happening <em>right now.</em> I use it to comment on, joke about, and commiserate with things tweeted by the people I follow <em>right now.</em> By keeping my timeline restricted to only the most recent few days, I feel like I&rsquo;m using Twitter more like it was meant to be used: a way to join the conversation and see what&rsquo;s happening in the world <em>right now</em> - instead of just another place to amass more &ldquo;stuff.&rdquo;</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/">Running a free Twitter bot on AWS Lambda</a>
+        <p class="li-brief">
+            How to save some time with automated link sharing on Twitter - for free!
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/aws/">aws</a>
+            
+            ☕️☕️&nbsp;
+            6 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">How to set up a short feedback loop as a solo coder</a>
+        <p class="li-brief">
+            Strategies for continuous improvement when you&#39;re a freelance developer.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/coding/">coding</a>
+            
+            ☕️☕️&nbsp;
+            10 min read
+        </p>
+        
+        
+    </li>
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">A coffee-break introduction to time complexity of algorithms</a>
+        <p class="li-brief">
+            A groundwork understanding of algorithm time complexity in about fifteen minutes.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
+            
+            ☕️☕️☕️&nbsp;
+            16 min read
+        </p>
+        
+        
+    </li>
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a senior software developer in Washington, DC. She currently serves as a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+    scrollTo = (element) => {
+        window.scroll({
+            behavior: 'smooth',
+            left: 0,
+            top: element.offsetTop
+        });
+    }
+
+    document.getElementById("up").addEventListener('click', () => {
+        scrollTo(document.getElementById("main"));
+    });
+</script>
+    
+
+    
+    
+    
+
+</body>
+
+</html>
