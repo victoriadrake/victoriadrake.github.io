@@ -205,42 +205,50 @@
 <p>I previously brought you <a href="/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">an interactive pre-commit checklist in the style of infomercials</a> that&rsquo;s both fun and useful for reinforcing the quality of your commits. But that&rsquo;s not all!</p>
 <p>Git hooks are scripts that run automatically at pre-determined points in your workflow. Use them well, and you can save a ton of brainpower. A <code>pre-commit</code> hook remembers to do things like lint and format code, and even runs local tests for you before you indelibly push something embarrassing. Hooks can be a little annoying to share (the <code>.git/hooks</code> directory isn&rsquo;t tracked and thus omitted when you clone or fork a repository) but there&rsquo;s a framework for that: the confusingly-named <a href="https://pre-commit.com/">pre-commit framework</a>, which allows you to create a sharable configuration file of Git hook plugins, not just for <code>pre-commit</code>.</p>
 <p>I spend a majority of my time these days coding in Python, so here is my current favorite <code>.pre-commit-config.yaml</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="k">fail_fast</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span><span class="w"></span><span class="k">repos</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="k">repo</span><span class="p">:</span><span class="w"> </span>https<span class="p">:</span>//github.com/pre-commit/pre-commit-hooks<span class="w">
-</span><span class="w">    </span><span class="k">rev</span><span class="p">:</span><span class="w"> </span>v3<span class="m">.1.0</span><span class="w"> </span><span class="c"># Use the ref you want to point at</span><span class="w">
-</span><span class="w">    </span><span class="k">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="k">id</span><span class="p">:</span><span class="w"> </span>detect-aws-credentials<span class="w">
-</span><span class="w">      </span>- <span class="k">id</span><span class="p">:</span><span class="w"> </span>end-of-file-fixer<span class="w">
-</span><span class="w">      </span>- <span class="k">id</span><span class="p">:</span><span class="w"> </span>trailing-whitespace<span class="w">
-</span><span class="w">  </span>- <span class="k">repo</span><span class="p">:</span><span class="w"> </span>https<span class="p">:</span>//github.com/psf/black<span class="w">
-</span><span class="w">    </span><span class="k">rev</span><span class="p">:</span><span class="w"> </span><span class="m">19.</span>3b0<span class="w">
-</span><span class="w">    </span><span class="k">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="k">id</span><span class="p">:</span><span class="w"> </span>black<span class="w">
-</span><span class="w">  </span>- <span class="k">repo</span><span class="p">:</span><span class="w"> </span>https<span class="p">:</span>//github.com/asottile/blacken-docs<span class="w">
-</span><span class="w">    </span><span class="k">rev</span><span class="p">:</span><span class="w"> </span>v1<span class="m">.7.0</span><span class="w">
-</span><span class="w">    </span><span class="k">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="k">id</span><span class="p">:</span><span class="w"> </span>blacken-docs<span class="w">
-</span><span class="w">        </span><span class="k">additional_dependencies</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>black==<span class="m">19.</span>3b0<span class="p">]</span><span class="w">
-</span><span class="w">  </span>- <span class="k">repo</span><span class="p">:</span><span class="w"> </span>https<span class="p">:</span>//github.com/pre-commit/mirrors-mypy<span class="w">
-</span><span class="w">    </span><span class="k">rev</span><span class="p">:</span><span class="w"> </span>v0<span class="m">.780</span><span class="w">
-</span><span class="w">    </span><span class="k">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="k">id</span><span class="p">:</span><span class="w"> </span>mypy<span class="w">
-</span><span class="w">  </span>- <span class="k">repo</span><span class="p">:</span><span class="w"> </span>local<span class="w">
-</span><span class="w">    </span><span class="k">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="k">id</span><span class="p">:</span><span class="w"> </span>isort<span class="w">
-</span><span class="w">        </span><span class="k">name</span><span class="p">:</span><span class="w"> </span>isort<span class="w">
-</span><span class="w">        </span><span class="k">stages</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>commit<span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="k">language</span><span class="p">:</span><span class="w"> </span>system<span class="w">
-</span><span class="w">        </span><span class="k">entry</span><span class="p">:</span><span class="w"> </span>isort<span class="w">
-</span><span class="w">        </span><span class="k">types</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>python<span class="p">]</span><span class="w">
-</span><span class="w">      </span>- <span class="k">id</span><span class="p">:</span><span class="w"> </span>black<span class="w">
-</span><span class="w">        </span><span class="k">name</span><span class="p">:</span><span class="w"> </span>black<span class="w">
-</span><span class="w">        </span><span class="k">stages</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>commit<span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="k">language</span><span class="p">:</span><span class="w"> </span>system<span class="w">
-</span><span class="w">        </span><span class="k">entry</span><span class="p">:</span><span class="w"> </span>black<span class="w">
-</span><span class="w">        </span><span class="k">types</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>python<span class="p">]</span><span class="w">
-</span><span class="w">
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">fail_fast: true
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.1.0 # Use the ref you want to point at
+    hooks:
+      - id: detect-aws-credentials
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/psf/black
+    rev: 19.3b0
+    hooks:
+      - id: black
+  - repo: https://github.com/asottile/blacken-docs
+    rev: v1.7.0
+    hooks:
+      - id: blacken-docs
+        additional_dependencies: [black==19.3b0]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.780
+    hooks:
+      - id: mypy
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        description: "Sort Python imports"
+        stages: [commit]
+        language: system
+        entry: isort
+        types: [python]
+      - id: black
+        name: black
+        description: "Format Python files with black"
+        stages: [commit]
+        language: system
+        entry: black
+        types: [python]
+      - id: markdownlint
+        name: markdownlint
+        description: "Lint Markdown files"
+        entry: markdownlint
+        language: node
+        types: [markdown]
+<span class="w">
 </span></code></pre></div><p>There are tons of <a href="https://pre-commit.com/hooks.html">supported hooks</a> to explore.</p>
 
 <h2 id="use-a-type-system" class="anchor-link"><a href="#use-a-type-system">Use a type system</a></h2>
