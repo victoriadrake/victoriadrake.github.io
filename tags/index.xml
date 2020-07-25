@@ -7,9 +7,106 @@
     <language>en-us</language>
     <managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor>
     <webMaster>hello@victoria.dev (Victoria Drake)</webMaster>
-    <lastBuildDate>Wed, 22 Jul 2020 06:36:36 -0400</lastBuildDate>
+    <lastBuildDate>Sat, 25 Jul 2020 10:51:15 -0400</lastBuildDate>
     
         <atom:link href="https://victoria.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+    
+    <item>
+      <title>Go automate your GitHub profile README</title>
+      <link>https://victoria.dev/blog/go-automate-your-github-profile-readme/</link>
+      <pubDate>Sat, 25 Jul 2020 10:51:15 -0400</pubDate>
+      <author>hello@victoria.dev (Victoria Drake)</author>
+      <guid>https://victoria.dev/blog/go-automate-your-github-profile-readme/</guid>
+      <description>Create a dynamic Markdown file with Go and GitHub Actions</description>
+      <content:encoded>
+        
+        
+        &lt;p&gt;GitHub&amp;rsquo;s new profile page README feature is having the wonderful effect of bringing some personality to the Myspace pages of the developer Internet. Though Markdown lends itself best to standard static text content, that&amp;rsquo;s not stopping creative folks from working to create a next-level README. You can include GIFs and images to add some motion and pizazz (they&amp;rsquo;re covered in &lt;a href=&#34;https://github.github.com/gfm/&#34;&gt;GitHub Flavor Markdown&lt;/a&gt;), but I&amp;rsquo;m thinking of something a little more dynamic.&lt;/p&gt;
+&lt;p&gt;At front-and-center on your GitHub profile, your README is a great opportunity to let folks know what you&amp;rsquo;re about, what you find important, and to showcase some highlights of your work. You might like to show off your latest repositories, tweet, or blog post. Keeping it up to date doesn&amp;rsquo;t have to be a pain either, thanks to continuous delivery tools like GitHub Actions.&lt;/p&gt;
+&lt;p&gt;My current README refreshes itself daily with a link to my latest blog post. Here&amp;rsquo;s how I&amp;rsquo;m creating a self-updating &lt;code&gt;README.md&lt;/code&gt; with Go and GitHub actions.&lt;/p&gt;
+
+&lt;h2 id=&#34;reading-and-writing-files-with-go&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#reading-and-writing-files-with-go&#34;&gt;Reading and writing files with Go&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;I&amp;rsquo;ve been writing a lot of Python lately, but for some things I really like using Go. You could say it&amp;rsquo;s my go-to language for just-for-&lt;code&gt;func&lt;/code&gt; projects. Sorry. Couldn&amp;rsquo;t stop myself.&lt;/p&gt;
+&lt;p&gt;To create my README.md, I&amp;rsquo;m going to get some static content from an existing file, mash it together with some new dynamic content that we&amp;rsquo;ll generate with Go, then bake the whole thing at 400 degrees until something awesome comes out.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s how we read in a file called &lt;code&gt;static.md&lt;/code&gt; and put it in &lt;code&gt;string&lt;/code&gt; form:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// Unwrap Markdown content
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;content&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;ioutil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;ReadFile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;static.md&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;Fatalf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;cannot read file: %v&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// Make it a string
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;stringyContent&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;string&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;content&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The possibilities for your dynamic content are only limited by your imagination! Here, I&amp;rsquo;ll use the &lt;a href=&#34;https://github.com/mmcdole/gofeed&#34;&gt;&lt;code&gt;github.com/mmcdole/gofeed&lt;/code&gt; package&lt;/a&gt; to read the RSS feed from my blog and get the newest post.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;nx&#34;&gt;fp&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;gofeed&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;NewParser&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;span class=&#34;nx&#34;&gt;feed&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;fp&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;ParseURL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;https://victoria.dev/index.xml&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;Fatalf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;error getting feed: %v&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// Get the freshest item
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;rssItem&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;feed&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Items&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;To join these bits together and produce stringy goodness, we use &lt;a href=&#34;https://golang.org/pkg/fmt/#Sprintf&#34;&gt;&lt;code&gt;fmt.Sprintf()&lt;/code&gt;&lt;/a&gt; to create a formatted string.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// Whisk together static and dynamic content until stiff peaks form
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;blog&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;Read my latest blog post: **[&amp;#34;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;rssItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;](&amp;#34;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;rssItem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Link&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;)**&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;nx&#34;&gt;data&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;fmt&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;Sprintf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;%s\n%s\n&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;stringyContent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;blog&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Then to create a new file from this mix, we use &lt;a href=&#34;https://golang.org/pkg/os/#Create&#34;&gt;&lt;code&gt;os.Create()&lt;/code&gt;&lt;/a&gt;. There are &lt;a href=&#34;https://www.joeshaw.org/dont-defer-close-on-writable-files/&#34;&gt;more things to know about deferring &lt;code&gt;file.Close()&lt;/code&gt;&lt;/a&gt;, but we don&amp;rsquo;t need to get into those details here. We&amp;rsquo;ll add &lt;code&gt;file.Sync()&lt;/code&gt; to ensure our README gets written.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// Prepare file with a light coating of os
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;file&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;os&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;Create&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;README.md&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;defer&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;file&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;Close&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// Bake at n bytes per second until golden brown
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;_&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;io&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;WriteString&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;file&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;file&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;Sync&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;View the full code &lt;a href=&#34;https://github.com/victoriadrake/victoriadrake/blob/master/update/main.go&#34;&gt;here in my README repository&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Mmmm, doesn&amp;rsquo;t that smell good? 🍪 Let&amp;rsquo;s make this happen on the daily with a GitHub Action.&lt;/p&gt;
+
+&lt;h2 id=&#34;running-your-go-program-on-a-schedule-with-actions&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#running-your-go-program-on-a-schedule-with-actions&#34;&gt;Running your Go program on a schedule with Actions&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;You can create a GitHub Action workflow that &lt;a href=&#34;https://docs.github.com/en/actions/reference/events-that-trigger-workflows&#34;&gt;triggers&lt;/a&gt; both on a push to your &lt;code&gt;master&lt;/code&gt; branch as well as on a daily schedule. Here&amp;rsquo;s a slice of the &lt;code&gt;.github/workflows/update.yaml&lt;/code&gt; that defines this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;k&#34;&gt;on&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;push&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;branches&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- master&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;schedule&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;cron&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;0 11 * * *&amp;#39;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;To run the Go program that rebuilds our README, we first need a copy of our files. We use &lt;code&gt;actions/checkout&lt;/code&gt; for that:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;k&#34;&gt;steps&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;🍽️&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Get&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;working&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;copy&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;uses&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;actions/checkout@master&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;with&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;fetch-depth&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This step runs our Go program:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;🍳&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Shake&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&amp;amp;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;bake&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;README&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;run&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;|
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;    cd ${GITHUB_WORKSPACE}/update/&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;go&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;run&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;main.go&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Finally, we push the updated files back to our repository. Learn more about the variables shown at &lt;a href=&#34;https://docs.github.com/en/actions/configuring-and-managing-workflows/using-variables-and-secrets-in-a-workflow&#34;&gt;Using variables and secrets in a workflow&lt;/a&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;- &lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;🚀&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;Deploy&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;run&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;|
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;    git config user.name &amp;#34;${GITHUB_ACTOR}&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;git&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;config&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;user.email&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;${GITHUB_ACTOR}@users.noreply.github.com&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;git&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;add&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;.&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;git&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;commit&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;-am&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Update dynamic content&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;git&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;push&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;--all&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;-f&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;https&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;//${{&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;secrets.GITHUB_TOKEN&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;}}@github.com/${GITHUB_REPOSITORY}.git&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;View the full code for this Action workflow &lt;a href=&#34;https://github.com/victoriadrake/victoriadrake/blob/master/.github/workflows/update.yaml&#34;&gt;here in my README repository&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;go-forth-and-auto-update-your-readme&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#go-forth-and-auto-update-your-readme&#34;&gt;Go forth and auto-update your README&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Congratulations and welcome to the cool kids&amp;rsquo; club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &amp;ndash; just go easy on the GIFs, okay?&lt;/p&gt;
+
+      </content:encoded>
+        
+        
+    </item>
+    
     
     
     
@@ -7804,21 +7901,26 @@ $ sed -i -- &lt;span class=&#34;s1&#34;&gt;&amp;#39;s/foo/bar/g&amp;#39;&lt;/spa
         &lt;p&gt;I&amp;rsquo;m frequently asked for my opinion on how to get started with being a freelance developer. If you&amp;rsquo;re hoping to live the life of a remote working digital nomad, whichever career you choose, having a little coding expertise in your back pocket will be a big benefit.&lt;/p&gt;
 &lt;p&gt;Here&amp;rsquo;s a quick list of resources that you should definitely look at first if you&amp;rsquo;re hoping to gain some coding superpowers for free.&lt;/p&gt;
 
-&lt;h2 id=&#34;freecodecamp-hahahugoshortcode-s0-hbhb&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#freecodecamp-hahahugoshortcode-s0-hbhb&#34;&gt;freeCodeCamp (&lt;a href=&#34;https://freecodecamp.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;freecodecamp.org&lt;/a&gt;)&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&#34;freecodecamp-hahahugoshortcode-s0-hbhb&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#freecodecamp-hahahugoshortcode-s0-hbhb&#34;&gt;freeCodeCamp (&lt;a href=&#34;https://freecodecamp.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;freecodecamp.org&lt;/a&gt;
+)&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;An amazingly high value curriculum that can take you from zero to full-stack.&lt;/strong&gt; This is always my top recommendation for someone looking to test the waters and see if a development career is interesting enough to pursue. The toughest part about learning to code on your own is getting stuck and not having quick help - this is the problem that I think freeCodeCamp (fCC) solves best by allowing you to immerse yourself in a hugely supportive social community. Through their forum, you can get quick advice if you get stuck on a challenge, and even team up with someone to tackle projects in-depth. The fCC community is lively and diverse with people from all over the world, and many local chapters even host regular meetups.&lt;/p&gt;
 
-&lt;h2 id=&#34;hackerrank-hahahugoshortcode-s1-hbhb&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#hackerrank-hahahugoshortcode-s1-hbhb&#34;&gt;HackerRank (&lt;a href=&#34;https://www.hackerrank.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;hackerrank.com&lt;/a&gt;)&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&#34;hackerrank-hahahugoshortcode-s1-hbhb&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#hackerrank-hahahugoshortcode-s1-hbhb&#34;&gt;HackerRank (&lt;a href=&#34;https://www.hackerrank.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;hackerrank.com&lt;/a&gt;
+)&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Solve challenges tailored for every level of coder over a variety of relevant topics. Enter competitions and increase your chances of getting hired.&lt;/strong&gt; I love HackerRank especially for its algorithm and statistics challenges - if you&amp;rsquo;re hoping to get into data science, this is an area that you&amp;rsquo;ll need to be especially sharp in. Seasoned developers return to HackerRank to hone their skills and enter competitions that can win you swag and get you noticed for jobs.&lt;/p&gt;
 
-&lt;h2 id=&#34;stack-overflow-hahahugoshortcode-s2-hbhb&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#stack-overflow-hahahugoshortcode-s2-hbhb&#34;&gt;Stack Overflow (&lt;a href=&#34;https://stackoverflow.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;stackoverflow.com/&lt;/a&gt;)&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&#34;stack-overflow-hahahugoshortcode-s2-hbhb&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#stack-overflow-hahahugoshortcode-s2-hbhb&#34;&gt;Stack Overflow (&lt;a href=&#34;https://stackoverflow.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;stackoverflow.com/&lt;/a&gt;
+)&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Even seasoned developers have questions.&lt;/strong&gt; This is the top search hit that comes up when you Google that error message you thought only you were getting. If you&amp;rsquo;re shy about asking a question you can&amp;rsquo;t find the answer to - don&amp;rsquo;t be! Simply asking it will be of help to the next person who comes looking for the exact same solution.&lt;/p&gt;
 
-&lt;h2 id=&#34;the-odin-project-hahahugoshortcode-s3-hbhb&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#the-odin-project-hahahugoshortcode-s3-hbhb&#34;&gt;The Odin Project (&lt;a href=&#34;http://www.theodinproject.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;theodinproject.com/&lt;/a&gt;)&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&#34;the-odin-project-hahahugoshortcode-s3-hbhb&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#the-odin-project-hahahugoshortcode-s3-hbhb&#34;&gt;The Odin Project (&lt;a href=&#34;http://www.theodinproject.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;theodinproject.com/&lt;/a&gt;
+)&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;A curriculum for web developers built on a collection of resources designed to take you from &amp;ldquo;What&amp;rsquo;s the Internet?&amp;rdquo; to web dev hire.&lt;/strong&gt; For those specifically interested in web development, there&amp;rsquo;s a community here for you. The Odin Project (TOP) has plenty of tutorials and practice projects to flesh out your knowledge of web dev essentials.&lt;/p&gt;
 
 &lt;h2 id=&#34;a-coding-glossary-for-kids---and-for-the-rest-of-us-too&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#a-coding-glossary-for-kids---and-for-the-rest-of-us-too&#34;&gt;A coding glossary for kids - and for the rest of us, too!&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;March 4, 2020 update:&lt;/em&gt; I recently received a nice email on behalf of Amelia and her class, from Ms. Lincoln. Amelia was kind enough to suggest adding the below resource for young people like her who want to learn how to program!&lt;/p&gt;
-&lt;p&gt;Here&amp;rsquo;s a handy glossary and list of games and resources for kids who want to have some fun while learning how to code: &lt;a href=&#34;https://www.smartadvocate.com/News/Blog/software-programming-and-coding-glossary-for-kids&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;Software Programming and Coding Glossary for Kids&lt;/a&gt;. Thanks for paying it forward, Amelia, and helping others find resources like these!&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s a handy glossary and list of games and resources for kids who want to have some fun while learning how to code: &lt;a href=&#34;https://www.smartadvocate.com/News/Blog/software-programming-and-coding-glossary-for-kids&#34; target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;Software Programming and Coding Glossary for Kids&lt;/a&gt;
+. Thanks for paying it forward, Amelia, and helping others find resources like these!&lt;/p&gt;
 
 &lt;h3 id=&#34;what-are-you-waiting-for&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#what-are-you-waiting-for&#34;&gt;What are you waiting for?&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;Dive in - it&amp;rsquo;s free! Good luck on your journey to coding superpowers!&lt;/p&gt;
