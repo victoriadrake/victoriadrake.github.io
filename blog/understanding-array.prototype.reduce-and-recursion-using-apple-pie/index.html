@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="Understanding Array.prototype.reduce() and recursion using apple pie - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/cover_recursion-pie.jpg"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Understanding Array.prototype.reduce() and recursion using apple pie" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/cover_recursion-pie.jpg" alt="cover image" />
 </div>
 
@@ -170,6 +174,8 @@
         </a>&nbsp;
         
         
+
+        
     </p>
 
     
@@ -187,7 +193,7 @@
 </code></pre></div><p>We want to produce this:</p>
 <div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">flat</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
 </code></pre></div>
-<h1 id="using-for-loops-and-if-statements" class="anchor-link"><a href="#using-for-loops-and-if-statements">Using for loops and if statements</a></h1>
+<h2 id="using-for-loops-and-if-statements" class="anchor-link"><a href="#using-for-loops-and-if-statements">Using for loops and if statements</a></h2>
 <p>Naively, if we know the maximum number of nested arrays we&rsquo;ll encounter (there are 4 in this example), we can use <code>for</code> loops to iterate through each array item, then <code>if</code> statements to check if each item is in itself an array, and so on&hellip;</p>
 <div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">flatten</span><span class="p">()</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">flat</span> <span class="o">=</span> <span class="p">[];</span>
@@ -217,7 +223,7 @@
 <span class="c1">// [1, 2, 3, 4]
 </span></code></pre></div><p>&hellip;Which works, but of course looks ridiculous. Besides looking ridiculous, a) it only works if we know how many nested arrays we&rsquo;ll process, b) it&rsquo;s hard to read and harder to understand, and c) can you imagine having to debug this mess?! (Gee, I think there&rsquo;s an extra <code>i</code> somewhere.)</p>
 
-<h1 id="using-reduce" class="anchor-link"><a href="#using-reduce">Using reduce</a></h1>
+<h2 id="using-reduce" class="anchor-link"><a href="#using-reduce">Using reduce</a></h2>
 <p>JavaScript has a couple methods we can use to make our code a little less ridiculous. One of these is <code>reduce()</code> and it looks like this:</p>
 <div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">flat</span> <span class="o">=</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">done</span><span class="p">,</span><span class="nx">curr</span><span class="p">){</span>
     <span class="k">return</span> <span class="nx">done</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">curr</span><span class="p">);</span>
@@ -226,26 +232,28 @@
 <span class="c1">// [ 1, 2, 3, [ [ 4 ] ] ]
 </span></code></pre></div><p>It&rsquo;s a lot less code, but we haven&rsquo;t taken care of some of the nested arrays. Let&rsquo;s first walk through <code>reduce()</code> together and examine what it does to see how we&rsquo;ll correct this.</p>
 <blockquote>
-<p><strong>Array.prototype.reduce()</strong></p>
-</blockquote>
-<blockquote>
-<p>The reduce() method applies a function against an accumulator and each element in the array (from left to right) to reduce it to a single value. (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce?v=example">MDN</a>)</p>
+<p><strong>Array.prototype.reduce()</strong>
+The reduce() method applies a function against an accumulator and each element in the array (from left to right) to reduce it to a single value. (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce?v=example">MDN</a>)</p>
 </blockquote>
 <p>It&rsquo;s not quite as complicated as it seems. Let&rsquo;s think of <code>reduce()</code> as an out-of-work developer (AI took all the dev jobs) with an empty basket. We&rsquo;ll call him Adam. Adam&rsquo;s main function (ba-dum ching) is now to take apples from a pile, shine them up, and put them one-by-one into the basket. This basket of shiny apples is destined to become delicious apple pies. It&rsquo;s a very important job.</p>
-<p>
+<figure>
+    <img src="recursion-apple-formula.jpg"
+         alt="Pile of apples &#43; Adam: apple pie"/> <figcaption>
+            <p>Apples plus human effort equals pie. Not to be confused with apple-human-pie, which is less appetizing.</p>
+        </figcaption>
+</figure>
 
-<img src="https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/recursion-apple-formula.jpg#center" alt="Pile of apples &#43; Adam: apple pie."  />
-</p>
-<!-- raw HTML omitted -->
 <p>In our above example, the pile of apples is our array, <code>arr</code>. Our basket is <code>done</code>, the accumulator. The initial value of <code>done</code> is an empty array, which we see as <code>[]</code> at the end of our reduce function. The apple that our out-of-work dev is currently shining, you guessed it, is <code>curr</code>. Once Adam processes the current apple, he places it into the basket (<code>.concat()</code>). When there are no more apples in the pile, he returns the basket of polished apples to us, and then probably goes home to his cat, or something.</p>
 
-<h1 id="using-reduce-recursively-to-address-nested-arrays" class="anchor-link"><a href="#using-reduce-recursively-to-address-nested-arrays">Using reduce recursively to address nested arrays</a></h1>
+<h2 id="using-reduce-recursively-to-address-nested-arrays" class="anchor-link"><a href="#using-reduce-recursively-to-address-nested-arrays">Using reduce recursively to address nested arrays</a></h2>
 <p>So that&rsquo;s all well and good, and now we have a basket of polished apples. But we still have some nested arrays to deal with. Going back to our analogy, let&rsquo;s say that some of the apples in the pile are in boxes. Within each box there could be more apples, and/or more boxes containing smaller, cuter apples.</p>
-<p>
+<figure>
+    <img src="recursion-nested-apples.jpg"
+         alt="Box within a box within a box with apples"/> <figcaption>
+            <p>Adorable, slightly skewed apples just want to be loved/eaten.</p>
+        </figcaption>
+</figure>
 
-<img src="https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/recursion-nested-apples.jpg#center" alt="Box within a box within a box with apples."  />
-</p>
-<!-- raw HTML omitted -->
 <p>Here&rsquo;s what we want our apple-processing-function/Adam to do:</p>
 <ol>
 <li>If the pile of apples is a pile of apples, take an apple from the pile.</li>
@@ -269,31 +277,30 @@
 <span class="c1">// [ 1, 2, 3, 4 ]
 </span></code></pre></div><p>Bear with me and I&rsquo;ll explain.</p>
 <blockquote>
-<p><strong>Recursion</strong></p>
-</blockquote>
-<blockquote>
 <p>An act of a function calling itself. Recursion is used to solve problems that contain smaller sub-problems. A recursive function can receive two inputs: a base case (ends recursion) or a recursive case (continues recursion). (<a href="https://developer.mozilla.org/en-US/docs/Glossary/Recursion">MDN</a>)</p>
 </blockquote>
 <p>If you examine our code above, you&rsquo;ll see that <code>flatten()</code> appears twice. The first time it appears, it tells Adam what to do with the pile of apples. The second time, it tells him what to do with the thing he&rsquo;s currently holding, providing instructions in the case it&rsquo;s an apple, and in the case it&rsquo;s not an apple. The thing to note is that these instructions are a <em>repeat of the original instructions we started with</em> - and that&rsquo;s recursion.</p>
 <p>We&rsquo;ll break it down line-by-line for clarity:</p>
 <ol>
 <li><code>function flatten(arr) {</code> - we name our overall function and specify that it will take an argument, <code>arr</code>.</li>
-<li><code>  if (Array.isArray(arr)) {</code> - we examine the provided &ldquo;arrgument&rdquo; (I know, I&rsquo;m very funny) to determine if it is an array.</li>
-<li><code>  return arr.reduce(function(done,curr){</code> - if the previous line is true and the argument is an array, we want to reduce it. This is our recursive case. We&rsquo;ll apply the following function to each array item&hellip;</li>
-<li><code>    return done.concat(flatten(curr));</code> - an unexpected plot twist appears! The function we want to apply is the very function we&rsquo;re in. Colloquially: take it from the top.</li>
-<li><code>    }, []);</code> - we tell our reduce function to start with an empty accumulator (<code>done</code>), and wrap it up.</li>
-<li><code>  } else {</code> - this resolves our if statement at line 2. If the provided argument isn&rsquo;t an array&hellip;</li>
-<li><code>    return arr;</code> - return whatever the <code>arr</code> is. (Hopefully a cute apple.) This is our base case that breaks us out of recursion.</li>
-<li><code>  }</code> - end the else statement.</li>
+<li>`if (Array.isArray(arr)) {we examine the provided &ldquo;arrgument&rdquo; (I know, I&rsquo;m very funny) to determine if it is an array.</li>
+<li>`return arr.reduce(function(done,curr){if the previous line is true and the argument is an array, we want to reduce it. This is our recursive case. We&rsquo;ll apply the following function to each array item&hellip;</li>
+<li>`return done.concat(flatten(curr));nexpected plot twist appears! The function we want to apply is the very function we&rsquo;re in. Colloquially: take it from the top.</li>
+<li><code>}, []);ell our reduce function to start with an empty accumulator (</code>done`), and wrap it up.</li>
+<li>`} else {this resolves our if statement at line 2. If the provided argument isn&rsquo;t an array&hellip;</li>
+<li><code>return arr;rn whatever the</code>arr` is. (Hopefully a cute apple.) This is our base case that breaks us out of recursion.</li>
+<li>`}end the else statement.</li>
 <li><code>}</code> - end the overall function.</li>
 </ol>
 <p>And we&rsquo;re done! We&rsquo;ve gone from our 24 line, 4-layers-deep nested <code>for</code> loop solution to a much more concise, 9 line recursive reduce solution. Reduce and recursion can seem a little impenetrable at first, but they&rsquo;re valuable tools that will save you lots of future effort once you grasp them.</p>
 <p>And don&rsquo;t worry about Adam, our out-of-work developer. He got so much press after being featured in this article that he opened up his very own AI-managed apple pie factory. He&rsquo;s very happy.</p>
-<p>
+<figure>
+    <img src="recursion-adams-apples.jpg"
+         alt="Adam&#39;s apple pie factory, Adam&#39;s Apples"/> <figcaption>
+            <p>+1 for you if you saw that one coming.</p>
+        </figcaption>
+</figure>
 
-<img src="https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/recursion-adams-apples.jpg#center" alt="Adam&amp;rsquo;s apple pie factory, &amp;ldquo;Adam&amp;rsquo;s Apples.&amp;quot;"  />
-</p>
-<!-- raw HTML omitted -->
 
 
 </div>
@@ -329,6 +336,7 @@
         
         
     </li>
+
         
             <li>
         
@@ -349,6 +357,7 @@
         
         
     </li>
+
         
             <li>
         
@@ -369,6 +378,7 @@
         
         
     </li>
+
         
     </ul>
     
@@ -400,6 +410,7 @@
     
     
 </footer>
+
             
         </div>
     </section>
@@ -416,6 +427,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

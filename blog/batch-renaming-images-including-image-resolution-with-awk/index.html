@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="Batch renaming images, including image resolution, with awk - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -30,6 +32,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/renaming-rainbow.png"/>
+
 
 
     <meta name="twitter:card" content="summary_large_image" />
@@ -54,7 +57,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -138,6 +141,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -147,7 +151,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/renaming-rainbow.png" alt="cover image" />
 </div>
 
@@ -182,6 +186,8 @@
             ci/cd
         </a>&nbsp;
         
+        
+
         
     </p>
 
@@ -224,10 +230,10 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 
 <h2 id="isolate-the-information-we-want" class="anchor-link"><a href="#isolate-the-information-we-want">Isolate the information we want</a></h2>
 <p>I love <code>awk</code> for its simplicity. It takes lines of text and makes individual bits of information available to us with built in variables that we can then refer to as column numbers denoted by <code>$1</code>, <code>$2</code>, etc. By default, <code>awk</code> splits up columns on whitespace. To take the example above:</p>
-<pre><code>|              1               |   2  |   3   |   4   |     5     |     6     | 7  |      8     |   9    | 10 |
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">|              1               |   2  |   3   |   4   |     5     |     6     | 7  |      8     |   9    | 10 |
 -------------------------------------------------------------------------------------------------------------
 | IMG_20170808_172653_425.jpg: | JPEG | image | data, | baseline, | precision | 8, | 4032x3024, | frames | 3  |
-</code></pre><p>We can denote different values to use as a splitter with, for example, <code>-F','</code> if we wanted to use commas as the column divisions. For our current project, spaces are fine.</p>
+</code></pre></div><p>We can denote different values to use as a splitter with, for example, <code>-F','</code> if we wanted to use commas as the column divisions. For our current project, spaces are fine.</p>
 <p>There are a couple issues we need to solve before we can plug the information into our new filenames. Column <code>$1</code> has the original filename we want, but there&rsquo;s an extra &ldquo;:&rdquo; character on the end. We don&rsquo;t need the &ldquo;.jpg&rdquo; either. Column <code>$8</code> has an extra &ldquo;,&rdquo; that we don&rsquo;t want as well. To get just to information we need, we&rsquo;ll take a substring of the column with <code>substr()</code>:</p>
 <p><code>substr($1, 1, length($1)-5)</code> - This gives us the file name from the beginning of the string to the end of the string, minus 5 characters (&ldquo;length minus 5&rdquo;).
 <code>substr($8,1, length($8)-1)</code> - This gives us the image size, without the extra comma (&ldquo;length minus 1&rdquo;).</p>
@@ -244,11 +250,11 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 <p>If we only used pipe in this instance, all our data from <code>file</code> and <code>awk</code> would get fed into <code>rename</code> all at once, making for one very, very long and probably non-compiling file name. To run the <code>rename</code> command line by line, we can use <code>while</code> and <code>read</code>. Similarly to <code>awk</code>, <code>read</code> takes input and splits it into variables we can assign and use. In our code, it takes the first bit of output from <code>awk</code> (the original file name) and assigns that the variable name <code>$fn</code>. It takes the second output (our incrementing number and the image resolution) and assigns that to <code>$fr</code>. The variable names are arbitrary; you can call them whatever you want.</p>
 <p>To run our <code>rename</code> commands as if we&rsquo;d manually entered them in the terminal one by one, we can use <code>echo $(some command)</code>. Finally, <code>done</code> ends our <code>while</code> loop.</p>
 
-<h2 id="bonus-round-rainbow-output" class="anchor-link"><a href="#bonus-round-rainbow-output">Bonus round: rainbow output!</a></h2>
+<h2 id="bonus-round-rainbow-output" class="anchor-link"><a href="#bonus-round-rainbow-output">Bonus round: rainbow output</a></h2>
 <p>I wasn&rsquo;t kidding with that <a href="https://github.com/tehmaze/lolcat">&ldquo;rainbow-coloured&rdquo; bit&hellip;</a></p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ pip install lolcat
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">p install lolcat
 </code></pre></div><p>Here&rsquo;s our full code:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ file IMG* <span class="p">|</span> awk <span class="s1">&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> fn fs<span class="p">;</span> <span class="k">do</span> <span class="nb">echo</span> <span class="k">$(</span>rename -v <span class="s2">&#34;s/</span><span class="nv">$fn</span><span class="s2">/img_</span><span class="nv">$fs</span><span class="s2">/g&#34;</span> *<span class="k">)</span><span class="p">;</span> <span class="k">done</span> <span class="p">|</span> lolcat
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">le IMG* <span class="p">|</span> awk <span class="s1">&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> fn fs<span class="p">;</span> <span class="k">do</span> <span class="nb">echo</span> <span class="k">$(</span>rename -v <span class="s2">&#34;s/</span><span class="nv">$fn</span><span class="s2">/img_</span><span class="nv">$fs</span><span class="s2">/g&#34;</span> *<span class="k">)</span><span class="p">;</span> <span class="k">done</span> <span class="p">|</span> lolcat
 </code></pre></div><p>Enjoy!</p>
 
 
@@ -285,6 +291,7 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
         
         
     </li>
+
         
             <li>
         
@@ -305,6 +312,7 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
         
         
     </li>
+
         
             <li>
         
@@ -325,6 +333,7 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
         
         
     </li>
+
         
     </ul>
     
@@ -356,6 +365,7 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
     
     
 </footer>
+
             
         </div>
     </section>
@@ -372,6 +382,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

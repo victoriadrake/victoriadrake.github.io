@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="Breaking bottlenecks 🍾 - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/breaking-bottlenecks/cover.png"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Breaking bottlenecks 🍾" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/breaking-bottlenecks/cover.png" alt="cover image" />
 </div>
 
@@ -185,6 +189,8 @@
             python
         </a>&nbsp;
         
+        
+
         
     </p>
 
@@ -238,7 +244,7 @@
 <p>As you can see, the nodes &ldquo;GET page&rdquo; -&gt; &ldquo;HTML&rdquo; -&gt; &ldquo;Parse links&rdquo; -&gt; &ldquo;Valid link&rdquo; -&gt; &ldquo;Check visited&rdquo; all form a loop. These are what enable our web crawler to continue crawling until all the links on the site have been accounted for in the &ldquo;Check visited&rdquo; node. When the crawler encounters links it&rsquo;s already checked, it will &ldquo;Stop.&rdquo; This loop will become more important in a moment.</p>
 <p>For now, the question on everyone&rsquo;s mind (I hope): how do we make it fast?</p>
 
-<h2 id="how-fast-can-you-do-the-thing" class="anchor-link"><a href="#how-fast-can-you-do-the-thing">How fast can you do the thing?</a></h2>
+<h2 id="how-fast-can-you-do-the-thing" class="anchor-link"><a href="#how-fast-can-you-do-the-thing">How fast can you do the thing</a></h2>
 <p>Here are some approximate timings for tasks performed on a typical PC:</p>
 <table>
 <thead>
@@ -336,7 +342,7 @@
 <p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
-🌮  
+🌮
 🌮   ╔══════════════╗
 🌮      Hi I&#39;m Bob                          🌳
 🌮   ╚══════════════╝ \
@@ -348,7 +354,7 @@
 </code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
-🌮  
+🌮
 🌮
 🌮                                          🌳
 🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵
@@ -361,7 +367,7 @@
 <p>We can try splitting the queue:</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
-🌮  
+🌮
 🌮         🧑💵🧑💵🧑💵🧑💵
 🌮                                          🌳
 🌮      🐹
@@ -481,26 +487,26 @@
 <span class="nx">wg</span><span class="p">.</span><span class="nf">Wait</span><span class="p">()</span>
 </code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
 
-<h2 id="did-we-do-the-thing-fast" class="anchor-link"><a href="#did-we-do-the-thing-fast">Did we do the thing fast?</a></h2>
+<h2 id="did-we-do-the-thing-fast" class="anchor-link"><a href="#did-we-do-the-thing-fast">Did we do the thing fast</a></h2>
 <p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
 
-real	17m34.084s
-user	11m40.761s
+real 17m34.084s
+user 11m40.761s
 sys     0m5.436s
 </code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
 <p>The multithreaded Python version did a bit better:</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 hydra.py https://victoria.dev
 
-real	1m13.358s
-user	0m13.161s
+real 1m13.358s
+user 0m13.161s
 sys     0m2.826s
 </code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
 <p>How did Go do?</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time ./go-link-check --url=https://victoria.dev
 
-real	0m7.926s
-user	0m9.044s
+real 0m7.926s
+user 0m9.044s
 sys     0m0.932s
 </code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
 
@@ -542,6 +548,7 @@ sys     0m0.932s
         
         
     </li>
+
         
             <li>
         
@@ -562,6 +569,7 @@ sys     0m0.932s
         
         
     </li>
+
         
             <li>
         
@@ -582,6 +590,7 @@ sys     0m0.932s
         
         
     </li>
+
         
     </ul>
     
@@ -613,6 +622,7 @@ sys     0m0.932s
     
     
 </footer>
+
             
         </div>
     </section>
@@ -629,6 +639,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

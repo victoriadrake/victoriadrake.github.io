@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="Two ways to deploy a public GitHub Pages site from a private Hugo repository - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover.png"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Two ways to deploy a public GitHub Pages site from a private Hugo repository" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover.png" alt="cover image" />
 </div>
 
@@ -170,6 +174,8 @@
         </a>&nbsp;
         
         
+
+        
     </p>
 
     
@@ -182,12 +188,18 @@
         </label>
         <nav id="TableOfContents">
   <ul>
-    <li><a href="#setting-up-the-travis-configuration-file">Setting up the Travis configuration file</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#setting-up-netlify">Setting up Netlify</a></li>
-    <li><a href="#same-same-but-different">Same same but different</a></li>
+    <li><a href="#private-to-public-github-pages-deployment-with-travis-ci">Private-to-public GitHub Pages deployment with Travis CI</a>
+      <ul>
+        <li><a href="#setting-up-the-travis-configuration-file">Setting up the Travis configuration file</a></li>
+      </ul>
+    </li>
+    <li><a href="#deploying-to-a-separate-repository-with-netlify-and-make">Deploying to a separate repository with Netlify and Make</a>
+      <ul>
+        <li><a href="#setting-up-netlify">Setting up Netlify</a></li>
+        <li><a href="#same-same-but-different">Same same but different</a></li>
+      </ul>
+    </li>
+    <li><a href="#go-forth-and-deploy-fearlessly">Go forth and deploy fearlessly</a></li>
   </ul>
 </nav>
     </div>
@@ -216,7 +228,7 @@
 <p>This article assumes you have working knowledge of Git and GitHub Pages. If not, you may like to spin off some browser tabs from my articles on <a href="/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy</a> and <a href="/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/">building a site with Hugo and GitHub Pages</a> first.</p>
 <p>Let&rsquo;s do it!</p>
 
-<h1 id="private-to-public-github-pages-deployment-with-travis-ci" class="anchor-link"><a href="#private-to-public-github-pages-deployment-with-travis-ci">Private-to-public GitHub Pages deployment with Travis CI</a></h1>
+<h2 id="private-to-public-github-pages-deployment-with-travis-ci" class="anchor-link"><a href="#private-to-public-github-pages-deployment-with-travis-ci">Private-to-public GitHub Pages deployment with Travis CI</a></h2>
 <p>Travis CI has the built-in ability (♪) to <a href="https://docs.travis-ci.com/user/deployment/pages/">deploy to GitHub Pages</a> following a successful build. They do a decent job in the docs of explaining how to add this feature, especially if you&rsquo;ve used Travis CI before&hellip; which I haven&rsquo;t. Don&rsquo;t worry, I did the bulk of the figuring-things-out for you.</p>
 <ul>
 <li>Travis CI gets all its instructions from a configuration file in the root of your repository called <code>.travis.yml</code></li>
@@ -224,12 +236,12 @@
 <li>Once your script successfully finishes doing what you&rsquo;ve told it to do (not necessarily what you <em>want</em> it to do but that&rsquo;s a whole other blog post), Travis will deploy your build directory to a repository you can specify with the <code>repo</code> configuration variable.</li>
 </ul>
 
-<h2 id="setting-up-the-travis-configuration-file" class="anchor-link"><a href="#setting-up-the-travis-configuration-file">Setting up the Travis configuration file</a></h2>
+<h3 id="setting-up-the-travis-configuration-file" class="anchor-link"><a href="#setting-up-the-travis-configuration-file">Setting up the Travis configuration file</a></h3>
 <p>Create a new configuration file for Travis with the filename <code>.travis.yml</code> (note the leading &ldquo;.&quot;). These scripts are very customizable and I struggled to find a relevant example to use as a starting point - luckily, you don&rsquo;t have that problem!</p>
 <p>Here&rsquo;s my basic <code>.travis.yml</code>:</p>
 <div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="k">git</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span><span class="k">depth</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-</span><span class="w">  
+</span><span class="w">
 </span><span class="w"></span><span class="k">env</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span><span class="k">global</span><span class="p">:</span><span class="w">
 </span><span class="w">    </span>- HUGO_VERSION=<span class="s2">&#34;0.54.0&#34;</span><span class="w">
@@ -266,7 +278,7 @@ travis encrypt <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>xxxxx
 <p><em>Yo that&rsquo;s cool but I like Netlify.</em></p>
 <p>Okay fine.</p>
 
-<h1 id="deploying-to-a-separate-repository-with-netlify-and-make" class="anchor-link"><a href="#deploying-to-a-separate-repository-with-netlify-and-make">Deploying to a separate repository with Netlify and Make</a></h1>
+<h2 id="deploying-to-a-separate-repository-with-netlify-and-make" class="anchor-link"><a href="#deploying-to-a-separate-repository-with-netlify-and-make">Deploying to a separate repository with Netlify and Make</a></h2>
 <p>We can get Netlify to do our bidding by using a Makefile, which we&rsquo;ll run with Netlify&rsquo;s build command.</p>
 <p>Here&rsquo;s what our <code>Makefile</code> looks like:</p>
 <div class="highlight"><pre class="chroma"><code class="language-makefile" data-lang="makefile"><span class="nv">SHELL</span><span class="o">:=</span>/bin/bash
@@ -278,31 +290,31 @@ travis encrypt <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>xxxxx
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">clean</span>
 <span class="nf">clean</span><span class="o">:</span>
-	@echo <span class="s2">&#34;Removing public directory&#34;</span>
-	rm -rf <span class="k">$(</span>BASEDIR<span class="k">)</span>/<span class="k">$(</span>OUTPUTDIR<span class="k">)</span>
+ @echo <span class="s2">&#34;Removing public directory&#34;</span>
+ rm -rf <span class="k">$(</span>BASEDIR<span class="k">)</span>/<span class="k">$(</span>OUTPUTDIR<span class="k">)</span>
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">get_repository</span>
 <span class="nf">get_repository</span><span class="o">:</span>
-	@echo <span class="s2">&#34;Getting public repository&#34;</span>
-	git clone https://github.com/gh-username/gh-username.github.io.git public
+ @echo <span class="s2">&#34;Getting public repository&#34;</span>
+ git clone https://github.com/gh-username/gh-username.github.io.git public
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">build</span>
 <span class="nf">build</span><span class="o">:</span>
-	@echo <span class="s2">&#34;Generating site&#34;</span>
-	hugo --gc --minify
+ @echo <span class="s2">&#34;Generating site&#34;</span>
+ hugo --gc --minify
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">deploy</span>
 <span class="nf">deploy</span><span class="o">:</span>
-	@echo <span class="s2">&#34;Preparing commit&#34;</span>
-	@cd <span class="k">$(</span>OUTPUTDIR<span class="k">)</span> <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git config user.email <span class="s2">&#34;you@youremail.com&#34;</span> <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git config user.name <span class="s2">&#34;Your Name&#34;</span> <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git add . <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git status <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git commit -m <span class="s2">&#34;Deploy via Makefile&#34;</span> <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git push -f -q https://<span class="k">$(</span>GITHUB_TOKEN<span class="k">)</span>@github.com/gh-username/gh-username.github.io.git master
+ @echo <span class="s2">&#34;Preparing commit&#34;</span>
+ @cd <span class="k">$(</span>OUTPUTDIR<span class="k">)</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git config user.email <span class="s2">&#34;you@youremail.com&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git config user.name <span class="s2">&#34;Your Name&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git add . <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git status <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git commit -m <span class="s2">&#34;Deploy via Makefile&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git push -f -q https://<span class="k">$(</span>GITHUB_TOKEN<span class="k">)</span>@github.com/gh-username/gh-username.github.io.git master
 
-	@echo <span class="s2">&#34;Pushed to remote&#34;</span>
+ @echo <span class="s2">&#34;Pushed to remote&#34;</span>
 </code></pre></div><p>To preserve the Git history of our separate GitHub Pages repository, we&rsquo;ll first clone it, build our new Hugo site to it, and then push it back to the Pages repository. This script first removes any existing <code>public/</code> folder that might contain files or a Git history. It then clones our Pages repository to <code>public/</code>, builds our Hugo site (essentially updating the files in <code>public/</code>), then takes care of committing the new site to the Pages repository.</p>
 <p>In the <code>deploy</code> section, you&rsquo;ll notice lines starting with <code>&amp;&amp;</code>. These are chained commands. Since Make <a href="https://www.gnu.org/software/make/manual/html_node/Execution.html#Execution">invokes a new sub-shell for each line</a>, it starts over with every new line from our root directory. To get our <code>cd</code> to stick and avoid running our Git commands in the project root directory, we&rsquo;re chaining the commands and using the backslash character to <a href="http://clarkgrubb.com/makefile-style-guide#breaking-long-lines">break long lines</a> for readability.</p>
 <p>By chaining our commands, we&rsquo;re able to <a href="https://stackoverflow.com/questions/6116548/how-to-tell-git-to-use-the-correct-identity-name-and-email-for-a-given-project">configure our Git identity</a>, add all our updated files, and create a commit for our Pages repository.</p>
@@ -311,22 +323,23 @@ travis encrypt <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>xxxxx
 <p>To avoid printing the token in Netlify&rsquo;s logs, we suppress <a href="https://www.gnu.org/software/make/manual/html_node/Echoing.html#Echoing">recipe echoing</a> for that line with the leading <code>@</code> character.</p>
 <p>With your Makefile in the root of your private GitHub repository, you can set up Netlify to run it for you.</p>
 
-<h2 id="setting-up-netlify" class="anchor-link"><a href="#setting-up-netlify">Setting up Netlify</a></h2>
+<h3 id="setting-up-netlify" class="anchor-link"><a href="#setting-up-netlify">Setting up Netlify</a></h3>
 <p>Getting set up with Netlify via the <a href="https://app.netlify.com/">web UI</a> is straightforward. Once you sign in with GitHub, choose the private GitHub repository where your Hugo site lives. The next page Netlify takes you to lets you enter deploy settings:</p>
 <p>
 
 <img src="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/netlify-new-site.png" alt="Create a new site page"  />
+
 </p>
 <p>You can specify the build command that will run your Makefile (<code>make all</code> for this example). The branch to deploy and the publish directory don&rsquo;t matter too much in our specific case, since we&rsquo;re only concerned with pushing to a separate repository. You can enter the typical <code>master</code> deploy branch and <code>public</code> publish directory.</p>
 <p>Under &ldquo;Advanced build settings&rdquo; click &ldquo;New variable&rdquo; to add your GitHub personal access token as a Build Environment Variable. In our example, the variable name is <code>GITHUB_TOKEN</code>. Click &ldquo;Deploy site&rdquo; to make the magic happen.</p>
 <p>If you&rsquo;ve already previously set up your repository with Netlify, find the settings for Continuous Deployment under Settings &gt; Build &amp; deploy.</p>
 <p>Netlify will build your site each time you push to the private repository. If you don&rsquo;t want a particular commit to trigger a build, <a href="https://www.netlify.com/docs/continuous-deployment/#skipping-a-deploy">add <code>[skip ci]</code> in your Git commit message</a>.</p>
 
-<h2 id="same-same-but-different" class="anchor-link"><a href="#same-same-but-different">Same same but different</a></h2>
+<h3 id="same-same-but-different" class="anchor-link"><a href="#same-same-but-different">Same same but different</a></h3>
 <p>One effect of using Netlify this way is that your site will be built in two places: one is the separate, public GitHub Pages repository that the Makefile pushes to, and the other is your Netlify site that deploys on their CDN from your linked private GitHub repository. The latter is useful if you&rsquo;re going to play with <a href="https://www.netlify.com/blog/2016/07/20/introducing-deploy-previews-in-netlify/">Deploy Previews</a> and other Netlify features, but those are outside the scope of this post.</p>
 <p>The main point is that your GitHub Pages site is now updated in your public repo. Yay!</p>
 
-<h1 id="go-forth-and-deploy-fearlessly" class="anchor-link"><a href="#go-forth-and-deploy-fearlessly">Go forth and deploy fearlessly</a></h1>
+<h2 id="go-forth-and-deploy-fearlessly" class="anchor-link"><a href="#go-forth-and-deploy-fearlessly">Go forth and deploy fearlessly</a></h2>
 <p>I hope the effect of this new information is that you feel more able to update your sites, wherever you happen to be. The possibilities are endless - at home on your couch with your laptop, out cafe-hopping with your iPad, or in the middle of a first date on your phone. Endless!</p>
 <figure>
     <img src="date-deploy.png"
@@ -370,6 +383,7 @@ travis encrypt <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>xxxxx
         
         
     </li>
+
         
             <li>
         
@@ -390,6 +404,7 @@ travis encrypt <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>xxxxx
         
         
     </li>
+
         
             <li>
         
@@ -410,6 +425,7 @@ travis encrypt <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>xxxxx
         
         
     </li>
+
         
     </ul>
     
@@ -441,6 +457,7 @@ travis encrypt <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>xxxxx
     
     
 </footer>
+
             
         </div>
     </section>
@@ -457,6 +474,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

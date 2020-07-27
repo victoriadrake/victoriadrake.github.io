@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="Moving to a new domain without breaking old links with AWS &amp; Disqus - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/cover_aws-moving.png"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Moving to a new domain without breaking old links with AWS &amp; Disqus" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/cover_aws-moving.png" alt="cover image" />
 </div>
 
@@ -170,6 +174,8 @@
         </a>&nbsp;
         
         
+
+        
     </p>
 
     
@@ -180,7 +186,13 @@
                 <span class="dropdown-icon">⚓</span>
             </p>
         </label>
-        <nav id="TableOfContents"></nav>
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#preserve-old-links-with-redirection-rules">Preserve old links with redirection rules</a></li>
+    <li><a href="#migrate-disqus-comments">Migrate Disqus comments</a></li>
+    <li><a href="#transfer-other-settings">Transfer other settings</a></li>
+  </ul>
+</nav>
     </div>
     
 </div>
@@ -202,15 +214,16 @@
 </ul>
 <p>If you&rsquo;d like a walk-through for how to set up a new domain with this structure, it&rsquo;s over here: <a href="https://victoria.dev/verbose/aws-static-site/">Hosting your static site with AWS S3, Route 53, and CloudFront</a>. In this post, I&rsquo;ll just detail how I managed to move my blog to the new site without breaking the old links or losing any comments.</p>
 
-<h1 id="preserve-old-links-with-redirection-rules" class="anchor-link"><a href="#preserve-old-links-with-redirection-rules">Preserve old links with redirection rules</a></h1>
+<h2 id="preserve-old-links-with-redirection-rules" class="anchor-link"><a href="#preserve-old-links-with-redirection-rules">Preserve old links with redirection rules</a></h2>
 <p>I wanted to avoid breaking links that have been posted around the web by forwarding visitors to the new URL. The change looks like this:</p>
-<p>Old URL: <code>https://victoria.dev/meta/5-bag-lessons/</code><br>
-New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
+<p>Old URL: <code>https://victoria.dev/meta/5-bag-lessons/</code></p>
+<p>New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
 <p>You can see that the domain name as well as the subdirectory have changed, but the slug for the blog post remains the same. (I love static sites.)</p>
 <p>To redirect links from the old site, we&rsquo;ll need to set redirection rules in the old site&rsquo;s S3 bucket. AWS provides a way to set up a conditional redirect. This is set in the &ldquo;Redirection rules&rdquo; section of your S3 bucket&rsquo;s properties, under &ldquo;Static website hosting.&rdquo; You can <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html#advanced-conditional-redirects">find the documentation here.</a></p>
 <p>
 
 <img src="https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/aws-redirect.png#screenshot" alt="Redirection rules placement"  />
+
 </p>
 <p>There are a few examples given, but none that represent the redirect I want. In addition to changing the prefix of the object key, we&rsquo;re also changing the domain. The latter is achieved with the <code>&lt;HostName&gt;</code> tag.</p>
 <p>To redirect requests for the old blog URL to the new top level domain, we&rsquo;ll use the code below.</p>
@@ -227,17 +240,18 @@ New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
 <span class="nt">&lt;/RoutingRules&gt;</span>
 </code></pre></div><p>This rule ensures that requests for <code>olddomain.com/oldblog/specific-blog-post</code> will redirect to <code>newdomain.com/newblog/specific-blog-post</code>.</p>
 
-<h1 id="migrate-disqus-comments" class="anchor-link"><a href="#migrate-disqus-comments">Migrate Disqus comments</a></h1>
+<h2 id="migrate-disqus-comments" class="anchor-link"><a href="#migrate-disqus-comments">Migrate Disqus comments</a></h2>
 <p>Disqus provides a tool for migrating the comment threads from your old blog site to the new one. You can find it in your Disqus admin tools at <code>your-short-name.disqus.com/admin/discussions/migrate/</code>.</p>
 <p>To migrate posts from the old blog address to the new one, we&rsquo;ll use the URL mapper tool. Click &ldquo;Start URL mapper,&rdquo; then &ldquo;you can download a CSV here.&rdquo;</p>
 <p>
 
 <img src="https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/aws-disqus.png#screenshot" alt="URL mapping for Disqus."  />
+
 </p>
 <p>Disqus has decent instructions for how this tool works, and you can <a href="https://help.disqus.com/customer/en/portal/articles/912757-url-mapper">read them here.</a> Basically, you&rsquo;ll input the new blog URLs into the second column of the CSV file you downloaded, then pass it back to Disqus to process. If you&rsquo;re using a program to edit the CSV, be sure to save the resulting file in CSV format.</p>
 <p>Unless you have a bazillion URLs, the tool works pretty quickly, and you&rsquo;ll get an email when it&rsquo;s finished. Don&rsquo;t forget to update the name of your site in the Disqus admin, too.</p>
 
-<h1 id="transfer-other-settings" class="anchor-link"><a href="#transfer-other-settings">Transfer other settings</a></h1>
+<h2 id="transfer-other-settings" class="anchor-link"><a href="#transfer-other-settings">Transfer other settings</a></h2>
 <p>Update links in your social profiles and any other sites you may have around the web. If you&rsquo;re using other services attached to your website like Google Analytics or IFTTT, don&rsquo;t forget to update those details too!</p>
 
 
@@ -274,6 +288,7 @@ New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
         
         
     </li>
+
         
             <li>
         
@@ -294,6 +309,7 @@ New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
         
         
     </li>
+
         
             <li>
         
@@ -314,6 +330,7 @@ New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
         
         
     </li>
+
         
     </ul>
     
@@ -345,6 +362,7 @@ New URL: <code>https://heronebag.com/blog/5-bag-lessons/</code></p>
     
     
 </footer>
+
             
         </div>
     </section>
@@ -361,6 +379,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

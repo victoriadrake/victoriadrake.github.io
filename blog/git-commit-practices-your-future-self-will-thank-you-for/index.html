@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="Git commit practices your future self will thank you for - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Git commit practices your future self will thank you for" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png" alt="cover image" />
 </div>
 
@@ -174,6 +178,8 @@
         </a>&nbsp;
         
         
+
+        
     </p>
 
     
@@ -186,14 +192,24 @@
         </label>
         <nav id="TableOfContents">
   <ul>
-    <li><a href="#reference-related-discussion">Reference related discussion</a></li>
-    <li><a href="#use-helpful-vim-settings-for-git-commit-messages">Use helpful Vim settings for git commit messages</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#method-1-one-commit-to-rule-the-master-branch">Method #1: one commit to rule the master branch</a></li>
-    <li><a href="#method-2-not-_that_-much">Method #2: not <em>that</em> much!</a></li>
-    <li><a href="#method-3-getting-picky">Method #3: getting picky</a></li>
+    <li><a href="#what-does-it-mean-to-commit-responsibly">What does it mean to commit responsibly</a></li>
+    <li><a href="#write-great-git-commit-messages-with-a-template">Write great Git commit messages with a template</a>
+      <ul>
+        <li><a href="#reference-related-discussion">Reference related discussion</a></li>
+        <li><a href="#use-helpful-vim-settings-for-git-commit-messages">Use helpful Vim settings for git commit messages</a></li>
+      </ul>
+    </li>
+    <li><a href="#one-change-per-commit-how-to-squash-git-commits">One change per commit: how to squash Git commits</a>
+      <ul>
+        <li><a href="#method-1-one-commit-to-rule-the-master-branch">Method #1: one commit to rule the master branch</a></li>
+        <li><a href="#method-2-not-_that_-much">Method #2: not <em>that</em> much</a></li>
+        <li><a href="#method-3-getting-picky">Method #3: getting picky</a></li>
+      </ul>
+    </li>
+    <li><a href="#git-stash">Git stash</a></li>
+    <li><a href="#tag-release-versions-using-annotated-git-tags">Tag release versions using annotated Git tags</a></li>
+    <li><a href="#practice-responsible-commits">Practice responsible commits</a></li>
+    <li><a href="#reference-links">Reference links</a></li>
   </ul>
 </nav>
     </div>
@@ -209,7 +225,7 @@
     <p>A history of clean commits can be evidence of a lot of things: attention to detail, good work ethic, and genuine investment in the project. What do your Git commits say about you?</p>
 <p>If, like me, there <em>might</em> be one or two less than stellar ones, well, we&rsquo;re only human. A nice part of being human is having the ability to learn new and complex things fairly quickly, and continuously improve ourselves. In that spirit, I&rsquo;d like to share some things I&rsquo;ve learned about creating clean, useful, and responsible Git commits.</p>
 
-<h1 id="what-does-it-mean-to-commit-responsibly" class="anchor-link"><a href="#what-does-it-mean-to-commit-responsibly">What does it mean to commit responsibly?</a></h1>
+<h2 id="what-does-it-mean-to-commit-responsibly" class="anchor-link"><a href="#what-does-it-mean-to-commit-responsibly">What does it mean to commit responsibly</a></h2>
 <p>Whether our code will be seen by the entire open source community or just future versions of ourselves, either one will be grateful if we commit responsibly today. Being responsible can mean a lot of things to different people, so I enlisted some of <a href="https://mastodon.technology/@victoria/">mastodon.technology</a> and <a href="https://dev.to/victoria/what-does-it-mean-to-commit-responsibly-22mi">dev.to</a> to help round out my list. From those (really great) threads, I distilled these main points:</p>
 <blockquote>
 <p><strong>Committing responsibly</strong></p>
@@ -223,7 +239,7 @@
 <p>Some of the above is achieved through maintaining a short feedback loop that helps you improve your code quality while staying accountable to yourself. <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">I wrote another article</a> that discusses this in detail, especially the part about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/#block-out-time-for-code-review">code review</a>. Other items on this list have to do specifically with making commits in Git. There are some features of Git that can benefit us in these areas, as can harnessing tools like Vim. I&rsquo;ll cover those topics here.</p>
 <p>If the majority of your Git commits so far have been created with something like <code>git commit -m &quot;Bug fixes&quot;</code> then this is the article for you!</p>
 
-<h1 id="write-great-git-commit-messages-with-a-template" class="anchor-link"><a href="#write-great-git-commit-messages-with-a-template">Write great Git commit messages with a template</a></h1>
+<h2 id="write-great-git-commit-messages-with-a-template" class="anchor-link"><a href="#write-great-git-commit-messages-with-a-template">Write great Git commit messages with a template</a></h2>
 <p>I think <a href="https://github.com/torvalds/subsurface-for-dirk/commit/b6590150d68df528efd40c889ba6eea476b39873">Linus</a> would be very happy if we didn&rsquo;t use <code>git commit -m &quot;Fix bug&quot;</code> in a public repository ever again. As very well put in <a href="https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html">this classic post</a> and <a href="https://chris.beams.io/posts/git-commit/">the seven rules of a great Git commit message</a>:</p>
 <blockquote>
 <p>A properly formed Git commit subject line should always be able to complete the following sentence:</p>
@@ -240,15 +256,15 @@ What effects does the patch have?</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global commit.template ~/.gitmessage
 vim ~/.gitmessage
 </code></pre></div><p>When we run <code>git commit</code> without the <code>-m</code> message flag, the editor will open with our helpful template ready to go. Here&rsquo;s my commit message template:</p>
-<pre><code class="language-console" data-lang="console"># If applied, this commit will...
-# [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
+<pre><code class="language-console" data-lang="console">## If applied, this commit will...
+## [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
 
 
-# Why is it necessary? (Bug fix, feature, improvements?)
+## Why is it necessary? (Bug fix, feature, improvements?)
 -
-# How does the change address the issue?
+## How does the change address the issue?
 -
-# What side effects does this change have?
+## What side effects does this change have?
 -
 </code></pre><p>I&rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:</p>
 <div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">Fix #16 missing CSS variables
@@ -256,10 +272,10 @@ vim ~/.gitmessage
 - Add background color, height for code blocks
 - Only affects highlight class
 </code></pre></div>
-<h2 id="reference-related-discussion" class="anchor-link"><a href="#reference-related-discussion">Reference related discussion</a></h2>
+<h3 id="reference-related-discussion" class="anchor-link"><a href="#reference-related-discussion">Reference related discussion</a></h3>
 <p>Issue trackers in <a href="https://help.github.com/articles/closing-issues-using-keywords/">GitHub</a> and <a href="https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html">Bitbucket</a> both recognize the keywords <code>close</code>, <code>fix</code>, and <code>resolve</code> followed immediately by the issue or pull request number. These keywords conveniently help us close the referenced issue or pull request, and this helps maintain a clear trail of changes. <a href="https://docs.gitlab.com/ee/user/project/issues/crosslinking_issues.html">GitLab</a>, and issue trackers like <a href="https://confluence.atlassian.com/jirasoftwarecloud/referencing-issues-in-your-development-work-777002789.html">Jira</a> offer similar functionalities.</p>
 
-<h2 id="use-helpful-vim-settings-for-git-commit-messages" class="anchor-link"><a href="#use-helpful-vim-settings-for-git-commit-messages">Use helpful Vim settings for git commit messages</a></h2>
+<h3 id="use-helpful-vim-settings-for-git-commit-messages" class="anchor-link"><a href="#use-helpful-vim-settings-for-git-commit-messages">Use helpful Vim settings for git commit messages</a></h3>
 <p>By adding a few lines to our Vim configuration, we can make writing great git commit messages easy. We can add these lines to <code>~/.vimrc</code> to turn on syntax highlighting in general, and spell check and text wrapping for commit messages in particular:</p>
 <div class="highlight"><pre class="chroma"><code class="language-vimrc" data-lang="vimrc"><span class="c">&#34; Filetype detection, plugins, and indent rules</span><span class="err">
 </span><span class="err"></span><span class="nx">filetype</span> <span class="nx">plugin</span> <span class="nx">indent</span> <span class="nx">on</span><span class="err">
@@ -272,12 +288,14 @@ vim ~/.gitmessage
 </span></code></pre></div><p>If you&rsquo;re curious, <a href="https://gist.github.com/victoriadrake/81699ada73748ecf7603c7708a5385ff">my full <code>~/.vimrc</code> is on GitHub</a>.</p>
 <p>Other editors have settings that can help us out as well. I came across <a href="https://dev.to/shreyasminocha/how-i-do-my-git-commits-34d">these for Sublime Text 3</a> and <a href="https://github.com/Microsoft/vscode-docs/blob/master/docs/getstarted/tips-and-tricks.md#language-specific-settings">language specific settings for VS Code</a>.</p>
 
-<h1 id="one-change-per-commit-how-to-squash-git-commits" class="anchor-link"><a href="#one-change-per-commit-how-to-squash-git-commits">One change per commit: how to squash Git commits</a></h1>
-<p>
+<h2 id="one-change-per-commit-how-to-squash-git-commits" class="anchor-link"><a href="#one-change-per-commit-how-to-squash-git-commits">One change per commit: how to squash Git commits</a></h2>
+<figure>
+    <img src="git-commit-squash.png"
+         alt="A doodle of squash"/> <figcaption>
+            <p>Still life Git</p>
+        </figcaption>
+</figure>
 
-<img src="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/git-commit-squash.png" alt="A doodle of squash"  />
-</p>
-<!-- raw HTML omitted -->
 <p>Let&rsquo;s get one thing out of the way first: rewriting Git history just for the sake of having a pretty tree, especially with public repositories, is generally not advisable. It&rsquo;s kind of like going back in time, where changes you make to your version of the project cause it to look completely different from a version that someone else forked from a point in history that you&rsquo;ve now erased - I mean, haven&rsquo;t you seen <em>Back to the Future Part II</em>? (If you&rsquo;d rather maintain that only one <em>Back to the Future</em> movie was ever made, thus sparing your future self from having to watch the sequels, I get it.)</p>
 <p>Here&rsquo;s the main point. If you&rsquo;ve pushed messy commits to a public repository, I say go right ahead and leave them be, instead of complicating things further. (We all learn from our embarrassments, especially the public ones - I&rsquo;m looking at you, past-Vicky.) If your messy commits currently only exist on your local version, great! We can tidy them up into one clean, well-described commit that we&rsquo;ll be proud to push, and no one will be the wiser.</p>
 <p>There are a couple different ways to squash commits, and choosing the appropriate one depends on what we need to achieve.</p>
@@ -285,7 +303,7 @@ vim ~/.gitmessage
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global alias.plog <span class="s2">&#34;log --graph --pretty=format:&#39;%h -%d %s %n&#39; --abbrev-commit --date=relative --branches&#34;</span>
 </code></pre></div><p>Then we just do <code>git plog</code> to see the pretty log.</p>
 
-<h2 id="method-1-one-commit-to-rule-the-master-branch" class="anchor-link"><a href="#method-1-one-commit-to-rule-the-master-branch">Method #1: one commit to rule the master branch</a></h2>
+<h3 id="method-1-one-commit-to-rule-the-master-branch" class="anchor-link"><a href="#method-1-one-commit-to-rule-the-master-branch">Method #1: one commit to rule the master branch</a></h3>
 <p>This is appropriate when:</p>
 <ul>
 <li>We&rsquo;re committing directly to master</li>
@@ -320,7 +338,7 @@ vim ~/.gitmessage
 git commit
 </code></pre></div><p>Yup that&rsquo;s all. We can delete the unwanted branch with <code>git branch -D new-article</code>.</p>
 
-<h2 id="method-2-not-_that_-much" class="anchor-link"><a href="#method-2-not-_that_-much">Method #2: not <em>that</em> much!</a></h2>
+<h3 id="method-2-not-_that_-much" class="anchor-link"><a href="#method-2-not-_that_-much">Method #2: not <em>that</em> much</a></h3>
 <p>This is appropriate when:</p>
 <ul>
 <li>We want to squash the last <em>x</em> commits but not <em>all</em> commits since <code>origin/master</code></li>
@@ -354,7 +372,7 @@ git commit -m <span class="s2">&#34;New message for the combined commit&#34;</sp
 </code></pre></div><p>Where <code>--soft</code> leaves our files untouched and staged, and <code>5</code> can be thought of as &ldquo;the number of previous commits I want to combine.&rdquo;</p>
 <p>We can then do <code>git merge master</code> and create our pull request.</p>
 
-<h2 id="method-3-getting-picky" class="anchor-link"><a href="#method-3-getting-picky">Method #3: getting picky</a></h2>
+<h3 id="method-3-getting-picky" class="anchor-link"><a href="#method-3-getting-picky">Method #3: getting picky</a></h3>
 <p>Say we had a really confusing afternoon and our Git tree looks like this:</p>
 <pre><code class="language-console" data-lang="console">* dc89918 - (HEAD -&gt; master) Add link
 |
@@ -468,7 +486,7 @@ Could not apply ccec365... Update list page
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
 </code></pre><p>Phew, much better.</p>
 
-<h1 id="git-stash" class="anchor-link"><a href="#git-stash">Git stash</a></h1>
+<h2 id="git-stash" class="anchor-link"><a href="#git-stash">Git stash</a></h2>
 <p>If we&rsquo;re in the middle of some work and it&rsquo;s not a good time to commit, but we need to switch branches, <a href="https://git-scm.com/book/en/v1/Git-Tools-Stashing">stashing</a> can be a good option. Stashing lets us save our unfinished work without needing to create a half-assed commit. It&rsquo;s like that pile of paper on your desk representing all the stuff you&rsquo;ve been in the middle of doing since two weeks ago. Yup, that one.</p>
 <p>It&rsquo;s as easy as typing <code>git stash</code>:</p>
 <pre><code class="language-console" data-lang="console">Saved working directory and index state WIP on master: 3564b8c Update list page
@@ -480,7 +498,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 <p>Applying a stash doesn&rsquo;t remove it from our list. To remove a stash from our stack, we do <code>git stash drop stash@{0}</code> where <code>0</code> is the one we want to remove.</p>
 <p>We can also use <code>git stash pop</code> to apply the most recent stash and then immediately remove it from the stack.</p>
 
-<h1 id="tag-release-versions-using-annotated-git-tags" class="anchor-link"><a href="#tag-release-versions-using-annotated-git-tags">Tag release versions using annotated Git tags</a></h1>
+<h2 id="tag-release-versions-using-annotated-git-tags" class="anchor-link"><a href="#tag-release-versions-using-annotated-git-tags">Tag release versions using annotated Git tags</a></h2>
 <p>In the spirit of having a beautiful, clean Git history, there&rsquo;s one more thing we can do to help make our commit log inspire infinite joy in its viewers. If you&rsquo;ve never heard of <code>git tag</code>, your master branch history might look like this&hellip;</p>
 <pre><code class="language-console" data-lang="console">* 0377782 - Update theme
 |
@@ -527,11 +545,11 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global push.followTags <span class="nb">true</span>
 </code></pre></div><p>If we then want to skip pushing tags this time, we pass <code>--no-follow-tags</code>.</p>
 
-<h1 id="practice-responsible-commits" class="anchor-link"><a href="#practice-responsible-commits">Practice responsible commits</a></h1>
+<h2 id="practice-responsible-commits" class="anchor-link"><a href="#practice-responsible-commits">Practice responsible commits</a></h2>
 <p>A little time invested in getting familiar with these tools and practices can make your commits even more useful and well-crafted. With a little practice, these processes will become second nature. You can make it even easier by creating a personal commit checklist on paper to keep handy while you work - or if that isn&rsquo;t fun enough, <a href="/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">make it an interactive pre-commit hook.</a></p>
 <p>Creating clean, useful, and responsible Git commits says a lot about you. Especially in the current climate of remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.</p>
 
-<h1 id="reference-links" class="anchor-link"><a href="#reference-links">Reference links</a></h1>
+<h2 id="reference-links" class="anchor-link"><a href="#reference-links">Reference links</a></h2>
 <p><a href="https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History">Git Tools - Rewriting History</a>
 <a href="https://semver.org/">Semantic Versioning 2.0.0</a>
 <a href="https://git-scm.com/docs/git-describe">git-describe</a>
@@ -574,6 +592,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
         
         
     </li>
+
         
             <li>
         
@@ -594,6 +613,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
         
         
     </li>
+
         
             <li>
         
@@ -614,6 +634,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
         
         
     </li>
+
         
     </ul>
     
@@ -645,6 +666,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
     
     
 </footer>
+
             
         </div>
     </section>
@@ -661,6 +683,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

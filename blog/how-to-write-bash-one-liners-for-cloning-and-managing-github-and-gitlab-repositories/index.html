@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="How to write Bash one-liners for cloning and managing GitHub and GitLab repositories - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/cover.png"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="How to write Bash one-liners for cloning and managing GitHub and GitLab repositories" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/cover.png" alt="cover image" />
 </div>
 
@@ -178,6 +182,8 @@
         </a>&nbsp;
         
         
+
+        
     </p>
 
     
@@ -191,7 +197,7 @@
     
     <p>Few things are more satisfying to me than one elegant line of Bash that automates hours of tedious work. As part of some recent explorations into <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">automatically re-creating my laptop with Bash scripts</a>, I wanted to find a way to easily clone my GitHub-hosted repositories to a new machine. After a bit of digging around, I wrote a one-liner that did just that. Then, in the spirit of not putting all our eggs in the same basket, I wrote another one-liner to automatically create and push to GitLab-hosted backups as well. Here they are.</p>
 
-<h1 id="a-bash-one-liner-to-clone-all-your-github-repositories" class="anchor-link"><a href="#a-bash-one-liner-to-clone-all-your-github-repositories">A Bash one-liner to clone all your GitHub repositories</a></h1>
+<h2 id="a-bash-one-liner-to-clone-all-your-github-repositories" class="anchor-link"><a href="#a-bash-one-liner-to-clone-all-your-github-repositories">A Bash one-liner to clone all your GitHub repositories</a></h2>
 <p>Caveat: you&rsquo;ll need a list of the GitHub repositories you want to clone. The good thing about that is it gives you full agency to choose just the repositories you want on your machine, instead of going in whole-hog.</p>
 <p>You can easily clone GitHub repositories without entering your password each time by using HTTPS with your <a href="https://help.github.com/en/articles/caching-your-github-password-in-git">15-minute cached credentials</a> or, my preferred method, by <a href="https://help.github.com/en/articles/connecting-to-github-with-ssh">connecting to GitHub with SSH</a>. For brevity I&rsquo;ll assume we&rsquo;re going with the latter, and our SSH keys are set up.</p>
 <p>Given a list of GitHub URLs in the file <code>gh-repos.txt</code>, like this:</p>
@@ -202,12 +208,12 @@ git@github.com:username/third-repository.git
 <div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">xargs -n1 git clone &lt; gh-repos.txt
 </code></pre></div><p>This clones all the repositories on the list into the current folder. This same one-liner works for GitLab repositories as well, if you substitute the appropriate URLs.</p>
 
-<h2 id="whats-going-on-here" class="anchor-link"><a href="#whats-going-on-here">What&rsquo;s going on here?</a></h2>
+<h3 id="whats-going-on-here" class="anchor-link"><a href="#whats-going-on-here">What&rsquo;s going on here</a></h3>
 <p>There are two halves to this one-liner: the input, counterintuitively on the right side, and the part that makes stuff happen, on the left. We could make the order of these parts more intuitive (maybe?) by writing the same command like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">&lt;gh-repos.txt xargs -n1 git clone 
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">&lt;gh-repos.txt xargs -n1 git clone
 </code></pre></div><p>To run a command for each line of our input, <code>gh-repos.txt</code>, we use <code>xargs -n1</code>. The tool <code>xargs</code> reads items from input and executes any commands it finds (it will <code>echo</code> if it doesn&rsquo;t find any). By default, it assumes that items are separated by spaces; new lines also works and makes our list easier to read. The flag <code>-n1</code> tells <code>xargs</code> to use <code>1</code> argument, or in our case, one line, per command. We build our command with <code>git clone</code>, which <code>xargs</code> then executes for each line. Ta-da.</p>
 
-<h1 id="a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab" class="anchor-link"><a href="#a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab">A Bash one-liner to create and push many repositories on GitLab</a></h1>
+<h2 id="a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab" class="anchor-link"><a href="#a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab">A Bash one-liner to create and push many repositories on GitLab</a></h2>
 <p>GitLab, unlike GitHub, lets us do this nifty thing where we don&rsquo;t have to use the website to make a new repository first. We can <a href="https://gitlab.com/help/gitlab-basics/create-project#push-to-create-a-new-project">create a new GitLab repository from our terminal</a>. The newly created repository defaults to being set as Private, so if we want to make it Public on GitLab, we&rsquo;ll have to do that manually later.</p>
 <p>The GitLab docs tell us to push to create a new project using <code>git push --set-upstream</code>, but I don&rsquo;t find this to be very convenient for using GitLab as a backup. As I work with my repositories in the future, I&rsquo;d like to run one command that pushes to both GitHub <em>and</em> GitLab without additional effort on my part.</p>
 <p>To make this Bash one-liner work, we&rsquo;ll also need a list of repository URLs for GitLab (ones that don&rsquo;t exist yet). We can easily do this by copying our GitHub repository list, opening it up with Vim, and doing a <a href="https://vim.fandom.com/wiki/Search_and_replace">search-and-replace</a>:</p>
@@ -229,14 +235,14 @@ git@gitlab.com:username/third-repository.git
 </ol>
 <p>The one-liner could be expanded to handle these assumptions, but it is the humble opinion of the author that at that point, we really ought to be writing a Bash script.</p>
 
-<h2 id="whats-going-on-here-1" class="anchor-link"><a href="#whats-going-on-here-1">What&rsquo;s going on here?</a></h2>
+<h3 id="whats-going-on-here-1" class="anchor-link"><a href="#whats-going-on-here-1">What&rsquo;s going on here</a></h3>
 <p>Our Bash one-liner uses each line (or URL) in the <code>gl-repos.txt</code> file as input. With <code>awk</code>, it splits off the name of the directory containing the repository on our local machine, and uses these pieces of information to build our larger command. If we were to <code>print</code> the output of <code>awk</code>, we&rsquo;d see:</p>
 <div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">cd</span> ~/FULL/PATH/first-repository <span class="o">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/first-repository.git <span class="o">&amp;&amp;</span> git push
 <span class="nb">cd</span> ~/FULL/PATH/second-repository <span class="o">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/second-repository.git <span class="o">&amp;&amp;</span> git push
 <span class="nb">cd</span> ~/FULL/PATH/third-repository <span class="o">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/third-repository.git <span class="o">&amp;&amp;</span> git push
 </code></pre></div><p>Let&rsquo;s look at how we build this command.</p>
 
-<h3 id="splitting-strings-with-awk" class="anchor-link"><a href="#splitting-strings-with-awk">Splitting strings with <code>awk</code></a></h3>
+<h4 id="splitting-strings-with-awk" class="anchor-link"><a href="#splitting-strings-with-awk">Splitting strings with <code>awk</code></a></h4>
 <p>The tool <code>awk</code> can split input based on <a href="https://www.gnu.org/software/gawk/manual/html_node/Command-Line-Field-Separator.html">field separators</a>. The default separator is a whitespace character, but we can change this by passing the <code>-F</code> flag. Besides single characters, we can also use a <a href="https://www.gnu.org/software/gawk/manual/html_node/Regexp-Field-Splitting.html#Regexp-Field-Splitting">regular expression field separator</a>. Since our repository URLs have a set format, we can grab the repository names by asking for the substring between the slash character <code>/</code> and the end of the URL, <code>.git</code>.</p>
 <p>One way to accomplish this is with our regex <code>\/|(\.git)</code>:</p>
 <ul>
@@ -250,11 +256,11 @@ git@gitlab.com:username/third-repository.git
 </code></pre></div><p>To use the whole string, or in our case, the whole URL, we use the field operator <code>$0</code>. To write the command, we just substitute the field operators for the repository name and URL. Running this with <code>print</code> as we&rsquo;re building it can help to make sure we&rsquo;ve got all the spaces right.</p>
 <div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">awk -F<span class="s1">&#39;\/|(\.git)&#39;</span> <span class="s1">&#39;{print &#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;}&#39;</span> gl-repos.txt
 </code></pre></div>
-<h3 id="running-the-command" class="anchor-link"><a href="#running-the-command">Running the command</a></h3>
+<h4 id="running-the-command" class="anchor-link"><a href="#running-the-command">Running the command</a></h4>
 <p>We build our command inside the parenthesis of <code>system()</code>. By using this as the output of <code>awk</code>, each command will run as soon as it is built and output. The <code>system()</code> function creates a <a href="https://en.wikipedia.org/wiki/Child_process">child process</a> that executes our command, then returns once the command is completed. In plain English, this lets us perform the Git commands on each repository, one-by-one, without breaking from our main process in which <code>awk</code> is doing things with our input file. Here&rsquo;s our final command again, all put together.</p>
 <div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">awk -F<span class="s1">&#39;\/|(\.git)&#39;</span> <span class="s1">&#39;{system(&#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;)}&#39;</span> gl-repos.txt
 </code></pre></div>
-<h3 id="using-our-backups" class="anchor-link"><a href="#using-our-backups">Using our backups</a></h3>
+<h4 id="using-our-backups" class="anchor-link"><a href="#using-our-backups">Using our backups</a></h4>
 <p>By adding the GitLab URLs as remotes, we&rsquo;ve simplified the process of pushing to both externally hosted repositories. If we run <code>git remote -v</code> in one of our repository directories, we&rsquo;ll see:</p>
 <div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">origin  git@github.com:username/first-repository.git <span class="o">(</span>fetch<span class="o">)</span>
 origin  git@github.com:username/first-repository.git <span class="o">(</span>push<span class="o">)</span>
@@ -262,7 +268,7 @@ origin  git@gitlab.com:username/first-repository.git <span class="o">(</span>pus
 </code></pre></div><p>Now, simply running <code>git push</code> without arguments will push the current branch to both remote repositories.</p>
 <p>We should also note that <code>git pull</code> will generally only try to pull from the remote repository you originally cloned from (the URL marked <code>(fetch)</code> in our example above). Pulling from multiple Git repositories at the same time is possible, but complicated, and beyond the scope of this post. Here&rsquo;s an <a href="https://astrofloyd.wordpress.com/2015/05/05/git-pushing-to-and-pulling-from-multiple-remote-locations-remote-url-and-pushurl/">explanation of pushing and pulling to multiple remotes</a> to help get you started, if you&rsquo;re curious. The <a href="https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes">Git documentation on remotes</a> may also be helpful.</p>
 
-<h1 id="to-elaborate-on-the-succinctness-of-bash-one-liners" class="anchor-link"><a href="#to-elaborate-on-the-succinctness-of-bash-one-liners">To elaborate on the succinctness of Bash one-liners</a></h1>
+<h2 id="to-elaborate-on-the-succinctness-of-bash-one-liners" class="anchor-link"><a href="#to-elaborate-on-the-succinctness-of-bash-one-liners">To elaborate on the succinctness of Bash one-liners</a></h2>
 <p>Bash one-liners, when understood, can be fun and handy shortcuts. At the very least, being aware of tools like <code>xargs</code> and <code>awk</code> can help to automate and alleviate a lot of tediousness in our work. However, there are some downsides.</p>
 <p>In terms of an easy-to-understand, maintainable, and approachable tool, Bash one-liners suck. They&rsquo;re usually more complicated to write than a Bash script using <code>if</code> or <code>while</code> loops, and certainly more complicated to read. It&rsquo;s likely that when we write them, we&rsquo;ll miss a single quote or closing parenthesis somewhere; and as I hope this post demonstrates, they can take quite a bit of explaining, too. So why use them?</p>
 <p>Imagine reading a recipe for baking a cake, step by step. You understand the methods and ingredients, and gather your supplies. Then, as you think about it, you begin to realize that if you just throw all the ingredients at the oven in precisely the right order, a cake will instantly materialize. You try it, and it works!</p>
@@ -302,6 +308,7 @@ origin  git@gitlab.com:username/first-repository.git <span class="o">(</span>pus
         
         
     </li>
+
         
             <li>
         
@@ -322,6 +329,7 @@ origin  git@gitlab.com:username/first-repository.git <span class="o">(</span>pus
         
         
     </li>
+
         
             <li>
         
@@ -342,6 +350,7 @@ origin  git@gitlab.com:username/first-repository.git <span class="o">(</span>pus
         
         
     </li>
+
         
     </ul>
     
@@ -373,6 +382,7 @@ origin  git@gitlab.com:username/first-repository.git <span class="o">(</span>pus
     
     
 </footer>
+
             
         </div>
     </section>
@@ -389,6 +399,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

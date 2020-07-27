@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="How to set up a fresh Ubuntu desktop using only dotfiles and bash scripts - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/cover.jpg"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="How to set up a fresh Ubuntu desktop using only dotfiles and bash scripts" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/cover.jpg" alt="cover image" />
 </div>
 
@@ -170,6 +174,8 @@
         </a>&nbsp;
         
         
+
+        
     </p>
 
     
@@ -187,7 +193,9 @@
 <p>In contrast to creating a <a href="https://askubuntu.com/questions/19901/how-to-make-a-disk-image-and-restore-from-it-later">disk image and restoring it later</a>, a collection of bash scripts is easier to create, maintain, and move around. They require no special utilities, only an external transportation method. It&rsquo;s like passing along the recipe, instead of the whole bundt cake. (Mmm, cake.)</p>
 <p>Additionally, functionality like this would be super useful when setting up a virtual machine, or VM, or even just a virtual private server, or VPS. (Both of which, now that I write this, would probably make more forgiving targets for my more destructive experiments&hellip; live and learn!)</p>
 <p>Well, after some grepping and Googling and digging around, I now have a suite of scripts that can do this:</p>
-<!-- raw HTML omitted -->
+<video controls="controls" poster="cover.jpg">
+    <source src="setup.mp4" type="video/mp4" />
+</video>
 <p>This is the tail end of a test run of the set up scripts on a fresh Ubuntu desktop, loaded off a bootable USB. It had all my programs and settings restored in under three minutes!</p>
 <p>This post will cover how to achieve the automatic set up of a computer running Ubuntu Desktop using bash scripts. This exact process was last used on Ubuntu 19.10; see my <a href="https://github.com/victoriadrake/dotfiles">dotfiles master branch</a> for the latest configuration. The majority of the information covered is applicable to all the Linux desktop flavours, though some syntax may differ. The bash scripts cover three main areas: linking dotfiles, installing software from Ubuntu and elsewhere, and setting up the desktop environment. We&rsquo;ll cover each of these areas and go over the important bits so that you can begin to craft your own scripts.</p>
 
@@ -211,7 +219,7 @@
 <h2 id="installing-software" class="anchor-link"><a href="#installing-software">Installing software</a></h2>
 <p>One of the beautiful things about exploring shell scripts is discovering how much can be achieved using only the command line. As someone whose first exposure to computers was through a graphical operating system, I find working in the terminal to be refreshingly fast.</p>
 <p>With Ubuntu, most programs we likely require are available through the default Ubuntu software repositories. We typically search for these with the command <code>apt search &lt;program&gt;</code> and install them with <code>sudo apt install &lt;program&gt;</code>. Some software we&rsquo;d like may not be in the default repositories, or may not be offered there in the most current version. In these cases, we can still install these programs in Ubuntu using a <a href="https://en.wikipedia.org/wiki/Ubuntu#Package_Archives">PPA, or Personal Package Archive</a>. We&rsquo;ll just have to be careful that the PPAs we choose are from the official sources.</p>
-<p>If a program we&rsquo;d like doesn&rsquo;t appear in the default repositories or doesn&rsquo;t seem to have a PPA, we may still be able to install it via command line. A quick search for &ldquo;<!-- raw HTML omitted --> installation command line&rdquo; should get some answers.</p>
+<p>If a program we&rsquo;d like doesn&rsquo;t appear in the default repositories or doesn&rsquo;t seem to have a PPA, we may still be able to install it via command line. A quick search for &ldquo;<program> installation command line&rdquo; should get some answers.</p>
 <p>Since bash scripts are just a collection of commands that we could run individually in the terminal, creating a script to install all our desired programs is as straightforward as putting all the commands into a script file. I chose to organize my installation scripts between the default repositories, which are installed by <a href="https://github.com/victoriadrake/dotfiles/blob/ubuntu-19.10/scripts/aptinstall.sh">my <code>aptinstall.sh</code> script</a>, and programs that involve external sources, handled with <a href="https://github.com/victoriadrake/dotfiles/blob/ubuntu-19.10/scripts/programs.sh">my <code>programs.sh</code> script</a>.</p>
 
 <h2 id="setting-up-the-desktop-environment" class="anchor-link"><a href="#setting-up-the-desktop-environment">Setting up the desktop environment</a></h2>
@@ -279,6 +287,7 @@ figlet <span class="s2">&#34;... and we&#39;re back!&#34;</span> <span class="p"
         
         
     </li>
+
         
             <li>
         
@@ -299,6 +308,7 @@ figlet <span class="s2">&#34;... and we&#39;re back!&#34;</span> <span class="p"
         
         
     </li>
+
         
             <li>
         
@@ -319,6 +329,7 @@ figlet <span class="s2">&#34;... and we&#39;re back!&#34;</span> <span class="p"
         
         
     </li>
+
         
     </ul>
     
@@ -350,6 +361,7 @@ figlet <span class="s2">&#34;... and we&#39;re back!&#34;</span> <span class="p"
     
     
 </footer>
+
             
         </div>
     </section>
@@ -366,6 +378,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="A portable Makefile for continuous delivery with Hugo and GitHub Pages - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/cover.png"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="A portable Makefile for continuous delivery with Hugo and GitHub Pages" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/cover.png" alt="cover image" />
 </div>
 
@@ -177,6 +181,8 @@
             websites
         </a>&nbsp;
         
+        
+
         
     </p>
 
@@ -220,50 +226,50 @@
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">get_repository</span>
 <span class="nf">get_repository</span><span class="o">:</span>
-	@echo <span class="s2">&#34;🛎 Getting Pages repository&#34;</span>
-	git clone https://github.com/victoriadrake/victoriadrake.github.io.git <span class="k">$(</span>DESTDIR<span class="k">)</span>
+ @echo <span class="s2">&#34;🛎 Getting Pages repository&#34;</span>
+ git clone https://github.com/victoriadrake/victoriadrake.github.io.git <span class="k">$(</span>DESTDIR<span class="k">)</span>
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">clean</span>
 <span class="nf">clean</span><span class="o">:</span>
-	@echo <span class="s2">&#34;🧹 Cleaning old build&#34;</span>
-	<span class="nb">cd</span> <span class="k">$(</span>DESTDIR<span class="k">)</span> <span class="o">&amp;&amp;</span> rm -rf *
+ @echo <span class="s2">&#34;🧹 Cleaning old build&#34;</span>
+ <span class="nb">cd</span> <span class="k">$(</span>DESTDIR<span class="k">)</span> <span class="o">&amp;&amp;</span> rm -rf *
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">get</span>
 <span class="nf">get</span><span class="o">:</span>
-	@echo <span class="s2">&#34;❓ Checking for hugo&#34;</span>
-	@if ! <span class="o">[</span> -x <span class="s2">&#34;</span><span class="nv">$$</span><span class="s2">(command -v hugo)&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span><span class="se">\
-</span><span class="se"></span>		<span class="nb">echo</span> <span class="s2">&#34;🤵 Getting Hugo&#34;</span><span class="p">;</span><span class="se">\
-</span><span class="se"></span>	    wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz<span class="p">;</span><span class="se">\
-</span><span class="se"></span>		tar xf tmp/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz -C tmp/<span class="p">;</span><span class="se">\
-</span><span class="se"></span>		sudo mv -f tmp/hugo /usr/bin/<span class="p">;</span><span class="se">\
-</span><span class="se"></span>		rm -rf tmp/<span class="p">;</span><span class="se">\
-</span><span class="se"></span>		hugo version<span class="p">;</span><span class="se">\
-</span><span class="se"></span>	<span class="k">fi</span>
+ @echo <span class="s2">&#34;❓ Checking for hugo&#34;</span>
+ @if ! <span class="o">[</span> -x <span class="s2">&#34;</span><span class="nv">$$</span><span class="s2">(command -v hugo)&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span><span class="se">\
+</span><span class="se"></span>  <span class="nb">echo</span> <span class="s2">&#34;🤵 Getting Hugo&#34;</span><span class="p">;</span><span class="se">\
+</span><span class="se"></span>     wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz<span class="p">;</span><span class="se">\
+</span><span class="se"></span>  tar xf tmp/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz -C tmp/<span class="p">;</span><span class="se">\
+</span><span class="se"></span>  sudo mv -f tmp/hugo /usr/bin/<span class="p">;</span><span class="se">\
+</span><span class="se"></span>  rm -rf tmp/<span class="p">;</span><span class="se">\
+</span><span class="se"></span>  hugo version<span class="p">;</span><span class="se">\
+</span><span class="se"></span> <span class="k">fi</span>
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">build</span>
 <span class="nf">build</span><span class="o">:</span>
-	@echo <span class="s2">&#34;🍳 Generating site&#34;</span>
-	hugo --gc --minify -d <span class="k">$(</span>DESTDIR<span class="k">)</span>
+ @echo <span class="s2">&#34;🍳 Generating site&#34;</span>
+ hugo --gc --minify -d <span class="k">$(</span>DESTDIR<span class="k">)</span>
 
-	@echo <span class="s2">&#34;🧂 Optimizing images&#34;</span>
-	<span class="k">$(</span>OPTIMIZE<span class="k">)</span>
+ @echo <span class="s2">&#34;🧂 Optimizing images&#34;</span>
+ <span class="k">$(</span>OPTIMIZE<span class="k">)</span>
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">test</span>
 <span class="nf">test</span><span class="o">:</span>
-	@echo <span class="s2">&#34;🍜 Testing HTML&#34;</span>
-	docker run -v <span class="k">$(</span>GITHUB_WORKSPACE<span class="k">)</span>/<span class="k">$(</span>DESTDIR<span class="k">)</span>/:/mnt 18fgsa/html-proofer mnt --disable-external
+ @echo <span class="s2">&#34;🍜 Testing HTML&#34;</span>
+ docker run -v <span class="k">$(</span>GITHUB_WORKSPACE<span class="k">)</span>/<span class="k">$(</span>DESTDIR<span class="k">)</span>/:/mnt 18fgsa/html-proofer mnt --disable-external
 
 <span class="nf">.PHONY</span><span class="o">:</span> <span class="n">deploy</span>
 <span class="nf">deploy</span><span class="o">:</span>
-	@echo <span class="s2">&#34;🎁 Preparing commit&#34;</span>
-	@cd <span class="k">$(</span>DESTDIR<span class="k">)</span> <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git config user.email <span class="s2">&#34;hello@victoria.dev&#34;</span> <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git config user.name <span class="s2">&#34;Victoria via GitHub Actions&#34;</span> <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git add . <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git status <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git commit -m <span class="s2">&#34;🤖 CD bot is helping&#34;</span> <span class="se">\
-</span><span class="se"></span>	<span class="o">&amp;&amp;</span> git push -f -q https://<span class="k">$(</span>TOKEN<span class="k">)</span>@github.com/victoriadrake/victoriadrake.github.io.git master
-	@echo <span class="s2">&#34;🚀 Site is deployed!&#34;</span>
+ @echo <span class="s2">&#34;🎁 Preparing commit&#34;</span>
+ @cd <span class="k">$(</span>DESTDIR<span class="k">)</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git config user.email <span class="s2">&#34;hello@victoria.dev&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git config user.name <span class="s2">&#34;Victoria via GitHub Actions&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git add . <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git status <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git commit -m <span class="s2">&#34;🤖 CD bot is helping&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git push -f -q https://<span class="k">$(</span>TOKEN<span class="k">)</span>@github.com/victoriadrake/victoriadrake.github.io.git master
+ @echo <span class="s2">&#34;🚀 Site is deployed!&#34;</span>
 </code></pre></div><p>Sequentially, this workflow:</p>
 <ol>
 <li>Clones the public Pages repository;</li>
@@ -327,6 +333,7 @@
         
         
     </li>
+
         
             <li>
         
@@ -347,6 +354,7 @@
         
         
     </li>
+
         
             <li>
         
@@ -367,6 +375,7 @@
         
         
     </li>
+
         
     </ul>
     
@@ -398,6 +407,7 @@
     
     
 </footer>
+
             
         </div>
     </section>
@@ -414,6 +424,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 

@@ -16,9 +16,11 @@
 </title>
 
 
+
     <meta
   name="monetization"
   content="$ilp.uphold.com/pBRfRwg2EJAe">
+
     <meta property="og:title" content="How to replace a string in a dozen old blog posts with one sed terminal command - victoria.dev" />
 <meta property="og:type" content="website" />
 <meta property="og:description"
@@ -28,6 +30,7 @@
 
 
 <meta property="og:image" content="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/cover_sed.png"/>
+
 
     <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="How to replace a string in a dozen old blog posts with one sed terminal command" />
@@ -48,7 +51,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.min.38b48e7f17281e58a802543654b67135544001e1b7d617f44985f1731f266756.css" integrity="sha256-OLSOfxcoHlioAlQ2VLZxNVRAAeG31hf0SYXxcx8mZ1Y=" media="screen">
+<link rel="stylesheet" href="/css/main.min.b28e7b7cc6da95528b86dc863a1c5fc36c3ab1630f4acad607bb93bf892ad372.css" integrity="sha256-so57fMbalVKLhtyGOhxfw2w6sWMPSsrWB7uTv4kq03I=" media="screen">
 
 
 
@@ -132,6 +135,7 @@
     </div>
 
 </div>
+
         
 
         <div class="container">
@@ -139,7 +143,7 @@
 
 
 
-<div id="images">
+<div id="cover-image">
     <img src="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/cover_sed.png" alt="cover image" />
 </div>
 
@@ -166,6 +170,8 @@
         </a>&nbsp;
         
         
+
+        
     </p>
 
     
@@ -180,33 +186,36 @@
     <p><em>June 1, 2018: This post was previously titled &ldquo;That time 30 seconds, StackOverflow, and sed saved me 30 minutes&rdquo; and has since been revised and updated with more examples and a couple new doodles. It&rsquo;s better now.</em></p>
 <p>I&rsquo;ve had more than a few usernames, URLs, and Twitter handles over the years. Whether it was changing to something that better reflected my current interests or briefly getting caught up in the &ldquo;.io&rdquo; domain craze, there always seemed to be a great reason for an Internet presence refresh. The downside to all this fresh rebranding is that it often means needing to update a lot of links. (If you want to redirect an old blog post URL, check out <a href="/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/">this article</a> too!)</p>
 <p>This week, I launched my new website and changed my Twitter username to match. I was about to spend time manually going through all my old blog posts to find and update the URLs when this very future blog post popped up on my screen like <a href="http://knowyourmeme.com/memes/clippy">Clippy</a> and shook its pixelated head disapprovingly.</p>
-<p>Here&rsquo;s a worthwhile new habit for you: anytime you find yourself going &ldquo;Ughhh I have to do <em>that?</em> It&rsquo;ll take forever!&rdquo; head on over to <a href="https://duckduckgo.com/">DuckDuckGo</a> and search for &ldquo;terminal command (the thing you&rsquo;re trying to do)”.</p>
+<p>Here&rsquo;s a worthwhile new habit for you: anytime you find yourself going &ldquo;Ughhh I have to do <em>that?</em> It&rsquo;ll take forever!&rdquo; head on over to <a href="https://duckduckgo.com/">DuckDuckGo</a> and search for &ldquo;terminal command (the thing you&rsquo;re trying to do)&rdquo;.</p>
 <p>
 
 <img src="https://victoria.dev/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/sed-duck.png" alt="Superhero DuckDuckGo doodle"  />
+
 </p>
-<!-- raw HTML omitted -->
+<p class="img-caption">Superhero Duck is here to save your future hours!</p>
 <p>Here&rsquo;s what I found to save myself a whole bunch of mindless tedium.</p>
 
-<h1 id="update-a-string-in-dozens-of-blog-posts-using-sed" class="anchor-link"><a href="#update-a-string-in-dozens-of-blog-posts-using-sed">Update a string in dozens of blog posts using sed</a></h1>
+<h2 id="update-a-string-in-dozens-of-blog-posts-using-sed" class="anchor-link"><a href="#update-a-string-in-dozens-of-blog-posts-using-sed">Update a string in dozens of blog posts using <code>sed</code></a></h2>
 <p>Meet your new friend <code>sed</code>. This amazingly powerful tool lives in your terminal and is available to be totally underused for things like finding and replacing strings in files. (I seem to have a habit of suggesting ways to totally underuse powerful tools, as in my exploration of how to <a href="/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/">use cron to create desktop notifications</a>, but I digress.)</p>
 
-<h2 id="current-directory-non-recursive" class="anchor-link"><a href="#current-directory-non-recursive">Current directory, non-recursive</a></h2>
+<h3 id="current-directory-non-recursive" class="anchor-link"><a href="#current-directory-non-recursive">Current directory, non-recursive</a></h3>
 <p><strong>Non-recursive</strong> means sed won&rsquo;t change files in any subdirectories of the current folder.</p>
 <p>Run this command to search all the files in your current directory and replace a given string.</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">// to replace <span class="s1">&#39;foo&#39;</span> with <span class="s1">&#39;bar&#39;</span>
 $ sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
 </code></pre></div><p>Here&rsquo;s what each component of the command does:</p>
-<p><code>-i</code> will change the original, and stands for &ldquo;in-place.&rdquo;<br>
-<code>s</code> is for substitute, so we can find and replace.<br>
-<code>foo</code> is the string we&rsquo;ll be taking away,<br>
-<code>bar</code> is the string we&rsquo;ll use instead today.<br>
-<code>g</code> as in &ldquo;global&rdquo; means &ldquo;all occurrences, please.&rdquo;<br>
-<code>*</code> denotes all file types. (No more rhymes. What a tease.)</p>
+<ul>
+<li><code>-i</code> will change the original, and stands for &ldquo;in-place.&rdquo;</li>
+<li><code>s</code> is for substitute, so we can find and replace.</li>
+<li><code>foo</code> is the string we&rsquo;ll be taking away,</li>
+<li><code>bar</code> is the string we&rsquo;ll use instead today.</li>
+<li><code>g</code> as in &ldquo;global&rdquo; means &ldquo;all occurrences, please.&rdquo;</li>
+<li><code>*</code> denotes all file types. (No more rhymes. What a tease.)</li>
+</ul>
 <p>You can limit the operation to one file type, such as <code>txt</code>, by using:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *.txt
 </code></pre></div>
-<h2 id="current-directory-and-subdirectories-recursive" class="anchor-link"><a href="#current-directory-and-subdirectories-recursive">Current directory and subdirectories, recursive</a></h2>
+<h3 id="current-directory-and-subdirectories-recursive" class="anchor-link"><a href="#current-directory-and-subdirectories-recursive">Current directory and subdirectories, recursive</a></h3>
 <p>We can supplement <code>sed</code> with <code>find</code> to expand our scope to all the current folder&rsquo;s subdirectories. This will include any hidden files.</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
 </code></pre></div><p>To ignore hidden files (such as <code>.git</code>) you can pass the negation modifier <code>-not -path '*/\.*'</code>.</p>
@@ -215,13 +224,13 @@ $ sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
 <p>Alternatively, you can limit the operation to file names that end in a certain extension, like Markdown:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -name <span class="s2">&#34;*.md&#34;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
 </code></pre></div>
-<h2 id="working-with-urls-change-the-separator" class="anchor-link"><a href="#working-with-urls-change-the-separator">Working with URLs: change the separator</a></h2>
+<h3 id="working-with-urls-change-the-separator" class="anchor-link"><a href="#working-with-urls-change-the-separator">Working with URLs: change the separator</a></h3>
 <p>In the case of needing to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&hellip;</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g&#39;</span> <span class="o">{}</span> +
 </code></pre></div><p>You can avoid some confusion and mistakes by changing the separator to any non-conflicting character. The character that follows the <code>s</code> will be treated as the separator. In our case, using a <code>,</code> or <code>_</code> would do. This doesn&rsquo;t require escaping and is much more readable:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g&#39;</span> <span class="o">{}</span> +
 </code></pre></div>
-<h1 id="maybe-endless-possibilities" class="anchor-link"><a href="#maybe-endless-possibilities">(Maybe) endless possibilities!</a></h1>
+<h2 id="maybe-endless-possibilities" class="anchor-link"><a href="#maybe-endless-possibilities">(Maybe) endless possibilities</a></h2>
 <p>There&rsquo;s a lot more that <code>sed</code> can do. I&rsquo;ll be adding to this living post as I find more examples that are useful. For now, <a href="http://www.folkstalk.com/2012/01/sed-command-in-unix-examples.html">here are some other use cases</a> that you may find handy.</p>
 
 
@@ -258,6 +267,7 @@ $ sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
         
         
     </li>
+
         
             <li>
         
@@ -278,6 +288,7 @@ $ sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
         
         
     </li>
+
         
             <li>
         
@@ -298,6 +309,7 @@ $ sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
         
         
     </li>
+
         
     </ul>
     
@@ -329,6 +341,7 @@ $ sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
     
     
 </footer>
+
             
         </div>
     </section>
@@ -345,6 +358,7 @@ if (!doNotTrack) {
 }
 </script>
 <script async src='https://www.google-analytics.com/analytics.js'></script>
+
 
     
 
