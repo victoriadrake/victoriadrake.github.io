@@ -7,9 +7,143 @@
     <language>en-us</language>
     <managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor>
     <webMaster>hello@victoria.dev (Victoria Drake)</webMaster>
-    <lastBuildDate>Tue, 31 Dec 2019 08:27:31 -0400</lastBuildDate>
+    <lastBuildDate>Wed, 05 Aug 2020 08:55:19 -0400</lastBuildDate>
     
         <atom:link href="https://victoria.dev/tags/docs/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <item>
+      <title>Self-documenting DevOps: make it better</title>
+      <link>https://victoria.dev/blog/self-documenting-devops-make-it-better/</link>
+      <pubDate>Wed, 05 Aug 2020 08:55:19 -0400</pubDate>
+      <author>hello@victoria.dev (Victoria Drake)</author>
+      <guid>https://victoria.dev/blog/self-documenting-devops-make-it-better/</guid>
+      <description>Accelerate your workflow with a self-documenting Makefile</description>
+      <content:encoded>
+        
+        
+        
+        <![CDATA[<img src="https://victoria.dev/blog/self-documenting-devops-make-it-better/cover_hu5b5f7817443ceb3a2651ffd8837c3ef8_243813_640x0_resize_box_2.png" width="640" height="256"/>]]>
+        
+        &lt;p&gt;My new favorite way to completely underuse a Makefile? Creating personalized, per-project repository workflow command aliases that you can check in.&lt;/p&gt;
+&lt;p&gt;Can a Makefile improve your DevOps and keep developers happy? How awesome would it be if a new developer working on your project didn&amp;rsquo;t start out by copying and pasting commands from your README? What if instead of:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;pip3 install pipenv
+pipenv shell --python 3.8
+pipenv install --dev
+npm install
+pre-commit install --install-hooks
+&lt;span class=&#34;c1&#34;&gt;# look up how to install Framework X...&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# copy and paste from README...&lt;/span&gt;
+npm run serve
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&amp;hellip; you could just type:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;make start
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&amp;hellip;and then start working?&lt;/p&gt;
+
+&lt;h2 id=&#34;making-a-difference&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#making-a-difference&#34;&gt;Making a difference&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;I use &lt;code&gt;make&lt;/code&gt; every day to take the tedium out of common development activities like updating programs, installing dependencies, and testing. To do all this with a Makefile (GNU make), we use &lt;a href=&#34;https://www.gnu.org/software/make/manual/make.html#Rules&#34;&gt;Makefile rules&lt;/a&gt; and &lt;a href=&#34;https://www.gnu.org/software/make/manual/make.html#Recipes&#34;&gt;recipes&lt;/a&gt;. Similar parallels exist for POSIX flavor make, like &lt;a href=&#34;https://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html#tag_20_76_13_04&#34;&gt;Target Rules&lt;/a&gt;; here&amp;rsquo;s a &lt;a href=&#34;https://nullprogram.com/blog/2017/08/20/&#34;&gt;great article&lt;/a&gt; on POSIX-compatible Makefiles.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s some examples of things we can &lt;code&gt;make&lt;/code&gt; easier (sorry):&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Makefile&#34; data-lang=&#34;Makefile&#34;&gt;&lt;span class=&#34;nf&#34;&gt;update&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Do apt upgrade and autoremove
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;    sudo apt update &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; sudo apt upgrade -y
+    sudo apt autoremove -y
+
+&lt;span class=&#34;nf&#34;&gt;env&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt;
+    pip3 install pipenv
+    pipenv shell --python 3.8
+
+&lt;span class=&#34;nf&#34;&gt;install&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Install or update dependencies
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;    pipenv install --dev
+    npm install
+    pre-commit install --install-hooks
+
+&lt;span class=&#34;nf&#34;&gt;serve&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Run the local development server
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;    hugo serve --enableGitInfo --disableFastRender --environment development
+
+&lt;span class=&#34;nf&#34;&gt;initial&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;update&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;env&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;serve&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Install tools and start development server
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now we have some command-line aliases that you can check in! Great idea! If you&amp;rsquo;re wondering what&amp;rsquo;s up with that weird &lt;code&gt;##&lt;/code&gt; comment syntax, it gets better.&lt;/p&gt;
+
+&lt;h2 id=&#34;a-self-documenting-makefile&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#a-self-documenting-makefile&#34;&gt;A self-documenting Makefile&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Aliases are great, if you remember what they all are and what they do without constantly typing &lt;code&gt;cat Makefile&lt;/code&gt;. Naturally, you need a &lt;code&gt;help&lt;/code&gt; command:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Makefile&#34; data-lang=&#34;Makefile&#34;&gt;&lt;span class=&#34;nf&#34;&gt;.PHONY&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;help&lt;/span&gt;
+&lt;span class=&#34;nf&#34;&gt;help&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Show this help
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;    @egrep -h &lt;span class=&#34;s1&#34;&gt;&amp;#39;\s##\s&amp;#39;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;MAKEFILE_LIST&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; sort &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; awk &lt;span class=&#34;s1&#34;&gt;&amp;#39;BEGIN {FS = &amp;#34;:.*?## &amp;#34;}; {printf &amp;#34;\033[36m%-20s\033[0m %s\n&amp;#34;, $$1, $$2}&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With a little command-line magic, this &lt;code&gt;egrep&lt;/code&gt; command takes the output of &lt;code&gt;MAKEFILE_LIST&lt;/code&gt;, sorts it, and uses &lt;code&gt;awk&lt;/code&gt; to find strings that follow the &lt;code&gt;##&lt;/code&gt; pattern. It then prints a helpful formatted version of the comments.&lt;/p&gt;
+&lt;p&gt;We&amp;rsquo;ll put it at the top of the file so it&amp;rsquo;s the default target. Now to see all our handy shortcuts and what they do, we just run &lt;code&gt;make&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;help                 Show this help
+initial              Install tools and start development server
+install              Install or update dependencies
+serve                Run the local development server
+update               Do apt upgrade and autoremove
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now we have our very own personalized and project-specific CLI tool!&lt;/p&gt;
+&lt;p&gt;The possibilities for improving your DevOps flow with a self-documenting Makefile are almost endless. You can use one to simplify any workflow and produce some very happy developers.&lt;/p&gt;
+&lt;p&gt;Please enjoy the (live!) Makefile I use to manage and develop this Hugo site. I hope it inspires you!&lt;/p&gt;
+&lt;details&gt;
+&lt;summary&gt;My Hugo site Makefile&lt;/summary&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Makefile&#34; data-lang=&#34;Makefile&#34;&gt;
+&lt;span class=&#34;nv&#34;&gt;SHELL&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:=&lt;/span&gt; /bin/bash
+&lt;span class=&#34;nf&#34;&gt;.POSIX&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt;
+&lt;span class=&#34;nf&#34;&gt;.PHONY&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;help&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;env&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;upgrade&lt;/span&gt;-&lt;span class=&#34;n&#34;&gt;hugo&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;lint&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;serve&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;build&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;start&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;initial&lt;/span&gt;
+
+&lt;span class=&#34;nf&#34;&gt;help&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Show this help
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;	@egrep -h &lt;span class=&#34;s1&#34;&gt;&amp;#39;\s##\s&amp;#39;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;MAKEFILE_LIST&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; sort &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; awk &lt;span class=&#34;s1&#34;&gt;&amp;#39;BEGIN {FS = &amp;#34;:.*?## &amp;#34;}; {printf &amp;#34;\033[36m%-20s\033[0m %s\n&amp;#34;, $$1, $$2}&amp;#39;&lt;/span&gt;
+
+&lt;span class=&#34;nf&#34;&gt;env&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt;
+	pip3 install pipenv
+	pipenv shell --python 3.8
+
+&lt;span class=&#34;nf&#34;&gt;shell&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Enter the virtual environment
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;	pipenv shell
+
+&lt;span class=&#34;nf&#34;&gt;install&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Install or update dependencies
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;	pipenv install --dev
+	npm install
+	npm install -g markdownlint-cli
+	pre-commit install --install-hooks
+
+&lt;span class=&#34;nf&#34;&gt;upgrade-hugo&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Get the latest Hugo
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;	&lt;span class=&#34;nv&#34;&gt;HUGO_VERSION&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; jq -r &lt;span class=&#34;s1&#34;&gt;&amp;#39;.tag_name&amp;#39;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;
+	mkdir tmp/ &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; tmp/
+	curl -sSL https://github.com/gohugoio/hugo/releases/download/&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;HUGO_VERSION&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/hugo_extended_&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;HUGO_VERSION: -6&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;_Linux-64bit.tar.gz &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; tar -xvzf-
+	sudo mv hugo /usr/local/bin/
+	&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; .. &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; rm -rf tmp/
+	hugo version
+
+&lt;span class=&#34;nf&#34;&gt;lint&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Lint files
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;	pre-commit run --all-files
+
+&lt;span class=&#34;nf&#34;&gt;serve&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Run the local development server
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;	hugo serve --enableGitInfo --disableFastRender --environment development
+
+&lt;span class=&#34;nf&#34;&gt;future&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Run the local development server in the future
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
+
+&lt;span class=&#34;nf&#34;&gt;build&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Lock dependencies and build site
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;	pipenv lock
+	hugo --minify --cleanDestination
+
+&lt;span class=&#34;nf&#34;&gt;start&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;upgrade&lt;/span&gt;-&lt;span class=&#34;n&#34;&gt;hugo&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;serve&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Update Hugo and start development server
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;
+&lt;span class=&#34;nf&#34;&gt;initial&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;env&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;upgrade&lt;/span&gt;-&lt;span class=&#34;n&#34;&gt;hugo&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;serve&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Install tools and start development server
+&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;
+
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/details&gt;
+
+      </content:encoded>
+        
+        
+        
+      <enclosure url="https://victoria.dev/blog/self-documenting-devops-make-it-better/cover_hu5b5f7817443ceb3a2651ffd8837c3ef8_243813_640x0_resize_box_2.png" type="image/jpg" />
+      
+    </item>
+    
     
     
     
@@ -112,8 +246,6 @@
       <enclosure url="https://victoria.dev/blog/go-automate-your-github-profile-readme/cover_huc867d29da9f2038bb1b7e753b00cef8e_329273_640x0_resize_box_2.png" type="image/jpg" />
       
     </item>
-    
-    
     
     
     
