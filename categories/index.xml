@@ -20,17 +20,17 @@
     
     
     <item>
-      <title>Self-documenting DevOps: make it better</title>
-      <link>https://victoria.dev/blog/self-documenting-devops-make-it-better/</link>
+      <title>How to create a self-documenting Makefile</title>
+      <link>https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/</link>
       <pubDate>Wed, 05 Aug 2020 08:55:19 -0400</pubDate>
       <author>hello@victoria.dev (Victoria Drake)</author>
-      <guid>https://victoria.dev/blog/self-documenting-devops-make-it-better/</guid>
-      <description>Accelerate your workflow with a self-documenting Makefile</description>
+      <guid>https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/</guid>
+      <description>Accelerate your workflow and DevOps with a CLI aliases you can check in</description>
       <content:encoded>
         
         
         
-        <![CDATA[<img src="https://victoria.dev/blog/self-documenting-devops-make-it-better/cover_hu5b5f7817443ceb3a2651ffd8837c3ef8_243813_640x0_resize_box_2.png" width="640" height="256"/>]]>
+        <![CDATA[<img src="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/cover_hu5b5f7817443ceb3a2651ffd8837c3ef8_243813_640x0_resize_box_2.png" width="640" height="256"/>]]>
         
         &lt;p&gt;My new favorite way to completely underuse a Makefile? Creating personalized, per-project repository workflow command aliases that you can check in.&lt;/p&gt;
 &lt;p&gt;Can a Makefile improve your DevOps and keep developers happy? How awesome would it be if a new developer working on your project didn&amp;rsquo;t start out by copying and pasting commands from your README? What if instead of:&lt;/p&gt;
@@ -74,7 +74,7 @@ npm run serve
 &lt;span class=&#34;nf&#34;&gt;help&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;## Show this help
 &lt;/span&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;    @egrep -h &lt;span class=&#34;s1&#34;&gt;&amp;#39;\s##\s&amp;#39;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;MAKEFILE_LIST&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; sort &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; awk &lt;span class=&#34;s1&#34;&gt;&amp;#39;BEGIN {FS = &amp;#34;:.*?## &amp;#34;}; {printf &amp;#34;\033[36m%-20s\033[0m %s\n&amp;#34;, $$1, $$2}&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With a little command-line magic, this &lt;code&gt;egrep&lt;/code&gt; command takes the output of &lt;code&gt;MAKEFILE_LIST&lt;/code&gt;, sorts it, and uses &lt;code&gt;awk&lt;/code&gt; to find strings that follow the &lt;code&gt;##&lt;/code&gt; pattern. It then prints a helpful formatted version of the comments.&lt;/p&gt;
-&lt;p&gt;We&amp;rsquo;ll put it at the top of the file so it&amp;rsquo;s the default target. Now to see all our handy shortcuts and what they do, we just run &lt;code&gt;make&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;We&amp;rsquo;ll put it at the top of the file so it&amp;rsquo;s the default target. Now to see all our handy shortcuts and what they do, we just run &lt;code&gt;make&lt;/code&gt;, or &lt;code&gt;make help&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;help                 Show this help
 initial              Install tools and start development server
 install              Install or update dependencies
@@ -139,7 +139,7 @@ update               Do apt upgrade and autoremove
         
         
         
-      <enclosure url="https://victoria.dev/blog/self-documenting-devops-make-it-better/cover_hu5b5f7817443ceb3a2651ffd8837c3ef8_243813_640x0_resize_box_2.png" type="image/jpg" />
+      <enclosure url="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/cover_hu5b5f7817443ceb3a2651ffd8837c3ef8_243813_640x0_resize_box_2.png" type="image/jpg" />
       
     </item>
     
@@ -203,7 +203,7 @@ update               Do apt upgrade and autoremove
     &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;err&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;file&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;Sync&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;View the full code &lt;a href=&#34;https://github.com/victoriadrake/victoriadrake/blob/master/update/main.go&#34;&gt;here in my README repository&lt;/a&gt;.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;View the full code &lt;a href=&#34;https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/update/main.go&#34;&gt;here in my README repository&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Mmmm, doesn&amp;rsquo;t that smell good? 🍪 Let&amp;rsquo;s make this happen on the daily with a GitHub Action.&lt;/p&gt;
 
 &lt;h2 id=&#34;running-your-go-program-on-a-schedule-with-actions&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#running-your-go-program-on-a-schedule-with-actions&#34;&gt;Running your Go program on a schedule with Actions&lt;/a&gt;&lt;/h2&gt;
@@ -233,7 +233,7 @@ update               Do apt upgrade and autoremove
 &lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;git&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;add&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;.&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;git&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;commit&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;-am&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Update dynamic content&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;git&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;push&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;--all&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;-f&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;https&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;//${{&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;secrets.GITHUB_TOKEN&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;}}@github.com/${GITHUB_REPOSITORY}.git&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;View the full code for this Action workflow &lt;a href=&#34;https://github.com/victoriadrake/victoriadrake/blob/master/.github/workflows/update.yaml&#34;&gt;here in my README repository&lt;/a&gt;.&lt;/p&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;View the full code for this Action workflow &lt;a href=&#34;https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/.github/workflows/update.yaml&#34;&gt;here in my README repository&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;go-forth-and-auto-update-your-readme&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#go-forth-and-auto-update-your-readme&#34;&gt;Go forth and auto-update your README&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Congratulations and welcome to the cool kids&amp;rsquo; club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &amp;ndash; just go easy on the GIFs, okay?&lt;/p&gt;
@@ -2113,7 +2113,7 @@ Good: &amp;ldquo;The code will output an error number or description.&amp;rdquo;
         
         <![CDATA[<img src="https://victoria.dev/blog/user-interface-security-for-the-front-end-developer/cover_hu07d29ec2cae21d8634af4fbdb25c976c_325727_640x0_resize_box_2.png" width="640" height="256"/>]]>
         
-        &lt;p&gt;While cybersecurity is often thought of in terms of databases and architecture, much of a strong security posture relies on elements in the domain of the front-end developer. For certain potentially devastating vulnerabilities like &lt;a href=&#34;https://www.owasp.org/index.php/Top_10-2017_A1-Injection&#34;&gt;SQL injection&lt;/a&gt; and &lt;a href=&#34;https://www.owasp.org/index.php/Top_10-2017_A7-Cross-Site_Scripting_(XSS)&#34;&gt;Cross-Site Scripting (XSS)&lt;/a&gt;, a well-considered user interface is the first line of defense.&lt;/p&gt;
+        &lt;p&gt;While cybersecurity is often thought of in terms of databases and architecture, much of a strong security posture relies on elements in the domain of the front-end developer. For certain potentially devastating vulnerabilities like &lt;a href=&#34;https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A1-Injection&#34;&gt;SQL injection&lt;/a&gt; and &lt;a href=&#34;https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS)&#34;&gt;Cross-Site Scripting (XSS)&lt;/a&gt;, a well-considered user interface is the first line of defense.&lt;/p&gt;
 &lt;p&gt;Here are a few areas of focus for front-end developers who want to help fight the good fight.&lt;/p&gt;
 
 &lt;h2 id=&#34;control-user-input&#34; class=&#34;anchor-link&#34;&gt;&lt;a href=&#34;#control-user-input&#34;&gt;Control user input&lt;/a&gt;&lt;/h2&gt;
