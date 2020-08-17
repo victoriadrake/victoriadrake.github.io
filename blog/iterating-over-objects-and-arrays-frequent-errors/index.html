@@ -1,549 +1,84 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-<head>
-    
-    <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer">
-
-<meta name="description" content="Victoria Drake is a senior software engineer and Director of Engineering. She builds better systems, processes, and cybersecurity awareness training.">
-<title>
-    Iterating over objects and arrays: frequent errors | victoria.dev
-</title>
-
-
-
-    <meta
-  name="monetization"
-  content="$ilp.uphold.com/pBRfRwg2EJAe">
-
-    <meta property="og:title" content="Iterating over objects and arrays: frequent errors - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="A quick reference to why your code isn&#39;t working, or some errors I frequently make with iteration when the coffee wears off." />
-<meta property="og:url" content="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/cover.png"/>
-
-
-    <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Iterating over objects and arrays: frequent errors" />
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/cover.png"/>
-
-<meta name="twitter:description"
-    content="A quick reference to why your code isn&#39;t working, or some errors I frequently make with iteration when the coffee wears off." />
-
-    
-<link rel="shortcut icon" href="/img/logo.ico">
-
-
-    
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.2d2b8306d2a8708f89c48a9e659e883f819ecc121ff5c2bde04559806d49309a.css" integrity="sha256-LSuDBtKocI&#43;JxIqeZZ6IP4GezBIf9cK94EVZgG1JMJo=" media="screen">
-
-
-
-
-
-    
-    
-    
-    
-</head>
-
-<body>
-    <section id="main">
-
-        
-        <div class="header">
-
-    <div class="toggle">
-        <input type="checkbox" />
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <div id="mobile-menu">
-            
-            
-            <span class="menu-item">
-                <a href="/">
-                    👩🏻‍💻 hi</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/blog/">
-                    📰 blog</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/about/">
-                    📖 readme</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/coffee/">
-                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-            </span>
-            
-            
-            
-            
-        </div>
-    </div>
-    <div id="menu">
-        
-        
-        <span class="menu-item">
-            <a href="/">
-                👩🏻‍💻 hi</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/blog/">
-                📰 blog</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/about/">
-                📖 readme</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/coffee/">
-                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-        </span>
-        
-        
-        
-        
-    </div>
-
-    <div id="logo">
-        <a href="#"><img id="🥚" alt="site logo" src="/img/logo.png" /></a>
-    </div>
-
-</div>
-
-        
-
-        <div class="container">
-            
-
-
-
-<div id="cover-image">
-    <img src="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/cover.png" alt="cover image" />
-</div>
-
-
-            
-
-
-<div class="markdown">
-    <h1>
-        Iterating over objects and arrays: frequent errors
-    </h1>
-    
-    <p class="subtitle">A quick reference to why your code isn&#39;t working, or some errors I frequently make with iteration when the coffee wears off.</p>
-    <p class="metadata" id="date">
-        May 16, 2017
-        ☕️&nbsp;
-        4 min read
-
-        
-        &nbsp;
-        
-        <a class="li-tag" href="/tags/coding/">
-            coding
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/computing/">
-            computing
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/javascript/">
-            javascript
-        </a>&nbsp;
-        
-        
-
-        
-    </p>
-
-    
-    <div class="dropdown">
-        <input type="checkbox" id="toc-toggle" />
-        <label for="toc-toggle" id="toggle">
-            <p class="toc-title">Jump to section...
-                <span class="dropdown-icon">⚓</span>
-            </p>
-        </label>
-        <nav id="TableOfContents">
-  <ul>
-    <li><a href="#quick-reference-for-equivalent-statements">Quick reference for equivalent statements</a></li>
-    <li><a href="#quick-reference-for-logical-statements">Quick reference for logical statements</a></li>
-    <li><a href="#objects">Objects</a>
-      <ul>
-        <li><a href="#iterate-over-object-properties">Iterate over object properties</a></li>
-        <li><a href="#get-object-property-value">Get object property value</a></li>
-        <li><a href="#get-object-property-from-the-value">Get object property from the value</a></li>
-        <li><a href="#alter-nested-property-values">Alter nested property values</a></li>
-      </ul>
-    </li>
-    <li><a href="#arrays">Arrays</a>
-      <ul>
-        <li><a href="#iterate-through-array-items">Iterate through array items</a></li>
-        <li><a href="#access-array-item-by-index">Access array item by index</a></li>
-        <li><a href="#ways-to-get-mixed-up-over-arrays">Ways to get mixed up over arrays</a></li>
-      </ul>
-    </li>
-    <li><a href="#practice-makes-better">Practice makes&hellip; better</a></li>
-  </ul>
-</nav>
-    </div>
-    
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-<div class="markdown">
-    
-    <p>Here&rsquo;s <del>some complaining</del> a quick overview of some code that has confounded me more than once. I&rsquo;m told even very experienced developers encounter these situations regularly, so if you find yourself on your third cup of coffee scratching your head over why your code is doing exactly what you told it to do (and not what you <em>want</em> it to do), maybe this post can help you.</p>
-<p>The example code is JavaScript, since that&rsquo;s what I&rsquo;ve been working in lately, but I believe the concepts to be pretty universal.</p>
-
-<h2 id="quick-reference-for-equivalent-statements" class="anchor-link"><a href="#quick-reference-for-equivalent-statements">Quick reference for equivalent statements</a></h2>
-<table>
-<thead>
-<tr>
-<th>This&hellip;</th>
-<th>&hellip;is the same as this</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>i++;</code></td>
-<td><code>i = i + 1;</code></td>
-</tr>
-<tr>
-<td><code>i--;</code></td>
-<td><code>i = i - 1;</code></td>
-</tr>
-<tr>
-<td><code>apples += 5</code></td>
-<td><code>apples = apples + 5;</code></td>
-</tr>
-<tr>
-<td><code>apples -= 5</code></td>
-<td><code>apples = apples - 5;</code></td>
-</tr>
-<tr>
-<td><code>apples *= 5</code></td>
-<td><code>apples = apples * 5;</code></td>
-</tr>
-<tr>
-<td><code>apples /= 5</code></td>
-<td><code>apples = apples / 5;</code></td>
-</tr>
-</tbody>
-</table>
-
-<h2 id="quick-reference-for-logical-statements" class="anchor-link"><a href="#quick-reference-for-logical-statements">Quick reference for logical statements</a></h2>
-<table>
-<thead>
-<tr>
-<th>This&hellip;</th>
-<th>&hellip;gives this</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>3 == '3'</code></td>
-<td><code>true</code> (type converted)</td>
-</tr>
-<tr>
-<td><code>3 === '3'</code></td>
-<td><code>false</code> (type matters; integer is not a string)</td>
-</tr>
-<tr>
-<td><code>3 != '3'</code></td>
-<td><code>false</code> (type converted, 3: 3)</td>
-</tr>
-<tr>
-<td><code>3 !== '3'</code></td>
-<td><code>true</code> (type matters; integer is not a string)</td>
-</tr>
-<tr>
-<td>||</td>
-<td>logical &ldquo;or&rdquo;: either side evaluated</td>
-</tr>
-<tr>
-<td><code>&amp;&amp;</code></td>
-<td>logical &ldquo;and&rdquo;: both sides evaluated</td>
-</tr>
-</tbody>
-</table>
-
-<h2 id="objects" class="anchor-link"><a href="#objects">Objects</a></h2>
-<p>Given a breakfast object that looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">breakfast</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;eggs&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s1">&#39;waffles&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s1">&#39;fruit&#39;</span><span class="o">:</span> <span class="p">{</span>
-        <span class="s1">&#39;blueberries&#39;</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s1">&#39;strawberries&#39;</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="s1">&#39;coffee&#39;</span><span class="o">:</span> <span class="mi">1</span>
-<span class="p">}</span>
-</code></pre></div><p>Or like this:</p>
-<p>
-
-<img src="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/cover.png#center" alt="Breakfast object."  />
-
-</p>
-
-<h3 id="iterate-over-object-properties" class="anchor-link"><a href="#iterate-over-object-properties">Iterate over object properties</a></h3>
-<p>We can iterate through each breakfast item using a for loop as follows:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="nx">item</span> <span class="k">in</span> <span class="nx">breakfast</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;item: &#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div><p>This produces:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">item: eggs
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake is a senior software engineer and Director of Engineering. She builds better systems, processes, and cybersecurity awareness training."><title>Iterating over objects and arrays: frequent errors | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Iterating over objects and arrays: frequent errors - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A quick reference to why your code isn't working, or some errors I frequently make with iteration when the coffee wears off."><meta property="og:url" content="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Iterating over objects and arrays: frequent errors"><meta name=twitter:image content="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/cover.png"><meta name=twitter:description content="A quick reference to why your code isn't working, or some errors I frequently make with iteration when the coffee wears off."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.2d2b8306d2a8708f89c48a9e659e883f819ecc121ff5c2bde04559806d49309a.css integrity="sha256-LSuDBtKocI+JxIqeZZ6IP4GezBIf9cK94EVZgG1JMJo=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
+<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><a href=#><img id=🥚 alt="site logo" src=/img/logo.png></a></div></div><div class=container><div id=cover-image><img src=https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/cover.png alt="cover image"></div><div class=markdown><h1>Iterating over objects and arrays: frequent errors</h1><p class=subtitle>A quick reference to why your code isn't working, or some errors I frequently make with iteration when the coffee wears off.</p><p class=metadata id=date>May 16, 2017
+☕️&nbsp;
+4 min read
+&nbsp;
+<a class=li-tag href=/tags/coding/>coding
+</a>&nbsp;
+<a class=li-tag href=/tags/computing/>computing
+</a>&nbsp;
+<a class=li-tag href=/tags/javascript/>javascript
+</a>&nbsp;</p><div class=dropdown><input type=checkbox id=toc-toggle>
+<label for=toc-toggle id=toggle><p class=toc-title>Jump to section...
+<span class=dropdown-icon>⚓</span></p></label><nav id=TableOfContents><ul><li><a href=#quick-reference-for-equivalent-statements>Quick reference for equivalent statements</a></li><li><a href=#quick-reference-for-logical-statements>Quick reference for logical statements</a></li><li><a href=#objects>Objects</a><ul><li><a href=#iterate-over-object-properties>Iterate over object properties</a></li><li><a href=#get-object-property-value>Get object property value</a></li><li><a href=#get-object-property-from-the-value>Get object property from the value</a></li><li><a href=#alter-nested-property-values>Alter nested property values</a></li></ul></li><li><a href=#arrays>Arrays</a><ul><li><a href=#iterate-through-array-items>Iterate through array items</a></li><li><a href=#access-array-item-by-index>Access array item by index</a></li><li><a href=#ways-to-get-mixed-up-over-arrays>Ways to get mixed up over arrays</a></li></ul></li><li><a href=#practice-makes-better>Practice makes&mldr; better</a></li></ul></nav></div></div><div class=page-separator><hr></div><div class=markdown><p>Here&rsquo;s <del>some complaining</del> a quick overview of some code that has confounded me more than once. I&rsquo;m told even very experienced developers encounter these situations regularly, so if you find yourself on your third cup of coffee scratching your head over why your code is doing exactly what you told it to do (and not what you <em>want</em> it to do), maybe this post can help you.</p><p>The example code is JavaScript, since that&rsquo;s what I&rsquo;ve been working in lately, but I believe the concepts to be pretty universal.</p><h2 id=quick-reference-for-equivalent-statements class=anchor-link><a href=#quick-reference-for-equivalent-statements>Quick reference for equivalent statements</a></h2><table><thead><tr><th>This&mldr;</th><th>&mldr;is the same as this</th></tr></thead><tbody><tr><td><code>i++;</code></td><td><code>i = i + 1;</code></td></tr><tr><td><code>i--;</code></td><td><code>i = i - 1;</code></td></tr><tr><td><code>apples += 5</code></td><td><code>apples = apples + 5;</code></td></tr><tr><td><code>apples -= 5</code></td><td><code>apples = apples - 5;</code></td></tr><tr><td><code>apples *= 5</code></td><td><code>apples = apples * 5;</code></td></tr><tr><td><code>apples /= 5</code></td><td><code>apples = apples / 5;</code></td></tr></tbody></table><h2 id=quick-reference-for-logical-statements class=anchor-link><a href=#quick-reference-for-logical-statements>Quick reference for logical statements</a></h2><table><thead><tr><th>This&mldr;</th><th>&mldr;gives this</th></tr></thead><tbody><tr><td><code>3 == '3'</code></td><td><code>true</code> (type converted)</td></tr><tr><td><code>3 === '3'</code></td><td><code>false</code> (type matters; integer is not a string)</td></tr><tr><td><code>3 != '3'</code></td><td><code>false</code> (type converted, 3: 3)</td></tr><tr><td><code>3 !== '3'</code></td><td><code>true</code> (type matters; integer is not a string)</td></tr><tr><td>||</td><td>logical &ldquo;or&rdquo;: either side evaluated</td></tr><tr><td><code>&&</code></td><td>logical &ldquo;and&rdquo;: both sides evaluated</td></tr></tbody></table><h2 id=objects class=anchor-link><a href=#objects>Objects</a></h2><p>Given a breakfast object that looks like this:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>var</span> <span class=nx>breakfast</span> <span class=o>=</span> <span class=p>{</span>
+    <span class=s1>&#39;eggs&#39;</span><span class=o>:</span> <span class=mi>2</span><span class=p>,</span>
+    <span class=s1>&#39;waffles&#39;</span><span class=o>:</span> <span class=mi>2</span><span class=p>,</span>
+    <span class=s1>&#39;fruit&#39;</span><span class=o>:</span> <span class=p>{</span>
+        <span class=s1>&#39;blueberries&#39;</span><span class=o>:</span> <span class=mi>5</span><span class=p>,</span>
+        <span class=s1>&#39;strawberries&#39;</span><span class=o>:</span> <span class=mi>1</span><span class=p>,</span>
+    <span class=p>},</span>
+    <span class=s1>&#39;coffee&#39;</span><span class=o>:</span> <span class=mi>1</span>
+<span class=p>}</span>
+</code></pre></div><p>Or like this:</p><p><img src=https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/cover.png#center alt="Breakfast object."></p><h3 id=iterate-over-object-properties class=anchor-link><a href=#iterate-over-object-properties>Iterate over object properties</a></h3><p>We can iterate through each breakfast item using a for loop as follows:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=k>for</span> <span class=p>(</span><span class=nx>item</span> <span class=k>in</span> <span class=nx>breakfast</span><span class=p>)</span> <span class=p>{</span>
+    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;item: &#39;</span><span class=p>,</span> <span class=nx>item</span><span class=p>);</span>
+<span class=p>}</span>
+</code></pre></div><p>This produces:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>item: eggs
 item: waffles
 item: fruit
 item: coffee
-</code></pre></div>
-<h3 id="get-object-property-value" class="anchor-link"><a href="#get-object-property-value">Get object property value</a></h3>
-<p>We can access the value of the property or nested properties (in this example, the number of items) like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many waffles? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;waffles&#39;</span><span class="p">])</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many strawberries? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;fruit&#39;</span><span class="p">][</span><span class="s1">&#39;strawberries&#39;</span><span class="p">])</span>
-</code></pre></div><p>Or equivalent syntax:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many waffles? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">.</span><span class="nx">waffles</span><span class="p">)</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many strawberries? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">.</span><span class="nx">fruit</span><span class="p">.</span><span class="nx">strawberries</span><span class="p">)</span>
-</code></pre></div><p>This produces:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">How many waffles?  <span class="m">2</span>
-How many strawberries?  <span class="m">1</span>
-</code></pre></div>
-<h3 id="get-object-property-from-the-value" class="anchor-link"><a href="#get-object-property-from-the-value">Get object property from the value</a></h3>
-<p>If instead I want to access the property via the value, for example, to find out which items are served in twos, I can do so by iterating like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="nx">item</span> <span class="k">in</span> <span class="nx">breakfast</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">breakfast</span><span class="p">[</span><span class="nx">item</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Two of: &#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>Which gives us:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Two of:  eggs
+</code></pre></div><h3 id=get-object-property-value class=anchor-link><a href=#get-object-property-value>Get object property value</a></h3><p>We can access the value of the property or nested properties (in this example, the number of items) like this:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;How many waffles? &#39;</span><span class=p>,</span> <span class=nx>breakfast</span><span class=p>[</span><span class=s1>&#39;waffles&#39;</span><span class=p>])</span>
+<span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;How many strawberries? &#39;</span><span class=p>,</span> <span class=nx>breakfast</span><span class=p>[</span><span class=s1>&#39;fruit&#39;</span><span class=p>][</span><span class=s1>&#39;strawberries&#39;</span><span class=p>])</span>
+</code></pre></div><p>Or equivalent syntax:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;How many waffles? &#39;</span><span class=p>,</span> <span class=nx>breakfast</span><span class=p>.</span><span class=nx>waffles</span><span class=p>)</span>
+<span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;How many strawberries? &#39;</span><span class=p>,</span> <span class=nx>breakfast</span><span class=p>.</span><span class=nx>fruit</span><span class=p>.</span><span class=nx>strawberries</span><span class=p>)</span>
+</code></pre></div><p>This produces:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>How many waffles?  <span class=m>2</span>
+How many strawberries?  <span class=m>1</span>
+</code></pre></div><h3 id=get-object-property-from-the-value class=anchor-link><a href=#get-object-property-from-the-value>Get object property from the value</a></h3><p>If instead I want to access the property via the value, for example, to find out which items are served in twos, I can do so by iterating like this:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=k>for</span> <span class=p>(</span><span class=nx>item</span> <span class=k>in</span> <span class=nx>breakfast</span><span class=p>)</span> <span class=p>{</span>
+    <span class=k>if</span> <span class=p>(</span><span class=nx>breakfast</span><span class=p>[</span><span class=nx>item</span><span class=p>]</span> <span class=o>==</span> <span class=mi>2</span><span class=p>)</span> <span class=p>{</span>
+        <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;Two of: &#39;</span><span class=p>,</span> <span class=nx>item</span><span class=p>);</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div><p>Which gives us:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>Two of:  eggs
 Two of:  waffles
-</code></pre></div>
-<h3 id="alter-nested-property-values" class="anchor-link"><a href="#alter-nested-property-values">Alter nested property values</a></h3>
-<p>Say I want to increase the number of fruits in breakfast, because sugar is bad for me and I like things that are bad for me. I can do that like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">fruits</span> <span class="o">=</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;fruit&#39;</span><span class="p">];</span>
-<span class="k">for</span> <span class="p">(</span><span class="nx">f</span> <span class="k">in</span> <span class="nx">fruits</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">fruits</span><span class="p">[</span><span class="nx">f</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">fruits</span><span class="p">);</span>
-</code></pre></div><p>Which gives us:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="o">{</span> blueberries: 6, strawberries: <span class="m">2</span> <span class="o">}</span>
-</code></pre></div>
-<h2 id="arrays" class="anchor-link"><a href="#arrays">Arrays</a></h2>
-<p>Given an array of waffles that looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">wafflesIAte</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">11</span> <span class="p">];</span>
-</code></pre></div><p>Or like this:</p>
-<p>
-
-<img src="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/iteration-waffles.png" alt="Waffle array."  />
-
-</p>
-
-<h3 id="iterate-through-array-items" class="anchor-link"><a href="#iterate-through-array-items">Iterate through array items</a></h3>
-<p>We can iterate through each item in the array using a for loop:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">wafflesIAte</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;array index: &#39;</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;item from array: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
-<span class="p">}</span>
-</code></pre></div><p>This produces:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">array index:  <span class="m">0</span>
-item from array:  <span class="m">1</span>
-array index:  <span class="m">1</span>
-item from array:  <span class="m">3</span>
-array index:  <span class="m">2</span>
-item from array:  <span class="m">2</span>
-array index:  <span class="m">3</span>
-item from array:  <span class="m">0</span>
-array index:  <span class="m">4</span>
-item from array:  <span class="m">5</span>
-array index:  <span class="m">5</span>
-item from array:  <span class="m">2</span>
-array index:  <span class="m">6</span>
-item from array:  <span class="m">11</span>
+</code></pre></div><h3 id=alter-nested-property-values class=anchor-link><a href=#alter-nested-property-values>Alter nested property values</a></h3><p>Say I want to increase the number of fruits in breakfast, because sugar is bad for me and I like things that are bad for me. I can do that like this:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>var</span> <span class=nx>fruits</span> <span class=o>=</span> <span class=nx>breakfast</span><span class=p>[</span><span class=s1>&#39;fruit&#39;</span><span class=p>];</span>
+<span class=k>for</span> <span class=p>(</span><span class=nx>f</span> <span class=k>in</span> <span class=nx>fruits</span><span class=p>)</span> <span class=p>{</span>
+    <span class=nx>fruits</span><span class=p>[</span><span class=nx>f</span><span class=p>]</span> <span class=o>+=</span> <span class=mi>1</span><span class=p>;</span>
+<span class=p>}</span>
+<span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>fruits</span><span class=p>);</span>
+</code></pre></div><p>Which gives us:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=o>{</span> blueberries: 6, strawberries: <span class=m>2</span> <span class=o>}</span>
+</code></pre></div><h2 id=arrays class=anchor-link><a href=#arrays>Arrays</a></h2><p>Given an array of waffles that looks like this:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>var</span> <span class=nx>wafflesIAte</span> <span class=o>=</span> <span class=p>[</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>11</span> <span class=p>];</span>
+</code></pre></div><p>Or like this:</p><p><img src=https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/iteration-waffles.png alt="Waffle array."></p><h3 id=iterate-through-array-items class=anchor-link><a href=#iterate-through-array-items>Iterate through array items</a></h3><p>We can iterate through each item in the array using a for loop:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=k>for</span> <span class=p>(</span><span class=kd>var</span> <span class=nx>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=o>&lt;</span> <span class=nx>wafflesIAte</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span> <span class=nx>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;array index: &#39;</span><span class=p>,</span> <span class=nx>i</span><span class=p>);</span>
+    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;item from array: &#39;</span><span class=p>,</span> <span class=nx>wafflesIAte</span><span class=p>[</span><span class=nx>i</span><span class=p>]);</span>
+<span class=p>}</span>
+</code></pre></div><p>This produces:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>array index:  <span class=m>0</span>
+item from array:  <span class=m>1</span>
+array index:  <span class=m>1</span>
+item from array:  <span class=m>3</span>
+array index:  <span class=m>2</span>
+item from array:  <span class=m>2</span>
+array index:  <span class=m>3</span>
+item from array:  <span class=m>0</span>
+array index:  <span class=m>4</span>
+item from array:  <span class=m>5</span>
+array index:  <span class=m>5</span>
+item from array:  <span class=m>2</span>
+array index:  <span class=m>6</span>
+item from array:  <span class=m>11</span>
 </code></pre></div><p>Some things to remember:
-<code>i</code> in the above context is a placeholder; we could substitute anything we like (<code>x</code>, <code>n</code>, <code>underpants</code>, etc). It simply denotes each instance of the iteration.</p>
-<p><code>i &lt; wafflesIAte.length</code> tells our for loop to continue as long as <code>i</code> is less than the array&rsquo;s length (in this case, 7).</p>
-<p><code>i++</code> is equivalent to <code>i+1</code> and means we&rsquo;re incrementing through our array by one each time. We could also use <code>i+2</code> to proceed with every other item in the array, for example.</p>
-
-<h3 id="access-array-item-by-index" class="anchor-link"><a href="#access-array-item-by-index">Access array item by index</a></h3>
-<p>We can specify an item in the array using the array index, written as <code>wafflesIAte[i]</code> where <code>i</code> is any index of the array. This gives the item at that location.</p>
-<p>Array index always starts with <code>0</code>, which is accessed with <code>wafflesIAte[0]</code>. Using <code>wafflesIAte[1]</code> gives us the second item in the array, which is &ldquo;3&rdquo;.</p>
-
-<h3 id="ways-to-get-mixed-up-over-arrays" class="anchor-link"><a href="#ways-to-get-mixed-up-over-arrays">Ways to get mixed up over arrays</a></h3>
-<p>Remember that <code>wafflesIAte.length</code> and the index of the last item in the array are different. The former is 7, the latter is <code>6</code>.</p>
-<p>When incrementing <code>i</code>, remember that <code>[i+1]</code> and <code>[i]+1</code> are different:</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[i+1] gives next array index: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="p">]);</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[i]+1 gives index value + 1: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
-</code></pre></div><p>Produces:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="o">[</span>i+1<span class="o">]</span> gives next array index:  <span class="m">3</span>
-<span class="o">[</span>i<span class="o">]</span>+1 gives index value + 1:  <span class="m">2</span>
-</code></pre></div>
-<h2 id="practice-makes-better" class="anchor-link"><a href="#practice-makes-better">Practice makes&hellip; better</a></h2>
-<p>The more often you code and correct your errors, the better you&rsquo;ll remember it next time!</p>
-<p>That&rsquo;s all for now. If you have a correction, best practice, or another common error for me to add, please let me know!</p>
-
-
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-<div class="related">
-    
-    <div class="markdown highlight">
-        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
-    </div>
-    <ul id="list-items">
-        
-            <li>
-        
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/">How to code a satellite algorithm and cook paella from scratch</a>
-        <p class="li-brief">
-            A guide to expertly tackling seemingly complicated problems that you&#39;d rather never tackle in the first place.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
-            
-            ☕️☕️&nbsp;
-            7 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-            <li>
-        
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/">Making sandwiches with closures in JavaScript</a>
-        <p class="li-brief">
-            An explanation of closures and how they can emulate private methods in JavaScript.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/javascript/">javascript</a>
-            
-            ☕️&nbsp;
-            4 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-            <li>
-        
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">Understanding Array.prototype.reduce() and recursion using apple pie</a>
-        <p class="li-brief">
-            An explanation of JavaScript reduce() method and recursive functions using delicious, attention-retaining apples.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/javascript/">javascript</a>
-            
-            ☕️☕️&nbsp;
-            6 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a> </p> </div> </div> 
-        </div>
-
-        <div class="container">
-            
-            <footer>
-    
-    
-    
-    
-    
-    <div class="markdown">
-        
-        <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a senior software engineer currently serving as Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-    </div>
-    
-    
-</footer>
-
-            
-        </div>
-    </section>
-
-    
-    
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-98623582-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-
-    
-
-    
-    
-    
-
-</body>
-
-</html>
+<code>i</code> in the above context is a placeholder; we could substitute anything we like (<code>x</code>, <code>n</code>, <code>underpants</code>, etc). It simply denotes each instance of the iteration.</p><p><code>i &lt; wafflesIAte.length</code> tells our for loop to continue as long as <code>i</code> is less than the array&rsquo;s length (in this case, 7).</p><p><code>i++</code> is equivalent to <code>i+1</code> and means we&rsquo;re incrementing through our array by one each time. We could also use <code>i+2</code> to proceed with every other item in the array, for example.</p><h3 id=access-array-item-by-index class=anchor-link><a href=#access-array-item-by-index>Access array item by index</a></h3><p>We can specify an item in the array using the array index, written as <code>wafflesIAte[i]</code> where <code>i</code> is any index of the array. This gives the item at that location.</p><p>Array index always starts with <code>0</code>, which is accessed with <code>wafflesIAte[0]</code>. Using <code>wafflesIAte[1]</code> gives us the second item in the array, which is &ldquo;3&rdquo;.</p><h3 id=ways-to-get-mixed-up-over-arrays class=anchor-link><a href=#ways-to-get-mixed-up-over-arrays>Ways to get mixed up over arrays</a></h3><p>Remember that <code>wafflesIAte.length</code> and the index of the last item in the array are different. The former is 7, the latter is <code>6</code>.</p><p>When incrementing <code>i</code>, remember that <code>[i+1]</code> and <code>[i]+1</code> are different:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;[i+1] gives next array index: &#39;</span><span class=p>,</span> <span class=nx>wafflesIAte</span><span class=p>[</span><span class=mi>0</span><span class=o>+</span><span class=mi>1</span><span class=p>]);</span>
+<span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;[i]+1 gives index value + 1: &#39;</span><span class=p>,</span> <span class=nx>wafflesIAte</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>+</span><span class=mi>1</span><span class=p>);</span>
+</code></pre></div><p>Produces:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=o>[</span>i+1<span class=o>]</span> gives next array index:  <span class=m>3</span>
+<span class=o>[</span>i<span class=o>]</span>+1 gives index value + 1:  <span class=m>2</span>
+</code></pre></div><h2 id=practice-makes-better class=anchor-link><a href=#practice-makes-better>Practice makes&mldr; better</a></h2><p>The more often you code and correct your errors, the better you&rsquo;ll remember it next time!</p><p>That&rsquo;s all for now. If you have a correction, best practice, or another common error for me to add, please let me know!</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/>How to code a satellite algorithm and cook paella from scratch</a><p class=li-brief>A guide to expertly tackling seemingly complicated problems that you'd rather never tackle in the first place.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
+☕️☕️&nbsp;
+7 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/>Making sandwiches with closures in JavaScript</a><p class=li-brief>An explanation of closures and how they can emulate private methods in JavaScript.</p><p class=metadata><a class=li-tag href=/tags/javascript/>javascript</a>
+☕️&nbsp;
+4 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/>Understanding Array.prototype.reduce() and recursion using apple pie</a><p class=li-brief>An explanation of JavaScript reduce() method and recursive functions using delicious, attention-retaining apples.</p><p class=metadata><a class=li-tag href=/tags/javascript/>javascript</a>
+☕️☕️&nbsp;
+6 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a senior software engineer currently serving as Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></body></html>
