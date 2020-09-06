@@ -1,325 +1,55 @@
-<!DOCTYPE html>
-<html lang="en-us">
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>Multithreaded Python: slithering through an I/O bottleneck | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Multithreaded Python: slithering through an I/O bottleneck - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How taking advantage of parallelism in Python can make your software orders of magnitude faster."><meta property="og:url" content="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Multithreaded Python: slithering through an I/O bottleneck"><meta name=twitter:image content="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/cover.png"><meta name=twitter:description content="How taking advantage of parallelism in Python can make your software orders of magnitude faster."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.d0927e5994e126a21f5d7814069600556254f6959ed33bcd28f766541512b176.css integrity="sha256-0JJ+WZThJqIfXXgUBpYAVWJU9pWe0zvNKPdmVBUSsXY=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
+<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><a href=#><img id=🥚 alt="site logo" src=/img/logo.png></a></div></div><div class=container><div id=cover-image><img src=https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/cover.png alt="cover image"></div><div class=markdown><h1>Multithreaded Python: slithering through an I/O bottleneck</h1><p class=subtitle>How taking advantage of parallelism in Python can make your software orders of magnitude faster.</p><p class=metadata id=date>February 28, 2020
+☕️&nbsp;
+5 min read
+&nbsp;
+<a class=li-tag href=/tags/python/>python
+</a>&nbsp;
+<a class=li-tag href=/tags/computing/>computing
+</a>&nbsp;
+<a class=li-tag href=/tags/ci/cd/>ci/cd
+</a>&nbsp;
+<a class=li-tag href=/tags/data/>data
+</a>&nbsp;
+<a class=li-tag href=/tags/open-source/>open-source
+</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>I recently developed a project that I called <a href=https://github.com/victoriadrake/hydra-link-checker>Hydra</a>: a multithreaded link checker written in Python. Unlike many Python site crawlers I found while researching, Hydra uses only standard libraries, with no external dependencies like BeautifulSoup. It&rsquo;s intended to be run as part of a CI/CD process, so part of its success depended on being fast.</p><p>Multiple threads in Python is a bit of a bitey subject (not sorry) in that the Python interpreter doesn&rsquo;t actually let multiple threads execute at the same time. Python&rsquo;s <a href=https://wiki.python.org/moin/GlobalInterpreterLock>Global Interpreter Lock</a>, or GIL, prevents multiple threads from executing Python bytecodes at once. Each thread that wants to execute must first wait for the GIL to be released by the currently executing thread. The GIL is pretty much the microphone in a low-budget conference panel, except where no one gets to shout.</p><p>This has the advantage of preventing <a href=https://en.wikipedia.org/wiki/Race_condition>race conditions</a>. It does, however, lack the performance advantages afforded by running multiple tasks in parallel. (If you&rsquo;d like a refresher on concurrency, parallelism, and multithreading, see <a href=/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/>Concurrency, parallelism, and the many threads of Santa Claus</a>.) While I prefer Go for its convenient first-class primitives that support concurrency (see <a href=https://tour.golang.org/concurrency/1>Goroutines</a>), this project&rsquo;s recipients were more comfortable with Python. I took it as an opportunity to test and explore!</p><p>Simultaneously performing multiple tasks in Python isn&rsquo;t impossible; it just takes a little extra work. For Hydra, the main advantage is in overcoming the input/output (I/O) bottleneck.</p><p>In order to get web pages to check, Hydra needs to go out to the Internet and fetch them. When compared to tasks that are performed by the CPU alone, going out over the network is comparatively slower. How slow?</p><p>Here are approximate timings for tasks performed on a typical PC:</p><table><thead><tr><th></th><th>Task</th><th>Time</th></tr></thead><tbody><tr><td>CPU</td><td>execute typical instruction</td><td>1/1,000,000,000 sec = 1 nanosec</td></tr><tr><td>CPU</td><td>fetch from L1 cache memory</td><td>0.5 nanosec</td></tr><tr><td>CPU</td><td>branch misprediction</td><td>5 nanosec</td></tr><tr><td>CPU</td><td>fetch from L2 cache memory</td><td>7 nanosec</td></tr><tr><td>RAM</td><td>Mutex lock/unlock</td><td>25 nanosec</td></tr><tr><td>RAM</td><td>fetch from main memory</td><td>100 nanosec</td></tr><tr><td>Network</td><td>send 2K bytes over 1Gbps network</td><td>20,000 nanosec</td></tr><tr><td>RAM</td><td>read 1MB sequentially from memory</td><td>250,000 nanosec</td></tr><tr><td>Disk</td><td>fetch from new disk location (seek)</td><td>8,000,000 nanosec (8ms)</td></tr><tr><td>Disk</td><td>read 1MB sequentially from disk</td><td>20,000,000 nanosec (20ms)</td></tr><tr><td>Network</td><td>send packet US to Europe and back</td><td>150,000,000 nanosec (150ms)</td></tr></tbody></table><p>Peter Norvig first published these numbers some years ago in <a href=http://norvig.com/21-days.html#answers>Teach Yourself Programming in Ten Years</a>. Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p><p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p><p>In Hydra, the task of parsing response data and assembling results into a report is relatively fast, since it all happens on the CPU. The slowest portion of the program&rsquo;s execution, by over six orders of magnitude, is network latency. Not only does Hydra need to fetch packets, but whole web pages! One way of improving Hydra&rsquo;s performance is to find a way for the page fetching tasks to execute without blocking the main thread.</p><p>Python has a couple options for doing tasks in parallel: multiple processes, or multiple threads. These methods allow you to circumvent the GIL and speed up execution in a couple different ways.</p><h2 id=multiple-processes class=anchor-link><a href=#multiple-processes>Multiple processes</a></h2><p>To execute parallel tasks using multiple processes, you can use Python&rsquo;s <a href=https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor><code>ProcessPoolExecutor</code></a>. A concrete subclass of <a href=https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor><code>Executor</code></a> from the <a href=https://docs.python.org/3/library/concurrent.futures.html><code>concurrent.futures</code> module</a>, <code>ProcessPoolExecutor</code> uses a pool of processes spawned with the <a href=https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing><code>multiprocessing</code> module</a> to avoid the GIL.</p><p>This option uses worker subprocesses that maximally default to the number of processors on the machine. The <code>multiprocessing</code> module allows you to maximally parallelize function execution across processes, which can really speed up compute-bound (or <a href=https://en.wikipedia.org/wiki/CPU-bound>CPU-bound</a>) tasks.</p><p>Since the main bottleneck for Hydra is I/O and not the processing to be done by the CPU, I&rsquo;m better served by using multiple threads.</p><h2 id=multiple-threads class=anchor-link><a href=#multiple-threads>Multiple threads</a></h2><p>Fittingly named, Python&rsquo;s <a href=https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor><code>ThreadPoolExecutor</code></a> uses a pool of threads to execute asynchronous tasks. Also a subclass of <a href=https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor><code>Executor</code></a>, it uses a defined number of maximum worker threads (at least five by default, according to the formula <code>min(32, os.cpu_count() + 4)</code>) and reuses idle threads before starting new ones, making it pretty efficient.</p><p>Here is a snippet of Hydra with comments showing how Hydra uses <code>ThreadPoolExecutor</code> to achieve parallel multithreaded bliss:</p><div class=highlight><pre class=chroma><code class=language-py data-lang=py><span class=c1># Create the Checker class</span>
+<span class=k>class</span> <span class=nc>Checker</span><span class=p>:</span>
+    <span class=c1># Queue of links to be checked</span>
+    <span class=n>TO_PROCESS</span> <span class=o>=</span> <span class=n>Queue</span><span class=p>()</span>
+    <span class=c1># Maximum workers to run</span>
+    <span class=n>THREADS</span> <span class=o>=</span> <span class=mi>100</span>
+    <span class=c1># Maximum seconds to wait for HTTP response</span>
+    <span class=n>TIMEOUT</span> <span class=o>=</span> <span class=mi>60</span>
 
-<head>
-    
-    <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer">
-
-<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
-<title>
-    Multithreaded Python: slithering through an I/O bottleneck | victoria.dev
-</title>
-
-
-
-    <meta
-  name="monetization"
-  content="$ilp.uphold.com/pBRfRwg2EJAe">
-
-    <meta property="og:title" content="Multithreaded Python: slithering through an I/O bottleneck - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="How taking advantage of parallelism in Python can make your software orders of magnitude faster." />
-<meta property="og:url" content="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/cover.png"/>
-
-
-    <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Multithreaded Python: slithering through an I/O bottleneck" />
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>url</span><span class=p>):</span>
+        <span class=o>...</span>
+        <span class=c1># Create the thread pool</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>pool</span> <span class=o>=</span> <span class=n>futures</span><span class=o>.</span><span class=n>ThreadPoolExecutor</span><span class=p>(</span><span class=n>max_workers</span><span class=o>=</span><span class=bp>self</span><span class=o>.</span><span class=n>THREADS</span><span class=p>)</span>
 
 
-<meta name="twitter:image" content="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/cover.png"/>
-
-<meta name="twitter:description"
-    content="How taking advantage of parallelism in Python can make your software orders of magnitude faster." />
-
-    
-<link rel="shortcut icon" href="/img/favicon.ico">
-
-
-    
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.d0927e5994e126a21f5d7814069600556254f6959ed33bcd28f766541512b176.css" integrity="sha256-0JJ&#43;WZThJqIfXXgUBpYAVWJU9pWe0zvNKPdmVBUSsXY=" media="screen">
-
-
-
-
-
-    
-    
-    
-        
-</head>
-
-<body>
-    <section id="main">
-
-        
-        <div class="header">
-
-    <div class="toggle">
-        <input type="checkbox" />
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <div id="mobile-menu">
-            
-            
-            <span class="menu-item">
-                <a href="/">
-                    👩🏻‍💻 hi</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/blog/">
-                    📰 blog</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/about/">
-                    📖 readme</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/coffee/">
-                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-            </span>
-            
-            
-            
-            
-        </div>
-    </div>
-    <div id="menu">
-        
-        
-        <span class="menu-item">
-            <a href="/">
-                👩🏻‍💻 hi</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/blog/">
-                📰 blog</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/about/">
-                📖 readme</a >
-        </span>
-        
-        <span class="menu-item">
-            <a href="/coffee/">
-                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-        </span>
-        
-        
-        
-        
-    </div>
-
-    <div id="logo">
-        <a href="#"><img id="🥚" alt="site logo" src="/img/logo.png" /></a>
-    </div>
-
-</div>
-
-        
-
-        <div class="container">
-            
-
-
-
-<div id="cover-image">
-    <img src="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/cover.png" alt="cover image" />
-</div>
-
-
-            
-
-
-<div class="markdown">
-    <h1>
-        Multithreaded Python: slithering through an I/O bottleneck
-    </h1>
-    
-    <p class="subtitle">How taking advantage of parallelism in Python can make your software orders of magnitude faster.</p>
-    <p class="metadata" id="date">
-        February 28, 2020
-        ☕️&nbsp;
-        5 min read
-
-        
-        &nbsp;
-        
-        <a class="li-tag" href="/tags/python/">
-            python
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/computing/">
-            computing
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/ci/cd/">
-            ci/cd
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/data/">
-            data
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/open-source/">
-            open-source
-        </a>&nbsp;
-        
-        
-
-        
-    </p>
-
-    
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-<div class="markdown">
-    
-    <p>I recently developed a project that I called <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>: a multithreaded link checker written in Python. Unlike many Python site crawlers I found while researching, Hydra uses only standard libraries, with no external dependencies like BeautifulSoup. It&rsquo;s intended to be run as part of a CI/CD process, so part of its success depended on being fast.</p>
-<p>Multiple threads in Python is a bit of a bitey subject (not sorry) in that the Python interpreter doesn&rsquo;t actually let multiple threads execute at the same time. Python&rsquo;s <a href="https://wiki.python.org/moin/GlobalInterpreterLock">Global Interpreter Lock</a>, or GIL, prevents multiple threads from executing Python bytecodes at once. Each thread that wants to execute must first wait for the GIL to be released by the currently executing thread. The GIL is pretty much the microphone in a low-budget conference panel, except where no one gets to shout.</p>
-<p>This has the advantage of preventing <a href="https://en.wikipedia.org/wiki/Race_condition">race conditions</a>. It does, however, lack the performance advantages afforded by running multiple tasks in parallel. (If you&rsquo;d like a refresher on concurrency, parallelism, and multithreading, see <a href="/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/">Concurrency, parallelism, and the many threads of Santa Claus</a>.) While I prefer Go for its convenient first-class primitives that support concurrency (see <a href="https://tour.golang.org/concurrency/1">Goroutines</a>), this project&rsquo;s recipients were more comfortable with Python. I took it as an opportunity to test and explore!</p>
-<p>Simultaneously performing multiple tasks in Python isn&rsquo;t impossible; it just takes a little extra work. For Hydra, the main advantage is in overcoming the input/output (I/O) bottleneck.</p>
-<p>In order to get web pages to check, Hydra needs to go out to the Internet and fetch them. When compared to tasks that are performed by the CPU alone, going out over the network is comparatively slower. How slow?</p>
-<p>Here are approximate timings for tasks performed on a typical PC:</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Task</th>
-<th>Time</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>CPU</td>
-<td>execute typical instruction</td>
-<td>1/1,000,000,000 sec = 1 nanosec</td>
-</tr>
-<tr>
-<td>CPU</td>
-<td>fetch from L1 cache memory</td>
-<td>0.5 nanosec</td>
-</tr>
-<tr>
-<td>CPU</td>
-<td>branch misprediction</td>
-<td>5 nanosec</td>
-</tr>
-<tr>
-<td>CPU</td>
-<td>fetch from L2 cache memory</td>
-<td>7 nanosec</td>
-</tr>
-<tr>
-<td>RAM</td>
-<td>Mutex lock/unlock</td>
-<td>25 nanosec</td>
-</tr>
-<tr>
-<td>RAM</td>
-<td>fetch from main memory</td>
-<td>100 nanosec</td>
-</tr>
-<tr>
-<td>Network</td>
-<td>send 2K bytes over 1Gbps network</td>
-<td>20,000 nanosec</td>
-</tr>
-<tr>
-<td>RAM</td>
-<td>read 1MB sequentially from memory</td>
-<td>250,000 nanosec</td>
-</tr>
-<tr>
-<td>Disk</td>
-<td>fetch from new disk location (seek)</td>
-<td>8,000,000 nanosec   (8ms)</td>
-</tr>
-<tr>
-<td>Disk</td>
-<td>read 1MB sequentially from disk</td>
-<td>20,000,000 nanosec  (20ms)</td>
-</tr>
-<tr>
-<td>Network</td>
-<td>send packet US to Europe and back</td>
-<td>150,000,000 nanosec (150ms)</td>
-</tr>
-</tbody>
-</table>
-<p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
-<p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
-<p>In Hydra, the task of parsing response data and assembling results into a report is relatively fast, since it all happens on the CPU. The slowest portion of the program&rsquo;s execution, by over six orders of magnitude, is network latency. Not only does Hydra need to fetch packets, but whole web pages! One way of improving Hydra&rsquo;s performance is to find a way for the page fetching tasks to execute without blocking the main thread.</p>
-<p>Python has a couple options for doing tasks in parallel: multiple processes, or multiple threads. These methods allow you to circumvent the GIL and speed up execution in a couple different ways.</p>
-
-<h2 id="multiple-processes" class="anchor-link"><a href="#multiple-processes">Multiple processes</a></h2>
-<p>To execute parallel tasks using multiple processes, you can use Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor"><code>ProcessPoolExecutor</code></a>. A concrete subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a> from the <a href="https://docs.python.org/3/library/concurrent.futures.html"><code>concurrent.futures</code> module</a>, <code>ProcessPoolExecutor</code> uses a pool of processes spawned with the <a href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing"><code>multiprocessing</code> module</a> to avoid the GIL.</p>
-<p>This option uses worker subprocesses that maximally default to the number of processors on the machine. The <code>multiprocessing</code> module allows you to maximally parallelize function execution across processes, which can really speed up compute-bound (or <a href="https://en.wikipedia.org/wiki/CPU-bound">CPU-bound</a>) tasks.</p>
-<p>Since the main bottleneck for Hydra is I/O and not the processing to be done by the CPU, I&rsquo;m better served by using multiple threads.</p>
-
-<h2 id="multiple-threads" class="anchor-link"><a href="#multiple-threads">Multiple threads</a></h2>
-<p>Fittingly named, Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor"><code>ThreadPoolExecutor</code></a> uses a pool of threads to execute asynchronous tasks. Also a subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a>, it uses a defined number of maximum worker threads (at least five by default, according to the formula <code>min(32, os.cpu_count() + 4)</code>) and reuses idle threads before starting new ones, making it pretty efficient.</p>
-<p>Here is a snippet of Hydra with comments showing how Hydra uses <code>ThreadPoolExecutor</code> to achieve parallel multithreaded bliss:</p>
-<div class="highlight"><pre class="chroma"><code class="language-py" data-lang="py"><span class="c1"># Create the Checker class</span>
-<span class="k">class</span> <span class="nc">Checker</span><span class="p">:</span>
-    <span class="c1"># Queue of links to be checked</span>
-    <span class="n">TO_PROCESS</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
-    <span class="c1"># Maximum workers to run</span>
-    <span class="n">THREADS</span> <span class="o">=</span> <span class="mi">100</span>
-    <span class="c1"># Maximum seconds to wait for HTTP response</span>
-    <span class="n">TIMEOUT</span> <span class="o">=</span> <span class="mi">60</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
-        <span class="o">...</span>
-        <span class="c1"># Create the thread pool</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">THREADS</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># Run until the TO_PROCESS queue is empty</span>
-    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">target_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TO_PROCESS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="c1"># If we haven&#39;t already checked this link</span>
-            <span class="k">if</span> <span class="n">target_url</span><span class="p">[</span><span class="s2">&#34;url&#34;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">visited</span><span class="p">:</span>
-                <span class="c1"># Mark it as visited</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target_url</span><span class="p">[</span><span class="s2">&#34;url&#34;</span><span class="p">])</span>
-                <span class="c1"># Submit the link to the pool</span>
-                <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_url</span><span class="p">,</span> <span class="n">target_url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_future</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-</code></pre></div><p>You can view the full code in <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&rsquo;s GitHub repository</a>.</p>
-
-<h2 id="single-thread-to-multithread" class="anchor-link"><a href="#single-thread-to-multithread">Single thread to multithread</a></h2>
-<p>If you&rsquo;d like to see the full effect, I compared the run times for checking my website between a prototype single-thread program, and the <del>multiheaded</del>multithreaded Hydra.</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
+<span class=k>def</span> <span class=nf>run</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+    <span class=c1># Run until the TO_PROCESS queue is empty</span>
+    <span class=k>while</span> <span class=bp>True</span><span class=p>:</span>
+        <span class=k>try</span><span class=p>:</span>
+            <span class=n>target_url</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>TO_PROCESS</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>block</span><span class=o>=</span><span class=bp>True</span><span class=p>,</span> <span class=n>timeout</span><span class=o>=</span><span class=mi>2</span><span class=p>)</span>
+            <span class=c1># If we haven&#39;t already checked this link</span>
+            <span class=k>if</span> <span class=n>target_url</span><span class=p>[</span><span class=s2>&#34;url&#34;</span><span class=p>]</span> <span class=ow>not</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>visited</span><span class=p>:</span>
+                <span class=c1># Mark it as visited</span>
+                <span class=bp>self</span><span class=o>.</span><span class=n>visited</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>target_url</span><span class=p>[</span><span class=s2>&#34;url&#34;</span><span class=p>])</span>
+                <span class=c1># Submit the link to the pool</span>
+                <span class=n>job</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>pool</span><span class=o>.</span><span class=n>submit</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>load_url</span><span class=p>,</span> <span class=n>target_url</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>TIMEOUT</span><span class=p>)</span>
+                <span class=n>job</span><span class=o>.</span><span class=n>add_done_callback</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>handle_future</span><span class=p>)</span>
+        <span class=k>except</span> <span class=n>Empty</span><span class=p>:</span>
+            <span class=k>return</span>
+        <span class=k>except</span> <span class=ne>Exception</span> <span class=k>as</span> <span class=n>e</span><span class=p>:</span>
+            <span class=k>print</span><span class=p>(</span><span class=n>e</span><span class=p>)</span>
+</code></pre></div><p>You can view the full code in <a href=https://github.com/victoriadrake/hydra-link-checker>Hydra&rsquo;s GitHub repository</a>.</p><h2 id=single-thread-to-multithread class=anchor-link><a href=#single-thread-to-multithread>Single thread to multithread</a></h2><p>If you&rsquo;d like to see the full effect, I compared the run times for checking my website between a prototype single-thread program, and the <del>multiheaded</del>multithreaded Hydra.</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>time python3 slow-link-check.py https://victoria.dev
 
 real    17m34.084s
 user    11m40.761s
@@ -331,142 +61,10 @@ time python3 hydra.py https://victoria.dev
 real    0m15.729s
 user    0m11.071s
 sys     0m2.526s
-</code></pre></div><p>The single-thread program, which blocks on I/O, ran in about seventeen minutes. When I first ran the multithreaded version, it finished in 1m13.358s - after some profiling and tuning, it took a little under sixteen seconds. Again, the exact times don&rsquo;t mean all that much; they&rsquo;ll vary depending on factors such as the size of the site being crawled, your network speed, and your program&rsquo;s balance between the overhead of thread management and the benefits of parallelism.</p>
-<p>The more important thing, and the result I&rsquo;ll take any day, is a program that runs some orders of magnitude faster.</p>
-
-
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-<div class="related">
-    
-    <div class="markdown highlight">
-        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
-    </div>
-    <ul id="list-items">
-        
-            <li>
-        
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/breaking-bottlenecks/">Breaking bottlenecks 🍾</a>
-        <p class="li-brief">
-            A talk on the benefits of non-blocking functions for programs, developers, and organizations.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/computing/">computing</a>
-            
-            ☕️☕️☕️&nbsp;
-            12 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-            <li>
-        
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/look-mom-im-a-github-action-hero/">Look mom, I&#39;m a GitHub Action Hero</a>
-        <p class="li-brief">
-            The GitHub blog interviews me for their GitHub Action Hero series.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
-            
-            ☕️&nbsp;
-            5 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-            <li>
-        
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/sqlite-in-production-with-wal/">SQLite in production with WAL 🔥</a>
-        <p class="li-brief">
-            An underappreciated candidate for light and fast database transactions.
-        </p>
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/data/">data</a>
-            
-            ☕️&nbsp;
-            4 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a> </p> </div> </div> 
-        </div>
-
-        <div class="container">
-            
-            <footer>
-    
-    
-    
-    
-    
-    <div class="markdown">
-        
-        <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-    </div>
-    
-    
-</footer>
-
-            
-        </div>
-    </section>
-
-    
-    
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-98623582-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-
-    
-
-    
-    
-        
-
-</body>
-
-</html>
+</code></pre></div><p>The single-thread program, which blocks on I/O, ran in about seventeen minutes. When I first ran the multithreaded version, it finished in 1m13.358s - after some profiling and tuning, it took a little under sixteen seconds. Again, the exact times don&rsquo;t mean all that much; they&rsquo;ll vary depending on factors such as the size of the site being crawled, your network speed, and your program&rsquo;s balance between the overhead of thread management and the benefits of parallelism.</p><p>The more important thing, and the result I&rsquo;ll take any day, is a program that runs some orders of magnitude faster.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/breaking-bottlenecks/>Breaking bottlenecks 🍾</a><p class=li-brief>A talk on the benefits of non-blocking functions for programs, developers, and organizations.</p><p class=metadata><a class=li-tag href=/tags/computing/>computing</a>
+☕️☕️☕️&nbsp;
+12 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/look-mom-im-a-github-action-hero/>Look mom, I'm a GitHub Action Hero</a><p class=li-brief>The GitHub blog interviews me for their GitHub Action Hero series.</p><p class=metadata><a class=li-tag href=/tags/ci/cd/>ci/cd</a>
+☕️&nbsp;
+5 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/sqlite-in-production-with-wal/>SQLite in production with WAL 🔥</a><p class=li-brief>An underappreciated candidate for light and fast database transactions.</p><p class=metadata><a class=li-tag href=/tags/data/>data</a>
+☕️&nbsp;
+4 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></body></html>
