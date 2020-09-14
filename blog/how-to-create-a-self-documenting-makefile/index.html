@@ -56,11 +56,10 @@ update               Do apt upgrade and autoremove
 <span class=nf>.PHONY</span><span class=o>:</span> <span class=n>help</span> <span class=n>env</span> <span class=n>install</span> <span class=n>upgrade</span>-<span class=n>hugo</span> <span class=n>lint</span> <span class=n>serve</span> <span class=n>build</span> <span class=n>start</span> <span class=n>initial</span>
 
 <span class=nf>help</span><span class=o>:</span> <span class=c>## Show this help
-</span><span class=c></span>	@egrep -h <span class=s1>&#39;\s##\s&#39;</span> <span class=k>$(</span>MAKEFILE_LIST<span class=k>)</span> <span class=p>|</span> sort <span class=p>|</span> awk <span class=s1>&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</span><span class=c></span>	@egrep -h <span class=s1>&#39;&amp;&amp; \s##&amp;&amp; \s&#39;</span> <span class=k>$(</span>MAKEFILE_LIST<span class=k>)</span> <span class=p>|</span> sort <span class=p>|</span> awk <span class=s1>&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;&amp;&amp; \033[36m%-20s&amp;&amp; \033[0m %s&amp;&amp; \n&#34;, $$1, $$2}&#39;</span>
 
 <span class=nf>env</span><span class=o>:</span>
 	pip3 install pipenv
-	pipenv shell --python 3.8
 
 <span class=nf>shell</span><span class=o>:</span> <span class=c>## Enter the virtual environment
 </span><span class=c></span>	pipenv shell
@@ -71,12 +70,15 @@ update               Do apt upgrade and autoremove
 	npm install -g markdownlint-cli
 	pre-commit install --install-hooks
 
+<span class=nv>HUGO_VERSION</span><span class=o>:=</span><span class=k>$(</span>shell curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest <span class=p>|</span> grep <span class=s1>&#39;tag_name&#39;</span> <span class=p>|</span> cut -d <span class=s1>&#39;&#34;&#39;</span> -f <span class=m>4</span> <span class=p>|</span> cut -c 2-<span class=k>)</span>
+
 <span class=nf>upgrade-hugo</span><span class=o>:</span> <span class=c>## Get the latest Hugo
-</span><span class=c></span>	<span class=nv>HUGO_VERSION</span><span class=o>=</span><span class=k>$(</span>curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest <span class=p>|</span> jq -r <span class=s1>&#39;.tag_name&#39;</span><span class=k>)</span>
-	mkdir tmp/ <span class=o>&amp;&amp;</span> <span class=nb>cd</span> tmp/
-	curl -sSL https://github.com/gohugoio/hugo/releases/download/<span class=k>$(</span>HUGO_VERSION<span class=k>)</span>/hugo_extended_<span class=k>$(</span>HUGO_VERSION: -6<span class=k>)</span>_Linux-64bit.tar.gz <span class=p>|</span> tar -xvzf-
-	sudo mv hugo /usr/local/bin/
-	<span class=nb>cd</span> .. <span class=o>&amp;&amp;</span> rm -rf tmp/
+</span><span class=c></span>	mkdir tmp/ <span class=o>&amp;&amp;</span> <span class=se>\
+</span><span class=se></span>	<span class=nb>cd</span> tmp/ <span class=o>&amp;&amp;</span> <span class=se>\
+</span><span class=se></span>	curl -sSL https://github.com/gohugoio/hugo/releases/download/v<span class=k>$(</span>HUGO_VERSION<span class=k>)</span>/hugo_extended_<span class=k>$(</span>HUGO_VERSION<span class=k>)</span>_Linux-64bit.tar.gz <span class=p>|</span> tar -xvzf- <span class=o>&amp;&amp;</span> <span class=se>\
+</span><span class=se></span>	sudo mv hugo /usr/local/bin/ <span class=o>&amp;&amp;</span> <span class=se>\
+</span><span class=se></span>	<span class=nb>cd</span> .. <span class=o>&amp;&amp;</span> <span class=se>\
+</span><span class=se></span>	rm -rf tmp/
 	hugo version
 
 <span class=nf>lint</span><span class=o>:</span> <span class=c>## Lint files

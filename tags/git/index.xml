@@ -1,4 +1,121 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>git on victoria.dev</title><link>https://victoria.dev/tags/git/</link><description>Recent content in git on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><lastBuildDate>Mon, 04 Nov 2019 09:13:23 -0400</lastBuildDate><atom:link href="https://victoria.dev/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>What is TLS? Transport Layer Security encryption explained in plain english</title><link>https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/</link><pubDate>Sat, 05 Sep 2020 04:48:39 -0600</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/</guid><description>How TLS, digital certificates, and sessions help keep communications secure.</description><content:encoded>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>git on victoria.dev</title><link>https://victoria.dev/tags/git/</link><description>Recent content in git on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><lastBuildDate>Mon, 04 Nov 2019 09:13:23 -0400</lastBuildDate><atom:link href="https://victoria.dev/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>Manipulating data with Django migrations</title><link>https://victoria.dev/blog/manipulating-data-with-django-migrations/</link><pubDate>Mon, 14 Sep 2020 02:12:57 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/manipulating-data-with-django-migrations/</guid><description>How to update Django models and manipulate existing data using migrations.</description><content:encoded>
+&lt;img src="https://victoria.dev/blog/manipulating-data-with-django-migrations/cover_hu0fb1319bf722fb9b3f3bf5ca6dac0f16_467744_640x0_resize_box_2.png" width="640" height="320"/>
+&lt;p>Growing, successful applications are a lovely problem to have. As a product develops, it tends to accumulate complication the way your weekend cake project accumulates layers of frosting. Thankfully, Django, my favorite batteries-included framework, handles complexity pretty well.&lt;/p>
+&lt;p>Django &lt;a href="https://victoria.dev/blog/writing-efficient-django/#django-models">models help humans work with data in a way that makes sense to our brains&lt;/a>, and the framework offers plenty of classes you can inherit to help you rapidly develop a robust application from scratch. As for developing on existing Django applications, there&amp;rsquo;s a feature for that, too. In this article, we&amp;rsquo;ll cover how to use Django migrations to update your existing models and database.&lt;/p>
+&lt;h2 id="whats-under-the-hood" class="anchor-link">&lt;a href="#whats-under-the-hood">What&amp;rsquo;s under the hood&lt;/a>&lt;/h2>
+&lt;p>Django migrations are Python files that help you add and change things in your database tables to reflect changes in your Django models. To understand how Django migrations help you work with data, it may be helpful to understand the underlying structures we&amp;rsquo;re working with.&lt;/p>
+&lt;h3 id="whats-a-database-table" class="anchor-link">&lt;a href="#whats-a-database-table">What&amp;rsquo;s a database table&lt;/a>&lt;/h3>
+&lt;p>If you&amp;rsquo;ve laid eyes on a spreadsheet before, you&amp;rsquo;re already most of the way to understanding a database table. In a relational database, for example, a PostgreSQL database, you can expect to see data organized into columns and rows. A relational database table may have a set number of columns and any number of rows.&lt;/p>
+&lt;p>In Django, each model is its own table. For example, here&amp;rsquo;s a Django model:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">from&lt;/span> &lt;span class="nn">django.db&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">models&lt;/span>
+&lt;span class="k">class&lt;/span> &lt;span class="nc">Lunch&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Model&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">left_side&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">center&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">right_side&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Each field is a column, and each row is a Django object instance of that model. Here&amp;rsquo;s a representation of a database table for the Django model &amp;ldquo;Lunch&amp;rdquo; above. In the database, its name would be &lt;code>lunch_table&lt;/code>.&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>id&lt;/th>
+&lt;th>left_side&lt;/th>
+&lt;th>center&lt;/th>
+&lt;th>right_side&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>1&lt;/td>
+&lt;td>Fork&lt;/td>
+&lt;td>Plate&lt;/td>
+&lt;td>Spoon&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>The model &lt;code>Lunch&lt;/code> has three fields: &lt;code>left_side&lt;/code>, &lt;code>center&lt;/code>, and &lt;code>right-side&lt;/code>. One instance of a &lt;code>Lunch&lt;/code> object would have &amp;ldquo;Fork&amp;rdquo; for the &lt;code>left_side&lt;/code>, a &amp;ldquo;Plate&amp;rdquo; for the &lt;code>center&lt;/code>, and &amp;ldquo;Spoon&amp;rdquo; for the &lt;code>right_side&lt;/code>. Django &lt;a href="https://docs.djangoproject.com/en/3.1/topics/db/models/#automatic-primary-key-fields">automatically adds an &lt;code>id&lt;/code> field&lt;/a> if you don&amp;rsquo;t specify a primary key.&lt;/p>
+&lt;p>If you wanted to change the name of your Lunch model, you would do so in your &lt;code>models.py&lt;/code> code. For example, change &amp;ldquo;Lunch&amp;rdquo; to &amp;ldquo;Dinner,&amp;rdquo; then &lt;a href="https://docs.djangoproject.com/en/3.1/ref/django-admin/#makemigrations">run &lt;code>python manage.py makemigrations&lt;/code>&lt;/a>. You&amp;rsquo;ll see:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">python manage.py makemigrations
+Did you rename the backend.Lunch model to Dinner? [y/N] y
+Migrations for &amp;#39;backend&amp;#39;:
+backend/migrations/0003_auto_20200922_2331.py
+- Rename model Lunch to Dinner
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Django automatically generates the appropriate migration files. The relevant line of the generated migrations file in this case would look like:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="n">migrations&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">RenameModel&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">old_name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Lunch&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">new_name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Dinner&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This operation would rename our &amp;ldquo;Lunch&amp;rdquo; model to &amp;ldquo;Dinner&amp;rdquo; while keeping everything else the same. But what if you also wanted to change the structure of the database table itself, its schema, as well as make sure that existing data ends up in the right place on your Dinner table?&lt;/p>
+&lt;p>Let&amp;rsquo;s explore how to turn our Lunch model into a Dinner model that looks like this:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="kn">from&lt;/span> &lt;span class="nn">django.db&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">models&lt;/span>
+&lt;span class="k">class&lt;/span> &lt;span class="nc">Dinner&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Model&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">top_left&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">top_center&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">top_right&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">bottom_left&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">bottom_center&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">bottom_right&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&amp;hellip;with a database table that would look like this:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>id&lt;/th>
+&lt;th>top_left&lt;/th>
+&lt;th>top_center&lt;/th>
+&lt;th>top_right&lt;/th>
+&lt;th>bottom_left&lt;/th>
+&lt;th>bottom_center&lt;/th>
+&lt;th>bottom_right&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>1&lt;/td>
+&lt;td>Bread plate&lt;/td>
+&lt;td>Spoon&lt;/td>
+&lt;td>Glass&lt;/td>
+&lt;td>Fork&lt;/td>
+&lt;td>Plate&lt;/td>
+&lt;td>Knife&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="manipulating-data-with-django-migrations" class="anchor-link">&lt;a href="#manipulating-data-with-django-migrations">Manipulating data with Django migrations&lt;/a>&lt;/h2>
+&lt;p>Before you begin to manipulate your data, it&amp;rsquo;s always a good idea to create a backup of your database that you can restore in case something goes wrong. There are various ways to do this depending on the database you&amp;rsquo;re using. You can typically find instructions by searching for &lt;code>&amp;lt;your database name&amp;gt;&lt;/code> and keywords like &lt;code>backup&lt;/code>, &lt;code>recovery&lt;/code>, or &lt;code>snapshot&lt;/code>.&lt;/p>
+&lt;p>In order to design your migration, it&amp;rsquo;s helpful to become familiar with the available &lt;a href="https://docs.djangoproject.com/en/3.1/ref/migration-operations/">migration operations&lt;/a>. Migrations are run step-by-step, and each operation is some flavor of adding, removing, or altering data. Like a strategic puzzle, it&amp;rsquo;s important to make model changes one step at a time so that the generated migrations have the correct result.&lt;/p>
+&lt;p>We&amp;rsquo;ve already renamed our model successfully. Now, we&amp;rsquo;ll rename the fields that hold the data we want to retain:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">class&lt;/span> &lt;span class="nc">Dinner&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Model&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">bottom_left&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">bottom_center&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">top_center&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Django is sometimes smart enough to determine the old and new field names correctly. You&amp;rsquo;ll be asked for confirmation:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">python manage.py makemigrations
+Did you rename dinner.center to dinner.bottom_center (a CharField)? [y/N] y
+Did you rename dinner.left_side to dinner.bottom_left (a CharField)? [y/N] y
+Did you rename dinner.right_side to dinner.top_center (a CharField)? [y/N] y
+Migrations for &amp;#39;backend&amp;#39;:
+backend/migrations/0004_auto_20200914_2345.py
+- Rename field center on dinner to bottom_center
+- Rename field left_side on dinner to bottom_left
+- Rename field right_side on dinner to top_center
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In some cases, you&amp;rsquo;ll want to try renaming the field and running &lt;code>makemigrations&lt;/code> one at a time.&lt;/p>
+&lt;p>Now that the existing fields have been migrated to their new names, add the remaining fields to the model:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="k">class&lt;/span> &lt;span class="nc">Dinner&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Model&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;span class="n">top_left&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">top_center&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">top_right&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">bottom_left&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">bottom_center&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;span class="n">bottom_right&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">models&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">CharField&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">max_length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">null&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Running &lt;code>makemigrations&lt;/code> again now gives us:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">python manage.py makemigrations
+Migrations for &amp;#39;backend&amp;#39;:
+backend/migrations/0005_auto_20200914_2351.py
+- Add field bottom_right to dinner
+- Add field top_left to dinner
+- Add field top_right to dinner
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>You&amp;rsquo;re done! By generating Django migrations, you&amp;rsquo;ve successfully set up your &lt;code>dinner_table&lt;/code> and moved existing data to its new spot.&lt;/p>
+&lt;h2 id="additional-complexity" class="anchor-link">&lt;a href="#additional-complexity">Additional complexity&lt;/a>&lt;/h2>
+&lt;p>You&amp;rsquo;ll notice that our Lunch and Dinner models are not very complex. Out of Django&amp;rsquo;s many &lt;a href="https://docs.djangoproject.com/en/3.1/ref/models/fields/#field-types">model field options&lt;/a>, we&amp;rsquo;re just using &lt;code>CharField&lt;/code>. We also set &lt;code>null=True&lt;/code> to let Django store empty values as &lt;code>NULL&lt;/code> in the database.&lt;/p>
+&lt;p>Django migrations can handle additional complexity, such as changing field types, and whether a blank or null value is permitted. I keep Django&amp;rsquo;s &lt;a href="https://docs.djangoproject.com/en/3.1/ref/models/fields/#">model field reference&lt;/a> handy as I work with varying types of data and different use cases.&lt;/p>
+&lt;h2 id="de-mystified-migrations" class="anchor-link">&lt;a href="#de-mystified-migrations">De-mystified migrations&lt;/a>&lt;/h2>
+&lt;p>I hope this article has helped you better understand Django migrations and how they work!&lt;/p>
+&lt;p>Now that you can change models and manipulate existing data in your Django application, be sure to use your powers wisely! Backup your database, research and plan your migrations, and always run tests before working with customer data. By doing so, you have the potential to enable your application to grow &amp;ndash; with manageable levels of complexity.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/manipulating-data-with-django-migrations/cover_hu0fb1319bf722fb9b3f3bf5ca6dac0f16_467744_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>What is TLS? Transport Layer Security encryption explained in plain english</title><link>https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/</link><pubDate>Sat, 05 Sep 2020 04:48:39 -0600</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/</guid><description>How TLS, digital certificates, and sessions help keep communications secure.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/cover_hu894d41c5ce9f3ab36a8b926bfa4bc68c_671316_640x0_resize_box_2.png" width="640" height="320"/>
 &lt;p>If you want to have a confidential conversation with someone you know, you might meet up in person and find a private place to talk. If you want to send data confidentially over the Internet, you might have a few more considerations to cover.&lt;/p>
 &lt;p>TLS, or Transport Layer Security, refers to a protocol. &amp;ldquo;Protocol&amp;rdquo; is a word that means, &amp;ldquo;the way we&amp;rsquo;ve agreed to do things around here,&amp;rdquo; more or less. The &amp;ldquo;transport layer&amp;rdquo; part of TLS simply refers to host-to-host communication, such as how a client and a server interact, in the &lt;a href="https://en.wikipedia.org/wiki/Internet_protocol_suite">Internet protocol suite model&lt;/a>.&lt;/p>
@@ -157,10 +274,9 @@ update Do apt upgrade and autoremove
 &lt;span class="nf">.POSIX&lt;/span>&lt;span class="o">:&lt;/span>
 &lt;span class="nf">.PHONY&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">help&lt;/span> &lt;span class="n">env&lt;/span> &lt;span class="n">install&lt;/span> &lt;span class="n">upgrade&lt;/span>-&lt;span class="n">hugo&lt;/span> &lt;span class="n">lint&lt;/span> &lt;span class="n">serve&lt;/span> &lt;span class="n">build&lt;/span> &lt;span class="n">start&lt;/span> &lt;span class="n">initial&lt;/span>
 &lt;span class="nf">help&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="c">## Show this help
-&lt;/span>&lt;span class="c">&lt;/span> @egrep -h &lt;span class="s1">&amp;#39;\s##\s&amp;#39;&lt;/span> &lt;span class="k">$(&lt;/span>MAKEFILE_LIST&lt;span class="k">)&lt;/span> &lt;span class="p">|&lt;/span> sort &lt;span class="p">|&lt;/span> awk &lt;span class="s1">&amp;#39;BEGIN {FS = &amp;#34;:.*?## &amp;#34;}; {printf &amp;#34;\033[36m%-20s\033[0m %s\n&amp;#34;, $$1, $$2}&amp;#39;&lt;/span>
+&lt;/span>&lt;span class="c">&lt;/span> @egrep -h &lt;span class="s1">&amp;#39;&amp;amp;&amp;amp; \s##&amp;amp;&amp;amp; \s&amp;#39;&lt;/span> &lt;span class="k">$(&lt;/span>MAKEFILE_LIST&lt;span class="k">)&lt;/span> &lt;span class="p">|&lt;/span> sort &lt;span class="p">|&lt;/span> awk &lt;span class="s1">&amp;#39;BEGIN {FS = &amp;#34;:.*?## &amp;#34;}; {printf &amp;#34;&amp;amp;&amp;amp; \033[36m%-20s&amp;amp;&amp;amp; \033[0m %s&amp;amp;&amp;amp; \n&amp;#34;, $$1, $$2}&amp;#39;&lt;/span>
 &lt;span class="nf">env&lt;/span>&lt;span class="o">:&lt;/span>
 pip3 install pipenv
-pipenv shell --python 3.8
 &lt;span class="nf">shell&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="c">## Enter the virtual environment
 &lt;/span>&lt;span class="c">&lt;/span> pipenv shell
 &lt;span class="nf">install&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="c">## Install or update dependencies
@@ -168,12 +284,14 @@ pipenv shell --python 3.8
 npm install
 npm install -g markdownlint-cli
 pre-commit install --install-hooks
+&lt;span class="nv">HUGO_VERSION&lt;/span>&lt;span class="o">:=&lt;/span>&lt;span class="k">$(&lt;/span>shell curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest &lt;span class="p">|&lt;/span> grep &lt;span class="s1">&amp;#39;tag_name&amp;#39;&lt;/span> &lt;span class="p">|&lt;/span> cut -d &lt;span class="s1">&amp;#39;&amp;#34;&amp;#39;&lt;/span> -f &lt;span class="m">4&lt;/span> &lt;span class="p">|&lt;/span> cut -c 2-&lt;span class="k">)&lt;/span>
 &lt;span class="nf">upgrade-hugo&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="c">## Get the latest Hugo
-&lt;/span>&lt;span class="c">&lt;/span> &lt;span class="nv">HUGO_VERSION&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="k">$(&lt;/span>curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest &lt;span class="p">|&lt;/span> jq -r &lt;span class="s1">&amp;#39;.tag_name&amp;#39;&lt;/span>&lt;span class="k">)&lt;/span>
-mkdir tmp/ &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="nb">cd&lt;/span> tmp/
-curl -sSL https://github.com/gohugoio/hugo/releases/download/&lt;span class="k">$(&lt;/span>HUGO_VERSION&lt;span class="k">)&lt;/span>/hugo_extended_&lt;span class="k">$(&lt;/span>HUGO_VERSION: -6&lt;span class="k">)&lt;/span>_Linux-64bit.tar.gz &lt;span class="p">|&lt;/span> tar -xvzf-
-sudo mv hugo /usr/local/bin/
-&lt;span class="nb">cd&lt;/span> .. &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> rm -rf tmp/
+&lt;/span>&lt;span class="c">&lt;/span> mkdir tmp/ &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;span class="se">&lt;/span> &lt;span class="nb">cd&lt;/span> tmp/ &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;span class="se">&lt;/span> curl -sSL https://github.com/gohugoio/hugo/releases/download/v&lt;span class="k">$(&lt;/span>HUGO_VERSION&lt;span class="k">)&lt;/span>/hugo_extended_&lt;span class="k">$(&lt;/span>HUGO_VERSION&lt;span class="k">)&lt;/span>_Linux-64bit.tar.gz &lt;span class="p">|&lt;/span> tar -xvzf- &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;span class="se">&lt;/span> sudo mv hugo /usr/local/bin/ &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;span class="se">&lt;/span> &lt;span class="nb">cd&lt;/span> .. &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;span class="se">&lt;/span> rm -rf tmp/
 hugo version
 &lt;span class="nf">lint&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="c">## Lint files
 &lt;/span>&lt;span class="c">&lt;/span> pre-commit run --all-files
@@ -234,34 +352,34 @@ hugo --minify --cleanDestination
 &lt;p>Mmmm, doesn&amp;rsquo;t that smell good? 🍪 Let&amp;rsquo;s make this happen on the daily with a GitHub Action.&lt;/p>
 &lt;h2 id="running-your-go-program-on-a-schedule-with-actions" class="anchor-link">&lt;a href="#running-your-go-program-on-a-schedule-with-actions">Running your Go program on a schedule with Actions&lt;/a>&lt;/h2>
 &lt;p>You can create a GitHub Action workflow that &lt;a href="https://docs.github.com/en/actions/reference/events-that-trigger-workflows">triggers&lt;/a> both on a push to your &lt;code>master&lt;/code> branch as well as on a daily schedule. Here&amp;rsquo;s a slice of the &lt;code>.github/workflows/update.yaml&lt;/code> that defines this:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="k">on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">push&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">branches&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- master&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">schedule&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">cron&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;0 11 * * *&amp;#39;&lt;/span>&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="nt">on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">push&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">branches&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="l">master&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">schedule&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">cron&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;0 11 * * *&amp;#39;&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>To run the Go program that rebuilds our README, we first need a copy of our files. We use &lt;code>actions/checkout&lt;/code> for that:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="k">steps&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>🍽️&lt;span class="w"> &lt;/span>Get&lt;span class="w"> &lt;/span>working&lt;span class="w"> &lt;/span>copy&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">uses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>actions/checkout@master&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">with&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">fetch-depth&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="nt">steps&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">🍽️ Get working copy&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">uses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">actions/checkout@master&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">with&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">fetch-depth&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This step runs our Go program:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>🍳&lt;span class="w"> &lt;/span>Shake&lt;span class="w"> &lt;/span>&amp;amp;&lt;span class="w"> &lt;/span>bake&lt;span class="w"> &lt;/span>README&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
-&lt;/span>&lt;span class="sd"> cd ${GITHUB_WORKSPACE}/update/&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>go&lt;span class="w"> &lt;/span>run&lt;span class="w"> &lt;/span>main.go&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">🍳 Shake &amp;amp; bake README&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
+&lt;/span>&lt;span class="sd"> cd ${GITHUB_WORKSPACE}/update/
+&lt;/span>&lt;span class="sd"> go run main.go
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, we push the updated files back to our repository. Learn more about the variables shown at &lt;a href="https://docs.github.com/en/actions/configuring-and-managing-workflows/using-variables-and-secrets-in-a-workflow">Using variables and secrets in a workflow&lt;/a>.&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>🚀&lt;span class="w"> &lt;/span>Deploy&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
-&lt;/span>&lt;span class="sd"> git config user.name &amp;#34;${GITHUB_ACTOR}&amp;#34;&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>config&lt;span class="w"> &lt;/span>user.email&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;${GITHUB_ACTOR}@users.noreply.github.com&amp;#34;&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>add&lt;span class="w"> &lt;/span>.&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>commit&lt;span class="w"> &lt;/span>-am&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;Update dynamic content&amp;#34;&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>push&lt;span class="w"> &lt;/span>--all&lt;span class="w"> &lt;/span>-f&lt;span class="w"> &lt;/span>https&lt;span class="p">:&lt;/span>//${{&lt;span class="w"> &lt;/span>secrets.GITHUB_TOKEN&lt;span class="w"> &lt;/span>}}@github.com/${GITHUB_REPOSITORY}.git&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">🚀 Deploy&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
+&lt;/span>&lt;span class="sd"> git config user.name &amp;#34;${GITHUB_ACTOR}&amp;#34;
+&lt;/span>&lt;span class="sd"> git config user.email &amp;#34;${GITHUB_ACTOR}@users.noreply.github.com&amp;#34;
+&lt;/span>&lt;span class="sd"> git add .
+&lt;/span>&lt;span class="sd"> git commit -am &amp;#34;Update dynamic content&amp;#34;
+&lt;/span>&lt;span class="sd"> git push --all -f https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>View the full code for this Action workflow &lt;a href="https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/.github/workflows/update.yaml">here in my README repository&lt;/a>.&lt;/p>
 &lt;h2 id="go-forth-and-auto-update-your-readme" class="anchor-link">&lt;a href="#go-forth-and-auto-update-your-readme">Go forth and auto-update your README&lt;/a>&lt;/h2>
-&lt;p>Congratulations and welcome to the cool kids&amp;rsquo; club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &amp;ndash; just go easy on the GIFs, okay?&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/go-automate-your-github-profile-readme/cover_huc867d29da9f2038bb1b7e753b00cef8e_329273_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>Writing efficient Django</title><link>https://victoria.dev/blog/writing-efficient-django/</link><pubDate>Thu, 09 Jul 2020 04:02:47 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/writing-efficient-django/</guid><description>How to use Django's views, models, and queries to build a better application.</description><content:encoded>
+&lt;p>Congratulations and welcome to the cool kids' club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &amp;ndash; just go easy on the GIFs, okay?&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/go-automate-your-github-profile-readme/cover_huc867d29da9f2038bb1b7e753b00cef8e_329273_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>Writing efficient Django</title><link>https://victoria.dev/blog/writing-efficient-django/</link><pubDate>Thu, 09 Jul 2020 04:02:47 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/writing-efficient-django/</guid><description>How to use Django's views, models, and queries to build a better application.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/writing-efficient-django/cover_hu17c23657d5071320ac32463f59b7c34e_26457_640x0_resize_box_2.png" width="640" height="271"/>
 &lt;p>I like Django. It&amp;rsquo;s a well-considered and intuitive framework with a name I can pronounce out loud. You can use it to to quickly spin up a &lt;a href="https://github.com/victoriadrake/react-in-django">weekend-sized project&lt;/a>, and you can still use it to run &lt;a href="https://applybyapi.com">full-blown production applications&lt;/a> at scale. I&amp;rsquo;ve done both these things, and over the years I&amp;rsquo;ve discovered how to use some of Django&amp;rsquo;s features for maximum efficiency. These are:&lt;/p>
 &lt;ul>
@@ -321,7 +439,7 @@ hugo --minify --cleanDestination
 &lt;h2 id="what-is-the-story-behind-your-built-github-action-why-did-you-build-this" class="anchor-link">&lt;a href="#what-is-the-story-behind-your-built-github-action-why-did-you-build-this">What is the story behind your built GitHub Action? (Why did you build this?)&lt;/a>&lt;/h2>
 &lt;p>Developers take on a lot of responsibility when it comes to building secure applications these days. I&amp;rsquo;m a full-time senior software developer at a cybersecurity company. I&amp;rsquo;ve found that I&amp;rsquo;m maximally productive when I create systems and processes that help myself and my team make desired outcomes inevitable. So I spend my free time building tools that make it easy for other developers to build secure software as well. My Actions help to automate contained, repeatable units of work that can make a big difference in a developer&amp;rsquo;s day.&lt;/p>
 &lt;h2 id="do-you-have-future-plans-for-this-or-other-actions" class="anchor-link">&lt;a href="#do-you-have-future-plans-for-this-or-other-actions">Do you have future plans for this or other Actions&lt;/a>&lt;/h2>
-&lt;p>Yes! I&amp;rsquo;m always finding ways for tools like GitHub Actions to boost the velocity of technical teams, whether at work or in my open source projects. Remember the Open Web Application Security Project? In the work I&amp;rsquo;ve lead with OWASP, I&amp;rsquo;ve championed the effort to increase automation using GitHub Actions to maintain quality, securely deploy new versions to the web, and even build PDFs of the WSTG. We&amp;rsquo;re constantly looking into new ways that GitHub Actions can make our lives easier and our readers&amp;rsquo; projects more secure.&lt;/p>
+&lt;p>Yes! I&amp;rsquo;m always finding ways for tools like GitHub Actions to boost the velocity of technical teams, whether at work or in my open source projects. Remember the Open Web Application Security Project? In the work I&amp;rsquo;ve lead with OWASP, I&amp;rsquo;ve championed the effort to increase automation using GitHub Actions to maintain quality, securely deploy new versions to the web, and even build PDFs of the WSTG. We&amp;rsquo;re constantly looking into new ways that GitHub Actions can make our lives easier and our readers' projects more secure.&lt;/p>
 &lt;h2 id="what-has-been-your-favorite-feature-of-github-actions" class="anchor-link">&lt;a href="#what-has-been-your-favorite-feature-of-github-actions">What has been your favorite feature of GitHub Actions&lt;/a>&lt;/h2>
 &lt;p>I like that I can build an Action using familiar and portable technologies, like Docker. Actions are easy for collaborators to work on too, since in the case of a Dockerized Action, you can use any language your team is comfortable with. This is especially useful in large organizations with polyglot teams and environments. There aren&amp;rsquo;t any complicated dependencies for running these portable tasks, and you don&amp;rsquo;t need to learn any special frameworks to get started.&lt;/p>
 &lt;p>One of my first blog posts about GitHub Actions even describes how I used an Action to run a Makefile! This is especially useful for large legacy applications that want to modernize their pipeline by using GitHub Actions.&lt;/p>
@@ -330,7 +448,7 @@ hugo --minify --cleanDestination
 &lt;p>Migrating legacy software is always challenging, particularly with large legacy applications. Moving to modern CI/CD processes requires changes at the software level, team level, and even a shift in thinking when it comes to individual developers. It can help to have a tool like GitHub Actions, which is at once seamlessly modern and familiar, when transitioning legacy code to a modern pipeline.&lt;/p>
 &lt;h2 id="anything-else-you-would-like-to-share-about-your-experience-any-stories-or-lessons-learned-through-building-your-action" class="anchor-link">&lt;a href="#anything-else-you-would-like-to-share-about-your-experience-any-stories-or-lessons-learned-through-building-your-action">Anything else you would like to share about your experience? Any stories or lessons learned through building your Action&lt;/a>&lt;/h2>
 &lt;p>I&amp;rsquo;m happiest when I&amp;rsquo;m solving a challenge that makes developing secure software less challenging in the future, both for myself and for the technology organization I&amp;rsquo;m leading. With tools like GitHub Actions, a lot of mental overhead can be offloaded to automatic processes &amp;ndash; like getting a whole other brain, for free! This can massively help organizations that are ready to scale up their development output.&lt;/p>
-&lt;p>In the realm of cybersecurity, not only does creating portable and reusable software make developers&amp;rsquo; lives easier, it helps to make whole workflows repeatable, which in turn makes software development processes more secure. With smart processes in place, technical teams are happier. As an inevitable result, they&amp;rsquo;ll build better software for customers, too.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/look-mom-im-a-github-action-hero/cover_hu32161be828bfd8bd18b75263073388c1_248508_640x0_resize_box_2.PNG" type="image/jpg"/></item><item><title>Technical ergonomics for the efficient developer</title><link>https://victoria.dev/blog/technical-ergonomics-for-the-efficient-developer/</link><pubDate>Mon, 22 Jun 2020 06:33:28 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/technical-ergonomics-for-the-efficient-developer/</guid><description>If you knew these tools existed, you'd probably be using them by now.</description><content:encoded>
+&lt;p>In the realm of cybersecurity, not only does creating portable and reusable software make developers' lives easier, it helps to make whole workflows repeatable, which in turn makes software development processes more secure. With smart processes in place, technical teams are happier. As an inevitable result, they&amp;rsquo;ll build better software for customers, too.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/look-mom-im-a-github-action-hero/cover_hu32161be828bfd8bd18b75263073388c1_248508_640x0_resize_box_2.PNG" type="image/jpg"/></item><item><title>Technical ergonomics for the efficient developer</title><link>https://victoria.dev/blog/technical-ergonomics-for-the-efficient-developer/</link><pubDate>Mon, 22 Jun 2020 06:33:28 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/technical-ergonomics-for-the-efficient-developer/</guid><description>If you knew these tools existed, you'd probably be using them by now.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/technical-ergonomics-for-the-efficient-developer/cover_hu5cda4cdd5e21d9163d35d5008411ea74_437949_640x0_resize_box_2.png" width="640" height="256"/>
 &lt;p>This article isn&amp;rsquo;t going to tell you about saving your neck with a Roost stand, or your wrists with a split keyboard - &lt;a href="https://heronebag.com/blog/next-level-ergonomics-for-remote-work-developers/">I&amp;rsquo;ve already done that&lt;/a>. This article is about saving your brain.&lt;/p>
 &lt;p>When I first began to program full time, I found myself constantly tired from the mental exertion. Programming is hard! Thankfully, you can take some solace in knowing it gets easier with practice, and with a great supporting cast. Some very nice folks who preceded us both came up with tools to make the difficult bits of communicating with computers much easier on our poor human meatbrains.&lt;/p>
@@ -353,7 +471,7 @@ hugo --minify --cleanDestination
 &lt;p>I previously brought you &lt;a href="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">an interactive pre-commit checklist in the style of infomercials&lt;/a> that&amp;rsquo;s both fun and useful for reinforcing the quality of your commits. But that&amp;rsquo;s not all!&lt;/p>
 &lt;p>Git hooks are scripts that run automatically at pre-determined points in your workflow. Use them well, and you can save a ton of brainpower. A &lt;code>pre-commit&lt;/code> hook remembers to do things like lint and format code, and even runs local tests for you before you indelibly push something embarrassing. Hooks can be a little annoying to share (the &lt;code>.git/hooks&lt;/code> directory isn&amp;rsquo;t tracked and thus omitted when you clone or fork a repository) but there&amp;rsquo;s a framework for that: the confusingly-named &lt;a href="https://pre-commit.com/">pre-commit framework&lt;/a>, which allows you to create a sharable configuration file of Git hook plugins, not just for &lt;code>pre-commit&lt;/code>.&lt;/p>
 &lt;p>I spend a majority of my time these days coding in Python, so here is my current &lt;code>.pre-commit-config.yaml&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">fail_fast: true
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="l">fail_fast: true
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
 rev: v3.1.0 # Use the ref you want to point at
@@ -379,7 +497,7 @@ description: "Lint Markdown files"
 entry: markdownlint '**/*.md' --fix --ignore node_modules --config "./.markdownlint.json"
 language: node
 types: [markdown]
-&lt;span class="w">
+&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>There are tons of &lt;a href="https://pre-commit.com/hooks.html">supported hooks&lt;/a> to explore.&lt;/p>
 &lt;h2 id="use-a-type-system" class="anchor-link">&lt;a href="#use-a-type-system">Use a type system&lt;/a>&lt;/h2>
 &lt;p>If you write in languages like Python and JavaScript, get yourself an early birthday present and start using a static type system. Not only will this help improve the way you think about code, it can help make type errors clear before running a single line.&lt;/p>
@@ -662,25 +780,25 @@ All Configuration Settings
 Customizing
 Help and Support
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Jekyll supports &lt;a href="https://jekyllrb.com/docs/datafiles/">data files&lt;/a> in a few formats, including YAML. Here&amp;rsquo;s the definition for the menu above in &lt;code>_data/menu.yml&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="k">section&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Introduction&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/intro&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">subsection&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Getting&lt;span class="w"> &lt;/span>Started&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/intro/quickstart&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Configuration&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/intro/config&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Deploying&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/intro/deploy&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Advanced&lt;span class="w"> &lt;/span>Usage&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/usage&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">subsection&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Customizing&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/usage/customizing&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>All&lt;span class="w"> &lt;/span>Configuration&lt;span class="w"> &lt;/span>Settings&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/usage/settings&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Help&lt;span class="w"> &lt;/span>and&lt;span class="w"> &lt;/span>Support&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/usage/support&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="nt">section&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Introduction&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/intro&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">subsection&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Getting Started&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/intro/quickstart&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Configuration&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/intro/config&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Deploying&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/intro/deploy&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Advanced Usage&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/usage&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">subsection&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Customizing&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/usage/customizing&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">All Configuration Settings&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/usage/settings&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">page&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Help and Support&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/usage/support&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Here&amp;rsquo;s how to render the data in the sidebar template:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-html" data-lang="html">{% for a in site.data.menu.section %}
 &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">a&lt;/span> &lt;span class="na">href&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;{{ a.url }}&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>{{ a.page }}&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">a&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
@@ -692,41 +810,41 @@ Help and Support
 {% endfor %}
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>This method allows you to build a custom menu, two nesting levels deep. The nesting levels are limited by the &lt;code>for&lt;/code> loops in the template. For a recursive version that handles further levels of nesting, see &lt;a href="https://jekyllrb.com/tutorials/navigation/#scenario-9-nested-tree-navigation-with-recursion">Nested tree navigation with recursion&lt;/a>.&lt;/p>
 &lt;p>Hugo does something similar with its &lt;a href="https://gohugo.io/templates/menu-templates/#section-menu-for-lazy-bloggers">menu templates&lt;/a>. You can define menu links in your &lt;a href="https://gohugo.io/getting-started/configuration/">Hugo site config&lt;/a>, and even add useful properties that Hugo understands, like weighting. Here&amp;rsquo;s a definition of the menu above in &lt;code>config.yaml&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="k">sectionPagesMenu&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>main&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="nt">sectionPagesMenu&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">main&lt;/span>&lt;span class="w">
 &lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">menu&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">main&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">identifier&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>intro&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Introduction&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/intro/&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Getting&lt;span class="w"> &lt;/span>Started&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>intro&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/intro/quickstart/&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Configuration&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>intro&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/intro/config/&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Deploying&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>intro&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/intro/deploy/&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">3&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">identifier&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>usage&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Advanced&lt;span class="w"> &lt;/span>Usage&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/usage/&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Customizing&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>usage&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/usage/customizing/&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>All&lt;span class="w"> &lt;/span>Configuration&lt;span class="w"> &lt;/span>Settings&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>usage&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/usage/settings/&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Help&lt;span class="w"> &lt;/span>and&lt;span class="w"> &lt;/span>Support&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>usage&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>/usage/support/&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">3&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">menu&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">main&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">identifier&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">intro&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Introduction&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/intro/&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Getting Started&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">intro&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/intro/quickstart/&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Configuration&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">intro&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/intro/config/&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Deploying&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">intro&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/intro/deploy/&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">3&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">identifier&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">usage&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Advanced Usage&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/usage/&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Customizing&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">usage&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/usage/customizing/&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">All Configuration Settings&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">usage&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/usage/settings/&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Help and Support&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">parent&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">usage&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/usage/support/&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">weight&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">3&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Hugo uses the &lt;code>identifier&lt;/code>, which must match the section name, along with the &lt;code>parent&lt;/code> variable to handle nesting. Here&amp;rsquo;s how to render the menu in the sidebar template:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">ul&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
 {{ range .Site.Menus.main }}
@@ -805,23 +923,23 @@ Help and Support
 &lt;p>Before your site generator can build your site, it needs a configuration file to set some necessary parameters. Configuration files live in the site root directory. Among other settings, you can declare the name of the theme to use when building the site.&lt;/p>
 &lt;h3 id="configure-jekyll" class="anchor-link">&lt;a href="#configure-jekyll">Configure Jekyll&lt;/a>&lt;/h3>
 &lt;p>Here&amp;rsquo;s a minimal &lt;code>_config.yml&lt;/code> for Jekyll:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="k">title&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Your&lt;span class="w"> &lt;/span>awesome&lt;span class="w"> &lt;/span>title&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">description&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&amp;gt;- &lt;span class="c"># this means to ignore newlines until &amp;#34;baseurl:&amp;#34;&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>Write&lt;span class="w"> &lt;/span>an&lt;span class="w"> &lt;/span>awesome&lt;span class="w"> &lt;/span>description&lt;span class="w"> &lt;/span>for&lt;span class="w"> &lt;/span>your&lt;span class="w"> &lt;/span>new&lt;span class="w"> &lt;/span>site&lt;span class="w"> &lt;/span>here.&lt;span class="w"> &lt;/span>You&lt;span class="w"> &lt;/span>can&lt;span class="w"> &lt;/span>edit&lt;span class="w"> &lt;/span>this&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>line&lt;span class="w"> &lt;/span>in&lt;span class="w"> &lt;/span>_config.yml.&lt;span class="w"> &lt;/span>It&lt;span class="w"> &lt;/span>will&lt;span class="w"> &lt;/span>appear&lt;span class="w"> &lt;/span>in&lt;span class="w"> &lt;/span>your&lt;span class="w"> &lt;/span>document&lt;span class="w"> &lt;/span>head&lt;span class="w"> &lt;/span>meta&lt;span class="w"> &lt;/span>(for&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>Google&lt;span class="w"> &lt;/span>search&lt;span class="w"> &lt;/span>results)&lt;span class="w"> &lt;/span>and&lt;span class="w"> &lt;/span>in&lt;span class="w"> &lt;/span>your&lt;span class="w"> &lt;/span>feed.xml&lt;span class="w"> &lt;/span>site&lt;span class="w"> &lt;/span>description.&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">baseurl&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># the subpath of your site, e.g. /blog&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># the base hostname &amp;amp; protocol for your site, e.g. http://example.com&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">theme&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># for gem-based themes&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">remote_theme&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># for themes hosted on GitHub, when used with GitHub Pages&lt;/span>&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="nt">title&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Your awesome title&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">description&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">&amp;gt;- # this means to ignore newlines until &amp;#34;baseurl:&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Write an awesome description for your new site here. You can edit this&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">line in _config.yml. It will appear in your document head meta (for&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Google search results) and in your feed.xml site description.&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">baseurl&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># the subpath of your site, e.g. /blog&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">url&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># the base hostname &amp;amp; protocol for your site, e.g. http://example.com&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">theme&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># for gem-based themes&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">remote_theme&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># for themes hosted on GitHub, when used with GitHub Pages&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>With &lt;code>remote_theme&lt;/code>, any &lt;a href="https://help.github.com/en/github/working-with-github-pages/adding-a-theme-to-your-github-pages-site-using-jekyll#adding-a-jekyll-theme-in-your-sites-_configyml-file">Jekyll theme hosted on GitHub can be used&lt;/a> with sites hosted on GitHub Pages.&lt;/p>
 &lt;p>Jekyll has a &lt;a href="https://jekyllrb.com/docs/configuration/default/">default configuration&lt;/a>, so any parameters added to your configuration file will override the defaults. Here are &lt;a href="https://jekyllrb.com/docs/configuration/options/">additional configuration settings&lt;/a>.&lt;/p>
 &lt;h3 id="configure-hugo" class="anchor-link">&lt;a href="#configure-hugo">Configure Hugo&lt;/a>&lt;/h3>
 &lt;p>Here&amp;rsquo;s a minimal example of Hugo&amp;rsquo;s &lt;code>config.yml&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="k">baseURL&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>https&lt;span class="p">:&lt;/span>//example.com/&lt;span class="w"> &lt;/span>&lt;span class="c"># The full domain your site will live at&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">languageCode&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>en-us&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">title&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Hugo&lt;span class="w"> &lt;/span>Docs&lt;span class="w"> &lt;/span>Site&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">theme&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># theme name&lt;/span>&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="nt">baseURL&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">https://example.com/ # The full domain your site will live at&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">languageCode&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">en-us&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">title&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Hugo Docs Site&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">theme&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># theme name&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Hugo makes no assumptions, so if a necessary parameter is missing, you&amp;rsquo;ll see a warning when building or serving your site. Here are &lt;a href="https://gohugo.io/getting-started/configuration/#all-configuration-settings">all configuration settings for Hugo&lt;/a>.&lt;/p>
 &lt;h3 id="deploy-to-github-pages" class="anchor-link">&lt;a href="#deploy-to-github-pages">Deploy to GitHub Pages&lt;/a>&lt;/h3>
 &lt;p>Both generators build your site with a command.&lt;/p>
@@ -1460,7 +1578,7 @@ jot &lt;span class="m">37&lt;/span> &lt;span class="m">275&lt;/span> &lt;span cl
 &lt;p>Elves working in parallel can also employ concurrency. One elf can still tackle only one task at a time, so it&amp;rsquo;s most efficient to have multiple elves concurrently producing presents.&lt;/p>
 &lt;p>Of course, if Santa&amp;rsquo;s workshop has, say, two-and-a-half million elves, each elf would only need to finish a maximum of one present per day. In this case, working sequentially doesn&amp;rsquo;t detract from the workshop&amp;rsquo;s efficiency. There would still be 7,668.26 elves left over to fetch coffee and lunch.&lt;/p>
 &lt;h2 id="santa-claus-and-threading" class="anchor-link">&lt;a href="#santa-claus-and-threading">Santa Claus, and threading&lt;/a>&lt;/h2>
-&lt;p>After all the elves&amp;rsquo; hard work is done, it&amp;rsquo;s up to Santa Claus to deliver the presents &amp;ndash; all 907,208,752 of them.&lt;/p>
+&lt;p>After all the elves' hard work is done, it&amp;rsquo;s up to Santa Claus to deliver the presents &amp;ndash; all 907,208,752 of them.&lt;/p>
 &lt;p>Santa doesn&amp;rsquo;t need to make a visit to every kid; just to the one household tree. So how many trees does Santa need to visit? Again with broad generalization, we&amp;rsquo;ll say that the average number of children per household worldwide is &lt;a href="https://en.wikipedia.org/wiki/Demographics_of_the_world#Total_fertility_rate">2.45, based on the year&amp;rsquo;s predicted fertility rates&lt;/a>. That makes 370,289,286.4 houses to visit. Let&amp;rsquo;s round that up to 370,289,287.&lt;/p>
 &lt;p>How long does Santa have? The lore says one night, which means one earthly rotation, and thus 24 hours. &lt;a href="https://www.noradsanta.org/">NORAD confirms&lt;/a>.&lt;/p>
 &lt;p>This means Santa must visit 370,289,287 households in 24 hours (86,400 seconds), at a rate of 4,285.75 households per second, nevermind the time it takes to put presents under the tree and grab a cookie.&lt;/p>
@@ -1501,7 +1619,7 @@ jot &lt;span class="m">37&lt;/span> &lt;span class="m">275&lt;/span> &lt;span cl
 &lt;p>I&amp;rsquo;ve been an editor longer than I&amp;rsquo;ve been a developer, so this topic for me is a real root issue. 🥁 When I see a great project with poorly-written docs, it hits close to &lt;code>/home&lt;/code>. Okay, okay, I&amp;rsquo;m done.&lt;/p>
 &lt;p>I help the &lt;a href="https://github.com/OWASP">Open Web Application Security Project (OWASP)&lt;/a> with their &lt;a href="https://github.com/OWASP/wstg">Web Security Testing Guide (WSTG)&lt;/a>. I was recently tasked with writing a &lt;a href="https://github.com/OWASP/wstg/blob/master/style_guide.md">style guide&lt;/a> and article template that show how to write technical instruction for testing software applications.&lt;/p>
 &lt;p>I thought parts of the guide would benefit more people than just OWASP&amp;rsquo;s contributors, so I&amp;rsquo;m sharing some here.&lt;/p>
-&lt;p>Many of the projects I participate in are open source. This is a wonderful way for people to share solutions and to build on each others&amp;rsquo; ideas. Unfortunately, it&amp;rsquo;s also a great way for misused and non-existent words to catch on. Here&amp;rsquo;s an excerpt of the guide with some mistakes I&amp;rsquo;ve noticed and how you can fix them in your technical documents.&lt;/p>
+&lt;p>Many of the projects I participate in are open source. This is a wonderful way for people to share solutions and to build on each others' ideas. Unfortunately, it&amp;rsquo;s also a great way for misused and non-existent words to catch on. Here&amp;rsquo;s an excerpt of the guide with some mistakes I&amp;rsquo;ve noticed and how you can fix them in your technical documents.&lt;/p>
 &lt;hr>
 &lt;h2 id="use-correct-words" class="anchor-link">&lt;a href="#use-correct-words">Use Correct Words&lt;/a>&lt;/h2>
 &lt;p>The following are frequently misused words and how to correct them.&lt;/p>
@@ -1578,7 +1696,7 @@ Good: &amp;ldquo;The code will output an error number or description.&amp;rdquo;
 &lt;p>While it may not be intuitive, even data that a user submits to their own area on a site should be validated. One of the fastest viruses to proliferate was the &lt;a href="https://en.wikipedia.org/wiki/Samy_(computer_worm)">Samy worm&lt;/a> on MySpace (yes, I&amp;rsquo;m old), thanks to code that Samy Kamkar was able to inject into his own profile page. Don&amp;rsquo;t directly return any input to your site without thorough validation or santization.&lt;/p>
 &lt;p>For some further guidance on battling injection attacks, see the &lt;a href="https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Injection_Prevention_Cheat_Sheet.md">OWASP Injection Prevention Cheat Sheet&lt;/a>.&lt;/p>
 &lt;h2 id="beware-hidden-fields" class="anchor-link">&lt;a href="#beware-hidden-fields">Beware hidden fields&lt;/a>&lt;/h2>
-&lt;p>Adding &lt;code>type=&amp;quot;hidden&amp;quot;&lt;/code> is an enticingly convenient way to hide sensitive data in pages and forms, but unfortunately not an effective one. With tools like &lt;a href="https://www.zaproxy.org/">ZapProxy&lt;/a> and even inspection tools in plain ol&amp;rsquo; web browsers, users can easily click to reveal tasty bits of invisible information. Hiding checkboxes can be a neat hack for creating CSS-only switches, but hidden fields do little to contribute to security.&lt;/p>
+&lt;p>Adding &lt;code>type=&amp;quot;hidden&amp;quot;&lt;/code> is an enticingly convenient way to hide sensitive data in pages and forms, but unfortunately not an effective one. With tools like &lt;a href="https://www.zaproxy.org/">ZapProxy&lt;/a> and even inspection tools in plain ol' web browsers, users can easily click to reveal tasty bits of invisible information. Hiding checkboxes can be a neat hack for creating CSS-only switches, but hidden fields do little to contribute to security.&lt;/p>
 &lt;p>If you must use hidden fields, here are some &lt;a href="https://www.owasp.org/index.php/Data_Validation#Hidden_fields">helpful guidelines&lt;/a>.&lt;/p>
 &lt;h2 id="carefully-consider-autofill-fields" class="anchor-link">&lt;a href="#carefully-consider-autofill-fields">Carefully consider autofill fields&lt;/a>&lt;/h2>
 &lt;p>When a user chooses to give you their &lt;a href="https://en.wikipedia.org/wiki/Personal_data">Personally Identifiable Information&lt;/a> (PII), it should be a conscious choice. Autofill form fields can be convenient - for both users and attackers. &lt;a href="https://freedom-to-tinker.com/2017/12/27/no-boundaries-for-user-identities-web-trackers-exploit-browser-login-managers/">Exploits using hidden fields can harvest PII&lt;/a> previously captured by an autocomplete field.&lt;/p>
@@ -1622,7 +1740,7 @@ Good: &amp;ldquo;The code will output an error number or description.&amp;rdquo;
 &lt;span class="c1"># ice&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The expanded variable is single-quoted, which is passed literally to &lt;code>printf&lt;/code>. As always, it is important to properly handle the input.&lt;/p>
 &lt;h2 id="bonus-round-shell-parameter-expansion" class="anchor-link">&lt;a href="#bonus-round-shell-parameter-expansion">Bonus round: shell parameter expansion&lt;/a>&lt;/h2>
-&lt;p>In my article explaining &lt;a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/">Bash and braces&lt;/a>, I covered the magic of &lt;a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion&lt;/a>. We can use one expansion, &lt;code>${parameter@operator}&lt;/code>, to interpret escape sequences, too. We use &lt;code>printf&lt;/code>'s &lt;code>%s&lt;/code> specifier to print as a string, and the &lt;code>E&lt;/code> operator will properly expand the escape sequences in our variable:&lt;/p>
+&lt;p>In my article explaining &lt;a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/">Bash and braces&lt;/a>, I covered the magic of &lt;a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion&lt;/a>. We can use one expansion, &lt;code>${parameter@operator}&lt;/code>, to interpret escape sequences, too. We use &lt;code>printf&lt;/code>&amp;rsquo;s &lt;code>%s&lt;/code> specifier to print as a string, and the &lt;code>E&lt;/code> operator will properly expand the escape sequences in our variable:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="nb">printf&lt;/span> &lt;span class="s2">&amp;#34;%s\n&amp;#34;&lt;/span> &lt;span class="si">${&lt;/span>&lt;span class="nv">puns&lt;/span>&lt;span class="p">@E&lt;/span>&lt;span class="si">}&lt;/span>
 &lt;span class="c1"># umber&lt;/span>
 &lt;span class="c1"># arrow&lt;/span>
@@ -1634,7 +1752,7 @@ Good: &amp;ldquo;The code will output an error number or description.&amp;rdquo;
 &lt;p>Poor string interpolation can lead to silly-looking output, as well as introduce security vulnerabilities, such as from &lt;a href="https://en.wikipedia.org/wiki/Code_injection">injection attacks&lt;/a>. Until the next evolution of the terminal has us talking in emojis, we&amp;rsquo;d best pay attention when printing output for humans.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/cover_huad486c0cadb16dfd85c71edfd1b24caf_253243_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>The care and feeding of an IoT device</title><link>https://victoria.dev/blog/the-care-and-feeding-of-an-iot-device/</link><pubDate>Wed, 27 Nov 2019 08:59:35 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/the-care-and-feeding-of-an-iot-device/</guid><description>Why IoT devices are, basically, puppies, and whether or not you should give somebody one for Christmas.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/the-care-and-feeding-of-an-iot-device/cover_hud30f2a27d6d9efe5f1116f60f0ded394_298910_640x0_resize_box_2.png" width="640" height="389"/>
 &lt;p>Giving someone a puppy for Christmas might work really well in a movie, but in real life often comes hitched to a multitude of responsibilities that the giftee may not be fully prepared to take on. The same is true for Internet of Things (IoT) devices, including Amazon&amp;rsquo;s Alexa-enabled devices, Google Home, and other Internet-connected appliances like cameras, lightbulbs, and toasters. Yes, they have those now.&lt;/p>
-&lt;p>Like puppies, IoT devices are still young. Many contain &lt;a href="https://threatpost.com/iot-devices-vulnerable-takeover/144167/">known vulnerabilities&lt;/a> that remote attackers can use to gain access to device owners&amp;rsquo; networks. These attacks are sometimes as laughably simple as using a default username and password that the &lt;a href="https://gdpr.report/news/2019/06/12/research-reveals-the-most-vulnerable-iot-devices/">device owner cannot change&lt;/a>.&lt;/p>
+&lt;p>Like puppies, IoT devices are still young. Many contain &lt;a href="https://threatpost.com/iot-devices-vulnerable-takeover/144167/">known vulnerabilities&lt;/a> that remote attackers can use to gain access to device owners' networks. These attacks are sometimes as laughably simple as using a default username and password that the &lt;a href="https://gdpr.report/news/2019/06/12/research-reveals-the-most-vulnerable-iot-devices/">device owner cannot change&lt;/a>.&lt;/p>
 &lt;p>Does all this mean you shouldn&amp;rsquo;t give Grandma Mabel a new app-enabled coffee maker or Ring doorbell for Christmas? Probably, although not necessarily. Like puppies, properly-maintained IoT devices are capable of warming your heart without causing &lt;em>too&lt;/em> much havoc; but they take a lot of work to care for. Here are a few responsibilities to keep in mind for the care and feeding of an IoT device.&lt;/p>
 &lt;h2 id="immature-security" class="anchor-link">&lt;a href="#immature-security">Immature security&lt;/a>&lt;/h2>
 &lt;p>Many manufacturers of IoT devices &lt;a href="https://www.infosecurity-magazine.com/news/vulnerabilities-in-iot-devices/">have not made security a priority&lt;/a>. There aren&amp;rsquo;t yet any enforced &lt;a href="https://blog.rapid7.com/2019/03/27/the-iot-cybersecurity-improvement-act-of-2019/">security requirements&lt;/a> for this industry, which leaves the protection of your device and the network it&amp;rsquo;s connected to in the hands of the manufacturer.&lt;/p>
@@ -1708,7 +1826,7 @@ candy cane
 white chocolate
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>This replaces the first instance of &amp;ldquo;lump of coal&amp;rdquo; with &amp;ldquo;candy cane.&amp;rdquo; To replace all instances (if there were multiple), use &lt;code>${parameter//pattern/string}&lt;/code>. This doesn&amp;rsquo;t change our &lt;code>$STUFF&lt;/code> variable, so we can still reuse the original list for someone naughty later.&lt;/p>
 &lt;h3 id="substrings" class="anchor-link">&lt;a href="#substrings">Substrings&lt;/a>&lt;/h3>
-&lt;p>While we&amp;rsquo;re improving things, our giftees may not all like white chocolate. We&amp;rsquo;d better add some regular chocolate to our lists just in case. Since I&amp;rsquo;m super lazy, I&amp;rsquo;m just going to hit the up arrow and modify a previous Bash command. Luckily, the last word in the &lt;code>$STUFF&lt;/code> variable is &amp;ldquo;chocolate,&amp;rdquo; which is nine characters long, so I&amp;rsquo;ll tell Bash to keep just that part using &lt;code>${parameter:offset}&lt;/code>. I&amp;rsquo;ll use &lt;code>tee&lt;/code>'s &lt;code>-a&lt;/code> flag to &lt;code>a&lt;/code>ppend to my existing lists:&lt;/p>
+&lt;p>While we&amp;rsquo;re improving things, our giftees may not all like white chocolate. We&amp;rsquo;d better add some regular chocolate to our lists just in case. Since I&amp;rsquo;m super lazy, I&amp;rsquo;m just going to hit the up arrow and modify a previous Bash command. Luckily, the last word in the &lt;code>$STUFF&lt;/code> variable is &amp;ldquo;chocolate,&amp;rdquo; which is nine characters long, so I&amp;rsquo;ll tell Bash to keep just that part using &lt;code>${parameter:offset}&lt;/code>. I&amp;rsquo;ll use &lt;code>tee&lt;/code>&amp;rsquo;s &lt;code>-a&lt;/code> flag to &lt;code>a&lt;/code>ppend to my existing lists:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">STUFF&lt;/span>&lt;span class="p">: -9&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span> tee -a &lt;span class="o">{&lt;/span>Amy,Brian,Charlie&lt;span class="o">}&lt;/span>.txt
 cat &lt;span class="o">{&lt;/span>Amy,Brian,Charlie&lt;span class="o">}&lt;/span>.txt
 socks
@@ -1865,7 +1983,7 @@ hairbrush
 &lt;p>Here&amp;rsquo;s one for backing up a local directory to a local destination, such as an external hard drive:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">rsync -a /home/user/directory /media/user/destination
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The first argument is the source, and the second is the destination. Reversing these in the above example would copy files from the mounted drive to the local home directory.&lt;/p>
-&lt;p>The &lt;code>a&lt;/code> flag for archive mode is one of &lt;code>rsync&lt;/code>'s superpowers. Equivalent to flags &lt;code>-rlptgoD&lt;/code>, it:&lt;/p>
+&lt;p>The &lt;code>a&lt;/code> flag for archive mode is one of &lt;code>rsync&lt;/code>&amp;rsquo;s superpowers. Equivalent to flags &lt;code>-rlptgoD&lt;/code>, it:&lt;/p>
 &lt;ul>
 &lt;li>Syncs files recursively through directories (&lt;code>r&lt;/code>);&lt;/li>
 &lt;li>Preserves symlinks (&lt;code>l&lt;/code>), permissions (&lt;code>p&lt;/code>), modification times (&lt;code>t&lt;/code>), groups (&lt;code>g&lt;/code>), and owner (&lt;code>o&lt;/code>); and&lt;/li>
@@ -1924,20 +2042,20 @@ hairbrush
 &lt;p>To preserve data captured in the workflow in the repository itself, it is necessary to add and push this data to the Git repository. You can do this in the workflow by creating new files with the data, or by appending data to existing files, using shell commands.&lt;/p>
 &lt;h3 id="creating-files-in-the-workflow" class="anchor-link">&lt;a href="#creating-files-in-the-workflow">Creating files in the workflow&lt;/a>&lt;/h3>
 &lt;p>To work with the repository files in the workflow, use the &lt;a href="https://github.com/actions/checkout">&lt;code>checkout&lt;/code> action&lt;/a> to first get a copy to work with:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="k">uses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>actions/checkout@master&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">with&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">fetch-depth&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="nt">uses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">actions/checkout@master&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">with&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">fetch-depth&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>To add comments to my guestbook, I turn the event data captured in shell variables into proper files, using substitutions in &lt;a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion&lt;/a> to sanitize user input and translate newlines to paragraphs. I wrote previously about &lt;a href="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">why user input should be treated carefully&lt;/a>.&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Turn&lt;span class="w"> &lt;/span>comment&lt;span class="w"> &lt;/span>into&lt;span class="w"> &lt;/span>file&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
-&lt;/span>&lt;span class="sd"> ID=${{ github.event.comment.id }}&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>AUTHOR=${{&lt;span class="w"> &lt;/span>github.event.comment.user.login&lt;span class="w"> &lt;/span>}}&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>DATE=${{&lt;span class="w"> &lt;/span>github.event.comment.created_at&lt;span class="w"> &lt;/span>}}&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>COMMENT=$(echo&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;${{ github.event.comment.body }}&amp;#34;&lt;/span>)&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>NO_TAGS=${COMMENT//&lt;span class="p">[&lt;/span>&amp;lt;&amp;gt;&lt;span class="p">]&lt;/span>/\`}&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>FOLDER=comments&lt;span class="w">
-&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>printf&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;%b\n&amp;#39;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;lt;div class=\&amp;#34;comment\&amp;#34;&amp;gt;&amp;lt;p&amp;gt;${AUTHOR} says:&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;${NO_TAGS//$&amp;#39;\n&amp;#39;/\&amp;lt;\/p\&amp;gt;\&amp;lt;p\&amp;gt;}&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;${DATE}&amp;lt;/p&amp;gt;&amp;lt;/div&amp;gt;\r\n&amp;#34;&lt;/span>&lt;span class="w"> &lt;/span>&amp;gt;&lt;span class="w"> &lt;/span>${FOLDER}/${ID}.html&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Turn comment into file&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
+&lt;/span>&lt;span class="sd"> ID=${{ github.event.comment.id }}
+&lt;/span>&lt;span class="sd"> AUTHOR=${{ github.event.comment.user.login }}
+&lt;/span>&lt;span class="sd"> DATE=${{ github.event.comment.created_at }}
+&lt;/span>&lt;span class="sd"> COMMENT=$(echo &amp;#34;${{ github.event.comment.body }}&amp;#34;)
+&lt;/span>&lt;span class="sd"> NO_TAGS=${COMMENT//[&amp;lt;&amp;gt;]/\`}
+&lt;/span>&lt;span class="sd"> FOLDER=comments
+&lt;/span>&lt;span class="sd">
+&lt;/span>&lt;span class="sd"> printf &amp;#39;%b\n&amp;#39; &amp;#34;&amp;lt;div class=\&amp;#34;comment\&amp;#34;&amp;gt;&amp;lt;p&amp;gt;${AUTHOR} says:&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;${NO_TAGS//$&amp;#39;\n&amp;#39;/\&amp;lt;\/p\&amp;gt;\&amp;lt;p\&amp;gt;}&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;${DATE}&amp;lt;/p&amp;gt;&amp;lt;/div&amp;gt;\r\n&amp;#34; &amp;gt; ${FOLDER}/${ID}.html
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>By using &lt;code>printf&lt;/code> and directing its output with &lt;code>&amp;gt;&lt;/code> to a new file, the event data is transformed into an HTML file, named with the comment ID number, that contains the captured event data. Formatted, it looks like:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">div&lt;/span> &lt;span class="na">class&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;comment&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
 &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">p&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>victoriadrake says:&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">p&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
@@ -1945,28 +2063,28 @@ hairbrush
 &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">p&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>2019-11-04T00:28:36Z&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">p&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
 &lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">div&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>When working with comments, one effect of naming files using the comment ID is that a new file with the same ID will overwrite the previous. This is handy for a guestbook, as it allows any edits to a comment to replace the original comment file.&lt;/p>
-&lt;p>If you&amp;rsquo;re using a static site generator like Hugo, you could build a Markdown format file, stick it in your &lt;code>content/&lt;/code> folder, and the regular site build will take care of the rest. In the case of my simplistic guestbook, I have an extra step to consolidate the individual comment files into a page. Each time it runs, it overwrites the existing &lt;code>index.html&lt;/code> with the &lt;code>header.html&lt;/code> portion (&lt;code>&amp;gt;&lt;/code>), then finds and appends (&lt;code>&amp;gt;&amp;gt;&lt;/code>) all the comment files&amp;rsquo; contents in descending order, and lastly appends the &lt;code>footer.html&lt;/code> portion to end the page.&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Assemble&lt;span class="w"> &lt;/span>page&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
-&lt;/span>&lt;span class="sd"> cat header.html &amp;gt; index.html&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>find&lt;span class="w"> &lt;/span>comments/&lt;span class="w"> &lt;/span>-name&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;*.html&amp;#34;&lt;/span>&lt;span class="w"> &lt;/span>|&lt;span class="w"> &lt;/span>sort&lt;span class="w"> &lt;/span>-r&lt;span class="w"> &lt;/span>|&lt;span class="w"> &lt;/span>xargs&lt;span class="w"> &lt;/span>-I&lt;span class="w"> &lt;/span>%&lt;span class="w"> &lt;/span>cat&lt;span class="w"> &lt;/span>%&lt;span class="w"> &lt;/span>&amp;gt;&amp;gt;&lt;span class="w"> &lt;/span>index.html&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>cat&lt;span class="w"> &lt;/span>footer.html&lt;span class="w"> &lt;/span>&amp;gt;&amp;gt;&lt;span class="w"> &lt;/span>index.html&lt;span class="w">
+&lt;p>If you&amp;rsquo;re using a static site generator like Hugo, you could build a Markdown format file, stick it in your &lt;code>content/&lt;/code> folder, and the regular site build will take care of the rest. In the case of my simplistic guestbook, I have an extra step to consolidate the individual comment files into a page. Each time it runs, it overwrites the existing &lt;code>index.html&lt;/code> with the &lt;code>header.html&lt;/code> portion (&lt;code>&amp;gt;&lt;/code>), then finds and appends (&lt;code>&amp;gt;&amp;gt;&lt;/code>) all the comment files' contents in descending order, and lastly appends the &lt;code>footer.html&lt;/code> portion to end the page.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Assemble page&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
+&lt;/span>&lt;span class="sd"> cat header.html &amp;gt; index.html
+&lt;/span>&lt;span class="sd"> find comments/ -name &amp;#34;*.html&amp;#34; | sort -r | xargs -I % cat % &amp;gt;&amp;gt; index.html
+&lt;/span>&lt;span class="sd"> cat footer.html &amp;gt;&amp;gt; index.html
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;h3 id="committing-changes-to-the-repository" class="anchor-link">&lt;a href="#committing-changes-to-the-repository">Committing changes to the repository&lt;/a>&lt;/h3>
 &lt;p>Since the &lt;code>checkout&lt;/code> action is not quite the same as cloning the repository, at time of writing, there are some &lt;a href="https://github.community/t5/GitHub-Actions/Checkout-Action-does-not-create-local-master-and-has-no-options/td-p/31575">issues&lt;/a> still to work around. A couple extra steps are necessary to &lt;code>pull&lt;/code>, &lt;code>checkout&lt;/code>, and successfully &lt;code>push&lt;/code> changes back to the &lt;code>master&lt;/code> branch, but this is pretty trivially done in the shell.&lt;/p>
 &lt;p>Below is the step that adds, commits, and pushes changes made by the workflow back to the repository&amp;rsquo;s &lt;code>master&lt;/code> branch.&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Push&lt;span class="w"> &lt;/span>changes&lt;span class="w"> &lt;/span>to&lt;span class="w"> &lt;/span>repo&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
-&lt;/span>&lt;span class="sd"> REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>config&lt;span class="w"> &lt;/span>user.email&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;${{ github.actor }}@users.noreply.github.com&amp;#34;&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>config&lt;span class="w"> &lt;/span>user.name&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;${{ github.actor }}&amp;#34;&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>pull&lt;span class="w"> &lt;/span>${REMOTE}&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>checkout&lt;span class="w"> &lt;/span>master&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>add&lt;span class="w"> &lt;/span>.&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>status&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>commit&lt;span class="w"> &lt;/span>-am&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;Add new comment&amp;#34;&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>git&lt;span class="w"> &lt;/span>push&lt;span class="w"> &lt;/span>${REMOTE}&lt;span class="w"> &lt;/span>master&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Push changes to repo&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="sd">|
+&lt;/span>&lt;span class="sd"> REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+&lt;/span>&lt;span class="sd"> git config user.email &amp;#34;${{ github.actor }}@users.noreply.github.com&amp;#34;
+&lt;/span>&lt;span class="sd"> git config user.name &amp;#34;${{ github.actor }}&amp;#34;
+&lt;/span>&lt;span class="sd">
+&lt;/span>&lt;span class="sd"> git pull ${REMOTE}
+&lt;/span>&lt;span class="sd"> git checkout master
+&lt;/span>&lt;span class="sd"> git add .
+&lt;/span>&lt;span class="sd"> git status
+&lt;/span>&lt;span class="sd"> git commit -am &amp;#34;Add new comment&amp;#34;
+&lt;/span>&lt;span class="sd"> git push ${REMOTE} master
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The remote, in fact, our repository, is specified using the &lt;code>github.repository&lt;/code> context variable. For our workflow to be allowed to push to master, we give the remote URL using &lt;a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/authenticating-with-the-github_token">the default &lt;code>secrets.GITHUB_TOKEN&lt;/code> variable&lt;/a>.&lt;/p>
 &lt;p>Since the workflow environment is shiny and newborn, we need to configure Git. In the above example, I&amp;rsquo;ve used the &lt;code>github.actor&lt;/code> context variable to input the username of the account initiating the workflow. The email is similarly configured using the &lt;a href="https://help.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address#setting-your-commit-email-address-on-github">default &lt;code>noreply&lt;/code> GitHub email address&lt;/a>.&lt;/p>
 &lt;h2 id="displaying-event-data" class="anchor-link">&lt;a href="#displaying-event-data">Displaying event data&lt;/a>&lt;/h2>
@@ -1974,10 +2092,10 @@ hairbrush
 &lt;p>To enable Actions to trigger a Pages site build, you&amp;rsquo;ll need to create a Personal Access Token. This token can be &lt;a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets">stored as a secret in the repository&lt;/a> settings and passed into the workflow in place of the default &lt;code>secrets.GITHUB_TOKEN&lt;/code> variable. I wrote more about &lt;a href="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/#environment-and-variables">Actions environment and variables in this post&lt;/a>.&lt;/p>
 &lt;p>With the use of a Personal Access Token, a push initiated by the Actions workflow will also update the Pages site. You can see it for yourself by &lt;a href="https://github.com/victoriadrake/github-guestbook/issues/1">leaving a comment&lt;/a> in my &lt;a href="https://victoria.dev/github-guestbook/">guestbook&lt;/a>! The comment creation event triggers the workflow, which then takes around 30 seconds to run and update the guestbook page.&lt;/p>
 &lt;p>Where a site build is necessary for changes to be published, such as when using Hugo, an Action can do this too. However, in order to avoid creating unintended loops, &lt;a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows#about-workflow-events">one Action workflow will not trigger another&lt;/a>. Instead, it&amp;rsquo;s extremely convenient to handle the process of &lt;a href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">building the site with a Makefile&lt;/a>, which any workflow can then run. Simply add running the Makefile as the final step in your workflow job, with the repository token where necessary:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Run&lt;span class="w"> &lt;/span>Makefile&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">env&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">TOKEN&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>${{&lt;span class="w"> &lt;/span>secrets.GITHUB_TOKEN&lt;span class="w"> &lt;/span>}}&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>make&lt;span class="w"> &lt;/span>all&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Run Makefile&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">env&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">TOKEN&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">${{ secrets.GITHUB_TOKEN }}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">make all&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This ensures that the final step of your workflow builds and deploys the updated site.&lt;/p>
 &lt;h2 id="no-more-event-data-horizon" class="anchor-link">&lt;a href="#no-more-event-data-horizon">No more event data horizon&lt;/a>&lt;/h2>
 &lt;p>GitHub Actions provides a neat way to capture and utilize event data so that it&amp;rsquo;s not only available within GitHub. The possibilities are only as limited as your imagination! Here are a few ideas for things this lets us create:&lt;/p>
@@ -2003,26 +2121,26 @@ hairbrush
 &lt;p>To our point on portability, my magic Makefile is stored right in the repository root. Since it&amp;rsquo;s included with the code, I can run the Makefile locally on any system where I can clone the repository, provided I set the environment variables. Using GitHub Actions as my CI/CD tool is as straightforward as making Make go worky-worky.&lt;/p>
 &lt;p>I found the &lt;a href="https://help.github.com/en/articles/workflow-syntax-for-github-actions">GitHub Actions workflow syntax guide&lt;/a> to be pretty straightforward, though also lengthy on options. Here&amp;rsquo;s the necessary set up for getting the Makefile to run.&lt;/p>
 &lt;p>The workflow file at &lt;code>.github/workflows/make-master.yml&lt;/code> contains the following:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>make-master&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">make-master&lt;/span>&lt;span class="w">
 &lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">push&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">branches&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- master&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">schedule&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">cron&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;20 13 * * *&amp;#39;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">push&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">branches&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="l">master&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">schedule&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">cron&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;20 13 * * *&amp;#39;&lt;/span>&lt;span class="w">
 &lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">jobs&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">build&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">runs-on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>ubuntu-latest&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">steps&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">uses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>actions/checkout@master&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">with&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">fetch-depth&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="k">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>Run&lt;span class="w"> &lt;/span>Makefile&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">env&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">TOKEN&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>${{&lt;span class="w"> &lt;/span>secrets.TOKEN&lt;span class="w"> &lt;/span>}}&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>make&lt;span class="w"> &lt;/span>all&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">jobs&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">build&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">runs-on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">ubuntu-latest&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">steps&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">uses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">actions/checkout@master&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">with&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">fetch-depth&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Run Makefile&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">env&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">TOKEN&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">${{ secrets.TOKEN }}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">run&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">make all&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>I&amp;rsquo;ll explain the components that make this work.&lt;/p>
 &lt;h2 id="triggering-the-workflow" class="anchor-link">&lt;a href="#triggering-the-workflow">Triggering the workflow&lt;/a>&lt;/h2>
 &lt;p>Actions support multiple &lt;a href="https://help.github.com/en/articles/events-that-trigger-workflows">triggers for a workflow&lt;/a>. Using the &lt;code>on&lt;/code> syntax, I&amp;rsquo;ve defined two triggers for mine: a &lt;a href="https://help.github.com/en/articles/workflow-syntax-for-github-actions#onpushpull_requestbranchestags">push event&lt;/a> to the &lt;code>master&lt;/code> branch only, and a &lt;a href="https://help.github.com/en/articles/events-that-trigger-workflows#scheduled-events-schedule">scheduled&lt;/a> &lt;code>cron&lt;/code> job.&lt;/p>
@@ -2165,7 +2283,7 @@ mogrify -strip &lt;span class="se">\
 &lt;/blockquote>
 &lt;p>Some people (🙋🏻‍) are really into cybersecurity, end-to-end encryption, and totally geeked out when they first learned how the &lt;a href="https://en.wikipedia.org/wiki/Enigma_machine">Enigma&lt;/a> worked. These people are likely to have an innate interest in building a less-than-laughable personal cybersecurity posture.&lt;/p>
 &lt;p>Most people, unfortunately, consider cybersecurity optional. Most people say things like:&lt;/p>
-&lt;p>&lt;em>&amp;ldquo;There&amp;rsquo;s no one targeting lil ol&amp;rsquo; me.&amp;quot;&lt;/em>&lt;br>
+&lt;p>&lt;em>&amp;ldquo;There&amp;rsquo;s no one targeting lil ol' me.&amp;quot;&lt;/em>&lt;br>
 &lt;em>&amp;ldquo;I have nothing to hide, anyway.&amp;quot;&lt;/em>&lt;br>
 &lt;em>&amp;ldquo;I&amp;rsquo;m too busy to learn all this stuff. Why can&amp;rsquo;t someone just give me a simple summary of best practices that I can skim in approximately seven minutes?&amp;quot;&lt;/em>&lt;/p>
 &lt;p>To those people, I say, hello, hypothetical incorporeal reader! Here is a simple summary of best practices that you can skim in approximately seven minutes.&lt;/p>
@@ -3066,34 +3184,34 @@ alt="Hashtag: you did not push from there"/> &lt;figcaption>
 &lt;h3 id="setting-up-the-travis-configuration-file" class="anchor-link">&lt;a href="#setting-up-the-travis-configuration-file">Setting up the Travis configuration file&lt;/a>&lt;/h3>
 &lt;p>Create a new configuration file for Travis with the filename &lt;code>.travis.yml&lt;/code> (note the leading &amp;ldquo;.&amp;quot;). These scripts are very customizable and I struggled to find a relevant example to use as a starting point - luckily, you don&amp;rsquo;t have that problem!&lt;/p>
 &lt;p>Here&amp;rsquo;s my basic &lt;code>.travis.yml&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="k">git&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">depth&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="w">
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-yml" data-lang="yml">&lt;span class="nt">git&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">depth&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="w">
 &lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">env&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">global&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- HUGO_VERSION=&lt;span class="s2">&amp;#34;0.54.0&amp;#34;&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">matrix&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- YOUR_ENCRYPTED_VARIABLE&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">env&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">global&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="l">HUGO_VERSION=&amp;#34;0.54.0&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">matrix&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="l">YOUR_ENCRYPTED_VARIABLE&lt;/span>&lt;span class="w">
 &lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">install&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- wget&lt;span class="w"> &lt;/span>-q&lt;span class="w"> &lt;/span>https&lt;span class="p">:&lt;/span>//github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- tar&lt;span class="w"> &lt;/span>xf&lt;span class="w"> &lt;/span>hugo_${HUGO_VERSION}_Linux-64bit.tar.gz&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- mv&lt;span class="w"> &lt;/span>hugo&lt;span class="w"> &lt;/span>~/bin/&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">install&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="l">wget -q https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="l">tar xf hugo_${HUGO_VERSION}_Linux-64bit.tar.gz&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="l">mv hugo ~/bin/&lt;/span>&lt;span class="w">
 &lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">script&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>- hugo&lt;span class="w"> &lt;/span>--gc&lt;span class="w"> &lt;/span>--minify&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">script&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>- &lt;span class="l">hugo --gc --minify&lt;/span>&lt;span class="w">
 &lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="k">deploy&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">provider&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>pages&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">skip-cleanup&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">github-token&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>$GITHUB_TOKEN&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">keep-history&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">local-dir&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>public&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">repo&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>gh-username/gh-username.github.io&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">target-branch&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>master&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">verbose&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">branch&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>master&lt;span class="w">
+&lt;/span>&lt;span class="w">&lt;/span>&lt;span class="nt">deploy&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">provider&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">pages&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">skip-cleanup&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">github-token&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">$GITHUB_TOKEN&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">keep-history&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">local-dir&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">public&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">repo&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">gh-username/gh-username.github.io&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">target-branch&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">master&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">verbose&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nt">branch&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">master&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This script downloads and installs Hugo, builds the site with the garbage collection and minify &lt;a href="https://gohugo.io/commands/hugo/#synopsis">flags&lt;/a>, then deploys the &lt;code>public/&lt;/code> directory to the specified &lt;code>repo&lt;/code> - in this example, your public GitHub Pages repository. You can read about each of the &lt;code>deploy&lt;/code> configuration options &lt;a href="https://docs.travis-ci.com/user/deployment/pages/#further-configuration">here&lt;/a>.&lt;/p>
 &lt;p>To &lt;a href="https://docs.travis-ci.com/user/environment-variables#defining-encrypted-variables-in-travisyml">add the GitHub personal access token as an encrypted variable&lt;/a>, you don&amp;rsquo;t need to manually edit your &lt;code>.travis.yml&lt;/code>. The &lt;code>travis&lt;/code> gem commands below will encrypt and add the variable for you when you run them in your repository directory.&lt;/p>
 &lt;p>First, install &lt;code>travis&lt;/code> with &lt;code>sudo gem install travis&lt;/code>.&lt;/p>
@@ -3854,7 +3972,7 @@ alt="Lifeguard MIQ the chip says no double dipping"/> &lt;figcaption>
 &lt;img src="graph%28n2%29.png"
 alt="A graph showing quadratic time complexity"/>
 &lt;/figure>
-&lt;p>Now here&amp;rsquo;s an example of code with time complexity of &lt;em>O&lt;/em>(_n_&lt;sup>2&lt;/sup>):&lt;/p>
+&lt;p>Now here&amp;rsquo;s an example of code with time complexity of &lt;em>O&lt;/em>(&lt;em>n&lt;/em>&lt;sup>2&lt;/sup>):&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">pizzaDelivery&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">pizzas&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="k">for&lt;/span> &lt;span class="nx">pizza&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">pizza&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="nx">pizzas&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">pizza&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="c1">// slice pizza
@@ -3863,13 +3981,13 @@ alt="A graph showing quadratic time complexity"/>
 &lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="p">}&lt;/span>
 &lt;span class="p">}&lt;/span>
 &lt;span class="p">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Because there are two nested loops, or nested linear operations, the algorithm process the input _n_&lt;sup>2&lt;/sup> times.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Because there are two nested loops, or nested linear operations, the algorithm process the input &lt;em>n&lt;/em>&lt;sup>2&lt;/sup> times.&lt;/p>
 &lt;h3 id="cubic" class="anchor-link">&lt;a href="#cubic">Cubic&lt;/a>&lt;/h3>
 &lt;figure class="screenshot">
 &lt;img src="graph%28n3%29.png"
 alt="A graph showing cubic time complexity"/>
 &lt;/figure>
-&lt;p>Extending on the previous example, this code with three nested loops has time complexity of &lt;em>O&lt;/em>(_n_&lt;sup>3&lt;/sup>):&lt;/p>
+&lt;p>Extending on the previous example, this code with three nested loops has time complexity of &lt;em>O&lt;/em>(&lt;em>n&lt;/em>&lt;sup>3&lt;/sup>):&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">pizzaDelivery&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">boxesDelivered&lt;/span> &lt;span class="kt">int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="k">for&lt;/span> &lt;span class="nx">pizzaBox&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">pizzaBox&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="nx">boxesDelivered&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">pizzaBox&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="c1">// open box
@@ -3923,7 +4041,7 @@ alt="A graph showing factorial time complexity"/>
 &lt;/figure>
 &lt;p>An algorithm with time complexity &lt;em>O&lt;/em>(&lt;em>n&lt;/em>!) often iterates through all permutations of the input elements. One common example is a &lt;a href="https://en.wikipedia.org/wiki/Brute-force_search">brute-force search&lt;/a> seen in the &lt;a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem#Computing_a_solution">travelling salesman problem&lt;/a>. It tries to find the least costly path between a number of points by enumerating all possible permutations and finding the ones with the lowest cost.&lt;/p>
 &lt;h3 id="exponential" class="anchor-link">&lt;a href="#exponential">Exponential&lt;/a>&lt;/h3>
-&lt;p>An &lt;strong>exponential&lt;/strong> algorithm often also iterates through all subsets of the input elements. It is denoted &lt;em>O&lt;/em>(2&lt;sup>_n_&lt;/sup>) and is often seen in brute-force algorithms. It is similar to factorial time except in its rate of growth, which as you may not be surprised to hear, is exponential. The larger the data set, the more steep the curve becomes.&lt;/p>
+&lt;p>An &lt;strong>exponential&lt;/strong> algorithm often also iterates through all subsets of the input elements. It is denoted &lt;em>O&lt;/em>(2&lt;sup>&lt;em>n&lt;/em>&lt;/sup>) and is often seen in brute-force algorithms. It is similar to factorial time except in its rate of growth, which as you may not be surprised to hear, is exponential. The larger the data set, the more steep the curve becomes.&lt;/p>
 &lt;figure class="screenshot">
 &lt;img src="graph%282n%29.png"
 alt="A graph showing exponential time complexity"/>
@@ -4015,7 +4133,7 @@ alt="A pile of pizza boxes with pies to be eaten"/> &lt;figcaption>
 &lt;tr>
 &lt;td>&lt;code>pizzaDelivery&lt;/code>&lt;/td>
 &lt;td>cubic&lt;/td>
-&lt;td>&lt;em>O&lt;/em>(_n_&lt;sup>3&lt;/sup>)&lt;/td>
+&lt;td>&lt;em>O&lt;/em>(&lt;em>n&lt;/em>&lt;sup>3&lt;/sup>)&lt;/td>
 &lt;/tr>
 &lt;tr>
 &lt;td>&lt;code>eatPies&lt;/code>&lt;/td>
@@ -4024,7 +4142,7 @@ alt="A pile of pizza boxes with pies to be eaten"/> &lt;figcaption>
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
-&lt;p>To describe the time complexity of the entire office party program, we choose the worst case. This program would have the time complexity &lt;em>O&lt;/em>(_n_&lt;sup>3&lt;/sup>).&lt;/p>
+&lt;p>To describe the time complexity of the entire office party program, we choose the worst case. This program would have the time complexity &lt;em>O&lt;/em>(&lt;em>n&lt;/em>&lt;sup>3&lt;/sup>).&lt;/p>
 &lt;p>Here&amp;rsquo;s the office party soundtrack, just for fun.&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-bash" data-lang="bash">Have cupcake number &lt;span class="m">1&lt;/span>
 Have some chips!
@@ -4064,15 +4182,15 @@ alt="Euler diagram"/> &lt;figcaption>
 &lt;/tr>
 &lt;tr>
 &lt;td>n ≤ 20&lt;/td>
-&lt;td>&lt;em>O&lt;/em>(2&lt;sup>_n_&lt;/sup>)&lt;/td>
+&lt;td>&lt;em>O&lt;/em>(2&lt;sup>&lt;em>n&lt;/em>&lt;/sup>)&lt;/td>
 &lt;/tr>
 &lt;tr>
 &lt;td>n ≤ 500&lt;/td>
-&lt;td>&lt;em>O&lt;/em>(_n_&lt;sup>3&lt;/sup>)&lt;/td>
+&lt;td>&lt;em>O&lt;/em>(&lt;em>n&lt;/em>&lt;sup>3&lt;/sup>)&lt;/td>
 &lt;/tr>
 &lt;tr>
 &lt;td>n ≤ 5000&lt;/td>
-&lt;td>&lt;em>O&lt;/em>(_n_&lt;sup>2&lt;/sup>)&lt;/td>
+&lt;td>&lt;em>O&lt;/em>(&lt;em>n&lt;/em>&lt;sup>2&lt;/sup>)&lt;/td>
 &lt;/tr>
 &lt;tr>
 &lt;td>n ≤ 10&lt;sup>6&lt;/sup>&lt;/td>
@@ -4107,7 +4225,7 @@ Benchmark_makeStrongCoffee-4 &lt;span class="m">1000000000&lt;/span> 0.86 ns/op
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="nx">diners&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">88&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">87&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">16&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">42&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">10&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">34&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">43&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">56&lt;/span>&lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Unfortunately, we&amp;rsquo;re bootstrapped and there are only three forks to go around. Since we&amp;rsquo;re a cooperative bunch, the three people who want pie the most will receive the forks to eat it with. Even though they&amp;rsquo;ve all agreed on this, no one seems to want to sort themselves out and line up in an orderly fashion, so we&amp;rsquo;ll have to make do with everybody jumbled about.&lt;/p>
 &lt;p>Without sorting the list of diners, return the three largest integers in the slice.&lt;/p>
-&lt;p>Here&amp;rsquo;s a function that solves this problem and has &lt;em>O&lt;/em>(_n_&lt;sup>2&lt;/sup>) time complexity:&lt;/p>
+&lt;p>Here&amp;rsquo;s a function that solves this problem and has &lt;em>O&lt;/em>(&lt;em>n&lt;/em>&lt;sup>2&lt;/sup>) time complexity:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="kd">func&lt;/span> &lt;span class="nf">giveForks&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">diners&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;span class="c1">// make a slice to store diners who will receive forks
 &lt;/span>&lt;span class="c1">&lt;/span> &lt;span class="kd">var&lt;/span> &lt;span class="nx">withForks&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="kt">int&lt;/span>
@@ -5355,7 +5473,7 @@ alt="Orbital period formula"/> &lt;figcaption>
 &lt;span class="p">}&lt;/span>
 &lt;span class="p">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Notice that we have an outer function, &lt;code>makeMeASandwich()&lt;/code> that takes an argument, &lt;code>x&lt;/code>. This outer function has the local variable &lt;code>ingredients&lt;/code>, which is just &lt;code>x&lt;/code> mushed together.&lt;/p>
-&lt;p>Barry? Who&amp;rsquo;s Barry? He&amp;rsquo;s the guy who works at the sandwich shop. You&amp;rsquo;ll never talk with Barry directly, but he&amp;rsquo;s the reason your sandwiches are made, and why they&amp;rsquo;re so delicious. Barry takes &lt;code>ingredients&lt;/code> and mushes them together with &amp;quot; sandwich&amp;rdquo;.&lt;/p>
+&lt;p>Barry? Who&amp;rsquo;s Barry? He&amp;rsquo;s the guy who works at the sandwich shop. You&amp;rsquo;ll never talk with Barry directly, but he&amp;rsquo;s the reason your sandwiches are made, and why they&amp;rsquo;re so delicious. Barry takes &lt;code>ingredients&lt;/code> and mushes them together with &amp;quot; sandwich&amp;quot;.&lt;/p>
 &lt;p>The reason Barry is able to access the &lt;code>ingredients&lt;/code> is because they&amp;rsquo;re in his outer scope. If you were to take Barry out of the sandwich shop, he&amp;rsquo;d no longer be able to access them. This is an example of &lt;em>lexical scoping&lt;/em>: &amp;ldquo;Nested functions have access to variables declared in their outer scope.&amp;rdquo; (&lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#Lexical_scoping">MDN&lt;/a>)&lt;/p>
 &lt;p>Barry, happily at work in the sandwich shop, is an example of a closure.&lt;/p>
 &lt;blockquote>
