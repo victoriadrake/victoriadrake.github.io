@@ -1,21 +1,355 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>SQLite in production with WAL 🔥 | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="SQLite in production with WAL 🔥 - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="An underappreciated candidate for light and fast database transactions."><meta property="og:url" content="https://victoria.dev/blog/sqlite-in-production-with-wal/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/sqlite-in-production-with-wal/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="SQLite in production with WAL 🔥"><meta name=twitter:image content="https://victoria.dev/blog/sqlite-in-production-with-wal/cover.png"><meta name=twitter:description content="An underappreciated candidate for light and fast database transactions."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.d0927e5994e126a21f5d7814069600556254f6959ed33bcd28f766541512b176.css integrity="sha256-0JJ+WZThJqIfXXgUBpYAVWJU9pWe0zvNKPdmVBUSsXY=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span></div><div id=logo><a href=#><img id=🥚 alt="site logo" src=/img/logo.png></a></div></div><div class=container><div id=cover-image><img src=https://victoria.dev/blog/sqlite-in-production-with-wal/cover.png alt="cover image"></div><div class=markdown><h1>SQLite in production with WAL 🔥</h1><p class=subtitle>An underappreciated candidate for light and fast database transactions.</p><p class=metadata id=date>March 5, 2020
-☕️&nbsp;
-4 min read
-&nbsp;
-<a class=li-tag href=/tags/data/>data
-</a>&nbsp;
-<a class=li-tag href=/tags/computing/>computing
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p><a href=https://sqlite.org/index.html>SQLite</a> (&ldquo;see-quell-lite&rdquo;) is a lightweight Sequel, or Structured Query Language (<a href=https://en.wikipedia.org/wiki/SQL>SQL</a>), database engine. Instead of using the client-server database management system model, SQLite is self-contained in a single file. It is library, database, and data, all in one package.</p><p>For certain applications, SQLite is a solid choice for a production database. It&rsquo;s lightweight, ultra-portable, and has no external dependencies. Remember when MacBook Air first came out? It&rsquo;s nothing like that.</p><p>SQLite is best suited for production use in applications that:</p><ul><li>Desire fast and simple set up.</li><li>Require high reliability in a small package.</li><li>Have, and want to retain, a small footprint.</li><li>Are read-heavy but not write-heavy.</li><li>Don&rsquo;t need multiple user accounts or features like multiversion concurrency snapshots.</li></ul><p>If your application can benefit from SQLite&rsquo;s serverless convenience, you may like to know about the different modes available for managing database changes.</p><h2 id=with-and-without-wal class=anchor-link><a href=#with-and-without-wal>With and without WAL</a></h2><p>POSIX <a href=https://linux.die.net/man/2/fsync>system call <code>fsync()</code></a> commits buffered data (data saved in the operating system cache) referred to by a specified file descriptor to permanent storage or disk. This is relevant to understanding the difference between SQLite&rsquo;s two modes, as <code>fsync()</code> will block until the device reports the transfer is complete.</p><p>For efficiency, SQLite uses <a href=https://sqlite.org/atomiccommit.html>atomic commits</a> to batch database changes into a single transaction. This enables the apparent writing of many transactions to a database file simultaneously. Atomic commits are performed using one of two modes: a rollback journal, or a write-ahead log (WAL).</p><h3 id=rollback-journal class=anchor-link><a href=#rollback-journal>Rollback journal</a></h3><p>A <a href=https://www.sqlite.org/lockingv3.html#rollback>rollback journal</a> is essentially a back-up file created by SQLite before write changes occur on a database file. It has the advantage of providing high reliability by helping SQLite restore the database to its original state in case a write operation is compromised during the disk-writing process.</p><p>Assuming a cold cache, SQLite first needs to read the relevant pages from a database file before it can write to it. Information is read out into the operating system cache, then transferred into user space. SQLite obtains a reserved lock on the database file, preventing other processes from writing to the database. At this point, other processes may still read from the database.</p><p>SQLite creates a separate file, the rollback journal, with the original content of the pages that will be changed. Initially existing in the cache, the rollback journal is written to persistent disk storage with <code>fsync()</code> to enable SQLite to restore the database should its next operations be compromised.</p><p>SQLite then obtains an exclusive lock preventing other processes from reading or writing, and writes the page changes to the database file in cache. Since writing to disk is slower than interaction with the cache, writing to disk doesn&rsquo;t occur immediately. The rollback journal continues to exist until changes are safely written to disk, with a second <code>fsync()</code>. From a user-space process point of view, the change to the disk (the COMMIT, or end of the transaction) happens instantaneously once the rollback journal is deleted - hence, atomic commits. However, the two <code>fsync()</code> operations required to complete the COMMIT make this option, from a transactional standpoint, slower than SQLite&rsquo;s lesser known WAL mode.</p><h3 id=write-ahead-logging-wal class=anchor-link><a href=#write-ahead-logging-wal>Write-ahead logging (WAL)</a></h3><p>While the rollback journal method uses a separate file to preserve the original database state, the <a href=https://www.sqlite.org/wal.html>WAL method</a> uses a separate WAL file to instead record the changes. Instead of a COMMIT depending on writing changes to disk, a COMMIT in WAL mode occurs when a record of one or more commits is appended to the WAL. This has the advantage of not requiring blocking read or write operations to the database file in order to make a COMMIT, so more transactions can happen concurrently.</p><p>WAL mode introduces the concept of the checkpoint, which is when the WAL file is synced to persistent storage before all its transactions are transferred to the database file. You can optionally specify when this occurs, but SQLite provides reasonable defaults. The checkpoint is the WAL version of the atomic commit.</p><p>In WAL mode, write transactions are performed faster than in the traditional rollback journal mode. Each transaction involves writing the changes only once to the WAL file instead of twice - to the rollback journal, and then to disk - before the COMMIT signals that the transaction is over.</p><h2 id=the-simplicity-of-sqlite class=anchor-link><a href=#the-simplicity-of-sqlite>The simplicity of SQLite</a></h2><p>For medium-sized read-heavy applications, SQLite may be a great choice. Using SQLite in WAL mode may make it an even better one. Benchmarks on the smallest EC2 instance, with no provisioned <a href=https://en.wikipedia.org/wiki/IOPS>IOPS</a>, put this little trooper at 400 write transactions per second, and thousands of reads. That&rsquo;s some perfectly adequate capability, in a perfectly compact package.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/>Multithreaded Python: slithering through an I/O bottleneck</a><p class=li-brief>How taking advantage of parallelism in Python can make your software orders of magnitude faster.</p><p class=metadata><a class=li-tag href=/tags/python/>python</a>
-☕️&nbsp;
-5 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/>Knapsack problem algorithms for my real-life carry-on knapsack</a><p class=li-brief>Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
-☕️☕️☕️☕️☕️&nbsp;
-24 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/manipulating-data-with-django-migrations/>Manipulating data with Django migrations</a><p class=li-brief>How to update Django models and manipulate existing data using migrations.</p><p class=metadata><a class=li-tag href=/tags/coding/>coding</a>
-☕️&nbsp;
-5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></body></html>
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    SQLite in production with WAL 🔥 | victoria.dev
+</title>
+
+
+
+    <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+    <meta property="og:title" content="SQLite in production with WAL 🔥 - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="An underappreciated candidate for light and fast database transactions." />
+<meta property="og:url" content="https://victoria.dev/blog/sqlite-in-production-with-wal/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/sqlite-in-production-with-wal/cover.png"/>
+
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="SQLite in production with WAL 🔥" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/sqlite-in-production-with-wal/cover.png"/>
+
+<meta name="twitter:description"
+    content="An underappreciated candidate for light and fast database transactions." />
+
+    
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.d0927e5994e126a21f5d7814069600556254f6959ed33bcd28f766541512b176.css" integrity="sha256-0JJ&#43;WZThJqIfXXgUBpYAVWJU9pWe0zvNKPdmVBUSsXY=" media="screen">
+
+
+
+
+
+    
+    
+    
+        
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        
+        
+    </div>
+
+    <div id="logo">
+        <a href="#"><img id="🥚" alt="site logo" src="/img/logo.png" /></a>
+    </div>
+
+</div>
+
+        
+
+        <div class="container">
+            
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/sqlite-in-production-with-wal/cover.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        SQLite in production with WAL 🔥
+    </h1>
+    
+    <p class="subtitle">An underappreciated candidate for light and fast database transactions.</p>
+    <p class="metadata" id="date">
+        March 5, 2020
+        ☕️&nbsp;
+        4 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/data/">
+            data
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/computing/">
+            computing
+        </a>&nbsp;
+        
+        
+
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p><a href="https://sqlite.org/index.html">SQLite</a> (&ldquo;see-quell-lite&rdquo;) is a lightweight Sequel, or Structured Query Language (<a href="https://en.wikipedia.org/wiki/SQL">SQL</a>), database engine. Instead of using the client-server database management system model, SQLite is self-contained in a single file. It is library, database, and data, all in one package.</p>
+<p>For certain applications, SQLite is a solid choice for a production database. It&rsquo;s lightweight, ultra-portable, and has no external dependencies. Remember when MacBook Air first came out? It&rsquo;s nothing like that.</p>
+<p>SQLite is best suited for production use in applications that:</p>
+<ul>
+<li>Desire fast and simple set up.</li>
+<li>Require high reliability in a small package.</li>
+<li>Have, and want to retain, a small footprint.</li>
+<li>Are read-heavy but not write-heavy.</li>
+<li>Don&rsquo;t need multiple user accounts or features like multiversion concurrency snapshots.</li>
+</ul>
+<p>If your application can benefit from SQLite&rsquo;s serverless convenience, you may like to know about the different modes available for managing database changes.</p>
+
+<h2 id="with-and-without-wal" class="anchor-link"><a href="#with-and-without-wal">With and without WAL</a></h2>
+<p>POSIX <a href="https://linux.die.net/man/2/fsync">system call <code>fsync()</code></a> commits buffered data (data saved in the operating system cache) referred to by a specified file descriptor to permanent storage or disk. This is relevant to understanding the difference between SQLite&rsquo;s two modes, as <code>fsync()</code> will block until the device reports the transfer is complete.</p>
+<p>For efficiency, SQLite uses <a href="https://sqlite.org/atomiccommit.html">atomic commits</a> to batch database changes into a single transaction. This enables the apparent writing of many transactions to a database file simultaneously. Atomic commits are performed using one of two modes: a rollback journal, or a write-ahead log (WAL).</p>
+
+<h3 id="rollback-journal" class="anchor-link"><a href="#rollback-journal">Rollback journal</a></h3>
+<p>A <a href="https://www.sqlite.org/lockingv3.html#rollback">rollback journal</a> is essentially a back-up file created by SQLite before write changes occur on a database file. It has the advantage of providing high reliability by helping SQLite restore the database to its original state in case a write operation is compromised during the disk-writing process.</p>
+<p>Assuming a cold cache, SQLite first needs to read the relevant pages from a database file before it can write to it. Information is read out into the operating system cache, then transferred into user space. SQLite obtains a reserved lock on the database file, preventing other processes from writing to the database. At this point, other processes may still read from the database.</p>
+<p>SQLite creates a separate file, the rollback journal, with the original content of the pages that will be changed. Initially existing in the cache, the rollback journal is written to persistent disk storage with <code>fsync()</code> to enable SQLite to restore the database should its next operations be compromised.</p>
+<p>SQLite then obtains an exclusive lock preventing other processes from reading or writing, and writes the page changes to the database file in cache. Since writing to disk is slower than interaction with the cache, writing to disk doesn&rsquo;t occur immediately. The rollback journal continues to exist until changes are safely written to disk, with a second <code>fsync()</code>. From a user-space process point of view, the change to the disk (the COMMIT, or end of the transaction) happens instantaneously once the rollback journal is deleted - hence, atomic commits. However, the two <code>fsync()</code> operations required to complete the COMMIT make this option, from a transactional standpoint, slower than SQLite&rsquo;s lesser known WAL mode.</p>
+
+<h3 id="write-ahead-logging-wal" class="anchor-link"><a href="#write-ahead-logging-wal">Write-ahead logging (WAL)</a></h3>
+<p>While the rollback journal method uses a separate file to preserve the original database state, the <a href="https://www.sqlite.org/wal.html">WAL method</a> uses a separate WAL file to instead record the changes. Instead of a COMMIT depending on writing changes to disk, a COMMIT in WAL mode occurs when a record of one or more commits is appended to the WAL. This has the advantage of not requiring blocking read or write operations to the database file in order to make a COMMIT, so more transactions can happen concurrently.</p>
+<p>WAL mode introduces the concept of the checkpoint, which is when the WAL file is synced to persistent storage before all its transactions are transferred to the database file. You can optionally specify when this occurs, but SQLite provides reasonable defaults. The checkpoint is the WAL version of the atomic commit.</p>
+<p>In WAL mode, write transactions are performed faster than in the traditional rollback journal mode. Each transaction involves writing the changes only once to the WAL file instead of twice - to the rollback journal, and then to disk - before the COMMIT signals that the transaction is over.</p>
+
+<h2 id="the-simplicity-of-sqlite" class="anchor-link"><a href="#the-simplicity-of-sqlite">The simplicity of SQLite</a></h2>
+<p>For medium-sized read-heavy applications, SQLite may be a great choice. Using SQLite in WAL mode may make it an even better one. Benchmarks on the smallest EC2 instance, with no provisioned <a href="https://en.wikipedia.org/wiki/IOPS">IOPS</a>, put this little trooper at 400 write transactions per second, and thousands of reads. That&rsquo;s some perfectly adequate capability, in a perfectly compact package.</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/">Multithreaded Python: slithering through an I/O bottleneck</a>
+        <p class="li-brief">
+            How taking advantage of parallelism in Python can make your software orders of magnitude faster.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/python/">python</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/">Knapsack problem algorithms for my real-life carry-on knapsack</a>
+        <p class="li-brief">
+            Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
+            
+            ☕️☕️☕️☕️☕️&nbsp;
+            24 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/manipulating-data-with-django-migrations/">Manipulating data with Django migrations</a>
+        <p class="li-brief">
+            How to update Django models and manipulate existing data using migrations.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/coding/">coding</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+    
+
+    
+    
+        
+
+</body>
+
+</html>
