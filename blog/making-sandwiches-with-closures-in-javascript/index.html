@@ -1,76 +1,413 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>Making sandwiches with closures in JavaScript | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Making sandwiches with closures in JavaScript - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="An explanation of closures and how they can emulate private methods in JavaScript."><meta property="og:url" content="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/cover_closures-sandwich.jpg"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Making sandwiches with closures in JavaScript"><meta name=twitter:image content="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/cover_closures-sandwich.jpg"><meta name=twitter:description content="An explanation of closures and how they can emulate private methods in JavaScript."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.04e90d52501e665691c1abbf143ac55586f1452d40109197e55bac39c019de39.css integrity="sha256-BOkNUlAeZlaRwau/FDrFVYbxRS1AEJGX5VusOcAZ3jk=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
-<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Making sandwiches with closures in JavaScript">📡 rss</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
-<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Making sandwiches with closures in JavaScript">📡 rss</a></span></div><div id=logo><a href=#><img id=🥚 alt="site logo" src=/img/logo.png></a></div></div><div class=container><div id=cover-image><img src=https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/cover_closures-sandwich.jpg alt="cover image"></div><div class=markdown><h1>Making sandwiches with closures in JavaScript</h1><p class=subtitle>An explanation of closures and how they can emulate private methods in JavaScript.</p><p class=metadata id=date>May 28, 2017
-☕️&nbsp;
-4 min read
-&nbsp;
-<a class=li-tag href=/tags/javascript/>javascript
-</a>&nbsp;
-<a class=li-tag href=/tags/coding/>coding
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>Say you&rsquo;re having a little coding get-together, and you need some sandwiches. You happen to know that everyone prefers a different type of sandwich, like chicken, ham, or peanut butter and mayo. You could make all these sandwiches yourself, but that would be tedious and boring.</p><p>Luckily, you know of a nearby sandwich shop that delivers. They have the ability and ingredients to make any kind of sandwich in the world, and all you have to do is order through their app.</p><p>The sandwich shop looks like this:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>function</span> <span class=nx>makeMeASandwich</span><span class=p>(</span><span class=nx>x</span><span class=p>)</span> <span class=p>{</span>
-    <span class=kd>var</span> <span class=nx>ingredients</span> <span class=o>=</span> <span class=nx>x</span><span class=p>.</span><span class=nx>join</span><span class=p>(</span><span class=s1>&#39; &#39;</span><span class=p>);</span>
-    <span class=k>return</span> <span class=kd>function</span> <span class=nx>barry</span><span class=p>()</span> <span class=p>{</span>
-        <span class=k>return</span> <span class=nx>ingredients</span><span class=p>.</span><span class=nx>concat</span><span class=p>(</span><span class=s1>&#39; sandwich&#39;</span><span class=p>);</span>
-    <span class=p>}</span>
-<span class=p>}</span>
-</code></pre></div><p>Notice that we have an outer function, <code>makeMeASandwich()</code> that takes an argument, <code>x</code>. This outer function has the local variable <code>ingredients</code>, which is just <code>x</code> mushed together.</p><p>Barry? Who&rsquo;s Barry? He&rsquo;s the guy who works at the sandwich shop. You&rsquo;ll never talk with Barry directly, but he&rsquo;s the reason your sandwiches are made, and why they&rsquo;re so delicious. Barry takes <code>ingredients</code> and mushes them together with " sandwich".</p><p>The reason Barry is able to access the <code>ingredients</code> is because they&rsquo;re in his outer scope. If you were to take Barry out of the sandwich shop, he&rsquo;d no longer be able to access them. This is an example of <em>lexical scoping</em>: &ldquo;Nested functions have access to variables declared in their outer scope.&rdquo; (<a href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#Lexical_scoping>MDN</a>)</p><p>Barry, happily at work in the sandwich shop, is an example of a closure.</p><blockquote><p><strong>Closures</strong> are functions that refer to independent (free) variables (variables that are used locally, but defined in an enclosing scope). In other words, these functions &lsquo;remember&rsquo; the environment in which they were created. (<a href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures>MDN</a>)</p></blockquote><p>When you order, the app submits your sandwich request like so:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>var</span> <span class=nx>pbm</span> <span class=o>=</span> <span class=nx>makeMeASandwich</span><span class=p>([</span><span class=s1>&#39;peanut butter&#39;</span><span class=p>,</span> <span class=s1>&#39;mayo&#39;</span><span class=p>]);</span>
+<!DOCTYPE html>
+<html lang="en-us">
 
-<span class=nx>pbm</span><span class=p>();</span>
-</code></pre></div><p>And in thirty-minutes-or-it&rsquo;s-free, you get: <code>peanut butter mayo sandwich</code>.</p><p>The nice thing about the sandwich shop app is that it remembers the sandwiches you&rsquo;ve ordered before. Your peanut butter and mayo sandwich is now available to you as <code>pbm()</code> for you to order anytime. It&rsquo;s pretty convenient since, each time you order, there&rsquo;s no need to specify that the sandwich you want is the same one you got before with peanut butter and mayo and it&rsquo;s a sandwich. Using <code>pbm()</code> is much more concise.</p><p>Let&rsquo;s order the sandwiches you need for the party:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>var</span> <span class=nx>pmrp</span> <span class=o>=</span> <span class=nx>makeMeASandwich</span><span class=p>([</span><span class=s1>&#39;prosciutto&#39;</span><span class=p>,</span> <span class=s1>&#39;mozzarella&#39;</span><span class=p>,</span> <span class=s1>&#39;red pepper&#39;</span><span class=p>]);</span>
-<span class=kd>var</span> <span class=nx>pbt</span> <span class=o>=</span> <span class=nx>makeMeASandwich</span><span class=p>([</span><span class=s1>&#39;peanut butter&#39;</span><span class=p>,</span> <span class=s1>&#39;tuna&#39;</span><span class=p>]);</span>
-<span class=kd>var</span> <span class=nx>hm</span> <span class=o>=</span> <span class=nx>makeMeASandwich</span><span class=p>([</span><span class=s1>&#39;ham&#39;</span><span class=p>]);</span>
-<span class=kd>var</span> <span class=nx>pbm</span> <span class=o>=</span> <span class=nx>makeMeASandwich</span><span class=p>([</span><span class=s1>&#39;peanut butter&#39;</span><span class=p>,</span> <span class=s1>&#39;mayo&#39;</span><span class=p>]);</span>
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 
-<span class=nx>pmrp</span><span class=p>();</span>
-<span class=nx>pbt</span><span class=p>();</span>
-<span class=nx>hm</span><span class=p>();</span>
-<span class=nx>pbm</span><span class=p>();</span>
-</code></pre></div><p>Your order confirmation reads:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>prosciutto mozzarella red pepper sandwich
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    Making sandwiches with closures in JavaScript | victoria.dev
+</title>
+
+
+
+    <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+    <meta property="og:title" content="Making sandwiches with closures in JavaScript - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="An explanation of closures and how they can emulate private methods in JavaScript." />
+<meta property="og:url" content="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/cover_closures-sandwich.jpg"/>
+
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Making sandwiches with closures in JavaScript" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/cover_closures-sandwich.jpg"/>
+
+<meta name="twitter:description"
+    content="An explanation of closures and how they can emulate private methods in JavaScript." />
+
+    
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.04e90d52501e665691c1abbf143ac55586f1452d40109197e55bac39c019de39.css" integrity="sha256-BOkNUlAeZlaRwau/FDrFVYbxRS1AEJGX5VusOcAZ3jk=" media="screen">
+
+
+
+
+
+    
+    
+    
+        
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            <span class="menu-item">
+                <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Making sandwiches with closures in JavaScript" />📡 rss</a>
+            </span>
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        <span class="menu-item">
+            <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Making sandwiches with closures in JavaScript" />📡 rss</a>
+        </span>
+        
+    </div>
+
+    <div id="logo">
+        <a href="#"><img id="🥚" alt="site logo" src="/img/logo.png" /></a>
+    </div>
+
+</div>
+
+        
+
+        <div class="container">
+            
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/cover_closures-sandwich.jpg" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        Making sandwiches with closures in JavaScript
+    </h1>
+    
+    <p class="subtitle">An explanation of closures and how they can emulate private methods in JavaScript.</p>
+    <p class="metadata" id="date">
+        May 28, 2017
+        ☕️&nbsp;
+        4 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/javascript/">
+            javascript
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/coding/">
+            coding
+        </a>&nbsp;
+        
+        
+
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>Say you&rsquo;re having a little coding get-together, and you need some sandwiches. You happen to know that everyone prefers a different type of sandwich, like chicken, ham, or peanut butter and mayo. You could make all these sandwiches yourself, but that would be tedious and boring.</p>
+<p>Luckily, you know of a nearby sandwich shop that delivers. They have the ability and ingredients to make any kind of sandwich in the world, and all you have to do is order through their app.</p>
+<p>The sandwich shop looks like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">makeMeASandwich</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">ingredients</span> <span class="o">=</span> <span class="nx">x</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+    <span class="k">return</span> <span class="kd">function</span> <span class="nx">barry</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">ingredients</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="s1">&#39; sandwich&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><p>Notice that we have an outer function, <code>makeMeASandwich()</code> that takes an argument, <code>x</code>. This outer function has the local variable <code>ingredients</code>, which is just <code>x</code> mushed together.</p>
+<p>Barry? Who&rsquo;s Barry? He&rsquo;s the guy who works at the sandwich shop. You&rsquo;ll never talk with Barry directly, but he&rsquo;s the reason your sandwiches are made, and why they&rsquo;re so delicious. Barry takes <code>ingredients</code> and mushes them together with &quot; sandwich&quot;.</p>
+<p>The reason Barry is able to access the <code>ingredients</code> is because they&rsquo;re in his outer scope. If you were to take Barry out of the sandwich shop, he&rsquo;d no longer be able to access them. This is an example of <em>lexical scoping</em>: &ldquo;Nested functions have access to variables declared in their outer scope.&rdquo; (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#Lexical_scoping">MDN</a>)</p>
+<p>Barry, happily at work in the sandwich shop, is an example of a closure.</p>
+<blockquote>
+<p><strong>Closures</strong> are functions that refer to independent (free) variables (variables that are used locally, but defined in an enclosing scope). In other words, these functions &lsquo;remember&rsquo; the environment in which they were created. (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures">MDN</a>)</p>
+</blockquote>
+<p>When you order, the app submits your sandwich request like so:</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">pbm</span> <span class="o">=</span> <span class="nx">makeMeASandwich</span><span class="p">([</span><span class="s1">&#39;peanut butter&#39;</span><span class="p">,</span> <span class="s1">&#39;mayo&#39;</span><span class="p">]);</span>
+
+<span class="nx">pbm</span><span class="p">();</span>
+</code></pre></div><p>And in thirty-minutes-or-it&rsquo;s-free, you get: <code>peanut butter mayo sandwich</code>.</p>
+<p>The nice thing about the sandwich shop app is that it remembers the sandwiches you&rsquo;ve ordered before. Your peanut butter and mayo sandwich is now available to you as <code>pbm()</code> for you to order anytime. It&rsquo;s pretty convenient since, each time you order, there&rsquo;s no need to specify that the sandwich you want is the same one you got before with peanut butter and mayo and it&rsquo;s a sandwich. Using <code>pbm()</code> is much more concise.</p>
+<p>Let&rsquo;s order the sandwiches you need for the party:</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">pmrp</span> <span class="o">=</span> <span class="nx">makeMeASandwich</span><span class="p">([</span><span class="s1">&#39;prosciutto&#39;</span><span class="p">,</span> <span class="s1">&#39;mozzarella&#39;</span><span class="p">,</span> <span class="s1">&#39;red pepper&#39;</span><span class="p">]);</span>
+<span class="kd">var</span> <span class="nx">pbt</span> <span class="o">=</span> <span class="nx">makeMeASandwich</span><span class="p">([</span><span class="s1">&#39;peanut butter&#39;</span><span class="p">,</span> <span class="s1">&#39;tuna&#39;</span><span class="p">]);</span>
+<span class="kd">var</span> <span class="nx">hm</span> <span class="o">=</span> <span class="nx">makeMeASandwich</span><span class="p">([</span><span class="s1">&#39;ham&#39;</span><span class="p">]);</span>
+<span class="kd">var</span> <span class="nx">pbm</span> <span class="o">=</span> <span class="nx">makeMeASandwich</span><span class="p">([</span><span class="s1">&#39;peanut butter&#39;</span><span class="p">,</span> <span class="s1">&#39;mayo&#39;</span><span class="p">]);</span>
+
+<span class="nx">pmrp</span><span class="p">();</span>
+<span class="nx">pbt</span><span class="p">();</span>
+<span class="nx">hm</span><span class="p">();</span>
+<span class="nx">pbm</span><span class="p">();</span>
+</code></pre></div><p>Your order confirmation reads:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">prosciutto mozzarella red pepper sandwich
 peanut butter tuna sandwich
 ham sandwich
 peanut butter mayo sandwich
-</code></pre></div><p>Plot twist! The guy who wanted a ham sandwich now wants a ham <em>and cheese</em> sandwich. Luckily, the sandwich shop just released a new version of their app that will let you add cheese to any sandwich.</p><p>With this added feature, the sandwich shop now looks like this:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=kd>function</span> <span class=nx>makeMeASandwich</span><span class=p>(</span><span class=nx>x</span><span class=p>)</span> <span class=p>{</span>
-    <span class=kd>var</span> <span class=nx>ingredients</span> <span class=o>=</span> <span class=nx>x</span><span class=p>.</span><span class=nx>join</span><span class=p>(</span><span class=s1>&#39; &#39;</span><span class=p>);</span>
-    <span class=kd>var</span> <span class=nx>slices</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</code></pre></div><p>Plot twist! The guy who wanted a ham sandwich now wants a ham <em>and cheese</em> sandwich. Luckily, the sandwich shop just released a new version of their app that will let you add cheese to any sandwich.</p>
+<p>With this added feature, the sandwich shop now looks like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">makeMeASandwich</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">ingredients</span> <span class="o">=</span> <span class="nx">x</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">slices</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-    <span class=kd>function</span> <span class=nx>barry</span><span class=p>()</span> <span class=p>{</span>
-        <span class=k>return</span> <span class=nx>ingredients</span><span class=p>.</span><span class=nx>concat</span><span class=p>(</span><span class=s1>&#39; sandwich&#39;</span><span class=p>);</span>
-    <span class=p>}</span>
-    <span class=kd>function</span> <span class=nx>barryAddCheese</span><span class=p>()</span> <span class=p>{</span>
-        <span class=nx>slices</span> <span class=o>+=</span> <span class=mi>2</span><span class=p>;</span>
-        <span class=k>return</span> <span class=nx>ingredients</span><span class=p>.</span><span class=nx>concat</span><span class=p>(</span><span class=s1>&#39; sandwich with &#39;</span><span class=p>,</span> <span class=nx>slices</span><span class=p>,</span> <span class=s1>&#39; slices of cheese&#39;</span><span class=p>);</span>
-    <span class=p>}</span>
-    <span class=k>return</span> <span class=p>{</span>
-        <span class=nx>noCheese</span><span class=o>:</span> <span class=kd>function</span><span class=p>()</span> <span class=p>{</span>
-            <span class=k>return</span> <span class=nx>barry</span><span class=p>();</span>
-        <span class=p>},</span>
-        <span class=nx>addCheese</span><span class=o>:</span> <span class=kd>function</span><span class=p>()</span> <span class=p>{</span>
-            <span class=k>return</span> <span class=nx>barryAddCheese</span><span class=p>();</span>
-        <span class=p>}</span>
-    <span class=p>}</span>
-<span class=p>}</span>
-</code></pre></div><p>You amend the order to look like this:</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=nx>pmrp</span><span class=p>.</span><span class=nx>noCheese</span><span class=p>();</span>
-<span class=nx>pbt</span><span class=p>.</span><span class=nx>noCheese</span><span class=p>();</span>
-<span class=nx>hm</span><span class=p>.</span><span class=nx>addCheese</span><span class=p>();</span>
-<span class=nx>pbm</span><span class=p>.</span><span class=nx>noCheese</span><span class=p>();</span>
-</code></pre></div><p>And your order confirmation reads:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>prosciutto mozzarella red pepper sandwich
+    <span class="kd">function</span> <span class="nx">barry</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">ingredients</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="s1">&#39; sandwich&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">barryAddCheese</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">slices</span> <span class="o">+=</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">ingredients</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="s1">&#39; sandwich with &#39;</span><span class="p">,</span> <span class="nx">slices</span><span class="p">,</span> <span class="s1">&#39; slices of cheese&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">noCheese</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">barry</span><span class="p">();</span>
+        <span class="p">},</span>
+        <span class="nx">addCheese</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">barryAddCheese</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><p>You amend the order to look like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="nx">pmrp</span><span class="p">.</span><span class="nx">noCheese</span><span class="p">();</span>
+<span class="nx">pbt</span><span class="p">.</span><span class="nx">noCheese</span><span class="p">();</span>
+<span class="nx">hm</span><span class="p">.</span><span class="nx">addCheese</span><span class="p">();</span>
+<span class="nx">pbm</span><span class="p">.</span><span class="nx">noCheese</span><span class="p">();</span>
+</code></pre></div><p>And your order confirmation reads:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">prosciutto mozzarella red pepper sandwich
 peanut butter tuna sandwich
-ham sandwich with <span class=m>2</span> slices of cheese
+ham sandwich with <span class="m">2</span> slices of cheese
 peanut butter mayo sandwich
-</code></pre></div><p>You&rsquo;ll notice that when you order a sandwich with cheese, Barry puts 2 slices of cheese on it. In this way, the sandwich shop controls how much cheese you get. You can&rsquo;t get to Barry to tell him you want more than 2 slices at a time. That&rsquo;s because your only access to the sandwich shop is through the public functions <code>noCheese</code> or <code>addCheese</code>.</p><p>Of course, there&rsquo;s a way to cheat the system&mldr;</p><div class=highlight><pre class=chroma><code class=language-js data-lang=js><span class=nx>hm</span><span class=p>.</span><span class=nx>addCheese</span><span class=p>();</span>
-<span class=nx>hm</span><span class=p>.</span><span class=nx>addCheese</span><span class=p>();</span>
-<span class=nx>hm</span><span class=p>.</span><span class=nx>addCheese</span><span class=p>();</span>
-</code></pre></div><p>By ordering the same ham sandwich with cheese three times, you get: <code>ham sandwich with 6 slices of cheese</code>.</p><p>This happens because the sandwich shop app recognizes the variable <code>hm</code> as the same sandwich each time, and increases the number of cheese slices it tells Barry to add.</p><p>The app could prevent you from adding lots of cheese to the same sandwich, either by adding a maximum or by appending unique order numbers to the variable names&mldr; but this is our fantasy sandwich shop, and we get to pile on as much cheese as we want.</p><p><img src=https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/closures-cheesestack.jpg#center alt="All the cheese."></p><p>By using closures, we can have JavaScript emulate private methods found in languages like Ruby and Java. Closures are a useful way to extend the functionality of JavaScript, and also order sandwiches.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/>How to code a satellite algorithm and cook paella from scratch</a><p class=li-brief>A guide to expertly tackling seemingly complicated problems that you'd rather never tackle in the first place.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
-☕️☕️&nbsp;
-7 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/>Understanding Array.prototype.reduce() and recursion using apple pie</a><p class=li-brief>An explanation of JavaScript reduce() method and recursive functions using delicious, attention-retaining apples.</p><p class=metadata><a class=li-tag href=/tags/javascript/>javascript</a>
-☕️☕️&nbsp;
-6 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/>Iterating over objects and arrays: frequent errors</a><p class=li-brief>A quick reference to why your code isn't working, or some errors I frequently make with iteration when the coffee wears off.</p><p class=metadata><a class=li-tag href=/tags/coding/>coding</a>
-☕️&nbsp;
-4 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></body></html>
+</code></pre></div><p>You&rsquo;ll notice that when you order a sandwich with cheese, Barry puts 2 slices of cheese on it. In this way, the sandwich shop controls how much cheese you get. You can&rsquo;t get to Barry to tell him you want more than 2 slices at a time. That&rsquo;s because your only access to the sandwich shop is through the public functions <code>noCheese</code> or <code>addCheese</code>.</p>
+<p>Of course, there&rsquo;s a way to cheat the system&hellip;</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="nx">hm</span><span class="p">.</span><span class="nx">addCheese</span><span class="p">();</span>
+<span class="nx">hm</span><span class="p">.</span><span class="nx">addCheese</span><span class="p">();</span>
+<span class="nx">hm</span><span class="p">.</span><span class="nx">addCheese</span><span class="p">();</span>
+</code></pre></div><p>By ordering the same ham sandwich with cheese three times, you get: <code>ham sandwich with 6 slices of cheese</code>.</p>
+<p>This happens because the sandwich shop app recognizes the variable <code>hm</code> as the same sandwich each time, and increases the number of cheese slices it tells Barry to add.</p>
+<p>The app could prevent you from adding lots of cheese to the same sandwich, either by adding a maximum or by appending unique order numbers to the variable names&hellip; but this is our fantasy sandwich shop, and we get to pile on as much cheese as we want.</p>
+<p>
+
+<img src="https://victoria.dev/blog/making-sandwiches-with-closures-in-javascript/closures-cheesestack.jpg#center" alt="All the cheese."  />
+
+</p>
+<p>By using closures, we can have JavaScript emulate private methods found in languages like Ruby and Java. Closures are a useful way to extend the functionality of JavaScript, and also order sandwiches.</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/">How to code a satellite algorithm and cook paella from scratch</a>
+        <p class="li-brief">
+            A guide to expertly tackling seemingly complicated problems that you&#39;d rather never tackle in the first place.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
+            
+            ☕️☕️&nbsp;
+            7 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">Understanding Array.prototype.reduce() and recursion using apple pie</a>
+        <p class="li-brief">
+            An explanation of JavaScript reduce() method and recursive functions using delicious, attention-retaining apples.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/javascript/">javascript</a>
+            
+            ☕️☕️&nbsp;
+            6 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/">Iterating over objects and arrays: frequent errors</a>
+        <p class="li-brief">
+            A quick reference to why your code isn&#39;t working, or some errors I frequently make with iteration when the coffee wears off.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/coding/">coding</a>
+            
+            ☕️&nbsp;
+            4 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+    
+
+    
+    
+        
+
+</body>
+
+</html>

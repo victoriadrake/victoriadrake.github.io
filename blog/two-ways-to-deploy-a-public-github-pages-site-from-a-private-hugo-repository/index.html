@@ -1,89 +1,491 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>Two ways to deploy a public GitHub Pages site from a private Hugo repository | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Two ways to deploy a public GitHub Pages site from a private Hugo repository - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="Keep your drafts out of the public eye by making use of continuous deployment tools to publish your public GitHub Pages site - from a separate private repository."><meta property="og:url" content="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Two ways to deploy a public GitHub Pages site from a private Hugo repository"><meta name=twitter:image content="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover.png"><meta name=twitter:description content="Keep your drafts out of the public eye by making use of continuous deployment tools to publish your public GitHub Pages site - from a separate private repository."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.04e90d52501e665691c1abbf143ac55586f1452d40109197e55bac39c019de39.css integrity="sha256-BOkNUlAeZlaRwau/FDrFVYbxRS1AEJGX5VusOcAZ3jk=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
-<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Two ways to deploy a public GitHub Pages site from a private Hugo repository">📡 rss</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
-<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Two ways to deploy a public GitHub Pages site from a private Hugo repository">📡 rss</a></span></div><div id=logo><a href=#><img id=🥚 alt="site logo" src=/img/logo.png></a></div></div><div class=container><div id=cover-image><img src=https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover.png alt="cover image"></div><div class=markdown><h1>Two ways to deploy a public GitHub Pages site from a private Hugo repository</h1><p class=subtitle>Keep your drafts out of the public eye by making use of continuous deployment tools to publish your public GitHub Pages site - from a separate private repository.</p><p class=metadata id=date>April 22, 2019
-☕️☕️&nbsp;
-8 min read
-&nbsp;
-<a class=li-tag href=/tags/ci/cd/>ci/cd
-</a>&nbsp;
-<a class=li-tag href=/tags/git/>git
-</a>&nbsp;</p><div class=dropdown><input type=checkbox id=toc-toggle>
-<label for=toc-toggle id=toggle><p class=toc-title>Jump to section...
-<span class=dropdown-icon>⚓</span></p></label><nav id=TableOfContents><ul><li><a href=#private-to-public-github-pages-deployment-with-travis-ci>Private-to-public GitHub Pages deployment with Travis CI</a><ul><li><a href=#setting-up-the-travis-configuration-file>Setting up the Travis configuration file</a></li></ul></li><li><a href=#deploying-to-a-separate-repository-with-netlify-and-make>Deploying to a separate repository with Netlify and Make</a><ul><li><a href=#setting-up-netlify>Setting up Netlify</a></li><li><a href=#same-same-but-different>Same same but different</a></li></ul></li><li><a href=#go-forth-and-deploy-fearlessly>Go forth and deploy fearlessly</a></li></ul></nav></div></div><div class=page-separator><hr></div><div class=markdown><p>Tools like Travis CI and Netlify offer some pretty nifty features, like seamlessly deploying your GitHub Pages site when changes are pushed to its repository. Along with a static site generator like Hugo, keeping a blog up to date is pretty painless.</p><p>I&rsquo;ve used Hugo to build my site for years, but until this past week I&rsquo;d never hooked up my Pages repository to any deployment service. Why? Because using a tool that built my site before deploying it seemed to require having the whole recipe in one place - and if you&rsquo;re using GitHub Pages with the free version of GitHub, <a href=https://help.github.com/en/articles/configuring-a-publishing-source-for-github-pages>that place is public</a>. That means that all my three-in-the-morning bright ideas and messy unfinished (and unfunny) drafts would be publicly available - and no amount of continuous convenience was going to convince me to do that.</p><p>So I kept things separated, with Hugo&rsquo;s messy behind-the-scenes stuff in a local Git repository, and the generated <code>public/</code> folder pushing to my GitHub Pages remote repository. Each time I wanted to deploy my site, I&rsquo;d have to get on my laptop and <code>hugo</code> to build my site, then <code>cd public/ && git add . && git commit</code>&mldr; etc etc. And all was well, except for the nagging feeling that there was a better way to do this.</p><p>I wrote another article a little while back about <a href=/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/>using GitHub and Working Copy</a> to make changes to my repositories on my iPad whenever I&rsquo;m out and about. It seemed off to me that I could do everything except deploy my site from my iPad, so I set out to change that.</p><p>A couple three-in-the-morning bright ideas and a revoked access token later (oops), I now have not one but <em>two</em> ways to deploy to my public GitHub Pages repository from an entirely separated, private GitHub repository. In this post, I&rsquo;ll take you through achieving this with <a href=https://travis-ci.com/>Travis CI</a> or using <a href=http://netlify.com/>Netlify</a> and <a href=https://www.gnu.org/software/make/>Make</a>.</p><p>There&rsquo;s nothing hackish about it - my public GitHub Pages repository still looks the same as it does when I pushed to it locally from my terminal. Only now, I&rsquo;m able to take advantage of a couple great deployment tools to have the site update whenever I push to my private repo, whether I&rsquo;m on my laptop or out and about with my iPad.</p><figure><img src=im-on-a-bridge.jpg alt="Hashtag: you did not push from there"><figcaption><p>#YouDidNotPushFromThere</p></figcaption></figure><p>This article assumes you have working knowledge of Git and GitHub Pages. If not, you may like to spin off some browser tabs from my articles on <a href=/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/>using GitHub and Working Copy</a> and <a href=/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/>building a site with Hugo and GitHub Pages</a> first.</p><p>Let&rsquo;s do it!</p><h2 id=private-to-public-github-pages-deployment-with-travis-ci class=anchor-link><a href=#private-to-public-github-pages-deployment-with-travis-ci>Private-to-public GitHub Pages deployment with Travis CI</a></h2><p>Travis CI has the built-in ability (♪) to <a href=https://docs.travis-ci.com/user/deployment/pages/>deploy to GitHub Pages</a> following a successful build. They do a decent job in the docs of explaining how to add this feature, especially if you&rsquo;ve used Travis CI before&mldr; which I haven&rsquo;t. Don&rsquo;t worry, I did the bulk of the figuring-things-out for you.</p><ul><li>Travis CI gets all its instructions from a configuration file in the root of your repository called <code>.travis.yml</code></li><li>You need to provide a <a href=https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line>GitHub personal access token</a> as a secure encrypted variable, which you can generate using <code>travis</code> on the command line</li><li>Once your script successfully finishes doing what you&rsquo;ve told it to do (not necessarily what you <em>want</em> it to do but that&rsquo;s a whole other blog post), Travis will deploy your build directory to a repository you can specify with the <code>repo</code> configuration variable.</li></ul><h3 id=setting-up-the-travis-configuration-file class=anchor-link><a href=#setting-up-the-travis-configuration-file>Setting up the Travis configuration file</a></h3><p>Create a new configuration file for Travis with the filename <code>.travis.yml</code> (note the leading &ldquo;."). These scripts are very customizable and I struggled to find a relevant example to use as a starting point - luckily, you don&rsquo;t have that problem!</p><p>Here&rsquo;s my basic <code>.travis.yml</code>:</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml><span class=nt>git</span><span class=p>:</span><span class=w>
-</span><span class=w>  </span><span class=nt>depth</span><span class=p>:</span><span class=w> </span><span class=kc>false</span><span class=w>
-</span><span class=w>
-</span><span class=w></span><span class=nt>env</span><span class=p>:</span><span class=w>
-</span><span class=w>  </span><span class=nt>global</span><span class=p>:</span><span class=w>
-</span><span class=w>    </span>- <span class=l>HUGO_VERSION=&#34;0.54.0&#34;</span><span class=w>
-</span><span class=w>  </span><span class=nt>matrix</span><span class=p>:</span><span class=w>
-</span><span class=w>    </span>- <span class=l>YOUR_ENCRYPTED_VARIABLE</span><span class=w>
-</span><span class=w>
-</span><span class=w></span><span class=nt>install</span><span class=p>:</span><span class=w>
-</span><span class=w>  </span>- <span class=l>wget -q https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz</span><span class=w>
-</span><span class=w>  </span>- <span class=l>tar xf hugo_${HUGO_VERSION}_Linux-64bit.tar.gz</span><span class=w>
-</span><span class=w>  </span>- <span class=l>mv hugo ~/bin/</span><span class=w>
-</span><span class=w>
-</span><span class=w></span><span class=nt>script</span><span class=p>:</span><span class=w>
-</span><span class=w>  </span>- <span class=l>hugo --gc --minify</span><span class=w>
-</span><span class=w>
-</span><span class=w></span><span class=nt>deploy</span><span class=p>:</span><span class=w>
-</span><span class=w>  </span><span class=nt>provider</span><span class=p>:</span><span class=w> </span><span class=l>pages</span><span class=w>
-</span><span class=w>  </span><span class=nt>skip-cleanup</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
-</span><span class=w>  </span><span class=nt>github-token</span><span class=p>:</span><span class=w> </span><span class=l>$GITHUB_TOKEN</span><span class=w>
-</span><span class=w>  </span><span class=nt>keep-history</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
-</span><span class=w>  </span><span class=nt>local-dir</span><span class=p>:</span><span class=w> </span><span class=l>public</span><span class=w>
-</span><span class=w>  </span><span class=nt>repo</span><span class=p>:</span><span class=w> </span><span class=l>gh-username/gh-username.github.io</span><span class=w>
-</span><span class=w>  </span><span class=nt>target-branch</span><span class=p>:</span><span class=w> </span><span class=l>master</span><span class=w>
-</span><span class=w>  </span><span class=nt>verbose</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
-</span><span class=w>  </span><span class=nt>on</span><span class=p>:</span><span class=w>
-</span><span class=w>    </span><span class=nt>branch</span><span class=p>:</span><span class=w> </span><span class=l>master</span><span class=w>
-</span></code></pre></div><p>This script downloads and installs Hugo, builds the site with the garbage collection and minify <a href=https://gohugo.io/commands/hugo/#synopsis>flags</a>, then deploys the <code>public/</code> directory to the specified <code>repo</code> - in this example, your public GitHub Pages repository. You can read about each of the <code>deploy</code> configuration options <a href=https://docs.travis-ci.com/user/deployment/pages/#further-configuration>here</a>.</p><p>To <a href=https://docs.travis-ci.com/user/environment-variables#defining-encrypted-variables-in-travisyml>add the GitHub personal access token as an encrypted variable</a>, you don&rsquo;t need to manually edit your <code>.travis.yml</code>. The <code>travis</code> gem commands below will encrypt and add the variable for you when you run them in your repository directory.</p><p>First, install <code>travis</code> with <code>sudo gem install travis</code>.</p><p>Then <a href=https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line>generate your GitHub personal access token</a>, copy it (it only shows up once!) and run the commands below in your repository root, substituting your token for the kisses:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>travis login --pro --github-token xxxxxxxxxxxxxxxxxxxxxxxxxxx
-travis encrypt <span class=nv>GITHUB_TOKEN</span><span class=o>=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxx --add env.matrix
-</code></pre></div><p>Your encrypted token magically appears in the file. Once you&rsquo;ve committed <code>.travis.yml</code> to your private Hugo repository, Travis CI will run the script and if the build succeeds, will deploy your site to your public GitHub Pages repo. Magic!</p><p>Travis will always run a build each time you push to your private repository. If you don&rsquo;t want to trigger this behavior with a particular commit, <a href=https://docs.travis-ci.com/user/customizing-the-build/#skipping-a-build>add the <code>skip</code> command to your commit message</a>.</p><p><em>Yo that&rsquo;s cool but I like Netlify.</em></p><p>Okay fine.</p><h2 id=deploying-to-a-separate-repository-with-netlify-and-make class=anchor-link><a href=#deploying-to-a-separate-repository-with-netlify-and-make>Deploying to a separate repository with Netlify and Make</a></h2><p>We can get Netlify to do our bidding by using a Makefile, which we&rsquo;ll run with Netlify&rsquo;s build command.</p><p>Here&rsquo;s what our <code>Makefile</code> looks like:</p><div class=highlight><pre class=chroma><code class=language-makefile data-lang=makefile><span class=nv>SHELL</span><span class=o>:=</span>/bin/bash
-<span class=nv>BASEDIR</span><span class=o>=</span><span class=k>$(</span>CURDIR<span class=k>)</span>
-<span class=nv>OUTPUTDIR</span><span class=o>=</span>public
+<!DOCTYPE html>
+<html lang="en-us">
 
-<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>all</span>
-<span class=nf>all</span><span class=o>:</span> <span class=n>clean</span> <span class=n>get_repository</span> <span class=n>build</span> <span class=n>deploy</span>
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 
-<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>clean</span>
-<span class=nf>clean</span><span class=o>:</span>
- @echo <span class=s2>&#34;Removing public directory&#34;</span>
- rm -rf <span class=k>$(</span>BASEDIR<span class=k>)</span>/<span class=k>$(</span>OUTPUTDIR<span class=k>)</span>
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    Two ways to deploy a public GitHub Pages site from a private Hugo repository | victoria.dev
+</title>
 
-<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>get_repository</span>
-<span class=nf>get_repository</span><span class=o>:</span>
- @echo <span class=s2>&#34;Getting public repository&#34;</span>
+
+
+    <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+    <meta property="og:title" content="Two ways to deploy a public GitHub Pages site from a private Hugo repository - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="Keep your drafts out of the public eye by making use of continuous deployment tools to publish your public GitHub Pages site - from a separate private repository." />
+<meta property="og:url" content="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover.png"/>
+
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Two ways to deploy a public GitHub Pages site from a private Hugo repository" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover.png"/>
+
+<meta name="twitter:description"
+    content="Keep your drafts out of the public eye by making use of continuous deployment tools to publish your public GitHub Pages site - from a separate private repository." />
+
+    
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.04e90d52501e665691c1abbf143ac55586f1452d40109197e55bac39c019de39.css" integrity="sha256-BOkNUlAeZlaRwau/FDrFVYbxRS1AEJGX5VusOcAZ3jk=" media="screen">
+
+
+
+
+
+    
+    
+    
+        
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            <span class="menu-item">
+                <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Two ways to deploy a public GitHub Pages site from a private Hugo repository" />📡 rss</a>
+            </span>
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        <span class="menu-item">
+            <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Two ways to deploy a public GitHub Pages site from a private Hugo repository" />📡 rss</a>
+        </span>
+        
+    </div>
+
+    <div id="logo">
+        <a href="#"><img id="🥚" alt="site logo" src="/img/logo.png" /></a>
+    </div>
+
+</div>
+
+        
+
+        <div class="container">
+            
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/cover.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        Two ways to deploy a public GitHub Pages site from a private Hugo repository
+    </h1>
+    
+    <p class="subtitle">Keep your drafts out of the public eye by making use of continuous deployment tools to publish your public GitHub Pages site - from a separate private repository.</p>
+    <p class="metadata" id="date">
+        April 22, 2019
+        ☕️☕️&nbsp;
+        8 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/ci/cd/">
+            ci/cd
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/git/">
+            git
+        </a>&nbsp;
+        
+        
+
+        
+    </p>
+
+    
+    <div class="dropdown">
+        <input type="checkbox" id="toc-toggle" />
+        <label for="toc-toggle" id="toggle">
+            <p class="toc-title">Jump to section...
+                <span class="dropdown-icon">⚓</span>
+            </p>
+        </label>
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#private-to-public-github-pages-deployment-with-travis-ci">Private-to-public GitHub Pages deployment with Travis CI</a>
+      <ul>
+        <li><a href="#setting-up-the-travis-configuration-file">Setting up the Travis configuration file</a></li>
+      </ul>
+    </li>
+    <li><a href="#deploying-to-a-separate-repository-with-netlify-and-make">Deploying to a separate repository with Netlify and Make</a>
+      <ul>
+        <li><a href="#setting-up-netlify">Setting up Netlify</a></li>
+        <li><a href="#same-same-but-different">Same same but different</a></li>
+      </ul>
+    </li>
+    <li><a href="#go-forth-and-deploy-fearlessly">Go forth and deploy fearlessly</a></li>
+  </ul>
+</nav>
+    </div>
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>Tools like Travis CI and Netlify offer some pretty nifty features, like seamlessly deploying your GitHub Pages site when changes are pushed to its repository. Along with a static site generator like Hugo, keeping a blog up to date is pretty painless.</p>
+<p>I&rsquo;ve used Hugo to build my site for years, but until this past week I&rsquo;d never hooked up my Pages repository to any deployment service. Why? Because using a tool that built my site before deploying it seemed to require having the whole recipe in one place - and if you&rsquo;re using GitHub Pages with the free version of GitHub, <a href="https://help.github.com/en/articles/configuring-a-publishing-source-for-github-pages">that place is public</a>. That means that all my three-in-the-morning bright ideas and messy unfinished (and unfunny) drafts would be publicly available - and no amount of continuous convenience was going to convince me to do that.</p>
+<p>So I kept things separated, with Hugo&rsquo;s messy behind-the-scenes stuff in a local Git repository, and the generated <code>public/</code> folder pushing to my GitHub Pages remote repository. Each time I wanted to deploy my site, I&rsquo;d have to get on my laptop and <code>hugo</code> to build my site, then <code>cd public/ &amp;&amp; git add . &amp;&amp; git commit</code>&hellip; etc etc. And all was well, except for the nagging feeling that there was a better way to do this.</p>
+<p>I wrote another article a little while back about <a href="/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy</a> to make changes to my repositories on my iPad whenever I&rsquo;m out and about. It seemed off to me that I could do everything except deploy my site from my iPad, so I set out to change that.</p>
+<p>A couple three-in-the-morning bright ideas and a revoked access token later (oops), I now have not one but <em>two</em> ways to deploy to my public GitHub Pages repository from an entirely separated, private GitHub repository. In this post, I&rsquo;ll take you through achieving this with <a href="https://travis-ci.com/">Travis CI</a> or using <a href="http://netlify.com/">Netlify</a> and <a href="https://www.gnu.org/software/make/">Make</a>.</p>
+<p>There&rsquo;s nothing hackish about it - my public GitHub Pages repository still looks the same as it does when I pushed to it locally from my terminal. Only now, I&rsquo;m able to take advantage of a couple great deployment tools to have the site update whenever I push to my private repo, whether I&rsquo;m on my laptop or out and about with my iPad.</p>
+<figure>
+    <img src="im-on-a-bridge.jpg"
+         alt="Hashtag: you did not push from there"/> <figcaption>
+            <p>#YouDidNotPushFromThere</p>
+        </figcaption>
+</figure>
+
+<p>This article assumes you have working knowledge of Git and GitHub Pages. If not, you may like to spin off some browser tabs from my articles on <a href="/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy</a> and <a href="/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/">building a site with Hugo and GitHub Pages</a> first.</p>
+<p>Let&rsquo;s do it!</p>
+
+<h2 id="private-to-public-github-pages-deployment-with-travis-ci" class="anchor-link"><a href="#private-to-public-github-pages-deployment-with-travis-ci">Private-to-public GitHub Pages deployment with Travis CI</a></h2>
+<p>Travis CI has the built-in ability (♪) to <a href="https://docs.travis-ci.com/user/deployment/pages/">deploy to GitHub Pages</a> following a successful build. They do a decent job in the docs of explaining how to add this feature, especially if you&rsquo;ve used Travis CI before&hellip; which I haven&rsquo;t. Don&rsquo;t worry, I did the bulk of the figuring-things-out for you.</p>
+<ul>
+<li>Travis CI gets all its instructions from a configuration file in the root of your repository called <code>.travis.yml</code></li>
+<li>You need to provide a <a href="https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line">GitHub personal access token</a> as a secure encrypted variable, which you can generate using <code>travis</code> on the command line</li>
+<li>Once your script successfully finishes doing what you&rsquo;ve told it to do (not necessarily what you <em>want</em> it to do but that&rsquo;s a whole other blog post), Travis will deploy your build directory to a repository you can specify with the <code>repo</code> configuration variable.</li>
+</ul>
+
+<h3 id="setting-up-the-travis-configuration-file" class="anchor-link"><a href="#setting-up-the-travis-configuration-file">Setting up the Travis configuration file</a></h3>
+<p>Create a new configuration file for Travis with the filename <code>.travis.yml</code> (note the leading &ldquo;.&quot;). These scripts are very customizable and I struggled to find a relevant example to use as a starting point - luckily, you don&rsquo;t have that problem!</p>
+<p>Here&rsquo;s my basic <code>.travis.yml</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">git</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">depth</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="nt">env</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">global</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="l">HUGO_VERSION=&#34;0.54.0&#34;</span><span class="w">
+</span><span class="w">  </span><span class="nt">matrix</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="l">YOUR_ENCRYPTED_VARIABLE</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="nt">install</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="l">wget -q https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz</span><span class="w">
+</span><span class="w">  </span>- <span class="l">tar xf hugo_${HUGO_VERSION}_Linux-64bit.tar.gz</span><span class="w">
+</span><span class="w">  </span>- <span class="l">mv hugo ~/bin/</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="nt">script</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="l">hugo --gc --minify</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="nt">deploy</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l">pages</span><span class="w">
+</span><span class="w">  </span><span class="nt">skip-cleanup</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">  </span><span class="nt">github-token</span><span class="p">:</span><span class="w"> </span><span class="l">$GITHUB_TOKEN</span><span class="w">
+</span><span class="w">  </span><span class="nt">keep-history</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">  </span><span class="nt">local-dir</span><span class="p">:</span><span class="w"> </span><span class="l">public</span><span class="w">
+</span><span class="w">  </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">gh-username/gh-username.github.io</span><span class="w">
+</span><span class="w">  </span><span class="nt">target-branch</span><span class="p">:</span><span class="w"> </span><span class="l">master</span><span class="w">
+</span><span class="w">  </span><span class="nt">verbose</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">  </span><span class="nt">on</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l">master</span><span class="w">
+</span></code></pre></div><p>This script downloads and installs Hugo, builds the site with the garbage collection and minify <a href="https://gohugo.io/commands/hugo/#synopsis">flags</a>, then deploys the <code>public/</code> directory to the specified <code>repo</code> - in this example, your public GitHub Pages repository. You can read about each of the <code>deploy</code> configuration options <a href="https://docs.travis-ci.com/user/deployment/pages/#further-configuration">here</a>.</p>
+<p>To <a href="https://docs.travis-ci.com/user/environment-variables#defining-encrypted-variables-in-travisyml">add the GitHub personal access token as an encrypted variable</a>, you don&rsquo;t need to manually edit your <code>.travis.yml</code>. The <code>travis</code> gem commands below will encrypt and add the variable for you when you run them in your repository directory.</p>
+<p>First, install <code>travis</code> with <code>sudo gem install travis</code>.</p>
+<p>Then <a href="https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line">generate your GitHub personal access token</a>, copy it (it only shows up once!) and run the commands below in your repository root, substituting your token for the kisses:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">travis login --pro --github-token xxxxxxxxxxxxxxxxxxxxxxxxxxx
+travis encrypt <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxx --add env.matrix
+</code></pre></div><p>Your encrypted token magically appears in the file. Once you&rsquo;ve committed <code>.travis.yml</code> to your private Hugo repository, Travis CI will run the script and if the build succeeds, will deploy your site to your public GitHub Pages repo. Magic!</p>
+<p>Travis will always run a build each time you push to your private repository. If you don&rsquo;t want to trigger this behavior with a particular commit, <a href="https://docs.travis-ci.com/user/customizing-the-build/#skipping-a-build">add the <code>skip</code> command to your commit message</a>.</p>
+<p><em>Yo that&rsquo;s cool but I like Netlify.</em></p>
+<p>Okay fine.</p>
+
+<h2 id="deploying-to-a-separate-repository-with-netlify-and-make" class="anchor-link"><a href="#deploying-to-a-separate-repository-with-netlify-and-make">Deploying to a separate repository with Netlify and Make</a></h2>
+<p>We can get Netlify to do our bidding by using a Makefile, which we&rsquo;ll run with Netlify&rsquo;s build command.</p>
+<p>Here&rsquo;s what our <code>Makefile</code> looks like:</p>
+<div class="highlight"><pre class="chroma"><code class="language-makefile" data-lang="makefile"><span class="nv">SHELL</span><span class="o">:=</span>/bin/bash
+<span class="nv">BASEDIR</span><span class="o">=</span><span class="k">$(</span>CURDIR<span class="k">)</span>
+<span class="nv">OUTPUTDIR</span><span class="o">=</span>public
+
+<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">all</span>
+<span class="nf">all</span><span class="o">:</span> <span class="n">clean</span> <span class="n">get_repository</span> <span class="n">build</span> <span class="n">deploy</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">clean</span>
+<span class="nf">clean</span><span class="o">:</span>
+ @echo <span class="s2">&#34;Removing public directory&#34;</span>
+ rm -rf <span class="k">$(</span>BASEDIR<span class="k">)</span>/<span class="k">$(</span>OUTPUTDIR<span class="k">)</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">get_repository</span>
+<span class="nf">get_repository</span><span class="o">:</span>
+ @echo <span class="s2">&#34;Getting public repository&#34;</span>
  git clone https://github.com/gh-username/gh-username.github.io.git public
 
-<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>build</span>
-<span class=nf>build</span><span class=o>:</span>
- @echo <span class=s2>&#34;Generating site&#34;</span>
+<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">build</span>
+<span class="nf">build</span><span class="o">:</span>
+ @echo <span class="s2">&#34;Generating site&#34;</span>
  hugo --gc --minify
 
-<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>deploy</span>
-<span class=nf>deploy</span><span class=o>:</span>
- @echo <span class=s2>&#34;Preparing commit&#34;</span>
- @cd <span class=k>$(</span>OUTPUTDIR<span class=k>)</span> <span class=se>\
-</span><span class=se></span> <span class=o>&amp;&amp;</span> git config user.email <span class=s2>&#34;you@youremail.com&#34;</span> <span class=se>\
-</span><span class=se></span> <span class=o>&amp;&amp;</span> git config user.name <span class=s2>&#34;Your Name&#34;</span> <span class=se>\
-</span><span class=se></span> <span class=o>&amp;&amp;</span> git add . <span class=se>\
-</span><span class=se></span> <span class=o>&amp;&amp;</span> git status <span class=se>\
-</span><span class=se></span> <span class=o>&amp;&amp;</span> git commit -m <span class=s2>&#34;Deploy via Makefile&#34;</span> <span class=se>\
-</span><span class=se></span> <span class=o>&amp;&amp;</span> git push -f -q https://<span class=k>$(</span>GITHUB_TOKEN<span class=k>)</span>@github.com/gh-username/gh-username.github.io.git master
+<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">deploy</span>
+<span class="nf">deploy</span><span class="o">:</span>
+ @echo <span class="s2">&#34;Preparing commit&#34;</span>
+ @cd <span class="k">$(</span>OUTPUTDIR<span class="k">)</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git config user.email <span class="s2">&#34;you@youremail.com&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git config user.name <span class="s2">&#34;Your Name&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git add . <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git status <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git commit -m <span class="s2">&#34;Deploy via Makefile&#34;</span> <span class="se">\
+</span><span class="se"></span> <span class="o">&amp;&amp;</span> git push -f -q https://<span class="k">$(</span>GITHUB_TOKEN<span class="k">)</span>@github.com/gh-username/gh-username.github.io.git master
 
- @echo <span class=s2>&#34;Pushed to remote&#34;</span>
-</code></pre></div><p>To preserve the Git history of our separate GitHub Pages repository, we&rsquo;ll first clone it, build our new Hugo site to it, and then push it back to the Pages repository. This script first removes any existing <code>public/</code> folder that might contain files or a Git history. It then clones our Pages repository to <code>public/</code>, builds our Hugo site (essentially updating the files in <code>public/</code>), then takes care of committing the new site to the Pages repository.</p><p>In the <code>deploy</code> section, you&rsquo;ll notice lines starting with <code>&&</code>. These are chained commands. Since Make <a href=https://www.gnu.org/software/make/manual/html_node/Execution.html#Execution>invokes a new sub-shell for each line</a>, it starts over with every new line from our root directory. To get our <code>cd</code> to stick and avoid running our Git commands in the project root directory, we&rsquo;re chaining the commands and using the backslash character to <a href=http://clarkgrubb.com/makefile-style-guide#breaking-long-lines>break long lines</a> for readability.</p><p>By chaining our commands, we&rsquo;re able to <a href=https://stackoverflow.com/questions/6116548/how-to-tell-git-to-use-the-correct-identity-name-and-email-for-a-given-project>configure our Git identity</a>, add all our updated files, and create a commit for our Pages repository.</p><p>Similarly to using Travis CI, we&rsquo;ll need to pass in a <a href=https://github.com/settings/tokens>GitHub personal access token</a> to push to our public GitHub Pages repository - only Netlify doesn&rsquo;t provide a straightforward way to encrypt the token in our Makefile.</p><p>Instead, we&rsquo;ll use Netlify&rsquo;s <a href=https://www.netlify.com/docs/continuous-deployment/#build-environment-variables>Build Environment Variables</a>, which live safely in our site settings in the Netlify app. We can then call our token variable in the Makefile. We use it to push (quietly, to avoid printing the token in logs) to our Pages repository by <a href=https://stackoverflow.com/questions/44773415/how-to-push-a-commit-to-github-from-a-circleci-build-using-a-personal-access-tok>passing it in the remote URL</a>.</p><p>To avoid printing the token in Netlify&rsquo;s logs, we suppress <a href=https://www.gnu.org/software/make/manual/html_node/Echoing.html#Echoing>recipe echoing</a> for that line with the leading <code>@</code> character.</p><p>With your Makefile in the root of your private GitHub repository, you can set up Netlify to run it for you.</p><h3 id=setting-up-netlify class=anchor-link><a href=#setting-up-netlify>Setting up Netlify</a></h3><p>Getting set up with Netlify via the <a href=https://app.netlify.com/>web UI</a> is straightforward. Once you sign in with GitHub, choose the private GitHub repository where your Hugo site lives. The next page Netlify takes you to lets you enter deploy settings:</p><p><img src=https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/netlify-new-site.png alt="Create a new site page"></p><p>You can specify the build command that will run your Makefile (<code>make all</code> for this example). The branch to deploy and the publish directory don&rsquo;t matter too much in our specific case, since we&rsquo;re only concerned with pushing to a separate repository. You can enter the typical <code>master</code> deploy branch and <code>public</code> publish directory.</p><p>Under &ldquo;Advanced build settings&rdquo; click &ldquo;New variable&rdquo; to add your GitHub personal access token as a Build Environment Variable. In our example, the variable name is <code>GITHUB_TOKEN</code>. Click &ldquo;Deploy site&rdquo; to make the magic happen.</p><p>If you&rsquo;ve already previously set up your repository with Netlify, find the settings for Continuous Deployment under Settings > Build & deploy.</p><p>Netlify will build your site each time you push to the private repository. If you don&rsquo;t want a particular commit to trigger a build, <a href=https://www.netlify.com/docs/continuous-deployment/#skipping-a-deploy>add <code>[skip ci]</code> in your Git commit message</a>.</p><h3 id=same-same-but-different class=anchor-link><a href=#same-same-but-different>Same same but different</a></h3><p>One effect of using Netlify this way is that your site will be built in two places: one is the separate, public GitHub Pages repository that the Makefile pushes to, and the other is your Netlify site that deploys on their CDN from your linked private GitHub repository. The latter is useful if you&rsquo;re going to play with <a href=https://www.netlify.com/blog/2016/07/20/introducing-deploy-previews-in-netlify/>Deploy Previews</a> and other Netlify features, but those are outside the scope of this post.</p><p>The main point is that your GitHub Pages site is now updated in your public repo. Yay!</p><h2 id=go-forth-and-deploy-fearlessly class=anchor-link><a href=#go-forth-and-deploy-fearlessly>Go forth and deploy fearlessly</a></h2><p>I hope the effect of this new information is that you feel more able to update your sites, wherever you happen to be. The possibilities are endless - at home on your couch with your laptop, out cafe-hopping with your iPad, or in the middle of a first date on your phone. Endless!</p><figure><img src=date-deploy.png alt="Don't update your site from your phone on a date"><figcaption><p>Don&rsquo;t do stuff on your phone when you&rsquo;re on a date. Not if you want a second one, anyway.</p></figcaption></figure></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/>Publishing GitHub event data with GitHub Actions and Pages</a><p class=li-brief>A guide to overcoming the GitHub event data horizon with a little command-line magic.</p><p class=metadata><a class=li-tag href=/tags/data/>data</a>
-☕️☕️&nbsp;
-8 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/>A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a><p class=li-brief>How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.</p><p class=metadata><a class=li-tag href=/tags/ci/cd/>ci/cd</a>
-☕️&nbsp;
-5 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>A portable Makefile for continuous delivery with Hugo and GitHub Pages</a><p class=li-brief>My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.</p><p class=metadata><a class=li-tag href=/tags/ci/cd/>ci/cd</a>
-☕️&nbsp;
-5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></body></html>
+ @echo <span class="s2">&#34;Pushed to remote&#34;</span>
+</code></pre></div><p>To preserve the Git history of our separate GitHub Pages repository, we&rsquo;ll first clone it, build our new Hugo site to it, and then push it back to the Pages repository. This script first removes any existing <code>public/</code> folder that might contain files or a Git history. It then clones our Pages repository to <code>public/</code>, builds our Hugo site (essentially updating the files in <code>public/</code>), then takes care of committing the new site to the Pages repository.</p>
+<p>In the <code>deploy</code> section, you&rsquo;ll notice lines starting with <code>&amp;&amp;</code>. These are chained commands. Since Make <a href="https://www.gnu.org/software/make/manual/html_node/Execution.html#Execution">invokes a new sub-shell for each line</a>, it starts over with every new line from our root directory. To get our <code>cd</code> to stick and avoid running our Git commands in the project root directory, we&rsquo;re chaining the commands and using the backslash character to <a href="http://clarkgrubb.com/makefile-style-guide#breaking-long-lines">break long lines</a> for readability.</p>
+<p>By chaining our commands, we&rsquo;re able to <a href="https://stackoverflow.com/questions/6116548/how-to-tell-git-to-use-the-correct-identity-name-and-email-for-a-given-project">configure our Git identity</a>, add all our updated files, and create a commit for our Pages repository.</p>
+<p>Similarly to using Travis CI, we&rsquo;ll need to pass in a <a href="https://github.com/settings/tokens">GitHub personal access token</a> to push to our public GitHub Pages repository - only Netlify doesn&rsquo;t provide a straightforward way to encrypt the token in our Makefile.</p>
+<p>Instead, we&rsquo;ll use Netlify&rsquo;s <a href="https://www.netlify.com/docs/continuous-deployment/#build-environment-variables">Build Environment Variables</a>, which live safely in our site settings in the Netlify app. We can then call our token variable in the Makefile. We use it to push (quietly, to avoid printing the token in logs) to our Pages repository by <a href="https://stackoverflow.com/questions/44773415/how-to-push-a-commit-to-github-from-a-circleci-build-using-a-personal-access-tok">passing it in the remote URL</a>.</p>
+<p>To avoid printing the token in Netlify&rsquo;s logs, we suppress <a href="https://www.gnu.org/software/make/manual/html_node/Echoing.html#Echoing">recipe echoing</a> for that line with the leading <code>@</code> character.</p>
+<p>With your Makefile in the root of your private GitHub repository, you can set up Netlify to run it for you.</p>
+
+<h3 id="setting-up-netlify" class="anchor-link"><a href="#setting-up-netlify">Setting up Netlify</a></h3>
+<p>Getting set up with Netlify via the <a href="https://app.netlify.com/">web UI</a> is straightforward. Once you sign in with GitHub, choose the private GitHub repository where your Hugo site lives. The next page Netlify takes you to lets you enter deploy settings:</p>
+<p>
+
+<img src="https://victoria.dev/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/netlify-new-site.png" alt="Create a new site page"  />
+
+</p>
+<p>You can specify the build command that will run your Makefile (<code>make all</code> for this example). The branch to deploy and the publish directory don&rsquo;t matter too much in our specific case, since we&rsquo;re only concerned with pushing to a separate repository. You can enter the typical <code>master</code> deploy branch and <code>public</code> publish directory.</p>
+<p>Under &ldquo;Advanced build settings&rdquo; click &ldquo;New variable&rdquo; to add your GitHub personal access token as a Build Environment Variable. In our example, the variable name is <code>GITHUB_TOKEN</code>. Click &ldquo;Deploy site&rdquo; to make the magic happen.</p>
+<p>If you&rsquo;ve already previously set up your repository with Netlify, find the settings for Continuous Deployment under Settings &gt; Build &amp; deploy.</p>
+<p>Netlify will build your site each time you push to the private repository. If you don&rsquo;t want a particular commit to trigger a build, <a href="https://www.netlify.com/docs/continuous-deployment/#skipping-a-deploy">add <code>[skip ci]</code> in your Git commit message</a>.</p>
+
+<h3 id="same-same-but-different" class="anchor-link"><a href="#same-same-but-different">Same same but different</a></h3>
+<p>One effect of using Netlify this way is that your site will be built in two places: one is the separate, public GitHub Pages repository that the Makefile pushes to, and the other is your Netlify site that deploys on their CDN from your linked private GitHub repository. The latter is useful if you&rsquo;re going to play with <a href="https://www.netlify.com/blog/2016/07/20/introducing-deploy-previews-in-netlify/">Deploy Previews</a> and other Netlify features, but those are outside the scope of this post.</p>
+<p>The main point is that your GitHub Pages site is now updated in your public repo. Yay!</p>
+
+<h2 id="go-forth-and-deploy-fearlessly" class="anchor-link"><a href="#go-forth-and-deploy-fearlessly">Go forth and deploy fearlessly</a></h2>
+<p>I hope the effect of this new information is that you feel more able to update your sites, wherever you happen to be. The possibilities are endless - at home on your couch with your laptop, out cafe-hopping with your iPad, or in the middle of a first date on your phone. Endless!</p>
+<figure>
+    <img src="date-deploy.png"
+         alt="Don&#39;t update your site from your phone on a date"/> <figcaption>
+            <p>Don&rsquo;t do stuff on your phone when you&rsquo;re on a date. Not if you want a second one, anyway.</p>
+        </figcaption>
+</figure>
+
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/">Publishing GitHub event data with GitHub Actions and Pages</a>
+        <p class="li-brief">
+            A guide to overcoming the GitHub event data horizon with a little command-line magic.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/data/">data</a>
+            
+            ☕️☕️&nbsp;
+            8 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>
+        <p class="li-brief">
+            How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">A portable Makefile for continuous delivery with Hugo and GitHub Pages</a>
+        <p class="li-brief">
+            My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
+        </p>
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+    
+
+    
+    
+        
+
+</body>
+
+</html>
