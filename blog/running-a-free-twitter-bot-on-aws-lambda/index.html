@@ -1,32 +1,473 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>Running a free Twitter bot on AWS Lambda | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Running a free Twitter bot on AWS Lambda - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How to save some time with automated link sharing on Twitter - for free!"><meta property="og:url" content="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/cover_lambda-doodle.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Running a free Twitter bot on AWS Lambda"><meta name=twitter:image content="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/cover_lambda-doodle.png"><meta name=twitter:description content="How to save some time with automated link sharing on Twitter - for free!"><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.2bcdfa719bbfbef1b87c2e199e01c62ffbef1cbebd49df3f6236cd7ccc980d10.css integrity="sha256-K836cZu/vvG4fC4ZngHGL/vvHL69Sd8/YjbNfMyYDRA=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
-<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Running a free Twitter bot on AWS Lambda">📡 rss</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
-<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Running a free Twitter bot on AWS Lambda">📡 rss</a></span></div><div id=logo><a href=#><img id=🥚 alt="site logo" src=/img/logo.png></a></div></div><div class=container><div id=cover-image><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/cover_lambda-doodle.png alt="cover image"></div><div class=markdown><h1>Running a free Twitter bot on AWS Lambda</h1><p class=subtitle>How to save some time with automated link sharing on Twitter - for free!</p><p class=metadata id=date>March 5, 2018
-☕️☕️&nbsp;
-6 min read
-&nbsp;
-<a class=li-tag href=/tags/aws/>aws
-</a>&nbsp;
-<a class=li-tag href=/tags/go/>go
-</a>&nbsp;</p><div class=dropdown><input type=checkbox id=toc-toggle>
-<label for=toc-toggle id=toggle><p class=toc-title>Jump to section...
-<span class=dropdown-icon>⚓</span></p></label><nav id=TableOfContents><ul><li><a href=#is-lambda-right-for-you>Is Lambda right for you</a></li><li><a href=#write-a-lambda-function>Write a Lambda function</a></li><li><a href=#setting-up-aws-lambda>Setting up AWS Lambda</a><ul><li><a href=#1-create-your-function>1. Create your function</a></li><li><a href=#2-configure-your-function>2. Configure your function</a></li><li><a href=#3-upload-your-code>3. Upload your code</a></li><li><a href=#4-test-your-function>4. Test your function</a></li><li><a href=#5-set-up-cloudwatch-events>5. Set up CloudWatch Events</a></li></ul></li><li><a href=#watch-it-go>Watch it go</a></li></ul></nav></div></div><div class=page-separator><hr></div><div class=markdown><p>If you read <a href=/blog/about-time/>About time</a>, you&rsquo;ll know that I&rsquo;m a big believer in spending time now on building things that save time in the future. To this end I built a simple Twitter bot in Go that would occasionally post links to my articles and keep my account interesting even when I&rsquo;m too busy to use it. The tweets help drive traffic to my sites, and I don&rsquo;t have to lift a finger.</p><p>I ran the bot on an Amazon EC2 instance for about a month. My AWS usage has historically been pretty inexpensive (less than the price of a coffee in most of North America), so I was surprised when the little instance I was using racked up a bill 90% bigger than the month before. I don&rsquo;t think AWS is expensive, to be clear, but still&mldr; I&rsquo;m cheap. I want my Twitter bot, and I want it for less.</p><p>I&rsquo;d been meaning to explore AWS Lamda, and figured this was a good opportunity. Unlike an EC2 instance that is constantly running (and charging you for it), Lambda charges you per request and according to the duration of time your function takes to run. There&rsquo;s a free tier, too, and the first 1 million requests, plus a certain amount of compute time, are free. Roughly translated to running a Twitter bot that posts for you, say, twice a day, your monthly cost for using Lambda would total&mldr; carry the one&mldr; nothing. I&rsquo;ve been running my Lambda function for a couple weeks now, completely free.</p><p>When recently it came to me to take the reigns of the <a href=https://twitter.com/freeCodeCampTO>@freeCodeCampTO</a> Twitter, I decided to employ a similar strategy, and also use this opportunity to document the process for you, dear reader.</p><p>So if you&rsquo;re currently using a full-time running instance for a task that could be served by a cron job, this is the article for you. I&rsquo;ll cover how to write your function for Lambda, how to get it set up to run automatically, and as a sweet little bonus, a handy bash script that updates your function from the command line whenever you need to make a change. Let&rsquo;s do it!</p><h2 id=is-lambda-right-for-you class=anchor-link><a href=#is-lambda-right-for-you>Is Lambda right for you</a></h2><p>When I wrote the code for my Twitter bot in Go, I intended to have it run on an AWS instance and borrowed heavily from <a href=https://github.com/campoy/justforfunc/tree/master/14-twitterbot>Francesc&rsquo;s awesome Just for Func episode</a>. Some time later I modified it to randomly choose an article from my RSS feeds and tweet the link, twice a day. I wanted to do something similar for the @freeCodeCampTO bot, and have it tweet an inspiring quote about programming every morning.</p><p>This is a good use case for Lambda because:</p><ul><li>The program should execute once</li><li>It runs on a regular schedule, using time as a trigger</li><li>It doesn&rsquo;t need to run constantly</li></ul><p>The important thing to keep in mind is that Lambda runs a function once in response to an event that you define. The most widely applicable trigger is a simple cron expression, but there are many other trigger events you can hook up. You can get an overview <a href=https://aws.amazon.com/lambda/>here</a>.</p><h2 id=write-a-lambda-function class=anchor-link><a href=#write-a-lambda-function>Write a Lambda function</a></h2><p>I found this really straightforward to do in Go. First, grab the <a href=https://github.com/aws/aws-lambda-go>aws-lambda-go</a> library:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash>go get github.com/aws/aws-lambda-go/lambda
-</code></pre></div><p>Then make this your <code>func main()</code>:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
- <span class=nx>lambda</span><span class=p>.</span><span class=nf>Start</span><span class=p>(</span><span class=nx>tweetFeed</span><span class=p>)</span>
-<span class=p>}</span>
-</code></pre></div><p>Where <code>tweetFeed</code> is the name of the function that makes everything happen. While I won&rsquo;t go into writing the whole Twitter bot here, you can view my code <a href=https://gist.github.com/victoriadrake/7859dab68df87e28f40d6715d08383c7>on GitHub</a>.</p><h2 id=setting-up-aws-lambda class=anchor-link><a href=#setting-up-aws-lambda>Setting up AWS Lambda</a></h2><p>I&rsquo;m assuming you already have an AWS account. If not, first things first here: <a href=https://aws.amazon.com/free>https://aws.amazon.com/free</a></p><h3 id=1-create-your-function class=anchor-link><a href=#1-create-your-function>1. Create your function</a></h3><p>Find AWS Lambda in the list of services, then look for this shiny button:</p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-01.png#screenshot alt="Create function"></p><p>We&rsquo;re going to author a function from scratch. Name your function, then under <strong>Runtime</strong> choose &ldquo;Go 1.x&rdquo;.</p><p>Under <strong>Role name</strong> write any name you like. It&rsquo;s a required field but irrelevant for this use case.</p><p>Click <strong>Create function.</strong></p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-02.png#screenshot alt="Author from scratch"></p><h3 id=2-configure-your-function class=anchor-link><a href=#2-configure-your-function>2. Configure your function</a></h3><p>You&rsquo;ll see a screen for configuring your new function. Under <strong>Handler</strong> enter the name of your Go program.</p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-03.png#screenshot alt="Configure your function"></p><p>If you scroll down, you&rsquo;ll see a spot to enter environment variables. This is a great place to enter the Twitter API tokens and secrets, using the variable names that your program expects. The AWS Lambda function will create the environment for you using the variables you provide here.</p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-04.png#screenshot alt="Environment variables"></p><p>No further settings are necessary for this use case. Click <strong>Save</strong> at the top of the page.</p><h3 id=3-upload-your-code class=anchor-link><a href=#3-upload-your-code>3. Upload your code</a></h3><p>You can upload your function code as a zip file on the configuration screen. Since we&rsquo;re using Go, you&rsquo;ll want to <code>go build</code> first, then zip the resulting executable before uploading that to Lambda.</p><p>&mldr;Of course I&rsquo;m not going to do that manually every time I want to tweak my function. That&rsquo;s what <code>awscli</code> and this bash script is for!</p><p><code>update.sh</code></p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>go build <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>zip fcc-tweet.zip fcc-tweet <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>rm fcc-tweet <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>aws lambda update-function-code --function-name fcc-tweet --zip-file fileb://fcc-tweet.zip <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>rm fcc-tweet.zip
-</code></pre></div><p>Now whenever I make a tweak, I just run <code>bash update.sh</code>.</p><p>If you&rsquo;re not already using <a href=https://aws.amazon.com/cli/>AWS Command Line Interface</a>, do <code>pip install awscli</code> and thank me later. Find instructions for getting set up and configured in a few minutes <a href=https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html>here</a> under <strong>Quick Configuration</strong>.</p><h3 id=4-test-your-function class=anchor-link><a href=#4-test-your-function>4. Test your function</a></h3><p>Wanna see it go? Of course you do! Click &ldquo;Configure test events&rdquo; in the dropdown at the top.</p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-05.png#screenshot alt="Configure test events"></p><p>Since you&rsquo;ll use a time-based trigger for this function, you don&rsquo;t need to enter any code to define test events in the popup window. Simply write any name under <strong>Event name</strong> and empty the JSON in the field below. Then click <strong>Create</strong>.</p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-06.png#screenshot alt="Configuring an empty test event"></p><p>Click <strong>Test</strong> at the top of the page, and if everything is working correctly you should see&mldr;</p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-07.png#screenshot alt="Test success notification"></p><h3 id=5-set-up-cloudwatch-events class=anchor-link><a href=#5-set-up-cloudwatch-events>5. Set up CloudWatch Events</a></h3><p>To run our function as we would a cron job - as a regularly scheduled time-based event - we&rsquo;ll use CloudWatch. Click <strong>CloudWatch Events</strong> in the <strong>Designer</strong> sidebar.</p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-08.png#screenshot alt="CloudWatch Events trigger"></p><p>Under <strong>Configure triggers</strong>, you&rsquo;ll create a new rule. Choose a descriptive name for your rule without spaces or punctuation, and ensure <strong>Schedule expression</strong> is selected. Then input the time you want your program to run as a <em>rate expression</em>, or cron expression.</p><p>A cron expression looks like this: <code>cron(0 12 * * ? *)</code></p><table><thead><tr><th>Minutes</th><th>Hours</th><th>Month</th><th>Day of week</th><th>Year</th><th>In English</th></tr></thead><tbody><tr><td>0</td><td>12</td><td><code>*</code></td><td>?</td><td><code>*</code></td><td>Run at noon (UTC) every day</td></tr></tbody></table><p>For more on how to write your cron expressions, read <a href=https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html>this.</a></p><p>To find out what the current time in UTC is, click <a href=https://codepen.io/victoriadrake/full/OQabar/>here.</a></p><p>If you want your program to run twice a day, say once at 10am and again at 3pm, you&rsquo;ll need to set two separate CloudWatch Events triggers and cron expression rules.</p><p>Click <strong>Add</strong>.</p><p><img src=https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-09.png#screenshot alt="Set cron expression rule"></p><h2 id=watch-it-go class=anchor-link><a href=#watch-it-go>Watch it go</a></h2><p>That&rsquo;s all you need to get your Lambda function up and running! Now you can sit back, relax, and do more important things than share your RSS links on Twitter.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li></li><li><a class=li-link href=https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/>A coffee-break introduction to time complexity of algorithms</a><p class=li-brief>A groundwork understanding of algorithm time complexity in about fifteen minutes.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
-☕️☕️☕️&nbsp;
-16 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/>Knapsack problem algorithms for my real-life carry-on knapsack</a><p class=li-brief>Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag.</p><p class=metadata><a class=li-tag href=/tags/algorithms/>algorithms</a>
-☕️☕️☕️☕️☕️&nbsp;
-24 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></body></html>
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    Running a free Twitter bot on AWS Lambda | victoria.dev
+</title>
+
+
+
+    <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+    <meta property="og:title" content="Running a free Twitter bot on AWS Lambda - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How to save some time with automated link sharing on Twitter - for free!" />
+<meta property="og:url" content="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/cover_lambda-doodle.png"/>
+
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Running a free Twitter bot on AWS Lambda" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/cover_lambda-doodle.png"/>
+
+<meta name="twitter:description"
+    content="How to save some time with automated link sharing on Twitter - for free!" />
+
+    
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.e269b13d057bec4fb4eedcb1e77470ec61024ff3b34b4816f63ce97ffbe73a3d.css" integrity="sha256-4mmxPQV77E&#43;07tyx53Rw7GECT/OzS0gW9jzpf/vnOj0=" media="screen">
+
+
+
+
+
+    
+    
+    
+        
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            <span class="menu-item">
+                <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Running a free Twitter bot on AWS Lambda" />📡 rss</a>
+            </span>
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item ">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item ">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item ">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item ">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        <span class="menu-item">
+            <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Running a free Twitter bot on AWS Lambda" />📡 rss</a>
+        </span>
+        
+    </div>
+
+    <div id="logo">
+        <a href="#"><img id="🥚" alt="site logo" src="/img/logo.png" /></a>
+    </div>
+
+</div>
+
+        
+
+        <div class="container">
+            
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/cover_lambda-doodle.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        Running a free Twitter bot on AWS Lambda
+    </h1>
+    
+    <p class="subtitle">How to save some time with automated link sharing on Twitter - for free!</p>
+    <p class="metadata" id="date">
+        March 5, 2018
+        ☕️☕️&nbsp;
+        6 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/aws/">
+            aws
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/go/">
+            go
+        </a>&nbsp;
+        
+        
+
+        
+    </p>
+
+    
+    <div class="dropdown">
+        <input type="checkbox" id="toc-toggle" />
+        <label for="toc-toggle" id="toggle">
+            <p class="toc-title">Jump to section...
+                <span class="dropdown-icon">⚓</span>
+            </p>
+        </label>
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#is-lambda-right-for-you">Is Lambda right for you</a></li>
+    <li><a href="#write-a-lambda-function">Write a Lambda function</a></li>
+    <li><a href="#setting-up-aws-lambda">Setting up AWS Lambda</a>
+      <ul>
+        <li><a href="#1-create-your-function">1. Create your function</a></li>
+        <li><a href="#2-configure-your-function">2. Configure your function</a></li>
+        <li><a href="#3-upload-your-code">3. Upload your code</a></li>
+        <li><a href="#4-test-your-function">4. Test your function</a></li>
+        <li><a href="#5-set-up-cloudwatch-events">5. Set up CloudWatch Events</a></li>
+      </ul>
+    </li>
+    <li><a href="#watch-it-go">Watch it go</a></li>
+  </ul>
+</nav>
+    </div>
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p>If you read <a href="/blog/about-time/">About time</a>, you&rsquo;ll know that I&rsquo;m a big believer in spending time now on building things that save time in the future. To this end I built a simple Twitter bot in Go that would occasionally post links to my articles and keep my account interesting even when I&rsquo;m too busy to use it. The tweets help drive traffic to my sites, and I don&rsquo;t have to lift a finger.</p>
+<p>I ran the bot on an Amazon EC2 instance for about a month. My AWS usage has historically been pretty inexpensive (less than the price of a coffee in most of North America), so I was surprised when the little instance I was using racked up a bill 90% bigger than the month before. I don&rsquo;t think AWS is expensive, to be clear, but still&hellip; I&rsquo;m cheap. I want my Twitter bot, and I want it for less.</p>
+<p>I&rsquo;d been meaning to explore AWS Lamda, and figured this was a good opportunity. Unlike an EC2 instance that is constantly running (and charging you for it), Lambda charges you per request and according to the duration of time your function takes to run. There&rsquo;s a free tier, too, and the first 1 million requests, plus a certain amount of compute time, are free. Roughly translated to running a Twitter bot that posts for you, say, twice a day, your monthly cost for using Lambda would total&hellip; carry the one&hellip; nothing. I&rsquo;ve been running my Lambda function for a couple weeks now, completely free.</p>
+<p>When recently it came to me to take the reigns of the <a href="https://twitter.com/freeCodeCampTO">@freeCodeCampTO</a> Twitter, I decided to employ a similar strategy, and also use this opportunity to document the process for you, dear reader.</p>
+<p>So if you&rsquo;re currently using a full-time running instance for a task that could be served by a cron job, this is the article for you. I&rsquo;ll cover how to write your function for Lambda, how to get it set up to run automatically, and as a sweet little bonus, a handy bash script that updates your function from the command line whenever you need to make a change. Let&rsquo;s do it!</p>
+
+<h2 id="is-lambda-right-for-you" class="anchor-link"><a href="#is-lambda-right-for-you">Is Lambda right for you</a></h2>
+<p>When I wrote the code for my Twitter bot in Go, I intended to have it run on an AWS instance and borrowed heavily from <a href="https://github.com/campoy/justforfunc/tree/master/14-twitterbot">Francesc&rsquo;s awesome Just for Func episode</a>. Some time later I modified it to randomly choose an article from my RSS feeds and tweet the link, twice a day. I wanted to do something similar for the @freeCodeCampTO bot, and have it tweet an inspiring quote about programming every morning.</p>
+<p>This is a good use case for Lambda because:</p>
+<ul>
+<li>The program should execute once</li>
+<li>It runs on a regular schedule, using time as a trigger</li>
+<li>It doesn&rsquo;t need to run constantly</li>
+</ul>
+<p>The important thing to keep in mind is that Lambda runs a function once in response to an event that you define. The most widely applicable trigger is a simple cron expression, but there are many other trigger events you can hook up. You can get an overview <a href="https://aws.amazon.com/lambda/">here</a>.</p>
+
+<h2 id="write-a-lambda-function" class="anchor-link"><a href="#write-a-lambda-function">Write a Lambda function</a></h2>
+<p>I found this really straightforward to do in Go. First, grab the <a href="https://github.com/aws/aws-lambda-go">aws-lambda-go</a> library:</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">go get github.com/aws/aws-lambda-go/lambda
+</code></pre></div><p>Then make this your <code>func main()</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+ <span class="nx">lambda</span><span class="p">.</span><span class="nf">Start</span><span class="p">(</span><span class="nx">tweetFeed</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div><p>Where <code>tweetFeed</code> is the name of the function that makes everything happen. While I won&rsquo;t go into writing the whole Twitter bot here, you can view my code <a href="https://gist.github.com/victoriadrake/7859dab68df87e28f40d6715d08383c7">on GitHub</a>.</p>
+
+<h2 id="setting-up-aws-lambda" class="anchor-link"><a href="#setting-up-aws-lambda">Setting up AWS Lambda</a></h2>
+<p>I&rsquo;m assuming you already have an AWS account. If not, first things first here: <a href="https://aws.amazon.com/free">https://aws.amazon.com/free</a></p>
+
+<h3 id="1-create-your-function" class="anchor-link"><a href="#1-create-your-function">1. Create your function</a></h3>
+<p>Find AWS Lambda in the list of services, then look for this shiny button:</p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-01.png#screenshot" alt="Create function"  />
+
+</p>
+<p>We&rsquo;re going to author a function from scratch. Name your function, then under <strong>Runtime</strong> choose &ldquo;Go 1.x&rdquo;.</p>
+<p>Under <strong>Role name</strong> write any name you like. It&rsquo;s a required field but irrelevant for this use case.</p>
+<p>Click <strong>Create function.</strong></p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-02.png#screenshot" alt="Author from scratch"  />
+
+</p>
+
+<h3 id="2-configure-your-function" class="anchor-link"><a href="#2-configure-your-function">2. Configure your function</a></h3>
+<p>You&rsquo;ll see a screen for configuring your new function. Under <strong>Handler</strong> enter the name of your Go program.</p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-03.png#screenshot" alt="Configure your function"  />
+
+</p>
+<p>If you scroll down, you&rsquo;ll see a spot to enter environment variables. This is a great place to enter the Twitter API tokens and secrets, using the variable names that your program expects. The AWS Lambda function will create the environment for you using the variables you provide here.</p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-04.png#screenshot" alt="Environment variables"  />
+
+</p>
+<p>No further settings are necessary for this use case. Click <strong>Save</strong> at the top of the page.</p>
+
+<h3 id="3-upload-your-code" class="anchor-link"><a href="#3-upload-your-code">3. Upload your code</a></h3>
+<p>You can upload your function code as a zip file on the configuration screen. Since we&rsquo;re using Go, you&rsquo;ll want to <code>go build</code> first, then zip the resulting executable before uploading that to Lambda.</p>
+<p>&hellip;Of course I&rsquo;m not going to do that manually every time I want to tweak my function. That&rsquo;s what <code>awscli</code> and this bash script is for!</p>
+<p><code>update.sh</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">go build <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>zip fcc-tweet.zip fcc-tweet <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>rm fcc-tweet <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>aws lambda update-function-code --function-name fcc-tweet --zip-file fileb://fcc-tweet.zip <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>rm fcc-tweet.zip
+</code></pre></div><p>Now whenever I make a tweak, I just run <code>bash update.sh</code>.</p>
+<p>If you&rsquo;re not already using <a href="https://aws.amazon.com/cli/">AWS Command Line Interface</a>, do <code>pip install awscli</code> and thank me later. Find instructions for getting set up and configured in a few minutes <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html">here</a> under <strong>Quick Configuration</strong>.</p>
+
+<h3 id="4-test-your-function" class="anchor-link"><a href="#4-test-your-function">4. Test your function</a></h3>
+<p>Wanna see it go? Of course you do! Click &ldquo;Configure test events&rdquo; in the dropdown at the top.</p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-05.png#screenshot" alt="Configure test events"  />
+
+</p>
+<p>Since you&rsquo;ll use a time-based trigger for this function, you don&rsquo;t need to enter any code to define test events in the popup window. Simply write any name under <strong>Event name</strong> and empty the JSON in the field below. Then click <strong>Create</strong>.</p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-06.png#screenshot" alt="Configuring an empty test event"  />
+
+</p>
+<p>Click <strong>Test</strong> at the top of the page, and if everything is working correctly you should see&hellip;</p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-07.png#screenshot" alt="Test success notification"  />
+
+</p>
+
+<h3 id="5-set-up-cloudwatch-events" class="anchor-link"><a href="#5-set-up-cloudwatch-events">5. Set up CloudWatch Events</a></h3>
+<p>To run our function as we would a cron job - as a regularly scheduled time-based event - we&rsquo;ll use CloudWatch. Click <strong>CloudWatch Events</strong> in the <strong>Designer</strong> sidebar.</p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-08.png#screenshot" alt="CloudWatch Events trigger"  />
+
+</p>
+<p>Under <strong>Configure triggers</strong>, you&rsquo;ll create a new rule. Choose a descriptive name for your rule without spaces or punctuation, and ensure <strong>Schedule expression</strong> is selected. Then input the time you want your program to run as a <em>rate expression</em>, or cron expression.</p>
+<p>A cron expression looks like this: <code>cron(0 12 * * ? *)</code></p>
+<table>
+<thead>
+<tr>
+<th>Minutes</th>
+<th>Hours</th>
+<th>Month</th>
+<th>Day of week</th>
+<th>Year</th>
+<th>In English</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>12</td>
+<td><code>*</code></td>
+<td>?</td>
+<td><code>*</code></td>
+<td>Run at noon (UTC) every day</td>
+</tr>
+</tbody>
+</table>
+<p>For more on how to write your cron expressions, read <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html">this.</a></p>
+<p>To find out what the current time in UTC is, click <a href="https://codepen.io/victoriadrake/full/OQabar/">here.</a></p>
+<p>If you want your program to run twice a day, say once at 10am and again at 3pm, you&rsquo;ll need to set two separate CloudWatch Events triggers and cron expression rules.</p>
+<p>Click <strong>Add</strong>.</p>
+<p>
+
+<img src="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/lambda-09.png#screenshot" alt="Set cron expression rule"  />
+
+</p>
+
+<h2 id="watch-it-go" class="anchor-link"><a href="#watch-it-go">Watch it go</a></h2>
+<p>That&rsquo;s all you need to get your Lambda function up and running! Now you can sit back, relax, and do more important things than share your RSS links on Twitter.</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+    </li>
+
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">A coffee-break introduction to time complexity of algorithms</a>
+        <p class="li-brief">
+            A groundwork understanding of algorithm time complexity in about fifteen minutes.
+        </p>
+        
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
+            
+            ☕️☕️☕️&nbsp;
+            16 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/">Knapsack problem algorithms for my real-life carry-on knapsack</a>
+        <p class="li-brief">
+            Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag.
+        </p>
+        
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/algorithms/">algorithms</a>
+            
+            ☕️☕️☕️☕️☕️&nbsp;
+            24 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+    
+
+    
+    
+        
+
+</body>
+
+</html>
