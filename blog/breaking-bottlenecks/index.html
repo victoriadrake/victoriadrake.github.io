@@ -1,32 +1,350 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>Breaking bottlenecks 🍾 | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Breaking bottlenecks 🍾 - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A talk on the benefits of non-blocking functions for programs, developers, and organizations."><meta property="og:url" content="https://victoria.dev/blog/breaking-bottlenecks/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/breaking-bottlenecks/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Breaking bottlenecks 🍾"><meta name=twitter:image content="https://victoria.dev/blog/breaking-bottlenecks/cover.png"><meta name=twitter:description content="A talk on the benefits of non-blocking functions for programs, developers, and organizations."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.e269b13d057bec4fb4eedcb1e77470ec61024ff3b34b4816f63ce97ffbe73a3d.css integrity="sha256-4mmxPQV77E+07tyx53Rw7GECT/OzS0gW9jzpf/vnOj0=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
-<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
-<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Breaking bottlenecks 🍾">📡 rss</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
-<span class=menu-item><a href=/blog/>📰 blog</a></span>
-<span class=menu-item><a href=/about/>📖 readme</a></span>
-<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
-<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Breaking bottlenecks 🍾">📡 rss</a></span></div><div id=logo><a href=#><img id=🥚 alt="site logo" src=/img/logo.png></a></div></div><div class=container><div id=cover-image><img src=https://victoria.dev/blog/breaking-bottlenecks/cover.png alt="cover image"></div><div class=markdown><h1>Breaking bottlenecks 🍾</h1><p class=subtitle>A talk on the benefits of non-blocking functions for programs, developers, and organizations.</p><p class=metadata id=date>February 25, 2020
-☕️☕️☕️&nbsp;
-12 min read
-&nbsp;
-<a class=li-tag href=/tags/computing/>computing
-</a>&nbsp;
-<a class=li-tag href=/tags/ci/cd/>ci/cd
-</a>&nbsp;
-<a class=li-tag href=/tags/coding/>coding
-</a>&nbsp;
-<a class=li-tag href=/tags/cybersecurity/>cybersecurity
-</a>&nbsp;
-<a class=li-tag href=/tags/go/>go
-</a>&nbsp;
-<a class=li-tag href=/tags/python/>python
-</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p><em>I recently gave a lecture on the benefits of building non-blocking processes. This is a write-up of the full talk, minus any &ldquo;ums&rdquo; that may have occurred. You can <a href=https://victoria.dev/slides/bottlenecks>view the slides here</a>.</em></p><p>I&rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.</p><p>OWASP is a great group doing important work. I&rsquo;ve seen this firsthand as part of the core team that produces the Web Security Testing Guide. However, while OWASP inspires in its large volunteer base, it lacks in the area of central organization.</p><p>This lack of organization was most recently apparent in the group&rsquo;s website, <a href=https://owasp.org>OWASP.org</a>. A big organization with an even bigger website to match, OWASP.org enjoys hundreds of thousands of visitors. Unfortunately, many of its pages - individually managed by disparate projects - are infrequently updated. Some are abandoned. The website as a whole lacks a centralized quality assurance process, and as a result, OWASP.org is peppered with broken links.</p><h2 id=the-trouble-with-broken-links class=anchor-link><a href=#the-trouble-with-broken-links>The trouble with broken links</a></h2><p>Customers don&rsquo;t like broken links; attackers really do. That&rsquo;s because broken links are a security vulnerability. Broken links can signal opportunities for attacks like <a href=https://edoverflow.com/2017/broken-link-hijacking/>broken link hijacking</a> and <a href=https://www.hackerone.com/blog/Guide-Subdomain-Takeovers>subdomain takeovers</a>. At their least effective, these attacks can be embarrassing; at their worst, severely damaging to businesses and organizations. One OWASP group, the Application Security Verification Standard (ASVS) project, writes about <a href=https://github.com/OWASP/ASVS/blob/d9e0ac99828ef3c1e9233bd8a1f691f2a6958aa3/4.0/en/0x18-V10-Malicious.md#v103-deployed-application-integrity-controls>integrity controls</a> that can help to mitigate the likelihood of these attacks. This knowledge, unfortunately, has not yet propagated throughout the rest of OWASP yet.</p><p>This is the story of how I created a fast and efficient tool to help OWASP solve this problem.</p><h2 id=the-job class=anchor-link><a href=#the-job>The job</a></h2><p>I took on the task of creating a program that could run as part of a CI/CD process to detect and report broken links. The program needed to:</p><ul><li>Find and enumerate all the broken links on OWASP.org in a report.</li><li>Keep track of the parent pages the broken links were on so they could be fixed.</li><li>Run efficiently as part of a CI/CD pipeline.</li></ul><p>Essentially; I need to build a web crawler.</p><p>My original journey through this process was also in Python, as that was a comfortable language choice for everyone in the OWASP group. Personally, I prefer to use Go for higher performance as it offers more convenient concurrency primitives. Between the task and this talk, I wrote three programs: a prototype single-thread Python program, a multithreaded Python program, and a Go program using goroutines. We&rsquo;ll see a comparison of how each worked out near the end of the talk - first, let&rsquo;s explore how to build a web crawler.</p><h2 id=prototyping-a-web-crawler class=anchor-link><a href=#prototyping-a-web-crawler>Prototyping a web crawler</a></h2><p>Here&rsquo;s what our web crawler will need to do:</p><ol><li>Get the HTML data of the first page of the website (for example, <code>https://victoria.dev</code>)</li><li>Check all of the links on the page<ol><li>Keep track of the links we&rsquo;ve already visited so we don&rsquo;t end up checking them twice</li><li>Record any broken links we find</li></ol></li><li>Fetch more HTML data from any valid links on the page, as long as they&rsquo;re in the same domain (<code>https://victoria.dev</code> and not <code>https://github.com</code>, for instance)</li><li>Repeat step #2 until all of the links on the site have been checked</li></ol><p>Here&rsquo;s what the execution flow will look like:</p><figure class=screenshot><img src=execution_flow.png alt="A flow chart showing program execution"></figure><p>As you can see, the nodes &ldquo;GET page&rdquo; -> &ldquo;HTML&rdquo; -> &ldquo;Parse links&rdquo; -> &ldquo;Valid link&rdquo; -> &ldquo;Check visited&rdquo; all form a loop. These are what enable our web crawler to continue crawling until all the links on the site have been accounted for in the &ldquo;Check visited&rdquo; node. When the crawler encounters links it&rsquo;s already checked, it will &ldquo;Stop.&rdquo; This loop will become more important in a moment.</p><p>For now, the question on everyone&rsquo;s mind (I hope): how do we make it fast?</p><h2 id=how-fast-can-you-do-the-thing class=anchor-link><a href=#how-fast-can-you-do-the-thing>How fast can you do the thing</a></h2><p>Here are some approximate timings for tasks performed on a typical PC:</p><table><thead><tr><th></th><th>Task</th><th>Time</th></tr></thead><tbody><tr><td>CPU</td><td>execute typical instruction</td><td>1/1,000,000,000 sec = 1 nanosec</td></tr><tr><td>CPU</td><td>fetch from L1 cache memory</td><td>0.5 nanosec</td></tr><tr><td>CPU</td><td>branch misprediction</td><td>5 nanosec</td></tr><tr><td>CPU</td><td>fetch from L2 cache memory</td><td>7 nanosec</td></tr><tr><td>RAM</td><td>Mutex lock/unlock</td><td>25 nanosec</td></tr><tr><td>RAM</td><td>fetch from main memory</td><td>100 nanosec</td></tr><tr><td>RAM</td><td>read 1MB sequentially from memory</td><td>250,000 nanosec</td></tr><tr><td>Disk</td><td>fetch from new disk location (seek)</td><td>8,000,000 nanosec (8ms)</td></tr><tr><td>Disk</td><td>read 1MB sequentially from disk</td><td>20,000,000 nanosec (20ms)</td></tr><tr><td>Network</td><td>send packet US to Europe and back</td><td>150,000,000 nanosec (150ms)</td></tr></tbody></table><p>Peter Norvig first published these numbers some years ago in <a href=http://norvig.com/21-days.html#answers>Teach Yourself Programming in Ten Years</a>. They typically crop up now and then in articles titled along the lines of, &ldquo;Latency numbers every developer should know.&rdquo;</p><p>Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p><p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p><h2 id=bottleneck-network-latency class=anchor-link><a href=#bottleneck-network-latency>Bottleneck: network latency</a></h2><p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p><p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>      150 milliseconds
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    Breaking bottlenecks 🍾 | victoria.dev
+</title>
+
+
+
+    <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+    <meta property="og:title" content="Breaking bottlenecks 🍾 - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="A talk on the benefits of non-blocking functions for programs, developers, and organizations." />
+<meta property="og:url" content="https://victoria.dev/blog/breaking-bottlenecks/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/breaking-bottlenecks/cover.png"/>
+
+
+    <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Breaking bottlenecks 🍾" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/breaking-bottlenecks/cover.png"/>
+
+<meta name="twitter:description"
+    content="A talk on the benefits of non-blocking functions for programs, developers, and organizations." />
+
+    
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+    
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.e269b13d057bec4fb4eedcb1e77470ec61024ff3b34b4816f63ce97ffbe73a3d.css" integrity="sha256-4mmxPQV77E&#43;07tyx53Rw7GECT/OzS0gW9jzpf/vnOj0=" media="screen">
+
+
+
+
+
+    
+    
+    
+        
+</head>
+
+<body>
+    <section id="main">
+
+        
+        <div class="header">
+
+    <div class="toggle">
+        <input type="checkbox" />
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <div id="mobile-menu">
+            
+            
+            <span class="menu-item">
+                <a href="/">
+                    👩🏻‍💻 hi</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/blog/">
+                    📰 blog</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/about/">
+                    📖 readme</a >
+            </span>
+            
+            <span class="menu-item">
+                <a href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+            </span>
+            
+            
+            <span class="menu-item">
+                <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Breaking bottlenecks 🍾" />📡 rss</a>
+            </span>
+            
+        </div>
+    </div>
+    <div id="menu">
+        
+        
+        <span class="menu-item ">
+            <a href="/">
+                👩🏻‍💻 hi</a >
+        </span>
+        
+        <span class="menu-item ">
+            <a href="/blog/">
+                📰 blog</a >
+        </span>
+        
+        <span class="menu-item ">
+            <a href="/about/">
+                📖 readme</a >
+        </span>
+        
+        <span class="menu-item ">
+            <a href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
+        </span>
+        
+        
+        <span class="menu-item">
+            <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Breaking bottlenecks 🍾" />📡 rss</a>
+        </span>
+        
+    </div>
+
+    <div id="logo">
+        <a href="#"><img id="🥚" alt="site logo" src="/img/logo.png" /></a>
+    </div>
+
+</div>
+
+        
+
+        <div class="container">
+            
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/breaking-bottlenecks/cover.png" alt="cover image" />
+</div>
+
+
+            
+
+
+<div class="markdown">
+    <h1>
+        Breaking bottlenecks 🍾
+    </h1>
+    
+    <p class="subtitle">A talk on the benefits of non-blocking functions for programs, developers, and organizations.</p>
+    <p class="metadata" id="date">
+        February 25, 2020
+        ☕️☕️☕️&nbsp;
+        12 min read
+
+        
+        &nbsp;
+        
+        <a class="li-tag" href="/tags/computing/">
+            computing
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/ci/cd/">
+            ci/cd
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/coding/">
+            coding
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/cybersecurity/">
+            cybersecurity
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/go/">
+            go
+        </a>&nbsp;
+        
+        <a class="li-tag" href="/tags/python/">
+            python
+        </a>&nbsp;
+        
+        
+
+        
+    </p>
+
+    
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<div class="markdown">
+    
+    <p><em>I recently gave a lecture on the benefits of building non-blocking processes. This is a write-up of the full talk, minus any &ldquo;ums&rdquo; that may have occurred. You can <a href="https://victoria.dev/slides/bottlenecks">view the slides here</a>.</em></p>
+<p>I&rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.</p>
+<p>OWASP is a great group doing important work. I&rsquo;ve seen this firsthand as part of the core team that produces the Web Security Testing Guide. However, while OWASP inspires in its large volunteer base, it lacks in the area of central organization.</p>
+<p>This lack of organization was most recently apparent in the group&rsquo;s website, <a href="https://owasp.org">OWASP.org</a>. A big organization with an even bigger website to match, OWASP.org enjoys hundreds of thousands of visitors. Unfortunately, many of its pages - individually managed by disparate projects - are infrequently updated. Some are abandoned. The website as a whole lacks a centralized quality assurance process, and as a result, OWASP.org is peppered with broken links.</p>
+
+<h2 id="the-trouble-with-broken-links" class="anchor-link"><a href="#the-trouble-with-broken-links">The trouble with broken links</a></h2>
+<p>Customers don&rsquo;t like broken links; attackers really do. That&rsquo;s because broken links are a security vulnerability. Broken links can signal opportunities for attacks like <a href="https://edoverflow.com/2017/broken-link-hijacking/">broken link hijacking</a> and <a href="https://www.hackerone.com/blog/Guide-Subdomain-Takeovers">subdomain takeovers</a>. At their least effective, these attacks can be embarrassing; at their worst, severely damaging to businesses and organizations. One OWASP group, the Application Security Verification Standard (ASVS) project, writes about <a href="https://github.com/OWASP/ASVS/blob/d9e0ac99828ef3c1e9233bd8a1f691f2a6958aa3/4.0/en/0x18-V10-Malicious.md#v103-deployed-application-integrity-controls">integrity controls</a> that can help to mitigate the likelihood of these attacks. This knowledge, unfortunately, has not yet propagated throughout the rest of OWASP yet.</p>
+<p>This is the story of how I created a fast and efficient tool to help OWASP solve this problem.</p>
+
+<h2 id="the-job" class="anchor-link"><a href="#the-job">The job</a></h2>
+<p>I took on the task of creating a program that could run as part of a CI/CD process to detect and report broken links. The program needed to:</p>
+<ul>
+<li>Find and enumerate all the broken links on OWASP.org in a report.</li>
+<li>Keep track of the parent pages the broken links were on so they could be fixed.</li>
+<li>Run efficiently as part of a CI/CD pipeline.</li>
+</ul>
+<p>Essentially; I need to build a web crawler.</p>
+<p>My original journey through this process was also in Python, as that was a comfortable language choice for everyone in the OWASP group. Personally, I prefer to use Go for higher performance as it offers more convenient concurrency primitives. Between the task and this talk, I wrote three programs: a prototype single-thread Python program, a multithreaded Python program, and a Go program using goroutines. We&rsquo;ll see a comparison of how each worked out near the end of the talk - first, let&rsquo;s explore how to build a web crawler.</p>
+
+<h2 id="prototyping-a-web-crawler" class="anchor-link"><a href="#prototyping-a-web-crawler">Prototyping a web crawler</a></h2>
+<p>Here&rsquo;s what our web crawler will need to do:</p>
+<ol>
+<li>Get the HTML data of the first page of the website (for example, <code>https://victoria.dev</code>)</li>
+<li>Check all of the links on the page
+<ol>
+<li>Keep track of the links we&rsquo;ve already visited so we don&rsquo;t end up checking them twice</li>
+<li>Record any broken links we find</li>
+</ol>
+</li>
+<li>Fetch more HTML data from any valid links on the page, as long as they&rsquo;re in the same domain (<code>https://victoria.dev</code> and not <code>https://github.com</code>, for instance)</li>
+<li>Repeat step #2 until all of the links on the site have been checked</li>
+</ol>
+<p>Here&rsquo;s what the execution flow will look like:</p>
+<figure class="screenshot">
+    <img src="execution_flow.png"
+         alt="A flow chart showing program execution"/> 
+</figure>
+
+<p>As you can see, the nodes &ldquo;GET page&rdquo; -&gt; &ldquo;HTML&rdquo; -&gt; &ldquo;Parse links&rdquo; -&gt; &ldquo;Valid link&rdquo; -&gt; &ldquo;Check visited&rdquo; all form a loop. These are what enable our web crawler to continue crawling until all the links on the site have been accounted for in the &ldquo;Check visited&rdquo; node. When the crawler encounters links it&rsquo;s already checked, it will &ldquo;Stop.&rdquo; This loop will become more important in a moment.</p>
+<p>For now, the question on everyone&rsquo;s mind (I hope): how do we make it fast?</p>
+
+<h2 id="how-fast-can-you-do-the-thing" class="anchor-link"><a href="#how-fast-can-you-do-the-thing">How fast can you do the thing</a></h2>
+<p>Here are some approximate timings for tasks performed on a typical PC:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Task</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU</td>
+<td>execute typical instruction</td>
+<td>1/1,000,000,000 sec = 1 nanosec</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>fetch from L1 cache memory</td>
+<td>0.5 nanosec</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>branch misprediction</td>
+<td>5 nanosec</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>fetch from L2 cache memory</td>
+<td>7 nanosec</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>Mutex lock/unlock</td>
+<td>25 nanosec</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>fetch from main memory</td>
+<td>100 nanosec</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>read 1MB sequentially from memory</td>
+<td>250,000 nanosec</td>
+</tr>
+<tr>
+<td>Disk</td>
+<td>fetch from new disk location (seek)</td>
+<td>8,000,000 nanosec   (8ms)</td>
+</tr>
+<tr>
+<td>Disk</td>
+<td>read 1MB sequentially from disk</td>
+<td>20,000,000 nanosec  (20ms)</td>
+</tr>
+<tr>
+<td>Network</td>
+<td>send packet US to Europe and back</td>
+<td>150,000,000 nanosec (150ms)</td>
+</tr>
+</tbody>
+</table>
+<p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. They typically crop up now and then in articles titled along the lines of, &ldquo;Latency numbers every developer should know.&rdquo;</p>
+<p>Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
+<p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
+
+<h2 id="bottleneck-network-latency" class="anchor-link"><a href="#bottleneck-network-latency">Bottleneck: network latency</a></h2>
+<p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
+<p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">      150 milliseconds
  x 12,000 links
 ---------
 1,800,000 milliseconds (30 minutes)
-</code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p><h3 id=feedback-loops class=anchor-link><a href=#feedback-loops>Feedback loops</a></h3><p>I previously wrote about <a href=/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/>feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p><p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&rsquo;m waiting on a process that&rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke <code>master</code> (hopefully <code>staging</code>).</p><p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&rsquo;ve got a slow and inefficient company.</p><h3 id=the-cost-of-bottlenecks class=anchor-link><a href=#the-cost-of-bottlenecks>The cost of bottlenecks</a></h3><p>To add insult to injury, not only are you waiting on a bottlenecked process to run; you&rsquo;re also paying to wait. Take the serverless example - AWS Lambda, for instance. Here&rsquo;s a chart showing the cost of functions by compute time and CPU usage.</p><figure><img src=lambda-chart.png alt="Chart showing Total Lambda compute cost by function execution"><figcaption><p>Source: <a href=https://serverless.com/blog/understanding-and-controlling-aws-lambda-costs/>Understanding and Controlling AWS Lambda Costs</a></p></figcaption></figure><p>Again, the numbers change over the years, but the main concepts remain the same: the bigger the function and the longer its compute time, the bigger the cost. For applications taking advantage of serverless, these costs can add up dramatically.</p><p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.</p><p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p><h2 id=tacos-and-threading class=anchor-link><a href=#tacos-and-threading>Tacos and threading</a></h2><p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
+
+<h3 id="feedback-loops" class="anchor-link"><a href="#feedback-loops">Feedback loops</a></h3>
+<p>I previously wrote about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p>
+<p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&rsquo;m waiting on a process that&rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke <code>master</code> (hopefully <code>staging</code>).</p>
+<p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&rsquo;ve got a slow and inefficient company.</p>
+
+<h3 id="the-cost-of-bottlenecks" class="anchor-link"><a href="#the-cost-of-bottlenecks">The cost of bottlenecks</a></h3>
+<p>To add insult to injury, not only are you waiting on a bottlenecked process to run; you&rsquo;re also paying to wait. Take the serverless example - AWS Lambda, for instance. Here&rsquo;s a chart showing the cost of functions by compute time and CPU usage.</p>
+<figure>
+    <img src="lambda-chart.png"
+         alt="Chart showing Total Lambda compute cost by function execution"/> <figcaption>
+            <p>Source: <a href="https://serverless.com/blog/understanding-and-controlling-aws-lambda-costs/">Understanding and Controlling AWS Lambda Costs</a></p>
+        </figcaption>
+</figure>
+
+<p>Again, the numbers change over the years, but the main concepts remain the same: the bigger the function and the longer its compute time, the bigger the cost. For applications taking advantage of serverless, these costs can add up dramatically.</p>
+<p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.</p>
+<p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p>
+
+<h2 id="tacos-and-threading" class="anchor-link"><a href="#tacos-and-threading">Tacos and threading</a></h2>
+<p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
 🌮   ╔══════════════╗
@@ -37,7 +355,8 @@
 🌮
 🌮                                          🌳
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
 🌮
@@ -48,7 +367,9 @@
 🌮
 🌮                                          🌳
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p><p>We can try splitting the queue:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p>
+<p>We can try splitting the queue:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
 🌮         🧑💵🧑💵🧑💵🧑💵
@@ -59,7 +380,9 @@
 🌮
 🌮                                          🌳
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href=https://en.wikipedia.org/wiki/Concurrency_(computer_science)>concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p><p>We could get two Bobs:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p>
+<p>We could get two Bobs:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
 🌮                                          🌳
@@ -70,7 +393,9 @@
 🌮
 🌮                                          🌳
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p><p>We can do even better than that:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p>
+<p>We can do even better than that:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮      🐹 🧑💵🧑💵
 🌮                                          🌳
@@ -81,99 +406,251 @@
 🌮      🐹 🧑💵🧑💵🧑💵
 🌮                                          🌳
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href=https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)>multithreading</a>.</p><p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p><h2 id=setting-up-a-go-web-crawler class=anchor-link><a href=#setting-up-a-go-web-crawler>Setting up a Go web crawler</a></h2><p>In order to share data between our <a href=https://tour.golang.org/concurrency/1>goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href=https://en.wikipedia.org/wiki/Mutual_exclusion>mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href=/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/>coffee-break introduction to time complexity of algorithms</a> article.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>type</span> <span class=nx>Checker</span> <span class=kd>struct</span> <span class=p>{</span>
-    <span class=nx>startDomain</span>             <span class=kt>string</span>
-    <span class=nx>brokenLinks</span>             <span class=p>[]</span><span class=nx>Result</span>
-    <span class=nx>visitedLinks</span>            <span class=kd>map</span><span class=p>[</span><span class=kt>string</span><span class=p>]</span><span class=kt>bool</span>
-    <span class=nx>workerCount</span><span class=p>,</span> <span class=nx>maxWorkers</span> <span class=kt>int</span>
-    <span class=nx>sync</span><span class=p>.</span><span class=nx>Mutex</span>
-<span class=p>}</span>
-<span class=o>...</span>
-<span class=c1>// Page allows us to retain parent and sublinks
-</span><span class=c1></span><span class=kd>type</span> <span class=nx>Page</span> <span class=kd>struct</span> <span class=p>{</span>
-    <span class=nx>parent</span><span class=p>,</span> <span class=nx>loc</span><span class=p>,</span> <span class=nx>data</span> <span class=kt>string</span>
-<span class=p>}</span>
+</code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
+<p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p>
 
-<span class=c1>// Result adds error information for the report
-</span><span class=c1></span><span class=kd>type</span> <span class=nx>Result</span> <span class=kd>struct</span> <span class=p>{</span>
-    <span class=nx>Page</span>
-    <span class=nx>reason</span> <span class=kt>string</span>
-    <span class=nx>code</span>   <span class=kt>int</span>
-<span class=p>}</span>
-</code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// Extract links from HTML
-</span><span class=c1></span><span class=kd>func</span> <span class=nf>parse</span><span class=p>(</span><span class=nx>parent</span><span class=p>,</span> <span class=nx>data</span> <span class=kt>string</span><span class=p>)</span> <span class=p>([]</span><span class=kt>string</span><span class=p>,</span> <span class=p>[]</span><span class=kt>string</span><span class=p>)</span> <span class=p>{</span>
-    <span class=nx>doc</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>html</span><span class=p>.</span><span class=nf>Parse</span><span class=p>(</span><span class=nx>strings</span><span class=p>.</span><span class=nf>NewReader</span><span class=p>(</span><span class=nx>data</span><span class=p>))</span>
-    <span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
-        <span class=nx>fmt</span><span class=p>.</span><span class=nf>Println</span><span class=p>(</span><span class=s>&#34;Could not parse: &#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
-    <span class=p>}</span>
-    <span class=nx>goodLinks</span> <span class=o>:=</span> <span class=nb>make</span><span class=p>([]</span><span class=kt>string</span><span class=p>,</span> <span class=mi>0</span><span class=p>)</span>
-    <span class=nx>badLinks</span> <span class=o>:=</span> <span class=nb>make</span><span class=p>([]</span><span class=kt>string</span><span class=p>,</span> <span class=mi>0</span><span class=p>)</span>
+<h2 id="setting-up-a-go-web-crawler" class="anchor-link"><a href="#setting-up-a-go-web-crawler">Setting up a Go web crawler</a></h2>
+<p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">startDomain</span>             <span class="kt">string</span>
+    <span class="nx">brokenLinks</span>             <span class="p">[]</span><span class="nx">Result</span>
+    <span class="nx">visitedLinks</span>            <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span>
+    <span class="nx">workerCount</span><span class="p">,</span> <span class="nx">maxWorkers</span> <span class="kt">int</span>
+    <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+<span class="p">}</span>
+<span class="o">...</span>
+<span class="c1">// Page allows us to retain parent and sublinks
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Page</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">parent</span><span class="p">,</span> <span class="nx">loc</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span>
+<span class="p">}</span>
 
-    <span class=kd>var</span> <span class=nx>f</span> <span class=kd>func</span><span class=p>(</span><span class=o>*</span><span class=nx>html</span><span class=p>.</span><span class=nx>Node</span><span class=p>)</span>
-    <span class=nx>f</span> <span class=p>=</span> <span class=kd>func</span><span class=p>(</span><span class=nx>n</span> <span class=o>*</span><span class=nx>html</span><span class=p>.</span><span class=nx>Node</span><span class=p>)</span> <span class=p>{</span>
-        <span class=k>if</span> <span class=nx>n</span><span class=p>.</span><span class=nx>Type</span> <span class=o>==</span> <span class=nx>html</span><span class=p>.</span><span class=nx>ElementNode</span> <span class=o>&amp;&amp;</span> <span class=nf>checkKey</span><span class=p>(</span><span class=nb>string</span><span class=p>(</span><span class=nx>n</span><span class=p>.</span><span class=nx>Data</span><span class=p>))</span> <span class=p>{</span>
-            <span class=k>for</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>a</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>n</span><span class=p>.</span><span class=nx>Attr</span> <span class=p>{</span>
-                <span class=k>if</span> <span class=nf>checkAttr</span><span class=p>(</span><span class=nb>string</span><span class=p>(</span><span class=nx>a</span><span class=p>.</span><span class=nx>Key</span><span class=p>))</span> <span class=p>{</span>
-                    <span class=nx>j</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nf>formatURL</span><span class=p>(</span><span class=nx>parent</span><span class=p>,</span> <span class=nx>a</span><span class=p>.</span><span class=nx>Val</span><span class=p>)</span>
-                    <span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
-                        <span class=nx>badLinks</span> <span class=p>=</span> <span class=nb>append</span><span class=p>(</span><span class=nx>badLinks</span><span class=p>,</span> <span class=nx>j</span><span class=p>)</span>
+<span class="c1">// Result adds error information for the report
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Result</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Page</span>
+    <span class="nx">reason</span> <span class="kt">string</span>
+    <span class="nx">code</span>   <span class="kt">int</span>
+<span class="p">}</span>
+</code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Extract links from HTML
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">parse</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span><span class="p">)</span> <span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="p">[]</span><span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">doc</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">html</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nf">NewReader</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Could not parse: &#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nx">goodLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nx">badLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-                    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
-                        <span class=nx>goodLinks</span> <span class=p>=</span> <span class=nb>append</span><span class=p>(</span><span class=nx>goodLinks</span><span class=p>,</span> <span class=nx>j</span><span class=p>)</span>
-                    <span class=p>}</span>
-                    <span class=k>break</span>
-                <span class=p>}</span>
-            <span class=p>}</span>
-        <span class=p>}</span>
-        <span class=k>for</span> <span class=nx>c</span> <span class=o>:=</span> <span class=nx>n</span><span class=p>.</span><span class=nx>FirstChild</span><span class=p>;</span> <span class=nx>c</span> <span class=o>!=</span> <span class=kc>nil</span><span class=p>;</span> <span class=nx>c</span> <span class=p>=</span> <span class=nx>c</span><span class=p>.</span><span class=nx>NextSibling</span> <span class=p>{</span>
-            <span class=nf>f</span><span class=p>(</span><span class=nx>c</span><span class=p>)</span>
-        <span class=p>}</span>
-    <span class=p>}</span>
-    <span class=nf>f</span><span class=p>(</span><span class=nx>doc</span><span class=p>)</span>
-    <span class=k>return</span> <span class=nx>goodLinks</span><span class=p>,</span> <span class=nx>badLinks</span>
-<span class=p>}</span>
-</code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href=https://www.theregister.co.uk/2016/03/23/npm_left_pad_chaos/>the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p><p>Here are snippets of the <code>main</code> function, where we pass in our starting URL and create a queue (or <a href=https://tour.golang.org/concurrency/2>channels</a>, in Go) to be filled with links for our goroutines to process.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
-    <span class=o>...</span>
-    <span class=nx>startURL</span> <span class=o>:=</span> <span class=nx>flag</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=s>&#34;url&#34;</span><span class=p>,</span> <span class=s>&#34;http://example.com&#34;</span><span class=p>,</span> <span class=s>&#34;full URL of site&#34;</span><span class=p>)</span>
-    <span class=o>...</span>
+    <span class="kd">var</span> <span class="nx">f</span> <span class="kd">func</span><span class="p">(</span><span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span>
+    <span class="nx">f</span> <span class="p">=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">n</span> <span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Type</span> <span class="o">==</span> <span class="nx">html</span><span class="p">.</span><span class="nx">ElementNode</span> <span class="o">&amp;&amp;</span> <span class="nf">checkKey</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">n</span><span class="p">.</span><span class="nx">Data</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Attr</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="nf">checkAttr</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Key</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">j</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">formatURL</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Val</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+                        <span class="nx">badLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">badLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
 
-    <span class=nx>firstPage</span> <span class=o>:=</span> <span class=nx>Page</span><span class=p>{</span>
-        <span class=nx>parent</span><span class=p>:</span> <span class=o>*</span><span class=nx>startURL</span><span class=p>,</span>
-        <span class=nx>loc</span><span class=p>:</span>    <span class=o>*</span><span class=nx>startURL</span><span class=p>,</span>
-    <span class=p>}</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="nx">goodLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
+                    <span class="p">}</span>
+                    <span class="k">break</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="nx">c</span> <span class="o">:=</span> <span class="nx">n</span><span class="p">.</span><span class="nx">FirstChild</span><span class="p">;</span> <span class="nx">c</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">;</span> <span class="nx">c</span> <span class="p">=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">NextSibling</span> <span class="p">{</span>
+            <span class="nf">f</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="nf">f</span><span class="p">(</span><span class="nx">doc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">badLinks</span>
+<span class="p">}</span>
+</code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href="https://www.theregister.co.uk/2016/03/23/npm_left_pad_chaos/">the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p>
+<p>Here are snippets of the <code>main</code> function, where we pass in our starting URL and create a queue (or <a href="https://tour.golang.org/concurrency/2">channels</a>, in Go) to be filled with links for our goroutines to process.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="nx">startURL</span> <span class="o">:=</span> <span class="nx">flag</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="s">&#34;url&#34;</span><span class="p">,</span> <span class="s">&#34;http://example.com&#34;</span><span class="p">,</span> <span class="s">&#34;full URL of site&#34;</span><span class="p">)</span>
+    <span class="o">...</span>
 
-    <span class=nx>toProcess</span> <span class=o>:=</span> <span class=nb>make</span><span class=p>(</span><span class=kd>chan</span> <span class=nx>Page</span><span class=p>,</span> <span class=mi>1</span><span class=p>)</span>
-    <span class=nx>toProcess</span> <span class=o>&lt;-</span> <span class=nx>firstPage</span>
+    <span class="nx">firstPage</span> <span class="o">:=</span> <span class="nx">Page</span><span class="p">{</span>
+        <span class="nx">parent</span><span class="p">:</span> <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
+        <span class="nx">loc</span><span class="p">:</span>    <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
+    <span class="p">}</span>
 
-    <span class=kd>var</span> <span class=nx>wg</span> <span class=nx>sync</span><span class=p>.</span><span class=nx>WaitGroup</span>
-</code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>toProcess</span> <span class=p>{</span>
-    <span class=nx>wg</span><span class=p>.</span><span class=nf>Add</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
-    <span class=nx>checker</span><span class=p>.</span><span class=nf>addWorker</span><span class=p>()</span>
-    <span class=err>🐹</span> <span class=k>go</span> <span class=nf>worker</span><span class=p>(</span><span class=nx>i</span><span class=p>,</span> <span class=o>&amp;</span><span class=nx>checker</span><span class=p>,</span> <span class=o>&amp;</span><span class=nx>wg</span><span class=p>,</span> <span class=nx>toProcess</span><span class=p>)</span>
-    <span class=k>if</span> <span class=nx>checker</span><span class=p>.</span><span class=nx>workerCount</span> <span class=p>&gt;</span> <span class=nx>checker</span><span class=p>.</span><span class=nx>maxWorkers</span> <span class=p>{</span>
-        <span class=nx>time</span><span class=p>.</span><span class=nf>Sleep</span><span class=p>(</span><span class=mi>1</span> <span class=o>*</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Second</span><span class=p>)</span> <span class=c1>// throttle down
-</span><span class=c1></span>    <span class=p>}</span>
-<span class=p>}</span>
-<span class=nx>wg</span><span class=p>.</span><span class=nf>Wait</span><span class=p>()</span>
-</code></pre></div><p>A <a href=https://golang.org/pkg/sync/#WaitGroup>WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p><h2 id=did-we-do-the-thing-fast class=anchor-link><a href=#did-we-do-the-thing-fast>Did we do the thing fast</a></h2><p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>time python3 slow-link-check.py https://victoria.dev
+    <span class="nx">toProcess</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">Page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nx">toProcess</span> <span class="o">&lt;-</span> <span class="nx">firstPage</span>
+
+    <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+</code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">toProcess</span> <span class="p">{</span>
+    <span class="nx">wg</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nx">checker</span><span class="p">.</span><span class="nf">addWorker</span><span class="p">()</span>
+    <span class="err">🐹</span> <span class="k">go</span> <span class="nf">worker</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">checker</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">wg</span><span class="p">,</span> <span class="nx">toProcess</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">workerCount</span> <span class="p">&gt;</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">maxWorkers</span> <span class="p">{</span>
+        <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span> <span class="c1">// throttle down
+</span><span class="c1"></span>    <span class="p">}</span>
+<span class="p">}</span>
+<span class="nx">wg</span><span class="p">.</span><span class="nf">Wait</span><span class="p">()</span>
+</code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
+
+<h2 id="did-we-do-the-thing-fast" class="anchor-link"><a href="#did-we-do-the-thing-fast">Did we do the thing fast</a></h2>
+<p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
 
 real 17m34.084s
 user 11m40.761s
 sys     0m5.436s
-</code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p><p>The multithreaded Python version did a bit better:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>time python3 hydra.py https://victoria.dev
+</code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
+<p>The multithreaded Python version did a bit better:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 hydra.py https://victoria.dev
 
 real 1m13.358s
 user 0m13.161s
 sys     0m2.826s
-</code></pre></div><p>My multithreaded Python program (which I dubbed <a href=https://github.com/victoriadrake/hydra-link-checker>Hydra</a>) finished in one minute and thirteen seconds.</p><p>How did Go do?</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>time ./go-link-check --url=https://victoria.dev
+</code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
+<p>How did Go do?</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time ./go-link-check --url=https://victoria.dev
 
 real 0m7.926s
 user 0m9.044s
 sys     0m0.932s
-</code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p><h2 id=breaking-bottlenecks class=anchor-link><a href=#breaking-bottlenecks>Breaking bottlenecks</a></h2><p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p><p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/look-mom-im-a-github-action-hero/>Look mom, I'm a GitHub Action Hero</a><p class=li-brief>The GitHub blog interviews me for their GitHub Action Hero series.</p><p class=metadata><a class=li-tag href=/tags/ci/cd/>ci/cd</a>
-☕️&nbsp;
-5 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/>Multithreaded Python: slithering through an I/O bottleneck</a><p class=li-brief>How taking advantage of parallelism in Python can make your software orders of magnitude faster.</p><p class=metadata><a class=li-tag href=/tags/python/>python</a>
-☕️&nbsp;
-5 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/>WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained</a><p class=li-brief>Which one should you be using? Why Wi-Fi security matters.</p><p class=metadata><a class=li-tag href=/tags/computing/>computing</a>
-☕️☕️&nbsp;
-8 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></body></html>
+</code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
+
+<h2 id="breaking-bottlenecks" class="anchor-link"><a href="#breaking-bottlenecks">Breaking bottlenecks</a></h2>
+<p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
+<p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p>
+
+
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+<div class="related">
+    
+    <div class="markdown highlight">
+        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
+    </div>
+    <ul id="list-items">
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/look-mom-im-a-github-action-hero/">Look mom, I&#39;m a GitHub Action Hero</a>
+        <p class="li-brief">
+            The GitHub blog interviews me for their GitHub Action Hero series.
+        </p>
+        
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/multithreaded-python-slithering-through-an-i/o-bottleneck/">Multithreaded Python: slithering through an I/O bottleneck</a>
+        <p class="li-brief">
+            How taking advantage of parallelism in Python can make your software orders of magnitude faster.
+        </p>
+        
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/python/">python</a>
+            
+            ☕️&nbsp;
+            5 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+            <li>
+        
+        
+        <a class="li-link" href="https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/">WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained</a>
+        <p class="li-brief">
+            Which one should you be using? Why Wi-Fi security matters.
+        </p>
+        
+        <p class="metadata">
+            
+            <a class="li-tag" href="/tags/computing/">computing</a>
+            
+            ☕️☕️&nbsp;
+            8 min read
+        </p>
+        
+        
+        
+    </li>
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a> </p> </div> </div> 
+        </div>
+
+        <div class="container">
+            
+            <footer>
+    
+    
+    
+    
+    
+    <div class="markdown">
+        
+        <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+    </div>
+    
+    
+</footer>
+
+            
+        </div>
+    </section>
+
+    
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-98623582-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+    
+
+    
+    
+        
+
+</body>
+
+</html>
