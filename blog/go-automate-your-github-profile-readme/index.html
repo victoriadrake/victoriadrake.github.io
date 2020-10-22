@@ -1,407 +1,77 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-<head>
-    
-    <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer">
-
-<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
-<title>
-    Go automate your GitHub profile README | victoria.dev
-</title>
-
-
-
-    <meta
-  name="monetization"
-  content="$ilp.uphold.com/pBRfRwg2EJAe">
-
-    <meta property="og:title" content="Go automate your GitHub profile README - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="Create a dynamic Markdown file with Go and GitHub Actions" />
-<meta property="og:url" content="https://victoria.dev/blog/go-automate-your-github-profile-readme/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/go-automate-your-github-profile-readme/cover.png"/>
-
-
-    <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Go automate your GitHub profile README" />
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/go-automate-your-github-profile-readme/cover.png"/>
-
-<meta name="twitter:description"
-    content="Create a dynamic Markdown file with Go and GitHub Actions" />
-
-    
-<link rel="shortcut icon" href="/img/favicon.ico">
-
-
-    
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.e269b13d057bec4fb4eedcb1e77470ec61024ff3b34b4816f63ce97ffbe73a3d.css" integrity="sha256-4mmxPQV77E&#43;07tyx53Rw7GECT/OzS0gW9jzpf/vnOj0=" media="screen">
-
-
-
-
-
-    
-    
-    
-        
-</head>
-
-<body>
-    <section id="main">
-
-        
-        <div class="header">
-
-    <div class="toggle">
-        <input type="checkbox" />
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <div id="mobile-menu">
-            
-            
-            <span class="menu-item">
-                <a href="/">
-                    👩🏻‍💻 hi</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/blog/">
-                    📰 blog</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/about/">
-                    📖 readme</a >
-            </span>
-            
-            <span class="menu-item">
-                <a href="/coffee/">
-                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-            </span>
-            
-            
-            <span class="menu-item">
-                <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Go automate your GitHub profile README" />📡 rss</a>
-            </span>
-            
-        </div>
-    </div>
-    <div id="menu">
-        
-        
-        <span class="menu-item ">
-            <a href="/">
-                👩🏻‍💻 hi</a >
-        </span>
-        
-        <span class="menu-item ">
-            <a href="/blog/">
-                📰 blog</a >
-        </span>
-        
-        <span class="menu-item ">
-            <a href="/about/">
-                📖 readme</a >
-        </span>
-        
-        <span class="menu-item ">
-            <a href="/coffee/">
-                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> contribute</a >
-        </span>
-        
-        
-        <span class="menu-item">
-            <a id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml" title="RSS for Go automate your GitHub profile README" />📡 rss</a>
-        </span>
-        
-    </div>
-
-    <div id="logo">
-        <a href="#"><img id="🥚" alt="site logo" src="/img/logo.png" /></a>
-    </div>
-
-</div>
-
-        
-
-        <div class="container">
-            
-
-
-
-<div id="cover-image">
-    <img src="https://victoria.dev/blog/go-automate-your-github-profile-readme/cover.png" alt="cover image" />
-</div>
-
-
-            
-
-
-<div class="markdown">
-    <h1>
-        Go automate your GitHub profile README
-    </h1>
-    
-    <p class="subtitle">Create a dynamic Markdown file with Go and GitHub Actions</p>
-    <p class="metadata" id="date">
-        July 25, 2020
-        ☕️&nbsp;
-        4 min read
-
-        
-        &nbsp;
-        
-        <a class="li-tag" href="/tags/ci/cd/">
-            ci/cd
-        </a>&nbsp;
-        
-        <a class="li-tag" href="/tags/go/">
-            go
-        </a>&nbsp;
-        
-        
-
-        
-    </p>
-
-    
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-<div class="markdown">
-    
-    <p>GitHub&rsquo;s new profile page README feature is having the wonderful effect of bringing some personality to the Myspace pages of the developer Internet. Though Markdown lends itself best to standard static text content, that&rsquo;s not stopping creative folks from working to create a next-level README. You can include GIFs and images to add some motion and pizazz (they&rsquo;re covered in <a href="https://github.github.com/gfm/">GitHub Flavor Markdown</a>), but I&rsquo;m thinking of something a little more dynamic.</p>
-<p>At front-and-center on your GitHub profile, your README is a great opportunity to let folks know what you&rsquo;re about, what you find important, and to showcase some highlights of your work. You might like to show off your latest repositories, tweet, or blog post. Keeping it up to date doesn&rsquo;t have to be a pain either, thanks to continuous delivery tools like GitHub Actions.</p>
-<p>My current README refreshes itself daily with a link to my latest blog post. Here&rsquo;s how I&rsquo;m creating a self-updating <code>README.md</code> with Go and GitHub actions.</p>
-
-<h2 id="reading-and-writing-files-with-go" class="anchor-link"><a href="#reading-and-writing-files-with-go">Reading and writing files with Go</a></h2>
-<p>I&rsquo;ve been writing a lot of Python lately, but for some things I really like using Go. You could say it&rsquo;s my go-to language for just-for-<code>func</code> projects. Sorry. Couldn&rsquo;t stop myself.</p>
-<p>To create my README.md, I&rsquo;m going to get some static content from an existing file, mash it together with some new dynamic content that we&rsquo;ll generate with Go, then bake the whole thing at 400 degrees until something awesome comes out.</p>
-<p>Here&rsquo;s how we read in a file called <code>static.md</code> and put it in <code>string</code> form:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Unwrap Markdown content
-</span><span class="c1"></span><span class="nx">content</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="s">&#34;static.md&#34;</span><span class="p">)</span>
-<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-    <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;cannot read file: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">err</span>
-<span class="p">}</span>
-
-<span class="c1">// Make it a string
-</span><span class="c1"></span><span class="nx">stringyContent</span> <span class="o">:=</span> <span class="nb">string</span><span class="p">(</span><span class="nx">content</span><span class="p">)</span>
-</code></pre></div><p>The possibilities for your dynamic content are only limited by your imagination! Here, I&rsquo;ll use the <a href="https://github.com/mmcdole/gofeed"><code>github.com/mmcdole/gofeed</code> package</a> to read the RSS feed from my blog and get the newest post.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">fp</span> <span class="o">:=</span> <span class="nx">gofeed</span><span class="p">.</span><span class="nf">NewParser</span><span class="p">()</span>
-<span class="nx">feed</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">fp</span><span class="p">.</span><span class="nf">ParseURL</span><span class="p">(</span><span class="s">&#34;https://victoria.dev/index.xml&#34;</span><span class="p">)</span>
-<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-    <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;error getting feed: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="c1">// Get the freshest item
-</span><span class="c1"></span><span class="nx">rssItem</span> <span class="o">:=</span> <span class="nx">feed</span><span class="p">.</span><span class="nx">Items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</code></pre></div><p>To join these bits together and produce stringy goodness, we use <a href="https://golang.org/pkg/fmt/#Sprintf"><code>fmt.Sprintf()</code></a> to create a formatted string.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Whisk together static and dynamic content until stiff peaks form
-</span><span class="c1"></span><span class="nx">blog</span> <span class="o">:=</span> <span class="s">&#34;Read my latest blog post: **[&#34;</span> <span class="o">+</span> <span class="nx">rssItem</span><span class="p">.</span><span class="nx">Title</span> <span class="o">+</span> <span class="s">&#34;](&#34;</span> <span class="o">+</span> <span class="nx">rssItem</span><span class="p">.</span><span class="nx">Link</span> <span class="o">+</span> <span class="s">&#34;)**&#34;</span>
-<span class="nx">data</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;%s\n%s\n&#34;</span><span class="p">,</span> <span class="nx">stringyContent</span><span class="p">,</span> <span class="nx">blog</span><span class="p">)</span>
-</code></pre></div><p>Then to create a new file from this mix, we use <a href="https://golang.org/pkg/os/#Create"><code>os.Create()</code></a>. There are <a href="https://www.joeshaw.org/dont-defer-close-on-writable-files/">more things to know about deferring <code>file.Close()</code></a>, but we don&rsquo;t need to get into those details here. We&rsquo;ll add <code>file.Sync()</code> to ensure our README gets written.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Prepare file with a light coating of os
-</span><span class="c1"></span><span class="nx">file</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="s">&#34;README.md&#34;</span><span class="p">)</span>
-<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">err</span>
-<span class="p">}</span>
-<span class="k">defer</span> <span class="nx">file</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
-
-<span class="c1">// Bake at n bytes per second until golden brown
-</span><span class="c1"></span><span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">io</span><span class="p">.</span><span class="nf">WriteString</span><span class="p">(</span><span class="nx">file</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span>
-<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">err</span>
-<span class="p">}</span>
-<span class="k">return</span> <span class="nx">file</span><span class="p">.</span><span class="nf">Sync</span><span class="p">()</span>
-</code></pre></div><p>View the full code <a href="https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/update/main.go">here in my README repository</a>.</p>
-<p>Mmmm, doesn&rsquo;t that smell good? 🍪 Let&rsquo;s make this happen on the daily with a GitHub Action.</p>
-
-<h2 id="running-your-go-program-on-a-schedule-with-actions" class="anchor-link"><a href="#running-your-go-program-on-a-schedule-with-actions">Running your Go program on a schedule with Actions</a></h2>
-<p>You can create a GitHub Action workflow that <a href="https://docs.github.com/en/actions/reference/events-that-trigger-workflows">triggers</a> both on a push to your <code>master</code> branch as well as on a daily schedule. Here&rsquo;s a slice of the <code>.github/workflows/update.yaml</code> that defines this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">on</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span><span class="nt">push</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="l">master</span><span class="w">
-</span><span class="w">  </span><span class="nt">schedule</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span>- <span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;0 11 * * *&#39;</span><span class="w">
-</span></code></pre></div><p>To run the Go program that rebuilds our README, we first need a copy of our files. We use <code>actions/checkout</code> for that:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">steps</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">🍽️ Get working copy</span><span class="w">
-</span><span class="w">      </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@master</span><span class="w">
-</span><span class="w">      </span><span class="nt">with</span><span class="p">:</span><span class="w">
-</span><span class="w">        </span><span class="nt">fetch-depth</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
-</span></code></pre></div><p>This step runs our Go program:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">🍳 Shake &amp; bake README</span><span class="w">
-</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
-</span><span class="sd">    cd ${GITHUB_WORKSPACE}/update/
-</span><span class="sd">    go run main.go</span><span class="w">    
-</span></code></pre></div><p>Finally, we push the updated files back to our repository. Learn more about the variables shown at <a href="https://docs.github.com/en/actions/configuring-and-managing-workflows/using-variables-and-secrets-in-a-workflow">Using variables and secrets in a workflow</a>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">🚀 Deploy</span><span class="w">
-</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
-</span><span class="sd">    git config user.name &#34;${GITHUB_ACTOR}&#34;
-</span><span class="sd">    git config user.email &#34;${GITHUB_ACTOR}@users.noreply.github.com&#34;
-</span><span class="sd">    git add .
-</span><span class="sd">    git commit -am &#34;Update dynamic content&#34;
-</span><span class="sd">    git push --all -f https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git</span><span class="w">    
-</span></code></pre></div><p>View the full code for this Action workflow <a href="https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/.github/workflows/update.yaml">here in my README repository</a>.</p>
-
-<h2 id="go-forth-and-auto-update-your-readme" class="anchor-link"><a href="#go-forth-and-auto-update-your-readme">Go forth and auto-update your README</a></h2>
-<p>Congratulations and welcome to the cool kids' club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &ndash; just go easy on the GIFs, okay?</p>
-
-
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-<div class="related">
-    
-    <div class="markdown highlight">
-        <pre class="chroma"><code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code></pre>
-    </div>
-    <ul id="list-items">
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/breaking-bottlenecks/">Breaking bottlenecks 🍾</a>
-        <p class="li-brief">
-            A talk on the benefits of non-blocking functions for programs, developers, and organizations.
-        </p>
-        
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/computing/">computing</a>
-            
-            ☕️☕️☕️&nbsp;
-            12 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/">How to create a self-documenting Makefile</a>
-        <p class="li-brief">
-            Accelerate your workflow and DevOps with command-line aliases you can check in
-        </p>
-        
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/coding/">coding</a>
-            
-            ☕️&nbsp;
-            4 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-            <li>
-        
-        
-        <a class="li-link" href="https://victoria.dev/blog/look-mom-im-a-github-action-hero/">Look mom, I&#39;m a GitHub Action Hero</a>
-        <p class="li-brief">
-            The GitHub blog interviews me for their GitHub Action Hero series.
-        </p>
-        
-        <p class="metadata">
-            
-            <a class="li-tag" href="/tags/ci/cd/">ci/cd</a>
-            
-            ☕️&nbsp;
-            5 min read
-        </p>
-        
-        
-        
-    </li>
-
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a> </p> </div> </div> 
-        </div>
-
-        <div class="container">
-            
-            <footer>
-    
-    
-    
-    
-    
-    <div class="markdown">
-        
-        <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-    </div>
-    
-    
-</footer>
-
-            
-        </div>
-    </section>
-
-    
-    
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-98623582-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-
-    
-
-    
-    
-        
-
-</body>
-
-</html>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=referrer content="no-referrer"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>Go automate your GitHub profile README | victoria.dev</title><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Go automate your GitHub profile README - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="Create a dynamic Markdown file with Go and GitHub Actions"><meta property="og:url" content="https://victoria.dev/blog/go-automate-your-github-profile-readme/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/go-automate-your-github-profile-readme/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Go automate your GitHub profile README"><meta name=twitter:image content="https://victoria.dev/blog/go-automate-your-github-profile-readme/cover.png"><meta name=twitter:description content="Create a dynamic Markdown file with Go and GitHub Actions"><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.e269b13d057bec4fb4eedcb1e77470ec61024ff3b34b4816f63ce97ffbe73a3d.css integrity="sha256-4mmxPQV77E+07tyx53Rw7GECT/OzS0gW9jzpf/vnOj0=" media=screen></head><body><section id=main><div class=header><div class=toggle><input type=checkbox>
+<span class=bar></span><span class=bar></span><span class=bar></span><div id=mobile-menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
+<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Go automate your GitHub profile README">📡 rss</a></span></div></div><div id=menu><span class=menu-item><a href=/>👩🏻‍💻 hi</a></span>
+<span class=menu-item><a href=/blog/>📰 blog</a></span>
+<span class=menu-item><a href=/about/>📖 readme</a></span>
+<span class=menu-item><a href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> contribute</a></span>
+<span class=menu-item><a id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Go automate your GitHub profile README">📡 rss</a></span></div><div id=logo><a href=#><img id=🥚 alt="site logo" src=/img/logo.png></a></div></div><div class=container><div id=cover-image><img src=https://victoria.dev/blog/go-automate-your-github-profile-readme/cover.png alt="cover image"></div><div class=markdown><h1>Go automate your GitHub profile README</h1><p class=subtitle>Create a dynamic Markdown file with Go and GitHub Actions</p><p class=metadata id=date>July 25, 2020
+☕️&nbsp;
+4 min read
+&nbsp;
+<a class=li-tag href=/tags/ci/cd/>ci/cd
+</a>&nbsp;
+<a class=li-tag href=/tags/go/>go
+</a>&nbsp;</p></div><div class=page-separator><hr></div><div class=markdown><p>GitHub&rsquo;s new profile page README feature is having the wonderful effect of bringing some personality to the Myspace pages of the developer Internet. Though Markdown lends itself best to standard static text content, that&rsquo;s not stopping creative folks from working to create a next-level README. You can include GIFs and images to add some motion and pizazz (they&rsquo;re covered in <a href=https://github.github.com/gfm/>GitHub Flavor Markdown</a>), but I&rsquo;m thinking of something a little more dynamic.</p><p>At front-and-center on your GitHub profile, your README is a great opportunity to let folks know what you&rsquo;re about, what you find important, and to showcase some highlights of your work. You might like to show off your latest repositories, tweet, or blog post. Keeping it up to date doesn&rsquo;t have to be a pain either, thanks to continuous delivery tools like GitHub Actions.</p><p>My current README refreshes itself daily with a link to my latest blog post. Here&rsquo;s how I&rsquo;m creating a self-updating <code>README.md</code> with Go and GitHub actions.</p><h2 id=reading-and-writing-files-with-go class=anchor-link><a href=#reading-and-writing-files-with-go>Reading and writing files with Go</a></h2><p>I&rsquo;ve been writing a lot of Python lately, but for some things I really like using Go. You could say it&rsquo;s my go-to language for just-for-<code>func</code> projects. Sorry. Couldn&rsquo;t stop myself.</p><p>To create my README.md, I&rsquo;m going to get some static content from an existing file, mash it together with some new dynamic content that we&rsquo;ll generate with Go, then bake the whole thing at 400 degrees until something awesome comes out.</p><p>Here&rsquo;s how we read in a file called <code>static.md</code> and put it in <code>string</code> form:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// Unwrap Markdown content
+</span><span class=c1></span><span class=nx>content</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>ioutil</span><span class=p>.</span><span class=nf>ReadFile</span><span class=p>(</span><span class=s>&#34;static.md&#34;</span><span class=p>)</span>
+<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+    <span class=nx>log</span><span class=p>.</span><span class=nf>Fatalf</span><span class=p>(</span><span class=s>&#34;cannot read file: %v&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+    <span class=k>return</span> <span class=nx>err</span>
+<span class=p>}</span>
+
+<span class=c1>// Make it a string
+</span><span class=c1></span><span class=nx>stringyContent</span> <span class=o>:=</span> <span class=nb>string</span><span class=p>(</span><span class=nx>content</span><span class=p>)</span>
+</code></pre></div><p>The possibilities for your dynamic content are only limited by your imagination! Here, I&rsquo;ll use the <a href=https://github.com/mmcdole/gofeed><code>github.com/mmcdole/gofeed</code> package</a> to read the RSS feed from my blog and get the newest post.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>fp</span> <span class=o>:=</span> <span class=nx>gofeed</span><span class=p>.</span><span class=nf>NewParser</span><span class=p>()</span>
+<span class=nx>feed</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>fp</span><span class=p>.</span><span class=nf>ParseURL</span><span class=p>(</span><span class=s>&#34;https://victoria.dev/index.xml&#34;</span><span class=p>)</span>
+<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+    <span class=nx>log</span><span class=p>.</span><span class=nf>Fatalf</span><span class=p>(</span><span class=s>&#34;error getting feed: %v&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+<span class=p>}</span>
+<span class=c1>// Get the freshest item
+</span><span class=c1></span><span class=nx>rssItem</span> <span class=o>:=</span> <span class=nx>feed</span><span class=p>.</span><span class=nx>Items</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+</code></pre></div><p>To join these bits together and produce stringy goodness, we use <a href=https://golang.org/pkg/fmt/#Sprintf><code>fmt.Sprintf()</code></a> to create a formatted string.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// Whisk together static and dynamic content until stiff peaks form
+</span><span class=c1></span><span class=nx>blog</span> <span class=o>:=</span> <span class=s>&#34;Read my latest blog post: **[&#34;</span> <span class=o>+</span> <span class=nx>rssItem</span><span class=p>.</span><span class=nx>Title</span> <span class=o>+</span> <span class=s>&#34;](&#34;</span> <span class=o>+</span> <span class=nx>rssItem</span><span class=p>.</span><span class=nx>Link</span> <span class=o>+</span> <span class=s>&#34;)**&#34;</span>
+<span class=nx>data</span> <span class=o>:=</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Sprintf</span><span class=p>(</span><span class=s>&#34;%s\n%s\n&#34;</span><span class=p>,</span> <span class=nx>stringyContent</span><span class=p>,</span> <span class=nx>blog</span><span class=p>)</span>
+</code></pre></div><p>Then to create a new file from this mix, we use <a href=https://golang.org/pkg/os/#Create><code>os.Create()</code></a>. There are <a href=https://www.joeshaw.org/dont-defer-close-on-writable-files/>more things to know about deferring <code>file.Close()</code></a>, but we don&rsquo;t need to get into those details here. We&rsquo;ll add <code>file.Sync()</code> to ensure our README gets written.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// Prepare file with a light coating of os
+</span><span class=c1></span><span class=nx>file</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>os</span><span class=p>.</span><span class=nf>Create</span><span class=p>(</span><span class=s>&#34;README.md&#34;</span><span class=p>)</span>
+<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+    <span class=k>return</span> <span class=nx>err</span>
+<span class=p>}</span>
+<span class=k>defer</span> <span class=nx>file</span><span class=p>.</span><span class=nf>Close</span><span class=p>()</span>
+
+<span class=c1>// Bake at n bytes per second until golden brown
+</span><span class=c1></span><span class=nx>_</span><span class=p>,</span> <span class=nx>err</span> <span class=p>=</span> <span class=nx>io</span><span class=p>.</span><span class=nf>WriteString</span><span class=p>(</span><span class=nx>file</span><span class=p>,</span> <span class=nx>data</span><span class=p>)</span>
+<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+    <span class=k>return</span> <span class=nx>err</span>
+<span class=p>}</span>
+<span class=k>return</span> <span class=nx>file</span><span class=p>.</span><span class=nf>Sync</span><span class=p>()</span>
+</code></pre></div><p>View the full code <a href=https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/update/main.go>here in my README repository</a>.</p><p>Mmmm, doesn&rsquo;t that smell good? 🍪 Let&rsquo;s make this happen on the daily with a GitHub Action.</p><h2 id=running-your-go-program-on-a-schedule-with-actions class=anchor-link><a href=#running-your-go-program-on-a-schedule-with-actions>Running your Go program on a schedule with Actions</a></h2><p>You can create a GitHub Action workflow that <a href=https://docs.github.com/en/actions/reference/events-that-trigger-workflows>triggers</a> both on a push to your <code>master</code> branch as well as on a daily schedule. Here&rsquo;s a slice of the <code>.github/workflows/update.yaml</code> that defines this:</p><div class=highlight><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>on</span><span class=p>:</span><span class=w>
+</span><span class=w>  </span><span class=nt>push</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span><span class=nt>branches</span><span class=p>:</span><span class=w>
+</span><span class=w>      </span>- <span class=l>master</span><span class=w>
+</span><span class=w>  </span><span class=nt>schedule</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span>- <span class=nt>cron</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;0 11 * * *&#39;</span><span class=w>
+</span></code></pre></div><p>To run the Go program that rebuilds our README, we first need a copy of our files. We use <code>actions/checkout</code> for that:</p><div class=highlight><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>steps</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>🍽️ Get working copy</span><span class=w>
+</span><span class=w>      </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class=l>actions/checkout@master</span><span class=w>
+</span><span class=w>      </span><span class=nt>with</span><span class=p>:</span><span class=w>
+</span><span class=w>        </span><span class=nt>fetch-depth</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></code></pre></div><p>This step runs our Go program:</p><div class=highlight><pre class=chroma><code class=language-yaml data-lang=yaml>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>🍳 Shake &amp; bake README</span><span class=w>
+</span><span class=w>  </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class=p>|</span><span class=sd>
+</span><span class=sd>    cd ${GITHUB_WORKSPACE}/update/
+</span><span class=sd>    go run main.go</span><span class=w>    
+</span></code></pre></div><p>Finally, we push the updated files back to our repository. Learn more about the variables shown at <a href=https://docs.github.com/en/actions/configuring-and-managing-workflows/using-variables-and-secrets-in-a-workflow>Using variables and secrets in a workflow</a>.</p><div class=highlight><pre class=chroma><code class=language-yaml data-lang=yaml>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>🚀 Deploy</span><span class=w>
+</span><span class=w>  </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class=p>|</span><span class=sd>
+</span><span class=sd>    git config user.name &#34;${GITHUB_ACTOR}&#34;
+</span><span class=sd>    git config user.email &#34;${GITHUB_ACTOR}@users.noreply.github.com&#34;
+</span><span class=sd>    git add .
+</span><span class=sd>    git commit -am &#34;Update dynamic content&#34;
+</span><span class=sd>    git push --all -f https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git</span><span class=w>    
+</span></code></pre></div><p>View the full code for this Action workflow <a href=https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/.github/workflows/update.yaml>here in my README repository</a>.</p><h2 id=go-forth-and-auto-update-your-readme class=anchor-link><a href=#go-forth-and-auto-update-your-readme>Go forth and auto-update your README</a></h2><p>Congratulations and welcome to the cool kids' club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &ndash; just go easy on the GIFs, okay?</p></div><div class=page-separator><hr></div><div class=related><div class="markdown highlight"><pre class=chroma><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code></pre></div><ul id=list-items><li><a class=li-link href=https://victoria.dev/blog/breaking-bottlenecks/>Breaking bottlenecks 🍾</a><p class=li-brief>A talk on the benefits of non-blocking functions for programs, developers, and organizations.</p><p class=metadata><a class=li-tag href=/tags/computing/>computing</a>
+☕️☕️☕️&nbsp;
+12 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/>How to create a self-documenting Makefile</a><p class=li-brief>Accelerate your workflow and DevOps with command-line aliases you can check in</p><p class=metadata><a class=li-tag href=/tags/coding/>coding</a>
+☕️&nbsp;
+4 min read</p></li><li><a class=li-link href=https://victoria.dev/blog/look-mom-im-a-github-action-hero/>Look mom, I'm a GitHub Action Hero</a><p class=li-brief>The GitHub blog interviews me for their GitHub Action Hero series.</p><p class=metadata><a class=li-tag href=/tags/ci/cd/>ci/cd</a>
+☕️&nbsp;
+5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><div class=container><footer><div class=markdown><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></div></section><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-98623582-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script></body></html>
