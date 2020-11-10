@@ -1,4 +1,92 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>life on victoria.dev</title><link>https://victoria.dev/tags/life/</link><description>Recent content in life on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><lastBuildDate>Sun, 18 Oct 2020 04:41:37 -0400</lastBuildDate><atom:link href="https://victoria.dev/tags/life/index.xml" rel="self" type="application/rss+xml"/><item><title>WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained</title><link>https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/</link><pubDate>Mon, 19 Oct 2020 04:02:27 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/</guid><description>Which one should you be using? Why Wi-Fi security matters.</description><content:encoded>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>life on victoria.dev</title><link>https://victoria.dev/tags/life/</link><description>Recent content in life on victoria.dev</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><lastBuildDate>Sun, 18 Oct 2020 04:41:37 -0400</lastBuildDate><atom:link href="https://victoria.dev/tags/life/index.xml" rel="self" type="application/rss+xml"/><item><title>Build your own serverless subscriber list with Go and AWS</title><link>https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/</link><pubDate>Tue, 10 Nov 2020 04:52:50 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/</guid><description>How to build your own newsletter list with DynamoDB and SES email sign up confirmations.</description><content:encoded>
+&lt;img src="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/envelope_hucad7a3ef0e3d02cdec9a6198cd528fcc_59352_640x0_resize_box_2.png" width="640" height="640"/>
+&lt;p>You can now subscribe to my email list on &lt;a href="https://victoria.dev/">victoria.dev&lt;/a>! Here&amp;rsquo;s how I lovingly built a subscription sign up flow with email confirmation that doesn&amp;rsquo;t suck. You can too.&lt;/p>
+&lt;h2 id="introducing-simple-subscribe" class="anchor-link">&lt;a href="#introducing-simple-subscribe">Introducing Simple Subscribe&lt;/a>&lt;/h2>
+&lt;p>If you&amp;rsquo;re interested in managing your own mailing list or newsletter, you can use Simple Subscribe to collect email addresses and create a list. This list is stored in a DynamoDB table, ready to be queried or exported at your leisure.&lt;/p>
+&lt;p>When someone signs up, they&amp;rsquo;ll receive an email asking them to confirm their subscription. This is sometimes called &amp;ldquo;double opt-in,&amp;rdquo; although I prefer the term &amp;ldquo;verified.&amp;rdquo; Simple Subscribe works on serverless infrastructure and uses an AWS Lambda to handle subscription, confirmation, and unsubscribe requests.&lt;/p>
+&lt;p>You can find the &lt;a href="https://github.com/victoriadrake/simple-subscribe">Simple Subscribe project, with its fully open-source code, on GitHub&lt;/a>. I encourage you to pull up the code and follow along! In this post I&amp;rsquo;ll share each build step, the thought process behind the API&amp;rsquo;s single-responsibility functions, and security considerations for an AWS project like this one.&lt;/p>
+&lt;h2 id="building-a-verified-subscription-flow" class="anchor-link">&lt;a href="#building-a-verified-subscription-flow">Building a verified subscription flow&lt;/a>&lt;/h2>
+&lt;p>A non-verified email sign up process is straightforward. Someone puts their email into a box on your website, then that email goes into your database. However, if I&amp;rsquo;ve taught you anything about &lt;a href="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">not trusting user input&lt;/a>, the very idea of a non-verified sign up process should raise your hackles. Spam may be great when fried in a sandwich, but no fun when it&amp;rsquo;s running up your AWS bill.&lt;/p>
+&lt;p>While you can use a strategy like a CAPTCHA or puzzle for is-it-a-human verification, these can create enough friction to turn away your potential subscribers. Instead, a confirmation email can help to ensure both address correctness and user sentience.&lt;/p>
+&lt;p>To build a subscription flow with email confirmation, create single-responsibility functions that satisfy each logical step. Those are:&lt;/p>
+&lt;ol>
+&lt;li>Accept an email address and record it.&lt;/li>
+&lt;li>Generate a token associated with that email address and record it.&lt;/li>
+&lt;li>Send a confirmation email to that email address with the token.&lt;/li>
+&lt;li>Accept a verification request that has both the email address and token.&lt;/li>
+&lt;/ol>
+&lt;p>To achieve each of these goals, Simple Subscribe uses the &lt;a href="https://docs.aws.amazon.com/sdk-for-go/api/">official AWS SDK for Go&lt;/a> to interact with DynamoDB and SES.&lt;/p>
+&lt;p>At each stage, consider what the data looks like and how you store it. This can help to handle conundrums like, &amp;ldquo;What happens if someone tries to subscribe twice?&amp;rdquo; or even &lt;a href="https://victoria.dev/blog/if-you-want-to-build-a-treehouse-start-at-the-bottom/">threat-modeling&lt;/a> such as, &amp;ldquo;What if someone subscribes with an email they don&amp;rsquo;t own?&amp;rdquo;&lt;/p>
+&lt;p>Ready? Let&amp;rsquo;s break down each step and see how the magic happens.&lt;/p>
+&lt;h3 id="subscribing" class="anchor-link">&lt;a href="#subscribing">Subscribing&lt;/a>&lt;/h3>
+&lt;p>The subscription process begins with a humble web form, like the one on my site&amp;rsquo;s main page. A form input with attributes &lt;code>type=&amp;quot;email&amp;quot; required&lt;/code> helps with validation, &lt;a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email#Validation">thanks to the browser&lt;/a>. When submitted, the form sends a GET request to the Simple Subscribe subscription endpoint.&lt;/p>
+&lt;p>Simple Subscribe receives a GET request to this endpoint with a query string containing the intended subscriber&amp;rsquo;s email. It then generates an &lt;code>id&lt;/code> value and adds both &lt;code>email&lt;/code> and &lt;code>id&lt;/code> to your DynamoDB table.&lt;/p>
+&lt;p>The table item now looks like:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>email&lt;/th>
+&lt;th>confirm&lt;/th>
+&lt;th>id&lt;/th>
+&lt;th>timestamp&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;code>subscriber@example.com&lt;/code>&lt;/td>
+&lt;td>&lt;em>false&lt;/em>&lt;/td>
+&lt;td>&lt;code>uuid-xxxxx&lt;/code>&lt;/td>
+&lt;td>2020-11-01 00:27:39&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>The &lt;code>confirm&lt;/code> column, which holds a boolean, indicates that the item is a subscription request that has not yet been confirmed. To verify an email address in the database, you&amp;rsquo;ll need to find the correct item and change &lt;code>confirm&lt;/code> to &lt;code>true&lt;/code>.&lt;/p>
+&lt;p>As you work with your data, consider the goal of each manipulation and how you might compare an incoming request to existing data.&lt;/p>
+&lt;p>For example, if someone made a subsequent subscription request for the same email address, how would you handle it? You might say, &amp;ldquo;Create a new line item with a new &lt;code>id&lt;/code>,&amp;rdquo; however, this might not be best strategy when your serverless application database is paid for by request volume.&lt;/p>
+&lt;p>Since &lt;a href="https://aws.amazon.com/dynamodb/pricing/">DynamoDB Pricing&lt;/a> depends on how much data you read and write to your tables, it&amp;rsquo;s advantageous to avoid piling on excess data.&lt;/p>
+&lt;p>With that in mind, it would be prudent to handle subscription requests for the same email by performing an update instead of adding a new line. Simple Subscribe actually uses the same function to either add or update a database item. This is typically referred to as, &amp;ldquo;update or insert.&amp;rdquo;&lt;/p>
+&lt;p>In a database like SQLite this is accomplished with the &lt;a href="https://www.sqlite.org/lang_UPSERT.html">UPSERT syntax&lt;/a>. In the case of DynamoDB, you use an update operation. For the &lt;a href="https://docs.aws.amazon.com/sdk-for-go/api/service/dynamodb/">Go SDK&lt;/a>, its syntax is &lt;code>UpdateItem&lt;/code>.&lt;/p>
+&lt;p>When a duplicate subscription request is received, the database item is matched on the &lt;code>email&lt;/code> only. If an existing line item is found, its &lt;code>id&lt;/code> and &lt;code>timestamp&lt;/code> are overridden, which updates the existing database record and avoids flooding your table with duplicate requests.&lt;/p>
+&lt;h3 id="verifying-email-addresses" class="anchor-link">&lt;a href="#verifying-email-addresses">Verifying email addresses&lt;/a>&lt;/h3>
+&lt;p>After submitting the form, the intended subscriber then receives an email from SES containing a link. This link is built using the &lt;code>email&lt;/code> and &lt;code>id&lt;/code> from the table, and takes the format:&lt;/p>
+&lt;pre>&lt;code class="language-url" data-lang="url">&amp;lt;BASE_URL&amp;gt;&amp;lt;VERIFY_PATH&amp;gt;/?email=subscriber@example.com&amp;amp;id=uuid-xxxxx
+&lt;/code>&lt;/pre>&lt;p>In this set up, the &lt;code>id&lt;/code> is a UUID that acts as a secret token. It provides an identifier that you can match that is sufficiently complex and hard to guess. This approach deters people from subscribing with email addresses they don&amp;rsquo;t control.&lt;/p>
+&lt;p>Visiting the link sends a request to your verification endpoint with the &lt;code>email&lt;/code> and &lt;code>id&lt;/code> in the query string. This time, it&amp;rsquo;s important to compare both the incoming &lt;code>email&lt;/code> and &lt;code>id&lt;/code> values to the database record. This verifies that the recipient of the confirmation email is initiating the request.&lt;/p>
+&lt;p>The verification endpoint ensures that these values match an item in your database, then performs another update operation to set &lt;code>confirm&lt;/code> to &lt;code>true&lt;/code>, and update the timestamp. The item now looks like:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>email&lt;/th>
+&lt;th>confirm&lt;/th>
+&lt;th>id&lt;/th>
+&lt;th>timestamp&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;code>subscriber@example.com&lt;/code>&lt;/td>
+&lt;td>&lt;em>true&lt;/em>&lt;/td>
+&lt;td>&lt;code>uuid-xxxxx&lt;/code>&lt;/td>
+&lt;td>2020-11-01 00:37:39&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="querying-for-emails" class="anchor-link">&lt;a href="#querying-for-emails">Querying for emails&lt;/a>&lt;/h3>
+&lt;p>You can now query your table to build your email list. Depending on your email sending solution, you might do this manually, with another Lambda, or even from the command line.&lt;/p>
+&lt;p>Since data for requested subscriptions (where &lt;code>confirm&lt;/code> is &lt;code>false&lt;/code>) is stored in the table alongside confirmed subscriptions, it&amp;rsquo;s important to differentiate this data when querying for email addresses to send to. You&amp;rsquo;ll want to ensure you only return emails where &lt;code>confirm&lt;/code> is &lt;code>true&lt;/code>.&lt;/p>
+&lt;h2 id="providing-unsubscribe-links" class="anchor-link">&lt;a href="#providing-unsubscribe-links">Providing unsubscribe links&lt;/a>&lt;/h2>
+&lt;p>Similar to verifying an email address, Simple Subscribe uses &lt;code>email&lt;/code> and &lt;code>id&lt;/code> as arguments to the function that deletes an item from your DynamoDB table in order to unsubscribe an email address. To allow people to remove themselves from your list, you&amp;rsquo;ll need to provide a URL in each email you send that includes their &lt;code>email&lt;/code> and &lt;code>id&lt;/code> as a query string to the unsubscribe endpoint. It would look something like:&lt;/p>
+&lt;pre>&lt;code class="language-url" data-lang="url">&amp;lt;BASE_URL&amp;gt;&amp;lt;UNSUBSCRIBE_PATH&amp;gt;/?email=subscriber@example.com&amp;amp;id=uuid-xxxxx
+&lt;/code>&lt;/pre>&lt;p>When the link is clicked, the query string is passed to the unsubscribe endpoint. If the provided &lt;code>email&lt;/code> and &lt;code>id&lt;/code> match a database item, that item will be deleted.&lt;/p>
+&lt;p>Proving a method for your subscribers to automatically remove themselves from your list, without any human intervention necessary, is part of an ethical and respectful philosophy towards handling the data that&amp;rsquo;s been entrusted to you.&lt;/p>
+&lt;h2 id="caring-for-your-data" class="anchor-link">&lt;a href="#caring-for-your-data">Caring for your data&lt;/a>&lt;/h2>
+&lt;p>Once you decide to accept other people&amp;rsquo;s data, it becomes your responsibility to care for it. This is applicable to everything you build. For Simple Subscribe, it means maintaining the security of your database, and periodically pruning your table.&lt;/p>
+&lt;p>In order to avoid retaining email addresses where &lt;code>confirm&lt;/code> is &lt;code>false&lt;/code> past a certain time frame, it would be a good idea to set up a cleaning function that runs on a regular schedule. This can be achieved manually, with an AWS Lambda function, or using the command line.&lt;/p>
+&lt;p>To clean up, find database items where &lt;code>confirm&lt;/code> is &lt;code>false&lt;/code> and &lt;code>timestamp&lt;/code> is older than a particular point in time. Depending on your use case and request volumes, the frequency at which you choose to clean up will vary.&lt;/p>
+&lt;p>Also depending on your use case, you may wish to keep backups of your data. If you are particularly concerned about data integrity, you can explore &lt;a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backuprestore_HowItWorks.html">On-Demand Backup&lt;/a> or &lt;a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html">Point-in-Time Recovery&lt;/a> for DynamoDB.&lt;/p>
+&lt;h2 id="build-your-independent-subscriber-base" class="anchor-link">&lt;a href="#build-your-independent-subscriber-base">Build your independent subscriber base&lt;/a>&lt;/h2>
+&lt;p>Building your own subscriber list can be an empowering endeavor! Whether you intend to start a newsletter, send out notifications for new content, or want to create a community around your work, there&amp;rsquo;s nothing more personal or direct than an email from me to you.&lt;/p>
+&lt;p>I encourage you to start building your subscriber base with Simple Subscribe today! Like most of my work, it&amp;rsquo;s open source and free for your personal use. Dive into the code at &lt;a href="https://github.com/victoriadrake/simple-subscribe">the GitHub repository&lt;/a> or learn more at &lt;a href="https://simplesubscribe.org">SimpleSubscribe.org&lt;/a>.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/envelope_hucad7a3ef0e3d02cdec9a6198cd528fcc_59352_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained</title><link>https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/</link><pubDate>Mon, 19 Oct 2020 04:02:27 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/</guid><description>Which one should you be using? Why Wi-Fi security matters.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/cover_hu61e2fc04569103989a955f6053c38fe9_477528_640x0_resize_box_2.png" width="640" height="320"/>
 &lt;p>Setting up new Wi-Fi? Picking the type of password you need can seem like an arbitrary choice. After all, WEP, WPA, WPA2, and WPA3 all have mostly the same letters in them. A password is a password, so what&amp;rsquo;s the difference?&lt;/p>
 &lt;p>About 60 seconds to billions of years, as it turns out.&lt;/p>
