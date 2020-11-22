@@ -1,102 +1,406 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>How to create a self-documenting Makefile | victoria.dev</title><script async defer data-domain=victoria.dev src=https://plausible.io/js/plausible.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="How to create a self-documenting Makefile - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="Accelerate your workflow and DevOps with command-line aliases you can check in"><meta property="og:url" content="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="How to create a self-documenting Makefile"><meta name=twitter:image content="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/cover.png"><meta name=twitter:description content="Accelerate your workflow and DevOps with command-line aliases you can check in"><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.3d96631fe99983f5f787097626eec346c27961426ec9d4654b510e9d44942a05.css integrity="sha256-PZZjH+mZg/X3hwl2Ju7DRsJ5YUJuydRlS1EOnUSUKgU=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻 hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰 blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖 about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for How to create a self-documenting Makefile">📡 rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/cover.png alt="cover image"></div><article><h1>How to create a self-documenting Makefile</h1><p class=subtitle>Accelerate your workflow and DevOps with command-line aliases you can check in</p><p class=metadata id=date>August 5, 2020&nbsp;
-☕️
-&nbsp;4 min read
-&nbsp;
-<a class="tag button" href=/tags/coding/>coding
-</a>&nbsp;
-<a class="tag button" href=/tags/ci/cd/>ci/cd
-</a>&nbsp;
-<a class="tag button" href=/tags/docs/>docs
-</a>&nbsp;
-<a class="tag button" href=/tags/tech-team/>tech team
-</a>&nbsp;</p><div class=page-separator><hr></div><div class=markdown><p>My new favorite way to completely underuse a Makefile? Creating personalized, per-project repository workflow command aliases that you can check in.</p><p>Can a Makefile improve your DevOps and keep developers happy? How awesome would it be if a new developer working on your project didn&rsquo;t start out by copying and pasting commands from your README? What if instead of:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>pip3 install pipenv
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    How to create a self-documenting Makefile | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://plausible.io/js/plausible.js"></script>
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="How to create a self-documenting Makefile - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="Accelerate your workflow and DevOps with command-line aliases you can check in" />
+<meta property="og:url" content="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How to create a self-documenting Makefile" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/cover.png"/>
+
+<meta name="twitter:description"
+    content="Accelerate your workflow and DevOps with command-line aliases you can check in" />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.3d96631fe99983f5f787097626eec346c27961426ec9d4654b510e9d44942a05.css" integrity="sha256-PZZjH&#43;mZg/X3hwl2Ju7DRsJ5YUJuydRlS1EOnUSUKgU=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                👩🏻‍💻 hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                📰 blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                📖 about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for How to create a self-documenting Makefile" />📡 rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+        How to create a self-documenting Makefile
+    </h1>
+    
+    <p class="subtitle">Accelerate your workflow and DevOps with command-line aliases you can check in</p>
+    
+    <p class="metadata" id="date">
+        August 5, 2020&nbsp;
+         ☕️
+        &nbsp;4 min read
+
+        
+        &nbsp;
+        
+        <a class="tag button" href="/tags/coding/">
+            coding
+        </a>&nbsp;
+        
+        <a class="tag button" href="/tags/ci/cd/">
+            ci/cd
+        </a>&nbsp;
+        
+        <a class="tag button" href="/tags/docs/">
+            docs
+        </a>&nbsp;
+        
+        <a class="tag button" href="/tags/tech-team/">
+            tech team
+        </a>&nbsp;
+        
+        
+
+        
+    </p>
+
+    
+
+    <div class="page-separator">
+        <hr />
+    </div>
+
+    <div class="markdown">
+        <p>My new favorite way to completely underuse a Makefile? Creating personalized, per-project repository workflow command aliases that you can check in.</p>
+<p>Can a Makefile improve your DevOps and keep developers happy? How awesome would it be if a new developer working on your project didn&rsquo;t start out by copying and pasting commands from your README? What if instead of:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">pip3 install pipenv
 pipenv shell --python 3.8
 pipenv install --dev
 npm install
 pre-commit install --install-hooks
-<span class=c1># look up how to install Framework X...</span>
-<span class=c1># copy and paste from README...</span>
+<span class="c1"># look up how to install Framework X...</span>
+<span class="c1"># copy and paste from README...</span>
 npm run serve
-</code></pre></div><p>&mldr; you could just type:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>make start
-</code></pre></div><p>&mldr;and then start working?</p><h2 id=making-a-difference class=anchor-link><a href=https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/#making-a-difference>Making a difference</a></h2><p>I use <code>make</code> every day to take the tedium out of common development activities like updating programs, installing dependencies, and testing. To do all this with a Makefile (GNU make), we use <a href=https://www.gnu.org/software/make/manual/make.html#Rules>Makefile rules</a> and <a href=https://www.gnu.org/software/make/manual/make.html#Recipes>recipes</a>. Similar parallels exist for POSIX flavor make, like <a href=https://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html#tag_20_76_13_04>Target Rules</a>; here&rsquo;s a <a href=https://nullprogram.com/blog/2017/08/20/>great article</a> on POSIX-compatible Makefiles.</p><p>Here&rsquo;s some examples of things we can <code>make</code> easier (sorry):</p><div class=highlight><pre class=chroma><code class=language-Makefile data-lang=Makefile><span class=nf>update</span><span class=o>:</span> <span class=c>## Do apt upgrade and autoremove
-</span><span class=c></span>    sudo apt update <span class=o>&amp;&amp;</span> sudo apt upgrade -y
+</code></pre></div><p>&hellip; you could just type:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">make start
+</code></pre></div><p>&hellip;and then start working?</p>
+<h2 id="making-a-difference" class="anchor-link"><a href="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/#making-a-difference">Making a difference</a></h2>
+<p>I use <code>make</code> every day to take the tedium out of common development activities like updating programs, installing dependencies, and testing. To do all this with a Makefile (GNU make), we use <a href="https://www.gnu.org/software/make/manual/make.html#Rules">Makefile rules</a> and <a href="https://www.gnu.org/software/make/manual/make.html#Recipes">recipes</a>. Similar parallels exist for POSIX flavor make, like <a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html#tag_20_76_13_04">Target Rules</a>; here&rsquo;s a <a href="https://nullprogram.com/blog/2017/08/20/">great article</a> on POSIX-compatible Makefiles.</p>
+<p>Here&rsquo;s some examples of things we can <code>make</code> easier (sorry):</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">update</span><span class="o">:</span> <span class="c">## Do apt upgrade and autoremove
+</span><span class="c"></span>    sudo apt update <span class="o">&amp;&amp;</span> sudo apt upgrade -y
     sudo apt autoremove -y
 
-<span class=nf>env</span><span class=o>:</span>
+<span class="nf">env</span><span class="o">:</span>
     pip3 install pipenv
     pipenv shell --python 3.8
 
-<span class=nf>install</span><span class=o>:</span> <span class=c>## Install or update dependencies
-</span><span class=c></span>    pipenv install --dev
+<span class="nf">install</span><span class="o">:</span> <span class="c">## Install or update dependencies
+</span><span class="c"></span>    pipenv install --dev
     npm install
     pre-commit install --install-hooks
 
-<span class=nf>serve</span><span class=o>:</span> <span class=c>## Run the local development server
-</span><span class=c></span>    hugo serve --enableGitInfo --disableFastRender --environment development
+<span class="nf">serve</span><span class="o">:</span> <span class="c">## Run the local development server
+</span><span class="c"></span>    hugo serve --enableGitInfo --disableFastRender --environment development
 
-<span class=nf>initial</span><span class=o>:</span> <span class=n>update</span> <span class=n>env</span> <span class=n>install</span> <span class=n>serve</span> <span class=c>## Install tools and start development server
-</span></code></pre></div><p>Now we have some command-line aliases that you can check in! Great idea! If you&rsquo;re wondering what&rsquo;s up with that weird <code>##</code> comment syntax, it gets better.</p><h2 id=a-self-documenting-makefile class=anchor-link><a href=https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/#a-self-documenting-makefile>A self-documenting Makefile</a></h2><p>Aliases are great, if you remember what they all are and what they do without constantly typing <code>cat Makefile</code>. Naturally, you need a <code>help</code> command:</p><div class=highlight><pre class=chroma><code class=language-Makefile data-lang=Makefile><span class=nf>.PHONY</span><span class=o>:</span> <span class=n>help</span>
-<span class=nf>help</span><span class=o>:</span> <span class=c>## Show this help
-</span><span class=c></span>    @egrep -h <span class=s1>&#39;\s##\s&#39;</span> <span class=k>$(</span>MAKEFILE_LIST<span class=k>)</span> <span class=p>|</span> sort <span class=p>|</span> awk <span class=s1>&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
-</code></pre></div><p>With a little command-line magic, this <code>egrep</code> command takes the output of <code>MAKEFILE_LIST</code>, sorts it, and uses <code>awk</code> to find strings that follow the <code>##</code> pattern. It then prints a helpful formatted version of the comments.</p><p>We&rsquo;ll put it at the top of the file so it&rsquo;s the default target. Now to see all our handy shortcuts and what they do, we just run <code>make</code>, or <code>make help</code>:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>help                 Show this help
+<span class="nf">initial</span><span class="o">:</span> <span class="n">update</span> <span class="n">env</span> <span class="n">install</span> <span class="n">serve</span> <span class="c">## Install tools and start development server
+</span></code></pre></div><p>Now we have some command-line aliases that you can check in! Great idea! If you&rsquo;re wondering what&rsquo;s up with that weird <code>##</code> comment syntax, it gets better.</p>
+<h2 id="a-self-documenting-makefile" class="anchor-link"><a href="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/#a-self-documenting-makefile">A self-documenting Makefile</a></h2>
+<p>Aliases are great, if you remember what they all are and what they do without constantly typing <code>cat Makefile</code>. Naturally, you need a <code>help</code> command:</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span>
+<span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
+</span><span class="c"></span>    @egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> sort <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</code></pre></div><p>With a little command-line magic, this <code>egrep</code> command takes the output of <code>MAKEFILE_LIST</code>, sorts it, and uses <code>awk</code> to find strings that follow the <code>##</code> pattern. It then prints a helpful formatted version of the comments.</p>
+<p>We&rsquo;ll put it at the top of the file so it&rsquo;s the default target. Now to see all our handy shortcuts and what they do, we just run <code>make</code>, or <code>make help</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">help                 Show this help
 initial              Install tools and start development server
 install              Install or update dependencies
 serve                Run the local development server
 update               Do apt upgrade and autoremove
-</code></pre></div><p>Now we have our very own personalized and project-specific CLI tool!</p><p>The possibilities for improving your DevOps flow with a self-documenting Makefile are almost endless. You can use one to simplify any workflow and produce some very happy developers.</p><p>Please enjoy the (live!) Makefile I use to manage and develop this Hugo site. I hope it inspires you!</p><details><summary>My Hugo site Makefile</summary><div class=highlight><pre class=chroma><code class=language-Makefile data-lang=Makefile>
-<span class=nv>SHELL</span> <span class=o>:=</span> /bin/bash
-<span class=nf>.POSIX</span><span class=o>:</span>
-<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>help</span> <span class=n>env</span> <span class=n>install</span> <span class=n>upgrade</span>-<span class=n>hugo</span> <span class=n>lint</span> <span class=n>serve</span> <span class=n>build</span> <span class=n>start</span> <span class=n>initial</span>
+</code></pre></div><p>Now we have our very own personalized and project-specific CLI tool!</p>
+<p>The possibilities for improving your DevOps flow with a self-documenting Makefile are almost endless. You can use one to simplify any workflow and produce some very happy developers.</p>
+<p>Please enjoy the (live!) Makefile I use to manage and develop this Hugo site. I hope it inspires you!</p>
+<details>
+<summary>My Hugo site Makefile</summary>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile">
+<span class="nv">SHELL</span> <span class="o">:=</span> /bin/bash
+<span class="nf">.POSIX</span><span class="o">:</span>
+<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span> <span class="n">env</span> <span class="n">install</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">lint</span> <span class="n">serve</span> <span class="n">build</span> <span class="n">start</span> <span class="n">initial</span>
 
-<span class=nf>help</span><span class=o>:</span> <span class=c>## Show this help
-</span><span class=c></span>	@egrep -h <span class=s1>&#39;\s##\s&#39;</span> <span class=k>$(</span>MAKEFILE_LIST<span class=k>)</span> <span class=p>|</span> sort <span class=p>|</span> awk <span class=s1>&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+<span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
+</span><span class="c"></span>	@egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> sort <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
 
-<span class=nf>env</span><span class=o>:</span>
+<span class="nf">env</span><span class="o">:</span>
 	pip3 install pipenv
 
-<span class=nf>shell</span><span class=o>:</span> <span class=c>## Enter the virtual environment
-</span><span class=c></span>	pipenv shell
+<span class="nf">shell</span><span class="o">:</span> <span class="c">## Enter the virtual environment
+</span><span class="c"></span>	pipenv shell
 
-<span class=nf>install</span><span class=o>:</span> <span class=c>## Install or update dependencies
-</span><span class=c></span>	pipenv install --dev
+<span class="nf">install</span><span class="o">:</span> <span class="c">## Install or update dependencies
+</span><span class="c"></span>	pipenv install --dev
 	npm install
 	npm install -g markdownlint-cli
 	pre-commit install --install-hooks
 
-<span class=nv>HUGO_VERSION</span><span class=o>:=</span><span class=k>$(</span>shell curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest <span class=p>|</span> grep <span class=s1>&#39;tag_name&#39;</span> <span class=p>|</span> cut -d <span class=s1>&#39;&#34;&#39;</span> -f <span class=m>4</span> <span class=p>|</span> cut -c 2-<span class=k>)</span>
+<span class="nv">HUGO_VERSION</span><span class="o">:=</span><span class="k">$(</span>shell curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest <span class="p">|</span> grep <span class="s1">&#39;tag_name&#39;</span> <span class="p">|</span> cut -d <span class="s1">&#39;&#34;&#39;</span> -f <span class="m">4</span> <span class="p">|</span> cut -c 2-<span class="k">)</span>
 
-<span class=nf>upgrade-hugo</span><span class=o>:</span> <span class=c>## Get the latest Hugo
-</span><span class=c></span>	mkdir tmp/ <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>	<span class=nb>cd</span> tmp/ <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>	curl -sSL https://github.com/gohugoio/hugo/releases/download/v<span class=k>$(</span>HUGO_VERSION<span class=k>)</span>/hugo_extended_<span class=k>$(</span>HUGO_VERSION<span class=k>)</span>_Linux-64bit.tar.gz <span class=p>|</span> tar -xvzf- <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>	sudo mv hugo /usr/local/bin/ <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>	<span class=nb>cd</span> .. <span class=o>&amp;&amp;</span> <span class=se>\
-</span><span class=se></span>	rm -rf tmp/
+<span class="nf">upgrade-hugo</span><span class="o">:</span> <span class="c">## Get the latest Hugo
+</span><span class="c"></span>	mkdir tmp/ <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>	<span class="nb">cd</span> tmp/ <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>	curl -sSL https://github.com/gohugoio/hugo/releases/download/v<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz <span class="p">|</span> tar -xvzf- <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>	sudo mv hugo /usr/local/bin/ <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>	<span class="nb">cd</span> .. <span class="o">&amp;&amp;</span> <span class="se">\
+</span><span class="se"></span>	rm -rf tmp/
 	hugo version
 
-<span class=nf>lint</span><span class=o>:</span> <span class=c>## Lint files
-</span><span class=c></span>	pre-commit run --all-files
+<span class="nf">lint</span><span class="o">:</span> <span class="c">## Lint files
+</span><span class="c"></span>	pre-commit run --all-files
 
-<span class=nf>serve</span><span class=o>:</span> <span class=c>## Run the local development server
-</span><span class=c></span>	hugo serve --enableGitInfo --disableFastRender --environment development
+<span class="nf">serve</span><span class="o">:</span> <span class="c">## Run the local development server
+</span><span class="c"></span>	hugo serve --enableGitInfo --disableFastRender --environment development
 
-<span class=nf>future</span><span class=o>:</span> <span class=c>## Run the local development server in the future
-</span><span class=c></span>	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
+<span class="nf">future</span><span class="o">:</span> <span class="c">## Run the local development server in the future
+</span><span class="c"></span>	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
 
-<span class=nf>build</span><span class=o>:</span> <span class=c>## Lock dependencies and build site
-</span><span class=c></span>	pipenv lock
+<span class="nf">build</span><span class="o">:</span> <span class="c">## Lock dependencies and build site
+</span><span class="c"></span>	pipenv lock
 	hugo --minify --cleanDestination
 
-<span class=nf>start</span><span class=o>:</span> <span class=n>upgrade</span>-<span class=n>hugo</span> <span class=n>serve</span> <span class=c>## Update Hugo and start development server
-</span><span class=c></span>
-<span class=nf>initial</span><span class=o>:</span> <span class=n>env</span> <span class=n>install</span> <span class=n>upgrade</span>-<span class=n>hugo</span> <span class=n>serve</span> <span class=c>## Install tools and start development server
-</span><span class=c></span>
+<span class="nf">start</span><span class="o">:</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">serve</span> <span class="c">## Update Hugo and start development server
+</span><span class="c"></span>
+<span class="nf">initial</span><span class="o">:</span> <span class="n">env</span> <span class="n">install</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">serve</span> <span class="c">## Install tools and start development server
+</span><span class="c"></span>
 
 
-</code></pre></div></details></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/>Django project best practices to keep your developers happy</a><p>Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.</p><p class=metadata><a class="tag button" href=/tags/python/>python</a>
-☕️ ☕️
-&nbsp;6 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/>Increase developer confidence with a great Django test suite</a><p>How to write tests for your Django applications that boost your team, and are actually useful.</p><p class=metadata><a class="tag button" href=/tags/coding/>coding</a>
-☕️
-&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/how-github-codespaces-increases-productivity-and-lowers-barriers/>How GitHub Codespaces increases productivity and lowers barriers</a><p>A look at how GitHub Codespaces can increase productivity and help new teammates and contributors start developing fast.</p><p class=metadata><a class="tag button" href=/tags/open-source/>open-source</a>
-☕️
-&nbsp;3 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px></a></li></ul></nav></body></html>
+</code></pre></div></details>
+
+    </div>
+</article>
+
+<div id="up-container">
+    <a href="#" id="up">&#709;</a>
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+
+<div class="related">
+    <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+    <ul role="menubar" id="article-list">
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/">Django project best practices to keep your developers happy</a>
+    <p>
+        Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/python/">python</a>
+        
+         ☕️ ☕️
+        &nbsp;6 min read
+    </p>
+    
+</li>
+
+
+
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/">Increase developer confidence with a great Django test suite</a>
+    <p>
+        How to write tests for your Django applications that boost your team, and are actually useful.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/coding/">coding</a>
+        
+         ☕️
+        &nbsp;5 min read
+    </p>
+    
+</li>
+
+
+
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/how-github-codespaces-increases-productivity-and-lowers-barriers/">How GitHub Codespaces increases productivity and lowers barriers</a>
+    <p>
+        A look at how GitHub Codespaces can increase productivity and help new teammates and contributors start developing fast.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/open-source/">open-source</a>
+        
+         ☕️
+        &nbsp;3 min read
+    </p>
+    
+</li>
+
+
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a>
+        </p>
+    </div>
+</div>
+
+            </div>
+
+            <footer class="container">
+                
+
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    👩🏻‍💻</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    📰</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    📖</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>

@@ -1,13 +1,175 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>Secure application architecture basics: separation, configuration, and access | victoria.dev</title><script async defer data-domain=victoria.dev src=https://plausible.io/js/plausible.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Secure application architecture basics: separation, configuration, and access - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A starting point for building secure application architecture, for busy developers."><meta property="og:url" content="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Secure application architecture basics: separation, configuration, and access"><meta name=twitter:image content="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/cover.png"><meta name=twitter:description content="A starting point for building secure application architecture, for busy developers."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.3d96631fe99983f5f787097626eec346c27961426ec9d4654b510e9d44942a05.css integrity="sha256-PZZjH+mZg/X3hwl2Ju7DRsJ5YUJuydRlS1EOnUSUKgU=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻 hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰 blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖 about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Secure application architecture basics: separation, configuration, and access">📡 rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/cover.png alt="cover image"></div><article><h1>Secure application architecture basics: separation, configuration, and access</h1><p class=subtitle>A starting point for building secure application architecture, for busy developers.</p><p class=metadata id=date>September 30, 2019&nbsp;
-☕️ ☕️
-&nbsp;8 min read
-&nbsp;
-<a class="tag button" href=/tags/cybersecurity/>cybersecurity
-</a>&nbsp;
-<a class="tag button" href=/tags/coding/>coding
-</a>&nbsp;
-<a class="tag button" href=/tags/data/>data
-</a>&nbsp;</p><div class=page-separator><hr></div><div class=markdown><p>Software developers today are encouraged to focus on building, and that&rsquo;s a great thing. We&rsquo;re benefitting from maker culture, an attitude of &ldquo;always be shipping,&rdquo; open source collaboration, and a bevy of apps that help us prioritize and execute with maximum efficiency. We&rsquo;re in an environment of constant creation, where both teams and solo entrepreneurs can be maximally productive.</p><p>Sometimes, this breakneck-speed productivity shows its downsides.</p><p>As I learn more about security best practices, I can&rsquo;t help but see more and more applications that just don&rsquo;t have a clue. A lack of awareness of security seems to lead to a lack of prioritization of tasks that don&rsquo;t directly support bringing the product to launch. The market seems to have made it more important to launch a usable product than a secure one, with the prevailing attitude being, &ldquo;we can do the security stuff later.&rdquo;</p><p>Cobbling together a foundation based more on expediency than longevity is a bad way to build applications and a great way to build security debt. Security debt, like technical debt, amasses when developers make (usually hasty) decisions that can make it more difficult to secure the application later on. If you&rsquo;re familiar with the concept of &ldquo;pushing left&rdquo; (or if you read my <a href=/blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/>article about sensitive data exposure</a>), you&rsquo;ll know that when it comes to security, sometimes there isn&rsquo;t a version of &ldquo;later&rdquo; that isn&rsquo;t <em>too</em> late. It&rsquo;s a shame, especially since following some basic security practices with high benefit yield early on in the development process doesn&rsquo;t take significantly more time than <em>not</em> following them. Often, it comes down to having some basic but important knowledge that enables making the more secure decision.</p><p>While application architecture specifics vary, there are a few basic principles we can commonly apply. This article will provide a high-level overview of areas that I hope will help point developers in the right direction.</p><p>There must be a reason we call it application &ldquo;architecture.&rdquo; I like to think it&rsquo;s because the architecture of software is similar in some basic ways to the architecture of a building. (Or at least, in my absolute zero building-creation expertise, how I imagine a pretty utilitarian building to be.) Here&rsquo;s how I like to summarize three basic points of building secure application architecture:</p><ol><li>Separated storage</li><li>Customized configuration</li><li>Controlled access and user scope</li></ol><p>This is only a jumping-off point meant to get us started on the right foot; a complete picture of a fully-realized application&rsquo;s security posture includes areas outside the scope of this post, including authentication, logging and monitoring, integration, and sometimes compliance.</p><h2 id=1-separated-storage class=anchor-link><a href=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/#1-separated-storage>1. Separated storage</a></h2><p>From a security standpoint, the concept of separation refers to storing files that serve different purposes in different places. When we&rsquo;re constructing our building and deciding where all the rooms go, we similarly create the lobby on the ground floor and place administrative offices on higher floors, perhaps off the main path. While both are rooms, we understand that they serve different purposes, have different functional needs, and possibly very different security requirements.</p><p><img src=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/separation.png alt="Separation of building floors"></p><p>When it comes to our files, the benefit is perhaps easiest for us to understand if we consider a simple file structure:</p><div class=highlight><pre class=chroma><code class=language-txt data-lang=txt>application/
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    Secure application architecture basics: separation, configuration, and access | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://plausible.io/js/plausible.js"></script>
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="Secure application architecture basics: separation, configuration, and access - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="A starting point for building secure application architecture, for busy developers." />
+<meta property="og:url" content="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Secure application architecture basics: separation, configuration, and access" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/cover.png"/>
+
+<meta name="twitter:description"
+    content="A starting point for building secure application architecture, for busy developers." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.3d96631fe99983f5f787097626eec346c27961426ec9d4654b510e9d44942a05.css" integrity="sha256-PZZjH&#43;mZg/X3hwl2Ju7DRsJ5YUJuydRlS1EOnUSUKgU=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                👩🏻‍💻 hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                📰 blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                📖 about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for Secure application architecture basics: separation, configuration, and access" />📡 rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+        Secure application architecture basics: separation, configuration, and access
+    </h1>
+    
+    <p class="subtitle">A starting point for building secure application architecture, for busy developers.</p>
+    
+    <p class="metadata" id="date">
+        September 30, 2019&nbsp;
+         ☕️ ☕️
+        &nbsp;8 min read
+
+        
+        &nbsp;
+        
+        <a class="tag button" href="/tags/cybersecurity/">
+            cybersecurity
+        </a>&nbsp;
+        
+        <a class="tag button" href="/tags/coding/">
+            coding
+        </a>&nbsp;
+        
+        <a class="tag button" href="/tags/data/">
+            data
+        </a>&nbsp;
+        
+        
+
+        
+    </p>
+
+    
+
+    <div class="page-separator">
+        <hr />
+    </div>
+
+    <div class="markdown">
+        <p>Software developers today are encouraged to focus on building, and that&rsquo;s a great thing. We&rsquo;re benefitting from maker culture, an attitude of &ldquo;always be shipping,&rdquo; open source collaboration, and a bevy of apps that help us prioritize and execute with maximum efficiency. We&rsquo;re in an environment of constant creation, where both teams and solo entrepreneurs can be maximally productive.</p>
+<p>Sometimes, this breakneck-speed productivity shows its downsides.</p>
+<p>As I learn more about security best practices, I can&rsquo;t help but see more and more applications that just don&rsquo;t have a clue. A lack of awareness of security seems to lead to a lack of prioritization of tasks that don&rsquo;t directly support bringing the product to launch. The market seems to have made it more important to launch a usable product than a secure one, with the prevailing attitude being, &ldquo;we can do the security stuff later.&rdquo;</p>
+<p>Cobbling together a foundation based more on expediency than longevity is a bad way to build applications and a great way to build security debt. Security debt, like technical debt, amasses when developers make (usually hasty) decisions that can make it more difficult to secure the application later on. If you&rsquo;re familiar with the concept of &ldquo;pushing left&rdquo; (or if you read my <a href="/blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/">article about sensitive data exposure</a>), you&rsquo;ll know that when it comes to security, sometimes there isn&rsquo;t a version of &ldquo;later&rdquo; that isn&rsquo;t <em>too</em> late. It&rsquo;s a shame, especially since following some basic security practices with high benefit yield early on in the development process doesn&rsquo;t take significantly more time than <em>not</em> following them. Often, it comes down to having some basic but important knowledge that enables making the more secure decision.</p>
+<p>While application architecture specifics vary, there are a few basic principles we can commonly apply. This article will provide a high-level overview of areas that I hope will help point developers in the right direction.</p>
+<p>There must be a reason we call it application &ldquo;architecture.&rdquo; I like to think it&rsquo;s because the architecture of software is similar in some basic ways to the architecture of a building. (Or at least, in my absolute zero building-creation expertise, how I imagine a pretty utilitarian building to be.) Here&rsquo;s how I like to summarize three basic points of building secure application architecture:</p>
+<ol>
+<li>Separated storage</li>
+<li>Customized configuration</li>
+<li>Controlled access and user scope</li>
+</ol>
+<p>This is only a jumping-off point meant to get us started on the right foot; a complete picture of a fully-realized application&rsquo;s security posture includes areas outside the scope of this post, including authentication, logging and monitoring, integration, and sometimes compliance.</p>
+<h2 id="1-separated-storage" class="anchor-link"><a href="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/#1-separated-storage">1. Separated storage</a></h2>
+<p>From a security standpoint, the concept of separation refers to storing files that serve different purposes in different places. When we&rsquo;re constructing our building and deciding where all the rooms go, we similarly create the lobby on the ground floor and place administrative offices on higher floors, perhaps off the main path. While both are rooms, we understand that they serve different purposes, have different functional needs, and possibly very different security requirements.</p>
+<p>
+
+<img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/separation.png" alt="Separation of building floors"  />
+
+</p>
+<p>When it comes to our files, the benefit is perhaps easiest for us to understand if we consider a simple file structure:</p>
+<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">application/
  ├───html/
  │   └───index.html
  ├───assets/
@@ -17,10 +179,188 @@
  │   └───style.css
  └───super-secret-configurations/
      └───master-keys.txt
-</code></pre></div><p>In our simplified example, let&rsquo;s say that all our application&rsquo;s images are stored in the <code>application/assets/images/</code> directory. When one of our users creates a profile and uploads their picture to it, this picture is also stored in this folder. Makes sense, right? It&rsquo;s an image, and that&rsquo;s where the images go. What&rsquo;s the issue?</p><p>If you&rsquo;re familiar with navigating a file structure in a terminal, you may have seen this syntax before: <code>../../</code>. The two dots are a handy way of saying, &ldquo;go up one directory.&rdquo; If we execute the command <code>cd ../../</code> in the <code>images/</code> directory of our simple file structure above, we&rsquo;d go up into <code>assets/</code>, then up again to the root directory, <code>application/</code>. This is a problem because of a wee little vulnerability dubbed <a href=https://cwe.mitre.org/data/definitions/22.html>path traversal</a>.</p><p>While the dot syntax saves us some typing, it also introduces the interesting advantage of not actually needing to know what the parent directory is called in order to go to it. Consider an attack payload script, delivered into the <code>images/</code> folder of our insecure application, that went up one directory using <code>cd ../</code> and then sent everything it found to the attacker, on repeat. Eventually, it would reach the root application directory and access the <code>super-secret-configurations/</code> folder. Not good.</p><p>While other measures should be in place to prevent path traversal and related user upload vulnerabilities, the simplest prevention by far is a separation of storage. Core application files and assets should not be combined with other data, and especially not with <a href=/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/>user input</a>. It&rsquo;s best to keep user-uploaded files and activity logs (which may contain juicy data and can be vulnerable to injection attacks) separate from the main application.</p><p>Separation can be achieved in a few ways, such as by using a different server, different instance, separate IP range, or separate domain.</p><h2 id=2-customized-configuration class=anchor-link><a href=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/#2-customized-configuration>2. Customized configuration</a></h2><p>While wasting time on customization can hinder productivity, one area that we definitely want to customize is configuration settings. <a href=https://github.com/OWASP/Top10/blob/cb5f8967bba106e14a350761ac4f93b8aec7f8fa/2017/en/0xa6-security-misconfiguration.md>Security misconfiguration</a> is listed in the OWASP Top 10. A significant number of security incidents occur because a server, firewall, or administrative account is running in production with default settings. Upon the opening of our new building, we&rsquo;d hopefully be more careful to ensure we haven&rsquo;t left any keys in the locks.</p><p><img src=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/defaultkey.png alt="Three keys"></p><p>Usually, the victims of attacks related to default settings aren&rsquo;t specifically targeted. Rather, they are found by automated scanning tools that attackers run over many possible targets, effectively prodding at many different systems to see if any roll over and expose some useful exploit. The automated nature of this attack means that it&rsquo;s important for us to review settings for every piece of our architecture. Even if an individual piece doesn&rsquo;t seem significant, it may provide a vulnerability that allows an attacker to use it as a gateway to our larger application.</p><p>In particular, examine architecture components for unattended areas such as:</p><ul><li>Default accounts, especially with default passwords, left in service;</li><li>Example web pages, tutorial applications, or sample data left in the application;</li><li>Unnecessary ports left in service, or ports left open to the Internet;</li><li>Unrestricted permitted HTTP methods;</li><li>Sensitive information stored in automated logs;</li><li>Default configured permissions in managed services; and,</li><li>Directory listings, or sensitive file types, left accessible by default.</li></ul><p>This list isn&rsquo;t exhaustive. Specific architecture components, such as cloud storage or web servers, will have other configurable features that should be reviewed. In general, reduce the application&rsquo;s attack surface by using minimal architecture components. If we use fewer components or don&rsquo;t install modules we don&rsquo;t need, we&rsquo;ll have fewer possible attack entry points to configure and safeguard.</p><h2 id=3-controlled-access-and-user-scope class=anchor-link><a href=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/#3-controlled-access-and-user-scope>3. Controlled access and user scope</a></h2><p>One of the more difficult security problems to test in an application is misconfigured access control. Automated testing tools have limited capability to find areas of an application that one user shouldn&rsquo;t be able to access. Thus, this is often left to manual testing or source code review to discover. By considering this vulnerability early on in the software development lifecycle when architectural decisions are being made, we reduce the risk that it becomes a problem that&rsquo;s harder to fix later. After all, we wouldn&rsquo;t simply leave our master keys out of reach on a high ledge and hope no one comes along with a ladder.</p><p><img src=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/access.png alt="A cartoon of a user attempting to elevate privilege"></p><p><a href=https://github.com/OWASP/Top10/blob/master/2017/en/0xa5-broken-access-control.md>Broken access control</a> is listed in the OWASP Top 10, which goes into more detail on its various forms. As a simple example, consider an application with two levels of access: administrators, and users. We want to build a new feature - the ability to moderate or ban users - with the intention that only administrators would be allowed to use it.</p><p>If we&rsquo;re aware of the possibility of access control misconfigurations or exploits, we may decide to build the moderation feature in a completely separate area from the user-accessible space, such as on a different domain, or as part of a model that users don&rsquo;t share. This greatly reduces the risk that an access control misconfiguration or elevation of privilege vulnerability might allow a user to improperly access the moderation feature later on.</p><p>Of course, robust access control in our application needs more support to be effective. Consider factors such as sensitive tokens, or keys passed as URL parameters, or whether a control fails securely or insecurely. Nevertheless, by considering authorization at the architectural stage, we can set ourselves up to make further reinforcements easier to implement.</p><h2 id=security-basics-for-maximum-benefit class=anchor-link><a href=https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/#security-basics-for-maximum-benefit>Security basics for maximum benefit</a></h2><p>Similar to avoiding racking up technical debt by choosing a well-vetted framework, developers can avoid security debt by becoming aware of common vulnerabilities and the simple architectural decisions we can make to help mitigate them. For a much more detailed resource on how to bake security into our applications from the start, the <a href=https://github.com/OWASP/ASVS>OWASP Application Security Verification Standard</a> is a robust guide.</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/>Build your own serverless subscriber list with Go and AWS</a><p>How to build your own newsletter list with DynamoDB and SES email sign up confirmations.</p><p class=metadata><a class="tag button" href=/tags/api/>api</a>
-☕️ ☕️
-&nbsp;7 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/secure-web-forms-for-the-front-end-developer/>Secure web forms for the front-end developer</a><p>How to design secure web forms: validate, sanitize, and control.</p><p class=metadata><a class="tag button" href=/tags/cybersecurity/>cybersecurity</a>
-☕️
-&nbsp;4 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/>A cron job that could save you from a ransomware attack</a><p>How a simple scheduled job can help you quickly recover from ransomware.</p><p class=metadata><a class="tag button" href=/tags/cybersecurity/>cybersecurity</a>
-☕️ ☕️
-&nbsp;7 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px></a></li></ul></nav></body></html>
+</code></pre></div><p>In our simplified example, let&rsquo;s say that all our application&rsquo;s images are stored in the <code>application/assets/images/</code> directory. When one of our users creates a profile and uploads their picture to it, this picture is also stored in this folder. Makes sense, right? It&rsquo;s an image, and that&rsquo;s where the images go. What&rsquo;s the issue?</p>
+<p>If you&rsquo;re familiar with navigating a file structure in a terminal, you may have seen this syntax before: <code>../../</code>. The two dots are a handy way of saying, &ldquo;go up one directory.&rdquo; If we execute the command <code>cd ../../</code> in the <code>images/</code> directory of our simple file structure above, we&rsquo;d go up into <code>assets/</code>, then up again to the root directory, <code>application/</code>. This is a problem because of a wee little vulnerability dubbed <a href="https://cwe.mitre.org/data/definitions/22.html">path traversal</a>.</p>
+<p>While the dot syntax saves us some typing, it also introduces the interesting advantage of not actually needing to know what the parent directory is called in order to go to it. Consider an attack payload script, delivered into the <code>images/</code> folder of our insecure application, that went up one directory using <code>cd ../</code> and then sent everything it found to the attacker, on repeat. Eventually, it would reach the root application directory and access the <code>super-secret-configurations/</code> folder. Not good.</p>
+<p>While other measures should be in place to prevent path traversal and related user upload vulnerabilities, the simplest prevention by far is a separation of storage. Core application files and assets should not be combined with other data, and especially not with <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">user input</a>. It&rsquo;s best to keep user-uploaded files and activity logs (which may contain juicy data and can be vulnerable to injection attacks) separate from the main application.</p>
+<p>Separation can be achieved in a few ways, such as by using a different server, different instance, separate IP range, or separate domain.</p>
+<h2 id="2-customized-configuration" class="anchor-link"><a href="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/#2-customized-configuration">2. Customized configuration</a></h2>
+<p>While wasting time on customization can hinder productivity, one area that we definitely want to customize is configuration settings. <a href="https://github.com/OWASP/Top10/blob/cb5f8967bba106e14a350761ac4f93b8aec7f8fa/2017/en/0xa6-security-misconfiguration.md">Security misconfiguration</a> is listed in the OWASP Top 10. A significant number of security incidents occur because a server, firewall, or administrative account is running in production with default settings. Upon the opening of our new building, we&rsquo;d hopefully be more careful to ensure we haven&rsquo;t left any keys in the locks.</p>
+<p>
+
+<img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/defaultkey.png" alt="Three keys"  />
+
+</p>
+<p>Usually, the victims of attacks related to default settings aren&rsquo;t specifically targeted. Rather, they are found by automated scanning tools that attackers run over many possible targets, effectively prodding at many different systems to see if any roll over and expose some useful exploit. The automated nature of this attack means that it&rsquo;s important for us to review settings for every piece of our architecture. Even if an individual piece doesn&rsquo;t seem significant, it may provide a vulnerability that allows an attacker to use it as a gateway to our larger application.</p>
+<p>In particular, examine architecture components for unattended areas such as:</p>
+<ul>
+<li>Default accounts, especially with default passwords, left in service;</li>
+<li>Example web pages, tutorial applications, or sample data left in the application;</li>
+<li>Unnecessary ports left in service, or ports left open to the Internet;</li>
+<li>Unrestricted permitted HTTP methods;</li>
+<li>Sensitive information stored in automated logs;</li>
+<li>Default configured permissions in managed services; and,</li>
+<li>Directory listings, or sensitive file types, left accessible by default.</li>
+</ul>
+<p>This list isn&rsquo;t exhaustive. Specific architecture components, such as cloud storage or web servers, will have other configurable features that should be reviewed. In general, reduce the application&rsquo;s attack surface by using minimal architecture components. If we use fewer components or don&rsquo;t install modules we don&rsquo;t need, we&rsquo;ll have fewer possible attack entry points to configure and safeguard.</p>
+<h2 id="3-controlled-access-and-user-scope" class="anchor-link"><a href="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/#3-controlled-access-and-user-scope">3. Controlled access and user scope</a></h2>
+<p>One of the more difficult security problems to test in an application is misconfigured access control. Automated testing tools have limited capability to find areas of an application that one user shouldn&rsquo;t be able to access. Thus, this is often left to manual testing or source code review to discover. By considering this vulnerability early on in the software development lifecycle when architectural decisions are being made, we reduce the risk that it becomes a problem that&rsquo;s harder to fix later. After all, we wouldn&rsquo;t simply leave our master keys out of reach on a high ledge and hope no one comes along with a ladder.</p>
+<p>
+
+<img src="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/access.png" alt="A cartoon of a user attempting to elevate privilege"  />
+
+</p>
+<p><a href="https://github.com/OWASP/Top10/blob/master/2017/en/0xa5-broken-access-control.md">Broken access control</a> is listed in the OWASP Top 10, which goes into more detail on its various forms. As a simple example, consider an application with two levels of access: administrators, and users. We want to build a new feature - the ability to moderate or ban users - with the intention that only administrators would be allowed to use it.</p>
+<p>If we&rsquo;re aware of the possibility of access control misconfigurations or exploits, we may decide to build the moderation feature in a completely separate area from the user-accessible space, such as on a different domain, or as part of a model that users don&rsquo;t share. This greatly reduces the risk that an access control misconfiguration or elevation of privilege vulnerability might allow a user to improperly access the moderation feature later on.</p>
+<p>Of course, robust access control in our application needs more support to be effective. Consider factors such as sensitive tokens, or keys passed as URL parameters, or whether a control fails securely or insecurely. Nevertheless, by considering authorization at the architectural stage, we can set ourselves up to make further reinforcements easier to implement.</p>
+<h2 id="security-basics-for-maximum-benefit" class="anchor-link"><a href="https://victoria.dev/blog/secure-application-architecture-basics-separation-configuration-and-access/#security-basics-for-maximum-benefit">Security basics for maximum benefit</a></h2>
+<p>Similar to avoiding racking up technical debt by choosing a well-vetted framework, developers can avoid security debt by becoming aware of common vulnerabilities and the simple architectural decisions we can make to help mitigate them. For a much more detailed resource on how to bake security into our applications from the start, the <a href="https://github.com/OWASP/ASVS">OWASP Application Security Verification Standard</a> is a robust guide.</p>
+
+    </div>
+</article>
+
+<div id="up-container">
+    <a href="#" id="up">&#709;</a>
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+
+<div class="related">
+    <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+    <ul role="menubar" id="article-list">
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/">Build your own serverless subscriber list with Go and AWS</a>
+    <p>
+        How to build your own newsletter list with DynamoDB and SES email sign up confirmations.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/api/">api</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+    </p>
+    
+</li>
+
+
+
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/secure-web-forms-for-the-front-end-developer/">Secure web forms for the front-end developer</a>
+    <p>
+        How to design secure web forms: validate, sanitize, and control.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/cybersecurity/">cybersecurity</a>
+        
+         ☕️
+        &nbsp;4 min read
+    </p>
+    
+</li>
+
+
+
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/">A cron job that could save you from a ransomware attack</a>
+    <p>
+        How a simple scheduled job can help you quickly recover from ransomware.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/cybersecurity/">cybersecurity</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+    </p>
+    
+</li>
+
+
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a>
+        </p>
+    </div>
+</div>
+
+            </div>
+
+            <footer class="container">
+                
+
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    👩🏻‍💻</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    📰</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    📖</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>
