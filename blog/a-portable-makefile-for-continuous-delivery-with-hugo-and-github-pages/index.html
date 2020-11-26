@@ -1,404 +1,76 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-    <head>
-        
-        <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
-<title>
-    A portable Makefile for continuous delivery with Hugo and GitHub Pages | victoria.dev
-</title>
-
-
-
-        <script async defer data-domain="victoria.dev" src="https://plausible.io/js/plausible.js"></script>
-        <meta
-  name="monetization"
-  content="$ilp.uphold.com/pBRfRwg2EJAe">
-
-        <meta property="og:title" content="A portable Makefile for continuous delivery with Hugo and GitHub Pages - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow." />
-<meta property="og:url" content="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/cover.png"/>
-
-
-        <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="A portable Makefile for continuous delivery with Hugo and GitHub Pages" />
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/cover.png"/>
-
-<meta name="twitter:description"
-    content="My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow." />
-
-        
-<link rel="shortcut icon" href="/img/favicon.ico">
-
-
-        
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.62b453726f59cb2eb0536ee9db4561f86672d7125b1278dd75ff87392881878f.css" integrity="sha256-YrRTcm9Zyy6wU27p20Vh&#43;GZy1xJbEnjddf&#43;HOSiBh48=" media="screen">
-
-
-
-
-
-        
-        
-        
-        
-    </head>
-
-    <body>
-        <header role="banner">
-            
-            <nav aria-label="Victoria.dev main menu" id="menu">
-    <ul role="menubar">
-        
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/">
-                👩🏻‍💻 hi</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/blog/">
-                📰 blog</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/about/">
-                📖 about</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/coffee/">
-                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> buy me coffee</a >
-        </li>
-        
-        <li role="none" class="menu-item">
-            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
-                title="RSS for A portable Makefile for continuous delivery with Hugo and GitHub Pages" />📡 rss</a>
-        </li>
-    </ul>
-</nav>
-
-            
-        </header>
-        <main aria-role="main">
-            <div class="container">
-                
-
-
-
-<div id="cover-image">
-    <img src="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/cover.png" alt="cover image" />
-</div>
-<article>
-    <h1>
-        
-
-                A portable Makefile for continuous delivery with Hugo and GitHub Pages
-            </h1>
-            
-            <p class="subtitle">My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.</p>
-            
-            <span>
-
-                
-                <a class="tag button" href="/tags/ci/cd/">
-                    ci/cd
-                </a>&nbsp;
-                
-                <a class="tag button" href="/tags/linux/">
-                    linux
-                </a>&nbsp;
-                
-                <a class="tag button" href="/tags/terminal/">
-                    terminal
-                </a>&nbsp;
-                
-                <a class="tag button" href="/tags/websites/">
-                    websites
-                </a>&nbsp;
-                
-                
-            </span>
-            <p class="metadata" id="date">
-                <span>October 21, 2019&nbsp;</span>
-                <span></span>
-                <span> ☕️&nbsp;5 min
-                    read</span>
-            </p>
-
-            
-            </p>
-
-            
-
-            <div class="page-separator">
-                <hr />
-            </div>
-
-            <div class="markdown">
-                <p>Fun fact: I first launched this GitHub Pages site 1,018 days ago.</p>
-<p>Since then, we&rsquo;ve grown together. From early cringe-worthy commit messages, through eighty-six versions of <a href="https://gohugo.io/">Hugo</a>, and up until last week, a less-than-streamlined multi-app continuous integration and deployment (CI/CD) workflow.</p>
-<p>If you know me at all, you know I love to automate things. I&rsquo;ve been using a combination of AWS Lambda, Netlify, and Travis CI to automatically build and publish this site. My workflow for the task includes:</p>
-<ul>
-<li>Build with <a href="https://gohugo.io/">Hugo</a> on push to master, and on a schedule (Netlify and Lambda);</li>
-<li>Optimize and resize images (Netlify);</li>
-<li>Test with <a href="https://github.com/gjtorikian/html-proofer">HTMLProofer</a> (Travis CI); and</li>
-<li>Deploy to my <a href="/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/">separate, public, GitHub Pages repository</a> (Netlify).</li>
-</ul>
-<p>Thanks to the introduction of GitHub Actions, I&rsquo;m able to do all the above with just one portable <a href="https://en.wikipedia.org/wiki/Makefile">Makefile</a>.</p>
-<p>Next week I&rsquo;ll cover my Actions set up; today, I&rsquo;ll take you through the nitty-gritty of my Makefile so you can write your own.</p>
-<h2 id="makefile-portability" class="anchor-link"><a href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#makefile-portability">Makefile portability</a></h2>
-<p><a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html">POSIX-standard-flavour Make</a> runs on every Unix-like system out there. <a href="https://en.wikipedia.org/wiki/Make_(software)#Derivatives">Make derivatives</a>, such as <a href="https://www.gnu.org/software/make/">GNU Make</a> and several flavours of BSD Make also run on Unix-like systems, though their particular use requires installing the respective program. To write a truly portable Makefile, mine follows the POSIX standard. (For a more thorough summation of POSIX-compatible Makefiles, I found this article helpful: <a href="https://nullprogram.com/blog/2017/08/20/">A Tutorial on Portable Makefiles</a>.) I run Ubuntu, so I&rsquo;ve tested the portability aspect using the BSD Make programs <code>bmake</code>, <code>pmake</code>, and <code>fmake</code>. Compatibility with non-Unix-like systems is a little more complicated, since shell commands differ. With derivatives such as Nmake, it&rsquo;s better to write a separate Makefile with appropriate Windows commands.</p>
-<p>While much of my particular use case could be achieved with shell scripting, I find Make offers some worthwhile advantages. I enjoy the ease of using variables and <a href="https://en.wikipedia.org/wiki/Make_(software)#Macros">macros</a>, and the modularity of <a href="https://en.wikipedia.org/wiki/Makefile#Rules">rules</a> when it comes to organizing my steps.</p>
-<p>The writing of rules mostly comes down to shell commands, which is the main reason Makefiles are as portable as they are. The best part is that you can do pretty much <em>anything</em> in a terminal, and certainly handle all the workflow steps listed above.</p>
-<h2 id="my-continuous-deployment-makefile" class="anchor-link"><a href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#my-continuous-deployment-makefile">My continuous deployment Makefile</a></h2>
-<p>Here&rsquo;s the portable Makefile that handles my workflow. Yes, I put emojis in there. I&rsquo;m a monster.</p>
-<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">.POSIX</span><span class="o">:</span>
-<span class="nv">DESTDIR</span><span class="o">=</span>public
-<span class="nv">HUGO_VERSION</span><span class="o">=</span>0.58.3
-
-<span class="nv">OPTIMIZE</span> <span class="o">=</span> find <span class="k">$(</span>DESTDIR<span class="k">)</span> -not -path <span class="s2">&#34;*/static/*&#34;</span> <span class="se">\(</span> -name <span class="s1">&#39;*.png&#39;</span> -o -name <span class="s1">&#39;*.jpg&#39;</span> -o -name <span class="s1">&#39;*.jpeg&#39;</span> <span class="se">\)</span> -print0 <span class="p">|</span> <span class="se">\
-</span><span class="se"></span><span class="err">xargs</span> <span class="err">-0</span> <span class="err">-P8</span> <span class="err">-n2</span> <span class="err">mogrify</span> <span class="err">-strip</span> <span class="err">-thumbnail</span> <span class="s1">&#39;1000&gt;&#39;</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">all</span>
-<span class="nf">all</span><span class="o">:</span> <span class="n">get_repository</span> <span class="n">clean</span> <span class="n">get</span> <span class="n">build</span> <span class="n">test</span> <span class="n">deploy</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">get_repository</span>
-<span class="nf">get_repository</span><span class="o">:</span>
- @echo <span class="s2">&#34;🛎 Getting Pages repository&#34;</span>
- git clone https://github.com/victoriadrake/victoriadrake.github.io.git <span class="k">$(</span>DESTDIR<span class="k">)</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">clean</span>
-<span class="nf">clean</span><span class="o">:</span>
- @echo <span class="s2">&#34;🧹 Cleaning old build&#34;</span>
- <span class="nb">cd</span> <span class="k">$(</span>DESTDIR<span class="k">)</span> <span class="o">&amp;&amp;</span> rm -rf *
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">get</span>
-<span class="nf">get</span><span class="o">:</span>
- @echo <span class="s2">&#34;❓ Checking for hugo&#34;</span>
- @if ! <span class="o">[</span> -x <span class="s2">&#34;</span><span class="nv">$$</span><span class="s2">(command -v hugo)&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span><span class="se">\
-</span><span class="se"></span>  <span class="nb">echo</span> <span class="s2">&#34;🤵 Getting Hugo&#34;</span><span class="p">;</span><span class="se">\
-</span><span class="se"></span>     wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz<span class="p">;</span><span class="se">\
-</span><span class="se"></span>  tar xf tmp/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz -C tmp/<span class="p">;</span><span class="se">\
-</span><span class="se"></span>  sudo mv -f tmp/hugo /usr/bin/<span class="p">;</span><span class="se">\
-</span><span class="se"></span>  rm -rf tmp/<span class="p">;</span><span class="se">\
-</span><span class="se"></span>  hugo version<span class="p">;</span><span class="se">\
-</span><span class="se"></span> <span class="k">fi</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">build</span>
-<span class="nf">build</span><span class="o">:</span>
- @echo <span class="s2">&#34;🍳 Generating site&#34;</span>
- hugo --gc --minify -d <span class="k">$(</span>DESTDIR<span class="k">)</span>
-
- @echo <span class="s2">&#34;🧂 Optimizing images&#34;</span>
- <span class="k">$(</span>OPTIMIZE<span class="k">)</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">test</span>
-<span class="nf">test</span><span class="o">:</span>
- @echo <span class="s2">&#34;🍜 Testing HTML&#34;</span>
- docker run -v <span class="k">$(</span>GITHUB_WORKSPACE<span class="k">)</span>/<span class="k">$(</span>DESTDIR<span class="k">)</span>/:/mnt 18fgsa/html-proofer mnt --disable-external
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">deploy</span>
-<span class="nf">deploy</span><span class="o">:</span>
- @echo <span class="s2">&#34;🎁 Preparing commit&#34;</span>
- @cd <span class="k">$(</span>DESTDIR<span class="k">)</span> <span class="se">\
-</span><span class="se"></span> <span class="o">&amp;&amp;</span> git config user.email <span class="s2">&#34;hello@victoria.dev&#34;</span> <span class="se">\
-</span><span class="se"></span> <span class="o">&amp;&amp;</span> git config user.name <span class="s2">&#34;Victoria via GitHub Actions&#34;</span> <span class="se">\
-</span><span class="se"></span> <span class="o">&amp;&amp;</span> git add . <span class="se">\
-</span><span class="se"></span> <span class="o">&amp;&amp;</span> git status <span class="se">\
-</span><span class="se"></span> <span class="o">&amp;&amp;</span> git commit -m <span class="s2">&#34;🤖 CD bot is helping&#34;</span> <span class="se">\
-</span><span class="se"></span> <span class="o">&amp;&amp;</span> git push -f -q https://<span class="k">$(</span>TOKEN<span class="k">)</span>@github.com/victoriadrake/victoriadrake.github.io.git master
- @echo <span class="s2">&#34;🚀 Site is deployed!&#34;</span>
-</code></pre></div><p>Sequentially, this workflow:</p>
-<ol>
-<li>Clones the public Pages repository;</li>
-<li>Cleans (deletes) the previous build files;</li>
-<li>Downloads and installs the specified version of Hugo, if Hugo is not already present;</li>
-<li>Builds the site;</li>
-<li>Optimizes images;</li>
-<li>Tests the built site with HTMLProofer, and</li>
-<li>Prepares a new commit and pushes to the public Pages repository.</li>
-</ol>
-<p>If you&rsquo;re familiar with command line, most of this may look familiar. Here are a couple bits that might warrant a little explanation.</p>
-<h3 id="checking-if-a-program-is-already-installed" class="anchor-link"><a href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#checking-if-a-program-is-already-installed">Checking if a program is already installed</a></h3>
-<p>I think this bit is pretty tidy:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="k">if</span> ! <span class="o">[</span> -x <span class="s2">&#34;</span><span class="nv">$$</span><span class="s2">(command -v hugo)&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span><span class="se">\
-</span><span class="se"></span>...
-<span class="k">fi</span>
-</code></pre></div><p>I use a negated <code>if</code> conditional in conjunction with <code>command -v</code> to check if an executable (<code>-x</code>) called <code>hugo</code> exists. If one is not present, the script gets the specified version of Hugo and installs it. <a href="https://stackoverflow.com/a/677212">This Stack Overflow answer</a> has a nice summation of why <code>command -v</code> is a more portable choice than <code>which</code>.</p>
-<h3 id="image-optimization" class="anchor-link"><a href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#image-optimization">Image optimization</a></h3>
-<p>My Makefile uses <code>mogrify</code> to batch resize and compress images in particular folders. It finds them automatically using the file extension, and only modifies images that are larger than the target size of 1000px in any dimension. I wrote more about the <a href="/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/">batch-processing one-liner in this post</a>.</p>
-<p>There are a few different ways to achieve this same task, one of which, theoretically, is to take advantage of Make&rsquo;s <a href="https://en.wikipedia.org/wiki/Make_(software)#Suffix_rules">suffix rules</a> to run commands only on image files. I find the shell script to be more readable.</p>
-<h3 id="using-dockerized-htmlproofer" class="anchor-link"><a href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#using-dockerized-htmlproofer">Using Dockerized HTMLProofer</a></h3>
-<p>HTMLProofer is installed with <code>gem</code>, and uses Ruby and <a href="https://nokogiri.org/tutorials/ensuring_well_formed_markup.html">Nokogiri</a>, which adds up to a lot of installation time for a CI workflow. Thankfully, <a href="https://github.com/18F">18F</a> has a <a href="https://github.com/18F/html-proofer-docker">Dockerized version</a> that is much faster to implement. Its usage requires starting the container with the built site directory <a href="https://docs.docker.com/storage/volumes/#start-a-container-with-a-volume">mounted as a data volume</a>, which is easily achieved by appending to the <code>docker run</code> command.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run -v /absolute/path/to/site/:/mounted-site 18fgsa/html-proofer /mounted-site
-</code></pre></div><p>In my Makefile, I specify the absolute site path using the <a href="https://help.github.com/en/articles/virtual-environments-for-github-actions#environment-variables">default environment variable</a> <code>GITHUB_WORKSPACE</code>. I&rsquo;ll dive into this and other GitHub Actions features in the next post.</p>
-<p>In the meantime, happy Making!</p>
-
-            </div>
-        </article>
-
-        <div id="up-container">
-            <a href="#" id="up">&#709;</a>
-        </div>
-
-        <div class="page-separator">
-            <hr />
-        </div>
-
-        
-        
-        <div class="related">
-            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
-            <ul role="menubar" id="article-list">
-                
-                
-
-<li role="none">
-    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>
-    <p>
-        How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.
-    </p>
-    
-    <p class="metadata">
-        
-        <a class="tag button" href="/tags/ci/cd/">ci/cd</a>
-        
-         ☕️
-        &nbsp;5 min read
-    </p>
-    
-</li>
-
-
-
-                
-                
-
-<li role="none">
-    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-quick-guide-to-changing-your-github-username/">A quick guide to changing your GitHub username</a>
-    <p>
-        Some additional steps to consider after making a change to your username on GitHub.
-    </p>
-    
-    <p class="metadata">
-        
-        <a class="tag button" href="/tags/websites/">websites</a>
-        
-         ☕️
-        &nbsp;2 min read
-    </p>
-    
-</li>
-
-
-
-                
-                
-
-<li role="none">
-    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/">Batch renaming images, including image resolution, with awk</a>
-    <p>
-        How to batch rename images with custom values using file, awk, and rename - in rainbow colors!
-    </p>
-    
-    <p class="metadata">
-        
-        <a class="tag button" href="/tags/terminal/">terminal</a>
-        
-         ☕️
-        &nbsp;4 min read
-    </p>
-    
-</li>
-
-
-
-                
-            </ul>
-            
-
-            <div class="page-separator">
-                <p class="back-link"><a href="/blog">
-                        &lt;&lt; Back to blog</a>
-                </p>
-            </div>
-        </div>
-        
-            </div>
-
-            <footer class="container">
-                
-        
-
-
-
-
-<div class="markdown bio">
-    
-    <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-</div>
-
-
-        
-            </footer>
-        </main>
-
-        
-        
-        
-        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
-            <ul role="menubar">
-            
-            
-            <li role="none" class="menu-item">
-                <a role="menuitem" href="/">
-                    👩🏻‍💻</a >
-            </li>
-            
-            <li role="none" class="menu-item">
-                <a role="menuitem" href="/blog/">
-                    📰</a >
-            </li>
-            
-            <li role="none" class="menu-item">
-                <a role="menuitem" href="/about/">
-                    📖</a >
-            </li>
-            
-            <li role="none" class="menu-item">
-                <a role="menuitem" href="/coffee/">
-                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'></a >
-            </li>
-            
-        </ul>
-        </nav>
-    </body>
-
-</html>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>A portable Makefile for continuous delivery with Hugo and GitHub Pages | victoria.dev</title><script async defer data-domain=victoria.dev src=https://plausible.io/js/plausible.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="A portable Makefile for continuous delivery with Hugo and GitHub Pages - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow."><meta property="og:url" content="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="A portable Makefile for continuous delivery with Hugo and GitHub Pages"><meta name=twitter:image content="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/cover.png"><meta name=twitter:description content="My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.62b453726f59cb2eb0536ee9db4561f86672d7125b1278dd75ff87392881878f.css integrity="sha256-YrRTcm9Zyy6wU27p20Vh+GZy1xJbEnjddf+HOSiBh48=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻 hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰 blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖 about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for A portable Makefile for continuous delivery with Hugo and GitHub Pages">📡 rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/cover.png alt="cover image"></div><article><h1>A portable Makefile for continuous delivery with Hugo and GitHub Pages</h1><p class=subtitle>My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.</p><span><a class="tag button" href=/tags/ci/cd/>ci/cd
+</a>&nbsp;
+<a class="tag button" href=/tags/linux/>linux
+</a>&nbsp;
+<a class="tag button" href=/tags/terminal/>terminal
+</a>&nbsp;
+<a class="tag button" href=/tags/websites/>websites
+</a>&nbsp;</span><p class=metadata id=date><span>October 21, 2019&nbsp;</span>
+<span></span><span>☕️&nbsp;5 min
+read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>Fun fact: I first launched this GitHub Pages site 1,018 days ago.</p><p>Since then, we&rsquo;ve grown together. From early cringe-worthy commit messages, through eighty-six versions of <a href=https://gohugo.io/>Hugo</a>, and up until last week, a less-than-streamlined multi-app continuous integration and deployment (CI/CD) workflow.</p><p>If you know me at all, you know I love to automate things. I&rsquo;ve been using a combination of AWS Lambda, Netlify, and Travis CI to automatically build and publish this site. My workflow for the task includes:</p><ul><li>Build with <a href=https://gohugo.io/>Hugo</a> on push to master, and on a schedule (Netlify and Lambda);</li><li>Optimize and resize images (Netlify);</li><li>Test with <a href=https://github.com/gjtorikian/html-proofer>HTMLProofer</a> (Travis CI); and</li><li>Deploy to my <a href=/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/>separate, public, GitHub Pages repository</a> (Netlify).</li></ul><p>Thanks to the introduction of GitHub Actions, I&rsquo;m able to do all the above with just one portable <a href=https://en.wikipedia.org/wiki/Makefile>Makefile</a>.</p><p>Next week I&rsquo;ll cover my Actions set up; today, I&rsquo;ll take you through the nitty-gritty of my Makefile so you can write your own.</p><h2 id=makefile-portability class=anchor-link><a href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#makefile-portability>Makefile portability</a></h2><p><a href=https://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html>POSIX-standard-flavour Make</a> runs on every Unix-like system out there. <a href=https://en.wikipedia.org/wiki/Make_(software)#Derivatives>Make derivatives</a>, such as <a href=https://www.gnu.org/software/make/>GNU Make</a> and several flavours of BSD Make also run on Unix-like systems, though their particular use requires installing the respective program. To write a truly portable Makefile, mine follows the POSIX standard. (For a more thorough summation of POSIX-compatible Makefiles, I found this article helpful: <a href=https://nullprogram.com/blog/2017/08/20/>A Tutorial on Portable Makefiles</a>.) I run Ubuntu, so I&rsquo;ve tested the portability aspect using the BSD Make programs <code>bmake</code>, <code>pmake</code>, and <code>fmake</code>. Compatibility with non-Unix-like systems is a little more complicated, since shell commands differ. With derivatives such as Nmake, it&rsquo;s better to write a separate Makefile with appropriate Windows commands.</p><p>While much of my particular use case could be achieved with shell scripting, I find Make offers some worthwhile advantages. I enjoy the ease of using variables and <a href=https://en.wikipedia.org/wiki/Make_(software)#Macros>macros</a>, and the modularity of <a href=https://en.wikipedia.org/wiki/Makefile#Rules>rules</a> when it comes to organizing my steps.</p><p>The writing of rules mostly comes down to shell commands, which is the main reason Makefiles are as portable as they are. The best part is that you can do pretty much <em>anything</em> in a terminal, and certainly handle all the workflow steps listed above.</p><h2 id=my-continuous-deployment-makefile class=anchor-link><a href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#my-continuous-deployment-makefile>My continuous deployment Makefile</a></h2><p>Here&rsquo;s the portable Makefile that handles my workflow. Yes, I put emojis in there. I&rsquo;m a monster.</p><div class=highlight><pre class=chroma><code class=language-Makefile data-lang=Makefile><span class=nf>.POSIX</span><span class=o>:</span>
+<span class=nv>DESTDIR</span><span class=o>=</span>public
+<span class=nv>HUGO_VERSION</span><span class=o>=</span>0.58.3
+
+<span class=nv>OPTIMIZE</span> <span class=o>=</span> find <span class=k>$(</span>DESTDIR<span class=k>)</span> -not -path <span class=s2>&#34;*/static/*&#34;</span> <span class=se>\(</span> -name <span class=s1>&#39;*.png&#39;</span> -o -name <span class=s1>&#39;*.jpg&#39;</span> -o -name <span class=s1>&#39;*.jpeg&#39;</span> <span class=se>\)</span> -print0 <span class=p>|</span> <span class=se>\
+</span><span class=se></span><span class=err>xargs</span> <span class=err>-0</span> <span class=err>-P8</span> <span class=err>-n2</span> <span class=err>mogrify</span> <span class=err>-strip</span> <span class=err>-thumbnail</span> <span class=s1>&#39;1000&gt;&#39;</span>
+
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>all</span>
+<span class=nf>all</span><span class=o>:</span> <span class=n>get_repository</span> <span class=n>clean</span> <span class=n>get</span> <span class=n>build</span> <span class=n>test</span> <span class=n>deploy</span>
+
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>get_repository</span>
+<span class=nf>get_repository</span><span class=o>:</span>
+ @echo <span class=s2>&#34;🛎 Getting Pages repository&#34;</span>
+ git clone https://github.com/victoriadrake/victoriadrake.github.io.git <span class=k>$(</span>DESTDIR<span class=k>)</span>
+
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>clean</span>
+<span class=nf>clean</span><span class=o>:</span>
+ @echo <span class=s2>&#34;🧹 Cleaning old build&#34;</span>
+ <span class=nb>cd</span> <span class=k>$(</span>DESTDIR<span class=k>)</span> <span class=o>&amp;&amp;</span> rm -rf *
+
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>get</span>
+<span class=nf>get</span><span class=o>:</span>
+ @echo <span class=s2>&#34;❓ Checking for hugo&#34;</span>
+ @if ! <span class=o>[</span> -x <span class=s2>&#34;</span><span class=nv>$$</span><span class=s2>(command -v hugo)&#34;</span> <span class=o>]</span><span class=p>;</span> <span class=k>then</span><span class=se>\
+</span><span class=se></span>  <span class=nb>echo</span> <span class=s2>&#34;🤵 Getting Hugo&#34;</span><span class=p>;</span><span class=se>\
+</span><span class=se></span>     wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span class=k>$(</span>HUGO_VERSION<span class=k>)</span>/hugo_extended_<span class=k>$(</span>HUGO_VERSION<span class=k>)</span>_Linux-64bit.tar.gz<span class=p>;</span><span class=se>\
+</span><span class=se></span>  tar xf tmp/hugo_extended_<span class=k>$(</span>HUGO_VERSION<span class=k>)</span>_Linux-64bit.tar.gz -C tmp/<span class=p>;</span><span class=se>\
+</span><span class=se></span>  sudo mv -f tmp/hugo /usr/bin/<span class=p>;</span><span class=se>\
+</span><span class=se></span>  rm -rf tmp/<span class=p>;</span><span class=se>\
+</span><span class=se></span>  hugo version<span class=p>;</span><span class=se>\
+</span><span class=se></span> <span class=k>fi</span>
+
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>build</span>
+<span class=nf>build</span><span class=o>:</span>
+ @echo <span class=s2>&#34;🍳 Generating site&#34;</span>
+ hugo --gc --minify -d <span class=k>$(</span>DESTDIR<span class=k>)</span>
+
+ @echo <span class=s2>&#34;🧂 Optimizing images&#34;</span>
+ <span class=k>$(</span>OPTIMIZE<span class=k>)</span>
+
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>test</span>
+<span class=nf>test</span><span class=o>:</span>
+ @echo <span class=s2>&#34;🍜 Testing HTML&#34;</span>
+ docker run -v <span class=k>$(</span>GITHUB_WORKSPACE<span class=k>)</span>/<span class=k>$(</span>DESTDIR<span class=k>)</span>/:/mnt 18fgsa/html-proofer mnt --disable-external
+
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>deploy</span>
+<span class=nf>deploy</span><span class=o>:</span>
+ @echo <span class=s2>&#34;🎁 Preparing commit&#34;</span>
+ @cd <span class=k>$(</span>DESTDIR<span class=k>)</span> <span class=se>\
+</span><span class=se></span> <span class=o>&amp;&amp;</span> git config user.email <span class=s2>&#34;hello@victoria.dev&#34;</span> <span class=se>\
+</span><span class=se></span> <span class=o>&amp;&amp;</span> git config user.name <span class=s2>&#34;Victoria via GitHub Actions&#34;</span> <span class=se>\
+</span><span class=se></span> <span class=o>&amp;&amp;</span> git add . <span class=se>\
+</span><span class=se></span> <span class=o>&amp;&amp;</span> git status <span class=se>\
+</span><span class=se></span> <span class=o>&amp;&amp;</span> git commit -m <span class=s2>&#34;🤖 CD bot is helping&#34;</span> <span class=se>\
+</span><span class=se></span> <span class=o>&amp;&amp;</span> git push -f -q https://<span class=k>$(</span>TOKEN<span class=k>)</span>@github.com/victoriadrake/victoriadrake.github.io.git master
+ @echo <span class=s2>&#34;🚀 Site is deployed!&#34;</span>
+</code></pre></div><p>Sequentially, this workflow:</p><ol><li>Clones the public Pages repository;</li><li>Cleans (deletes) the previous build files;</li><li>Downloads and installs the specified version of Hugo, if Hugo is not already present;</li><li>Builds the site;</li><li>Optimizes images;</li><li>Tests the built site with HTMLProofer, and</li><li>Prepares a new commit and pushes to the public Pages repository.</li></ol><p>If you&rsquo;re familiar with command line, most of this may look familiar. Here are a couple bits that might warrant a little explanation.</p><h3 id=checking-if-a-program-is-already-installed class=anchor-link><a href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#checking-if-a-program-is-already-installed>Checking if a program is already installed</a></h3><p>I think this bit is pretty tidy:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=k>if</span> ! <span class=o>[</span> -x <span class=s2>&#34;</span><span class=nv>$$</span><span class=s2>(command -v hugo)&#34;</span> <span class=o>]</span><span class=p>;</span> <span class=k>then</span><span class=se>\
+</span><span class=se></span>...
+<span class=k>fi</span>
+</code></pre></div><p>I use a negated <code>if</code> conditional in conjunction with <code>command -v</code> to check if an executable (<code>-x</code>) called <code>hugo</code> exists. If one is not present, the script gets the specified version of Hugo and installs it. <a href=https://stackoverflow.com/a/677212>This Stack Overflow answer</a> has a nice summation of why <code>command -v</code> is a more portable choice than <code>which</code>.</p><h3 id=image-optimization class=anchor-link><a href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#image-optimization>Image optimization</a></h3><p>My Makefile uses <code>mogrify</code> to batch resize and compress images in particular folders. It finds them automatically using the file extension, and only modifies images that are larger than the target size of 1000px in any dimension. I wrote more about the <a href=/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/>batch-processing one-liner in this post</a>.</p><p>There are a few different ways to achieve this same task, one of which, theoretically, is to take advantage of Make&rsquo;s <a href=https://en.wikipedia.org/wiki/Make_(software)#Suffix_rules>suffix rules</a> to run commands only on image files. I find the shell script to be more readable.</p><h3 id=using-dockerized-htmlproofer class=anchor-link><a href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/#using-dockerized-htmlproofer>Using Dockerized HTMLProofer</a></h3><p>HTMLProofer is installed with <code>gem</code>, and uses Ruby and <a href=https://nokogiri.org/tutorials/ensuring_well_formed_markup.html>Nokogiri</a>, which adds up to a lot of installation time for a CI workflow. Thankfully, <a href=https://github.com/18F>18F</a> has a <a href=https://github.com/18F/html-proofer-docker>Dockerized version</a> that is much faster to implement. Its usage requires starting the container with the built site directory <a href=https://docs.docker.com/storage/volumes/#start-a-container-with-a-volume>mounted as a data volume</a>, which is easily achieved by appending to the <code>docker run</code> command.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>docker run -v /absolute/path/to/site/:/mounted-site 18fgsa/html-proofer /mounted-site
+</code></pre></div><p>In my Makefile, I specify the absolute site path using the <a href=https://help.github.com/en/articles/virtual-environments-for-github-actions#environment-variables>default environment variable</a> <code>GITHUB_WORKSPACE</code>. I&rsquo;ll dive into this and other GitHub Actions features in the next post.</p><p>In the meantime, happy Making!</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/>A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a><p>How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.</p><p class=metadata><a class="tag button" href=/tags/ci/cd/>ci/cd</a>
+☕️
+&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-quick-guide-to-changing-your-github-username/>A quick guide to changing your GitHub username</a><p>Some additional steps to consider after making a change to your username on GitHub.</p><p class=metadata><a class="tag button" href=/tags/websites/>websites</a>
+☕️
+&nbsp;2 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/>Batch renaming images, including image resolution, with awk</a><p>How to batch rename images with custom values using file, awk, and rename - in rainbow colors!</p><p class=metadata><a class="tag button" href=/tags/terminal/>terminal</a>
+☕️
+&nbsp;4 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px></a></li></ul></nav></body></html>
