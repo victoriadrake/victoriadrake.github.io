@@ -1,16 +1,362 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>What is TLS? Transport Layer Security encryption explained in plain english | victoria.dev</title><script async defer data-domain=victoria.dev src=https://plausible.io/js/plausible.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="What is TLS? Transport Layer Security encryption explained in plain english - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How TLS, digital certificates, and sessions help keep communications secure."><meta property="og:url" content="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="What is TLS? Transport Layer Security encryption explained in plain english"><meta name=twitter:image content="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/cover.png"><meta name=twitter:description content="How TLS, digital certificates, and sessions help keep communications secure."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.772ebe90e4fd6d88ba08adf07d75b0ee367dd239532bbda2ac98c7824d484acc.css integrity="sha256-dy6+kOT9bYi6CK3wfXWw7jZ90jlTK72irJjHgk1ISsw=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻 hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰 blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖 about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for What is TLS? Transport Layer Security encryption explained in plain english">📡 rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/cover.png alt="cover image"></div><article><h1>What is TLS? Transport Layer Security encryption explained in plain english</h1><p class=subtitle>How TLS, digital certificates, and sessions help keep communications secure.</p><span><a class="tag button" href=/tags/cybersecurity/>cybersecurity
-</a>&nbsp;
-<a class="tag button" href=/tags/algorithms/>algorithms
-</a>&nbsp;
-<a class="tag button" href=/tags/protocols/>protocols
-</a>&nbsp;
-<a class="tag button" href=/tags/computing/>computing
-</a>&nbsp;</span><p class=metadata id=date><span>September 5, 2020&nbsp;</span>
-<span></span><span>☕️&nbsp;5 min
-read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>If you want to have a confidential conversation with someone you know, you might meet up in person and find a private place to talk. If you want to send data confidentially over the Internet, you might have a few more considerations to cover.</p><p>TLS, or Transport Layer Security, refers to a protocol. &ldquo;Protocol&rdquo; is a word that means, &ldquo;the way we&rsquo;ve agreed to do things around here,&rdquo; more or less. The &ldquo;transport layer&rdquo; part of TLS simply refers to host-to-host communication, such as how a client and a server interact, in the <a href=https://en.wikipedia.org/wiki/Internet_protocol_suite>Internet protocol suite model</a>.</p><p>The TLS protocol attempts to solve these fundamental problems:</p><ul><li>How do I know you are who you say you are?</li><li>How do I know this message from you hasn&rsquo;t been tampered with?</li><li>How can we communicate securely?</li></ul><p>Here&rsquo;s how TLS works, explained in plain English. As with many successful interactions, it begins with a handshake.</p><h2 id=getting-to-know-you class=anchor-link><a href=https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#getting-to-know-you>Getting to know you</a></h2><p>The basic process of a <a href=https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_handshake>TLS handshake</a> involves a client, such as your web browser, and a server, such as one hosting a website, establishing some ground rules for communication. It begins with the client saying hello. Literally. It&rsquo;s called a <em>ClientHello</em> message.</p><p>The <em>ClientHello</em> message tells the server which TLS protocol version and <em>cipher suites</em> it supports. While &ldquo;cipher suite&rdquo; sounds like a fancy hotel upgrade, it just refers to a set of algorithms that can be used to secure communications. The server, in a similarly named <em>ServerHello</em> message, chooses the protocol version and cipher suite to use from the choices offered. Other data may also be sent, for example, a <em>session ID</em> if the server supports resuming a previous handshake.</p><p><img src=https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/hello-hello.png alt="A cartoon of a client and server saying hello"></p><p>Depending on the cipher suite chosen, the client and server exchange further information in order to establish a shared secret. Often, this process moves the exchange from <a href=https://en.wikipedia.org/wiki/Public-key_cryptography>asymmetric cryptography</a> to <a href=https://en.wikipedia.org/wiki/Symmetric-key_algorithm>symmetric cryptography</a> with varying levels of complexity. Let&rsquo;s explore these concepts at a general level and see why they matter to TLS.</p><h2 id=asymmetric-beginnings class=anchor-link><a href=https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#asymmetric-beginnings>Asymmetric beginnings</a></h2><p>This is asymmetry:</p><figure><img src=asymmetry-eggs.jpeg alt="A small egg and a big egg"><figcaption><p>Small egg, big egg.</p></figcaption></figure><p>Asymmetric cryptography is one method by which you can perform <em>authentication</em>. When you authenticate yourself, you answer the fundamental question, &ldquo;How do I know you are who you say you are?&rdquo;</p><p>In an asymmetric cryptographic system, you use a pair of keys in order to achieve authentication. These keys are asymmetric. One key is your public key, which, as you would guess, is public. The other is your private key, which &ndash; well, you know.</p><p>Typically, during the TLS handshake, the server will provide its public key via its digital certificate, sometimes still called its <em>SSL certificate</em>, though TLS replaces the deprecated Secure Sockets Layer (SSL) protocol. Digital certificates are provided and verified by trusted third parties known as <a href=https://en.wikipedia.org/wiki/Certificate_authority>Certificate Authorities (CA)</a>, which are a whole other article in themselves.</p><p>While anyone may encrypt a message using your public key, only your private key can then decrypt that message. The security of asymmetric cryptography relies only on your private key staying private, hence the asymmetry. It&rsquo;s also asymmetric in the sense that it&rsquo;s a one-way trip. Alice can send messages encrypted with your public key to you, but neither of your keys will help you send an encrypted message to Alice.</p><h2 id=symmetric-secrets class=anchor-link><a href=https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#symmetric-secrets>Symmetric secrets</a></h2><p>Asymmetric cryptography also requires more computational resources than symmetric cryptography. Thus when a TLS handshake begins with an asymmetric exchange, the client and server will use this initial communication to establish a shared secret, sometimes called a <em>session key</em>. This key is symmetric, meaning that both parties use the same shared secret and must maintain that secrecy for the encryption to be secure.</p><figure><img src=asym-vs-sym.png alt="A cartoon of public-key cryptography vs. shared-key cryptography"><figcaption><p>Wise man say: share your public key, but keep your shared keys private.</p></figcaption></figure><p>By using the initial asymmetric communication to establish a session key, the client and server can rely on the session key being known only to them. For the rest of the session, they&rsquo;ll both use this same shared key to encrypt and decrypt messages, which speeds up communication.</p><h2 id=secure-sessions class=anchor-link><a href=https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#secure-sessions>Secure sessions</a></h2><p>A TLS handshake may use asymmetric cryptography or other cipher suites to establish the shared session key. Once the session key is established, the handshaking portion is complete and the session begins.</p><p>The <em>session</em> is the duration of encrypted communication between the client and server. During this time, messages are encrypted and decrypted using the session key that only the client and server have. This ensures that communication is secure.</p><p>The integrity of exchanged information is maintained by using a checksum. Messages exchanged using session keys have a <a href=https://en.wikipedia.org/wiki/Message_authentication_code>message authentication code (MAC)</a> attached. This is not the same thing as your device&rsquo;s <a href=https://en.wikipedia.org/wiki/MAC_address>MAC address</a>. The MAC is generated and verified using the session key. Because of this, either party can detect if a message has been changed before being received. This solves the fundamental question, &ldquo;How do I know this message from you hasn&rsquo;t been tampered with?&rdquo;</p><p>Sessions can end deliberately, due to network disconnection, or from the client staying idle for too long. Once a session ends, it must be re-established via a new handshake or through previously established secrets called <em>session IDs</em> that allow resuming a session.</p><h2 id=tls-and-you class=anchor-link><a href=https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#tls-and-you>TLS and you</a></h2><p>Let&rsquo;s recap:</p><ul><li>TLS is a cryptographic protocol for providing secure communication.</li><li>The process of creating a secure connection begins with a handshake.</li><li>The handshake establishes a shared session key that is then used to secure messages and provide message integrity.</li><li>Sessions are temporary, and once ended, must be re-established or resumed.</li></ul><p>This is just a surface-level skim of the very complex cryptographic systems that help to keep your communications secure. For more depth on the topic, I recommend exploring cipher suites and the various <a href=https://en.wikipedia.org/wiki/Cipher_suite#Supported_algorithms>supported algorithms</a>.</p><p>The TLS protocol serves a very important purpose in your everyday life. It helps to secure your emails to family, your online banking activities, and the connection by which you&rsquo;re reading this article. The <a href=https://en.wikipedia.org/wiki/HTTPS>HTTPS communication protocol</a> is encrypted using TLS. Every time you see that little lock icon in your URL bar, you&rsquo;re experiencing firsthand all the concepts you&rsquo;ve just read about in this article. Now you know the answer to the last question: &ldquo;How can we communicate securely?&rdquo;</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/>WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained</a><p>Which one should you be using? Why Wi-Fi security matters.</p><p class=metadata><a class="tag button" href=/tags/computing/>computing</a>
-☕️ ☕️
-&nbsp;8 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/breaking-bottlenecks/>Breaking bottlenecks 🍾</a><p>A talk on the benefits of non-blocking functions for programs, developers, and organizations.</p><p class=metadata><a class="tag button" href=/tags/computing/>computing</a>
-☕️ ☕️ ☕️
-&nbsp;12 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/>A coffee-break introduction to time complexity of algorithms</a><p>A groundwork understanding of algorithm time complexity in about fifteen minutes.</p><p class=metadata><a class="tag button" href=/tags/algorithms/>algorithms</a>
-☕️ ☕️ ☕️
-&nbsp;16 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px></a></li></ul></nav></body></html>
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    What is TLS? Transport Layer Security encryption explained in plain english | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://plausible.io/js/plausible.js"></script>
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="What is TLS? Transport Layer Security encryption explained in plain english - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How TLS, digital certificates, and sessions help keep communications secure." />
+<meta property="og:url" content="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="What is TLS? Transport Layer Security encryption explained in plain english" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/cover.png"/>
+
+<meta name="twitter:description"
+    content="How TLS, digital certificates, and sessions help keep communications secure." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.772ebe90e4fd6d88ba08adf07d75b0ee367dd239532bbda2ac98c7824d484acc.css" integrity="sha256-dy6&#43;kOT9bYi6CK3wfXWw7jZ90jlTK72irJjHgk1ISsw=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                👩🏻‍💻 hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                📰 blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                📖 about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for What is TLS? Transport Layer Security encryption explained in plain english" />📡 rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+                What is TLS? Transport Layer Security encryption explained in plain english
+            </h1>
+            
+            <p class="subtitle">How TLS, digital certificates, and sessions help keep communications secure.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/cybersecurity/">
+                    cybersecurity
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/algorithms/">
+                    algorithms
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/protocols/">
+                    protocols
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/computing/">
+                    computing
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>September 5, 2020&nbsp;</span>
+                <span></span>
+                <span> ☕️&nbsp;5 min
+                    read</span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <p>If you want to have a confidential conversation with someone you know, you might meet up in person and find a private place to talk. If you want to send data confidentially over the Internet, you might have a few more considerations to cover.</p>
+<p>TLS, or Transport Layer Security, refers to a protocol. &ldquo;Protocol&rdquo; is a word that means, &ldquo;the way we&rsquo;ve agreed to do things around here,&rdquo; more or less. The &ldquo;transport layer&rdquo; part of TLS simply refers to host-to-host communication, such as how a client and a server interact, in the <a href="https://en.wikipedia.org/wiki/Internet_protocol_suite">Internet protocol suite model</a>.</p>
+<p>The TLS protocol attempts to solve these fundamental problems:</p>
+<ul>
+<li>How do I know you are who you say you are?</li>
+<li>How do I know this message from you hasn&rsquo;t been tampered with?</li>
+<li>How can we communicate securely?</li>
+</ul>
+<p>Here&rsquo;s how TLS works, explained in plain English. As with many successful interactions, it begins with a handshake.</p>
+<h2 id="getting-to-know-you" class="anchor-link"><a href="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#getting-to-know-you">Getting to know you</a></h2>
+<p>The basic process of a <a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_handshake">TLS handshake</a> involves a client, such as your web browser, and a server, such as one hosting a website, establishing some ground rules for communication. It begins with the client saying hello. Literally. It&rsquo;s called a <em>ClientHello</em> message.</p>
+<p>The <em>ClientHello</em> message tells the server which TLS protocol version and <em>cipher suites</em> it supports. While &ldquo;cipher suite&rdquo; sounds like a fancy hotel upgrade, it just refers to a set of algorithms that can be used to secure communications. The server, in a similarly named <em>ServerHello</em> message, chooses the protocol version and cipher suite to use from the choices offered. Other data may also be sent, for example, a <em>session ID</em> if the server supports resuming a previous handshake.</p>
+<p>
+
+<img src="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/hello-hello.png" alt="A cartoon of a client and server saying hello"  />
+
+</p>
+<p>Depending on the cipher suite chosen, the client and server exchange further information in order to establish a shared secret. Often, this process moves the exchange from <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">asymmetric cryptography</a> to <a href="https://en.wikipedia.org/wiki/Symmetric-key_algorithm">symmetric cryptography</a> with varying levels of complexity. Let&rsquo;s explore these concepts at a general level and see why they matter to TLS.</p>
+<h2 id="asymmetric-beginnings" class="anchor-link"><a href="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#asymmetric-beginnings">Asymmetric beginnings</a></h2>
+<p>This is asymmetry:</p>
+<figure>
+    <img src="asymmetry-eggs.jpeg"
+         alt="A small egg and a big egg"/> <figcaption>
+            <p>Small egg, big egg.</p>
+        </figcaption>
+</figure>
+
+<p>Asymmetric cryptography is one method by which you can perform <em>authentication</em>. When you authenticate yourself, you answer the fundamental question, &ldquo;How do I know you are who you say you are?&rdquo;</p>
+<p>In an asymmetric cryptographic system, you use a pair of keys in order to achieve authentication. These keys are asymmetric. One key is your public key, which, as you would guess, is public. The other is your private key, which &ndash; well, you know.</p>
+<p>Typically, during the TLS handshake, the server will provide its public key via its digital certificate, sometimes still called its <em>SSL certificate</em>, though TLS replaces the deprecated Secure Sockets Layer (SSL) protocol. Digital certificates are provided and verified by trusted third parties known as <a href="https://en.wikipedia.org/wiki/Certificate_authority">Certificate Authorities (CA)</a>, which are a whole other article in themselves.</p>
+<p>While anyone may encrypt a message using your public key, only your private key can then decrypt that message. The security of asymmetric cryptography relies only on your private key staying private, hence the asymmetry. It&rsquo;s also asymmetric in the sense that it&rsquo;s a one-way trip. Alice can send messages encrypted with your public key to you, but neither of your keys will help you send an encrypted message to Alice.</p>
+<h2 id="symmetric-secrets" class="anchor-link"><a href="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#symmetric-secrets">Symmetric secrets</a></h2>
+<p>Asymmetric cryptography also requires more computational resources than symmetric cryptography. Thus when a TLS handshake begins with an asymmetric exchange, the client and server will use this initial communication to establish a shared secret, sometimes called a <em>session key</em>. This key is symmetric, meaning that both parties use the same shared secret and must maintain that secrecy for the encryption to be secure.</p>
+<figure>
+    <img src="asym-vs-sym.png"
+         alt="A cartoon of public-key cryptography vs. shared-key cryptography"/> <figcaption>
+            <p>Wise man say: share your public key, but keep your shared keys private.</p>
+        </figcaption>
+</figure>
+
+<p>By using the initial asymmetric communication to establish a session key, the client and server can rely on the session key being known only to them. For the rest of the session, they&rsquo;ll both use this same shared key to encrypt and decrypt messages, which speeds up communication.</p>
+<h2 id="secure-sessions" class="anchor-link"><a href="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#secure-sessions">Secure sessions</a></h2>
+<p>A TLS handshake may use asymmetric cryptography or other cipher suites to establish the shared session key. Once the session key is established, the handshaking portion is complete and the session begins.</p>
+<p>The <em>session</em> is the duration of encrypted communication between the client and server. During this time, messages are encrypted and decrypted using the session key that only the client and server have. This ensures that communication is secure.</p>
+<p>The integrity of exchanged information is maintained by using a checksum. Messages exchanged using session keys have a <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message authentication code (MAC)</a> attached. This is not the same thing as your device&rsquo;s <a href="https://en.wikipedia.org/wiki/MAC_address">MAC address</a>. The MAC is generated and verified using the session key. Because of this, either party can detect if a message has been changed before being received. This solves the fundamental question, &ldquo;How do I know this message from you hasn&rsquo;t been tampered with?&rdquo;</p>
+<p>Sessions can end deliberately, due to network disconnection, or from the client staying idle for too long. Once a session ends, it must be re-established via a new handshake or through previously established secrets called <em>session IDs</em> that allow resuming a session.</p>
+<h2 id="tls-and-you" class="anchor-link"><a href="https://victoria.dev/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/#tls-and-you">TLS and you</a></h2>
+<p>Let&rsquo;s recap:</p>
+<ul>
+<li>TLS is a cryptographic protocol for providing secure communication.</li>
+<li>The process of creating a secure connection begins with a handshake.</li>
+<li>The handshake establishes a shared session key that is then used to secure messages and provide message integrity.</li>
+<li>Sessions are temporary, and once ended, must be re-established or resumed.</li>
+</ul>
+<p>This is just a surface-level skim of the very complex cryptographic systems that help to keep your communications secure. For more depth on the topic, I recommend exploring cipher suites and the various <a href="https://en.wikipedia.org/wiki/Cipher_suite#Supported_algorithms">supported algorithms</a>.</p>
+<p>The TLS protocol serves a very important purpose in your everyday life. It helps to secure your emails to family, your online banking activities, and the connection by which you&rsquo;re reading this article. The <a href="https://en.wikipedia.org/wiki/HTTPS">HTTPS communication protocol</a> is encrypted using TLS. Every time you see that little lock icon in your URL bar, you&rsquo;re experiencing firsthand all the concepts you&rsquo;ve just read about in this article. Now you know the answer to the last question: &ldquo;How can we communicate securely?&rdquo;</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/">WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained</a>
+    <p>
+        Which one should you be using? Why Wi-Fi security matters.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/computing/">computing</a>
+        
+         ☕️ ☕️
+        &nbsp;8 min read
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/breaking-bottlenecks/">Breaking bottlenecks 🍾</a>
+    <p>
+        A talk on the benefits of non-blocking functions for programs, developers, and organizations.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/computing/">computing</a>
+        
+         ☕️ ☕️ ☕️
+        &nbsp;12 min read
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">A coffee-break introduction to time complexity of algorithms</a>
+    <p>
+        A groundwork understanding of algorithm time complexity in about fifteen minutes.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/algorithms/">algorithms</a>
+        
+         ☕️ ☕️ ☕️
+        &nbsp;16 min read
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    👩🏻‍💻</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    📰</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    📖</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>

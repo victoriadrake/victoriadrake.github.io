@@ -1,16 +1,367 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training."><title>Migrating to the cloud but without screwing it up, or how to move house | victoria.dev</title><script async defer data-domain=victoria.dev src=https://plausible.io/js/plausible.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Migrating to the cloud but without screwing it up, or how to move house - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A practical guide to moving to cloud services with minimal downtime, using AWS examples."><meta property="og:url" content="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Migrating to the cloud but without screwing it up, or how to move house"><meta name=twitter:image content="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/cover.png"><meta name=twitter:description content="A practical guide to moving to cloud services with minimal downtime, using AWS examples."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.772ebe90e4fd6d88ba08adf07d75b0ee367dd239532bbda2ac98c7824d484acc.css integrity="sha256-dy6+kOT9bYi6CK3wfXWw7jZ90jlTK72irJjHgk1ISsw=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻 hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰 blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖 about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Migrating to the cloud but without screwing it up, or how to move house">📡 rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/cover.png alt="cover image"></div><article><h1>Migrating to the cloud but without screwing it up, or how to move house</h1><p class=subtitle>A practical guide to moving to cloud services with minimal downtime, using AWS examples.</p><span><a class="tag button" href=/tags/aws/>aws
-</a>&nbsp;
-<a class="tag button" href=/tags/coding/>coding
-</a>&nbsp;
-<a class="tag button" href=/tags/data/>data
-</a>&nbsp;
-<a class="tag button" href=/tags/websites/>websites
-</a>&nbsp;</span><p class=metadata id=date><span>September 23, 2019&nbsp;</span>
-<span></span><span>☕️ ☕️&nbsp;11 min
-read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>For an application that&rsquo;s ready to scale, not using managed cloud architecture these days is like insisting on digging your own well for water. It&rsquo;s far more labour-intensive, requires buying all your own equipment, takes a lot more time, and there&rsquo;s a higher chance you&rsquo;re going to get it wrong because you don&rsquo;t personally have a whole lot of experience digging wells, anyway.</p><p>That said - let&rsquo;s just get this out of the way first - there is no cloud. It&rsquo;s just someone else&rsquo;s computer.</p><p>Of course, these days, cloud services go far beyond the utility we&rsquo;d expect from a single computer. Besides being able to quickly set up and utilize the kind of computing power that previously required a new office lease agreement to house, there are now a multitude of monitoring, management, and analysis tools at our giddy fingertips. While it&rsquo;s important to understand that the cloud isn&rsquo;t a better option in every case, for applications that can take advantage of it, we can do more, do it faster, and do it for less money than if we were to insist on building our own on-premises infrastructure.</p><p>That&rsquo;s all great, and easily said; moving to the cloud, however, can look from the outset like a pretty daunting task. How, exactly, do we go about shifting what may be years of on-premises data and built-up systems to <em>someone else&rsquo;s computer?</em> You know, without being able to see it, touch it, and without completely screwing up our stuff.</p><p>While it probably takes less work and money than setting up or maintaining the same architecture on-premise, it does take some work to move to the cloud initially. It&rsquo;s important that our application is prepared to migrate, and capable of using the benefits of cloud services once it gets there. To accomplish this, and a smooth transition, preparation is key. In fact, it&rsquo;s a whole lot like moving to a new house.</p><p>In this article, we&rsquo;ll take a high-level look at the general stages of taking an on-premise or self-hosted application and moving it to the cloud. This guide is meant to serve as a starting point for designing the appropriate process for your particular situation, and to enable you to better understand the cloud migration process. While cloud migration may not be the best choice for some applications - such as ones without scalable architecture or where very high computing resources are needed - a majority of modular and modern applications stand to benefit from a move to the cloud.</p><p>It&rsquo;s certainly possible, as I discovered at a recent event put on by <a href=https://aws.amazon.com/>Amazon Web Services</a> (AWS) Solutions Architects, to migrate smoothly and efficiently, with near-zero loss of availability to customers. I&rsquo;ll specifically reference some services provided by AWS, however, similar functionality can be found with other cloud providers. I&rsquo;ve found the offerings from AWS to be pleasantly modular in scope, which is why I use them myself and why they make good examples for discussing general concepts.</p><p>To have our move go as smoothly as possible, here are the things we&rsquo;ll want to consider:</p><ol><li>The type of move we&rsquo;re making;</li><li>The things we&rsquo;ll take, and the things we&rsquo;ll clean up;</li><li>How to choose the right type and size for the infrastructure we&rsquo;re moving into; and</li><li>How to do test runs to practice for the big day.</li></ol><h2 id=the-type-of-move-were-making class=anchor-link><a href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#the-type-of-move-were-making>The type of move we&rsquo;re making</a></h2><p>While it&rsquo;s important to understand why we&rsquo;re moving our application to cloud services, we should also have an idea of what we&rsquo;d like it to look like when it gets there. There are three main ways to move to the cloud: re-host, re-platform, or re-factor.</p><h3 id=re-host class=anchor-link><a href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#re-host>Re-host</a></h3><p>A re-host scenario is the the most straightforward type of move. It involves no change to the way our application is built or how it runs. For example, if we currently have Python code, use PostgreSQL, and serve our application with Apache, a re-host move would mean we use all the same components, combined in just the same way, only now they&rsquo;re in the cloud. It&rsquo;s a lot like moving into a new house that has the exact same floor plan as the current one. All the furniture goes into the same room it&rsquo;s in now, and it&rsquo;s going to feel pretty familiar when we get there.</p><p>The main draw of a re-host move is that it may offer the least amount of complication necessary in order to take advantage of going to the cloud. Scalable applications, for example, can gain the ability to automatically manage necessary application resources.</p><p>While re-hosting makes scaling more automatic, it&rsquo;s important to note that it won&rsquo;t in itself make an application scalable. If the application infrastructure is not organized in such a way that gives it the ability to scale, a re-factor may be necessary instead.</p><h3 id=re-platform class=anchor-link><a href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#re-platform>Re-platform</a></h3><p>If a component of our current application set up isn&rsquo;t working out well for us, we&rsquo;re probably going to want to re-platform. In this case, we&rsquo;re making a change to at least one component of our architecture; for example, switching our database from Oracle to MySQL on <a href=https://aws.amazon.com/rds/>Amazon Relational Database Service</a> (RDS).</p><p>Like moving from a small apartment in Tokyo to an equally small apartment in New York, a re-platform doesn&rsquo;t change the basic nature of our application, but does change its appearance and environment. In the database change example, we&rsquo;ll have all the same data, just organized or formatted a little differently. In most cases, we won&rsquo;t have to make these changes manually. A tool such as <a href=https://aws.amazon.com/dms/>Amazon Database Migration Service</a> (DMS) can help to seamlessly shift our data over to the new database.</p><p>We might re-platform in order to enable us to better meet a business demand in the future, such as scaling up, integrating with other technological components, or choosing a more modern technology stack.</p><h3 id=re-factor class=anchor-link><a href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#re-factor>Re-factor</a></h3><p>A move in which we re-factor our application is necessarily more complicated than our other options, however, it may provide the most overall benefit for companies or applications that have reason to make this type of move. As with code, refactoring is done when fundamental changes need to be made in order for our application to meet a business need. The specifics necessarily differ case-by-case, but typically involve changes to architectural components or how those components relate to one another. This type of move may also involve changing application code in order to optimize the application&rsquo;s performance in a cloud environment. We can think of it like moving out from our parent&rsquo;s basement in the suburbs and getting a nice townhouse in the city. There&rsquo;s no way we&rsquo;re taking that ancient hand-me-down sofa, so we&rsquo;ll need some new furniture, and for our neighbour&rsquo;s sake, probably window dressings.</p><p>Refactoring may enable us to modernize a dated application, or make it more efficient in general. With greater efficiency, we can better take advantage of services that cloud providers typically offer, like bursting resources or attaining deep analytical insight.</p><p>If a re-factor is necessary but time is scarce, it may be better to re-host or re-platform first, then re-factor later. That way, we&rsquo;ll have a job well done later instead of a hasty, botched migration (and more problems) sooner.</p><h2 id=what-to-take-and-what-to-clean-up class=anchor-link><a href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#what-to-take-and-what-to-clean-up>What to take, and what to clean up</a></h2><p>Over the years of living in one place, stuff tends to pile up unnoticed in nooks and crannies. When moving house, it&rsquo;s usually a great opportunity to sort everything out and decide what is useful enough to keep, and what should be discarded or given away. Moving to the cloud is a similarly great opportunity to do the same when it comes to our application.</p><p>While cloud storage is inexpensive nowadays, there may be some things that don&rsquo;t make sense to store any longer, or at least not keep stored with our primary application. If data cannot be discarded due to policy or regulations, we may choose a different storage class to house data that we don&rsquo;t expect to need anytime soon outside of our main application.</p><p>In the case of <a href=https://aws.amazon.com/s3/>Amazon&rsquo;s Simple Storage Service</a> (S3), we can choose to use different <a href=https://aws.amazon.com/s3/storage-classes/>storage classes</a> that accomplish this goal. While the data that our business relies on every day can take advantage of the Standard class 99.99% availability, data meant for long-term cold storage such as archival backups can be put into the Glacier class, which has longer retrieval time and lower cost.</p><h2 id=the-right-type-and-size class=anchor-link><a href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#the-right-type-and-size>The right type and size</a></h2><p>Choosing the type and size of cloud infrastructure appropriate for our business is usually the part that can be the most confusing. How should we predict, in a new environment or for a growing company, the computing power we&rsquo;ll need?</p><p>Part of the beauty of not procuring hardware on our own is that won&rsquo;t have to make predictions like these. Using cloud storage and instances, expanding or scaling back resources can be done in a matter of minutes, sometimes seconds. With managed services, it can even be done automatically for us. With the proper support for scalability in our application, it&rsquo;s like having a magical house that instantly generates any type of room and amenity we need at that moment. The ability to continually ensure that we&rsquo;re using appropriate, cost-effective resources is at our fingertips, and often clearly visualized in charts and dashboards.</p><p>For applications new to the cloud, some leeway for experimentation may be necessary. While cloud services enables us to quickly spin up and try out different architectures, there&rsquo;s no guarantee that all of those set ups will work well for our application. For example, running a single instance may be <a href=http://einaregilsson.com/serverless-15-percent-slower-and-eight-times-more-expensive/>less expensive than going serverless</a>, but we&rsquo;d be hard pressed to know this until we tried it out.</p><p>As a starting point, we simply need enough storage and computing power to support the application as it is currently running, today. For example, in the case of storage, consider the size of the current database - the actual database data, not the total storage capacity of hardware on-premises. For a detailed cost exploration, AWS even offers a <a href=https://calculator.s3.amazonaws.com/index.html>Simple Monthly Calculator</a> with use case samples to help guide expectations.</p><h2 id=do-test-runs-before-the-big-day class=anchor-link><a href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#do-test-runs-before-the-big-day>Do test runs before the big day</a></h2><p>Running a trial cloud migration may be an odd concept, but it is an essential component to ensuring that the move goes as planned with minimal service interruption. Imagine the time and energy that would be saved in the moving house example if we could automate test runs! Invariably, some box or still-hung picture is forgotten and left out of the main truck, necessitating additional trips in other vehicles. With multiple chances to ensure we&rsquo;ve got it down pat, we minimize the possibility that our move causes any break in normal day-to-day business.</p><p>Generally, to do a test run, we create a duplicate version of our application. The more we can duplicate, the more thorough the test run will be, especially if our data is especially large. Though duplication may seem tedious, working with the actual components we intend to migrate is essential to ensuring the migration goes as planned. After all, if we only did a moving-house test run with one box, it wouldn&rsquo;t be very representative.</p><p>Test runs can help to validate our migration plan against any challenges we may encounter. These challenges might include:</p><ul><li>Downtime restrictions;</li><li>Encrypting data in transit and immediately when at rest on the target;</li><li>Schema conversion to a new target schema (the <a href=https://aws.amazon.com/dms/schema-conversion-tool/>AWS Schema Conversion Tool</a> can also help);</li><li>Access to databases, such as through firewalls or VPNs;</li><li>Developing a process to ensure that all the data successfully migrated, such as by using a hash function.</li></ul><p>Test runs also help to give us a more accurate picture of the overall time that a migration will take, as well as affording us the opportunity to fine-tune it. Factors that may affect the overall speed of a migration include:</p><ul><li>The sizes of the source and target instances;</li><li>Available bandwidth for moving data;</li><li>Schema configurations; and</li><li>Transaction pressure on the source, such as changes to the data and the volume of incoming transactions.</li></ul><p>Once the duplicate application has been migrated via one or more <a href=https://aws.amazon.com/cloud-data-migration/>options</a>, we test the heck out of the application that&rsquo;s now running in the cloud to ensure it performs as expected. Ideally, on the big day, we&rsquo;d follow this same general process to move up-to-date duplicate data, and then seamlessly point the &ldquo;real&rdquo; application or web address to the new location in the cloud. This means that our customers experience near-zero downtime; essentially, only the amount of time that the change in location-pointing would need to propagate to their device.</p><p>In the case of very large or complex applications with many components or many teams working together at the same time, a more gradual approach may be more appropriate than the &ldquo;Big Bang&rdquo; approach, and may help to mitigate risk of any interruptions. This means migrating in stages, component by component, and running tests between stages to ensure that all parts of the application are communicating with each other as expected.</p><h2 id=preparation-is-essential-to-a-smooth-migration class=anchor-link><a href=https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#preparation-is-essential-to-a-smooth-migration>Preparation is essential to a smooth migration</a></h2><p>I hope this article has enabled a more practical understanding of how cloud migration can be achieved. With thorough preparation, it&rsquo;s possible to take advantage of all the cloud has to offer, with minimal hassle to get there.</p><p>My thanks to the AWS Solutions Architects who presented at Pop-Up Loft and shared their knowledge on these topics, in particular: Chandra Kapireddy, Stephen Moon, John Franklin, Michael Alpaugh, and Priyanka Mahankali.</p><p>One last nugget of wisdom, courtesy of John: &ldquo;Friends don&rsquo;t let friends use DMS to create schema objects.&rdquo;</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/>Build your own serverless subscriber list with Go and AWS</a><p>How to build your own newsletter list with DynamoDB and SES email sign up confirmations.</p><p class=metadata><a class="tag button" href=/tags/api/>api</a>
-☕️ ☕️
-&nbsp;7 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/>A cron job that could save you from a ransomware attack</a><p>How a simple scheduled job can help you quickly recover from ransomware.</p><p class=metadata><a class="tag button" href=/tags/cybersecurity/>cybersecurity</a>
-☕️ ☕️
-&nbsp;7 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/>Publishing GitHub event data with GitHub Actions and Pages</a><p>A guide to overcoming the GitHub event data horizon with a little command-line magic.</p><p class=metadata><a class="tag button" href=/tags/data/>data</a>
-☕️ ☕️
-&nbsp;8 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/>👩🏻‍💻</a></li><li role=none class=menu-item><a role=menuitem href=/blog/>📰</a></li><li role=none class=menu-item><a role=menuitem href=/about/>📖</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/coffee/cup.png alt="coffee icon" height=16px></a></li></ul></nav></body></html>
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better systems, processes, and cybersecurity awareness training.">
+<title>
+    Migrating to the cloud but without screwing it up, or how to move house | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://plausible.io/js/plausible.js"></script>
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="Migrating to the cloud but without screwing it up, or how to move house - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="A practical guide to moving to cloud services with minimal downtime, using AWS examples." />
+<meta property="og:url" content="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Migrating to the cloud but without screwing it up, or how to move house" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/cover.png"/>
+
+<meta name="twitter:description"
+    content="A practical guide to moving to cloud services with minimal downtime, using AWS examples." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.772ebe90e4fd6d88ba08adf07d75b0ee367dd239532bbda2ac98c7824d484acc.css" integrity="sha256-dy6&#43;kOT9bYi6CK3wfXWw7jZ90jlTK72irJjHgk1ISsw=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                👩🏻‍💻 hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                📰 blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                📖 about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/coffee/cup.png' alt='coffee icon' height='16px'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for Migrating to the cloud but without screwing it up, or how to move house" />📡 rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+                Migrating to the cloud but without screwing it up, or how to move house
+            </h1>
+            
+            <p class="subtitle">A practical guide to moving to cloud services with minimal downtime, using AWS examples.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/aws/">
+                    aws
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/coding/">
+                    coding
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/data/">
+                    data
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/websites/">
+                    websites
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>September 23, 2019&nbsp;</span>
+                <span></span>
+                <span> ☕️ ☕️&nbsp;11 min
+                    read</span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <p>For an application that&rsquo;s ready to scale, not using managed cloud architecture these days is like insisting on digging your own well for water. It&rsquo;s far more labour-intensive, requires buying all your own equipment, takes a lot more time, and there&rsquo;s a higher chance you&rsquo;re going to get it wrong because you don&rsquo;t personally have a whole lot of experience digging wells, anyway.</p>
+<p>That said - let&rsquo;s just get this out of the way first - there is no cloud. It&rsquo;s just someone else&rsquo;s computer.</p>
+<p>Of course, these days, cloud services go far beyond the utility we&rsquo;d expect from a single computer. Besides being able to quickly set up and utilize the kind of computing power that previously required a new office lease agreement to house, there are now a multitude of monitoring, management, and analysis tools at our giddy fingertips. While it&rsquo;s important to understand that the cloud isn&rsquo;t a better option in every case, for applications that can take advantage of it, we can do more, do it faster, and do it for less money than if we were to insist on building our own on-premises infrastructure.</p>
+<p>That&rsquo;s all great, and easily said; moving to the cloud, however, can look from the outset like a pretty daunting task. How, exactly, do we go about shifting what may be years of on-premises data and built-up systems to <em>someone else&rsquo;s computer?</em> You know, without being able to see it, touch it, and without completely screwing up our stuff.</p>
+<p>While it probably takes less work and money than setting up or maintaining the same architecture on-premise, it does take some work to move to the cloud initially. It&rsquo;s important that our application is prepared to migrate, and capable of using the benefits of cloud services once it gets there. To accomplish this, and a smooth transition, preparation is key. In fact, it&rsquo;s a whole lot like moving to a new house.</p>
+<p>In this article, we&rsquo;ll take a high-level look at the general stages of taking an on-premise or self-hosted application and moving it to the cloud. This guide is meant to serve as a starting point for designing the appropriate process for your particular situation, and to enable you to better understand the cloud migration process. While cloud migration may not be the best choice for some applications - such as ones without scalable architecture or where very high computing resources are needed - a majority of modular and modern applications stand to benefit from a move to the cloud.</p>
+<p>It&rsquo;s certainly possible, as I discovered at a recent event put on by <a href="https://aws.amazon.com/">Amazon Web Services</a> (AWS) Solutions Architects, to migrate smoothly and efficiently, with near-zero loss of availability to customers. I&rsquo;ll specifically reference some services provided by AWS, however, similar functionality can be found with other cloud providers. I&rsquo;ve found the offerings from AWS to be pleasantly modular in scope, which is why I use them myself and why they make good examples for discussing general concepts.</p>
+<p>To have our move go as smoothly as possible, here are the things we&rsquo;ll want to consider:</p>
+<ol>
+<li>The type of move we&rsquo;re making;</li>
+<li>The things we&rsquo;ll take, and the things we&rsquo;ll clean up;</li>
+<li>How to choose the right type and size for the infrastructure we&rsquo;re moving into; and</li>
+<li>How to do test runs to practice for the big day.</li>
+</ol>
+<h2 id="the-type-of-move-were-making" class="anchor-link"><a href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#the-type-of-move-were-making">The type of move we&rsquo;re making</a></h2>
+<p>While it&rsquo;s important to understand why we&rsquo;re moving our application to cloud services, we should also have an idea of what we&rsquo;d like it to look like when it gets there. There are three main ways to move to the cloud: re-host, re-platform, or re-factor.</p>
+<h3 id="re-host" class="anchor-link"><a href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#re-host">Re-host</a></h3>
+<p>A re-host scenario is the the most straightforward type of move. It involves no change to the way our application is built or how it runs. For example, if we currently have Python code, use PostgreSQL, and serve our application with Apache, a re-host move would mean we use all the same components, combined in just the same way, only now they&rsquo;re in the cloud. It&rsquo;s a lot like moving into a new house that has the exact same floor plan as the current one. All the furniture goes into the same room it&rsquo;s in now, and it&rsquo;s going to feel pretty familiar when we get there.</p>
+<p>The main draw of a re-host move is that it may offer the least amount of complication necessary in order to take advantage of going to the cloud. Scalable applications, for example, can gain the ability to automatically manage necessary application resources.</p>
+<p>While re-hosting makes scaling more automatic, it&rsquo;s important to note that it won&rsquo;t in itself make an application scalable. If the application infrastructure is not organized in such a way that gives it the ability to scale, a re-factor may be necessary instead.</p>
+<h3 id="re-platform" class="anchor-link"><a href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#re-platform">Re-platform</a></h3>
+<p>If a component of our current application set up isn&rsquo;t working out well for us, we&rsquo;re probably going to want to re-platform. In this case, we&rsquo;re making a change to at least one component of our architecture; for example, switching our database from Oracle to MySQL on <a href="https://aws.amazon.com/rds/">Amazon Relational Database Service</a> (RDS).</p>
+<p>Like moving from a small apartment in Tokyo to an equally small apartment in New York, a re-platform doesn&rsquo;t change the basic nature of our application, but does change its appearance and environment. In the database change example, we&rsquo;ll have all the same data, just organized or formatted a little differently. In most cases, we won&rsquo;t have to make these changes manually. A tool such as <a href="https://aws.amazon.com/dms/">Amazon Database Migration Service</a> (DMS) can help to seamlessly shift our data over to the new database.</p>
+<p>We might re-platform in order to enable us to better meet a business demand in the future, such as scaling up, integrating with other technological components, or choosing a more modern technology stack.</p>
+<h3 id="re-factor" class="anchor-link"><a href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#re-factor">Re-factor</a></h3>
+<p>A move in which we re-factor our application is necessarily more complicated than our other options, however, it may provide the most overall benefit for companies or applications that have reason to make this type of move. As with code, refactoring is done when fundamental changes need to be made in order for our application to meet a business need. The specifics necessarily differ case-by-case, but typically involve changes to architectural components or how those components relate to one another. This type of move may also involve changing application code in order to optimize the application&rsquo;s performance in a cloud environment. We can think of it like moving out from our parent&rsquo;s basement in the suburbs and getting a nice townhouse in the city. There&rsquo;s no way we&rsquo;re taking that ancient hand-me-down sofa, so we&rsquo;ll need some new furniture, and for our neighbour&rsquo;s sake, probably window dressings.</p>
+<p>Refactoring may enable us to modernize a dated application, or make it more efficient in general. With greater efficiency, we can better take advantage of services that cloud providers typically offer, like bursting resources or attaining deep analytical insight.</p>
+<p>If a re-factor is necessary but time is scarce, it may be better to re-host or re-platform first, then re-factor later. That way, we&rsquo;ll have a job well done later instead of a hasty, botched migration (and more problems) sooner.</p>
+<h2 id="what-to-take-and-what-to-clean-up" class="anchor-link"><a href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#what-to-take-and-what-to-clean-up">What to take, and what to clean up</a></h2>
+<p>Over the years of living in one place, stuff tends to pile up unnoticed in nooks and crannies. When moving house, it&rsquo;s usually a great opportunity to sort everything out and decide what is useful enough to keep, and what should be discarded or given away. Moving to the cloud is a similarly great opportunity to do the same when it comes to our application.</p>
+<p>While cloud storage is inexpensive nowadays, there may be some things that don&rsquo;t make sense to store any longer, or at least not keep stored with our primary application. If data cannot be discarded due to policy or regulations, we may choose a different storage class to house data that we don&rsquo;t expect to need anytime soon outside of our main application.</p>
+<p>In the case of <a href="https://aws.amazon.com/s3/">Amazon&rsquo;s Simple Storage Service</a> (S3), we can choose to use different <a href="https://aws.amazon.com/s3/storage-classes/">storage classes</a> that accomplish this goal. While the data that our business relies on every day can take advantage of the Standard class 99.99% availability, data meant for long-term cold storage such as archival backups can be put into the Glacier class, which has longer retrieval time and lower cost.</p>
+<h2 id="the-right-type-and-size" class="anchor-link"><a href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#the-right-type-and-size">The right type and size</a></h2>
+<p>Choosing the type and size of cloud infrastructure appropriate for our business is usually the part that can be the most confusing. How should we predict, in a new environment or for a growing company, the computing power we&rsquo;ll need?</p>
+<p>Part of the beauty of not procuring hardware on our own is that won&rsquo;t have to make predictions like these. Using cloud storage and instances, expanding or scaling back resources can be done in a matter of minutes, sometimes seconds. With managed services, it can even be done automatically for us. With the proper support for scalability in our application, it&rsquo;s like having a magical house that instantly generates any type of room and amenity we need at that moment. The ability to continually ensure that we&rsquo;re using appropriate, cost-effective resources is at our fingertips, and often clearly visualized in charts and dashboards.</p>
+<p>For applications new to the cloud, some leeway for experimentation may be necessary. While cloud services enables us to quickly spin up and try out different architectures, there&rsquo;s no guarantee that all of those set ups will work well for our application. For example, running a single instance may be <a href="http://einaregilsson.com/serverless-15-percent-slower-and-eight-times-more-expensive/">less expensive than going serverless</a>, but we&rsquo;d be hard pressed to know this until we tried it out.</p>
+<p>As a starting point, we simply need enough storage and computing power to support the application as it is currently running, today. For example, in the case of storage, consider the size of the current database - the actual database data, not the total storage capacity of hardware on-premises. For a detailed cost exploration, AWS even offers a <a href="https://calculator.s3.amazonaws.com/index.html">Simple Monthly Calculator</a> with use case samples to help guide expectations.</p>
+<h2 id="do-test-runs-before-the-big-day" class="anchor-link"><a href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#do-test-runs-before-the-big-day">Do test runs before the big day</a></h2>
+<p>Running a trial cloud migration may be an odd concept, but it is an essential component to ensuring that the move goes as planned with minimal service interruption. Imagine the time and energy that would be saved in the moving house example if we could automate test runs! Invariably, some box or still-hung picture is forgotten and left out of the main truck, necessitating additional trips in other vehicles. With multiple chances to ensure we&rsquo;ve got it down pat, we minimize the possibility that our move causes any break in normal day-to-day business.</p>
+<p>Generally, to do a test run, we create a duplicate version of our application. The more we can duplicate, the more thorough the test run will be, especially if our data is especially large. Though duplication may seem tedious, working with the actual components we intend to migrate is essential to ensuring the migration goes as planned. After all, if we only did a moving-house test run with one box, it wouldn&rsquo;t be very representative.</p>
+<p>Test runs can help to validate our migration plan against any challenges we may encounter. These challenges might include:</p>
+<ul>
+<li>Downtime restrictions;</li>
+<li>Encrypting data in transit and immediately when at rest on the target;</li>
+<li>Schema conversion to a new target schema (the <a href="https://aws.amazon.com/dms/schema-conversion-tool/">AWS Schema Conversion Tool</a> can also help);</li>
+<li>Access to databases, such as through firewalls or VPNs;</li>
+<li>Developing a process to ensure that all the data successfully migrated, such as by using a hash function.</li>
+</ul>
+<p>Test runs also help to give us a more accurate picture of the overall time that a migration will take, as well as affording us the opportunity to fine-tune it. Factors that may affect the overall speed of a migration include:</p>
+<ul>
+<li>The sizes of the source and target instances;</li>
+<li>Available bandwidth for moving data;</li>
+<li>Schema configurations; and</li>
+<li>Transaction pressure on the source, such as changes to the data and the volume of incoming transactions.</li>
+</ul>
+<p>Once the duplicate application has been migrated via one or more <a href="https://aws.amazon.com/cloud-data-migration/">options</a>, we test the heck out of the application that&rsquo;s now running in the cloud to ensure it performs as expected. Ideally, on the big day, we&rsquo;d follow this same general process to move up-to-date duplicate data, and then seamlessly point the &ldquo;real&rdquo; application or web address to the new location in the cloud. This means that our customers experience near-zero downtime; essentially, only the amount of time that the change in location-pointing would need to propagate to their device.</p>
+<p>In the case of very large or complex applications with many components or many teams working together at the same time, a more gradual approach may be more appropriate than the &ldquo;Big Bang&rdquo; approach, and may help to mitigate risk of any interruptions. This means migrating in stages, component by component, and running tests between stages to ensure that all parts of the application are communicating with each other as expected.</p>
+<h2 id="preparation-is-essential-to-a-smooth-migration" class="anchor-link"><a href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/#preparation-is-essential-to-a-smooth-migration">Preparation is essential to a smooth migration</a></h2>
+<p>I hope this article has enabled a more practical understanding of how cloud migration can be achieved. With thorough preparation, it&rsquo;s possible to take advantage of all the cloud has to offer, with minimal hassle to get there.</p>
+<p>My thanks to the AWS Solutions Architects who presented at Pop-Up Loft and shared their knowledge on these topics, in particular: Chandra Kapireddy, Stephen Moon, John Franklin, Michael Alpaugh, and Priyanka Mahankali.</p>
+<p>One last nugget of wisdom, courtesy of John: &ldquo;Friends don&rsquo;t let friends use DMS to create schema objects.&rdquo;</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/">Build your own serverless subscriber list with Go and AWS</a>
+    <p>
+        How to build your own newsletter list with DynamoDB and SES email sign up confirmations.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/api/">api</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/">A cron job that could save you from a ransomware attack</a>
+    <p>
+        How a simple scheduled job can help you quickly recover from ransomware.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/cybersecurity/">cybersecurity</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/">Publishing GitHub event data with GitHub Actions and Pages</a>
+    <p>
+        A guide to overcoming the GitHub event data horizon with a little command-line magic.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/data/">data</a>
+        
+         ☕️ ☕️
+        &nbsp;8 min read
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and information security awareness.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    👩🏻‍💻</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    📰</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    📖</a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/coffee/cup.png' alt='coffee icon' height='16px'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>
