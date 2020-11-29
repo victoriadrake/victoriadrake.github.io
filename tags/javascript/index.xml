@@ -3228,132 +3228,128 @@ alt="An HTML dance party with a little JS cutting in"/> &lt;figcaption>
 &lt;p>Software developers are at a marked disadvantage when it comes to competing with black hat, or malicious, hackers. For all the work we do to secure each and every input that could potentially compromise our application, an attacker need only find the one we missed. It&amp;rsquo;s like installing deadbolts on all the doors, but leaving a window open!&lt;/p>
 &lt;p>By learning to think along the same lines as an attacker, however, we can better prepare our software to stand up against bad actors. Exciting as it may be to ship features as quickly as possible, we&amp;rsquo;ll avoid racking up a lot of security debt if we take the time beforehand to think through our application&amp;rsquo;s flow, follow the data, and pay attention to our inputs.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/cover_huc77b01b4a69883cffc22e79b459adb70_272308_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>How to set up OpenVPN on AWS EC2 and fix DNS leaks on Ubuntu 18.04 LTS</title><link>https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/</link><pubDate>Mon, 26 Aug 2019 09:01:23 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/</guid><description>A guide for setting up your own private VPN service, and understanding and fixing a DNS leak.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/cover_hudf0a9e712aaa7cfff13d04d6bd5de865_250170_640x0_resize_box_2.png" width="640" height="388"/>
-&lt;p>While rolling your own Virtual Private Network (VPN) is far more complicated than choosing a VPN provider from someone&amp;rsquo;s &amp;ldquo;best VPN 2019&amp;rdquo; list, the more I learn about why someone should use a VPN at all, the less appealing the latter option becomes. Besides the dangers of trusting a fake VPN app or falling victim to a lookalike URL, even &lt;em>legit&lt;/em> VPN service providers have pressures and motivations that may not be aligned with the privacy you hope to be purchasing.&lt;/p>
-&lt;p>Usually, the point of using a VPN is to gain a layer of privacy by disguising your location. If you aren&amp;rsquo;t currently using one, you can see what the Internet knows about where you are at &lt;a href="https://dnsleaktest.com/">the DNS leak test website&lt;/a>. You&amp;rsquo;ll see a big hello, your IP address, and your location. If that&amp;rsquo;s a little unsettling, know that a VPN can help to shield your location and online activities from wandering eyes and opportunistic advertisers. The former might be a too-curious or even malicious public-WiFi-cafe-goer, but the latter, counterintuitively, might be your own household Internet Service Provider (ISP).&lt;/p>
-&lt;p>Using a VPN means that the Internet can&amp;rsquo;t easily see your location, and your ISP can&amp;rsquo;t see your unencrypted web traffic (and neither can your curious coffee shop neighbor). Your ISP &lt;em>can&lt;/em> see the amount of data you&amp;rsquo;re sending, in its encrypted form, and that you&amp;rsquo;re sending it to your VPN server - but that&amp;rsquo;s all.&lt;/p>
-&lt;p>Unless you have a &lt;a href="https://dnsleaktest.com/what-is-a-dns-leak.html">DNS leak&lt;/a>.&lt;/p>
-&lt;p>If you are still using your ISP&amp;rsquo;s DNS server, they are still able to see all the URLs the server is resolving for you. So they&amp;rsquo;ll know you asked for &lt;code>lastminutebackwax.com&lt;/code>, although they won&amp;rsquo;t be able to decrypt the data that was exchanged with the site. (Is it just me, or does that seem even worse, somehow?)&lt;/p>
-&lt;p>Setting up your own instance and VPN service offers some peace of mind over trusting yet another company to do right with your data. Note that a VPN will &lt;em>not&lt;/em> give you complete online anonymity; there are many other ways your Internet presence can be tracked and your location discovered. However, if properly set up, without DNS leaks, you&amp;rsquo;ll have about as much Internet privacy as can be afforded without using &lt;a href="https://en.wikipedia.org/wiki/Tor_(anonymity_network)">Tor&lt;/a>.&lt;/p>
-&lt;h2 id="setting-up-our-vpn" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#setting-up-our-vpn">Setting up our VPN&lt;/a>&lt;/h2>
-&lt;p>This post will cover how to set up the &lt;a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE/">OpenVPN Access Server&lt;/a> product on AWS Marketplace, running on an &lt;a href="https://aws.amazon.com/ec2/">Amazon EC2 instance&lt;/a>. Then, we&amp;rsquo;ll look at how to fix a &lt;a href="https://gitlab.gnome.org/GNOME/NetworkManager-openvpn/issues/10">known NetworkManager bug in Ubuntu 18.04 that might cause DNS leaks&lt;/a>. The whole process should take about fifteen minutes, so grab a ☕ and let&amp;rsquo;s do some adulting.&lt;/p>
+&lt;p>Rolling your own Virtual Private Network (VPN) is complicated. I put a lot of time and effort into setting up OpenVPN on my own AWS EC2 instance, yet was still delighted to outsource the ongoing maintenance when I found &lt;a href="https://victoria.dev/blog/vpn">my preferred privacy-focused VPN&lt;/a>.&lt;/p>
+&lt;p>That said, there&amp;rsquo;s no better way to strive for maximum privacy than a VPN service you control, configure, and maintain yourself. Here&amp;rsquo;s a step-by-step tutorial for &lt;a href="#set-up-openvpn-on-aws-ec2">setting up your own OpenVPN on AWS EC2&lt;/a>, and &lt;a href="#what-a-dns-leak-looks-like">how to check for and fix DNS leaks&lt;/a>.&lt;/p>
+&lt;h2 id="set-up-openvpn-on-aws-ec2" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#set-up-openvpn-on-aws-ec2">Set up OpenVPN on AWS EC2&lt;/a>&lt;/h2>
+&lt;p>This post will cover how to set up the &lt;a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE/">OpenVPN Access Server&lt;/a> product on AWS Marketplace, running on an &lt;a href="https://aws.amazon.com/ec2/">Amazon EC2 instance&lt;/a>. Then, you&amp;rsquo;ll look at how to fix a &lt;a href="https://gitlab.gnome.org/GNOME/NetworkManager-openvpn/issues/10">known NetworkManager bug in Ubuntu 18.04 that might cause DNS leaks&lt;/a>. The whole process should take about fifteen minutes, so grab a ☕ and let&amp;rsquo;s be configuration superheroes.&lt;/p>
 &lt;p>&lt;em>Note: IDs and IP addresses shown for demonstration in this tutorial are invalid.&lt;/em>&lt;/p>
 &lt;h3 id="1-launch-the-openvpn-access-server-on-aws-marketplace" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#1-launch-the-openvpn-access-server-on-aws-marketplace">1. Launch the OpenVPN Access Server on AWS Marketplace&lt;/a>&lt;/h3>
-&lt;p>The &lt;a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE">OpenVPN Access Server&lt;/a> is available on AWS Marketplace. The Bring Your Own License (BYOL) model doesn&amp;rsquo;t actually require a license for up to two connected devices; to connect more clients, you can get &lt;a href="https://aws.amazon.com/marketplace/seller-profile/ref=srh_res_product_vendor?ie=UTF8&amp;amp;id=aac3a8a3-2823-483c-b5aa-60022894b89d">bundled billing&lt;/a> for five, ten, or twenty-five clients, or &lt;a href="https://openvpn.net/pricing/">purchase a minimum of ten OpenVPN licenses a la carte&lt;/a> for $15/device/year. For most of us, the two free connected devices will suffice; and if using an EC2 Micro instance, our set up will be &lt;a href="https://aws.amazon.com/free/">AWS Free Tier eligible&lt;/a> as well.&lt;/p>
-&lt;p>Start by clicking &amp;ldquo;Continue to Subscribe&amp;rdquo; for the &lt;a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE">OpenVPN Access Server&lt;/a>, which will bring you to a page that looks like this:&lt;/p>
+&lt;p>The &lt;a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE">OpenVPN Access Server&lt;/a> is available on AWS Marketplace. The Bring Your Own License (BYOL) model doesn&amp;rsquo;t actually require a license for up to two connected devices; to connect more clients, you can get &lt;a href="https://aws.amazon.com/marketplace/seller-profile/ref=srh_res_product_vendor?ie=UTF8&amp;amp;id=aac3a8a3-2823-483c-b5aa-60022894b89d">bundled billing&lt;/a> for five, ten, or twenty-five clients, or &lt;a href="https://openvpn.net/pricing/">purchase a minimum of ten OpenVPN licenses a la carte&lt;/a> for $15/device/year. For most of us, the two free connected devices will suffice; and if using an EC2 Micro instance, your set up will be &lt;a href="https://aws.amazon.com/free/">AWS Free Tier eligible&lt;/a> as well.&lt;/p>
+&lt;p>Start by clicking &lt;strong>Continue to Subscribe&lt;/strong> for the &lt;a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE">OpenVPN Access Server&lt;/a>, which will bring you to a page that looks like this:&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/1-subscribe.jpg#screenshot" alt="Subscription details page for OpenVPN Access Server" />
 &lt;/p>
-&lt;p>Click &amp;ldquo;Continue to Configuration.&amp;rdquo;&lt;/p>
+&lt;p>Click &lt;strong>Continue to Configuration&lt;/strong>.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/2-configure.jpg#screenshot" alt="Configure this software page for OpenVPN Access Server" />
 &lt;/p>
-&lt;p>You may notice that the EC2 instance type in the right side bar (and consequently, the Monthly Estimate) isn&amp;rsquo;t the one we want - that&amp;rsquo;s okay, we can change it soon. Just ensure that the &amp;ldquo;Region&amp;rdquo; chosen is where we want the instance to be located. Generally, the closer it is to the physical location of your client (your laptop, in this case), the faster your VPN will be. Click &amp;ldquo;Continue to Launch.&amp;rdquo;&lt;/p>
+&lt;p>You may notice that the EC2 instance type in the right side bar (and consequently, the Monthly Estimate) isn&amp;rsquo;t the one you want - that&amp;rsquo;s okay, you can change it soon. Just ensure that the &lt;strong>Region&lt;/strong> chosen is where you want the instance to be located. Generally, the closer it is to the physical location of your client (your laptop, in this case), the faster your VPN will be. Click &lt;strong>Continue to Launch&lt;/strong>.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/3-launch.jpg#screenshot" alt="Launch this software page" />
 &lt;/p>
-&lt;p>On this page, we&amp;rsquo;ll change three things:&lt;/p>
+&lt;p>On this page, you&amp;rsquo;ll change three things:&lt;/p>
 &lt;h4 id="1-the-ec2-instance-type" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#1-the-ec2-instance-type">1. The EC2 Instance type&lt;/a>&lt;/h4>
-&lt;p>Different types of EC2 (Elastic Compute Cloud) instances will offer us different levels of computing power. If you plan to use your instance for something more than just this VPN, you may want to choose something with higher memory or storage capacity, depending on how you plan to use it. We can view each instance offering on the &lt;a href="https://aws.amazon.com/ec2/instance-types/">Amazon EC2 Instance Types page&lt;/a>.&lt;/p>
+&lt;p>Different types of EC2 (Elastic Compute Cloud) instances will offer you different levels of computing power. If you plan to use your instance for something more than just this VPN, you may want to choose something with higher memory or storage capacity, depending on how you plan to use it. You can view each instance offering on the &lt;a href="https://aws.amazon.com/ec2/instance-types/">Amazon EC2 Instance Types page&lt;/a>.&lt;/p>
 &lt;p>For simple VPN use, the &lt;code>t2.nano&lt;/code> or &lt;code>t2.micro&lt;/code> instances are likely sufficient. Only the Micro instance is Free Tier eligible.&lt;/p>
 &lt;h4 id="2-the-security-group-settings" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#2-the-security-group-settings">2. The Security Group settings&lt;/a>&lt;/h4>
-&lt;p>A &lt;a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html">Security Group&lt;/a> is a profile, or collection of settings, that Amazon uses to control access to our instance. If you&amp;rsquo;ve set up other AWS products before, you may already have some groups with their own rules defined. We should be careful to understand the reasons for our Security Group settings, as these define how public or private our instance is, and consequently, who has access to it.&lt;/p>
-&lt;p>If we click &amp;ldquo;Create New Based on Seller Settings,&amp;rdquo; the OpenVPN server defines some recommended settings for a default Security Group.&lt;/p>
+&lt;p>A &lt;a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html">Security Group&lt;/a> is a profile, or collection of settings, that Amazon uses to control access to your instance. If you&amp;rsquo;ve set up other AWS products before, you may already have some groups with their own rules defined. You should be careful to understand the reasons for your Security Group settings, as these define how public or private your instance is, and consequently, who has access to it.&lt;/p>
+&lt;p>If you click &lt;strong>Create New Based on Seller Settings&lt;/strong>, the OpenVPN server defines some recommended settings for a default Security Group.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/4-security-group.jpg#screenshot" alt="Security group settings" />
 &lt;/p>
-&lt;p>The default recommended settings are all &lt;code>0.0.0.0/0&lt;/code> for TCP ports 22, 943, 443, and 945, and UDP port 1194. OpenVPN offers an &lt;a href="https://openvpn.net/vpn-server-resources/amazon-web-services-ec2-byol-appliance-quick-start-guide/#Instance_Launch_Options">explanation of how the ports are used&lt;/a> on their website. With the default settings, all these ports are left open to support various features of the OpenVPN server. We may wish to restrict access to these ports to a specific IP address or block of addresses (like that of your own ISP) to increase the security of our instance. However, if your IP address frequently changes (like when you travel and connect to a different WiFi network), restricting the ports may not be as helpful as we hope.&lt;/p>
-&lt;p>In any case, our instance will require SSH keys to connect to, and the OpenVPN server will be password protected. Unless you have other specific security goals, it&amp;rsquo;s fine to accept the default settings for now.&lt;/p>
-&lt;p>Let&amp;rsquo;s give the Security Group a name and brief description, so we know what it&amp;rsquo;s for. Then click &amp;ldquo;Save.&amp;rdquo;&lt;/p>
+&lt;p>The default recommended settings are all &lt;code>0.0.0.0/0&lt;/code> for TCP ports 22, 943, 443, and 945, and UDP port 1194. OpenVPN offers an &lt;a href="https://openvpn.net/vpn-server-resources/amazon-web-services-ec2-byol-appliance-quick-start-guide/#Instance_Launch_Options">explanation of how the ports are used&lt;/a> on their website. With the default settings, all these ports are left open to support various features of the OpenVPN server. You may wish to restrict access to these ports to a specific IP address or block of addresses (like that of your own ISP) to increase the security of your instance. However, if your IP address frequently changes (like when you travel and connect to a different WiFi network), restricting the ports may not be as helpful as you hope.&lt;/p>
+&lt;p>In any case, your instance will require SSH keys to connect to, and the OpenVPN server will be password protected. Unless you have other specific security goals, it&amp;rsquo;s fine to accept the default settings for now.&lt;/p>
+&lt;p>Let&amp;rsquo;s give the Security Group a name and brief description, so you know what it&amp;rsquo;s for. Then click &lt;strong>Save&lt;/strong>.&lt;/p>
 &lt;h4 id="3-the-key-pair-settings" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#3-the-key-pair-settings">3. The Key Pair settings&lt;/a>&lt;/h4>
-&lt;p>The aforementioned SSH keys are access credentials that we&amp;rsquo;ll use to connect to our instance. We can &lt;a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair">create a key pair&lt;/a> in this section, or you can choose a key pair you may already be using with AWS.&lt;/p>
+&lt;p>The aforementioned SSH keys are access credentials that you&amp;rsquo;ll use to connect to your instance. You can &lt;a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair">create a key pair&lt;/a> in this section, or you can choose a key pair you may already be using with AWS.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/5-keys.jpg#screenshot" alt="Key Pair Settings link" />
 &lt;/p>
-&lt;p>To create a new set of access credentials, click &amp;ldquo;Create a key pair in EC2&amp;rdquo; to open a new window. Then, click the &amp;ldquo;Create Key Pair&amp;rdquo; blue button. Once you give your key pair a name, it will be created and the private key will automatically download to your machine. It&amp;rsquo;s a file ending with the extension &lt;code>.pem&lt;/code>. Store this key in a secure place on your computer. We&amp;rsquo;ll need to refer to it when we connect to our new EC2 instance.&lt;/p>
-&lt;p>We can return to the previous window to select the key pair we just created. If it doesn&amp;rsquo;t show up, hit the little &amp;ldquo;refresh&amp;rdquo; icon next to the drop-down. Once it&amp;rsquo;s selected, hit the shiny yellow &amp;ldquo;Launch&amp;rdquo; button.&lt;/p>
-&lt;p>We should see a message like this:&lt;/p>
+&lt;p>To create a new set of access credentials, click &lt;strong>Create a key pair in EC2&lt;/strong> to open a new window. Then, click the &lt;strong>Create Key Pair&lt;/strong> blue button. Once you give your key pair a name, it will be created and the private key will automatically download to your machine. It&amp;rsquo;s a file ending with the extension &lt;code>.pem&lt;/code>. Store this key in a secure place on your computer. You&amp;rsquo;ll need to refer to it when you connect to your new EC2 instance.&lt;/p>
+&lt;p>You can return to the previous window to select the key pair you just created. If it doesn&amp;rsquo;t show up, hit the little &amp;ldquo;refresh&amp;rdquo; icon next to the drop-down. Once it&amp;rsquo;s selected, hit the shiny yellow &lt;strong>Launch&lt;/strong> button.&lt;/p>
+&lt;p>You should see a message like this:&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/6-launched.jpg#screenshot" alt="Launch success message" />
 &lt;/p>
-&lt;p>Great stuff! Now that our instance exists, let&amp;rsquo;s make sure we can access it and start up our VPN. For a shortcut to the next step, click on the &amp;ldquo;EC2 Console&amp;rdquo; link in the success message.&lt;/p>
+&lt;p>Great stuff! Now that your instance exists, let&amp;rsquo;s make sure you can access it and start up your VPN. For a shortcut to the next step, click on the &amp;ldquo;EC2 Console&amp;rdquo; link in the success message.&lt;/p>
 &lt;h3 id="2-associate-an-elastic-ip" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#2-associate-an-elastic-ip">2. Associate an Elastic IP&lt;/a>&lt;/h3>
-&lt;p>Amazon&amp;rsquo;s &lt;a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html">Elastic IP Addresses&lt;/a> provides us with a public IPv4 address controlled by our account, unlike the public IP address tied to our EC2 instance. It&amp;rsquo;s considered a best practice to create one and associate it with our VPN instance. If anything should go wrong with our instance, or if we want to use a new instance for our VPN in the future, the Elastic IP can be disassociated from the current instance and reassociated with our new one. This makes the transition seamless for our connected clients. Think of the Elastic IP like a web domain address that we register - we can point it at whatever we choose.&lt;/p>
+&lt;p>Amazon&amp;rsquo;s &lt;a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html">Elastic IP Addresses&lt;/a> provides you with a public IPv4 address controlled by your account, unlike the public IP address tied to your EC2 instance. It&amp;rsquo;s considered a best practice to create one and associate it with your VPN instance. If anything should go wrong with your instance, or if you want to use a new instance for your VPN in the future, the Elastic IP can be disassociated from the current instance and reassociated with your new one. This makes the transition seamless for your connected clients. Think of the Elastic IP like a web domain address that you register - you can point it at whatever you choose.&lt;/p>
 &lt;p>We can create a new Elastic IP address on the &lt;a href="https://console.aws.amazon.com/ec2/">Amazon EC2 Console&lt;/a>. If you clicked the link from the success message above, we&amp;rsquo;re already there.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/7-ec2.jpg#screenshot" alt="EC2 console" />
 &lt;/p>
-&lt;p>If you have more than one instance, take note of the Instance ID of the one we&amp;rsquo;ve just launched.&lt;/p>
-&lt;p>In the left sidebar under &amp;ldquo;Network &amp;amp; Security,&amp;rdquo; choose &amp;ldquo;Elastic IPs.&amp;rdquo; Then click the blue &amp;ldquo;Allocate new address&amp;rdquo; button.&lt;/p>
+&lt;p>If you have more than one instance, take note of the Instance ID of the one you&amp;rsquo;ve just launched.&lt;/p>
+&lt;p>In the left sidebar under &lt;strong>Network &amp;amp; Security&lt;/strong>, choose &lt;strong>Elastic IPs&lt;/strong>. Then click the blue &lt;strong>Allocate new address&lt;/strong> button.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/8-elasticip.jpg#screenshot" alt="Allocate new address page" />
 &lt;/p>
-&lt;p>Choose &amp;ldquo;Amazon Pool,&amp;rdquo; then click &amp;ldquo;Allocate.&amp;rdquo;&lt;/p>
+&lt;p>Choose &lt;strong>Amazon Pool,&lt;/strong> then click &lt;strong>Allocate&lt;/strong>.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/9-elasticip.jpg#screenshot" alt="Allocate elastic IP success message" />
 &lt;/p>
-&lt;p>Success! We can click &amp;ldquo;Close&amp;rdquo; to return to the Elastic IP console.&lt;/p>
+&lt;p>Success! Click &lt;strong>Close&lt;/strong> to return to the Elastic IP console.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/10-associateip.jpg#screenshot" alt="Associate elastic IP" />
 &lt;/p>
-&lt;p>Now that we have an Elastic IP, let&amp;rsquo;s associate it with our instance. Select the IP address, then click &amp;ldquo;Actions,&amp;rdquo; and choose &amp;ldquo;Associate address.&amp;rdquo;&lt;/p>
+&lt;p>Now that you have an Elastic IP, let&amp;rsquo;s associate it with your instance. Select the IP address, then click &lt;strong>Actions,&lt;/strong> and choose &lt;strong>Associate address&lt;/strong>.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/11-associateip.jpg#screenshot" alt="Associate elastic IP with instance" />
 &lt;/p>
-&lt;p>Ensure the &amp;ldquo;Instance&amp;rdquo; option is selected, then click the drop-down menu. We should see our EC2 instance ID there. Select it, then click &amp;ldquo;Associate.&amp;rdquo;&lt;/p>
+&lt;p>Ensure the &lt;strong>Instance&lt;/strong> option is selected, then click the drop-down menu. You should see your EC2 instance ID there. Select it, then click &lt;strong>Associate&lt;/strong>.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/12-associateip.jpg#screenshot" alt="Associate elastic IP success message" />
 &lt;/p>
-&lt;p>Success! Now that we&amp;rsquo;ll be able to access our VPN instance, let&amp;rsquo;s get our VPN service up and running.&lt;/p>
+&lt;p>Success! Now that you&amp;rsquo;ll be able to access your VPN instance, let&amp;rsquo;s get your VPN service up and running.&lt;/p>
 &lt;h3 id="3-initialize-openvpn-on-the-ec2-server" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#3-initialize-openvpn-on-the-ec2-server">3. Initialize OpenVPN on the EC2 server&lt;/a>&lt;/h3>
-&lt;p>First, we&amp;rsquo;ll need to connect to the EC2 instance via our terminal. We&amp;rsquo;ll use the private key we created earlier.&lt;/p>
-&lt;p>Open a new terminal window and navigate to the directory containing the private key &lt;code>.pem&lt;/code> file. We&amp;rsquo;ll need to set its permissions with:&lt;/p>
+&lt;p>First, you&amp;rsquo;ll need to connect to the EC2 instance via your terminal. You&amp;rsquo;ll use the private key you created earlier.&lt;/p>
+&lt;p>Open a new terminal window and navigate to the directory containing the private key &lt;code>.pem&lt;/code> file. You&amp;rsquo;ll need to set its permissions with:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo chmod &lt;span class="m">400&lt;/span> &amp;lt;name&amp;gt;.pem
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Be sure to substitute &lt;code>&amp;lt;name&amp;gt;&lt;/code> with the name of your key.&lt;/p>
-&lt;p>This sets the file permissions to &lt;code>-r--------&lt;/code> so that it can only be read by the user (you). It may help to protect the private key from read and write operations by other users, but more pertinently, will prevent AWS from throwing an error when we try to connect to our instance.&lt;/p>
+&lt;p>This sets the file permissions to &lt;code>-r--------&lt;/code> so that it can only be read by the user (you). It may help to protect the private key from read and write operations by other users, but more importantly, will prevent AWS from throwing an error when you try to connect to your instance.&lt;/p>
 &lt;p>We can now do just that by running:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">ssh -i &amp;lt;name&amp;gt;.pem openvpnas@&amp;lt;elastic ip&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>The user &lt;code>openvpnas&lt;/code> is set up by the OpenVPN Access Server to allow us to connect to our instance. Replace &lt;code>&amp;lt;elastic ip&amp;gt;&lt;/code> with the Elastic IP address we just associated.&lt;/p>
-&lt;p>We may get a message saying that the authenticity of our host can&amp;rsquo;t be established. As long as we&amp;rsquo;ve typed the Elastic IP correctly, we can go ahead and answer &amp;ldquo;yes&amp;rdquo; to the prompt.&lt;/p>
-&lt;p>Upon the initial connection to the OpenVPN instance, a set up wizard called &amp;ldquo;Initial Configuration Tool&amp;rdquo; should automatically run. (If, for some reason, it doesn&amp;rsquo;t, or you panic-mashed a button, we can restart it with &lt;code>sudo ovpn-init –ec2&lt;/code>.) We&amp;rsquo;ll be asked to accept the agreement, then the wizard will help to walk us through some configuration settings for our VPN server.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The user &lt;code>openvpnas&lt;/code> is set up by the OpenVPN Access Server to allow you to connect to your instance. Replace &lt;code>&amp;lt;elastic ip&amp;gt;&lt;/code> with the Elastic IP address you just associated.&lt;/p>
+&lt;p>We may get a message saying that the authenticity of your host can&amp;rsquo;t be established. As long as you&amp;rsquo;ve typed the Elastic IP correctly, go ahead and answer &lt;strong>yes&lt;/strong> to the prompt.&lt;/p>
+&lt;p>Upon the initial connection to the OpenVPN instance, a set up wizard called &lt;strong>Initial Configuration Tool&lt;/strong> should automatically run. (If, for some reason, it doesn&amp;rsquo;t, or you panic-mashed a button, you can restart it with &lt;code>sudo ovpn-init –ec2&lt;/code>.) You&amp;rsquo;ll be asked to accept the agreement, then the wizard will help to walk you through some configuration settings for your VPN server.&lt;/p>
 &lt;p>You may generally accept the default settings, however, there are a couple questions you may like to answer knowledgeably. They are:&lt;/p>
-&lt;blockquote>
-&lt;p>&lt;strong>Should client traffic be routed by default through the VPN?&lt;/strong>
-&lt;strong>Should client DNS traffic be routed by default through the VPN?&lt;/strong>
-When asked for our &amp;ldquo;OpenVPN-AS license key&amp;rdquo;, we can leave it blank to use the VPN with up to two clients. If you&amp;rsquo;ve purchased a key, enter it here.
-Once the configuration wizard finishes running, we should see the message &amp;ldquo;Initial Configuration Complete!&amp;rdquo; Before we move on, we should set a password for our server&amp;rsquo;s administration account. To do this, run:&lt;/p>
-&lt;/blockquote>
+&lt;p>&lt;strong>Should client traffic be routed by default through the VPN?&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>Should client DNS traffic be routed by default through the VPN?&lt;/strong>&lt;/p>
+&lt;p>These answers depend on your privacy goals for your VPN.&lt;/p>
+&lt;p>When asked for your &lt;strong>OpenVPN-AS license key&lt;/strong>, you can leave it blank to use the VPN with up to two clients. If you&amp;rsquo;ve purchased a key, enter it here.&lt;/p>
+&lt;p>Once the configuration wizard finishes running, you should see the message &amp;ldquo;Initial Configuration Complete!&amp;rdquo; Before you move on, you should set a password for your server&amp;rsquo;s administration account. To do this, run:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo passwd openvpn
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Then enter your chosen password twice. Now we&amp;rsquo;re ready to get connected!&lt;/p>
-&lt;p>To close the ssh connection, type &lt;code>exit&lt;/code>.&lt;/p>
+&lt;p>To close the SSH connection, type &lt;code>exit&lt;/code>.&lt;/p>
 &lt;h3 id="4-connect-the-client-to-the-vpn" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#4-connect-the-client-to-the-vpn">4. Connect the client to the VPN&lt;/a>&lt;/h3>
-&lt;p>To connect our client (in this case, our laptop) to the VPN and start reaping the benefits, we&amp;rsquo;ll need to do two things; first, obtain our connection profile; second, install the &lt;code>openvpn&lt;/code> daemon.&lt;/p>
+&lt;p>To connect your client (in this case, your laptop) to the VPN and start reaping the benefits, you&amp;rsquo;ll need to do two things; first, obtain your connection profile; second, install the &lt;code>openvpn&lt;/code> daemon.&lt;/p>
 &lt;h4 id="1-get-your-ovpn-connection-profile" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#1-get-your-ovpn-connection-profile">1. Get your &lt;code>.ovpn&lt;/code> connection profile&lt;/a>&lt;/h4>
-&lt;p>We&amp;rsquo;ll need to download a connection profile for ourselves; this is like a personal configuration file with information, including keys, that the VPN server will need to allow our connection. We can do this by logging in with the password we just set at our Elastic IP address, port 943. This looks like:&lt;/p>
+&lt;p>You&amp;rsquo;ll need to download a connection profile; this is like a personal configuration file with information, including keys, that the VPN server will need to allow your connection. You can do this by logging in with the password you just set at your Elastic IP address, port 943. This looks like:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">https://&amp;lt;elastic ip&amp;gt;:943/
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>The &lt;code>https&lt;/code> part is important; without it, the instance won&amp;rsquo;t send any data.&lt;/p>
-&lt;p>When we go to this URL, we may see a page warning us that this site&amp;rsquo;s certificate issuer is unknown or invalid. As long as we&amp;rsquo;ve typed our Elastic IP correctly, it&amp;rsquo;s safe to proceed. If you&amp;rsquo;re using Firefox, click &amp;ldquo;Advanced,&amp;rdquo; and then &amp;ldquo;Accept the Risk and Continue.&amp;rdquo; In Chrome, click &amp;ldquo;Advanced,&amp;rdquo; then &amp;ldquo;Proceed to &amp;hellip;&amp;rdquo; the elastic IP.&lt;/p>
+&lt;p>When you go to this URL, you may see a page warning you that this site&amp;rsquo;s certificate issuer is unknown or invalid. As long as you&amp;rsquo;ve typed your Elastic IP correctly, it&amp;rsquo;s safe to proceed. If you&amp;rsquo;re using Firefox, click &lt;strong>Advanced&lt;/strong>, and then &lt;strong>Accept the Risk and Continue&lt;/strong>. In Chrome, click &lt;strong>Advanced&lt;/strong>, then &lt;strong>Proceed&lt;/strong> to the elastic IP.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/13-warning.jpg#screenshot" alt="Security warning page" />
 &lt;/p>
-&lt;p>Log in with the username &lt;code>openvpn&lt;/code> and the password we just set. We&amp;rsquo;ll now be presented with a link to download our user-locked connection profile:&lt;/p>
+&lt;p>Log in with the username &lt;code>openvpn&lt;/code> and the password you just set. You&amp;rsquo;ll now be presented with a link to download your user-locked connection profile:&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/14-profile.jpg#screenshot" alt="Connection profile download page" />
 &lt;/p>
-&lt;p>When we click the link, a file named &lt;code>client.ovpn&lt;/code> will download.&lt;/p>
+&lt;p>When you click the link, a file named &lt;code>client.ovpn&lt;/code> will download.&lt;/p>
 &lt;h4 id="2-install-and-start-openvpn-on-your-ubuntu-1804-client" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#2-install-and-start-openvpn-on-your-ubuntu-1804-client">2. Install and start &lt;code>openvpn&lt;/code> on your Ubuntu 18.04 client&lt;/a>&lt;/h4>
-&lt;p>The &lt;code>openvpn&lt;/code> daemon will allow our client to connect to our VPN server. It can be installed through the default Ubuntu repositories. Run:&lt;/p>
+&lt;p>The &lt;code>openvpn&lt;/code> daemon will allow your client to connect to your VPN server. It can be installed through the default Ubuntu repositories. Run:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo apt install openvpn
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>In order for OpenVPN to automatically start when we boot up our computer, we&amp;rsquo;ll need to rename and move the connection profile file. I suggest using a &lt;a href="https://en.wikipedia.org/wiki/Symbolic_link">symlink&lt;/a> to accomplish this, as it leaves our original file more easily accessible for editing, and allows us to store it in any directory we choose. We can create a symlink by running this command in the directory where our file is located:&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In order for OpenVPN to automatically start when you boot up your computer, you&amp;rsquo;ll need to rename and move the connection profile file. I suggest using a &lt;a href="https://en.wikipedia.org/wiki/Symbolic_link">symlink&lt;/a> to accomplish this, as it leaves your original file more easily accessible for editing, and allows you to store it in any directory you choose. You can create a symlink by running this command in the directory where your file is located:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo ln -s client.ovpn /etc/openvpn/&amp;lt;name&amp;gt;.conf
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>This creates a symbolic link for the connection profile in the appropriate folder for &lt;code>systemd&lt;/code> to find it. The &lt;code>&amp;lt;name&amp;gt;&lt;/code> can be anything. When the Linux kernel has booted, &lt;code>systemd&lt;/code> is used to initialize the services and daemons that the user has set up to run; one of these will now be OpenVPN. Renaming the file with the extension &lt;code>.conf&lt;/code> will let the &lt;code>openvpn&lt;/code> daemon know to use it as our connection file.&lt;/p>
-&lt;p>For now, we can manually start and connect to OpenVPN by running:&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This creates a symbolic link for the connection profile in the appropriate folder for &lt;code>systemd&lt;/code> to find it. The &lt;code>&amp;lt;name&amp;gt;&lt;/code> can be anything. When the Linux kernel has booted, &lt;code>systemd&lt;/code> is used to initialize the services and daemons that the user has set up to run; one of these will now be OpenVPN. Renaming the file with the extension &lt;code>.conf&lt;/code> will let the &lt;code>openvpn&lt;/code> daemon know to use it as your connection file.&lt;/p>
+&lt;p>For now, you can manually start and connect to OpenVPN by running:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo openvpn --config client.ovpn
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>We&amp;rsquo;ll be asked for a username and password, which will be the same credentials we used before. Once the service finishes starting up, we&amp;rsquo;ll see &amp;ldquo;Initialization Sequence Complete.&amp;rdquo; If we now visit &lt;a href="https://www.dnsleaktest.com/">the DNS leak test website&lt;/a>, we should see the Elastic IP and the location of our EC2 server. Yay!&lt;/p>
-&lt;p>If you&amp;rsquo;re on a later version of Ubuntu, you may check for DNS leaks by clicking on one of the &amp;ldquo;test&amp;rdquo; buttons. If all the ISPs shown are Amazon and none are your own service provider&amp;rsquo;s, congratulations! No leaks! You can move on to &lt;a href="#3-set-up-openvpn-as-networkmanager-system-connection">Step 3 in the second section&lt;/a> below, after which, you&amp;rsquo;ll be finished.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>You&amp;rsquo;ll be asked for a username and password, which will be the same credentials you used before. Once the service finishes starting up, you&amp;rsquo;ll see &amp;ldquo;Initialization Sequence Complete.&amp;rdquo; If you now visit &lt;a href="https://www.dnsleaktest.com/">the DNS leak test website&lt;/a>, you should see the Elastic IP and the location of your EC2 server. Yay!&lt;/p>
+&lt;p>If you&amp;rsquo;re on a later version of Ubuntu, you may check for DNS leaks by clicking on one of the test buttons. If all the ISPs shown are Amazon and none are your own service provider&amp;rsquo;s, congratulations! No leaks! You can move on to &lt;a href="#3-set-up-openvpn-as-networkmanager-system-connection">Step 3 in the second section&lt;/a> below, after which, you&amp;rsquo;ll be finished.&lt;/p>
 &lt;p>If you&amp;rsquo;re using Ubuntu 18.04 LTS, however, we&amp;rsquo;re not yet done.&lt;/p>
 &lt;h2 id="what-a-dns-leak-looks-like" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#what-a-dns-leak-looks-like">What a DNS leak looks like&lt;/a>&lt;/h2>
-&lt;p>To see what a DNS leak looks like, click on one of the &amp;ldquo;test&amp;rdquo; buttons on the &lt;a href="https://www.dnsleaktest.com/">the DNS leak test page&lt;/a>. When we do, we&amp;rsquo;ll see not only our Amazon.com IP addresses, but also our own ISP and location.&lt;/p>
-&lt;p>We can also see the leak by running &lt;code>systemd-resolve --status&lt;/code> in our terminal. Our results will contain two lines under different interfaces that both have entries for DNS Servers. It&amp;rsquo;ll look something like this:&lt;/p>
+&lt;p>Sites like &lt;a href="https://dnsleaktest.com/">the DNS leak test website&lt;/a> can help you check your configuration and see if the Internet knows more about your location than you&amp;rsquo;d like. On the main page you&amp;rsquo;ll see a big hello, your IP address, and your location, so far as can be determined.&lt;/p>
+&lt;p>If you have a DNS leak, you can see what it looks like by clicking on one of the test buttons on the &lt;a href="https://www.dnsleaktest.com/">the DNS leak test page&lt;/a>. When you do, you&amp;rsquo;ll see not only your Amazon.com IP addresses, but also your own ISP and location.&lt;/p>
+&lt;p>You can also see the leak by running &lt;code>systemd-resolve --status&lt;/code> in your terminal. Your results will contain two lines under different interfaces that both have entries for DNS Servers. It&amp;rsquo;ll look something like this:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">Link &lt;span class="m">7&lt;/span> &lt;span class="o">(&lt;/span>tun0&lt;span class="o">)&lt;/span>
 Current Scopes: DNS
 LLMNR setting: yes
@@ -3370,15 +3366,15 @@ DNSSEC setting: no
 DNSSEC supported: no
 DNS Servers: 192.168.0.1
 DNS Domain: ~.
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>The &lt;a href="https://unix.stackexchange.com/questions/434916/how-to-fix-openvpn-dns-leak">DNS leak problem in Ubuntu 18.04&lt;/a> stems from Ubuntu&amp;rsquo;s DNS resolver, &lt;code>systemd-resolved&lt;/code>, failing to properly handle our OpenVPN configuration. In order to try and be a good, efficient DNS resolver, &lt;code>systemd-resolved&lt;/code> will send DNS lookup requests in parallel to each interface that has a DNS server configuration, and then utilizes the fastest response. In our case, we only want to use our VPN&amp;rsquo;s DNS servers. Sorry, &lt;code>systemd-resolved&lt;/code>. You tried.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The &lt;a href="https://unix.stackexchange.com/questions/434916/how-to-fix-openvpn-dns-leak">DNS leak problem in Ubuntu 18.04&lt;/a> stems from Ubuntu&amp;rsquo;s DNS resolver, &lt;code>systemd-resolved&lt;/code>, failing to properly handle your OpenVPN configuration. In order to try and be a good, efficient DNS resolver, &lt;code>systemd-resolved&lt;/code> will send DNS lookup requests in parallel to each interface that has a DNS server configuration, and then utilizes the fastest response. In your case, you only want to use your VPN&amp;rsquo;s DNS servers. Sorry, &lt;code>systemd-resolved&lt;/code>. You tried.&lt;/p>
 &lt;h2 id="how-to-fix-openvpn-dns-leak-on-ubuntu-1804" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#how-to-fix-openvpn-dns-leak-on-ubuntu-1804">How to fix OpenVPN DNS leak on Ubuntu 18.04&lt;/a>&lt;/h2>
-&lt;p>Luckily, there is a fix that we can implement. We&amp;rsquo;ll need to install a few helpers from the Ubuntu repositories, update our configuration file, then set up OpenVPN using NetworkManager. Let&amp;rsquo;s do it!&lt;/p>
+&lt;p>Luckily, there is a fix that you can implement. You&amp;rsquo;ll need to install a few helpers from the Ubuntu repositories, update your configuration file, then set up OpenVPN using NetworkManager. Let&amp;rsquo;s do it!&lt;/p>
 &lt;h3 id="1-install-some-helpers" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#1-install-some-helpers">1. Install some helpers&lt;/a>&lt;/h3>
-&lt;p>To properly integrate OpenVPN with &lt;code>systemd-resolved&lt;/code>, we&amp;rsquo;ll need a bit more help. In a terminal, run:&lt;/p>
+&lt;p>To properly integrate OpenVPN with &lt;code>systemd-resolved&lt;/code>, you&amp;rsquo;ll need a bit more help. In a terminal, run:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo apt install -y openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>This will install a helper script that integrates OpenVPN and &lt;code>systemd-resolved&lt;/code>, a NetworkManager plugin for OpenVPN, and its GUI counterpart for GNOME desktop environment.&lt;/p>
 &lt;h3 id="2-add-dns-implementation-to-your-connection-profile" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#2-add-dns-implementation-to-your-connection-profile">2. Add DNS implementation to your connection profile&lt;/a>&lt;/h3>
-&lt;p>We&amp;rsquo;ll need to edit the connection profile file we downloaded earlier. Since it&amp;rsquo;s symbolically linked, we can accomplish this by changing the &lt;code>.ovpn&lt;/code> file, wherever it&amp;rsquo;s stored. Run &lt;code>vim &amp;lt;name&amp;gt;.ovpn&lt;/code> to open it in Vim, then add the following lines at the bottom. Explanation in the comments:&lt;/p>
+&lt;p>You&amp;rsquo;ll need to edit the connection profile file you downloaded earlier. Since it&amp;rsquo;s symbolically linked, you can accomplish this by changing the &lt;code>.ovpn&lt;/code> file, wherever it&amp;rsquo;s stored. Run &lt;code>vim &amp;lt;name&amp;gt;.ovpn&lt;/code> to open it in Vim, then add the following lines at the bottom. Explanation in the comments:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="c1"># Allow OpenVPN to call user-defined scripts&lt;/span>
 script-security &lt;span class="m">2&lt;/span>
 &lt;span class="c1"># Tell systemd-resolved to send all DNS queries over the VPN&lt;/span>
@@ -3391,25 +3387,25 @@ down /etc/openvpn/update-systemd-resolved
 down-pre
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>For the full list of OpenVPN options, see &lt;a href="https://openvpn.net/community-resources/reference-manual-for-openvpn-2-1/">OpenVPN Scripting and Environment Variables&lt;/a>. You may also like &lt;a href="https://en.wikipedia.org/wiki/TUN/TAP">more information about TUN/TAP&lt;/a>.&lt;/p>
 &lt;h3 id="3-set-up-openvpn-as-networkmanager-system-connection" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#3-set-up-openvpn-as-networkmanager-system-connection">3. Set up OpenVPN as NetworkManager system connection&lt;/a>&lt;/h3>
-&lt;p>We&amp;rsquo;ll use the GUI to set up our VPN with NetworkManager. Open up Network Settings, which should look something like this:&lt;/p>
+&lt;p>Use the GUI to set up your VPN with NetworkManager. Open up Network Settings, which should look something like this:&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/15-networksettings.png#screenshot" alt="Network Settings window on Ubuntu 18.04" />
 &lt;/p>
-&lt;p>Then click the &amp;ldquo;+&amp;rdquo; button. On the window that pops up, counterintuitively, choose &amp;ldquo;Import from file&amp;hellip;&amp;rdquo; instead of the OpenVPN option.&lt;/p>
+&lt;p>Then click the plus sign (&lt;strong>+&lt;/strong>) button. On the window that pops up, counterintuitively, choose &lt;strong>Import from file&amp;hellip;&lt;/strong> instead of the OpenVPN option.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/16-importvpn.jpg#screenshot" alt="Add VPN window" />
 &lt;/p>
-&lt;p>Navigate to, and then select, your &lt;code>.ovpn&lt;/code> file. We should now see something like this:&lt;/p>
+&lt;p>Navigate to, and then select, your &lt;code>.ovpn&lt;/code> file. You should now see something like this:&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/17-vpnsettings.png#screenshot" alt="The filled VPN connection settings" />
 &lt;/p>
-&lt;p>Add your username and password for the server (&lt;code>openvpn&lt;/code> and the password we set in &lt;a href="#3-initialize-openvpn-on-the-ec2-server">the first section&amp;rsquo;s Step 3&lt;/a>), and your user key password (the same one again, if you&amp;rsquo;ve followed this tutorial), then click the &amp;ldquo;Add&amp;rdquo; button.&lt;/p>
+&lt;p>Add your username and password for the server (&lt;code>openvpn&lt;/code> and the password you set in &lt;a href="#3-initialize-openvpn-on-the-ec2-server">the first section&amp;rsquo;s Step 3&lt;/a>), and your user key password (the same one again, if you&amp;rsquo;ve followed this tutorial), then click the &amp;ldquo;Add&amp;rdquo; button.&lt;/p>
 &lt;h3 id="4-edit-your-openvpn-networkmanager-configuration" class="anchor-link">&lt;a href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/#4-edit-your-openvpn-networkmanager-configuration">4. Edit your OpenVPN NetworkManager configuration&lt;/a>&lt;/h3>
-&lt;p>Nearly there! Now that we&amp;rsquo;ve added the VPN as a NetworkManager connection, we&amp;rsquo;ll need to make a quick change to it. We can see a list of NetworkManager connections by running:&lt;/p>
+&lt;p>Nearly there! Now that you&amp;rsquo;ve added the VPN as a NetworkManager connection, you&amp;rsquo;ll need to make a quick change to it. You can see a list of NetworkManager connections by running:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">ls -la /etc/NetworkManager/system-connections/*
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>The one for our VPN is probably called &lt;code>openvpn&lt;/code>, so let&amp;rsquo;s edit it by running:&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The one for your VPN is probably called &lt;code>openvpn&lt;/code>, so let&amp;rsquo;s edit it by running:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo vim /etc/NetworkManager/system-connections/openvpn
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Under &lt;code>[ipv4]&lt;/code>, we&amp;rsquo;ll need to add the line &lt;code>dns-priority=-42&lt;/code>. It should end up looking like this:&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Under &lt;code>[ipv4]&lt;/code>, you&amp;rsquo;ll need to add the line &lt;code>dns-priority=-42&lt;/code>. It should end up looking like this:&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/18-connsettings.jpg#screenshot" alt="Connection settings for ipv4" />
 &lt;/p>
@@ -3421,11 +3417,12 @@ down-pre
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/19-vpnon.jpg#screenshot" alt="Network Settings window" />
 &lt;/p>
-&lt;p>Finally, visit &lt;a href="https://www.dnsleaktest.com/">the DNS leak test website&lt;/a> and click on &amp;ldquo;Extended test&amp;rdquo; to verify the fix. If everything&amp;rsquo;s working properly, we should now see a list containing only our VPN ISP.&lt;/p>
+&lt;p>Finally, visit &lt;a href="https://www.dnsleaktest.com/">the DNS leak test website&lt;/a> and click on &lt;strong>Extended test&lt;/strong> to verify the fix. If everything&amp;rsquo;s working properly, you should now see a list containing only your VPN ISP.&lt;/p>
 &lt;p>
 &lt;img src="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/20-noleaks.png#screenshot" alt="Successful DNS leak test results" />
 &lt;/p>
-&lt;p>And we&amp;rsquo;re done! Congratulations on rolling your very own VPN server and stopping DNS leaks with OpenVPN. Enjoy surfing in (relative) privacy. Now your only worry at the local coffeeshop is who&amp;rsquo;s watching you surf from the seat behind you.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/cover_hudf0a9e712aaa7cfff13d04d6bd5de865_250170_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>How to do twice as much with half the keystrokes using `.bashrc`</title><link>https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/</link><pubDate>Wed, 21 Aug 2019 09:17:02 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/</guid><description>An overview of time-saving aliases, functions, and creating a useful Bash prompt.</description><content:encoded>
+&lt;p>And we&amp;rsquo;re done! Congratulations on rolling your very own VPN server and stopping DNS leaks with OpenVPN. Enjoy surfing in (relative) privacy. Now your only worry at the local coffeeshop is who&amp;rsquo;s watching you surf from the seat behind you.&lt;/p>
+&lt;p>If you enjoyed this post, there&amp;rsquo;s a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. &lt;a href="https://victoria.dev">Subscribe on victoria.dev&lt;/a> to see new articles first.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/cover_hudf0a9e712aaa7cfff13d04d6bd5de865_250170_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>How to do twice as much with half the keystrokes using `.bashrc`</title><link>https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/</link><pubDate>Wed, 21 Aug 2019 09:17:02 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/</guid><description>An overview of time-saving aliases, functions, and creating a useful Bash prompt.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/cover_huc91640f9694e31ff03eab28f9c840023_19597_640x0_resize_box_2.png" width="640" height="245"/>
 &lt;p>In my &lt;a href="https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">recent post about setting up Ubuntu with Bash scripts&lt;/a>, I briefly alluded to the magic of &lt;code>.bashrc&lt;/code>. This didn&amp;rsquo;t really do it justice, so here&amp;rsquo;s a quick post that offers a bit more detail about what the Bash configuration file can do.&lt;/p>
 &lt;p>My current configuration hugely improves my workflow, and saves me well over 50% of the keystrokes I would have to employ without it! Let&amp;rsquo;s look at some examples of aliases, functions, and prompt configurations that can improve our workflow by helping us be more efficient with fewer key presses.&lt;/p>
@@ -3919,11 +3916,11 @@ alt="Don&amp;#39;t update your site from your phone on a date"/> &lt;figcaption>
 &lt;p>I think that on the infrequent occasions when we encounter these people, we should do our best to lead by example. We should have open minds, tell our stories, listen to theirs. Try and learn something. That&amp;rsquo;s all.&lt;/p>
 &lt;p>When I present myself, I don&amp;rsquo;t point out that I&amp;rsquo;m a woman. I don&amp;rsquo;t align myself with &amp;ldquo;women in tech&amp;rdquo; or seek to represent them. I don&amp;rsquo;t go to women-only meetings or support organizations that discriminate against men, or anyone at all. It&amp;rsquo;s not because I&amp;rsquo;m insecure as a woman, or ashamed that I&amp;rsquo;m a woman, or some other inflammatory adjective that lately shows up in conjunction with being female. It&amp;rsquo;s because I&amp;rsquo;ve no reason to point out my gender, any more than needing to point out that my hair is black, or that I&amp;rsquo;m short. It&amp;rsquo;s obvious and simultaneously irrelevant.&lt;/p>
 &lt;p>When I identify with a group, I talk about the go-getters who wake up at 0500 every day and go work out - no matter the weather, or whether they feel like it. I tell stories about the people I met in different countries around the world, who left home, struck out on their own, and had an adventure, because they saw value in the experience. I identify with people who constantly build things, try things, design and make things, and then share those things with the world, because they love to do so. This is how I see myself. This is what matters to me.&lt;/p>
-&lt;p>Like the unassuming park named after an amazing woman, when truly great things are done, they are done relatively quietly. Not done for the fanfare of announcing them to the world, but for the love of the thing itself. So go do great things, please. The world still needs them.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/on-doing-great-things/grace-murray-hopper-park_hu2bbff2aa9b6171d9361d3e244239fc60_166728_640x0_resize_q75_box.jpeg" type="image/jpg"/></item><item><title>Git commit practices your future self will thank you for</title><link>https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/</link><pubDate>Mon, 06 Aug 2018 08:54:56 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/</guid><description>How squash commits, vimrc, and git tags can help you make great Git commits.</description><content:encoded>
+&lt;p>Like the unassuming park named after an amazing woman, when truly great things are done, they are done relatively quietly. Not done for the fanfare of announcing them to the world, but for the love of the thing itself. So go do great things, please. The world still needs them.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/on-doing-great-things/grace-murray-hopper-park_hu2bbff2aa9b6171d9361d3e244239fc60_166728_640x0_resize_q75_box.jpeg" type="image/jpg"/></item><item><title>Git commit practices your future self will thank you for</title><link>https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/</link><pubDate>Mon, 06 Aug 2018 08:54:56 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/</guid><description>Learn how to easily create a clean and readable Git commit history with git squash, message templates, git stash, and tags.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art_hu3c5d7a1ac69b5f3a44f90a6688078cc1_89530_640x0_resize_box_2.png" width="640" height="320"/>
 &lt;p>A history of clean commits can be evidence of a lot of things: attention to detail, good work ethic, and genuine investment in the project. What do your Git commits say about you?&lt;/p>
-&lt;p>If, like me, there &lt;em>might&lt;/em> be one or two less than stellar ones, well, we&amp;rsquo;re only human. A nice part of being human is having the ability to learn new and complex things fairly quickly, and continuously improve ourselves. In that spirit, I&amp;rsquo;d like to share some things I&amp;rsquo;ve learned about creating clean, useful, and responsible Git commits.&lt;/p>
-&lt;h2 id="what-does-it-mean-to-commit-responsibly" class="anchor-link">&lt;a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#what-does-it-mean-to-commit-responsibly">What does it mean to commit responsibly&lt;/a>&lt;/h2>
+&lt;p>Here&amp;rsquo;s how you can create and maintain a clean and orderly Git commit history using &lt;a href="#write-great-git-commit-messages-with-a-template">message templates&lt;/a>, &lt;a href="#one-change-per-commit-how-to-squash-git-commits">learning how to squash commits&lt;/a>, &lt;a href="#git-stash">using git stash&lt;/a>, and &lt;a href="#tag-release-versions-using-annotated-git-tags">creating annotated commit tags&lt;/a>.&lt;/p>
+&lt;h2 id="what-it-means-to-commit-responsibly" class="anchor-link">&lt;a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#what-it-means-to-commit-responsibly">What it means to commit responsibly&lt;/a>&lt;/h2>
 &lt;p>Whether our code will be seen by the entire open source community or just future versions of ourselves, either one will be grateful if we commit responsibly today. Being responsible can mean a lot of things to different people, so I enlisted some of &lt;a href="https://mastodon.technology/@victoria/">mastodon.technology&lt;/a> and &lt;a href="https://dev.to/victoria/what-does-it-mean-to-commit-responsibly-22mi">dev.to&lt;/a> to help round out my list. From those (really great) threads, I distilled these main points:&lt;/p>
 &lt;blockquote>
 &lt;p>&lt;strong>Committing responsibly&lt;/strong>&lt;/p>
@@ -3953,7 +3950,7 @@ What effects does the patch have?&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">git config --global commit.template ~/.gitmessage
 vim ~/.gitmessage
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>When we run &lt;code>git commit&lt;/code> without the &lt;code>-m&lt;/code> message flag, the editor will open with our helpful template ready to go. Here&amp;rsquo;s my commit message template:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">## If applied, this commit will...
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">## If applied, this commit will...
 ## [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
 ## Why is it necessary? (Bug fix, feature, improvements?)
 -
@@ -3961,7 +3958,7 @@ vim ~/.gitmessage
 -
 ## What side effects does this change have?
 -
-&lt;/code>&lt;/pre>&lt;p>I&amp;rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>I&amp;rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-txt" data-lang="txt">Fix #16 missing CSS variables
 - Fix for unstyled elements
 - Add background color, height for code blocks
@@ -4001,11 +3998,11 @@ alt="A doodle of squash"/> &lt;figcaption>
 &lt;li>We don&amp;rsquo;t want to preserve history of branches or changes we haven&amp;rsquo;t yet pushed&lt;/li>
 &lt;/ul>
 &lt;p>This method takes a Git tree that looks like this:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">* 3e8fd79 - (HEAD -&amp;gt; master) Fix a thing
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">* 3e8fd79 - (HEAD -&amp;gt; master) Fix a thing
 |
 * 4f0d387 - Tweak something
 |
-* 0a6b8b3 - Merge branch 'new-article'
+* 0a6b8b3 - Merge branch &amp;#39;new-article&amp;#39;
 |\
 | * 33b5509 - (new-article) Update article again again
 | |
@@ -4019,11 +4016,11 @@ alt="A doodle of squash"/> &lt;figcaption>
 * 65af7e7 Add social media link
 |
 * 0e3fa32 (origin/master, origin/HEAD) Update theme
-&lt;/code>&lt;/pre>&lt;p>And makes it look like this:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">* 7f9a127 - (HEAD -&amp;gt; master) Add new article
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>And makes it look like this:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">* 7f9a127 - (HEAD -&amp;gt; master) Add new article
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-&lt;/code>&lt;/pre>&lt;p>Here&amp;rsquo;s how to do it - hold on to your hoverboards, it&amp;rsquo;s super complicated:&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Here&amp;rsquo;s how to do it - hold on to your hoverboards, it&amp;rsquo;s super complicated:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">git reset --soft origin/master
 git commit
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Yup that&amp;rsquo;s all. We can delete the unwanted branch with &lt;code>git branch -D new-article&lt;/code>.&lt;/p>
@@ -4034,7 +4031,7 @@ git commit
 &lt;li>We want to open a pull request to merge a branch&lt;/li>
 &lt;/ul>
 &lt;p>This method takes a Git tree that looks like this:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">* 13a070f - (HEAD -&amp;gt; new-article) Finish new article
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">* 13a070f - (HEAD -&amp;gt; new-article) Finish new article
 |
 * 78e728a - Edit article draft
 |
@@ -4048,21 +4045,21 @@ git commit
 |/
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-&lt;/code>&lt;/pre>&lt;p>And makes it look like this:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">* 90da69a - (HEAD -&amp;gt; new-article) Add new article
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>And makes it look like this:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">* 90da69a - (HEAD -&amp;gt; new-article) Add new article
 |
 | * 65af7e7 - (master) Add social media link
 |/
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-&lt;/code>&lt;/pre>&lt;p>To squash the last five commits on branch &lt;code>new-article&lt;/code> into one, we use:&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>To squash the last five commits on branch &lt;code>new-article&lt;/code> into one, we use:&lt;/p>
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">git reset --soft HEAD~5
 git commit -m &lt;span class="s2">&amp;#34;New message for the combined commit&amp;#34;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Where &lt;code>--soft&lt;/code> leaves our files untouched and staged, and &lt;code>5&lt;/code> can be thought of as &amp;ldquo;the number of previous commits I want to combine.&amp;rdquo;&lt;/p>
 &lt;p>We can then do &lt;code>git merge master&lt;/code> and create our pull request.&lt;/p>
 &lt;h3 id="method-3-getting-picky" class="anchor-link">&lt;a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#method-3-getting-picky">Method #3: getting picky&lt;/a>&lt;/h3>
 &lt;p>Say we had a really confusing afternoon and our Git tree looks like this:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">* dc89918 - (HEAD -&amp;gt; master) Add link
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">* dc89918 - (HEAD -&amp;gt; master) Add link
 |
 * 9b6780f - Update image asset
 |
@@ -4079,7 +4076,7 @@ git commit -m &lt;span class="s2">&amp;#34;New message for the combined commit&a
 |/
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-&lt;/code>&lt;/pre>&lt;p>We want to retain some of this history, but clean up the commits. We also want to change the messages for some of the commits. To achieve this, we&amp;rsquo;ll use &lt;code>git rebase&lt;/code>.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We want to retain some of this history, but clean up the commits. We also want to change the messages for some of the commits. To achieve this, we&amp;rsquo;ll use &lt;code>git rebase&lt;/code>.&lt;/p>
 &lt;p>This is appropriate when:&lt;/p>
 &lt;ul>
 &lt;li>We want to squash only some commits&lt;/li>
@@ -4092,7 +4089,7 @@ git commit -m &lt;span class="s2">&amp;#34;New message for the combined commit&a
 &lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">git rebase -i 0e3fa32
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Where the commit hash is the last commit we want to retain as-is.&lt;/p>
 &lt;p>The &lt;code>-i&lt;/code> option lets us run the interactive rebase tool, which launches our editor with, essentially, a script for us to modify. We&amp;rsquo;ll see a list of our commits in reverse order to the git log, with the oldest at the top:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">pick 90da69a Add new article
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">pick 90da69a Add new article
 pick 033dee7 Fix typo
 pick ccec365 Update list page
 pick 6379956 Fix CSS bug
@@ -4105,7 +4102,7 @@ pick dc89918 Add link
 # r, reword = use commit, but edit the commit message
 # e, edit = use commit, but stop for amending
 # s, squash = use commit, but meld into previous commit
-# f, fixup = like &amp;quot;squash&amp;quot;, but discard this commit's log message
+# f, fixup = like &amp;#34;squash&amp;#34;, but discard this commit&amp;#39;s log message
 # x, exec = run command (the rest of the line) using shell
 # d, drop = remove commit
 #
@@ -4118,21 +4115,21 @@ pick dc89918 Add link
 # Note that empty commits are commented out
 #
 ~
-&lt;/code>&lt;/pre>&lt;p>The comments give us a handy guide as to what we&amp;rsquo;re able to do. For now, let&amp;rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">pick 90da69a Add new article
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The comments give us a handy guide as to what we&amp;rsquo;re able to do. For now, let&amp;rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">pick 90da69a Add new article
 squash 033dee7 Fix typo
 pick ccec365 Update list page
 squash 6379956 Fix CSS bug
 squash 9b6780f Update image asset
 squash dc89918 Add link
-&lt;/code>&lt;/pre>&lt;p>Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console"># This is a combination of 2 commits.
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text"># This is a combination of 2 commits.
 # This is the 1st commit message:
 Add new article
 # This is the commit message #2:
 Fix typo
 # Please enter the commit message for your changes. Lines starting
-# with '#' will be ignored, and an empty message aborts the commit.
+# with &amp;#39;#&amp;#39; will be ignored, and an empty message aborts the commit.
 #
 # interactive rebase in progress; onto 0e3fa32
 # Last commands done (2 commands done):
@@ -4141,45 +4138,45 @@ Fix typo
 # Next commands to do (4 remaining commands):
 # pick ccec365 Update list page
 # squash 6379956 Fix CSS bug
-# You are currently rebasing branch 'master' on '0e3fa32'.
+# You are currently rebasing branch &amp;#39;master&amp;#39; on &amp;#39;0e3fa32&amp;#39;.
 #
 # Changes to be committed:
 # modified: ...
 #
 ~
-&lt;/code>&lt;/pre>&lt;p>Here&amp;rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&amp;hellip;&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">[detached HEAD 3cbad01] Add new article
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Here&amp;rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&amp;hellip;&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">[detached HEAD 3cbad01] Add new article
 1 file changed, 129 insertions(+), 19 deletions(-)
 Auto-merging content/dir/file.md
 CONFLICT (content): Merge conflict in content/dir/file.md
 error: could not apply ccec365... Update list page
 Resolve all conflicts manually, mark them as resolved with
-&amp;quot;git add/rm &amp;lt;conflicted_files&amp;gt;&amp;quot;, then run &amp;quot;git rebase --continue&amp;quot;.
-You can instead skip this commit: run &amp;quot;git rebase --skip&amp;quot;.
-To abort and get back to the state before &amp;quot;git rebase&amp;quot;, run &amp;quot;git rebase --abort&amp;quot;.
+&amp;#34;git add/rm &amp;lt;conflicted_files&amp;gt;&amp;#34;, then run &amp;#34;git rebase --continue&amp;#34;.
+You can instead skip this commit: run &amp;#34;git rebase --skip&amp;#34;.
+To abort and get back to the state before &amp;#34;git rebase&amp;#34;, run &amp;#34;git rebase --abort&amp;#34;.
 Could not apply ccec365... Update list page
-&lt;/code>&lt;/pre>&lt;p>Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with &lt;code>git rebase --continue&lt;/code>. Our interactive rebase picks up where it left off.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with &lt;code>git rebase --continue&lt;/code>. Our interactive rebase picks up where it left off.&lt;/p>
 &lt;p>Once all the squashing is done, our Git tree looks like this:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">* 3564b8c - (HEAD -&amp;gt; master) Update list page
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">* 3564b8c - (HEAD -&amp;gt; master) Update list page
 |
 * 3cbad01 - Add new article
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-&lt;/code>&lt;/pre>&lt;p>Phew, much better.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Phew, much better.&lt;/p>
 &lt;h2 id="git-stash" class="anchor-link">&lt;a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#git-stash">Git stash&lt;/a>&lt;/h2>
 &lt;p>If we&amp;rsquo;re in the middle of some work and it&amp;rsquo;s not a good time to commit, but we need to switch branches, &lt;a href="https://git-scm.com/book/en/v1/Git-Tools-Stashing">stashing&lt;/a> can be a good option. Stashing lets us save our unfinished work without needing to create a half-assed commit. It&amp;rsquo;s like that pile of paper on your desk representing all the stuff you&amp;rsquo;ve been in the middle of doing since two weeks ago. Yup, that one.&lt;/p>
 &lt;p>It&amp;rsquo;s as easy as typing &lt;code>git stash&lt;/code>:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">Saved working directory and index state WIP on master: 3564b8c Update list page
-&lt;/code>&lt;/pre>&lt;p>The dirty work we&amp;rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&amp;rsquo;s in our stash stack, we do &lt;code>git stash list&lt;/code>:&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">stash@{0}: WIP on master: 3564b8c Update list page
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">Saved working directory and index state WIP on master: 3564b8c Update list page
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The dirty work we&amp;rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&amp;rsquo;s in our stash stack, we do &lt;code>git stash list&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">stash@{0}: WIP on master: 3564b8c Update list page
 stash@{1}: WIP on master: 90da69a Add new article
 stash@{2}: WIP on cleanup: 0e3fa32 Update theme
-&lt;/code>&lt;/pre>&lt;p>To restore our work in progress, we use &lt;code>git stash apply&lt;/code>. Git will try and apply our most recent stashed work. To apply an older stash, we use &lt;code>git stash apply stash@{1}&lt;/code> where &lt;code>1&lt;/code> is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>To restore our work in progress, we use &lt;code>git stash apply&lt;/code>. Git will try and apply our most recent stashed work. To apply an older stash, we use &lt;code>git stash apply stash@{1}&lt;/code> where &lt;code>1&lt;/code> is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.&lt;/p>
 &lt;p>Applying a stash doesn&amp;rsquo;t remove it from our list. To remove a stash from our stack, we do &lt;code>git stash drop stash@{0}&lt;/code> where &lt;code>0&lt;/code> is the one we want to remove.&lt;/p>
 &lt;p>We can also use &lt;code>git stash pop&lt;/code> to apply the most recent stash and then immediately remove it from the stack.&lt;/p>
 &lt;h2 id="tag-release-versions-using-annotated-git-tags" class="anchor-link">&lt;a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#tag-release-versions-using-annotated-git-tags">Tag release versions using annotated Git tags&lt;/a>&lt;/h2>
 &lt;p>In the spirit of having a beautiful, clean Git history, there&amp;rsquo;s one more thing we can do to help make our commit log inspire infinite joy in its viewers. If you&amp;rsquo;ve never heard of &lt;code>git tag&lt;/code>, your master branch history might look like this&amp;hellip;&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">* 0377782 - Update theme
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">* 0377782 - Update theme
 |
 * ecf8128 - Add about page (#25)
 |
@@ -4190,8 +4187,8 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 * 63d18b4 - Add theme (#12)
 |
 * 233e23f - Add main content (#6)
-&lt;/code>&lt;/pre>&lt;p>Wouldn&amp;rsquo;t it be nice if it looked like this instead?&lt;/p>
-&lt;pre>&lt;code class="language-console" data-lang="console">* 0377782 - (tag: v2.1.0) Update theme
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Wouldn&amp;rsquo;t it be nice if it looked like this instead?&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">* 0377782 - (tag: v2.1.0) Update theme
 |
 * ecf8128 - Add about page (#25)
 |
@@ -4202,7 +4199,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 * 63d18b4 - Add theme (#12)
 |
 * 233e23f - (tag: v1.1.0) Add main content (#6)
-&lt;/code>&lt;/pre>&lt;p>We can tag Git commits with anything, but tags are especially helpful for semantic versioning of releases. Sites like &lt;a href="https://help.github.com/articles/creating-releases/">GitHub&lt;/a> and &lt;a href="https://docs.gitlab.com/ee/user/project/releases/">GitLab&lt;/a> have pages for repositories that list tags, letting viewers of our project browse the release versions. This can be helpful for public projects to differentiate major releases, updates with bug fixes, or beta versions.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We can tag Git commits with anything, but tags are especially helpful for semantic versioning of releases. Sites like &lt;a href="https://help.github.com/articles/creating-releases/">GitHub&lt;/a> and &lt;a href="https://docs.gitlab.com/ee/user/project/releases/">GitLab&lt;/a> have pages for repositories that list tags, letting viewers of our project browse the release versions. This can be helpful for public projects to differentiate major releases, updates with bug fixes, or beta versions.&lt;/p>
 &lt;p>There are two types of Git tags: lightweight and annotated. For adding a version tag to commits, we use annotated Git tags.&lt;/p>
 &lt;p>The &lt;a href="https://git-scm.com/docs/git-tag">Git tag documentation&lt;/a> explains it this way:&lt;/p>
 &lt;blockquote>
@@ -4225,15 +4222,8 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>If we then want to skip pushing tags this time, we pass &lt;code>--no-follow-tags&lt;/code>.&lt;/p>
 &lt;h2 id="practice-responsible-commits" class="anchor-link">&lt;a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#practice-responsible-commits">Practice responsible commits&lt;/a>&lt;/h2>
 &lt;p>A little time invested in getting familiar with these tools and practices can make your commits even more useful and well-crafted. With a little practice, these processes will become second nature. You can make it even easier by creating a personal commit checklist on paper to keep handy while you work - or if that isn&amp;rsquo;t fun enough, &lt;a href="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">make it an interactive pre-commit hook.&lt;/a>&lt;/p>
-&lt;p>Creating clean, useful, and responsible Git commits says a lot about you. Especially in the current climate of remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.&lt;/p>
-&lt;h2 id="reference-links" class="anchor-link">&lt;a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#reference-links">Reference links&lt;/a>&lt;/h2>
-&lt;p>&lt;a href="https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History">Git Tools - Rewriting History&lt;/a>
-&lt;a href="https://semver.org/">Semantic Versioning 2.0.0&lt;/a>
-&lt;a href="https://git-scm.com/docs/git-describe">git-describe&lt;/a>
-&lt;a href="https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work">Git Tools - Signing Your Work&lt;/a>
-&lt;a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration">Customizing Git - Git Configuration&lt;/a>
-&lt;a href="https://git-scm.com/book/en/v1/Git-Tools-Stashing">Git Tools - Stashing&lt;/a>
-&lt;a href="https://git-scm.com/book/en/v2/Git-Basics-Tagging">Git Basics - Tagging&lt;/a>&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art_hu3c5d7a1ac69b5f3a44f90a6688078cc1_89530_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>An automatic interactive pre-commit checklist, in the style of infomercials</title><link>https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</link><pubDate>Mon, 23 Jul 2018 09:38:09 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</guid><description>How to set up an interactive checklist using a Git pre-commit hook script.</description><content:encoded>
+&lt;p>Creating clean, useful, and responsible Git commits says a lot about you. Especially in remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.&lt;/p>
+&lt;p>If you enjoyed this post, there&amp;rsquo;s a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. &lt;a href="https://victoria.dev">Subscribe on victoria.dev&lt;/a> to see new articles first, and check out the ones below!&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art_hu3c5d7a1ac69b5f3a44f90a6688078cc1_89530_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>An automatic interactive pre-commit checklist, in the style of infomercials</title><link>https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</link><pubDate>Mon, 23 Jul 2018 09:38:09 -0400</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</guid><description>How to set up an interactive checklist using a Git pre-commit hook script.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/precommit-infomercial_hu3f89b2526dd77ee153311b13b3651634_84493_640x0_resize_box_2.png" width="640" height="320"/>
 &lt;p>What&amp;rsquo;s that, you say? You&amp;rsquo;ve become tired of regular old boring &lt;em>paper checklists?&lt;/em> Well, my friend, today is your lucky day! You, yes, &lt;em>you,&lt;/em> can become the proud owner of a brand-spanking-new &lt;em>automatic interactive pre-commit hook checklist!&lt;/em> You&amp;rsquo;re gonna love this! Your life will be so much easier! Just wait until your friends see you.&lt;/p>
 &lt;h2 id="whats-a-pre-commit-hook" class="anchor-link">&lt;a href="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/#whats-a-pre-commit-hook">What&amp;rsquo;s a pre-commit hook&lt;/a>&lt;/h2>
