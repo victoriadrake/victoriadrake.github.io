@@ -1,27 +1,361 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>Command line tricks for managing your messy open source repository | victoria.dev</title><script async defer data-domain=victoria.dev src=https://plausible.io/js/plausible.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Command line tricks for managing your messy open source repository - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A handy toolbox for the terminal to help open source maintainers make their projects sparkle."><meta property="og:url" content="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Command line tricks for managing your messy open source repository"><meta name=twitter:image content="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/cover.png"><meta name=twitter:description content="A handy toolbox for the terminal to help open source maintainers make their projects sparkle."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.d997ac9dabaf96b2c4b7cefae70145b3e6cf75978ecdace0ab644b577a66f2b7.css integrity="sha256-2ZesnauvlrLEt8765wFFs+bPdZeOzazgq2RLV3pm8rc=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Command line tricks for managing your messy open source repository"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/cover.png alt="cover image"></div><article><h1>Command line tricks for managing your messy open source repository</h1><p class=subtitle>A handy toolbox for the terminal to help open source maintainers make their projects sparkle.</p><span><a class="tag button" href=/tags/terminal/>terminal
-</a>&nbsp;
-<a class="tag button" href=/tags/linux/>linux
-</a>&nbsp;
-<a class="tag button" href=/tags/open-source/>open-source
-</a>&nbsp;</span><p class=metadata id=date><span>February 17, 2020&nbsp;</span>
-<span></span><span>☕️&nbsp;5 min
-read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>Effective collaboration, especially in open source software development, starts with effective organization. To make sure that nothing gets missed, the general rule, &ldquo;one issue, one pull request&rdquo; is a nice rule of thumb.</p><p>Instead of opening an issue with a large scope like, &ldquo;Fix all the broken links in the documentation,&rdquo; open source projects will have more luck attracting contributors with several smaller and more manageable issues. In the preceding example, you might scope broken links by section or by page. This allows more contributors to jump in and dedicate small windows of their time, rather than waiting for one person to take on a larger and more tedious contribution effort.</p><p>Smaller scoped issues also help project maintainers see where work has been completed and where it hasn&rsquo;t. This reduces the chances that some part of the issue is missed, assumed to be completed, and later leads to bugs or security vulnerabilities.</p><p>That&rsquo;s all well and good; but what if you&rsquo;ve already opened several massively-scoped issues, some PRs have already been submitted or merged, and you currently have no idea where the work started or stopped?</p><p>It&rsquo;s going to take a little sorting out to get the state of your project back under control. Thankfully, there are a number of command line tools to help you scan, sort, and make sense of a messy repository. Here&rsquo;s a small selection of ones I use.</p><p>Jump to:</p><ul><li><a href=#interactive-search-and-replace-with-vim>Interactive search-and-replace with <code>vim</code></a></li><li><a href=#find-dead-links-in-markdown-files-with-a-node-module>Find dead links in Markdown files with a node module</a></li><li><a href=#list-subdirectories-with-or-without-a-git-repository-with-find>List subdirectories with or without a git repository with <code>find</code></a></li><li><a href=#pull-multiple-git-repositories-from-a-list-with-xargs>Pull multiple git repositories from a list with <code>xargs</code></a></li><li><a href=#list-issues-by-number-with-jot>List issues by number with <code>jot</code></a></li><li><a href=#cli-powered-open-source-organization>CLI-powered open source organization</a></li></ul><h2 id=interactive-search-and-replace-with-vim class=anchor-link><a href=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#interactive-search-and-replace-with-vim>Interactive search-and-replace with <code>vim</code></a></h2><p>You can open a file in Vim, then interactively search and replace with:</p><div class=highlight><pre class=chroma><code class=language-vim data-lang=vim><span class=p>:</span>%<span class=nx>s</span><span class=sr>/\&lt;word\&gt;/</span><span class=nx>newword</span>/<span class=nx>gc</span><span class=err>
-</span></code></pre></div><p>The <code>%</code> indicates to look in all lines of the current file; <code>s</code> is for substitute; <code>\&lt;word\></code> matches the whole word; and the <code>g</code> for &ldquo;global&rdquo; is for every occurrence. The <code>c</code> at the end will let you view and confirm each change before it&rsquo;s made. You can run it automatically, and much faster, without <code>c</code>; however, you put yourself at risk of complicating things if you&rsquo;ve made a pattern-matching error.</p><h2 id=find-dead-links-in-markdown-files-with-a-node-module class=anchor-link><a href=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#find-dead-links-in-markdown-files-with-a-node-module>Find dead links in Markdown files with a node module</a></h2><p>The <a href=https://github.com/tcort/markdown-link-check>markdown-link-check</a> node module has a great <a href=https://github.com/tcort/markdown-link-check#command-line-tool>CLI buddy</a>.</p><p>I use this so often I turned it into a <a href=/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/#bash-functions>Bash alias function</a>. To do the same, add this to your <code>.bashrc</code>:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=c1># Markdown link check in a folder, recursive</span>
-<span class=k>function</span> mlc <span class=o>()</span> <span class=o>{</span>
-    find <span class=nv>$1</span> -name <span class=se>\*</span>.md -exec markdown-link-check -p <span class=o>{}</span> <span class=se>\;</span>
-<span class=o>}</span>
-</code></pre></div><p>Then run with <code>mlc &lt;filename></code>.</p><h2 id=list-subdirectories-with-or-without-a-git-repository-with-find class=anchor-link><a href=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#list-subdirectories-with-or-without-a-git-repository-with-find>List subdirectories with or without a git repository with <code>find</code></a></h2><p>Print all subdirectories that are git repositories, or in other words, have a <code>.git</code> in them:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -maxdepth <span class=m>1</span> -type d -exec <span class=nb>test</span> -e <span class=s1>&#39;{}/.git&#39;</span> <span class=s1>&#39;;&#39;</span> -printf <span class=s2>&#34;is git repo: %p\n&#34;</span>
-</code></pre></div><p>To print all subdirectories that are not git repositories, negate the test with <code>!</code>:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -maxdepth <span class=m>1</span> -type d -exec <span class=nb>test</span> <span class=s1>&#39;!&#39;</span> -e <span class=s1>&#39;{}/.git&#39;</span> <span class=s1>&#39;;&#39;</span> -printf <span class=s2>&#34;not git repo: %p\n&#34;</span>
-</code></pre></div><h2 id=pull-multiple-git-repositories-from-a-list-with-xargs class=anchor-link><a href=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#pull-multiple-git-repositories-from-a-list-with-xargs>Pull multiple git repositories from a list with <code>xargs</code></a></h2><p>I initially used this as part of <a href=/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/>automatically re-creating my laptop with Bash scripts</a>, but it&rsquo;s pretty handy when you&rsquo;re working with cloud instances or Dockerfiles.</p><p>Given a file, <code>repos.txt</code> with a repository’s SSH link on each line (and your SSH keys set up), run:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>xargs -n1 git clone &lt; repos.txt
-</code></pre></div><p>If you want to pull and push many repositories, I previously wrote about <a href=/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/>how to use a Bash one-liner to manage your repositories</a>.</p><h2 id=list-issues-by-number-with-jot class=anchor-link><a href=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#list-issues-by-number-with-jot>List issues by number with <code>jot</code></a></h2><p>I&rsquo;m a co-author and maintainer for the <a href=https://github.com/OWASP/wstg/>OWASP Web Security Testing Guide</a> repository where I recently took one large issue (yup, it was &ldquo;Fix all the broken links in the documentation&rdquo; - how&rsquo;d you guess?) and broke it up into several smaller, more manageable issues. A whole thirty-seven smaller, more manageable issues.</p><p>I wanted to enumerate all the issues that the original one became, but the idea of typing out thirty-seven issue numbers (#275 through #312) seemed awfully tedious and time-consuming. So, in natural programmer fashion, I spent the same amount of time I would have used to type out all those numbers and crafted a way to automate it instead.</p><p>The <code>jot</code> utility (<code>apt install athena-jot</code>) is a tiny tool that&rsquo;s a big help when you want to print out some numbers. Just tell it how many you want, and where to start and stop.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=c1># jot [ reps [ begin [ end ] ] ]</span>
-jot <span class=m>37</span> <span class=m>275</span> <span class=m>312</span>
-</code></pre></div><p>This prints each number, inclusively, from 275 to 312 on a new line. To make these into issue number notations that GitHub and many other platforms automatically recognize and turn into links, you can pipe the output to <code>awk</code>.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>jot <span class=m>37</span> <span class=m>275</span> <span class=m>312</span> <span class=p>|</span> awk <span class=s1>&#39;{printf &#34;#&#34;$0&#34;, &#34;}&#39;</span>
+<!DOCTYPE html>
+<html lang="en-us">
 
-<span class=c1>#275, #276, #277, #278, #279, #280, #281, #282, #283, #284, #285, #286, #287, #288, #289, #290, #291, #292, #293, #295, #296, #297, #298, #299, #300, #301, #302, #303, #304, #305, #306, #307, #308, #309, #310, #311, #312</span>
-</code></pre></div><p>You can also use <code>jot</code> to generate random or redundant data, mainly for development or testing purposes.</p><h2 id=cli-powered-open-source-organization class=anchor-link><a href=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#cli-powered-open-source-organization>CLI-powered open source organization</a></h2><p>A well-organized open source repository is a well-maintained open source project. Save this post for handy reference, and use your newfound CLI superpowers for good! 🚀</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/>Deceptively simple search-and-replace across multiple files</a><p>How to interactively search-and-replace across many files with just two commands, thanks to Vim.</p><p class=metadata><a class="tag button" href=/tags/terminal/>terminal</a>
-☕️
-&nbsp;2 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/look-mom-im-a-github-action-hero/>Look mom, I'm a GitHub Action Hero</a><p>The GitHub blog interviews me for their GitHub Action Hero series.</p><p class=metadata><a class="tag button" href=/tags/ci/cd/>ci/cd</a>
-☕️
-&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/>Bash and shell expansions: lazy list-making</a><p>A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.</p><p class=metadata><a class="tag button" href=/tags/terminal/>terminal</a>
-☕️
-&nbsp;5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    Command line tricks for managing your messy open source repository | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://plausible.io/js/plausible.js"></script>
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="Command line tricks for managing your messy open source repository - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="A handy toolbox for the terminal to help open source maintainers make their projects sparkle." />
+<meta property="og:url" content="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Command line tricks for managing your messy open source repository" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/cover.png"/>
+
+<meta name="twitter:description"
+    content="A handy toolbox for the terminal to help open source maintainers make their projects sparkle." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.d997ac9dabaf96b2c4b7cefae70145b3e6cf75978ecdace0ab644b577a66f2b7.css" integrity="sha256-2ZesnauvlrLEt8765wFFs&#43;bPdZeOzazgq2RLV3pm8rc=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for Command line tricks for managing your messy open source repository" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+                Command line tricks for managing your messy open source repository
+            </h1>
+            
+            <p class="subtitle">A handy toolbox for the terminal to help open source maintainers make their projects sparkle.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/terminal/">
+                    terminal
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/linux/">
+                    linux
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/open-source/">
+                    open-source
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>February 17, 2020&nbsp;</span>
+                <span></span>
+                <span> ☕️&nbsp;5 min
+                    read</span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <p>Effective collaboration, especially in open source software development, starts with effective organization. To make sure that nothing gets missed, the general rule, &ldquo;one issue, one pull request&rdquo; is a nice rule of thumb.</p>
+<p>Instead of opening an issue with a large scope like, &ldquo;Fix all the broken links in the documentation,&rdquo; open source projects will have more luck attracting contributors with several smaller and more manageable issues. In the preceding example, you might scope broken links by section or by page. This allows more contributors to jump in and dedicate small windows of their time, rather than waiting for one person to take on a larger and more tedious contribution effort.</p>
+<p>Smaller scoped issues also help project maintainers see where work has been completed and where it hasn&rsquo;t. This reduces the chances that some part of the issue is missed, assumed to be completed, and later leads to bugs or security vulnerabilities.</p>
+<p>That&rsquo;s all well and good; but what if you&rsquo;ve already opened several massively-scoped issues, some PRs have already been submitted or merged, and you currently have no idea where the work started or stopped?</p>
+<p>It&rsquo;s going to take a little sorting out to get the state of your project back under control. Thankfully, there are a number of command line tools to help you scan, sort, and make sense of a messy repository. Here&rsquo;s a small selection of ones I use.</p>
+<p>Jump to:</p>
+<ul>
+<li><a href="#interactive-search-and-replace-with-vim">Interactive search-and-replace with <code>vim</code></a></li>
+<li><a href="#find-dead-links-in-markdown-files-with-a-node-module">Find dead links in Markdown files with a node module</a></li>
+<li><a href="#list-subdirectories-with-or-without-a-git-repository-with-find">List subdirectories with or without a git repository with <code>find</code></a></li>
+<li><a href="#pull-multiple-git-repositories-from-a-list-with-xargs">Pull multiple git repositories from a list with <code>xargs</code></a></li>
+<li><a href="#list-issues-by-number-with-jot">List issues by number with <code>jot</code></a></li>
+<li><a href="#cli-powered-open-source-organization">CLI-powered open source organization</a></li>
+</ul>
+<h2 id="interactive-search-and-replace-with-vim" class="anchor-link"><a href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#interactive-search-and-replace-with-vim">Interactive search-and-replace with <code>vim</code></a></h2>
+<p>You can open a file in Vim, then interactively search and replace with:</p>
+<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/\&lt;word\&gt;/</span><span class="nx">newword</span>/<span class="nx">gc</span><span class="err">
+</span></code></pre></div><p>The <code>%</code> indicates to look in all lines of the current file; <code>s</code> is for substitute; <code>\&lt;word\&gt;</code> matches the whole word; and the <code>g</code> for &ldquo;global&rdquo; is for every occurrence. The <code>c</code> at the end will let you view and confirm each change before it&rsquo;s made. You can run it automatically, and much faster, without <code>c</code>; however, you put yourself at risk of complicating things if you&rsquo;ve made a pattern-matching error.</p>
+<h2 id="find-dead-links-in-markdown-files-with-a-node-module" class="anchor-link"><a href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#find-dead-links-in-markdown-files-with-a-node-module">Find dead links in Markdown files with a node module</a></h2>
+<p>The <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> node module has a great <a href="https://github.com/tcort/markdown-link-check#command-line-tool">CLI buddy</a>.</p>
+<p>I use this so often I turned it into a <a href="/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/#bash-functions">Bash alias function</a>. To do the same, add this to your <code>.bashrc</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Markdown link check in a folder, recursive</span>
+<span class="k">function</span> mlc <span class="o">()</span> <span class="o">{</span>
+    find <span class="nv">$1</span> -name <span class="se">\*</span>.md -exec markdown-link-check -p <span class="o">{}</span> <span class="se">\;</span>
+<span class="o">}</span>
+</code></pre></div><p>Then run with <code>mlc &lt;filename&gt;</code>.</p>
+<h2 id="list-subdirectories-with-or-without-a-git-repository-with-find" class="anchor-link"><a href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#list-subdirectories-with-or-without-a-git-repository-with-find">List subdirectories with or without a git repository with <code>find</code></a></h2>
+<p>Print all subdirectories that are git repositories, or in other words, have a <code>.git</code> in them:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -maxdepth <span class="m">1</span> -type d -exec <span class="nb">test</span> -e <span class="s1">&#39;{}/.git&#39;</span> <span class="s1">&#39;;&#39;</span> -printf <span class="s2">&#34;is git repo: %p\n&#34;</span>
+</code></pre></div><p>To print all subdirectories that are not git repositories, negate the test with <code>!</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -maxdepth <span class="m">1</span> -type d -exec <span class="nb">test</span> <span class="s1">&#39;!&#39;</span> -e <span class="s1">&#39;{}/.git&#39;</span> <span class="s1">&#39;;&#39;</span> -printf <span class="s2">&#34;not git repo: %p\n&#34;</span>
+</code></pre></div><h2 id="pull-multiple-git-repositories-from-a-list-with-xargs" class="anchor-link"><a href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#pull-multiple-git-repositories-from-a-list-with-xargs">Pull multiple git repositories from a list with <code>xargs</code></a></h2>
+<p>I initially used this as part of <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">automatically re-creating my laptop with Bash scripts</a>, but it&rsquo;s pretty handy when you&rsquo;re working with cloud instances or Dockerfiles.</p>
+<p>Given a file, <code>repos.txt</code> with a repository’s SSH link on each line (and your SSH keys set up), run:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">xargs -n1 git clone &lt; repos.txt
+</code></pre></div><p>If you want to pull and push many repositories, I previously wrote about <a href="/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/">how to use a Bash one-liner to manage your repositories</a>.</p>
+<h2 id="list-issues-by-number-with-jot" class="anchor-link"><a href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#list-issues-by-number-with-jot">List issues by number with <code>jot</code></a></h2>
+<p>I&rsquo;m a co-author and maintainer for the <a href="https://github.com/OWASP/wstg/">OWASP Web Security Testing Guide</a> repository where I recently took one large issue (yup, it was &ldquo;Fix all the broken links in the documentation&rdquo; - how&rsquo;d you guess?) and broke it up into several smaller, more manageable issues. A whole thirty-seven smaller, more manageable issues.</p>
+<p>I wanted to enumerate all the issues that the original one became, but the idea of typing out thirty-seven issue numbers (#275 through #312) seemed awfully tedious and time-consuming. So, in natural programmer fashion, I spent the same amount of time I would have used to type out all those numbers and crafted a way to automate it instead.</p>
+<p>The <code>jot</code> utility (<code>apt install athena-jot</code>) is a tiny tool that&rsquo;s a big help when you want to print out some numbers. Just tell it how many you want, and where to start and stop.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># jot [ reps [ begin [ end ] ] ]</span>
+jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</span>
+</code></pre></div><p>This prints each number, inclusively, from 275 to 312 on a new line. To make these into issue number notations that GitHub and many other platforms automatically recognize and turn into links, you can pipe the output to <code>awk</code>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</span> <span class="p">|</span> awk <span class="s1">&#39;{printf &#34;#&#34;$0&#34;, &#34;}&#39;</span>
+
+<span class="c1">#275, #276, #277, #278, #279, #280, #281, #282, #283, #284, #285, #286, #287, #288, #289, #290, #291, #292, #293, #295, #296, #297, #298, #299, #300, #301, #302, #303, #304, #305, #306, #307, #308, #309, #310, #311, #312</span>
+</code></pre></div><p>You can also use <code>jot</code> to generate random or redundant data, mainly for development or testing purposes.</p>
+<h2 id="cli-powered-open-source-organization" class="anchor-link"><a href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/#cli-powered-open-source-organization">CLI-powered open source organization</a></h2>
+<p>A well-organized open source repository is a well-maintained open source project. Save this post for handy reference, and use your newfound CLI superpowers for good! 🚀</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/">Deceptively simple search-and-replace across multiple files</a>
+    <p>
+        How to interactively search-and-replace across many files with just two commands, thanks to Vim.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/terminal/">terminal</a>
+        
+         ☕️
+        &nbsp;2 min read
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/look-mom-im-a-github-action-hero/">Look mom, I&#39;m a GitHub Action Hero</a>
+    <p>
+        The GitHub blog interviews me for their GitHub Action Hero series.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/ci/cd/">ci/cd</a>
+        
+         ☕️
+        &nbsp;5 min read
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/">Bash and shell expansions: lazy list-making</a>
+    <p>
+        A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/terminal/">terminal</a>
+        
+         ☕️
+        &nbsp;5 min read
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/bookshelf/">
+                    <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>
