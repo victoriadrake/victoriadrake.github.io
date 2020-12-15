@@ -1,38 +1,384 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>The basics of streaming with Twitter API | victoria.dev</title><script async defer data-domain=victoria.dev src=https://plausible.io/js/plausible.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="The basics of streaming with Twitter API - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="Getting started with Twitter's Streaming API on Windows 10 with Python."><meta property="og:url" content="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/twitter-stream.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="The basics of streaming with Twitter API"><meta name=twitter:image content="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/twitter-stream.png"><meta name=twitter:description content="Getting started with Twitter's Streaming API on Windows 10 with Python."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.2f2890fa9f484dd4df7fc5a807cce235c1c8542b4ed09ff8725fbadd9247c647.css integrity="sha256-LyiQ+p9ITdTff8WoB8ziNcHIVCtO0J/4cl+63ZJHxkc=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for The basics of streaming with Twitter API"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><article><h1 class=title-header>The basics of streaming with Twitter API</h1><p class=subtitle>Getting started with Twitter's Streaming API on Windows 10 with Python.</p><span><a class="tag button" href=/tags/api/>api
-</a>&nbsp;
-<a class="tag button" href=/tags/python/>python
-</a>&nbsp;</span><p class=metadata id=date><span>January 6, 2017</span>
-<span><em>Updated: Dec 14, 2020</em></span>
-<span>☕️&nbsp;5 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><div id=deprecated>Twitter has begun asking users to <a href=https://developer.twitter.com/en/apply-for-access>apply to use the API</a>, presumably to cut down on <a href=https://developer.twitter.com/en/developer-terms/more-on-restricted-use-cases>unpalatable uses</a>. This article is still relevant, however, no longer represents the best way to get started with Twitter API streaming. For more on the current API, please see the <a href=https://developer.twitter.com/en/docs>Twitter API Docs</a>.</div><p>This post covers my initial adventures in exploring Twitter&rsquo;s Streaming API. I&rsquo;ll talk about:</p><ol><li>Getting started making a Twitter Streaming program using a template</li></ol><ul><li>Problems arising from programming in Python with Windows 10 and Unicode</li><li>Refining the search function</li></ul><p>You can follow along with <a href=https://github.com/victoriadrake/twitter-stream-template>my template on Github</a>.</p><h2 id=1-getting-started class=anchor-link><a href=https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/#1-getting-started>1. Getting started</a></h2><p>If you&rsquo;re new to Twitter&rsquo;s Streaming API like I was this morning, here it is from the top.</p><p>Twitter&rsquo;s <a href=https://dev.twitter.com/streaming/public>Streaming API</a> basically enables you to continually load a stream of tweets based on search parameters of your choosing, as they&rsquo;re created in real time. Using a little Python script run from the Windows 10 command line, you can have these tweets display (print) as they&rsquo;re retrieved, while your script is running. The stream will continually update until you stop the script, which from the terminal is achieved with <code>ctrl+c</code>.</p><p>I started with <a href=https://github.com/adamdrake/twitterstreamtemplate>@adamdrake&rsquo;s twitterstreamtemplate on Github</a>, which makes use of queuing in Python (still a concept I&rsquo;m just getting familiar with, but <a href=https://www.troyfawkes.com/learn-python-multithreading-queues-basics/>this article</a> has a nice basic overview of it). <a href=https://twython.readthedocs.io/en/latest/usage/starting_out.html#starting-out>The Twython 3.4.0 documentation</a> was also very helpful.</p><p>The Twitter API requires authentication, for which you&rsquo;ll need to register an application with Twitter. You can do this here: <a href=https://dev.twitter.com/apps>https://dev.twitter.com/apps</a>s>. Don&rsquo;t worry too much about its name or description if you&rsquo;re just tinkering, like I am. Once you&rsquo;ve registered, you can obtain your new credentials (<code>consumer_key</code>, <code>consumer_secret</code>, <code>token</code>, and <code>token_secret</code>) from the Keys and Access Tokens tab.</p><p>Input your credentials in the appropriate places:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=c1># Input your credentials below</span>
-<span class=n>consumer_key</span> <span class=o>=</span> <span class=s2>&#34;xxx&#34;</span>
-<span class=n>consumer_secret</span> <span class=o>=</span> <span class=s2>&#34;xxx&#34;</span>
-<span class=n>token</span> <span class=o>=</span> <span class=s2>&#34;xxx&#34;</span>
-<span class=n>token_secret</span> <span class=o>=</span> <span class=s2>&#34;xxx&#34;</span>
-</code></pre></div><p>You can set parameters to find specific tweets, or just show a sample stream. The relevant lines are:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=c1># stream.statuses.filter(track=&#39;twitter&#39;, language=&#39;en&#39;)</span>
-<span class=n>stream</span><span class=o>.</span><span class=n>statuses</span><span class=o>.</span><span class=n>sample</span><span class=p>(</span><span class=n>language</span><span class=o>=</span><span class=s2>&#34;en&#34;</span><span class=p>)</span>
-</code></pre></div><p>As written, it&rsquo;ll show you the sample stream. Switch the commented lines if you want to set your own search parameters. (More on that below.)</p><h2 id=2-hiccups-windows-10-python-and-unicode class=anchor-link><a href=https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/#2-hiccups-windows-10-python-and-unicode>2. Hiccups: Windows 10, Python, and Unicode</a></h2><p>My first pass at this program consisted of two goals: 1) successfully pull up a stream of tweets based on my search parameters, and 2) print them. The relevant line for achieving the second goal is:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>print</span><span class=p>(</span><span class=n>tweet</span><span class=p>)</span>
-</code></pre></div><p>I opened up the terminal and typed <code>python tweet_stream.py</code> to run the program. After a brief pause it returned this error:</p><pre><code class=language-system data-lang=system>return codecs.charmap_encode(input,self.errors,encoding_map)[0]
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    The basics of streaming with Twitter API | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://plausible.io/js/plausible.js"></script>
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="The basics of streaming with Twitter API - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="Getting started with Twitter&#39;s Streaming API on Windows 10 with Python." />
+<meta property="og:url" content="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+
+
+<meta property="og:image" content="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/twitter-stream.png"/>
+
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The basics of streaming with Twitter API" />
+
+
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/twitter-stream.png"/>
+
+
+<meta name="twitter:description"
+    content="Getting started with Twitter&#39;s Streaming API on Windows 10 with Python." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.2f2890fa9f484dd4df7fc5a807cce235c1c8542b4ed09ff8725fbadd9247c647.css" integrity="sha256-LyiQ&#43;p9ITdTff8WoB8ziNcHIVCtO0J/4cl&#43;63ZJHxkc=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for The basics of streaming with Twitter API" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+
+        
+        <article>
+            <h1 class="title-header">
+
+                
+
+                The basics of streaming with Twitter API
+            </h1>
+            
+            <p class="subtitle">Getting started with Twitter&#39;s Streaming API on Windows 10 with Python.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/api/">
+                    api
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/python/">
+                    python
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>January 6, 2017</span>
+                
+                <span>
+                    <em>Updated: Dec 15, 2020</em>
+                </span>
+                
+                <span>
+                     ☕️&nbsp;5 min read
+                </span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <div id="deprecated">Twitter has begun asking users to <a href="https://developer.twitter.com/en/apply-for-access">apply to use the API</a>, presumably to cut down on <a href="https://developer.twitter.com/en/developer-terms/more-on-restricted-use-cases">unpalatable uses</a>. This article is still relevant, however, no longer represents the best way to get started with Twitter API streaming. For more on the current API, please see the <a href="https://developer.twitter.com/en/docs">Twitter API Docs</a>.</div>
+
+<p>This post covers my initial adventures in exploring Twitter&rsquo;s Streaming API. I&rsquo;ll talk about:</p>
+<ol>
+<li>Getting started making a Twitter Streaming program using a template</li>
+</ol>
+<ul>
+<li>Problems arising from programming in Python with Windows 10 and Unicode</li>
+<li>Refining the search function</li>
+</ul>
+<p>You can follow along with <a href="https://github.com/victoriadrake/twitter-stream-template">my template on Github</a>.</p>
+<h2 id="1-getting-started" class="anchor-link"><a href="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/#1-getting-started">1. Getting started</a></h2>
+<p>If you&rsquo;re new to Twitter&rsquo;s Streaming API like I was this morning, here it is from the top.</p>
+<p>Twitter&rsquo;s <a href="https://dev.twitter.com/streaming/public">Streaming API</a> basically enables you to continually load a stream of tweets based on search parameters of your choosing, as they&rsquo;re created in real time. Using a little Python script run from the Windows 10 command line, you can have these tweets display (print) as they&rsquo;re retrieved, while your script is running. The stream will continually update until you stop the script, which from the terminal is achieved with <code>ctrl+c</code>.</p>
+<p>I started with <a href="https://github.com/adamdrake/twitterstreamtemplate">@adamdrake&rsquo;s twitterstreamtemplate on Github</a>, which makes use of queuing in Python (still a concept I&rsquo;m just getting familiar with, but <a href="https://www.troyfawkes.com/learn-python-multithreading-queues-basics/">this article</a> has a nice basic overview of it). <a href="https://twython.readthedocs.io/en/latest/usage/starting_out.html#starting-out">The Twython 3.4.0 documentation</a> was also very helpful.</p>
+<p>The Twitter API requires authentication, for which you&rsquo;ll need to register an application with Twitter. You can do this here: <a href="https://dev.twitter.com/apps">https://dev.twitter.com/apps</a>s&gt;. Don&rsquo;t worry too much about its name or description if you&rsquo;re just tinkering, like I am. Once you&rsquo;ve registered, you can obtain your new credentials (<code>consumer_key</code>, <code>consumer_secret</code>, <code>token</code>, and <code>token_secret</code>) from the Keys and Access Tokens tab.</p>
+<p>Input your credentials in the appropriate places:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Input your credentials below</span>
+<span class="n">consumer_key</span> <span class="o">=</span> <span class="s2">&#34;xxx&#34;</span>
+<span class="n">consumer_secret</span> <span class="o">=</span> <span class="s2">&#34;xxx&#34;</span>
+<span class="n">token</span> <span class="o">=</span> <span class="s2">&#34;xxx&#34;</span>
+<span class="n">token_secret</span> <span class="o">=</span> <span class="s2">&#34;xxx&#34;</span>
+</code></pre></div><p>You can set parameters to find specific tweets, or just show a sample stream. The relevant lines are:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># stream.statuses.filter(track=&#39;twitter&#39;, language=&#39;en&#39;)</span>
+<span class="n">stream</span><span class="o">.</span><span class="n">statuses</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="s2">&#34;en&#34;</span><span class="p">)</span>
+</code></pre></div><p>As written, it&rsquo;ll show you the sample stream. Switch the commented lines if you want to set your own search parameters. (More on that below.)</p>
+<h2 id="2-hiccups-windows-10-python-and-unicode" class="anchor-link"><a href="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/#2-hiccups-windows-10-python-and-unicode">2. Hiccups: Windows 10, Python, and Unicode</a></h2>
+<p>My first pass at this program consisted of two goals: 1) successfully pull up a stream of tweets based on my search parameters, and 2) print them. The relevant line for achieving the second goal is:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">print</span><span class="p">(</span><span class="n">tweet</span><span class="p">)</span>
+</code></pre></div><p>I opened up the terminal and typed <code>python tweet_stream.py</code> to run the program. After a brief pause it returned this error:</p>
+<pre><code class="language-system" data-lang="system">return codecs.charmap_encode(input,self.errors,encoding_map)[0]
 UnicodeEncodeError: 'charmap' codec can't encode characters in position 1270-1271: character maps to &lt;undefined&gt;
-</code></pre><p>The short explanation is that Windows 10 doesn&rsquo;t play well with Python&rsquo;s default output encoding, UTF-8. (I&rsquo;m making my way through <a href=https://docs.python.org/3.6/howto/unicode.html>Python&rsquo;s documentation on Unicode</a>, which is rather long but truly fascinating to me.)</p><p>I explored installing a Linux shell with updated Python so I could use Bash. While that&rsquo;s a good eventual idea for programming in general, it&rsquo;s definitely a big diversion from the topic at hand. Instead, I implemented a program-specific fix using a much faster and less complicated method: convert the tweets to ASCII before they display in the Windows 10 terminal.</p><p>This is achieved by changing the encoding of the tweet text:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>print</span><span class=p>(</span><span class=n>tweet</span><span class=p>[</span><span class=s2>&#34;text&#34;</span><span class=p>]</span><span class=o>.</span><span class=n>encode</span><span class=p>(</span><span class=s2>&#34;ascii&#34;</span><span class=p>,</span> <span class=s2>&#34;ignore&#34;</span><span class=p>))</span>
-</code></pre></div><p>The above displays the text of the tweets using ASCII encoding, and ignores any characters it can&rsquo;t encode. Instead of <code>ignore</code>, you could also use other handlers to indicate errors. Python documentation gives an example of what these different handlers do <a href=https://docs.python.org/3.6/howto/unicode.html#converting-to-bytes>here</a>.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>&gt;&gt;&gt; u.encode<span class=o>(</span><span class=s1>&#39;ascii&#39;</span>, <span class=s1>&#39;ignore&#39;</span><span class=o>)</span>
-b<span class=s1>&#39;abcd&#39;</span>
-&gt;&gt;&gt; u.encode<span class=o>(</span><span class=s1>&#39;ascii&#39;</span>, <span class=s1>&#39;replace&#39;</span><span class=o>)</span>
-b<span class=s1>&#39;?abcd?&#39;</span>
-&gt;&gt;&gt; u.encode<span class=o>(</span><span class=s1>&#39;ascii&#39;</span>, <span class=s1>&#39;xmlcharrefreplace&#39;</span><span class=o>)</span> <span class=c1># inserts XML character reference</span>
-b<span class=s1>&#39;&amp;#40960;abcd&amp;#1972;&#39;</span>
-&gt;&gt;&gt; u.encode<span class=o>(</span><span class=s1>&#39;ascii&#39;</span>, <span class=s1>&#39;backslashreplace&#39;</span><span class=o>)</span> <span class=c1># inserts a \uNNNN escape sequence</span>
-b<span class=s1>&#39;\\ua000abcd\\u07b4&#39;</span>
-&gt;&gt;&gt; u.encode<span class=o>(</span><span class=s1>&#39;ascii&#39;</span>, <span class=s1>&#39;namereplace&#39;</span><span class=o>)</span> <span class=c1># inserts a \N{...} escape sequence</span>
-b<span class=s1>&#39;\\N{YI SYLLABLE IT}abcd\\u07b4&#39;</span>
-</code></pre></div><p>Now running the program with the Windows 10 terminal should give you&mldr; a <em>lot</em> of tweets. (It&rsquo;ll keep going until you stop the program using <code>ctrl+c</code>. On a couple occassions when my program wasn&rsquo;t finding many tweets, <code>ctrl+c</code> didn&rsquo;t seem to work. I hit it a few more times in succession before it seemed to sync up with the program actually doing something, and stopped the operation.)</p><h2 id=3-refining-the-search-function class=anchor-link><a href=https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/#3-refining-the-search-function>3. Refining the search function</a></h2><p>To retrieve a stream of tweets filtered by your search parameters, you&rsquo;ll want to alter this line of code:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>stream</span><span class=o>.</span><span class=n>statuses</span><span class=o>.</span><span class=n>filter</span><span class=p>(</span><span class=n>track</span><span class=o>=</span><span class=s2>&#34;twitter&#34;</span><span class=p>,</span> <span class=n>language</span><span class=o>=</span><span class=s2>&#34;en&#34;</span><span class=p>)</span>
-</code></pre></div><p>The <code>track</code> parameter is what lets you filter your tweets by keywords, hashtags, user mentions, and urls. In the above example, it will search for tweets containing the keyword &ldquo;twitter&rdquo;. You can find its accepted phrases <a href=https://dev.twitter.com/streaming/overview/request-parameters#track>here</a>. Note that the phrases don&rsquo;t work like search engine phrases - characters in the tweet must exactly match the search phrase, and punctuation within the quotes will be considered part of the phrase. For example, &ldquo;café&rdquo; will not find &ldquo;cafe&rdquo; or vice versa, and &ldquo;hello,&rdquo; is a different phrase than &ldquo;hello&rdquo;.</p><p>The <code>language</code> parameter in the example above limits the search results to tweets written in English. There are further parameters you can use to filter your results, such as follow (which limits your stream to searching the timelines of the users you specify) and location (which can allow you to filter by geolocated tweets). Find the full list of parameters and their values <a href=https://dev.twitter.com/streaming/overview/request-parameters>here</a>.</p><p>I intended to use the <code>track</code> parameter to find tweets containing any one of a list of hashtags. I started out with the code below:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>stream</span><span class=o>.</span><span class=n>statuses</span><span class=o>.</span><span class=n>filter</span><span class=p>(</span><span class=n>track</span><span class=o>=</span><span class=s2>&#34;#coding,#programming,#travel&#34;</span><span class=p>,</span> <span class=n>language</span><span class=o>=</span><span class=s2>&#34;en&#34;</span><span class=p>)</span>
-</code></pre></div><p>Note that the comma separators will cause the program to find tweets that contain any of those search terms: #coding OR #programming, etc. If you want to have your search find tweets containing all your search terms, use spaces only.</p><p>The track function is pretty literal, and thus not very intuitive. For example, my &ldquo;#programming&rdquo; phrase called up tweets that were related to computer programming as well as television programming. While you could set other parameters that omit certain words, it&rsquo;s not long before such an approach turns into a very lengthy guessing game. A cleaner (and faster) approach is to choose more specific search phrases, for example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>stream</span><span class=o>.</span><span class=n>statuses</span><span class=o>.</span><span class=n>filter</span><span class=p>(</span>
-    <span class=n>track</span><span class=o>=</span><span class=s2>&#34;#coding,#python,#digitalnomad,#laptoplifestyle&#34;</span><span class=p>,</span> <span class=n>language</span><span class=o>=</span><span class=s2>&#34;en&#34;</span>
-<span class=p>)</span>
-</code></pre></div><p>Your keywords will vary depending on what you want your stream to display. The <a href=https://twitter.com/search-advanced>Twitter Advanced Search page</a> is a good resource for trying out different combinations before running your script.</p><p>I hope you find this overview of my first Twitter streaming script useful! Thanks for reading!</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/iteration-in-python-for-list-and-map/>Iteration in Python: for, list, and map</a><p>The basics of writing iterations in Python using for loops, list comprehensions, and map.</p><p class=metadata><a class="tag button" href=/tags/python/>python</a>
-☕️
-&nbsp;4 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/>Build your own serverless subscriber list with Go and AWS</a><p>How to build your own newsletter list with DynamoDB and SES email sign up confirmations.</p><p class=metadata><a class="tag button" href=/tags/api/>api</a>
-☕️ ☕️
-&nbsp;7 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/>Increase developer confidence with a great Django test suite</a><p>How to write tests for your Django applications that boost your team, and are actually useful.</p><p class=metadata><a class="tag button" href=/tags/coding/>coding</a>
-☕️
-&nbsp;5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+</code></pre><p>The short explanation is that Windows 10 doesn&rsquo;t play well with Python&rsquo;s default output encoding, UTF-8. (I&rsquo;m making my way through <a href="https://docs.python.org/3.6/howto/unicode.html">Python&rsquo;s documentation on Unicode</a>, which is rather long but truly fascinating to me.)</p>
+<p>I explored installing a Linux shell with updated Python so I could use Bash. While that&rsquo;s a good eventual idea for programming in general, it&rsquo;s definitely a big diversion from the topic at hand. Instead, I implemented a program-specific fix using a much faster and less complicated method: convert the tweets to ASCII before they display in the Windows 10 terminal.</p>
+<p>This is achieved by changing the encoding of the tweet text:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">print</span><span class="p">(</span><span class="n">tweet</span><span class="p">[</span><span class="s2">&#34;text&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&#34;ascii&#34;</span><span class="p">,</span> <span class="s2">&#34;ignore&#34;</span><span class="p">))</span>
+</code></pre></div><p>The above displays the text of the tweets using ASCII encoding, and ignores any characters it can&rsquo;t encode. Instead of <code>ignore</code>, you could also use other handlers to indicate errors. Python documentation gives an example of what these different handlers do <a href="https://docs.python.org/3.6/howto/unicode.html#converting-to-bytes">here</a>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">&gt;&gt;&gt; u.encode<span class="o">(</span><span class="s1">&#39;ascii&#39;</span>, <span class="s1">&#39;ignore&#39;</span><span class="o">)</span>
+b<span class="s1">&#39;abcd&#39;</span>
+&gt;&gt;&gt; u.encode<span class="o">(</span><span class="s1">&#39;ascii&#39;</span>, <span class="s1">&#39;replace&#39;</span><span class="o">)</span>
+b<span class="s1">&#39;?abcd?&#39;</span>
+&gt;&gt;&gt; u.encode<span class="o">(</span><span class="s1">&#39;ascii&#39;</span>, <span class="s1">&#39;xmlcharrefreplace&#39;</span><span class="o">)</span> <span class="c1"># inserts XML character reference</span>
+b<span class="s1">&#39;&amp;#40960;abcd&amp;#1972;&#39;</span>
+&gt;&gt;&gt; u.encode<span class="o">(</span><span class="s1">&#39;ascii&#39;</span>, <span class="s1">&#39;backslashreplace&#39;</span><span class="o">)</span> <span class="c1"># inserts a \uNNNN escape sequence</span>
+b<span class="s1">&#39;\\ua000abcd\\u07b4&#39;</span>
+&gt;&gt;&gt; u.encode<span class="o">(</span><span class="s1">&#39;ascii&#39;</span>, <span class="s1">&#39;namereplace&#39;</span><span class="o">)</span> <span class="c1"># inserts a \N{...} escape sequence</span>
+b<span class="s1">&#39;\\N{YI SYLLABLE IT}abcd\\u07b4&#39;</span>
+</code></pre></div><p>Now running the program with the Windows 10 terminal should give you&hellip; a <em>lot</em> of tweets. (It&rsquo;ll keep going until you stop the program using <code>ctrl+c</code>. On a couple occassions when my program wasn&rsquo;t finding many tweets, <code>ctrl+c</code> didn&rsquo;t seem to work. I hit it a few more times in succession before it seemed to sync up with the program actually doing something, and stopped the operation.)</p>
+<h2 id="3-refining-the-search-function" class="anchor-link"><a href="https://victoria.dev/blog/the-basics-of-streaming-with-twitter-api/#3-refining-the-search-function">3. Refining the search function</a></h2>
+<p>To retrieve a stream of tweets filtered by your search parameters, you&rsquo;ll want to alter this line of code:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">stream</span><span class="o">.</span><span class="n">statuses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">track</span><span class="o">=</span><span class="s2">&#34;twitter&#34;</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&#34;en&#34;</span><span class="p">)</span>
+</code></pre></div><p>The <code>track</code> parameter is what lets you filter your tweets by keywords, hashtags, user mentions, and urls. In the above example, it will search for tweets containing the keyword &ldquo;twitter&rdquo;. You can find its accepted phrases <a href="https://dev.twitter.com/streaming/overview/request-parameters#track">here</a>. Note that the phrases don&rsquo;t work like search engine phrases - characters in the tweet must exactly match the search phrase, and punctuation within the quotes will be considered part of the phrase. For example, &ldquo;café&rdquo; will not find &ldquo;cafe&rdquo; or vice versa, and &ldquo;hello,&rdquo; is a different phrase than &ldquo;hello&rdquo;.</p>
+<p>The <code>language</code> parameter in the example above limits the search results to tweets written in English. There are further parameters you can use to filter your results, such as follow (which limits your stream to searching the timelines of the users you specify) and location (which can allow you to filter by geolocated tweets). Find the full list of parameters and their values <a href="https://dev.twitter.com/streaming/overview/request-parameters">here</a>.</p>
+<p>I intended to use the <code>track</code> parameter to find tweets containing any one of a list of hashtags. I started out with the code below:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">stream</span><span class="o">.</span><span class="n">statuses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">track</span><span class="o">=</span><span class="s2">&#34;#coding,#programming,#travel&#34;</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&#34;en&#34;</span><span class="p">)</span>
+</code></pre></div><p>Note that the comma separators will cause the program to find tweets that contain any of those search terms: #coding OR #programming, etc. If you want to have your search find tweets containing all your search terms, use spaces only.</p>
+<p>The track function is pretty literal, and thus not very intuitive. For example, my &ldquo;#programming&rdquo; phrase called up tweets that were related to computer programming as well as television programming. While you could set other parameters that omit certain words, it&rsquo;s not long before such an approach turns into a very lengthy guessing game. A cleaner (and faster) approach is to choose more specific search phrases, for example:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">stream</span><span class="o">.</span><span class="n">statuses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+    <span class="n">track</span><span class="o">=</span><span class="s2">&#34;#coding,#python,#digitalnomad,#laptoplifestyle&#34;</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&#34;en&#34;</span>
+<span class="p">)</span>
+</code></pre></div><p>Your keywords will vary depending on what you want your stream to display. The <a href="https://twitter.com/search-advanced">Twitter Advanced Search page</a> is a good resource for trying out different combinations before running your script.</p>
+<p>I hope you find this overview of my first Twitter streaming script useful! Thanks for reading!</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/iteration-in-python-for-list-and-map/">Iteration in Python: for, list, and map</a>
+    <p>
+        The basics of writing iterations in Python using for loops, list comprehensions, and map.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/python/">python</a>
+        
+         ☕️
+        &nbsp;4 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/">Build your own serverless subscriber list with Go and AWS</a>
+    <p>
+        How to build your own newsletter list with DynamoDB and SES email sign up confirmations.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/api/">api</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/">Increase developer confidence with a great Django test suite</a>
+    <p>
+        How to write tests for your Django applications that boost your team, and are actually useful.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/coding/">coding</a>
+        
+         ☕️
+        &nbsp;5 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/bookshelf/">
+                    <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>
