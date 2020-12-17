@@ -1,38 +1,256 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>Manipulating data with Django migrations | victoria.dev</title><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Manipulating data with Django migrations - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How to update Django models and manipulate existing data using migrations."><meta property="og:url" content="https://victoria.dev/blog/manipulating-data-with-django-migrations/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/manipulating-data-with-django-migrations/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Manipulating data with Django migrations"><meta name=twitter:image content="https://victoria.dev/blog/manipulating-data-with-django-migrations/cover.png"><meta name=twitter:description content="How to update Django models and manipulate existing data using migrations."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.2f2890fa9f484dd4df7fc5a807cce235c1c8542b4ed09ff8725fbadd9247c647.css integrity="sha256-LyiQ+p9ITdTff8WoB8ziNcHIVCtO0J/4cl+63ZJHxkc=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Manipulating data with Django migrations"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/manipulating-data-with-django-migrations/cover.png alt="cover image"></div><article><h1>Manipulating data with Django migrations</h1><p class=subtitle>How to update Django models and manipulate existing data using migrations.</p><span><a class="tag button" href=/tags/coding/>coding
-</a>&nbsp;
-<a class="tag button" href=/tags/data/>data
-</a>&nbsp;
-<a class="tag button" href=/tags/python/>python
-</a>&nbsp;</span><p class=metadata id=date><span>September 14, 2020</span>
-<span><em>Updated: Dec 17, 2020</em></span>
-<span>☕️&nbsp;5 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>Growing, successful applications are a lovely problem to have. As a product develops, it tends to accumulate complication the way your weekend cake project accumulates layers of frosting. Thankfully, Django, my favorite batteries-included framework, handles complexity pretty well.</p><p>Django <a href=/blog/writing-efficient-django/#django-models>models help humans work with data in a way that makes sense to our brains</a>, and the framework offers plenty of classes you can inherit to help you rapidly develop a robust application from scratch. As for developing on existing Django applications, there&rsquo;s a feature for that, too. In this article, we&rsquo;ll cover how to use Django migrations to update your existing models and database.</p><h2 id=whats-under-the-hood class=anchor-link><a href=https://victoria.dev/blog/manipulating-data-with-django-migrations/#whats-under-the-hood>What&rsquo;s under the hood</a></h2><p>Django migrations are Python files that help you add and change things in your database tables to reflect changes in your Django models. To understand how Django migrations help you work with data, it may be helpful to understand the underlying structures we&rsquo;re working with.</p><h3 id=whats-a-database-table class=anchor-link><a href=https://victoria.dev/blog/manipulating-data-with-django-migrations/#whats-a-database-table>What&rsquo;s a database table</a></h3><p>If you&rsquo;ve laid eyes on a spreadsheet before, you&rsquo;re already most of the way to understanding a database table. In a relational database, for example, a PostgreSQL database, you can expect to see data organized into columns and rows. A relational database table may have a set number of columns and any number of rows.</p><p>In Django, each model is its own table. For example, here&rsquo;s a Django model:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>django.db</span> <span class=kn>import</span> <span class=n>models</span>
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    Manipulating data with Django migrations | victoria.dev
+</title>
 
 
-<span class=k>class</span> <span class=nc>Lunch</span><span class=p>(</span><span class=n>models</span><span class=o>.</span><span class=n>Model</span><span class=p>):</span>
-    <span class=n>left_side</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>center</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>right_side</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-</code></pre></div><p>Each field is a column, and each row is a Django object instance of that model. Here&rsquo;s a representation of a database table for the Django model &ldquo;Lunch&rdquo; above. In the database, its name would be <code>lunch_table</code>.</p><table><thead><tr><th>id</th><th>left_side</th><th>center</th><th>right_side</th></tr></thead><tbody><tr><td>1</td><td>Fork</td><td>Plate</td><td>Spoon</td></tr></tbody></table><p>The model <code>Lunch</code> has three fields: <code>left_side</code>, <code>center</code>, and <code>right-side</code>. One instance of a <code>Lunch</code> object would have &ldquo;Fork&rdquo; for the <code>left_side</code>, a &ldquo;Plate&rdquo; for the <code>center</code>, and &ldquo;Spoon&rdquo; for the <code>right_side</code>. Django <a href=https://docs.djangoproject.com/en/3.1/topics/db/models/#automatic-primary-key-fields>automatically adds an <code>id</code> field</a> if you don&rsquo;t specify a primary key.</p><p>If you wanted to change the name of your Lunch model, you would do so in your <code>models.py</code> code. For example, change &ldquo;Lunch&rdquo; to &ldquo;Dinner,&rdquo; then <a href=https://docs.djangoproject.com/en/3.1/ref/django-admin/#makemigrations>run <code>python manage.py makemigrations</code></a>. You&rsquo;ll see:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>python manage.py makemigrations
+
+        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
+
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="Manipulating data with Django migrations - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How to update Django models and manipulate existing data using migrations." />
+<meta property="og:url" content="https://victoria.dev/blog/manipulating-data-with-django-migrations/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/manipulating-data-with-django-migrations/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Manipulating data with Django migrations" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/manipulating-data-with-django-migrations/cover.png"/>
+
+<meta name="twitter:description"
+    content="How to update Django models and manipulate existing data using migrations." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.2f2890fa9f484dd4df7fc5a807cce235c1c8542b4ed09ff8725fbadd9247c647.css" integrity="sha256-LyiQ&#43;p9ITdTff8WoB8ziNcHIVCtO0J/4cl&#43;63ZJHxkc=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for Manipulating data with Django migrations" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/manipulating-data-with-django-migrations/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+                Manipulating data with Django migrations
+            </h1>
+            
+            <p class="subtitle">How to update Django models and manipulate existing data using migrations.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/coding/">
+                    coding
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/data/">
+                    data
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/python/">
+                    python
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>September 14, 2020</span>
+                
+                <span>
+                    <em>Updated: Dec 17, 2020</em>
+                </span>
+                
+                <span>
+                     ☕️&nbsp;5 min read
+                </span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <p>Growing, successful applications are a lovely problem to have. As a product develops, it tends to accumulate complication the way your weekend cake project accumulates layers of frosting. Thankfully, Django, my favorite batteries-included framework, handles complexity pretty well.</p>
+<p>Django <a href="/blog/writing-efficient-django/#django-models">models help humans work with data in a way that makes sense to our brains</a>, and the framework offers plenty of classes you can inherit to help you rapidly develop a robust application from scratch. As for developing on existing Django applications, there&rsquo;s a feature for that, too. In this article, we&rsquo;ll cover how to use Django migrations to update your existing models and database.</p>
+<h2 id="whats-under-the-hood" class="anchor-link"><a href="https://victoria.dev/blog/manipulating-data-with-django-migrations/#whats-under-the-hood">What&rsquo;s under the hood</a></h2>
+<p>Django migrations are Python files that help you add and change things in your database tables to reflect changes in your Django models. To understand how Django migrations help you work with data, it may be helpful to understand the underlying structures we&rsquo;re working with.</p>
+<h3 id="whats-a-database-table" class="anchor-link"><a href="https://victoria.dev/blog/manipulating-data-with-django-migrations/#whats-a-database-table">What&rsquo;s a database table</a></h3>
+<p>If you&rsquo;ve laid eyes on a spreadsheet before, you&rsquo;re already most of the way to understanding a database table. In a relational database, for example, a PostgreSQL database, you can expect to see data organized into columns and rows. A relational database table may have a set number of columns and any number of rows.</p>
+<p>In Django, each model is its own table. For example, here&rsquo;s a Django model:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+
+<span class="k">class</span> <span class="nc">Lunch</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">left_side</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">right_side</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div><p>Each field is a column, and each row is a Django object instance of that model. Here&rsquo;s a representation of a database table for the Django model &ldquo;Lunch&rdquo; above. In the database, its name would be <code>lunch_table</code>.</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>left_side</th>
+<th>center</th>
+<th>right_side</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Fork</td>
+<td>Plate</td>
+<td>Spoon</td>
+</tr>
+</tbody>
+</table>
+<p>The model <code>Lunch</code> has three fields: <code>left_side</code>, <code>center</code>, and <code>right-side</code>. One instance of a <code>Lunch</code> object would have &ldquo;Fork&rdquo; for the <code>left_side</code>, a &ldquo;Plate&rdquo; for the <code>center</code>, and &ldquo;Spoon&rdquo; for the <code>right_side</code>. Django <a href="https://docs.djangoproject.com/en/3.1/topics/db/models/#automatic-primary-key-fields">automatically adds an <code>id</code> field</a> if you don&rsquo;t specify a primary key.</p>
+<p>If you wanted to change the name of your Lunch model, you would do so in your <code>models.py</code> code. For example, change &ldquo;Lunch&rdquo; to &ldquo;Dinner,&rdquo; then <a href="https://docs.djangoproject.com/en/3.1/ref/django-admin/#makemigrations">run <code>python manage.py makemigrations</code></a>. You&rsquo;ll see:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">python manage.py makemigrations
 Did you rename the backend.Lunch model to Dinner? [y/N] y
 Migrations for &#39;backend&#39;:
   backend/migrations/0003_auto_20200922_2331.py
     - Rename model Lunch to Dinner
-</code></pre></div><p>Django automatically generates the appropriate migration files. The relevant line of the generated migrations file in this case would look like:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>migrations</span><span class=o>.</span><span class=n>RenameModel</span><span class=p>(</span><span class=n>old_name</span><span class=o>=</span><span class=s2>&#34;Lunch&#34;</span><span class=p>,</span> <span class=n>new_name</span><span class=o>=</span><span class=s2>&#34;Dinner&#34;</span><span class=p>),</span>
-</code></pre></div><p>This operation would rename our &ldquo;Lunch&rdquo; model to &ldquo;Dinner&rdquo; while keeping everything else the same. But what if you also wanted to change the structure of the database table itself, its schema, as well as make sure that existing data ends up in the right place on your Dinner table?</p><p>Let&rsquo;s explore how to turn our Lunch model into a Dinner model that looks like this:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>django.db</span> <span class=kn>import</span> <span class=n>models</span>
+</code></pre></div><p>Django automatically generates the appropriate migration files. The relevant line of the generated migrations file in this case would look like:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">migrations</span><span class="o">.</span><span class="n">RenameModel</span><span class="p">(</span><span class="n">old_name</span><span class="o">=</span><span class="s2">&#34;Lunch&#34;</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="s2">&#34;Dinner&#34;</span><span class="p">),</span>
+</code></pre></div><p>This operation would rename our &ldquo;Lunch&rdquo; model to &ldquo;Dinner&rdquo; while keeping everything else the same. But what if you also wanted to change the structure of the database table itself, its schema, as well as make sure that existing data ends up in the right place on your Dinner table?</p>
+<p>Let&rsquo;s explore how to turn our Lunch model into a Dinner model that looks like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
 
 
-<span class=k>class</span> <span class=nc>Dinner</span><span class=p>(</span><span class=n>models</span><span class=o>.</span><span class=n>Model</span><span class=p>):</span>
-    <span class=n>top_left</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>top_center</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>top_right</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>bottom_left</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>bottom_center</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>bottom_right</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-</code></pre></div><p>&mldr;with a database table that would look like this:</p><table><thead><tr><th>id</th><th>top_left</th><th>top_center</th><th>top_right</th><th>bottom_left</th><th>bottom_center</th><th>bottom_right</th></tr></thead><tbody><tr><td>1</td><td>Bread plate</td><td>Spoon</td><td>Glass</td><td>Fork</td><td>Plate</td><td>Knife</td></tr></tbody></table><h2 id=manipulating-data-with-django-migrations class=anchor-link><a href=https://victoria.dev/blog/manipulating-data-with-django-migrations/#manipulating-data-with-django-migrations>Manipulating data with Django migrations</a></h2><p>Before you begin to manipulate your data, it&rsquo;s always a good idea to create a backup of your database that you can restore in case something goes wrong. There are various ways to do this depending on the database you&rsquo;re using. You can typically find instructions by searching for <code>&lt;your database name></code> and keywords like <code>backup</code>, <code>recovery</code>, or <code>snapshot</code>.</p><p>In order to design your migration, it&rsquo;s helpful to become familiar with the available <a href=https://docs.djangoproject.com/en/3.1/ref/migration-operations/>migration operations</a>. Migrations are run step-by-step, and each operation is some flavor of adding, removing, or altering data. Like a strategic puzzle, it&rsquo;s important to make model changes one step at a time so that the generated migrations have the correct result.</p><p>We&rsquo;ve already renamed our model successfully. Now, we&rsquo;ll rename the fields that hold the data we want to retain:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>Dinner</span><span class=p>(</span><span class=n>models</span><span class=o>.</span><span class=n>Model</span><span class=p>):</span>
-    <span class=n>bottom_left</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>bottom_center</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>top_center</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-</code></pre></div><p>Django is sometimes smart enough to determine the old and new field names correctly. You&rsquo;ll be asked for confirmation:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>python manage.py makemigrations
+<span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">top_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">top_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">bottom_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div><p>&hellip;with a database table that would look like this:</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>top_left</th>
+<th>top_center</th>
+<th>top_right</th>
+<th>bottom_left</th>
+<th>bottom_center</th>
+<th>bottom_right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Bread plate</td>
+<td>Spoon</td>
+<td>Glass</td>
+<td>Fork</td>
+<td>Plate</td>
+<td>Knife</td>
+</tr>
+</tbody>
+</table>
+<h2 id="manipulating-data-with-django-migrations" class="anchor-link"><a href="https://victoria.dev/blog/manipulating-data-with-django-migrations/#manipulating-data-with-django-migrations">Manipulating data with Django migrations</a></h2>
+<p>Before you begin to manipulate your data, it&rsquo;s always a good idea to create a backup of your database that you can restore in case something goes wrong. There are various ways to do this depending on the database you&rsquo;re using. You can typically find instructions by searching for <code>&lt;your database name&gt;</code> and keywords like <code>backup</code>, <code>recovery</code>, or <code>snapshot</code>.</p>
+<p>In order to design your migration, it&rsquo;s helpful to become familiar with the available <a href="https://docs.djangoproject.com/en/3.1/ref/migration-operations/">migration operations</a>. Migrations are run step-by-step, and each operation is some flavor of adding, removing, or altering data. Like a strategic puzzle, it&rsquo;s important to make model changes one step at a time so that the generated migrations have the correct result.</p>
+<p>We&rsquo;ve already renamed our model successfully. Now, we&rsquo;ll rename the fields that hold the data we want to retain:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div><p>Django is sometimes smart enough to determine the old and new field names correctly. You&rsquo;ll be asked for confirmation:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">python manage.py makemigrations
 Did you rename dinner.center to dinner.bottom_center (a CharField)? [y/N] y
 Did you rename dinner.left_side to dinner.bottom_left (a CharField)? [y/N] y
 Did you rename dinner.right_side to dinner.top_center (a CharField)? [y/N] y
@@ -41,23 +259,183 @@ Migrations for &#39;backend&#39;:
     - Rename field center on dinner to bottom_center
     - Rename field left_side on dinner to bottom_left
     - Rename field right_side on dinner to top_center
-</code></pre></div><p>In some cases, you&rsquo;ll want to try renaming the field and running <code>makemigrations</code> one at a time.</p><p>Now that the existing fields have been migrated to their new names, add the remaining fields to the model:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>Dinner</span><span class=p>(</span><span class=n>models</span><span class=o>.</span><span class=n>Model</span><span class=p>):</span>
-    <span class=n>top_left</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>top_center</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>top_right</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>bottom_left</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>bottom_center</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-    <span class=n>bottom_right</span> <span class=o>=</span> <span class=n>models</span><span class=o>.</span><span class=n>CharField</span><span class=p>(</span><span class=n>max_length</span><span class=o>=</span><span class=mi>100</span><span class=p>,</span> <span class=n>null</span><span class=o>=</span><span class=bp>True</span><span class=p>)</span>
-</code></pre></div><p>Running <code>makemigrations</code> again now gives us:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>python manage.py makemigrations
+</code></pre></div><p>In some cases, you&rsquo;ll want to try renaming the field and running <code>makemigrations</code> one at a time.</p>
+<p>Now that the existing fields have been migrated to their new names, add the remaining fields to the model:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">top_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">top_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">bottom_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div><p>Running <code>makemigrations</code> again now gives us:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">python manage.py makemigrations
 Migrations for &#39;backend&#39;:
   backend/migrations/0005_auto_20200914_2351.py
     - Add field bottom_right to dinner
     - Add field top_left to dinner
     - Add field top_right to dinner
-</code></pre></div><p>You&rsquo;re done! By generating Django migrations, you&rsquo;ve successfully set up your <code>dinner_table</code> and moved existing data to its new spot.</p><h2 id=additional-complexity class=anchor-link><a href=https://victoria.dev/blog/manipulating-data-with-django-migrations/#additional-complexity>Additional complexity</a></h2><p>You&rsquo;ll notice that our Lunch and Dinner models are not very complex. Out of Django&rsquo;s many <a href=https://docs.djangoproject.com/en/3.1/ref/models/fields/#field-types>model field options</a>, we&rsquo;re just using <code>CharField</code>. We also set <code>null=True</code> to let Django store empty values as <code>NULL</code> in the database.</p><p>Django migrations can handle additional complexity, such as changing field types, and whether a blank or null value is permitted. I keep Django&rsquo;s <a href=https://docs.djangoproject.com/en/3.1/ref/models/fields/#>model field reference</a> handy as I work with varying types of data and different use cases.</p><h2 id=de-mystified-migrations class=anchor-link><a href=https://victoria.dev/blog/manipulating-data-with-django-migrations/#de-mystified-migrations>De-mystified migrations</a></h2><p>I hope this article has helped you better understand Django migrations and how they work!</p><p>Now that you can change models and manipulate existing data in your Django application, be sure to use your powers wisely! Backup your database, research and plan your migrations, and always run tests before working with customer data. By doing so, you have the potential to enable your application to grow &ndash; with manageable levels of complexity.</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/>Build your own serverless subscriber list with Go and AWS</a><p>How to build your own newsletter list with DynamoDB and SES email sign up confirmations.</p><p class=metadata><a class="tag button" href=/tags/api/>api</a>
-☕️ ☕️
-&nbsp;7 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/>Increase developer confidence with a great Django test suite</a><p>How to write tests for your Django applications that boost your team, and are actually useful.</p><p class=metadata><a class="tag button" href=/tags/coding/>coding</a>
-☕️
-&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/>Django project best practices to keep your developers happy</a><p>Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.</p><p class=metadata><a class="tag button" href=/tags/python/>python</a>
-☕️ ☕️
-&nbsp;6 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+</code></pre></div><p>You&rsquo;re done! By generating Django migrations, you&rsquo;ve successfully set up your <code>dinner_table</code> and moved existing data to its new spot.</p>
+<h2 id="additional-complexity" class="anchor-link"><a href="https://victoria.dev/blog/manipulating-data-with-django-migrations/#additional-complexity">Additional complexity</a></h2>
+<p>You&rsquo;ll notice that our Lunch and Dinner models are not very complex. Out of Django&rsquo;s many <a href="https://docs.djangoproject.com/en/3.1/ref/models/fields/#field-types">model field options</a>, we&rsquo;re just using <code>CharField</code>. We also set <code>null=True</code> to let Django store empty values as <code>NULL</code> in the database.</p>
+<p>Django migrations can handle additional complexity, such as changing field types, and whether a blank or null value is permitted. I keep Django&rsquo;s <a href="https://docs.djangoproject.com/en/3.1/ref/models/fields/#">model field reference</a> handy as I work with varying types of data and different use cases.</p>
+<h2 id="de-mystified-migrations" class="anchor-link"><a href="https://victoria.dev/blog/manipulating-data-with-django-migrations/#de-mystified-migrations">De-mystified migrations</a></h2>
+<p>I hope this article has helped you better understand Django migrations and how they work!</p>
+<p>Now that you can change models and manipulate existing data in your Django application, be sure to use your powers wisely! Backup your database, research and plan your migrations, and always run tests before working with customer data. By doing so, you have the potential to enable your application to grow &ndash; with manageable levels of complexity.</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/">Build your own serverless subscriber list with Go and AWS</a>
+    <p>
+        How to build your own newsletter list with DynamoDB and SES email sign up confirmations.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/api/">api</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/">Increase developer confidence with a great Django test suite</a>
+    <p>
+        How to write tests for your Django applications that boost your team, and are actually useful.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/coding/">coding</a>
+        
+         ☕️
+        &nbsp;5 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/">Django project best practices to keep your developers happy</a>
+    <p>
+        Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/python/">python</a>
+        
+         ☕️ ☕️
+        &nbsp;6 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/bookshelf/">
+                    <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>
