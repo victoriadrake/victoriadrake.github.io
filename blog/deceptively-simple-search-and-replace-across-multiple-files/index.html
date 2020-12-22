@@ -1,19 +1,336 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>Deceptively simple search-and-replace across multiple files | victoria.dev</title><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Deceptively simple search-and-replace across multiple files - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How to interactively search-and-replace across many files with just two commands, thanks to Vim."><meta property="og:url" content="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Deceptively simple search-and-replace across multiple files"><meta name=twitter:image content="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/cover.png"><meta name=twitter:description content="How to interactively search-and-replace across many files with just two commands, thanks to Vim."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.792a9dbcf3cd4dec275cda59ec0949fb439618c6d34eec60817e6b72ea184f5b.css integrity="sha256-eSqdvPPNTewnXNpZ7AlJ+0OWGMbTTuxggX5rcuoYT1s=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Deceptively simple search-and-replace across multiple files"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/cover.png alt="cover image"></div><article><h1>Deceptively simple search-and-replace across multiple files</h1><p class=subtitle>How to interactively search-and-replace across many files with just two commands, thanks to Vim.</p><span><a class="tag button" href=/tags/terminal/>terminal
-</a>&nbsp;
-<a class="tag button" href=/tags/linux/>linux
-</a>&nbsp;</span><p class=metadata id=date><span>August 25, 2020</span>
-<span><em>Updated: Dec 21, 2020</em></span>
-<span>☕️&nbsp;2 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>While a multitude of methods exist to search for and replace words in a single file, what do you do when you&rsquo;ve got a string to update across multiple unrelated files, all with different names? You harness the power of command line tools, of course!</p><p>First, you&rsquo;ll need to <code>find</code> all the files you want to change. Stringing together what are effectively search queries for <code>find</code> is really only limited by your imagination. Here&rsquo;s a simple example that finds Python files:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -name <span class=s1>&#39;*.py&#39;</span>
-</code></pre></div><p>The <code>-name</code> test searches for a pattern, such as all files ending in <code>.py</code>, but <code>find</code> can do a lot more with other test conditions, including <code>-regex</code> tests. Run <code>find --help</code> to see the multitude of options.</p><p>Further tune your search by using <code>grep</code> to get only the files that contain the string you want to change, such as by adding:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>grep -le <span class=s1>&#39;\&lt;a whale\&gt;&#39;</span>
-</code></pre></div><p>The <code>-l</code> option gives you just the file names for all files containing a pattern (denoted with <code>-e</code>) that match &ldquo;a whale&rdquo;.</p><p>Using Vim&rsquo;s impressive <code>:bufdo</code> lets you run the same command across multiple buffers, interactively working with all of these files without the tedium of opening, saving, and closing each file, one at a time.</p><p>Let&rsquo;s plug your powerful <code>find</code>+<code>grep</code> results into Vim with:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>vim <span class=sb>`</span>find . -name <span class=s1>&#39;*.py&#39;</span> <span class=se>\
-</span><span class=se></span>-exec grep -le <span class=s1>&#39;\&lt;a whale\&gt;&#39;</span> <span class=o>{}</span> <span class=se>\;</span><span class=sb>`</span>
-</code></pre></div><p>Using backtick-expansion to pass our search to Vim opens up multiple buffers ready to go. (Do <code>:h backtick-expansion</code> in Vim for more.) Now you can apply the Vim command <code>:bufdo</code> to all of these files and perform actions such as interactive search-and-replace:</p><div class=highlight><pre class=chroma><code class=language-vim data-lang=vim><span class=p>:</span><span class=nx>bufdo</span> %<span class=nx>s</span><span class=sr>/a whale/</span><span class=nx>a</span> <span class=nx>bowl</span> <span class=nx>of</span> <span class=nx>petunias</span>/<span class=nx>gce</span><span class=err>
-</span></code></pre></div><p>The <code>g</code> for &ldquo;global&rdquo; will change occurrences of the pattern on all lines. The <code>e</code> will omit errors if the pattern is not found. The <code>c</code> option makes this interactive; if you&rsquo;re feeling confident, you can omit it to make the changes without reviewing each one.</p><p>If one of the patterns contains a <code>/</code> character, you can substitute the separator in the above command to make it more readable. Vim will assume the character following the <code>%s</code> is the separator, so for example:</p><div class=highlight><pre class=chroma><code class=language-vim data-lang=vim><span class=p>:</span><span class=nx>bufdo</span> %<span class=nx>s_a</span> <span class=nx>whale_a</span> <span class=nx>bowl</span> <span class=nx>of</span> <span class=nx>peonies</span>/<span class=nx>petunias_gce</span><span class=err>
-</span></code></pre></div><p>When you&rsquo;ve finished going through all the buffers, save all the work you&rsquo;ve completed with:</p><div class=highlight><pre class=chroma><code class=language-vim data-lang=vim><span class=p>:</span><span class=nx>bufdo</span> <span class=nx>wq</span><span class=p>!</span><span class=err>
-</span></code></pre></div><p>Then bask in the glory of your saved time and effort.</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/>Command line tricks for managing your messy open source repository</a><p>A handy toolbox for the terminal to help open source maintainers make their projects sparkle.</p><p class=metadata><a class="tag button" href=/tags/terminal/>terminal</a>
-☕️
-&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/>Bash and shell expansions: lazy list-making</a><p>A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.</p><p class=metadata><a class="tag button" href=/tags/terminal/>terminal</a>
-☕️
-&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>A portable Makefile for continuous delivery with Hugo and GitHub Pages</a><p>My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.</p><p class=metadata><a class="tag button" href=/tags/ci/cd/>ci/cd</a>
-☕️
-&nbsp;5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    Deceptively simple search-and-replace across multiple files | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
+
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="Deceptively simple search-and-replace across multiple files - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How to interactively search-and-replace across many files with just two commands, thanks to Vim." />
+<meta property="og:url" content="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Deceptively simple search-and-replace across multiple files" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/cover.png"/>
+
+<meta name="twitter:description"
+    content="How to interactively search-and-replace across many files with just two commands, thanks to Vim." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.792a9dbcf3cd4dec275cda59ec0949fb439618c6d34eec60817e6b72ea184f5b.css" integrity="sha256-eSqdvPPNTewnXNpZ7AlJ&#43;0OWGMbTTuxggX5rcuoYT1s=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for Deceptively simple search-and-replace across multiple files" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+                Deceptively simple search-and-replace across multiple files
+            </h1>
+            
+            <p class="subtitle">How to interactively search-and-replace across many files with just two commands, thanks to Vim.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/terminal/">
+                    terminal
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/linux/">
+                    linux
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>August 25, 2020</span>
+                
+                <span>
+                    <em>Updated: Dec 22, 2020</em>
+                </span>
+                
+                <span>
+                     ☕️&nbsp;2 min read
+                </span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <p>While a multitude of methods exist to search for and replace words in a single file, what do you do when you&rsquo;ve got a string to update across multiple unrelated files, all with different names? You harness the power of command line tools, of course!</p>
+<p>First, you&rsquo;ll need to <code>find</code> all the files you want to change. Stringing together what are effectively search queries for <code>find</code> is really only limited by your imagination. Here&rsquo;s a simple example that finds Python files:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -name <span class="s1">&#39;*.py&#39;</span>
+</code></pre></div><p>The <code>-name</code> test searches for a pattern, such as all files ending in <code>.py</code>, but <code>find</code> can do a lot more with other test conditions, including <code>-regex</code> tests. Run <code>find --help</code> to see the multitude of options.</p>
+<p>Further tune your search by using <code>grep</code> to get only the files that contain the string you want to change, such as by adding:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">grep -le <span class="s1">&#39;\&lt;a whale\&gt;&#39;</span>
+</code></pre></div><p>The <code>-l</code> option gives you just the file names for all files containing a pattern (denoted with <code>-e</code>) that match &ldquo;a whale&rdquo;.</p>
+<p>Using Vim&rsquo;s impressive <code>:bufdo</code> lets you run the same command across multiple buffers, interactively working with all of these files without the tedium of opening, saving, and closing each file, one at a time.</p>
+<p>Let&rsquo;s plug your powerful <code>find</code>+<code>grep</code> results into Vim with:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">vim <span class="sb">`</span>find . -name <span class="s1">&#39;*.py&#39;</span> <span class="se">\
+</span><span class="se"></span>-exec grep -le <span class="s1">&#39;\&lt;a whale\&gt;&#39;</span> <span class="o">{}</span> <span class="se">\;</span><span class="sb">`</span>
+</code></pre></div><p>Using backtick-expansion to pass our search to Vim opens up multiple buffers ready to go. (Do <code>:h backtick-expansion</code> in Vim for more.) Now you can apply the Vim command <code>:bufdo</code> to all of these files and perform actions such as interactive search-and-replace:</p>
+<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> %<span class="nx">s</span><span class="sr">/a whale/</span><span class="nx">a</span> <span class="nx">bowl</span> <span class="nx">of</span> <span class="nx">petunias</span>/<span class="nx">gce</span><span class="err">
+</span></code></pre></div><p>The <code>g</code> for &ldquo;global&rdquo; will change occurrences of the pattern on all lines. The <code>e</code> will omit errors if the pattern is not found. The <code>c</code> option makes this interactive; if you&rsquo;re feeling confident, you can omit it to make the changes without reviewing each one.</p>
+<p>If one of the patterns contains a <code>/</code> character, you can substitute the separator in the above command to make it more readable. Vim will assume the character following the <code>%s</code> is the separator, so for example:</p>
+<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> %<span class="nx">s_a</span> <span class="nx">whale_a</span> <span class="nx">bowl</span> <span class="nx">of</span> <span class="nx">peonies</span>/<span class="nx">petunias_gce</span><span class="err">
+</span></code></pre></div><p>When you&rsquo;ve finished going through all the buffers, save all the work you&rsquo;ve completed with:</p>
+<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> <span class="nx">wq</span><span class="p">!</span><span class="err">
+</span></code></pre></div><p>Then bask in the glory of your saved time and effort.</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/">Command line tricks for managing your messy open source repository</a>
+    <p>
+        A handy toolbox for the terminal to help open source maintainers make their projects sparkle.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/terminal/">terminal</a>
+        
+         ☕️
+        &nbsp;5 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/">Bash and shell expansions: lazy list-making</a>
+    <p>
+        A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/terminal/">terminal</a>
+        
+         ☕️
+        &nbsp;5 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">A portable Makefile for continuous delivery with Hugo and GitHub Pages</a>
+    <p>
+        My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/ci/cd/">ci/cd</a>
+        
+         ☕️
+        &nbsp;5 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/bookshelf/">
+                    <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>

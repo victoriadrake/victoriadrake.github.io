@@ -1,28 +1,196 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>Bash and shell expansions: lazy list-making | victoria.dev</title><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Bash and shell expansions: lazy list-making - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash."><meta property="og:url" content="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Bash and shell expansions: lazy list-making"><meta name=twitter:image content="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/cover.png"><meta name=twitter:description content="A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.792a9dbcf3cd4dec275cda59ec0949fb439618c6d34eec60817e6b72ea184f5b.css integrity="sha256-eSqdvPPNTewnXNpZ7AlJ+0OWGMbTTuxggX5rcuoYT1s=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Bash and shell expansions: lazy list-making"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/cover.png alt="cover image"></div><article><h1>Bash and shell expansions: lazy list-making</h1><p class=subtitle>A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.</p><span><a class="tag button" href=/tags/terminal/>terminal
-</a>&nbsp;
-<a class="tag button" href=/tags/linux/>linux
-</a>&nbsp;</span><p class=metadata id=date><span>November 18, 2019</span>
-<span><em>Updated: Dec 21, 2020</em></span>
-<span>☕️&nbsp;5 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>It&rsquo;s that time of year again! When stores start putting up colourful sparkly lit-up plastic bits, we all begin to feel a little festive, and by festive I mean let&rsquo;s go shopping. Specifically, holiday gift shopping! (Gifts for yourself are still gifts, technically.)</p><p>Just so this doesn&rsquo;t all go completely madcap, you ought to make some gift lists. Bash can help.</p><h2 id=brace-expansion class=anchor-link><a href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#brace-expansion>Brace expansion</a></h2><p>These are not braces: <code>()</code></p><p>Neither are these: <code>[]</code></p><p><em>These</em> are braces: <code>{}</code></p><p>Braces tell Bash to do something with the arbitrary string or strings it finds between them. Multiple strings are comma-separated: <code>{a,b,c}</code>. You can also add an optional preamble and postscript to be attached to each expanded result. Mostly, this can save some typing, such as with common file paths and extensions.</p><p>Let&rsquo;s make some lists for each person we want to give stuff to. The following commands are equivalent:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>touch /home/me/gift-lists/Amy.txt /home/me/gift-lists/Bryan.txt /home/me/gift-lists/Charlie.txt
-</code></pre></div><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>touch /home/me/gift-lists/<span class=o>{</span>Amy,Bryan,Charlie<span class=o>}</span>.txt
-</code></pre></div><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>tree gift-lists
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    Bash and shell expansions: lazy list-making | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
+
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="Bash and shell expansions: lazy list-making - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash." />
+<meta property="og:url" content="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Bash and shell expansions: lazy list-making" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/cover.png"/>
+
+<meta name="twitter:description"
+    content="A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.792a9dbcf3cd4dec275cda59ec0949fb439618c6d34eec60817e6b72ea184f5b.css" integrity="sha256-eSqdvPPNTewnXNpZ7AlJ&#43;0OWGMbTTuxggX5rcuoYT1s=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for Bash and shell expansions: lazy list-making" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+                Bash and shell expansions: lazy list-making
+            </h1>
+            
+            <p class="subtitle">A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/terminal/">
+                    terminal
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/linux/">
+                    linux
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>November 18, 2019</span>
+                
+                <span>
+                    <em>Updated: Dec 22, 2020</em>
+                </span>
+                
+                <span>
+                     ☕️&nbsp;5 min read
+                </span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <p>It&rsquo;s that time of year again! When stores start putting up colourful sparkly lit-up plastic bits, we all begin to feel a little festive, and by festive I mean let&rsquo;s go shopping. Specifically, holiday gift shopping! (Gifts for yourself are still gifts, technically.)</p>
+<p>Just so this doesn&rsquo;t all go completely madcap, you ought to make some gift lists. Bash can help.</p>
+<h2 id="brace-expansion" class="anchor-link"><a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#brace-expansion">Brace expansion</a></h2>
+<p>These are not braces: <code>()</code></p>
+<p>Neither are these: <code>[]</code></p>
+<p><em>These</em> are braces: <code>{}</code></p>
+<p>Braces tell Bash to do something with the arbitrary string or strings it finds between them. Multiple strings are comma-separated: <code>{a,b,c}</code>. You can also add an optional preamble and postscript to be attached to each expanded result. Mostly, this can save some typing, such as with common file paths and extensions.</p>
+<p>Let&rsquo;s make some lists for each person we want to give stuff to. The following commands are equivalent:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">touch /home/me/gift-lists/Amy.txt /home/me/gift-lists/Bryan.txt /home/me/gift-lists/Charlie.txt
+</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">touch /home/me/gift-lists/<span class="o">{</span>Amy,Bryan,Charlie<span class="o">}</span>.txt
+</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">tree gift-lists
 
 /home/me/gift-lists
 ├── Amy.txt
 ├── Bryan.txt
 └── Charlie.txt
-</code></pre></div><p>Oh darn, &ldquo;Bryan&rdquo; spells his name with an &ldquo;i.&rdquo; I can fix that.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>mv /home/me/gift-lists/<span class=o>{</span>Bryan,Brian<span class=o>}</span>.txt
+</code></pre></div><p>Oh darn, &ldquo;Bryan&rdquo; spells his name with an &ldquo;i.&rdquo; I can fix that.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">mv /home/me/gift-lists/<span class="o">{</span>Bryan,Brian<span class="o">}</span>.txt
 
-renamed <span class=s1>&#39;/home/me/gift-lists/Bryan.txt&#39;</span> -&gt; <span class=s1>&#39;/home/me/gift-lists/Brian.txt&#39;</span>
-</code></pre></div><h2 id=shell-parameter-expansions class=anchor-link><a href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#shell-parameter-expansions>Shell parameter expansions</a></h2><p><a href=https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html>Shell parameter expansion</a> allows us to make all sorts of changes to parameters enclosed in braces, like manipulate and substitute text.</p><p>There are a few stocking stuffers that all our giftees deserve. Let&rsquo;s make that a variable:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nv>STUFF</span><span class=o>=</span><span class=s1>$&#39;socks\nlump of coal\nwhite chocolate&#39;</span>
+renamed <span class="s1">&#39;/home/me/gift-lists/Bryan.txt&#39;</span> -&gt; <span class="s1">&#39;/home/me/gift-lists/Brian.txt&#39;</span>
+</code></pre></div><h2 id="shell-parameter-expansions" class="anchor-link"><a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#shell-parameter-expansions">Shell parameter expansions</a></h2>
+<p><a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">Shell parameter expansion</a> allows us to make all sorts of changes to parameters enclosed in braces, like manipulate and substitute text.</p>
+<p>There are a few stocking stuffers that all our giftees deserve. Let&rsquo;s make that a variable:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">STUFF</span><span class="o">=</span><span class="s1">$&#39;socks\nlump of coal\nwhite chocolate&#39;</span>
 
-<span class=nb>echo</span> <span class=s2>&#34;</span><span class=nv>$STUFF</span><span class=s2>&#34;</span>
+<span class="nb">echo</span> <span class="s2">&#34;</span><span class="nv">$STUFF</span><span class="s2">&#34;</span>
 socks
 lump of coal
 white chocolate
-</code></pre></div><p>Now to add these items to each of our lists with some help from <a href=https://en.wikipedia.org/wiki/Tee_(command)>the <code>tee</code> command</a> to get <code>echo</code> and expansions to play nice.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>echo</span> <span class=s2>&#34;</span><span class=nv>$STUFF</span><span class=s2>&#34;</span> <span class=p>|</span> tee <span class=o>{</span>Amy,Brian,Charlie<span class=o>}</span>.txt
+</code></pre></div><p>Now to add these items to each of our lists with some help from <a href="https://en.wikipedia.org/wiki/Tee_(command)">the <code>tee</code> command</a> to get <code>echo</code> and expansions to play nice.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="nv">$STUFF</span><span class="s2">&#34;</span> <span class="p">|</span> tee <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
-cat <span class=o>{</span>Amy,Brian,Charlie<span class=o>}</span>.txt
+cat <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
 socks
 lump of coal
@@ -33,9 +201,11 @@ white chocolate
 socks
 lump of coal
 white chocolate
-</code></pre></div><h3 id=pattern-match-substitution class=anchor-link><a href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#pattern-match-substitution>Pattern match substitution</a></h3><p>On second thought, maybe the lump of coal isn&rsquo;t such a nice gift. You can replace it with something better using a pattern match substitution in the form of <code>${parameter/pattern/string}</code>:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>echo</span> <span class=s2>&#34;</span><span class=si>${</span><span class=nv>STUFF</span><span class=p>/lump of coal/candy cane</span><span class=si>}</span><span class=s2>&#34;</span> <span class=p>|</span> tee <span class=o>{</span>Amy,Brian,Charlie<span class=o>}</span>.txt
+</code></pre></div><h3 id="pattern-match-substitution" class="anchor-link"><a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#pattern-match-substitution">Pattern match substitution</a></h3>
+<p>On second thought, maybe the lump of coal isn&rsquo;t such a nice gift. You can replace it with something better using a pattern match substitution in the form of <code>${parameter/pattern/string}</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">STUFF</span><span class="p">/lump of coal/candy cane</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> tee <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
-cat <span class=o>{</span>Amy,Brian,Charlie<span class=o>}</span>.txt
+cat <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
 socks
 candy cane
@@ -46,9 +216,12 @@ white chocolate
 socks
 candy cane
 white chocolate
-</code></pre></div><p>This replaces the first instance of &ldquo;lump of coal&rdquo; with &ldquo;candy cane.&rdquo; To replace all instances (if there were multiple), use <code>${parameter//pattern/string}</code>. This doesn&rsquo;t change our <code>$STUFF</code> variable, so we can still reuse the original list for someone naughty later.</p><h3 id=substrings class=anchor-link><a href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#substrings>Substrings</a></h3><p>While we&rsquo;re improving things, our giftees may not all like white chocolate. We&rsquo;d better add some regular chocolate to our lists just in case. Since I&rsquo;m super lazy, I&rsquo;m just going to hit the up arrow and modify a previous Bash command. Luckily, the last word in the <code>$STUFF</code> variable is &ldquo;chocolate,&rdquo; which is nine characters long, so I&rsquo;ll tell Bash to keep just that part using <code>${parameter:offset}</code>. I&rsquo;ll use <code>tee</code>&rsquo;s <code>-a</code> flag to <code>a</code>ppend to my existing lists:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>echo</span> <span class=s2>&#34;</span><span class=si>${</span><span class=nv>STUFF</span><span class=p>: -9</span><span class=si>}</span><span class=s2>&#34;</span> <span class=p>|</span> tee -a <span class=o>{</span>Amy,Brian,Charlie<span class=o>}</span>.txt
+</code></pre></div><p>This replaces the first instance of &ldquo;lump of coal&rdquo; with &ldquo;candy cane.&rdquo; To replace all instances (if there were multiple), use <code>${parameter//pattern/string}</code>. This doesn&rsquo;t change our <code>$STUFF</code> variable, so we can still reuse the original list for someone naughty later.</p>
+<h3 id="substrings" class="anchor-link"><a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#substrings">Substrings</a></h3>
+<p>While we&rsquo;re improving things, our giftees may not all like white chocolate. We&rsquo;d better add some regular chocolate to our lists just in case. Since I&rsquo;m super lazy, I&rsquo;m just going to hit the up arrow and modify a previous Bash command. Luckily, the last word in the <code>$STUFF</code> variable is  &ldquo;chocolate,&rdquo; which is nine characters long, so I&rsquo;ll tell Bash to keep just that part using <code>${parameter:offset}</code>. I&rsquo;ll use <code>tee</code>&rsquo;s <code>-a</code> flag to <code>a</code>ppend to my existing lists:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">STUFF</span><span class="p">: -9</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> tee -a <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
-cat <span class=o>{</span>Amy,Brian,Charlie<span class=o>}</span>.txt
+cat <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
 socks
 candy cane
@@ -62,13 +235,61 @@ socks
 candy cane
 white chocolate
 chocolate
-</code></pre></div><p>You can also:</p><table><thead><tr><th>Do this</th><th>With this</th></tr></thead><tbody><tr><td>Get substring from <em>n</em> characters onwards</td><td><code>${parameter:n}</code></td></tr><tr><td>Get substring for <em>x</em> characters starting at <em>n</em></td><td><code>${parameter:n:x}</code></td></tr></tbody></table><p>There! Now our base lists are finished. Let&rsquo;s have some eggnog.</p><h3 id=testing-variables class=anchor-link><a href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#testing-variables>Testing variables</a></h3><p>You know, it may be the eggnog, but I think I started a list for Amy yesterday and stored it in a variable that I might have called <code>amy</code>. Let&rsquo;s see if I did. I&rsquo;ll use the <code>${parameter:?word}</code> expansion. It&rsquo;ll write <code>word</code> to standard error and exit if there&rsquo;s no <code>amy</code> parameter.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>echo</span> <span class=s2>&#34;</span><span class=si>${</span><span class=nv>amy</span><span class=p>:?no such</span><span class=si>}</span><span class=s2>&#34;</span>
+</code></pre></div><p>You can also:</p>
+<table>
+<thead>
+<tr>
+<th>Do this</th>
+<th>With this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Get substring from <em>n</em> characters onwards</td>
+<td><code>${parameter:n}</code></td>
+</tr>
+<tr>
+<td>Get substring for <em>x</em> characters starting at <em>n</em></td>
+<td><code>${parameter:n:x}</code></td>
+</tr>
+</tbody>
+</table>
+<p>There! Now our base lists are finished. Let&rsquo;s have some eggnog.</p>
+<h3 id="testing-variables" class="anchor-link"><a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#testing-variables">Testing variables</a></h3>
+<p>You know, it may be the eggnog, but I think I started a list for Amy yesterday and stored it in a variable that I might have called <code>amy</code>. Let&rsquo;s see if I did. I&rsquo;ll use the <code>${parameter:?word}</code> expansion. It&rsquo;ll write <code>word</code> to standard error and exit if there&rsquo;s no <code>amy</code> parameter.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">amy</span><span class="p">:?no such</span><span class="si">}</span><span class="s2">&#34;</span>
 
 bash: amy: no such
-</code></pre></div><p>I guess not. Maybe it was Brian instead?</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>echo</span> <span class=s2>&#34;</span><span class=si>${</span><span class=nv>brian</span><span class=p>:?no such</span><span class=si>}</span><span class=s2>&#34;</span>
+</code></pre></div><p>I guess not. Maybe it was Brian instead?</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">brian</span><span class="p">:?no such</span><span class="si">}</span><span class="s2">&#34;</span>
 
 Lederhosen
-</code></pre></div><p>You can also:</p><table><thead><tr><th>Do this</th><th>With this</th></tr></thead><tbody><tr><td>Substitute <code>word</code> if <code>parameter</code> is unset or null</td><td><code>${parameter:-word}</code></td></tr><tr><td>Substitute <code>word</code> if <code>parameter</code> is not unset or null</td><td><code>${parameter:+word}</code></td></tr><tr><td>Assign <code>word</code> to <code>parameter</code> if <code>parameter</code> is unset or null</td><td><code>${parameter:=word}</code></td></tr></tbody></table><h3 id=changing-case class=anchor-link><a href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#changing-case>Changing case</a></h3><p>That&rsquo;s right! Brian said he wanted some lederhosen and so I made myself a note. This is pretty important, so I&rsquo;ll add it to Brian&rsquo;s list in capital letters with the <code>${parameter^^pattern}</code> expansion. The <code>pattern</code> part is optional. We&rsquo;re only writing to Brian&rsquo;s list, so I&rsquo;ll just use <code>>></code> instead of <code>tee -a</code>.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>echo</span> <span class=s2>&#34;</span><span class=si>${</span><span class=nv>brian</span><span class=p>^^</span><span class=si>}</span><span class=s2>&#34;</span> &gt;&gt; Brian.txt
+</code></pre></div><p>You can also:</p>
+<table>
+<thead>
+<tr>
+<th>Do this</th>
+<th>With this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Substitute <code>word</code> if <code>parameter</code> is unset or null</td>
+<td><code>${parameter:-word}</code></td>
+</tr>
+<tr>
+<td>Substitute <code>word</code> if <code>parameter</code> is not unset or null</td>
+<td><code>${parameter:+word}</code></td>
+</tr>
+<tr>
+<td>Assign <code>word</code> to <code>parameter</code> if <code>parameter</code> is unset or null</td>
+<td><code>${parameter:=word}</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="changing-case" class="anchor-link"><a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#changing-case">Changing case</a></h3>
+<p>That&rsquo;s right! Brian said he wanted some lederhosen and so I made myself a note. This is pretty important, so I&rsquo;ll add it to Brian&rsquo;s list in capital letters with the <code>${parameter^^pattern}</code> expansion. The <code>pattern</code> part is optional. We&rsquo;re only writing to Brian&rsquo;s list, so I&rsquo;ll just use <code>&gt;&gt;</code> instead of <code>tee -a</code>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">brian</span><span class="p">^^</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Brian.txt
 
 cat Brian.txt
 
@@ -77,11 +298,37 @@ candy cane
 white chocolate
 chocolate
 LEDERHOSEN
-</code></pre></div><p>You can also:</p><table><thead><tr><th>Do this</th><th>With this</th></tr></thead><tbody><tr><td>Capitalize the first letter</td><td><code>${parameter^pattern}</code></td></tr><tr><td>Lowercase the first letter</td><td><code>${parameter,pattern}</code></td></tr><tr><td>Lowercase all letters</td><td><code>${parameter,,pattern}</code></td></tr></tbody></table><h3 id=expanding-arrays class=anchor-link><a href=https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#expanding-arrays>Expanding arrays</a></h3><p>You know what, all this gift-listing business is a lot of work. I&rsquo;m just going to make <a href=https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Arrays>an array</a> of things I saw at the store:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nv>gifts</span><span class=o>=(</span>sweater gameboy wagon pillows chestnuts hairbrush<span class=o>)</span>
-</code></pre></div><p>I can use substring expansion in the form of <code>${parameter:offset:length}</code> to make this simple. I&rsquo;ll add the first two to Amy&rsquo;s list, the middle two to Brian&rsquo;s, and the last two to Charlie&rsquo;s. I&rsquo;ll use <code>printf</code> to help with newlines.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>printf</span> <span class=s1>&#39;%s\n&#39;</span> <span class=s2>&#34;</span><span class=si>${</span><span class=nv>gifts</span><span class=p>[@]:</span><span class=nv>0</span><span class=p>:</span><span class=nv>2</span><span class=si>}</span><span class=s2>&#34;</span> &gt;&gt; Amy.txt
-<span class=nb>printf</span> <span class=s1>&#39;%s\n&#39;</span> <span class=s2>&#34;</span><span class=si>${</span><span class=nv>gifts</span><span class=p>[@]:</span><span class=nv>2</span><span class=p>:</span><span class=nv>2</span><span class=si>}</span><span class=s2>&#34;</span> &gt;&gt; Brian.txt
-<span class=nb>printf</span> <span class=s1>&#39;%s\n&#39;</span> <span class=s2>&#34;</span><span class=si>${</span><span class=nv>gifts</span><span class=p>[@]: -2</span><span class=si>}</span><span class=s2>&#34;</span> &gt;&gt; Charlie.txt
-</code></pre></div><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>cat Amy.txt
+</code></pre></div><p>You can also:</p>
+<table>
+<thead>
+<tr>
+<th>Do this</th>
+<th>With this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Capitalize the first letter</td>
+<td><code>${parameter^pattern}</code></td>
+</tr>
+<tr>
+<td>Lowercase the first letter</td>
+<td><code>${parameter,pattern}</code></td>
+</tr>
+<tr>
+<td>Lowercase all letters</td>
+<td><code>${parameter,,pattern}</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="expanding-arrays" class="anchor-link"><a href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/#expanding-arrays">Expanding arrays</a></h3>
+<p>You know what, all this gift-listing business is a lot of work. I&rsquo;m just going to make <a href="https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Arrays">an array</a> of things I saw at the store:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">gifts</span><span class="o">=(</span>sweater gameboy wagon pillows chestnuts hairbrush<span class="o">)</span>
+</code></pre></div><p>I can use substring expansion in the form of <code>${parameter:offset:length}</code> to make this simple. I&rsquo;ll add the first two to Amy&rsquo;s list, the middle two to Brian&rsquo;s, and the last two to Charlie&rsquo;s. I&rsquo;ll  use <code>printf</code> to help with newlines.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s1">&#39;%s\n&#39;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">gifts</span><span class="p">[@]:</span><span class="nv">0</span><span class="p">:</span><span class="nv">2</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Amy.txt
+<span class="nb">printf</span> <span class="s1">&#39;%s\n&#39;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">gifts</span><span class="p">[@]:</span><span class="nv">2</span><span class="p">:</span><span class="nv">2</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Brian.txt
+<span class="nb">printf</span> <span class="s1">&#39;%s\n&#39;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">gifts</span><span class="p">[@]: -2</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Charlie.txt
+</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">cat Amy.txt
 
 socks
 candy cane
@@ -108,10 +355,161 @@ white chocolate
 chocolate
 chestnuts
 hairbrush
-</code></pre></div><p>There! Now we&rsquo;ve got a comprehensive set of super personalized gift lists. Thanks Bash! Too bad it can&rsquo;t do the shopping for us, too.</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>A portable Makefile for continuous delivery with Hugo and GitHub Pages</a><p>My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.</p><p class=metadata><a class="tag button" href=/tags/ci/cd/>ci/cd</a>
-☕️
-&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/>How to do twice as much with half the keystrokes using `.bashrc`</a><p>An overview of time-saving aliases, functions, and creating a useful Bash prompt.</p><p class=metadata><a class="tag button" href=/tags/linux/>linux</a>
-☕️ ☕️
-&nbsp;7 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/>How to set up a fresh Ubuntu desktop using only dotfiles and bash scripts</a><p>Configure settings, install programs, and customize your desktop environment with a single bash command.</p><p class=metadata><a class="tag button" href=/tags/linux/>linux</a>
-☕️ ☕️
-&nbsp;9 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+</code></pre></div><p>There! Now we&rsquo;ve got a comprehensive set of super personalized gift lists. Thanks Bash! Too bad it can&rsquo;t do the shopping for us, too.</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">A portable Makefile for continuous delivery with Hugo and GitHub Pages</a>
+    <p>
+        My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/ci/cd/">ci/cd</a>
+        
+         ☕️
+        &nbsp;5 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/">How to do twice as much with half the keystrokes using `.bashrc`</a>
+    <p>
+        An overview of time-saving aliases, functions, and creating a useful Bash prompt.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/linux/">linux</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">How to set up a fresh Ubuntu desktop using only dotfiles and bash scripts</a>
+    <p>
+        Configure settings, install programs, and customize your desktop environment with a single bash command.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/linux/">linux</a>
+        
+         ☕️ ☕️
+        &nbsp;9 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/bookshelf/">
+                    <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>
