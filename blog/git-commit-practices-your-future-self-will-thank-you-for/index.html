@@ -1,17 +1,204 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>Git commit practices your future self will thank you for | victoria.dev</title><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Git commit practices your future self will thank you for - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="Learn how to easily create a clean and readable Git commit history with git squash, message templates, git stash, and tags."><meta property="og:url" content="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Git commit practices your future self will thank you for"><meta name=twitter:image content="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png"><meta name=twitter:description content="Learn how to easily create a clean and readable Git commit history with git squash, message templates, git stash, and tags."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.792a9dbcf3cd4dec275cda59ec0949fb439618c6d34eec60817e6b72ea184f5b.css integrity="sha256-eSqdvPPNTewnXNpZ7AlJ+0OWGMbTTuxggX5rcuoYT1s=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Git commit practices your future self will thank you for"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png alt="cover image"></div><article><h1>Git commit practices your future self will thank you for</h1><p class=subtitle>Learn how to easily create a clean and readable Git commit history with git squash, message templates, git stash, and tags.</p><span><a class="tag button" href=/tags/git/>git
-</a>&nbsp;
-<a class="tag button" href=/tags/coding/>coding
-</a>&nbsp;
-<a class="tag button" href=/tags/terminal/>terminal
-</a>&nbsp;
-<a class="tag button" href=/tags/tech-team/>tech team
-</a>&nbsp;</span><p class=metadata id=date><span>August 6, 2018</span>
-<span><em>Updated: Dec 22, 2020</em></span>
-<span>☕️ ☕️ ☕️&nbsp;15 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>A history of clean commits can be evidence of a lot of things: attention to detail, good work ethic, and genuine investment in the project. What do your Git commits say about you?</p><p>Here&rsquo;s how you can create and maintain a clean and orderly Git commit history using <a href=#write-great-git-commit-messages-with-a-template>message templates</a>, <a href=#one-change-per-commit-how-to-squash-git-commits>learning how to squash commits</a>, <a href=#git-stash>using git stash</a>, and <a href=#tag-release-versions-using-annotated-git-tags>creating annotated commit tags</a>.</p><h2 id=what-it-means-to-commit-responsibly class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#what-it-means-to-commit-responsibly>What it means to commit responsibly</a></h2><p>Whether our code will be seen by the entire open source community or just future versions of ourselves, either one will be grateful if we commit responsibly today. Being responsible can mean a lot of things to different people, so I enlisted some of <a href=https://mastodon.technology/@victoria/>mastodon.technology</a> and <a href=https://dev.to/victoria/what-does-it-mean-to-commit-responsibly-22mi>dev.to</a> to help round out my list. From those (really great) threads, I distilled these main points:</p><blockquote><p><strong>Committing responsibly</strong></p><ol><li>Provide and/or use tests to avoid committing bugs or broken builds</li><li>Write clean code that meets style specifications</li><li>Use descriptive commit messages that reference related discussion</li><li>Make only one change per commit and avoid including unrelated changes</li></ol></blockquote><p>Some of the above is achieved through maintaining a short feedback loop that helps you improve your code quality while staying accountable to yourself. <a href=/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/>I wrote another article</a> that discusses this in detail, especially the part about <a href=/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/#block-out-time-for-code-review>code review</a>. Other items on this list have to do specifically with making commits in Git. There are some features of Git that can benefit us in these areas, as can harnessing tools like Vim. I&rsquo;ll cover those topics here.</p><p>If the majority of your Git commits so far have been created with something like <code>git commit -m "Bug fixes"</code> then this is the article for you!</p><h2 id=write-great-git-commit-messages-with-a-template class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#write-great-git-commit-messages-with-a-template>Write great Git commit messages with a template</a></h2><p>I think <a href=https://github.com/torvalds/subsurface-for-dirk/commit/b6590150d68df528efd40c889ba6eea476b39873>Linus</a> would be very happy if we didn&rsquo;t use <code>git commit -m "Fix bug"</code> in a public repository ever again. As very well put in <a href=https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>this classic post</a> and <a href=https://chris.beams.io/posts/git-commit/>the seven rules of a great Git commit message</a>:</p><blockquote><p>A properly formed Git commit subject line should always be able to complete the following sentence:</p><p>If applied, this commit will <em>your subject line here</em></p></blockquote><p><a href=http://who-t.blogspot.com/2009/12/on-commit-messages.html>This other classic post</a> also discusses three questions that the body of the commit message should answer:</p><blockquote><p>Why is it necessary?
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    Git commit practices your future self will thank you for | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
+
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="Git commit practices your future self will thank you for - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="Learn how to easily create a clean and readable Git commit history with git squash, message templates, git stash, and tags." />
+<meta property="og:url" content="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Git commit practices your future self will thank you for" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png"/>
+
+<meta name="twitter:description"
+    content="Learn how to easily create a clean and readable Git commit history with git squash, message templates, git stash, and tags." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.792a9dbcf3cd4dec275cda59ec0949fb439618c6d34eec60817e6b72ea184f5b.css" integrity="sha256-eSqdvPPNTewnXNpZ7AlJ&#43;0OWGMbTTuxggX5rcuoYT1s=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for Git commit practices your future self will thank you for" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/cover_git-commit-art.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+                Git commit practices your future self will thank you for
+            </h1>
+            
+            <p class="subtitle">Learn how to easily create a clean and readable Git commit history with git squash, message templates, git stash, and tags.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/git/">
+                    git
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/coding/">
+                    coding
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/terminal/">
+                    terminal
+                </a>&nbsp;
+                
+                <a class="tag button" href="/tags/tech-team/">
+                    tech team
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>August 6, 2018</span>
+                
+                <span>
+                    <em>Updated: Dec 22, 2020</em>
+                </span>
+                
+                <span>
+                     ☕️ ☕️ ☕️&nbsp;15 min read
+                </span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <p>A history of clean commits can be evidence of a lot of things: attention to detail, good work ethic, and genuine investment in the project. What do your Git commits say about you?</p>
+<p>Here&rsquo;s how you can create and maintain a clean and orderly Git commit history using <a href="#write-great-git-commit-messages-with-a-template">message templates</a>, <a href="#one-change-per-commit-how-to-squash-git-commits">learning how to squash commits</a>, <a href="#git-stash">using git stash</a>, and <a href="#tag-release-versions-using-annotated-git-tags">creating annotated commit tags</a>.</p>
+<h2 id="what-it-means-to-commit-responsibly" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#what-it-means-to-commit-responsibly">What it means to commit responsibly</a></h2>
+<p>Whether our code will be seen by the entire open source community or just future versions of ourselves, either one will be grateful if we commit responsibly today. Being responsible can mean a lot of things to different people, so I enlisted some of <a href="https://mastodon.technology/@victoria/">mastodon.technology</a> and <a href="https://dev.to/victoria/what-does-it-mean-to-commit-responsibly-22mi">dev.to</a> to help round out my list. From those (really great) threads, I distilled these main points:</p>
+<blockquote>
+<p><strong>Committing responsibly</strong></p>
+<ol>
+<li>Provide and/or use tests to avoid committing bugs or broken builds</li>
+<li>Write clean code that meets style specifications</li>
+<li>Use descriptive commit messages that reference related discussion</li>
+<li>Make only one change per commit and avoid including unrelated changes</li>
+</ol>
+</blockquote>
+<p>Some of the above is achieved through maintaining a short feedback loop that helps you improve your code quality while staying accountable to yourself. <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">I wrote another article</a> that discusses this in detail, especially the part about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/#block-out-time-for-code-review">code review</a>. Other items on this list have to do specifically with making commits in Git. There are some features of Git that can benefit us in these areas, as can harnessing tools like Vim. I&rsquo;ll cover those topics here.</p>
+<p>If the majority of your Git commits so far have been created with something like <code>git commit -m &quot;Bug fixes&quot;</code> then this is the article for you!</p>
+<h2 id="write-great-git-commit-messages-with-a-template" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#write-great-git-commit-messages-with-a-template">Write great Git commit messages with a template</a></h2>
+<p>I think <a href="https://github.com/torvalds/subsurface-for-dirk/commit/b6590150d68df528efd40c889ba6eea476b39873">Linus</a> would be very happy if we didn&rsquo;t use <code>git commit -m &quot;Fix bug&quot;</code> in a public repository ever again. As very well put in <a href="https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html">this classic post</a> and <a href="https://chris.beams.io/posts/git-commit/">the seven rules of a great Git commit message</a>:</p>
+<blockquote>
+<p>A properly formed Git commit subject line should always be able to complete the following sentence:</p>
+<p>If applied, this commit will <em>your subject line here</em></p>
+</blockquote>
+<p><a href="http://who-t.blogspot.com/2009/12/on-commit-messages.html">This other classic post</a> also discusses three questions that the body of the commit message should answer:</p>
+<blockquote>
+<p>Why is it necessary?
 How does it address the issue?
-What effects does the patch have?</p></blockquote><p>This can be a lot to remember to cover, but there&rsquo;s a slick way to have these prompts at hand right when you need it. You can set up a commit message template by using the <code>commit.template</code> <a href=https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration>configuration value</a>.</p><p>To set it, configure Git to use a template file (for example, <code>.gitmessage</code> in your home directory), then create the template file with Vim:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git config --global commit.template ~/.gitmessage
+What effects does the patch have?</p>
+</blockquote>
+<p>This can be a lot to remember to cover, but there&rsquo;s a slick way to have these prompts at hand right when you need it. You can set up a commit message template by using the <code>commit.template</code> <a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration">configuration value</a>.</p>
+<p>To set it, configure Git to use a template file (for example, <code>.gitmessage</code> in your home directory), then create the template file with Vim:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global commit.template ~/.gitmessage
 vim ~/.gitmessage
-</code></pre></div><p>When we run <code>git commit</code> without the <code>-m</code> message flag, the editor will open with our helpful template ready to go. Here&rsquo;s my commit message template:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>## If applied, this commit will...
+</code></pre></div><p>When we run <code>git commit</code> without the <code>-m</code> message flag, the editor will open with our helpful template ready to go. Here&rsquo;s my commit message template:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">## If applied, this commit will...
 ## [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
 
 
@@ -21,20 +208,48 @@ vim ~/.gitmessage
 -
 ## What side effects does this change have?
 -
-</code></pre></div><p>I&rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:</p><div class=highlight><pre class=chroma><code class=language-txt data-lang=txt>Fix #16 missing CSS variables
+</code></pre></div><p>I&rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">Fix #16 missing CSS variables
 - Fix for unstyled elements
 - Add background color, height for code blocks
 - Only affects highlight class
-</code></pre></div><h3 id=reference-related-discussion class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#reference-related-discussion>Reference related discussion</a></h3><p>Issue trackers in <a href=https://help.github.com/articles/closing-issues-using-keywords/>GitHub</a> and <a href=https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html>Bitbucket</a> both recognize the keywords <code>close</code>, <code>fix</code>, and <code>resolve</code> followed immediately by the issue or pull request number. These keywords conveniently help us close the referenced issue or pull request, and this helps maintain a clear trail of changes. <a href=https://docs.gitlab.com/ee/user/project/issues/crosslinking_issues.html>GitLab</a>, and issue trackers like <a href=https://confluence.atlassian.com/jirasoftwarecloud/referencing-issues-in-your-development-work-777002789.html>Jira</a> offer similar functionalities.</p><h3 id=use-helpful-vim-settings-for-git-commit-messages class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#use-helpful-vim-settings-for-git-commit-messages>Use helpful Vim settings for git commit messages</a></h3><p>By adding a few lines to our Vim configuration, we can make writing great git commit messages easy. We can add these lines to <code>~/.vimrc</code> to turn on syntax highlighting in general, and spell check and text wrapping for commit messages in particular:</p><div class=highlight><pre class=chroma><code class=language-vimrc data-lang=vimrc><span class=c>&#34; Filetype detection, plugins, and indent rules</span><span class=err>
-</span><span class=err></span><span class=nx>filetype</span> <span class=nx>plugin</span> <span class=nx>indent</span> <span class=nx>on</span><span class=err>
-</span><span class=err></span><span class=c>
-</span><span class=c>&#34; Syntax highlighting</span><span class=err>
-</span><span class=err></span><span class=nx>syntax</span> <span class=nx>on</span><span class=err>
-</span><span class=err></span><span class=c>
-</span><span class=c>&#34; Spell check and line wrap just for git commit messages</span><span class=err>
-</span><span class=err></span><span class=nx>autocmd</span> <span class=nx>Filetype</span> <span class=nx>gitcommit</span> <span class=nx>setlocal</span> <span class=nx>spell</span> <span class=nx>textwidth</span><span class=p>=</span><span class=m>72</span><span class=err>
-</span></code></pre></div><p>If you&rsquo;re curious, you can find my full <code>~/.vimrc</code> in my <a href=https://github.com/victoriadrake/dotfiles>dotfiles</a>.</p><p>Other editors have settings that can help us out as well. I came across <a href=https://dev.to/shreyasminocha/how-i-do-my-git-commits-34d>these for Sublime Text 3</a> and <a href=https://github.com/Microsoft/vscode-docs/blob/master/docs/getstarted/tips-and-tricks.md#language-specific-settings>language specific settings for VS Code</a>.</p><h2 id=one-change-per-commit-how-to-squash-git-commits class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#one-change-per-commit-how-to-squash-git-commits>One change per commit: how to squash Git commits</a></h2><figure><img src=git-commit-squash.png alt="A doodle of squash"><figcaption><p>Still life Git</p></figcaption></figure><p>Let&rsquo;s get one thing out of the way first: rewriting Git history just for the sake of having a pretty tree, especially with public repositories, is generally not advisable. It&rsquo;s kind of like going back in time, where changes you make to your version of the project cause it to look completely different from a version that someone else forked from a point in history that you&rsquo;ve now erased - I mean, haven&rsquo;t you seen <em>Back to the Future Part II</em>? (If you&rsquo;d rather maintain that only one <em>Back to the Future</em> movie was ever made, thus sparing your future self from having to watch the sequels, I get it.)</p><p>Here&rsquo;s the main point. If you&rsquo;ve pushed messy commits to a public repository, I say go right ahead and leave them be, instead of complicating things further. (We all learn from our embarrassments, especially the public ones - I&rsquo;m looking at you, past-Vicky.) If your messy commits currently only exist on your local version, great! We can tidy them up into one clean, well-described commit that we&rsquo;ll be proud to push, and no one will be the wiser.</p><p>There are a couple different ways to squash commits, and choosing the appropriate one depends on what we need to achieve.</p><p>The following examples are illustrated using <code>git log --graph</code>, with some options for brevity. We can set a handy alias to see this log format in our terminal with:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git config --global alias.plog <span class=s2>&#34;log --graph --pretty=format:&#39;%h -%d %s %n&#39; --abbrev-commit --date=relative --branches&#34;</span>
-</code></pre></div><p>Then we just do <code>git plog</code> to see the pretty log.</p><h3 id=method-1-one-commit-to-rule-the-master-branch class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#method-1-one-commit-to-rule-the-master-branch>Method #1: one commit to rule the master branch</a></h3><p>This is appropriate when:</p><ul><li>We&rsquo;re committing directly to master</li><li>We don&rsquo;t intend to open a pull request to merge a feature</li><li>We don&rsquo;t want to preserve history of branches or changes we haven&rsquo;t yet pushed</li></ul><p>This method takes a Git tree that looks like this:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>*   3e8fd79 - (HEAD -&gt; master) Fix a thing
+</code></pre></div><h3 id="reference-related-discussion" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#reference-related-discussion">Reference related discussion</a></h3>
+<p>Issue trackers in <a href="https://help.github.com/articles/closing-issues-using-keywords/">GitHub</a> and <a href="https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html">Bitbucket</a> both recognize the keywords <code>close</code>, <code>fix</code>, and <code>resolve</code> followed immediately by the issue or pull request number. These keywords conveniently help us close the referenced issue or pull request, and this helps maintain a clear trail of changes. <a href="https://docs.gitlab.com/ee/user/project/issues/crosslinking_issues.html">GitLab</a>, and issue trackers like <a href="https://confluence.atlassian.com/jirasoftwarecloud/referencing-issues-in-your-development-work-777002789.html">Jira</a> offer similar functionalities.</p>
+<h3 id="use-helpful-vim-settings-for-git-commit-messages" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#use-helpful-vim-settings-for-git-commit-messages">Use helpful Vim settings for git commit messages</a></h3>
+<p>By adding a few lines to our Vim configuration, we can make writing great git commit messages easy. We can add these lines to <code>~/.vimrc</code> to turn on syntax highlighting in general, and spell check and text wrapping for commit messages in particular:</p>
+<div class="highlight"><pre class="chroma"><code class="language-vimrc" data-lang="vimrc"><span class="c">&#34; Filetype detection, plugins, and indent rules</span><span class="err">
+</span><span class="err"></span><span class="nx">filetype</span> <span class="nx">plugin</span> <span class="nx">indent</span> <span class="nx">on</span><span class="err">
+</span><span class="err"></span><span class="c">
+</span><span class="c">&#34; Syntax highlighting</span><span class="err">
+</span><span class="err"></span><span class="nx">syntax</span> <span class="nx">on</span><span class="err">
+</span><span class="err"></span><span class="c">
+</span><span class="c">&#34; Spell check and line wrap just for git commit messages</span><span class="err">
+</span><span class="err"></span><span class="nx">autocmd</span> <span class="nx">Filetype</span> <span class="nx">gitcommit</span> <span class="nx">setlocal</span> <span class="nx">spell</span> <span class="nx">textwidth</span><span class="p">=</span><span class="m">72</span><span class="err">
+</span></code></pre></div><p>If you&rsquo;re curious, you can find my full <code>~/.vimrc</code> in my <a href="https://github.com/victoriadrake/dotfiles">dotfiles</a>.</p>
+<p>Other editors have settings that can help us out as well. I came across <a href="https://dev.to/shreyasminocha/how-i-do-my-git-commits-34d">these for Sublime Text 3</a> and <a href="https://github.com/Microsoft/vscode-docs/blob/master/docs/getstarted/tips-and-tricks.md#language-specific-settings">language specific settings for VS Code</a>.</p>
+<h2 id="one-change-per-commit-how-to-squash-git-commits" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#one-change-per-commit-how-to-squash-git-commits">One change per commit: how to squash Git commits</a></h2>
+<figure>
+    <img src="git-commit-squash.png"
+         alt="A doodle of squash"/> <figcaption>
+            <p>Still life Git</p>
+        </figcaption>
+</figure>
+
+<p>Let&rsquo;s get one thing out of the way first: rewriting Git history just for the sake of having a pretty tree, especially with public repositories, is generally not advisable. It&rsquo;s kind of like going back in time, where changes you make to your version of the project cause it to look completely different from a version that someone else forked from a point in history that you&rsquo;ve now erased - I mean, haven&rsquo;t you seen <em>Back to the Future Part II</em>? (If you&rsquo;d rather maintain that only one <em>Back to the Future</em> movie was ever made, thus sparing your future self from having to watch the sequels, I get it.)</p>
+<p>Here&rsquo;s the main point. If you&rsquo;ve pushed messy commits to a public repository, I say go right ahead and leave them be, instead of complicating things further. (We all learn from our embarrassments, especially the public ones - I&rsquo;m looking at you, past-Vicky.) If your messy commits currently only exist on your local version, great! We can tidy them up into one clean, well-described commit that we&rsquo;ll be proud to push, and no one will be the wiser.</p>
+<p>There are a couple different ways to squash commits, and choosing the appropriate one depends on what we need to achieve.</p>
+<p>The following examples are illustrated using <code>git log --graph</code>, with some options for brevity. We can set a handy alias to see this log format in our terminal with:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global alias.plog <span class="s2">&#34;log --graph --pretty=format:&#39;%h -%d %s %n&#39; --abbrev-commit --date=relative --branches&#34;</span>
+</code></pre></div><p>Then we just do <code>git plog</code> to see the pretty log.</p>
+<h3 id="method-1-one-commit-to-rule-the-master-branch" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#method-1-one-commit-to-rule-the-master-branch">Method #1: one commit to rule the master branch</a></h3>
+<p>This is appropriate when:</p>
+<ul>
+<li>We&rsquo;re committing directly to master</li>
+<li>We don&rsquo;t intend to open a pull request to merge a feature</li>
+<li>We don&rsquo;t want to preserve history of branches or changes we haven&rsquo;t yet pushed</li>
+</ul>
+<p>This method takes a Git tree that looks like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">*   3e8fd79 - (HEAD -&gt; master) Fix a thing
 |
 *   4f0d387 - Tweak something
 |
@@ -52,12 +267,22 @@ vim ~/.gitmessage
 * 65af7e7 Add social media link
 |
 * 0e3fa32 (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>And makes it look like this:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>* 7f9a127 - (HEAD -&gt; master) Add new article
+</code></pre></div><p>And makes it look like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 7f9a127 - (HEAD -&gt; master) Add new article
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>Here&rsquo;s how to do it - hold on to your hoverboards, it&rsquo;s super complicated:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git reset --soft origin/master
+</code></pre></div><p>Here&rsquo;s how to do it - hold on to your hoverboards, it&rsquo;s super complicated:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git reset --soft origin/master
 git commit
-</code></pre></div><p>Yup that&rsquo;s all. We can delete the unwanted branch with <code>git branch -D new-article</code>.</p><h3 id=method-2-not-_that_-much class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#method-2-not-_that_-much>Method #2: not <em>that</em> much</a></h3><p>This is appropriate when:</p><ul><li>We want to squash the last <em>x</em> commits but not <em>all</em> commits since <code>origin/master</code></li><li>We want to open a pull request to merge a branch</li></ul><p>This method takes a Git tree that looks like this:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>* 13a070f - (HEAD -&gt; new-article) Finish new article
+</code></pre></div><p>Yup that&rsquo;s all. We can delete the unwanted branch with <code>git branch -D new-article</code>.</p>
+<h3 id="method-2-not-_that_-much" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#method-2-not-_that_-much">Method #2: not <em>that</em> much</a></h3>
+<p>This is appropriate when:</p>
+<ul>
+<li>We want to squash the last <em>x</em> commits but not <em>all</em> commits since <code>origin/master</code></li>
+<li>We want to open a pull request to merge a branch</li>
+</ul>
+<p>This method takes a Git tree that looks like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 13a070f - (HEAD -&gt; new-article) Finish new article
 |
 * 78e728a - Edit article draft
 |
@@ -71,15 +296,21 @@ git commit
 |/
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>And makes it look like this:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>* 90da69a - (HEAD -&gt; new-article) Add new article
+</code></pre></div><p>And makes it look like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 90da69a - (HEAD -&gt; new-article) Add new article
 |
 | * 65af7e7 - (master) Add social media link
 |/
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>To squash the last five commits on branch <code>new-article</code> into one, we use:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git reset --soft HEAD~5
-git commit -m <span class=s2>&#34;New message for the combined commit&#34;</span>
-</code></pre></div><p>Where <code>--soft</code> leaves our files untouched and staged, and <code>5</code> can be thought of as &ldquo;the number of previous commits I want to combine.&rdquo;</p><p>We can then do <code>git merge master</code> and create our pull request.</p><h3 id=method-3-getting-picky class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#method-3-getting-picky>Method #3: getting picky</a></h3><p>Say we had a really confusing afternoon and our Git tree looks like this:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>* dc89918 - (HEAD -&gt; master) Add link
+</code></pre></div><p>To squash the last five commits on branch <code>new-article</code> into one, we use:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git reset --soft HEAD~5
+git commit -m <span class="s2">&#34;New message for the combined commit&#34;</span>
+</code></pre></div><p>Where <code>--soft</code> leaves our files untouched and staged, and <code>5</code> can be thought of as &ldquo;the number of previous commits I want to combine.&rdquo;</p>
+<p>We can then do <code>git merge master</code> and create our pull request.</p>
+<h3 id="method-3-getting-picky" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#method-3-getting-picky">Method #3: getting picky</a></h3>
+<p>Say we had a really confusing afternoon and our Git tree looks like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* dc89918 - (HEAD -&gt; master) Add link
 |
 * 9b6780f - Update image asset
 |
@@ -96,9 +327,20 @@ git commit -m <span class=s2>&#34;New message for the combined commit&#34;</span
 |/
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>We want to retain some of this history, but clean up the commits. We also want to change the messages for some of the commits. To achieve this, we&rsquo;ll use <code>git rebase</code>.</p><p>This is appropriate when:</p><ul><li>We want to squash only some commits</li><li>We want to edit previous commit messages</li><li>We want to delete or reorder specific commits</li></ul><p>Git <code>rebase</code> is a powerful tool, and handy once we&rsquo;ve got the hang of it. To change all the commits since <code>origin/master</code>, we do:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git rebase -i origin/master
-</code></pre></div><p>Or, we can do:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git rebase -i 0e3fa32
-</code></pre></div><p>Where the commit hash is the last commit we want to retain as-is.</p><p>The <code>-i</code> option lets us run the interactive rebase tool, which launches our editor with, essentially, a script for us to modify. We&rsquo;ll see a list of our commits in reverse order to the git log, with the oldest at the top:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>pick 90da69a Add new article
+</code></pre></div><p>We want to retain some of this history, but clean up the commits. We also want to change the messages for some of the commits. To achieve this, we&rsquo;ll use <code>git rebase</code>.</p>
+<p>This is appropriate when:</p>
+<ul>
+<li>We want to squash only some commits</li>
+<li>We want to edit previous commit messages</li>
+<li>We want to delete or reorder specific commits</li>
+</ul>
+<p>Git <code>rebase</code> is a powerful tool, and handy once we&rsquo;ve got the hang of it. To change all the commits since <code>origin/master</code>, we do:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git rebase -i origin/master
+</code></pre></div><p>Or, we can do:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git rebase -i 0e3fa32
+</code></pre></div><p>Where the commit hash is the last commit we want to retain as-is.</p>
+<p>The <code>-i</code> option lets us run the interactive rebase tool, which launches our editor with, essentially, a script for us to modify. We&rsquo;ll see a list of our commits in reverse order to the git log, with the oldest at the top:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">pick 90da69a Add new article
 pick 033dee7 Fix typo
 pick ccec365 Update list page
 pick 6379956 Fix CSS bug
@@ -125,13 +367,15 @@ pick dc89918 Add link
 # Note that empty commits are commented out
 #
 ~
-</code></pre></div><p>The comments give us a handy guide as to what we&rsquo;re able to do. For now, let&rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>pick 90da69a Add new article
+</code></pre></div><p>The comments give us a handy guide as to what we&rsquo;re able to do. For now, let&rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">pick 90da69a Add new article
 squash 033dee7 Fix typo
 pick ccec365 Update list page
 squash 6379956 Fix CSS bug
 squash 9b6780f Update image asset
 squash dc89918 Add link
-</code></pre></div><p>Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text># This is a combination of 2 commits.
+</code></pre></div><p>Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text"># This is a combination of 2 commits.
 # This is the 1st commit message:
 
 Add new article
@@ -156,7 +400,8 @@ Fix typo
 #       modified:   ...
 #
 ~
-</code></pre></div><p>Here&rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&mldr;</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>[detached HEAD 3cbad01] Add new article
+</code></pre></div><p>Here&rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&hellip;</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">[detached HEAD 3cbad01] Add new article
  1 file changed, 129 insertions(+), 19 deletions(-)
 Auto-merging content/dir/file.md
 CONFLICT (content): Merge conflict in content/dir/file.md
@@ -168,16 +413,28 @@ You can instead skip this commit: run &#34;git rebase --skip&#34;.
 To abort and get back to the state before &#34;git rebase&#34;, run &#34;git rebase --abort&#34;.
 
 Could not apply ccec365... Update list page
-</code></pre></div><p>Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with <code>git rebase --continue</code>. Our interactive rebase picks up where it left off.</p><p>Once all the squashing is done, our Git tree looks like this:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>* 3564b8c - (HEAD -&gt; master) Update list page
+</code></pre></div><p>Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with <code>git rebase --continue</code>. Our interactive rebase picks up where it left off.</p>
+<p>Once all the squashing is done, our Git tree looks like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 3564b8c - (HEAD -&gt; master) Update list page
 |
 * 3cbad01 - Add new article
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>Phew, much better.</p><h2 id=git-stash class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#git-stash>Git stash</a></h2><p>If we&rsquo;re in the middle of some work and it&rsquo;s not a good time to commit, but we need to switch branches, <a href=https://git-scm.com/book/en/v1/Git-Tools-Stashing>stashing</a> can be a good option. Stashing lets us save our unfinished work without needing to create a half-assed commit. It&rsquo;s like that pile of paper on your desk representing all the stuff you&rsquo;ve been in the middle of doing since two weeks ago. Yup, that one.</p><p>It&rsquo;s as easy as typing <code>git stash</code>:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>Saved working directory and index state WIP on master: 3564b8c Update list page
-</code></pre></div><p>The dirty work we&rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&rsquo;s in our stash stack, we do <code>git stash list</code>:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>stash@{0}: WIP on master: 3564b8c Update list page
+</code></pre></div><p>Phew, much better.</p>
+<h2 id="git-stash" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#git-stash">Git stash</a></h2>
+<p>If we&rsquo;re in the middle of some work and it&rsquo;s not a good time to commit, but we need to switch branches, <a href="https://git-scm.com/book/en/v1/Git-Tools-Stashing">stashing</a> can be a good option. Stashing lets us save our unfinished work without needing to create a half-assed commit. It&rsquo;s like that pile of paper on your desk representing all the stuff you&rsquo;ve been in the middle of doing since two weeks ago. Yup, that one.</p>
+<p>It&rsquo;s as easy as typing <code>git stash</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">Saved working directory and index state WIP on master: 3564b8c Update list page
+</code></pre></div><p>The dirty work we&rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&rsquo;s in our stash stack, we do <code>git stash list</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">stash@{0}: WIP on master: 3564b8c Update list page
 stash@{1}: WIP on master: 90da69a Add new article
 stash@{2}: WIP on cleanup: 0e3fa32 Update theme
-</code></pre></div><p>To restore our work in progress, we use <code>git stash apply</code>. Git will try and apply our most recent stashed work. To apply an older stash, we use <code>git stash apply stash@{1}</code> where <code>1</code> is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.</p><p>Applying a stash doesn&rsquo;t remove it from our list. To remove a stash from our stack, we do <code>git stash drop stash@{0}</code> where <code>0</code> is the one we want to remove.</p><p>We can also use <code>git stash pop</code> to apply the most recent stash and then immediately remove it from the stack.</p><h2 id=tag-release-versions-using-annotated-git-tags class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#tag-release-versions-using-annotated-git-tags>Tag release versions using annotated Git tags</a></h2><p>In the spirit of having a beautiful, clean Git history, there&rsquo;s one more thing we can do to help make our commit log inspire infinite joy in its viewers. If you&rsquo;ve never heard of <code>git tag</code>, your master branch history might look like this&mldr;</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>* 0377782 - Update theme
+</code></pre></div><p>To restore our work in progress, we use <code>git stash apply</code>. Git will try and apply our most recent stashed work. To apply an older stash, we use <code>git stash apply stash@{1}</code> where <code>1</code> is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.</p>
+<p>Applying a stash doesn&rsquo;t remove it from our list. To remove a stash from our stack, we do <code>git stash drop stash@{0}</code> where <code>0</code> is the one we want to remove.</p>
+<p>We can also use <code>git stash pop</code> to apply the most recent stash and then immediately remove it from the stack.</p>
+<h2 id="tag-release-versions-using-annotated-git-tags" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#tag-release-versions-using-annotated-git-tags">Tag release versions using annotated Git tags</a></h2>
+<p>In the spirit of having a beautiful, clean Git history, there&rsquo;s one more thing we can do to help make our commit log inspire infinite joy in its viewers. If you&rsquo;ve never heard of <code>git tag</code>, your master branch history might look like this&hellip;</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 0377782 - Update theme
 |
 * ecf8128 - Add about page (#25)
 |
@@ -188,7 +445,8 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 * 63d18b4 - Add theme (#12)
 |
 * 233e23f - Add main content (#6)
-</code></pre></div><p>Wouldn&rsquo;t it be nice if it looked like this instead?</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>* 0377782 - (tag: v2.1.0) Update theme
+</code></pre></div><p>Wouldn&rsquo;t it be nice if it looked like this instead?</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 0377782 - (tag: v2.1.0) Update theme
 |
 * ecf8128 - Add about page (#25)
 |
@@ -199,13 +457,185 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 * 63d18b4 - Add theme (#12)
 |
 * 233e23f - (tag: v1.1.0) Add main content (#6)
-</code></pre></div><p>We can tag Git commits with anything, but tags are especially helpful for semantic versioning of releases. Sites like <a href=https://help.github.com/articles/creating-releases/>GitHub</a> and <a href=https://docs.gitlab.com/ee/user/project/releases/>GitLab</a> have pages for repositories that list tags, letting viewers of our project browse the release versions. This can be helpful for public projects to differentiate major releases, updates with bug fixes, or beta versions.</p><p>There are two types of Git tags: lightweight and annotated. For adding a version tag to commits, we use annotated Git tags.</p><p>The <a href=https://git-scm.com/docs/git-tag>Git tag documentation</a> explains it this way:</p><blockquote><p>Tag objects (created with -a, -s, or -u) are called &ldquo;annotated&rdquo; tags; they contain a creation date, the tagger name and e-mail, a tagging message, and an optional GnuPG signature. Whereas a &ldquo;lightweight&rdquo; tag is simply a name for an object (usually a commit object).</p><p>Annotated tags are meant for release while lightweight tags are meant for private or temporary object labels. For this reason, some git commands for naming objects (like git describe) will ignore lightweight tags by default.</p></blockquote><p>We can think of lightweight tags as bookmarks, and annotated tags as signed releases.</p><p>For public repositories, annotated tags allow us to:</p><ul><li>See who tagged the commit, which may differ from the commit author</li><li>See all the tags with <code>git describe</code></li><li>Avoid conflicting tag names</li></ul><p>To create an annotated Git tag and attach it to our current (last) commit, we do:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git tag -a v1.2.0 -m <span class=s2>&#34;Clever release title&#34;</span>
-</code></pre></div><p>This tags the commit on our local repository. To push all annotated tags to the remote, we do:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git push --follow-tags
-</code></pre></div><p>We can also set our Git configuration to push our annotated tags by default:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>git config --global push.followTags <span class=nb>true</span>
-</code></pre></div><p>If we then want to skip pushing tags this time, we pass <code>--no-follow-tags</code>.</p><h2 id=practice-responsible-commits class=anchor-link><a href=https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#practice-responsible-commits>Practice responsible commits</a></h2><p>A little time invested in getting familiar with these tools and practices can make your commits even more useful and well-crafted. With a little practice, these processes will become second nature. You can make it even easier by creating a personal commit checklist on paper to keep handy while you work - or if that isn&rsquo;t fun enough, <a href=/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/>make it an interactive pre-commit hook.</a></p><p>Creating clean, useful, and responsible Git commits says a lot about you. Especially in remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.</p><p>If you enjoyed this post, there&rsquo;s a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. <a href=https://victoria.dev>Subscribe on victoria.dev</a> to see new articles first, and check out the ones below!</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/>An automatic interactive pre-commit checklist, in the style of infomercials</a><p>How to set up an interactive checklist using a Git pre-commit hook script.</p><p class=metadata><a class="tag button" href=/tags/git/>git</a>
-☕️
-&nbsp;3 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/>Increase developer confidence with a great Django test suite</a><p>How to write tests for your Django applications that boost your team, and are actually useful.</p><p class=metadata><a class="tag button" href=/tags/coding/>coding</a>
-☕️
-&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/>Django project best practices to keep your developers happy</a><p>Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.</p><p class=metadata><a class="tag button" href=/tags/python/>python</a>
-☕️ ☕️
-&nbsp;6 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+</code></pre></div><p>We can tag Git commits with anything, but tags are especially helpful for semantic versioning of releases. Sites like <a href="https://help.github.com/articles/creating-releases/">GitHub</a> and <a href="https://docs.gitlab.com/ee/user/project/releases/">GitLab</a> have pages for repositories that list tags, letting viewers of our project browse the release versions. This can be helpful for public projects to differentiate major releases, updates with bug fixes, or beta versions.</p>
+<p>There are two types of Git tags: lightweight and annotated. For adding a version tag to commits, we use annotated Git tags.</p>
+<p>The <a href="https://git-scm.com/docs/git-tag">Git tag documentation</a> explains it this way:</p>
+<blockquote>
+<p>Tag objects (created with -a, -s, or -u) are called &ldquo;annotated&rdquo; tags; they contain a creation date, the tagger name and e-mail, a tagging message, and an optional GnuPG signature. Whereas a &ldquo;lightweight&rdquo; tag is simply a name for an object (usually a commit object).</p>
+<p>Annotated tags are meant for release while lightweight tags are meant for private or temporary object labels. For this reason, some git commands for naming objects (like git describe) will ignore lightweight tags by default.</p>
+</blockquote>
+<p>We can think of lightweight tags as bookmarks, and annotated tags as signed releases.</p>
+<p>For public repositories, annotated tags allow us to:</p>
+<ul>
+<li>See who tagged the commit, which may differ from the commit author</li>
+<li>See all the tags with <code>git describe</code></li>
+<li>Avoid conflicting tag names</li>
+</ul>
+<p>To create an annotated Git tag and attach it to our current (last) commit, we do:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git tag -a v1.2.0 -m <span class="s2">&#34;Clever release title&#34;</span>
+</code></pre></div><p>This tags the commit on our local repository. To push all annotated tags to the remote, we do:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git push --follow-tags
+</code></pre></div><p>We can also set our Git configuration to push our annotated tags by default:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global push.followTags <span class="nb">true</span>
+</code></pre></div><p>If we then want to skip pushing tags this time, we pass <code>--no-follow-tags</code>.</p>
+<h2 id="practice-responsible-commits" class="anchor-link"><a href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/#practice-responsible-commits">Practice responsible commits</a></h2>
+<p>A little time invested in getting familiar with these tools and practices can make your commits even more useful and well-crafted. With a little practice, these processes will become second nature. You can make it even easier by creating a personal commit checklist on paper to keep handy while you work - or if that isn&rsquo;t fun enough, <a href="/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">make it an interactive pre-commit hook.</a></p>
+<p>Creating clean, useful, and responsible Git commits says a lot about you. Especially in remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.</p>
+<p>If you enjoyed this post, there&rsquo;s a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. <a href="https://victoria.dev">Subscribe on victoria.dev</a> to see new articles first, and check out the ones below!</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">An automatic interactive pre-commit checklist, in the style of infomercials</a>
+    <p>
+        How to set up an interactive checklist using a Git pre-commit hook script.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/git/">git</a>
+        
+         ☕️
+        &nbsp;3 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/">Increase developer confidence with a great Django test suite</a>
+    <p>
+        How to write tests for your Django applications that boost your team, and are actually useful.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/coding/">coding</a>
+        
+         ☕️
+        &nbsp;5 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/">Django project best practices to keep your developers happy</a>
+    <p>
+        Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/python/">python</a>
+        
+         ☕️ ☕️
+        &nbsp;6 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/bookshelf/">
+                    <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>

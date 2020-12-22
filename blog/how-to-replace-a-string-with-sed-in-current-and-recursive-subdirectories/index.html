@@ -1,24 +1,358 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>How to replace a string with sed in current and recursive subdirectories | victoria.dev</title><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="How to replace a string with sed in current and recursive subdirectories - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="The power to update multiple files with a single command in your terminal."><meta property="og:url" content="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/cover_sed.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="How to replace a string with sed in current and recursive subdirectories"><meta name=twitter:image content="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/cover_sed.png"><meta name=twitter:description content="The power to update multiple files with a single command in your terminal."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.792a9dbcf3cd4dec275cda59ec0949fb439618c6d34eec60817e6b72ea184f5b.css integrity="sha256-eSqdvPPNTewnXNpZ7AlJ+0OWGMbTTuxggX5rcuoYT1s=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for How to replace a string with sed in current and recursive subdirectories"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/cover_sed.png alt="cover image"></div><article><h1>How to replace a string with sed in current and recursive subdirectories</h1><p class=subtitle>The power to update multiple files with a single command in your terminal.</p><span><a class="tag button" href=/tags/terminal/>terminal
-</a>&nbsp;</span><p class=metadata id=date><span>May 6, 2017</span>
-<span><em>Updated: Nov 22, 2020</em></span>
-<span>☕️&nbsp;3 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>Rebranding? Moving to <a href=/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/>a new domain</a> or <a href=/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/>static site</a>? I&rsquo;ve had more than a few of these situations myself! Here&rsquo;s how <code>sed</code> can help make these changes easier.</p><h2 id=update-a-string-in-multiple-files-with-sed class=anchor-link><a href=https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#update-a-string-in-multiple-files-with-sed>Update a string in multiple files with <code>sed</code></a></h2><p>Meet your new friend <code>sed</code>. This amazingly powerful tool lives in your terminal and is available to be totally underused for things like finding and replacing strings in files. You&rsquo;ve got two levels of intensity to choose from:</p><ul><li>Non-recursive: Just the files in my current directory.</li><li>Recursive: This directory and all the subdirectories it contains, with <em>maximum prejudice.</em></li></ul><p>Here&rsquo;s how!</p><h2 id=current-directory-non-recursive class=anchor-link><a href=https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#current-directory-non-recursive>Current directory, non-recursive</a></h2><p><em>Non-recursive</em> means sed won&rsquo;t change files in any subdirectories of the current folder.</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>.
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    How to replace a string with sed in current and recursive subdirectories | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
+
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="How to replace a string with sed in current and recursive subdirectories - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="The power to update multiple files with a single command in your terminal." />
+<meta property="og:url" content="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/cover_sed.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How to replace a string with sed in current and recursive subdirectories" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/cover_sed.png"/>
+
+<meta name="twitter:description"
+    content="The power to update multiple files with a single command in your terminal." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.792a9dbcf3cd4dec275cda59ec0949fb439618c6d34eec60817e6b72ea184f5b.css" integrity="sha256-eSqdvPPNTewnXNpZ7AlJ&#43;0OWGMbTTuxggX5rcuoYT1s=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for How to replace a string with sed in current and recursive subdirectories" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/cover_sed.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+        
+
+                How to replace a string with sed in current and recursive subdirectories
+            </h1>
+            
+            <p class="subtitle">The power to update multiple files with a single command in your terminal.</p>
+            
+            <span>
+
+                
+                <a class="tag button" href="/tags/terminal/">
+                    terminal
+                </a>&nbsp;
+                
+                
+            </span>
+            <p class="metadata" id="date">
+                <span>May 6, 2017</span>
+                
+                <span>
+                    <em>Updated: Nov 22, 2020</em>
+                </span>
+                
+                <span>
+                     ☕️&nbsp;3 min read
+                </span>
+            </p>
+
+            
+            </p>
+
+            
+
+            <div class="page-separator">
+                <hr />
+            </div>
+
+            <div class="markdown">
+                <p>Rebranding? Moving to <a href="/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/">a new domain</a> or <a href="/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/">static site</a>? I&rsquo;ve had more than a few of these situations myself! Here&rsquo;s how <code>sed</code> can help make these changes easier.</p>
+<h2 id="update-a-string-in-multiple-files-with-sed" class="anchor-link"><a href="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#update-a-string-in-multiple-files-with-sed">Update a string in multiple files with <code>sed</code></a></h2>
+<p>Meet your new friend <code>sed</code>. This amazingly powerful tool lives in your terminal and is available to be totally underused for things like finding and replacing strings in files. You&rsquo;ve got two levels of intensity to choose from:</p>
+<ul>
+<li>Non-recursive: Just the files in my current directory.</li>
+<li>Recursive: This directory and all the subdirectories it contains, with <em>maximum prejudice.</em></li>
+</ul>
+<p>Here&rsquo;s how!</p>
+<h2 id="current-directory-non-recursive" class="anchor-link"><a href="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#current-directory-non-recursive">Current directory, non-recursive</a></h2>
+<p><em>Non-recursive</em> means sed won&rsquo;t change files in any subdirectories of the current folder.</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">.
 ├── index.html        # Change this file
 └── blog
     ├── list.html     # Don&#39;t change
     └── single.html   # these files
-</code></pre></div><p>Run this command to search all the files in your current directory and replace a given string. For example, to replace all occurrences of &ldquo;foo&rdquo; with &ldquo;bar&rdquo;:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>sed -i -- <span class=s1>&#39;s/foo/bar/g&#39;</span> *
-</code></pre></div><p>Here&rsquo;s what each component of the command does:</p><ul><li><code>-i</code> will change the original, and stands for &ldquo;in-place.&rdquo;</li><li><code>s</code> is for substitute, so we can find and replace.</li><li><code>foo</code> is the string we&rsquo;ll be taking away,</li><li><code>bar</code> is the string we&rsquo;ll use instead today.</li><li><code>g</code> as in &ldquo;global&rdquo; means &ldquo;all occurrences, please.&rdquo;</li><li><code>*</code> denotes all file types. (No more rhymes. What a tease.)</li></ul><p>You can limit the operation to one file type, such as <code>txt</code>, by using:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>sed -i -- <span class=s1>&#39;s/foo/bar/g&#39;</span> *.txt
-</code></pre></div><h2 id=current-directory-and-subdirectories-recursive class=anchor-link><a href=https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#current-directory-and-subdirectories-recursive>Current directory and subdirectories, recursive</a></h2><p>You can supplement <code>sed</code> with <code>find</code> to expand your scope to all of the current folder&rsquo;s subdirectories. This will include any hidden files.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><p>To ignore hidden files (such as <code>.git</code>) you can pass the negation modifier <code>-not -path '*/\.*'</code>, like this:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -not -path <span class=s1>&#39;*/\.*&#39;</span> -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><p>This will exclude any file that has the string <code>/.</code> in its path.</p><p>You can also limit this operation to file names that end in a certain extension, like Markdown:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -name <span class=s2>&#34;*.md&#34;</span> -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><h2 id=working-with-urls-change-the-separator class=anchor-link><a href=https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#working-with-urls-change-the-separator>Working with URLs: change the separator</a></h2><p>If you want to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&mldr;</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=se>\
-</span><span class=se></span><span class=s1>&#39;s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><p>You can avoid confusion and mistakes by changing the separator to any non-conflicting character. The character that follows the <code>s</code> will be treated as the separator. In this case, using a <code>,</code> or <code>_</code> would do. This doesn&rsquo;t require escaping and is much more readable:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=se>\
-</span><span class=se></span><span class=s1>&#39;s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><h2 id=command-line-superpowers-for-all class=anchor-link><a href=https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#command-line-superpowers-for-all>Command-line superpowers for all!</a></h2><p>I hope this was helpful! If you like this post, there&rsquo;s a lot more where that came from. I write about all sorts of ways to save time with tricks for your terminal. There&rsquo;s some below!</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/>Batch renaming images, including image resolution, with awk</a><p>How to batch rename images with custom values using file, awk, and rename - in rainbow colors!</p><p class=metadata><a class="tag button" href=/tags/terminal/>terminal</a>
-☕️
-&nbsp;4 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/>How I created custom desktop notifications using terminal and cron</a><p>How you can use tools your Linux system already has to create custom desktop notifications.</p><p class=metadata><a class="tag button" href=/tags/terminal/>terminal</a>
-☕️ ☕️
-&nbsp;6 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/>Deceptively simple search-and-replace across multiple files</a><p>How to interactively search-and-replace across many files with just two commands, thanks to Vim.</p><p class=metadata><a class="tag button" href=/tags/terminal/>terminal</a>
-☕️
-&nbsp;2 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+</code></pre></div><p>Run this command to search all the files in your current directory and replace a given string. For example, to replace all occurrences of &ldquo;foo&rdquo; with &ldquo;bar&rdquo;:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
+</code></pre></div><p>Here&rsquo;s what each component of the command does:</p>
+<ul>
+<li><code>-i</code> will change the original, and stands for &ldquo;in-place.&rdquo;</li>
+<li><code>s</code> is for substitute, so we can find and replace.</li>
+<li><code>foo</code> is the string we&rsquo;ll be taking away,</li>
+<li><code>bar</code> is the string we&rsquo;ll use instead today.</li>
+<li><code>g</code> as in &ldquo;global&rdquo; means &ldquo;all occurrences, please.&rdquo;</li>
+<li><code>*</code> denotes all file types. (No more rhymes. What a tease.)</li>
+</ul>
+<p>You can limit the operation to one file type, such as <code>txt</code>, by using:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *.txt
+</code></pre></div><h2 id="current-directory-and-subdirectories-recursive" class="anchor-link"><a href="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#current-directory-and-subdirectories-recursive">Current directory and subdirectories, recursive</a></h2>
+<p>You can supplement <code>sed</code> with <code>find</code> to expand your scope to all of the current folder&rsquo;s subdirectories. This will include any hidden files.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+</code></pre></div><p>To ignore hidden files (such as <code>.git</code>) you can pass the negation modifier <code>-not -path '*/\.*'</code>, like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -not -path <span class="s1">&#39;*/\.*&#39;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+</code></pre></div><p>This will exclude any file that has the string <code>/.</code> in its path.</p>
+<p>You can also limit this operation to file names that end in a certain extension, like Markdown:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -name <span class="s2">&#34;*.md&#34;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+</code></pre></div><h2 id="working-with-urls-change-the-separator" class="anchor-link"><a href="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#working-with-urls-change-the-separator">Working with URLs: change the separator</a></h2>
+<p>If you want to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&hellip;</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="se">\
+</span><span class="se"></span><span class="s1">&#39;s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g&#39;</span> <span class="o">{}</span> +
+</code></pre></div><p>You can avoid confusion and mistakes by changing the separator to any non-conflicting character. The character that follows the <code>s</code> will be treated as the separator. In this case, using a <code>,</code> or <code>_</code> would do. This doesn&rsquo;t require escaping and is much more readable:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="se">\
+</span><span class="se"></span><span class="s1">&#39;s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g&#39;</span> <span class="o">{}</span> +
+</code></pre></div><h2 id="command-line-superpowers-for-all" class="anchor-link"><a href="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/#command-line-superpowers-for-all">Command-line superpowers for all!</a></h2>
+<p>I hope this was helpful! If you like this post, there&rsquo;s a lot more where that came from. I write about all sorts of ways to save time with tricks for your terminal. There&rsquo;s some below!</p>
+
+            </div>
+        </article>
+
+        <div id="up-container">
+            <a href="#" id="up">&#709;</a>
+        </div>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+        
+        
+        <div class="related">
+            <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+            <ul role="menubar" id="article-list">
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/">Batch renaming images, including image resolution, with awk</a>
+    <p>
+        How to batch rename images with custom values using file, awk, and rename - in rainbow colors!
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/terminal/">terminal</a>
+        
+         ☕️
+        &nbsp;4 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/">How I created custom desktop notifications using terminal and cron</a>
+    <p>
+        How you can use tools your Linux system already has to create custom desktop notifications.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/terminal/">terminal</a>
+        
+         ☕️ ☕️
+        &nbsp;6 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+                
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/">Deceptively simple search-and-replace across multiple files</a>
+    <p>
+        How to interactively search-and-replace across many files with just two commands, thanks to Vim.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/terminal/">terminal</a>
+        
+         ☕️
+        &nbsp;2 min read
+        
+    </p>
+    
+</li>
+
+
+
+                
+            </ul>
+            
+
+            <div class="page-separator">
+                <p class="back-link"><a href="/blog">
+                        &lt;&lt; Back to blog</a>
+                </p>
+            </div>
+        </div>
+        
+            </div>
+
+            <footer class="container">
+                
+        
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+        
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+            
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/">
+                    <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/blog/">
+                    <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/about/">
+                    <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/coffee/">
+                    <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+            <li role="none" class="menu-item">
+                <a role="menuitem" href="/bookshelf/">
+                    <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+            </li>
+            
+        </ul>
+        </nav>
+    </body>
+
+</html>
