@@ -1,43 +1,400 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>Increase developer confidence with a great Django test suite | victoria.dev</title><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Increase developer confidence with a great Django test suite - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="How to write tests for your Django applications that boost your team, and are actually useful."><meta property="og:url" content="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Increase developer confidence with a great Django test suite"><meta name=twitter:image content="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/cover.png"><meta name=twitter:description content="How to write tests for your Django applications that boost your team, and are actually useful."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.843b58ef62818dd4d1fc9ea546e7b27090724f94463bc30fbd92e7200c32f34e.css integrity="sha256-hDtY72KBjdTR/J6lRueycJByT5RGO8MPvZLnIAwy804=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Increase developer confidence with a great Django test suite"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/cover.png alt="cover image"></div><article><h1>Increase developer confidence with a great Django test suite</h1><p class=subtitle>How to write tests for your Django applications that boost your team, and are actually useful.</p><span><a class="tag button" href=/tags/coding/>coding
-</a>&nbsp;
-<a class="tag button" href=/tags/tech-team/>tech team
-</a>&nbsp;
-<a class="tag button" href=/tags/python/>python
-</a>&nbsp;</span><p class=metadata id=date><span>October 1, 2020</span>
-<span><em>Updated: Dec 29, 2020</em></span>
-<span>☕️&nbsp;5 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>If you regard writing tests as a lame checkbox task, nothing could be farther from the truth. Done correctly, tests are one of your application&rsquo;s most valuable assets.</p><p>The Django framework in particular offers your team the opportunity to create an efficient testing practice, based on the Python standard library <code>unittest</code>. Proper tests in Django are fast to write, faster to run, and can offer you a seamless continuous integration solution for taking the pulse of your developing application.</p><p>With comprehensive tests, developers have higher confidence when pushing changes. I&rsquo;ve seen firsthand in my own teams that good tests can boost development velocity as a direct result of a better developer experience.</p><p>In this article, I&rsquo;ll share my own experiences in building useful tests for Django applications, from the basics to the best possible execution. If you&rsquo;re using Django or building with it in your organization, you might like to read the rest of my <a href=/series/django/>Django series</a>.</p><h2 id=what-to-test class=anchor-link><a href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#what-to-test>What to test</a></h2><p>Tests are extremely important. Far beyond simply letting you know if a function works, tests can form the basis of your team&rsquo;s understanding of how your application is <em>intended</em> to work.</p><p>Here&rsquo;s the main goal: if you hit your head and forgot everything about how your application works tomorrow, you should be able to regain most of your understanding by reading and running the tests you write today.</p><p>Here are some questions that may be helpful to ask as you decide what to test:</p><ul><li>What is our customer supposed to be able to do?</li><li>What is our customer <em>not</em> supposed to be able to do?</li><li>What should this method, view, or logical flow achieve?</li><li>When, how, or where is this feature supposed to execute?</li></ul><p>Tests that make sense for your application can help build developer confidence. With these sensible safeguards in place, developers make improvements more readily, and feel confident introducing innovative solutions to product needs. The result is an application that comes together faster, and features that are shipped often and with confidence.</p><p><img src=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/pbj-tests.png alt="A cartoon for peanut butter and jelly sandwich tests"></p><h2 id=where-to-put-tests class=anchor-link><a href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#where-to-put-tests>Where to put tests</a></h2><p>If you only have a few tests, you may organize your test files similarly to <a href=https://docs.djangoproject.com/en/3.1/ref/django-admin/#startapp>Django&rsquo;s default app template</a> by putting them all in a file called <code>tests.py</code>. This straightforward approach is best for smaller applications.</p><p>As your application grows, you may like to split your tests into different files, or test modules. One method is to use a directory to organize your files, such as <code>projectroot/app/tests/</code>. The name of each test file within that directory should begin with <code>test</code>, for example, <code>test_models.py</code>.</p><p>Besides being aptly named, Django will find these files using <a href=https://docs.python.org/3/library/unittest.html#unittest-test-discovery>built-in test discovery</a> based on the <code>unittest</code> module. All files in your application with names that begin with <code>test</code> will be collected into a test suite.</p><p>This convenient test discovery allows you to place test files anywhere that makes sense for your application. As long as they&rsquo;re correctly named, Django&rsquo;s test utility can find and run them.</p><h2 id=how-to-document-a-test class=anchor-link><a href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#how-to-document-a-test>How to document a test</a></h2><p>Use <a href=https://www.python.org/dev/peps/pep-0257/>docstrings</a> to explain what a test is intended to verify at a high level. For example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>test_create_user</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
-    <span class=s2>&#34;&#34;&#34;Creating a new user object should also create an associated profile object&#34;&#34;&#34;</span>
-    <span class=c1># ...</span>
-</code></pre></div><p>These docstrings help you quickly understand what a test is supposed to be doing. Besides navigating the codebase, this helps to make it obvious when a test doesn&rsquo;t verify what the docstring says it should.</p><p>Docstrings are also shown when the tests are being run, which can be helpful for logging and debugging.</p><h2 id=what-a-test-needs-to-work class=anchor-link><a href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#what-a-test-needs-to-work>What a test needs to work</a></h2><p>Django tests can be quickly set up using data created in the <a href=https://docs.djangoproject.com/en/3.1/topics/testing/tools/#django.test.TestCase.setUpTestData><code>setUpTestData()</code> method</a>. You can use various approaches to create your test data, such as utilizing external files, or even hard-coding silly phrases or the names of your staff. Personally, I much prefer to use a fake-data-generation library, such as <a href=https://github.com/joke2k/faker/><code>faker</code></a>.</p><p>The proper set up of arbitrary testing data can help you ensure that you&rsquo;re testing your application functionality instead of accidentally testing test data. Because generators like <code>faker</code> add some degree of unexpectedness to your inputs, it can be more representative of real-world use.</p><p>Here is an example set up for a test:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>django.test</span> <span class=kn>import</span> <span class=n>TestCase</span>
-<span class=kn>from</span> <span class=nn>faker</span> <span class=kn>import</span> <span class=n>Faker</span>
+<!DOCTYPE html>
+<html lang="en-us">
 
-<span class=kn>from</span> <span class=nn>app.models</span> <span class=kn>import</span> <span class=n>MyModel</span><span class=p>,</span> <span class=n>AnotherModel</span>
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<span class=n>fake</span> <span class=o>=</span> <span class=n>Faker</span><span class=p>()</span>
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    Increase developer confidence with a great Django test suite | victoria.dev
+</title>
 
 
-<span class=k>class</span> <span class=nc>MyModelTest</span><span class=p>(</span><span class=n>TestCase</span><span class=p>):</span>
-    <span class=k>def</span> <span class=nf>setUpTestData</span><span class=p>(</span><span class=bp>cls</span><span class=p>):</span>
-        <span class=s2>&#34;&#34;&#34;Quickly set up data for the whole TestCase&#34;&#34;&#34;</span>
-        <span class=bp>cls</span><span class=o>.</span><span class=n>user_first</span> <span class=o>=</span> <span class=n>fake</span><span class=o>.</span><span class=n>first_name</span><span class=p>()</span>
-        <span class=bp>cls</span><span class=o>.</span><span class=n>user_last</span> <span class=o>=</span> <span class=n>fake</span><span class=o>.</span><span class=n>last_name</span><span class=p>()</span>
 
-    <span class=k>def</span> <span class=nf>test_create_models</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
-        <span class=s2>&#34;&#34;&#34;Creating a MyModel object should also create AnotherModel object&#34;&#34;&#34;</span>
-        <span class=c1># In test methods, use the variables created above</span>
-        <span class=n>test_object</span> <span class=o>=</span> <span class=n>MyModel</span><span class=o>.</span><span class=n>objects</span><span class=o>.</span><span class=n>create</span><span class=p>(</span>
-            <span class=n>first_name</span><span class=o>=</span><span class=bp>self</span><span class=o>.</span><span class=n>user_first</span><span class=p>,</span>
-            <span class=n>last_name</span><span class=o>=</span><span class=bp>self</span><span class=o>.</span><span class=n>user_last</span><span class=p>,</span>
-            <span class=c1># ...</span>
-        <span class=p>)</span>
-        <span class=n>another_model</span> <span class=o>=</span> <span class=n>AnotherModel</span><span class=o>.</span><span class=n>objects</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>my_model</span><span class=o>=</span><span class=n>test_object</span><span class=p>)</span>
-        <span class=bp>self</span><span class=o>.</span><span class=n>assertEqual</span><span class=p>(</span><span class=n>another_model</span><span class=o>.</span><span class=n>first_name</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>user_first</span><span class=p>)</span>
-        <span class=c1># ...</span>
-</code></pre></div><p>Tests pass or fail based on the outcome of the assertion methods. You can use <a href=https://docs.python.org/3/library/unittest.html#assert-methods>Python&rsquo;s <code>unittest</code> methods</a>, and <a href=https://docs.djangoproject.com/en/3.1/topics/testing/tools/#assertions>Django&rsquo;s assertion methods</a>.</p><p>For further guidance on writing tests, see <a href=https://docs.djangoproject.com/en/3.1/topics/testing/>Testing in Django</a>.</p><h2 id=best-possible-execution-for-running-your-tests class=anchor-link><a href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#best-possible-execution-for-running-your-tests>Best possible execution for running your tests</a></h2><p>Django&rsquo;s test suite is manually run with:</p><div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>./manage.py <span class=nb>test</span>
-</code></pre></div><p>I rarely run my Django tests this way.</p><p>The best, or most efficient, testing practice is one that occurs without you or your developers ever thinking, &ldquo;I need to run the tests first.&rdquo; The beauty of Django&rsquo;s near-effortless test suite set up is that it can be seamlessly run as a part of regular developer activities. This could be in a pre-commit hook, or in a continuous integration or deployment workflow.</p><p>I&rsquo;ve previously written about how to use pre-commit hooks to <a href=/blog/technical-ergonomics-for-the-efficient-developer/>improve your developer ergonomics</a> and save your team some brainpower. Django&rsquo;s speedy tests can be run this way, and they become especially efficient if you can <a href=https://docs.djangoproject.com/en/3.1/ref/django-admin/#cmdoption-test-parallel>run tests in parallel</a>.</p><p>Tests that run as part of a CI/CD workflow, for example, <a href=/blog/django-project-best-practices-to-keep-your-developers-happy/#continuous-testing-with-github-actions>on pull requests with GitHub Actions</a>, require no regular effort from your developers to remember to run tests at all. I&rsquo;m not sure how plainly I can put it &ndash; this one&rsquo;s literally a no-brainer.</p><h2 id=testing-your-way-to-a-great-django-application class=anchor-link><a href=https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#testing-your-way-to-a-great-django-application>Testing your way to a great Django application</a></h2><p>Tests are extremely important, and underappreciated. They can catch logical errors in your application. They can help explain and validate how concepts and features of your product actually function. Best of all, tests can boost developer confidence and development velocity as a result.</p><p>The best tests are ones that are relevant, help to explain and define your application, and are run continuously without a second thought. I hope I&rsquo;ve now shown you how testing in Django can help you to achieve these goals for your team!</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/>Django project best practices to keep your developers happy</a><p>Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.</p><p class=metadata><a class="tag button" href=/tags/python/>python</a>
-☕️ ☕️
-&nbsp;6 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/manipulating-data-with-django-migrations/>Manipulating data with Django migrations</a><p>How to update Django models and manipulate existing data using migrations.</p><p class=metadata><a class="tag button" href=/tags/coding/>coding</a>
-☕️
-&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/how-github-codespaces-increases-productivity-and-lowers-barriers/>How GitHub Codespaces increases productivity and lowers barriers</a><p>A look at how GitHub Codespaces can increase productivity and help new teammates and contributors start developing fast.</p><p class=metadata><a class="tag button" href=/tags/open-source/>open-source</a>
-☕️
-&nbsp;3 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
+
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="Increase developer confidence with a great Django test suite - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="How to write tests for your Django applications that boost your team, and are actually useful." />
+<meta property="og:url" content="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+<meta property="og:image" content="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/cover.png"/>
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Increase developer confidence with a great Django test suite" />
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/cover.png"/>
+
+<meta name="twitter:description"
+    content="How to write tests for your Django applications that boost your team, and are actually useful." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.843b58ef62818dd4d1fc9ea546e7b27090724f94463bc30fbd92e7200c32f34e.css" integrity="sha256-hDtY72KBjdTR/J6lRueycJByT5RGO8MPvZLnIAwy804=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for Increase developer confidence with a great Django test suite" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+<div id="cover-image">
+    <img src="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/cover.png" alt="cover image" />
+</div>
+<article>
+    <h1>
+
+
+        Increase developer confidence with a great Django test suite
+    </h1>
+    
+    <p class="subtitle">How to write tests for your Django applications that boost your team, and are actually useful.</p>
+    
+    <span>
+
+        
+        <a class="tag button" href="/tags/coding/">
+            coding
+        </a>&nbsp;
+        
+        <a class="tag button" href="/tags/tech-team/">
+            tech team
+        </a>&nbsp;
+        
+        <a class="tag button" href="/tags/python/">
+            python
+        </a>&nbsp;
+        
+        
+    </span>
+    <p class="metadata" id="date">
+        <span>October 1, 2020</span>
+        
+        <span>
+            <em>Updated: Dec 29, 2020</em>
+        </span>
+        
+        <span>
+             ☕️&nbsp;5 min read
+        </span>
+    </p>
+
+    
+    </p>
+
+    
+
+    <div class="page-separator">
+        <hr />
+    </div>
+
+    <div class="markdown">
+        <p>If you regard writing tests as a lame checkbox task, nothing could be farther from the truth. Done correctly, tests are one of your application&rsquo;s most valuable assets.</p>
+<p>The Django framework in particular offers your team the opportunity to create an efficient testing practice, based on the Python standard library <code>unittest</code>. Proper tests in Django are fast to write, faster to run, and can offer you a seamless continuous integration solution for taking the pulse of your developing application.</p>
+<p>With comprehensive tests, developers have higher confidence when pushing changes. I&rsquo;ve seen firsthand in my own teams that good tests can boost development velocity as a direct result of a better developer experience.</p>
+<p>In this article, I&rsquo;ll share my own experiences in building useful tests for Django applications, from the basics to the best possible execution. If you&rsquo;re using Django or building with it in your organization, you might like to read the rest of my <a href="/series/django/">Django series</a>.</p>
+<h2 id="what-to-test" class="anchor-link"><a href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#what-to-test">What to test</a></h2>
+<p>Tests are extremely important. Far beyond simply letting you know if a function works, tests can form the basis of your team&rsquo;s understanding of how your application is <em>intended</em> to work.</p>
+<p>Here&rsquo;s the main goal: if you hit your head and forgot everything about how your application works tomorrow, you should be able to regain most of your understanding by reading and running the tests you write today.</p>
+<p>Here are some questions that may be helpful to ask as you decide what to test:</p>
+<ul>
+<li>What is our customer supposed to be able to do?</li>
+<li>What is our customer <em>not</em> supposed to be able to do?</li>
+<li>What should this method, view, or logical flow achieve?</li>
+<li>When, how, or where is this feature supposed to execute?</li>
+</ul>
+<p>Tests that make sense for your application can help build developer confidence. With these sensible safeguards in place, developers make improvements more readily, and feel confident introducing innovative solutions to product needs. The result is an application that comes together faster, and features that are shipped often and with confidence.</p>
+<p>
+
+<img src="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/pbj-tests.png" alt="A cartoon for peanut butter and jelly sandwich tests"  />
+
+</p>
+<h2 id="where-to-put-tests" class="anchor-link"><a href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#where-to-put-tests">Where to put tests</a></h2>
+<p>If you only have a few tests, you may organize your test files similarly to <a href="https://docs.djangoproject.com/en/3.1/ref/django-admin/#startapp">Django&rsquo;s default app template</a> by putting them all in a file called <code>tests.py</code>. This straightforward approach is best for smaller applications.</p>
+<p>As your application grows, you may like to split your tests into different files, or test modules. One method is to use a directory to organize your files, such as <code>projectroot/app/tests/</code>. The name of each test file within that directory should begin with <code>test</code>, for example, <code>test_models.py</code>.</p>
+<p>Besides being aptly named, Django will find these files using <a href="https://docs.python.org/3/library/unittest.html#unittest-test-discovery">built-in test discovery</a> based on the <code>unittest</code> module. All files in your application with names that begin with <code>test</code> will be collected into a test suite.</p>
+<p>This convenient test discovery allows you to place test files anywhere that makes sense for your application. As long as they&rsquo;re correctly named, Django&rsquo;s test utility can find and run them.</p>
+<h2 id="how-to-document-a-test" class="anchor-link"><a href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#how-to-document-a-test">How to document a test</a></h2>
+<p>Use <a href="https://www.python.org/dev/peps/pep-0257/">docstrings</a> to explain what a test is intended to verify at a high level. For example:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">test_create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="s2">&#34;&#34;&#34;Creating a new user object should also create an associated profile object&#34;&#34;&#34;</span>
+    <span class="c1"># ...</span>
+</code></pre></div><p>These docstrings help you quickly understand what a test is supposed to be doing. Besides navigating the codebase, this helps to make it obvious when a test doesn&rsquo;t verify what the docstring says it should.</p>
+<p>Docstrings are also shown when the tests are being run, which can be helpful for logging and debugging.</p>
+<h2 id="what-a-test-needs-to-work" class="anchor-link"><a href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#what-a-test-needs-to-work">What a test needs to work</a></h2>
+<p>Django tests can be quickly set up using data created in the <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#django.test.TestCase.setUpTestData"><code>setUpTestData()</code> method</a>. You can use various approaches to create your test data, such as utilizing external files, or even hard-coding silly phrases or the names of your staff. Personally, I much prefer to use a fake-data-generation library, such as <a href="https://github.com/joke2k/faker/"><code>faker</code></a>.</p>
+<p>The proper set up of arbitrary testing data can help you ensure that you&rsquo;re testing your application functionality instead of accidentally testing test data. Because generators like <code>faker</code> add some degree of unexpectedness to your inputs, it can be more representative of real-world use.</p>
+<p>Here is an example set up for a test:</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">faker</span> <span class="kn">import</span> <span class="n">Faker</span>
+
+<span class="kn">from</span> <span class="nn">app.models</span> <span class="kn">import</span> <span class="n">MyModel</span><span class="p">,</span> <span class="n">AnotherModel</span>
+
+<span class="n">fake</span> <span class="o">=</span> <span class="n">Faker</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">MyModelTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUpTestData</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;Quickly set up data for the whole TestCase&#34;&#34;&#34;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">user_first</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">first_name</span><span class="p">()</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">user_last</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">last_name</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">test_create_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&#34;&#34;&#34;Creating a MyModel object should also create AnotherModel object&#34;&#34;&#34;</span>
+        <span class="c1"># In test methods, use the variables created above</span>
+        <span class="n">test_object</span> <span class="o">=</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">first_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">,</span>
+            <span class="n">last_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_last</span><span class="p">,</span>
+            <span class="c1"># ...</span>
+        <span class="p">)</span>
+        <span class="n">another_model</span> <span class="o">=</span> <span class="n">AnotherModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">my_model</span><span class="o">=</span><span class="n">test_object</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">another_model</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">)</span>
+        <span class="c1"># ...</span>
+</code></pre></div><p>Tests pass or fail based on the outcome of the assertion methods. You can use <a href="https://docs.python.org/3/library/unittest.html#assert-methods">Python&rsquo;s <code>unittest</code> methods</a>, and <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#assertions">Django&rsquo;s assertion methods</a>.</p>
+<p>For further guidance on writing tests, see <a href="https://docs.djangoproject.com/en/3.1/topics/testing/">Testing in Django</a>.</p>
+<h2 id="best-possible-execution-for-running-your-tests" class="anchor-link"><a href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#best-possible-execution-for-running-your-tests">Best possible execution for running your tests</a></h2>
+<p>Django&rsquo;s test suite is manually run with:</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">./manage.py <span class="nb">test</span>
+</code></pre></div><p>I rarely run my Django tests this way.</p>
+<p>The best, or most efficient, testing practice is one that occurs without you or your developers ever thinking, &ldquo;I need to run the tests first.&rdquo; The beauty of Django&rsquo;s near-effortless test suite set up is that it can be seamlessly run as a part of regular developer activities. This could be in a pre-commit hook, or in a continuous integration or deployment workflow.</p>
+<p>I&rsquo;ve previously written about how to use pre-commit hooks to <a href="/blog/technical-ergonomics-for-the-efficient-developer/">improve your developer ergonomics</a> and save your team some brainpower. Django&rsquo;s speedy tests can be run this way, and they become especially efficient if you can <a href="https://docs.djangoproject.com/en/3.1/ref/django-admin/#cmdoption-test-parallel">run tests in parallel</a>.</p>
+<p>Tests that run as part of a CI/CD workflow, for example, <a href="/blog/django-project-best-practices-to-keep-your-developers-happy/#continuous-testing-with-github-actions">on pull requests with GitHub Actions</a>, require no regular effort from your developers to remember to run tests at all. I&rsquo;m not sure how plainly I can put it &ndash; this one&rsquo;s literally a no-brainer.</p>
+<h2 id="testing-your-way-to-a-great-django-application" class="anchor-link"><a href="https://victoria.dev/blog/increase-developer-confidence-with-a-great-django-test-suite/#testing-your-way-to-a-great-django-application">Testing your way to a great Django application</a></h2>
+<p>Tests are extremely important, and underappreciated. They can catch logical errors in your application. They can help explain and validate how concepts and features of your product actually function. Best of all, tests can boost developer confidence and development velocity as a result.</p>
+<p>The best tests are ones that are relevant, help to explain and define your application, and are run continuously without a second thought. I hope I&rsquo;ve now shown you how testing in Django can help you to achieve these goals for your team!</p>
+
+    </div>
+</article>
+
+<div id="up-container">
+    <a href="#" id="up">&#709;</a>
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+
+<div class="related">
+    <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+    <ul role="menubar" id="article-list">
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/">Django project best practices to keep your developers happy</a>
+    <p>
+        Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/python/">python</a>
+        
+         ☕️ ☕️
+        &nbsp;6 min read
+        
+    </p>
+    
+</li>
+
+
+
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/manipulating-data-with-django-migrations/">Manipulating data with Django migrations</a>
+    <p>
+        How to update Django models and manipulate existing data using migrations.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/coding/">coding</a>
+        
+         ☕️
+        &nbsp;5 min read
+        
+    </p>
+    
+</li>
+
+
+
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/how-github-codespaces-increases-productivity-and-lowers-barriers/">How GitHub Codespaces increases productivity and lowers barriers</a>
+    <p>
+        A look at how GitHub Codespaces can increase productivity and help new teammates and contributors start developing fast.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/open-source/">open-source</a>
+        
+         ☕️
+        &nbsp;3 min read
+        
+    </p>
+    
+</li>
+
+
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a>
+        </p>
+    </div>
+</div>
+
+            </div>
+
+            <footer class="container">
+                
+
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award two years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+
+
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+                
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/">
+                        <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/blog/">
+                        <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/about/">
+                        <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/coffee/">
+                        <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/bookshelf/">
+                        <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+            </ul>
+        </nav>
+    </body>
+
+</html>
