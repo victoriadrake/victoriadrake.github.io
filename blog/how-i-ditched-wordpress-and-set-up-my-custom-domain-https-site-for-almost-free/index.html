@@ -1,18 +1,378 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>How I ditched WordPress and set up my custom domain HTTPS site for (almost) free | victoria.dev</title><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="How I ditched WordPress and set up my custom domain HTTPS site for (almost) free - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A guide (for the minimally tech-savvy) to setting up a website with HTTPS using Hugo, Cloudflare and GitHub Pages."><meta property="og:url" content="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/custom-domain-https.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="How I ditched WordPress and set up my custom domain HTTPS site for (almost) free"><meta name=twitter:image content="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/custom-domain-https.png"><meta name=twitter:description content="A guide (for the minimally tech-savvy) to setting up a website with HTTPS using Hugo, Cloudflare and GitHub Pages."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.3a452fb60463ad896be3851a004116c71412a50787e5c39f48d220e65f9ca5de.css integrity="sha256-OkUvtgRjrYlr44UaAEEWxxQSpQeH5cOfSNIg5l+cpd4=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for How I ditched WordPress and set up my custom domain HTTPS site for (almost) free"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><article><h1 class=title-header>How I ditched WordPress and set up my custom domain HTTPS site for (almost) free</h1><p class=subtitle>A guide (for the minimally tech-savvy) to setting up a website with HTTPS using Hugo, Cloudflare and GitHub Pages.</p><span><a class="tag button" href=/tags/websites/>websites
-</a>&nbsp;</span><p class=metadata id=date><span>January 28, 2017</span>
-<span><em>Updated: Jan 15, 2021</em></span>
-<span>☕️&nbsp;5 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>I got annoyed with WordPress.com. While using the service has its pros (like https and a mobile responsive website, and being very visual and beginner-friendly) it&rsquo;s limiting. For someone who&rsquo;s comfortable enough to be tweaking CSS but who&rsquo;s not interested in creating their own theme (or paying upwards of $50 for one), I felt I wasn&rsquo;t really the type of consumer WordPress.com was suited to.</p><p>To start with, if you want to remove WordPress advertising and use a custom domain name, it&rsquo;s a minimum of $3 per month. If, like me, the free themes provided aren&rsquo;t just what you&rsquo;re looking for, you&rsquo;re stuck with two choices: buy a theme for $50+, or pay $8.25 per month to do <em>some</em> css customization. I don&rsquo;t know about you, but I feel like there should be a hack for this.</p><h2 id=how-i-ditched-wordpress-and-got-everything-i-wanted-for-free class=anchor-link><a href=https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#how-i-ditched-wordpress-and-got-everything-i-wanted-for-free>How I ditched WordPress and got everything I wanted for free</a></h2><p>Okay, <em>almost</em> free. You still have to pay <a href=https://www.tkqlhce.com/click-100268310-14326263>at least $0.99</a> for a domain name.</p><p>For those of you technical enough to skip reading a long post, the recipe is this:</p><ol><li>Buy a <a href=https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX target=_top>custom domain via this Namecheap affiliate link</a>
-(Thanks for your support! 😊)</li><li>Install <a href=https://www.gohugo.io/>Hugo</a>, my favorite static site generator</li><li>Host with <a href=https://pages.github.com/>GitHub Pages</a></li><li>Put your <a href=https://help.github.com/articles/setting-up-an-apex-domain/#configuring-an-alias-or-aname-record-with-your-dns-provider>custom domain to work with GitHub Pages</a></li><li><del>Use Cloudflare&rsquo;s free plan</del> <a href=#5-enforce-https-for-github-pages>Enforce HTTPS for GitHub Pages</a></li></ol><p>Let&rsquo;s do the nitty gritty:</p><h3 id=1-buy-a-custom-domain class=anchor-link><a href=https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#1-buy-a-custom-domain>1. Buy a custom domain</a></h3><p>This one&rsquo;s pretty simple. Head on over to <a href=https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX target=_top>Namecheap</a>
-, <a href=https://www.gandi.net>Gandi</a>, or if you&rsquo;re rolling in dough, <a href=https://www.godaddy.com/>GoDaddy</a>. Find your perfect web address and buy it up.</p><p>If it&rsquo;s a personal domain like <em>yourname.com,</em> it&rsquo;s a pretty good idea to pay upfront for five years or even ten years, if you&rsquo;ve got the cash. It&rsquo;ll save you the trouble of remembering to renew, allow you to build your personal brand, and prevent someone else from buying up your URL.</p><p>If you&rsquo;re just trying out an idea, you can go with a one-year <a href=https://www.tkqlhce.com/click-100268310-14326263>$0.99 experiment</a>. Namecheap also gives you WhoisGuard (domain registration privacy) free for one year.</p><h3 id=2-install-hugo class=anchor-link><a href=https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#2-install-hugo>2. Install Hugo</a></h3><p>I&rsquo;m a big fan of <a href=https://www.gohugo.io/>Hugo</a> so far. Admittedly, those who feel more comfortable with a visual, WYSIWYG editor may feel like a fish out of water at first. As long as you&rsquo;re not afraid of using command line, though, using Hugo is pretty straightforward. The fact that I have access to all my code is my favorite part. It&rsquo;s only as simple or complicated as I want it to be.</p><p>Hugo is open source and free. They&rsquo;ve got great documentation, and following their <a href=https://gohugo.io/overview/quickstart/>Quickstart guide</a> line-by-line will get you set up with your new site in minutes.</p><p>If you&rsquo;re not used to the idea of your site existing as files and folders, the basic premise is this: Hugo, along with the themes available, helps you to create all the pages and files that your site needs to run.</p><p>Blog posts can be written in Markdown and saved in your <code>/content/blog/</code> folder; preferences for your site and theme can be set in the <code>config.toml</code> file. After that, generating all your site&rsquo;s pages is as quick and easy as typing the command <code>hugo --theme=&lt;your theme></code>. You&rsquo;ll be able to see a live version of your site in your browser as you&rsquo;re editing it (go to <code>http://localhost:1313/</code> in your browser, as described in Step 5) so you&rsquo;re not flying blind.</p><h3 id=3-host-with-github-pages class=anchor-link><a href=https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#3-host-with-github-pages>3. Host with GitHub Pages</a></h3><p>If you read to Step 12 of Hugo&rsquo;s Quickstart Guide, you&rsquo;ll see that they even provided instructions for hosting your files on GitHub pages. If you&rsquo;re new to Git, you&rsquo;ll first need to <a href=https://github.com/>sign up at GitHub</a> and then <a href=https://help.github.com/articles/set-up-git/>set up Git</a>. GitHub is a very friendly resource, and you can find a multitude of code examples and guides in connection with it. The <a href=https://guides.github.com/activities/hello-world/>Hello World Guide</a> will take you through all you need to know to use GitHub.com.</p><p>Once you&rsquo;re comfortable with the way GitHub works generally, setting up a site by following <a href=https://pages.github.com/>the guide on GitHub Pages</a> is no big deal. If you followed the Hugo Quickstart Guide up to Step 11, you&rsquo;ll want to jump to Step 12 after creating the repository on GitHub.</p><p>In case it&rsquo;s not clear, once you set up your new repository on GitHub called <em>yourusername</em>.github.io, grab the HTTPS link at the top. From there it&rsquo;s just a few simple commands to create the git repository for your site and push it to your new web address:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=c1>## from yoursite/public folder:</span>
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
+<title>
+    How I ditched WordPress and set up my custom domain HTTPS site for (almost) free | victoria.dev
+</title>
+
+
+
+        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
+
+        <meta
+  name="monetization"
+  content="$ilp.uphold.com/pBRfRwg2EJAe">
+
+        <meta property="og:title" content="How I ditched WordPress and set up my custom domain HTTPS site for (almost) free - victoria.dev" />
+<meta property="og:type" content="website" />
+<meta property="og:description"
+    content="A guide (for the minimally tech-savvy) to setting up a website with HTTPS using Hugo, Cloudflare and GitHub Pages." />
+<meta property="og:url" content="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/" />
+<meta property="og:site_name" content="victoria.dev" />
+
+
+
+
+<meta property="og:image" content="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/custom-domain-https.png"/>
+
+
+
+        <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How I ditched WordPress and set up my custom domain HTTPS site for (almost) free" />
+
+
+
+
+<meta name="twitter:image" content="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/custom-domain-https.png"/>
+
+
+<meta name="twitter:description"
+    content="A guide (for the minimally tech-savvy) to setting up a website with HTTPS using Hugo, Cloudflare and GitHub Pages." />
+
+        
+<link rel="shortcut icon" href="/img/favicon.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.3a452fb60463ad896be3851a004116c71412a50787e5c39f48d220e65f9ca5de.css" integrity="sha256-OkUvtgRjrYlr44UaAEEWxxQSpQeH5cOfSNIg5l&#43;cpd4=" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+
+    <body>
+        <header role="banner">
+            
+            <nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/">
+                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/blog/">
+                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/about/">
+                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/coffee/">
+                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
+        </li>
+        
+        <li role="none" class="menu-item ">
+            <a role="menuitem" href="/bookshelf/">
+                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
+        </li>
+        
+        <li role="none" class="menu-item">
+            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
+                title="RSS for How I ditched WordPress and set up my custom domain HTTPS site for (almost) free" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
+        </li>
+    </ul>
+</nav>
+
+            
+        </header>
+        <main aria-role="main">
+            <div class="container">
+                
+
+
+
+
+
+<article>
+    <h1 class="title-header">
+
+        
+
+        How I ditched WordPress and set up my custom domain HTTPS site for (almost) free
+    </h1>
+    
+    <p class="subtitle">A guide (for the minimally tech-savvy) to setting up a website with HTTPS using Hugo, Cloudflare and GitHub Pages.</p>
+    
+    <span>
+
+        
+        <a class="tag button" href="/tags/websites/">
+            websites
+        </a>&nbsp;
+        
+        
+    </span>
+    <p class="metadata" id="date">
+        <span>January 28, 2017</span>
+        
+        <span>
+            <em>Updated: Jan 15, 2021</em>
+        </span>
+        
+        <span>
+             ☕️&nbsp;5 min read
+        </span>
+    </p>
+
+    
+    </p>
+
+    
+
+    <div class="page-separator">
+        <hr />
+    </div>
+
+    <div class="markdown">
+        <p>I got annoyed with WordPress.com. While using the service has its pros (like https and a mobile responsive website, and being very visual and beginner-friendly) it&rsquo;s limiting. For someone who&rsquo;s comfortable enough to be tweaking CSS but who&rsquo;s not interested in creating their own theme (or paying upwards of $50 for one), I felt I wasn&rsquo;t really the type of consumer WordPress.com was suited to.</p>
+<p>To start with, if you want to remove WordPress advertising and use a custom domain name, it&rsquo;s a minimum of $3 per month. If, like me, the free themes provided aren&rsquo;t just what you&rsquo;re looking for, you&rsquo;re stuck with two choices: buy a theme for $50+, or pay $8.25 per month to do <em>some</em> css customization. I don&rsquo;t know about you, but I feel like there should be a hack for this.</p>
+<h2 id="how-i-ditched-wordpress-and-got-everything-i-wanted-for-free" class="anchor-link"><a href="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#how-i-ditched-wordpress-and-got-everything-i-wanted-for-free">How I ditched WordPress and got everything I wanted for free</a></h2>
+<p>Okay, <em>almost</em> free. You still have to pay <a href="https://www.tkqlhce.com/click-100268310-14326263">at least $0.99</a> for a domain name.</p>
+<p>For those of you technical enough to skip reading a long post, the recipe is this:</p>
+<ol>
+<li>Buy a <a href="https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX" target="_top">custom domain via this Namecheap affiliate link</a>
+ (Thanks for your support! 😊)</li>
+<li>Install <a href="https://www.gohugo.io/">Hugo</a>, my favorite static site generator</li>
+<li>Host with <a href="https://pages.github.com/">GitHub Pages</a></li>
+<li>Put your <a href="https://help.github.com/articles/setting-up-an-apex-domain/#configuring-an-alias-or-aname-record-with-your-dns-provider">custom domain to work with GitHub Pages</a></li>
+<li><del>Use Cloudflare&rsquo;s free plan</del> <a href="#5-enforce-https-for-github-pages">Enforce HTTPS for GitHub Pages</a></li>
+</ol>
+<p>Let&rsquo;s do the nitty gritty:</p>
+<h3 id="1-buy-a-custom-domain" class="anchor-link"><a href="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#1-buy-a-custom-domain">1. Buy a custom domain</a></h3>
+<p>This one&rsquo;s pretty simple. Head on over to <a href="https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX" target="_top">Namecheap</a>
+, <a href="https://www.gandi.net">Gandi</a>, or if you&rsquo;re rolling in dough, <a href="https://www.godaddy.com/">GoDaddy</a>. Find your perfect web address and buy it up.</p>
+<p>If it&rsquo;s a personal domain like <em>yourname.com,</em> it&rsquo;s a pretty good idea to pay upfront for five years or even ten years, if you&rsquo;ve got the cash. It&rsquo;ll save you the trouble of remembering to renew, allow you to build your personal brand, and prevent someone else from buying up your URL.</p>
+<p>If you&rsquo;re just trying out an idea, you can go with a one-year <a href="https://www.tkqlhce.com/click-100268310-14326263">$0.99 experiment</a>. Namecheap also gives you WhoisGuard (domain registration privacy) free for one year.</p>
+<h3 id="2-install-hugo" class="anchor-link"><a href="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#2-install-hugo">2. Install Hugo</a></h3>
+<p>I&rsquo;m a big fan of <a href="https://www.gohugo.io/">Hugo</a> so far. Admittedly, those who feel more comfortable with a visual, WYSIWYG editor may feel like a fish out of water at first. As long as you&rsquo;re not afraid of using command line, though, using Hugo is pretty straightforward. The fact that I have access to all my code is my favorite part. It&rsquo;s only as simple or complicated as I want it to be.</p>
+<p>Hugo is open source and free. They&rsquo;ve got great documentation, and following their <a href="https://gohugo.io/overview/quickstart/">Quickstart guide</a> line-by-line will get you set up with your new site in minutes.</p>
+<p>If you&rsquo;re not used to the idea of your site existing as files and folders, the basic premise is this: Hugo, along with the themes available, helps you to create all the pages and files that your site needs to run.</p>
+<p>Blog posts can be written in Markdown and saved in your <code>/content/blog/</code> folder; preferences for your site and theme can be set in the <code>config.toml</code> file. After that, generating all your site&rsquo;s pages is as quick and easy as typing the command <code>hugo --theme=&lt;your theme&gt;</code>. You&rsquo;ll be able to see a live version of your site in your browser as you&rsquo;re editing it (go to <code>http://localhost:1313/</code> in your browser, as described in Step 5) so you&rsquo;re not flying blind.</p>
+<h3 id="3-host-with-github-pages" class="anchor-link"><a href="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#3-host-with-github-pages">3. Host with GitHub Pages</a></h3>
+<p>If you read to Step 12 of Hugo&rsquo;s Quickstart Guide, you&rsquo;ll see that they even provided instructions for hosting your files on GitHub pages. If you&rsquo;re new to Git, you&rsquo;ll first need to <a href="https://github.com/">sign up at GitHub</a> and then <a href="https://help.github.com/articles/set-up-git/">set up Git</a>. GitHub is a very friendly resource, and you can find a multitude of code examples and guides in connection with it. The <a href="https://guides.github.com/activities/hello-world/">Hello World Guide</a> will take you through all you need to know to use GitHub.com.</p>
+<p>Once you&rsquo;re comfortable with the way GitHub works generally, setting up a site by following <a href="https://pages.github.com/">the guide on GitHub Pages</a> is no big deal. If you followed the Hugo Quickstart Guide up to Step 11, you&rsquo;ll want to jump to Step 12 after creating the repository on GitHub.</p>
+<p>In case it&rsquo;s not clear, once you set up your new repository on GitHub called <em>yourusername</em>.github.io, grab the HTTPS link at the top. From there it&rsquo;s just a few simple commands to create the git repository for your site and push it to your new web address:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1">## from yoursite/public folder:</span>
 $ git init
 $ git remote add origin &lt;paste that https url here!&gt;
 $ git add --all
-$ git commit -m <span class=s2>&#34;Initial commit.&#34;</span>
+$ git commit -m <span class="s2">&#34;Initial commit.&#34;</span>
 $ git push origin master
-</code></pre></div><p>Have a little celebration - your site is already up at <code>https://yourusername.github.io</code>! Now for the pizza-de-resilience: the custom domain.</p><h3 id=4-point-your-custom-domain-to-github-pages class=anchor-link><a href=https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#4-point-your-custom-domain-to-github-pages>4. Point your custom domain to GitHub Pages</a></h3><p>To set up your site at apex (meaning <code>yourname.com</code> will replace <code>yourusername.github.io</code>), there&rsquo;s just four steps:</p><ol><li><a href=https://help.github.com/articles/adding-or-removing-a-custom-domain-for-your-github-pages-site/>Add your domain to your GitHub Pages site repository</a></li><li>In your domain registrar&rsquo;s DNS settings, <a href=https://help.github.com/articles/setting-up-an-apex-domain/#configuring-a-records-with-your-dns-provider>create A records pointing to GitHub&rsquo;s IP addresses</a></li><li>In your domain registrar&rsquo;s DNS settings, create a CNAME record pointing to <code>yourusername.github.io</code></li><li>Make sure there&rsquo;s a CNAME file in the root directory of your GitHub repository containing <code>yourname.com</code> (your custom domain)</li></ol><h3 id=5-enforce-https-for-github-pages class=anchor-link><a href=https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#5-enforce-https-for-github-pages>5. Enforce HTTPS for GitHub Pages</a></h3><p><a href=https://blog.github.com/2018-05-01-github-pages-custom-domains-https/>GitHub Pages supports HTTPS</a> through a partnership with <a href=https://letsencrypt.org/>Let&rsquo;s Encrypt</a>! This greatly simplifies the process of serving your site securely. Just look for this clever checkbox in the Settings of your site&rsquo;s GitHub repository.</p><p><img src=https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/custom-domain-https.png#screenshot alt="Enforce HTTPS checkbox"></p><p><em>Why do I need HTTPS anyway?</em> For one, it&rsquo;ll <a href=http://searchengineland.com/google-starts-giving-ranking-boost-secure-httpsssl-sites-199446/>give your site a little boost on Google</a>. More importantly, it&rsquo;s fundamental to your website security. You can <a href=/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/>learn more about HTTPS and TLS in this post</a>.</p><p>That&rsquo;s pretty much it! If you don&rsquo;t see changes right away, give all your services a lunch hour or so to propogate. Soon your site will be up and running at <code>https://yourname.com</code>.</p><p>Thanks for reading! If you found this post helpful, there&rsquo;s a lot more where this came from. You can <a href=/>subscribe to victoria.dev</a> to see new posts first!</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/>Hosting your static site with AWS S3, Route 53, and CloudFront</a><p>A guide to using Amazon Web Services to serve your site with HTTPS. For (almost) free.</p><p class=metadata><a class="tag button" href=/tags/aws/>aws</a>
-☕️ ☕️
-&nbsp;7 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/responsive-pages-and-color-themes-with-minimal-css/>Responsive pages and color themes with minimal CSS</a><p>Building a responsive website with color themes? Start at the root.</p><p class=metadata><a class="tag button" href=/tags/websites/>websites</a>
-☕️
-&nbsp;4 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/>Build your own serverless subscriber list with Go and AWS</a><p>How to build your own newsletter list with DynamoDB and SES email sign up confirmations.</p><p class=metadata><a class="tag button" href=/tags/api/>api</a>
-☕️ ☕️
-&nbsp;7 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award three years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
+</code></pre></div><p>Have a little celebration - your site is already up at <code>https://yourusername.github.io</code>! Now for the pizza-de-resilience: the custom domain.</p>
+<h3 id="4-point-your-custom-domain-to-github-pages" class="anchor-link"><a href="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#4-point-your-custom-domain-to-github-pages">4. Point your custom domain to GitHub Pages</a></h3>
+<p>To set up your site at apex (meaning <code>yourname.com</code> will replace <code>yourusername.github.io</code>), there&rsquo;s just four steps:</p>
+<ol>
+<li><a href="https://help.github.com/articles/adding-or-removing-a-custom-domain-for-your-github-pages-site/">Add your domain to your GitHub Pages site repository</a></li>
+<li>In your domain registrar&rsquo;s DNS settings, <a href="https://help.github.com/articles/setting-up-an-apex-domain/#configuring-a-records-with-your-dns-provider">create A records pointing to GitHub&rsquo;s IP addresses</a></li>
+<li>In your domain registrar&rsquo;s DNS settings, create a CNAME record pointing to <code>yourusername.github.io</code></li>
+<li>Make sure there&rsquo;s a CNAME file in the root directory of your GitHub repository containing <code>yourname.com</code> (your custom domain)</li>
+</ol>
+<h3 id="5-enforce-https-for-github-pages" class="anchor-link"><a href="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/#5-enforce-https-for-github-pages">5. Enforce HTTPS for GitHub Pages</a></h3>
+<p><a href="https://blog.github.com/2018-05-01-github-pages-custom-domains-https/">GitHub Pages supports HTTPS</a> through a partnership with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>! This greatly simplifies the process of serving your site securely. Just look for this clever checkbox in the Settings of your site&rsquo;s GitHub repository.</p>
+<p>
+
+<img src="https://victoria.dev/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/custom-domain-https.png#screenshot" alt="Enforce HTTPS checkbox"  />
+
+</p>
+<p><em>Why do I need HTTPS anyway?</em> For one, it&rsquo;ll <a href="http://searchengineland.com/google-starts-giving-ranking-boost-secure-httpsssl-sites-199446/">give your site a little boost on Google</a>. More importantly, it&rsquo;s fundamental to your website security. You can <a href="/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/">learn more about HTTPS and TLS in this post</a>.</p>
+<p>That&rsquo;s pretty much it! If you don&rsquo;t see changes right away, give all your services a lunch hour or so to propogate. Soon your site will be up and running at <code>https://yourname.com</code>.</p>
+<p>Thanks for reading! If you found this post helpful, there&rsquo;s a lot more where this came from. You can <a href="/">subscribe to victoria.dev</a> to see new posts first!</p>
+
+    </div>
+</article>
+
+<div id="up-container">
+    <a href="#" id="up">&#709;</a>
+</div>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+
+
+<div class="related">
+    <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+    <ul role="menubar" id="article-list">
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/">Hosting your static site with AWS S3, Route 53, and CloudFront</a>
+    <p>
+        A guide to using Amazon Web Services to serve your site with HTTPS. For (almost) free.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/aws/">aws</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+        
+    </p>
+    
+</li>
+
+
+
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/responsive-pages-and-color-themes-with-minimal-css/">Responsive pages and color themes with minimal CSS</a>
+    <p>
+        Building a responsive website with color themes? Start at the root.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/websites/">websites</a>
+        
+         ☕️
+        &nbsp;4 min read
+        
+    </p>
+    
+</li>
+
+
+
+        
+        
+
+<li role="none">
+    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/">Build your own serverless subscriber list with Go and AWS</a>
+    <p>
+        How to build your own newsletter list with DynamoDB and SES email sign up confirmations.
+    </p>
+    
+    <p class="metadata">
+        
+        <a class="tag button" href="/tags/api/">api</a>
+        
+         ☕️ ☕️
+        &nbsp;7 min read
+        
+    </p>
+    
+</li>
+
+
+
+        
+    </ul>
+    
+
+    <div class="page-separator">
+        <p class="back-link"><a href="/blog">
+                &lt;&lt; Back to blog</a>
+        </p>
+    </div>
+</div>
+
+            </div>
+
+            <footer class="container">
+                
+
+
+
+
+
+<div class="markdown bio">
+    
+    <figure class="profile">
+    <img src="/img/victoria_headshot.jpg"
+         alt="Victoria&#39;s headshot"/> 
+</figure>
+
+<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award three years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
+<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
+
+</div>
+
+
+
+
+            </footer>
+        </main>
+
+        
+        
+        
+        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+            <ul role="menubar">
+                
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/">
+                        <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/blog/">
+                        <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/about/">
+                        <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/coffee/">
+                        <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+                <li role="none" class="menu-item">
+                    <a role="menuitem"
+                        href="/bookshelf/">
+                        <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
+                </li>
+                
+            </ul>
+        </nav>
+    </body>
+
+</html>
