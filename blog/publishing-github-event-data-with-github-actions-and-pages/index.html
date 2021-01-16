@@ -1,429 +1,63 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-    <head>
-        
-        <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
-<title>
-    Publishing GitHub event data with GitHub Actions and Pages | victoria.dev
-</title>
-
-
-
-        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
-
-        <meta
-  name="monetization"
-  content="$ilp.uphold.com/pBRfRwg2EJAe">
-
-        <meta property="og:title" content="Publishing GitHub event data with GitHub Actions and Pages - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="A guide to overcoming the GitHub event data horizon with a little command-line magic." />
-<meta property="og:url" content="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/cover.png"/>
-
-
-        <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Publishing GitHub event data with GitHub Actions and Pages" />
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/cover.png"/>
-
-<meta name="twitter:description"
-    content="A guide to overcoming the GitHub event data horizon with a little command-line magic." />
-
-        
-<link rel="shortcut icon" href="/img/favicon.ico">
-
-
-        
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.3a452fb60463ad896be3851a004116c71412a50787e5c39f48d220e65f9ca5de.css" integrity="sha256-OkUvtgRjrYlr44UaAEEWxxQSpQeH5cOfSNIg5l&#43;cpd4=" media="screen">
-
-
-
-
-
-        
-        
-        
-        
-    </head>
-
-    <body>
-        <header role="banner">
-            
-            <nav aria-label="Victoria.dev main menu" id="menu">
-    <ul role="menubar">
-        
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/">
-                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/blog/">
-                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/about/">
-                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/coffee/">
-                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/bookshelf/">
-                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
-        </li>
-        
-        <li role="none" class="menu-item">
-            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
-                title="RSS for Publishing GitHub event data with GitHub Actions and Pages" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
-        </li>
-    </ul>
-</nav>
-
-            
-        </header>
-        <main aria-role="main">
-            <div class="container">
-                
-
-
-
-<div id="cover-image">
-    <img src="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/cover.png" alt="cover image" />
-</div>
-<article>
-    <h1>
-
-
-        Publishing GitHub event data with GitHub Actions and Pages
-    </h1>
-    
-    <p class="subtitle">A guide to overcoming the GitHub event data horizon with a little command-line magic.</p>
-    
-    <span>
-
-        
-        <a class="tag button" href="/tags/data/">
-            data
-        </a>&nbsp;
-        
-        <a class="tag button" href="/tags/ci/cd/">
-            ci/cd
-        </a>&nbsp;
-        
-        <a class="tag button" href="/tags/api/">
-            api
-        </a>&nbsp;
-        
-        <a class="tag button" href="/tags/git/">
-            git
-        </a>&nbsp;
-        
-        <a class="tag button" href="/tags/websites/">
-            websites
-        </a>&nbsp;
-        
-        
-    </span>
-    <p class="metadata" id="date">
-        <span>November 4, 2019</span>
-        
-        <span>
-            <em>Updated: Jan 15, 2021</em>
-        </span>
-        
-        <span>
-             ☕️ ☕️&nbsp;8 min read
-        </span>
-    </p>
-
-    
-    </p>
-
-    
-
-    <div class="page-separator">
-        <hr />
-    </div>
-
-    <div class="markdown">
-        <p>Teams who work on GitHub rely on event data to collaborate. The data recorded as issues, pull requests, and comments, become vital to understanding the project.</p>
-<p>With the general availability of GitHub Actions, we have a chance to programmatically access and preserve GitHub event data in our repository. Making the data part of the repository itself is a way of preserving it outside of GitHub, and also gives us the ability to feature the data on a front-facing website, such as with GitHub Pages, through an automated process that&rsquo;s part of our CI/CD pipeline.</p>
-<p>And, if you&rsquo;re like me, you can turn <a href="https://github.com/victoriadrake/github-guestbook/issues/1">GitHub issue comments</a> into an <a href="https://victoria.dev/github-guestbook/">awesome 90s guestbook page</a>.</p>
-<p>No matter the usage, the principle concepts are the same. We can use Actions to access, preserve, and display GitHub event data - with just one workflow file. To illustrate the process, I&rsquo;ll take you through the <a href="https://github.com/victoriadrake/github-guestbook/blob/master/.github/workflows/publish-comments.yml">workflow code</a> that makes my guestbook shine on.</p>
-<p>For an introductory look at GitHub Actions including how workflows are triggered, see <a href="/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>.</p>
-<h2 id="accessing-github-event-data" class="anchor-link"><a href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#accessing-github-event-data">Accessing GitHub event data</a></h2>
-<p>An Action workflow runs in an environment with some default environment variables. A lot of convenient information is available here, including event data. The most complete way to access the event data is using the <code>$GITHUB_EVENT_PATH</code> variable, the path of the file with the complete JSON event payload.</p>
-<p>The expanded path looks like <code>/home/runner/work/_temp/_github_workflow/event.json</code> and its data corresponds to its webhook event. You  can find the documentation for webhook event data in GitHub REST API <a href="https://developer.github.com/webhooks/#events">Event Types and Payloads</a>. To make the JSON data available in the workflow environment, you can use a tool like <code>jq</code> to parse the event data and put it in an environment variable.</p>
-<p>Below, I grab the comment ID from an <a href="https://developer.github.com/v3/activity/events/types/#issuecommentevent">issue comment event</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">ID</span><span class="o">=</span><span class="s2">&#34;</span><span class="k">$(</span>jq <span class="s1">&#39;.comment.id&#39;</span> <span class="nv">$GITHUB_EVENT_PATH</span><span class="k">)</span><span class="s2">&#34;</span>
-</code></pre></div><p>Most event data is also available via the <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#github-context"><code>github.event</code> context variable</a> without needing to parse JSON. The fields are accessed using dot notation, as in the example below where I grab the same comment ID:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">ID</span><span class="o">=</span><span class="si">${</span><span class="p">{ github.event.comment.id </span><span class="si">}</span><span class="o">}</span>
-</code></pre></div><p>For my guestbook, I want to display entries with the user&rsquo;s handle, and the date and time. I can capture this event data like so:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">AUTHOR</span><span class="o">=</span><span class="si">${</span><span class="p">{ github.event.comment.user.login </span><span class="si">}</span><span class="o">}</span>
-<span class="nv">DATE</span><span class="o">=</span><span class="si">${</span><span class="p">{ github.event.comment.created_at </span><span class="si">}</span><span class="o">}</span>
-</code></pre></div><p>Shell variables are handy for accessing data, however, they&rsquo;re ephemeral. The workflow environment is created anew each run, and even shell variables set in one step do not persist to other steps. To persist the captured data, you have two options: use artifacts, or commit it to the repository.</p>
-<h2 id="preserving-event-data-using-artifacts" class="anchor-link"><a href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#preserving-event-data-using-artifacts">Preserving event data: using artifacts</a></h2>
-<p>Using artifacts, you can persist data between workflow jobs without committing it to your repository. This is handy when, for example, you wish to transform or incorporate the data before putting it somewhere more permanent. It&rsquo;s necessary to persist data between workflow jobs because:</p>
-<blockquote>
-<p>Each job in a workflow runs in a fresh instance of the virtual environment. When the job completes, the runner terminates and deletes the instance of the virtual environment. <em>(<a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts">Persisting workflow data using artifacts</a>)</em></p>
-</blockquote>
-<p>Two actions assist with using artifacts: <code>upload-artifact</code> and <code>download-artifact</code>. You can use these actions to make files available to other jobs in the same workflow. For a full example, see <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts#passing-data-between-jobs-in-a-workflow">passing data between jobs in a workflow</a>.</p>
-<p>The <code>upload-artifact</code> action&rsquo;s <code>action.yml</code> contains an <a href="https://github.com/actions/upload-artifact/blob/master/action.yml">explanation</a> of the keywords. The uploaded files are saved in <code>.zip</code> format. Another job in the same workflow run can use the <code>download-artifact</code> action to utilize the data in another step.</p>
-<p>You can also manually download the archive on the workflow run page, under the repository&rsquo;s Actions tab.</p>
-<p>Persisting workflow data between jobs does not make any changes to the repository files, as the artifacts generated live only in the workflow environment. Personally, being comfortable working in a shell environment, I see a narrow use case for artifacts, though I&rsquo;d have been remiss not to mention them. Besides passing data between jobs, they could be useful for creating <code>.zip</code> format archives of, say, test output data. In the case of my guestbook example, I simply ran all the necessary steps in one job, negating any need for passing data between jobs.</p>
-<h2 id="preserving-event-data-pushing-workflow-files-to-the-repository" class="anchor-link"><a href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#preserving-event-data-pushing-workflow-files-to-the-repository">Preserving event data: pushing workflow files to the repository</a></h2>
-<p>To preserve data captured in the workflow in the repository itself, it is necessary to add and push this data to the Git repository. You can do this in the workflow by creating new files with the data, or by appending data to existing files, using shell commands.</p>
-<h3 id="creating-files-in-the-workflow" class="anchor-link"><a href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#creating-files-in-the-workflow">Creating files in the workflow</a></h3>
-<p>To work with the repository files in the workflow, use the <a href="https://github.com/actions/checkout"><code>checkout</code> action</a> to first get a copy to work with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@master</span><span class="w">
-</span><span class="w">  </span><span class="nt">with</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">fetch-depth</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
-</span></code></pre></div><p>To add comments to my guestbook, I turn the event data captured in shell variables into proper files, using substitutions in <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion</a> to sanitize user input and translate newlines to paragraphs. I wrote previously about <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">why user input should be treated carefully</a>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Turn comment into file</span><span class="w">
-</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
-</span><span class="sd">    ID=${{ github.event.comment.id }}
-</span><span class="sd">    AUTHOR=${{ github.event.comment.user.login }}
-</span><span class="sd">    DATE=${{ github.event.comment.created_at }}
-</span><span class="sd">    COMMENT=$(echo &#34;${{ github.event.comment.body }}&#34;)
-</span><span class="sd">    NO_TAGS=${COMMENT//[&lt;&gt;]/\`}
-</span><span class="sd">    FOLDER=comments
-</span><span class="sd">
-</span><span class="sd">    printf &#39;%b\n&#39; &#34;&lt;div class=\&#34;comment\&#34;&gt;&lt;p&gt;${AUTHOR} says:&lt;/p&gt;&lt;p&gt;${NO_TAGS//$&#39;\n&#39;/\&lt;\/p\&gt;\&lt;p\&gt;}&lt;/p&gt;&lt;p&gt;${DATE}&lt;/p&gt;&lt;/div&gt;\r\n&#34; &gt; ${FOLDER}/${ID}.html</span><span class="w">    
-</span></code></pre></div><p>By using <code>printf</code> and directing its output with <code>&gt;</code> to a new file, the event data is transformed into an HTML file, named with the comment ID number, that contains the captured event data. Formatted, it looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;comment&#34;</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>victoriadrake says:<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>This is a comment!<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>2019-11-04T00:28:36Z<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-
-
-</code></pre></div><p>When working with comments, one effect of naming files using the comment ID is that a new file with the same ID will overwrite the previous. This is handy for a guestbook, as it allows any edits to a comment to replace the original comment file.</p>
-<p>If you&rsquo;re using a static site generator like Hugo, you could build a Markdown format file, stick it in your <code>content/</code> folder, and the regular site build will take care of the rest. In the case of my simplistic guestbook, I have an extra step to consolidate the individual comment files into a page. Each time it runs, it overwrites the existing <code>index.html</code> with the <code>header.html</code> portion (<code>&gt;</code>), then finds and appends (<code>&gt;&gt;</code>) all the comment files' contents in descending order, and lastly appends the <code>footer.html</code> portion to end the page.</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Assemble page</span><span class="w">
-</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
-</span><span class="sd">    cat header.html &gt; index.html
-</span><span class="sd">    find comments/ -name &#34;*.html&#34; | sort -r | xargs -I % cat % &gt;&gt; index.html
-</span><span class="sd">    cat footer.html &gt;&gt; index.html</span><span class="w">    
-</span></code></pre></div><h3 id="committing-changes-to-the-repository" class="anchor-link"><a href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#committing-changes-to-the-repository">Committing changes to the repository</a></h3>
-<p>Since the <code>checkout</code> action is not quite the same as cloning the repository, at time of writing, there are some <a href="https://github.community/t5/GitHub-Actions/Checkout-Action-does-not-create-local-master-and-has-no-options/td-p/31575">issues</a> still to work around. A couple extra steps are necessary to <code>pull</code>, <code>checkout</code>, and successfully <code>push</code> changes back to the <code>master</code> branch, but this is pretty trivially done in the shell.</p>
-<p>Below is the step that adds, commits, and pushes changes made by the workflow back to the repository&rsquo;s <code>master</code> branch.</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Push changes to repo</span><span class="w">
-</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
-</span><span class="sd">    REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-</span><span class="sd">    git config user.email &#34;${{ github.actor }}@users.noreply.github.com&#34;
-</span><span class="sd">    git config user.name &#34;${{ github.actor }}&#34;
-</span><span class="sd">
-</span><span class="sd">    git pull ${REMOTE}
-</span><span class="sd">    git checkout master
-</span><span class="sd">    git add .
-</span><span class="sd">    git status
-</span><span class="sd">    git commit -am &#34;Add new comment&#34;
-</span><span class="sd">    git push ${REMOTE} master</span><span class="w">    
-</span></code></pre></div><p>The remote, in fact, our repository, is specified using the <code>github.repository</code> context variable. For our workflow to be allowed to push to master, we give the remote URL using <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/authenticating-with-the-github_token">the default <code>secrets.GITHUB_TOKEN</code> variable</a>.</p>
-<p>Since the workflow environment is shiny and newborn, we need to configure Git. In the above example, I&rsquo;ve used the <code>github.actor</code> context variable to input the username of the account initiating the workflow. The email is similarly configured using the <a href="https://help.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address#setting-your-commit-email-address-on-github">default <code>noreply</code> GitHub email address</a>.</p>
-<h2 id="displaying-event-data" class="anchor-link"><a href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#displaying-event-data">Displaying event data</a></h2>
-<p>If you&rsquo;re using GitHub Pages with the default <code>secrets.GITHUB_TOKEN</code> variable and without a site generator, pushing changes to the repository in the workflow will only update the repository files. The GitHub Pages build will fail with an error, &ldquo;Your site is having problems building: Page build failed.&rdquo;</p>
-<p>To enable Actions to trigger a Pages site build, you&rsquo;ll need to create a Personal Access Token. This token can be <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets">stored as a secret in the repository</a> settings and passed into the workflow in place of the default <code>secrets.GITHUB_TOKEN</code> variable. I wrote more about <a href="/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/#environment-and-variables">Actions environment and variables in this post</a>.</p>
-<p>With the use of a Personal Access Token, a push initiated by the Actions workflow will also update the Pages site. You can see it for yourself by <a href="https://github.com/victoriadrake/github-guestbook/issues/1">leaving a comment</a> in my <a href="https://victoria.dev/github-guestbook/">guestbook</a>! The comment creation event triggers the workflow, which then takes around 30 seconds to run and update the guestbook page.</p>
-<p>Where a site build is necessary for changes to be published, such as when using Hugo, an Action can do this too. However, in order to avoid creating unintended loops, <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows#about-workflow-events">one Action workflow will not trigger another</a>. Instead, it&rsquo;s extremely convenient to handle the process of <a href="/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">building the site with a Makefile</a>, which any workflow can then run. Simply add running the Makefile as the final step in your workflow job, with the repository token where necessary:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run Makefile</span><span class="w">
-</span><span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">TOKEN</span><span class="p">:</span><span class="w"> </span><span class="l">${{ secrets.GITHUB_TOKEN }}</span><span class="w">
-</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make all</span><span class="w">
-</span></code></pre></div><p>This ensures that the final step of your workflow builds and deploys the updated site.</p>
-<h2 id="no-more-event-data-horizon" class="anchor-link"><a href="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#no-more-event-data-horizon">No more event data horizon</a></h2>
-<p>GitHub Actions provides a neat way to capture and utilize event data so that it&rsquo;s not only available within GitHub. The possibilities are only as limited as your imagination! Here are a few ideas for things this lets us create:</p>
-<ol>
-<li>A public-facing issues board, where customers without GitHub accounts can view and give feedback on project issues.</li>
-<li>An automatically-updating RSS feed of new issues, comments, or PRs for any repository.</li>
-<li>A comments system for static sites, utilizing GitHub issue comments as an input method.</li>
-<li>An awesome 90s guestbook page.</li>
-</ol>
-<p>Did I mention I made a <a href="https://victoria.dev/github-guestbook/">90s guestbook page</a>? My inner-Geocities-nerd is a little excited.</p>
-
-    </div>
-</article>
-
-<div id="up-container">
-    <a href="#" id="up">&#709;</a>
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-
-<div class="related">
-    <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
-    <ul role="menubar" id="article-list">
-        
-        
-
-<li role="none">
-    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/">Build your own serverless subscriber list with Go and AWS</a>
-    <p>
-        How to build your own newsletter list with DynamoDB and SES email sign up confirmations.
-    </p>
-    
-    <p class="metadata">
-        
-        <a class="tag button" href="/tags/api/">api</a>
-        
-         ☕️ ☕️
-        &nbsp;7 min read
-        
-    </p>
-    
-</li>
-
-
-
-        
-        
-
-<li role="none">
-    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>
-    <p>
-        How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.
-    </p>
-    
-    <p class="metadata">
-        
-        <a class="tag button" href="/tags/ci/cd/">ci/cd</a>
-        
-         ☕️
-        &nbsp;5 min read
-        
-    </p>
-    
-</li>
-
-
-
-        
-        
-
-<li role="none">
-    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">A portable Makefile for continuous delivery with Hugo and GitHub Pages</a>
-    <p>
-        My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
-    </p>
-    
-    <p class="metadata">
-        
-        <a class="tag button" href="/tags/ci/cd/">ci/cd</a>
-        
-         ☕️
-        &nbsp;5 min read
-        
-    </p>
-    
-</li>
-
-
-
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a>
-        </p>
-    </div>
-</div>
-
-            </div>
-
-            <footer class="container">
-                
-
-
-
-
-
-<div class="markdown bio">
-    
-    <figure class="profile">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award three years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-</div>
-
-
-
-
-            </footer>
-        </main>
-
-        
-        
-        
-        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
-            <ul role="menubar">
-                
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/">
-                        <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/blog/">
-                        <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/about/">
-                        <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/coffee/">
-                        <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/bookshelf/">
-                        <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-            </ul>
-        </nav>
-    </body>
-
-</html>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>Publishing GitHub event data with GitHub Actions and Pages | victoria.dev</title><link href=https://github.com/victoriadrake rel=me><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Publishing GitHub event data with GitHub Actions and Pages - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="A guide to overcoming the GitHub event data horizon with a little command-line magic."><meta property="og:url" content="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/cover.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Publishing GitHub event data with GitHub Actions and Pages"><meta name=twitter:image content="https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/cover.png"><meta name=twitter:description content="A guide to overcoming the GitHub event data horizon with a little command-line magic."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.3a452fb60463ad896be3851a004116c71412a50787e5c39f48d220e65f9ca5de.css integrity="sha256-OkUvtgRjrYlr44UaAEEWxxQSpQeH5cOfSNIg5l+cpd4=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Publishing GitHub event data with GitHub Actions and Pages"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/cover.png alt="cover image"></div><article><h1>Publishing GitHub event data with GitHub Actions and Pages</h1><p class=subtitle>A guide to overcoming the GitHub event data horizon with a little command-line magic.</p><span><a class="tag button" href=/tags/data/>data
+</a>&nbsp;
+<a class="tag button" href=/tags/ci/cd/>ci/cd
+</a>&nbsp;
+<a class="tag button" href=/tags/api/>api
+</a>&nbsp;
+<a class="tag button" href=/tags/git/>git
+</a>&nbsp;
+<a class="tag button" href=/tags/websites/>websites
+</a>&nbsp;</span><p class=metadata id=date><span>November 4, 2019</span>
+<span><em>Updated: Jan 16, 2021</em></span>
+<span>☕️ ☕️&nbsp;8 min read</span></p></p><div class=page-separator><hr></div><div class=markdown><p>Teams who work on GitHub rely on event data to collaborate. The data recorded as issues, pull requests, and comments, become vital to understanding the project.</p><p>With the general availability of GitHub Actions, we have a chance to programmatically access and preserve GitHub event data in our repository. Making the data part of the repository itself is a way of preserving it outside of GitHub, and also gives us the ability to feature the data on a front-facing website, such as with GitHub Pages, through an automated process that&rsquo;s part of our CI/CD pipeline.</p><p>And, if you&rsquo;re like me, you can turn <a href=https://github.com/victoriadrake/github-guestbook/issues/1>GitHub issue comments</a> into an <a href=https://victoria.dev/github-guestbook/>awesome 90s guestbook page</a>.</p><p>No matter the usage, the principle concepts are the same. We can use Actions to access, preserve, and display GitHub event data - with just one workflow file. To illustrate the process, I&rsquo;ll take you through the <a href=https://github.com/victoriadrake/github-guestbook/blob/master/.github/workflows/publish-comments.yml>workflow code</a> that makes my guestbook shine on.</p><p>For an introductory look at GitHub Actions including how workflows are triggered, see <a href=/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/>A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>.</p><h2 id=accessing-github-event-data class=anchor-link><a href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#accessing-github-event-data>Accessing GitHub event data</a></h2><p>An Action workflow runs in an environment with some default environment variables. A lot of convenient information is available here, including event data. The most complete way to access the event data is using the <code>$GITHUB_EVENT_PATH</code> variable, the path of the file with the complete JSON event payload.</p><p>The expanded path looks like <code>/home/runner/work/_temp/_github_workflow/event.json</code> and its data corresponds to its webhook event. You can find the documentation for webhook event data in GitHub REST API <a href=https://developer.github.com/webhooks/#events>Event Types and Payloads</a>. To make the JSON data available in the workflow environment, you can use a tool like <code>jq</code> to parse the event data and put it in an environment variable.</p><p>Below, I grab the comment ID from an <a href=https://developer.github.com/v3/activity/events/types/#issuecommentevent>issue comment event</a>:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nv>ID</span><span class=o>=</span><span class=s2>&#34;</span><span class=k>$(</span>jq <span class=s1>&#39;.comment.id&#39;</span> <span class=nv>$GITHUB_EVENT_PATH</span><span class=k>)</span><span class=s2>&#34;</span>
+</code></pre></div><p>Most event data is also available via the <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#github-context><code>github.event</code> context variable</a> without needing to parse JSON. The fields are accessed using dot notation, as in the example below where I grab the same comment ID:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nv>ID</span><span class=o>=</span><span class=si>${</span><span class=p>{ github.event.comment.id </span><span class=si>}</span><span class=o>}</span>
+</code></pre></div><p>For my guestbook, I want to display entries with the user&rsquo;s handle, and the date and time. I can capture this event data like so:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nv>AUTHOR</span><span class=o>=</span><span class=si>${</span><span class=p>{ github.event.comment.user.login </span><span class=si>}</span><span class=o>}</span>
+<span class=nv>DATE</span><span class=o>=</span><span class=si>${</span><span class=p>{ github.event.comment.created_at </span><span class=si>}</span><span class=o>}</span>
+</code></pre></div><p>Shell variables are handy for accessing data, however, they&rsquo;re ephemeral. The workflow environment is created anew each run, and even shell variables set in one step do not persist to other steps. To persist the captured data, you have two options: use artifacts, or commit it to the repository.</p><h2 id=preserving-event-data-using-artifacts class=anchor-link><a href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#preserving-event-data-using-artifacts>Preserving event data: using artifacts</a></h2><p>Using artifacts, you can persist data between workflow jobs without committing it to your repository. This is handy when, for example, you wish to transform or incorporate the data before putting it somewhere more permanent. It&rsquo;s necessary to persist data between workflow jobs because:</p><blockquote><p>Each job in a workflow runs in a fresh instance of the virtual environment. When the job completes, the runner terminates and deletes the instance of the virtual environment. <em>(<a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts>Persisting workflow data using artifacts</a>)</em></p></blockquote><p>Two actions assist with using artifacts: <code>upload-artifact</code> and <code>download-artifact</code>. You can use these actions to make files available to other jobs in the same workflow. For a full example, see <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts#passing-data-between-jobs-in-a-workflow>passing data between jobs in a workflow</a>.</p><p>The <code>upload-artifact</code> action&rsquo;s <code>action.yml</code> contains an <a href=https://github.com/actions/upload-artifact/blob/master/action.yml>explanation</a> of the keywords. The uploaded files are saved in <code>.zip</code> format. Another job in the same workflow run can use the <code>download-artifact</code> action to utilize the data in another step.</p><p>You can also manually download the archive on the workflow run page, under the repository&rsquo;s Actions tab.</p><p>Persisting workflow data between jobs does not make any changes to the repository files, as the artifacts generated live only in the workflow environment. Personally, being comfortable working in a shell environment, I see a narrow use case for artifacts, though I&rsquo;d have been remiss not to mention them. Besides passing data between jobs, they could be useful for creating <code>.zip</code> format archives of, say, test output data. In the case of my guestbook example, I simply ran all the necessary steps in one job, negating any need for passing data between jobs.</p><h2 id=preserving-event-data-pushing-workflow-files-to-the-repository class=anchor-link><a href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#preserving-event-data-pushing-workflow-files-to-the-repository>Preserving event data: pushing workflow files to the repository</a></h2><p>To preserve data captured in the workflow in the repository itself, it is necessary to add and push this data to the Git repository. You can do this in the workflow by creating new files with the data, or by appending data to existing files, using shell commands.</p><h3 id=creating-files-in-the-workflow class=anchor-link><a href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#creating-files-in-the-workflow>Creating files in the workflow</a></h3><p>To work with the repository files in the workflow, use the <a href=https://github.com/actions/checkout><code>checkout</code> action</a> to first get a copy to work with:</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml>- <span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class=l>actions/checkout@master</span><span class=w>
+</span><span class=w>  </span><span class=nt>with</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span><span class=nt>fetch-depth</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></code></pre></div><p>To add comments to my guestbook, I turn the event data captured in shell variables into proper files, using substitutions in <a href=https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html>shell parameter expansion</a> to sanitize user input and translate newlines to paragraphs. I wrote previously about <a href=/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/>why user input should be treated carefully</a>.</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>Turn comment into file</span><span class=w>
+</span><span class=w>  </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class=p>|</span><span class=sd>
+</span><span class=sd>    ID=${{ github.event.comment.id }}
+</span><span class=sd>    AUTHOR=${{ github.event.comment.user.login }}
+</span><span class=sd>    DATE=${{ github.event.comment.created_at }}
+</span><span class=sd>    COMMENT=$(echo &#34;${{ github.event.comment.body }}&#34;)
+</span><span class=sd>    NO_TAGS=${COMMENT//[&lt;&gt;]/\`}
+</span><span class=sd>    FOLDER=comments
+</span><span class=sd>
+</span><span class=sd>    printf &#39;%b\n&#39; &#34;&lt;div class=\&#34;comment\&#34;&gt;&lt;p&gt;${AUTHOR} says:&lt;/p&gt;&lt;p&gt;${NO_TAGS//$&#39;\n&#39;/\&lt;\/p\&gt;\&lt;p\&gt;}&lt;/p&gt;&lt;p&gt;${DATE}&lt;/p&gt;&lt;/div&gt;\r\n&#34; &gt; ${FOLDER}/${ID}.html</span><span class=w>    
+</span></code></pre></div><p>By using <code>printf</code> and directing its output with <code>></code> to a new file, the event data is transformed into an HTML file, named with the comment ID number, that contains the captured event data. Formatted, it looks like:</p><div class=highlight><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>div</span> <span class=na>class</span><span class=o>=</span><span class=s>&#34;comment&#34;</span><span class=p>&gt;</span>
+    <span class=p>&lt;</span><span class=nt>p</span><span class=p>&gt;</span>victoriadrake says:<span class=p>&lt;/</span><span class=nt>p</span><span class=p>&gt;</span>
+    <span class=p>&lt;</span><span class=nt>p</span><span class=p>&gt;</span>This is a comment!<span class=p>&lt;/</span><span class=nt>p</span><span class=p>&gt;</span>
+    <span class=p>&lt;</span><span class=nt>p</span><span class=p>&gt;</span>2019-11-04T00:28:36Z<span class=p>&lt;/</span><span class=nt>p</span><span class=p>&gt;</span>
+<span class=p>&lt;/</span><span class=nt>div</span><span class=p>&gt;</span>
+
+
+</code></pre></div><p>When working with comments, one effect of naming files using the comment ID is that a new file with the same ID will overwrite the previous. This is handy for a guestbook, as it allows any edits to a comment to replace the original comment file.</p><p>If you&rsquo;re using a static site generator like Hugo, you could build a Markdown format file, stick it in your <code>content/</code> folder, and the regular site build will take care of the rest. In the case of my simplistic guestbook, I have an extra step to consolidate the individual comment files into a page. Each time it runs, it overwrites the existing <code>index.html</code> with the <code>header.html</code> portion (<code>></code>), then finds and appends (<code>>></code>) all the comment files' contents in descending order, and lastly appends the <code>footer.html</code> portion to end the page.</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>Assemble page</span><span class=w>
+</span><span class=w>  </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class=p>|</span><span class=sd>
+</span><span class=sd>    cat header.html &gt; index.html
+</span><span class=sd>    find comments/ -name &#34;*.html&#34; | sort -r | xargs -I % cat % &gt;&gt; index.html
+</span><span class=sd>    cat footer.html &gt;&gt; index.html</span><span class=w>    
+</span></code></pre></div><h3 id=committing-changes-to-the-repository class=anchor-link><a href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#committing-changes-to-the-repository>Committing changes to the repository</a></h3><p>Since the <code>checkout</code> action is not quite the same as cloning the repository, at time of writing, there are some <a href=https://github.community/t5/GitHub-Actions/Checkout-Action-does-not-create-local-master-and-has-no-options/td-p/31575>issues</a> still to work around. A couple extra steps are necessary to <code>pull</code>, <code>checkout</code>, and successfully <code>push</code> changes back to the <code>master</code> branch, but this is pretty trivially done in the shell.</p><p>Below is the step that adds, commits, and pushes changes made by the workflow back to the repository&rsquo;s <code>master</code> branch.</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>Push changes to repo</span><span class=w>
+</span><span class=w>  </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class=p>|</span><span class=sd>
+</span><span class=sd>    REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+</span><span class=sd>    git config user.email &#34;${{ github.actor }}@users.noreply.github.com&#34;
+</span><span class=sd>    git config user.name &#34;${{ github.actor }}&#34;
+</span><span class=sd>
+</span><span class=sd>    git pull ${REMOTE}
+</span><span class=sd>    git checkout master
+</span><span class=sd>    git add .
+</span><span class=sd>    git status
+</span><span class=sd>    git commit -am &#34;Add new comment&#34;
+</span><span class=sd>    git push ${REMOTE} master</span><span class=w>    
+</span></code></pre></div><p>The remote, in fact, our repository, is specified using the <code>github.repository</code> context variable. For our workflow to be allowed to push to master, we give the remote URL using <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/authenticating-with-the-github_token>the default <code>secrets.GITHUB_TOKEN</code> variable</a>.</p><p>Since the workflow environment is shiny and newborn, we need to configure Git. In the above example, I&rsquo;ve used the <code>github.actor</code> context variable to input the username of the account initiating the workflow. The email is similarly configured using the <a href=https://help.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address#setting-your-commit-email-address-on-github>default <code>noreply</code> GitHub email address</a>.</p><h2 id=displaying-event-data class=anchor-link><a href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#displaying-event-data>Displaying event data</a></h2><p>If you&rsquo;re using GitHub Pages with the default <code>secrets.GITHUB_TOKEN</code> variable and without a site generator, pushing changes to the repository in the workflow will only update the repository files. The GitHub Pages build will fail with an error, &ldquo;Your site is having problems building: Page build failed.&rdquo;</p><p>To enable Actions to trigger a Pages site build, you&rsquo;ll need to create a Personal Access Token. This token can be <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets>stored as a secret in the repository</a> settings and passed into the workflow in place of the default <code>secrets.GITHUB_TOKEN</code> variable. I wrote more about <a href=/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/#environment-and-variables>Actions environment and variables in this post</a>.</p><p>With the use of a Personal Access Token, a push initiated by the Actions workflow will also update the Pages site. You can see it for yourself by <a href=https://github.com/victoriadrake/github-guestbook/issues/1>leaving a comment</a> in my <a href=https://victoria.dev/github-guestbook/>guestbook</a>! The comment creation event triggers the workflow, which then takes around 30 seconds to run and update the guestbook page.</p><p>Where a site build is necessary for changes to be published, such as when using Hugo, an Action can do this too. However, in order to avoid creating unintended loops, <a href=https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows#about-workflow-events>one Action workflow will not trigger another</a>. Instead, it&rsquo;s extremely convenient to handle the process of <a href=/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>building the site with a Makefile</a>, which any workflow can then run. Simply add running the Makefile as the final step in your workflow job, with the repository token where necessary:</p><div class=highlight><pre class=chroma><code class=language-yml data-lang=yml>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>Run Makefile</span><span class=w>
+</span><span class=w>  </span><span class=nt>env</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span><span class=nt>TOKEN</span><span class=p>:</span><span class=w> </span><span class=l>${{ secrets.GITHUB_TOKEN }}</span><span class=w>
+</span><span class=w>  </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class=l>make all</span><span class=w>
+</span></code></pre></div><p>This ensures that the final step of your workflow builds and deploys the updated site.</p><h2 id=no-more-event-data-horizon class=anchor-link><a href=https://victoria.dev/blog/publishing-github-event-data-with-github-actions-and-pages/#no-more-event-data-horizon>No more event data horizon</a></h2><p>GitHub Actions provides a neat way to capture and utilize event data so that it&rsquo;s not only available within GitHub. The possibilities are only as limited as your imagination! Here are a few ideas for things this lets us create:</p><ol><li>A public-facing issues board, where customers without GitHub accounts can view and give feedback on project issues.</li><li>An automatically-updating RSS feed of new issues, comments, or PRs for any repository.</li><li>A comments system for static sites, utilizing GitHub issue comments as an input method.</li><li>An awesome 90s guestbook page.</li></ol><p>Did I mention I made a <a href=https://victoria.dev/github-guestbook/>90s guestbook page</a>? My inner-Geocities-nerd is a little excited.</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/>Build your own serverless subscriber list with Go and AWS</a><p>How to build your own newsletter list with DynamoDB and SES email sign up confirmations.</p><p class=metadata><a class="tag button" href=/tags/api/>api</a>
+☕️ ☕️
+&nbsp;7 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/>A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a><p>How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.</p><p class=metadata><a class="tag button" href=/tags/ci/cd/>ci/cd</a>
+☕️
+&nbsp;5 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/>A portable Makefile for continuous delivery with Hugo and GitHub Pages</a><p>My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.</p><p class=metadata><a class="tag button" href=/tags/ci/cd/>ci/cd</a>
+☕️
+&nbsp;5 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio"><figure class=profile><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award three years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
