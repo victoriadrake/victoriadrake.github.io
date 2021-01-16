@@ -217,7 +217,6 @@ A more detailed example:
         linkclass = "name";
         linktext = "(mention)";
       }
-      console.log(linktext)
 
       html += '<div class="webmention__content ' + linkclass + '">' + linktext + '</div>';
 
