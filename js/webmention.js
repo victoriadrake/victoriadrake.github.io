@@ -153,10 +153,13 @@ A more detailed example:
   }
 
     function publishDate (d) {
-        let date = new Date(d)
-        var options = { month: 'long'};
-        let month = new Intl.DateTimeFormat('en-US', options).format(date)
-        let html = '<span class="webmention__date">' + date.getDay() + ' ' + month + ' ' + date.getFullYear() + '</span>'
+        let dateobj = new Date(d)
+        let date = dateobj.toString()
+        console.log(date.substr(0,15))
+        // var options = { month: 'long'};
+        // let month = new Intl.DateTimeFormat('en-US', options).format(date)
+        // let html = '<span class="webmention__date">' + date.getDay() + ' ' + month + ' ' + date.getFullYear() + '</span>'
+        let html = '<span class="webmention__date">' + date.substr(0, 15) + '</span>'
         return html
     }
 
