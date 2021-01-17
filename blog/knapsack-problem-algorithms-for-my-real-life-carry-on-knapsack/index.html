@@ -1,1318 +1,261 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-    <head>
-        
-        <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<meta name="description" content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.">
-<title>
-    Knapsack problem algorithms for my real-life carry-on knapsack | victoria.dev
-</title>
-
-
-
-<link href="https://github.com/victoriadrake" rel="me">
-
-<link rel="webmention" href="https://webmention.io/victoria.dev/webmention" />
-<link rel="pingback" href="https://webmention.io/victoria.dev/xmlrpc" />
-        <script async defer data-domain="victoria.dev" src="https://p.victoria.dev/js/index.js"></script>
-
-        <meta
-  name="monetization"
-  content="$ilp.uphold.com/pBRfRwg2EJAe">
-
-        <meta property="og:title" content="Knapsack problem algorithms for my real-life carry-on knapsack - victoria.dev" />
-<meta property="og:type" content="website" />
-<meta property="og:description"
-    content="Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag." />
-<meta property="og:url" content="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/" />
-<meta property="og:site_name" content="victoria.dev" />
-
-
-<meta property="og:image" content="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/cover_knapsack-doodle.png"/>
-
-
-        <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Knapsack problem algorithms for my real-life carry-on knapsack" />
-
-
-<meta name="twitter:image" content="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/cover_knapsack-doodle.png"/>
-
-<meta name="twitter:description"
-    content="Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag." />
-
-        
-<link rel="shortcut icon" href="/img/favicon.ico">
-
-
-        
-
-
-
-
-
-<link rel="stylesheet" href="/css/main.min.b24a173485d1dc8d036f80df3a292a5f843b412cbceb66fff789eaff73266449.css" integrity="sha256-skoXNIXR3I0Db4DfOikqX4Q7QSy862b/94nq/3MmZEk=" media="screen">
-
-
-
-
-
-        
-        
-        
-        
-    </head>
-
-    <body>
-        <header role="banner">
-            
-            <nav aria-label="Victoria.dev main menu" id="menu">
-    <ul role="menubar">
-        
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/">
-                <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'> hi</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/blog/">
-                <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'> blog</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/about/">
-                <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'> about</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/coffee/">
-                <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'> buy me coffee</a >
-        </li>
-        
-        <li role="none" class="menu-item ">
-            <a role="menuitem" href="/bookshelf/">
-                <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'> bookshelf</a >
-        </li>
-        
-        <li role="none" class="menu-item">
-            <a role="menuitem" id="rss" href="https://victoria.dev/index.xml" rel="alternate" type="application/rss+xml"
-                title="RSS for Knapsack problem algorithms for my real-life carry-on knapsack" /><img src='/img/rss.svg' alt='RSS icon' height='18px' class='filter-icon'> rss</a>
-        </li>
-    </ul>
-</nav>
-
-            
-        </header>
-        <main aria-role="main">
-            <div class="container">
-                
-
-
-
-<div id="cover-image">
-    <img src="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/cover_knapsack-doodle.png" alt="cover image" />
-</div>
-<article>
-    <h1>
-
-
-        Knapsack problem algorithms for my real-life carry-on knapsack
-    </h1>
-    
-    <p class="subtitle">Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag.</p>
-    
-    <span>
-
-        
-        <a class="tag button" href="/tags/algorithms/">
-            algorithms
-        </a>&nbsp;
-        
-        <a class="tag button" href="/tags/data/">
-            data
-        </a>&nbsp;
-        
-        <a class="tag button" href="/tags/go/">
-            go
-        </a>&nbsp;
-        
-        
-    </span>
-    <p class="metadata" id="date">
-        <span><a class="u-url dt-published" href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/">May 9, 2018</a></span>
-        
-        <span>
-            <em>Updated: Jan 17, 2021</em>
-        </span>
-        
-        <span>
-             ☕️ ☕️ ☕️ ☕️&nbsp;23 min read
-        </span>
-    </p>
-
-    
-    </p>
-
-    
-    <div class="toc-dropdown">
-        <input type="checkbox" id="toc-toggle" />
-        <label for="toc-toggle" id="toggle">
-            <p class="toc-title">
-                <span class="toc-dropdown-icon"><img src="/img/anchor.svg" height="18px" class="filter-icon">
-                </span>
-                Jump to section...
-            </p>
-        </label>
-        <nav id="TableOfContents">
-  <ul>
-    <li><a href="#the-knapsack-problem">The knapsack problem</a></li>
-    <li><a href="#the-set-up">The set up</a></li>
-    <li><a href="#data-structures">Data structures</a>
-      <ul>
-        <li><a href="#reading-in-a-file">Reading in a file</a></li>
-        <li><a href="#creating-a-struct">Creating a struct</a></li>
-        <li><a href="#parsing-and-storing-our-data">Parsing and storing our data</a></li>
-      </ul>
-    </li>
-    <li><a href="#greedy-algorithm">Greedy algorithm</a>
-      <ul>
-        <li><a href="#building-our-greedy-algorithm">Building our greedy algorithm</a></li>
-        <li><a href="#greedy-algorithm-results">Greedy algorithm results</a></li>
-      </ul>
-    </li>
-    <li><a href="#dynamic-programming">Dynamic programming</a>
-      <ul>
-        <li><a href="#building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm</a></li>
-        <li><a href="#getting-our-optimized-item-list">Getting our optimized item list</a></li>
-        <li><a href="#dynamic-programming-results">Dynamic programming results</a></li>
-        <li><a href="#input-sort-order">Input sort order</a></li>
-      </ul>
-    </li>
-    <li><a href="#which-approach-is-better">Which approach is better?</a>
-      <ul>
-        <li><a href="#go-benchmarking">Go benchmarking</a></li>
-        <li><a href="#the-verdict">The verdict</a></li>
-        <li><a href="#better-algorithm-design">Better algorithm design</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-    </div>
-    
-
-    <div class="page-separator">
-        <hr />
-    </div>
-
-    <div class="markdown e-content">
-        <h2 id="the-knapsack-problem" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#the-knapsack-problem">The knapsack problem</a></h2>
-<p>I&rsquo;m a nomad and live out of one carry-on bag. This means that the total weight of all my worldly possessions must fall under airline cabin baggage weight limits - usually 10kg. On some smaller airlines, however, this weight limit drops to 7kg. Occasionally, I have to decide not to bring something with me to adjust to the smaller weight limit.</p>
-<p>As a practical exercise, deciding what to leave behind (or get rid of altogether) entails laying out all my things and choosing which ones to keep. That decision is based on the item&rsquo;s usefulness to me (its worth) and its weight.</p>
-<figure>
-    <img src="knapsack-stuff.jpeg"
-         alt="All my stuff."/> <figcaption>
-            <p>This is all my stuff, and my Minaal Carry-on bag.</p>
-        </figcaption>
-</figure>
-
-<p>Being a programmer, I&rsquo;m aware that decisions like this could be made more efficiently by a computer. It&rsquo;s done so frequently and so ubiquitously, in fact, that many will recognize this scenario as the classic <em>packing problem</em> or <em>knapsack problem.</em> How do I go about telling a computer to put as many important items in my bag as possible while coming in at or under a weight limit of 7kg? With algorithms! Yay!</p>
-<p>I&rsquo;ll discuss two common approaches to solving the knapsack problem: one called a <em>greedy algorithm,</em> and another called <em>dynamic programming</em> (a little harder, but better, faster, stronger&hellip;).</p>
-<p>Let&rsquo;s get to it.</p>
-<h2 id="the-set-up" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#the-set-up">The set up</a></h2>
-<p>I prepared my data in the form of a CSV file with three columns: the item&rsquo;s name (a string), a representation of its worth (an integer), and its weight in grams (an integer). There are 40 items in total. I represented worth by ranking each item from 40 to 1, with 40 being the most important and 1 equating with something like &ldquo;why do I even have this again?&rdquo; (If you&rsquo;ve never listed out all your possessions and ranked them by order of how useful they are to you, I highly recommend you try it. It can be a very revealing exercise.)</p>
-<p><strong>Total weight of all items and bag:</strong> 9003g</p>
-<p><strong>Bag weight:</strong> 1415g</p>
-<p><strong>Airline limit:</strong> 7000g</p>
-<p><strong>Maximum weight of items I can pack:</strong> 5585g</p>
-<p><strong>Total possible worth of items:</strong> 820</p>
-<p><strong>The challenge:</strong> Pack as many items as the limit allows while maximizing the total worth.</p>
-<h2 id="data-structures" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#data-structures">Data structures</a></h2>
-<h3 id="reading-in-a-file" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#reading-in-a-file">Reading in a file</a></h3>
-<p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&rsquo;s <code>io/ioutil</code> package makes the first part straightforward.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&#34;fmt&#34;</span>
-    <span class="s">&#34;io/ioutil&#34;</span>
-<span class="p">)</span>
-
-<span class="kd">func</span> <span class="nf">check</span><span class="p">(</span><span class="nx">e</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">e</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-        <span class="nb">panic</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">readItems</span><span class="p">(</span><span class="nx">path</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">dat</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span>
-    <span class="nf">check</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Print</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">dat</span><span class="p">))</span>
-<span class="p">}</span>
-</code></pre></div><p>The <code>ReadFile()</code> function takes a file path and returns the file&rsquo;s contents and an error (<code>nil</code> if the call is successful) so we&rsquo;ve also created a <code>check()</code> function to handle any errors that might be returned. In a real-world application we probably would want to do something more sophisticated than <code>panic</code>, but that&rsquo;s not important right now.</p>
-<h3 id="creating-a-struct" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#creating-a-struct">Creating a struct</a></h3>
-<p>Now that we&rsquo;ve got our data, we should probably do something with it. Since we&rsquo;re working with real-life items and a real-life bag, let&rsquo;s create some types to represent them and make it easier to conceptualize our program. A <code>struct</code> in Go is a typed collection of fields. Here are our two types:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">item</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">name</span>          <span class="kt">string</span>
-    <span class="nx">worth</span><span class="p">,</span> <span class="nx">weight</span> <span class="kt">int</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">bag</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">bagWeight</span><span class="p">,</span> <span class="nx">currItemsWeight</span><span class="p">,</span> <span class="nx">maxItemsWeight</span><span class="p">,</span> <span class="nx">totalWeight</span> <span class="kt">int</span>
-    <span class="nx">items</span>                                                   <span class="p">[]</span><span class="nx">item</span>
-<span class="p">}</span>
-</code></pre></div><p>It is helpful to use field names that are very descriptive. You can see that the structs are set up just as we&rsquo;ve described the things they represent. An <code>item</code> has a <code>name</code> (string), and a <code>worth</code> and <code>weight</code> (integers). A <code>bag</code> has several fields of type <code>int</code> representing its attributes, and also has the ability to hold <code>items</code>, represented in the struct as a slice of <code>item</code> type thingamabobbers.</p>
-<h3 id="parsing-and-storing-our-data" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#parsing-and-storing-our-data">Parsing and storing our data</a></h3>
-<p>Several comprehensive Go packages exist that we could use to parse our CSV data&hellip; but where&rsquo;s the fun in that? Let&rsquo;s go basic with some string splitting and a for loop. Here&rsquo;s our updated <code>readItems()</code> function:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">readItems</span><span class="p">(</span><span class="nx">path</span> <span class="kt">string</span><span class="p">)</span> <span class="p">[]</span><span class="nx">item</span> <span class="p">{</span>
-
-    <span class="nx">dat</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span>
-    <span class="nf">check</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-
-    <span class="nx">lines</span> <span class="o">:=</span> <span class="nx">strings</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">dat</span><span class="p">),</span> <span class="s">&#34;\n&#34;</span><span class="p">)</span>
-
-    <span class="nx">itemList</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">item</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">lines</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-            <span class="k">continue</span>
-        <span class="p">}</span>
-        <span class="nx">s</span> <span class="o">:=</span> <span class="nx">strings</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="nx">v</span><span class="p">,</span> <span class="s">&#34;,&#34;</span><span class="p">)</span>
-        <span class="nx">newItemWorth</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nf">Atoi</span><span class="p">(</span><span class="nx">s</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="nx">newItemWeight</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nf">Atoi</span><span class="p">(</span><span class="nx">s</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="nx">newItem</span> <span class="o">:=</span> <span class="nx">item</span><span class="p">{</span><span class="nx">name</span><span class="p">:</span> <span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">worth</span><span class="p">:</span> <span class="nx">newItemWorth</span><span class="p">,</span> <span class="nx">weight</span><span class="p">:</span> <span class="nx">newItemWeight</span><span class="p">}</span>
-        <span class="nx">itemList</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">itemList</span><span class="p">,</span> <span class="nx">newItem</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nx">itemList</span>
-<span class="p">}</span>
-
-</code></pre></div><p>Using <code>strings.Split</code>, we split our <code>dat</code> on newlines. We then create an empty <code>itemList</code> to hold our items.</p>
-<p>In our for loop, we skip the first line of our CSV file (the headers) then iterate over each line. We use <code>strconv.Atoi</code> (read &ldquo;A to i&rdquo;) to convert the values for each item&rsquo;s worth and weight into integers. We then create a <code>newItem</code> with these field values and append it to the <code>itemList</code>. Finally, we return <code>itemList</code>.</p>
-<p>Here&rsquo;s what our set up looks like so far:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&#34;io/ioutil&#34;</span>
-    <span class="s">&#34;strconv&#34;</span>
-    <span class="s">&#34;strings&#34;</span>
-<span class="p">)</span>
-
-<span class="kd">type</span> <span class="nx">item</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">name</span>          <span class="kt">string</span>
-    <span class="nx">worth</span><span class="p">,</span> <span class="nx">weight</span> <span class="kt">int</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">bag</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">bagWeight</span><span class="p">,</span> <span class="nx">currItemsWeight</span><span class="p">,</span> <span class="nx">maxItemsWeight</span><span class="p">,</span> <span class="nx">totalWeight</span><span class="p">,</span> <span class="nx">totalWorth</span> <span class="kt">int</span>
-    <span class="nx">items</span>                                                               <span class="p">[]</span><span class="nx">item</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">check</span><span class="p">(</span><span class="nx">e</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">e</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-        <span class="nb">panic</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">readItems</span><span class="p">(</span><span class="nx">path</span> <span class="kt">string</span><span class="p">)</span> <span class="p">[]</span><span class="nx">item</span> <span class="p">{</span>
-
-    <span class="nx">dat</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span>
-    <span class="nf">check</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-
-    <span class="nx">lines</span> <span class="o">:=</span> <span class="nx">strings</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">dat</span><span class="p">),</span> <span class="s">&#34;\n&#34;</span><span class="p">)</span>
-
-    <span class="nx">itemList</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">item</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">lines</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-            <span class="k">continue</span> <span class="c1">// skip the headers on the first line
-</span><span class="c1"></span>        <span class="p">}</span>
-        <span class="nx">s</span> <span class="o">:=</span> <span class="nx">strings</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="nx">v</span><span class="p">,</span> <span class="s">&#34;,&#34;</span><span class="p">)</span>
-        <span class="nx">newItemWorth</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nf">Atoi</span><span class="p">(</span><span class="nx">s</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="nx">newItemWeight</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nf">Atoi</span><span class="p">(</span><span class="nx">s</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="nx">newItem</span> <span class="o">:=</span> <span class="nx">item</span><span class="p">{</span><span class="nx">name</span><span class="p">:</span> <span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">worth</span><span class="p">:</span> <span class="nx">newItemWorth</span><span class="p">,</span> <span class="nx">weight</span><span class="p">:</span> <span class="nx">newItemWeight</span><span class="p">}</span>
-        <span class="nx">itemList</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">itemList</span><span class="p">,</span> <span class="nx">newItem</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nx">itemList</span>
-<span class="p">}</span>
-</code></pre></div><p>Now that we&rsquo;ve got our data structures set up, let&rsquo;s get packing (🥁) on the first approach.</p>
-<h2 id="greedy-algorithm" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#greedy-algorithm">Greedy algorithm</a></h2>
-<p>A greedy algorithm is the most straightforward approach to solving the knapsack problem, in that it is a one-pass algorithm that constructs a single final solution. At each stage of the problem, the greedy algorithm picks the option that is locally optimal, meaning it looks like the most suitable option right now. It does not revise its previous choices as it progresses through our data set.</p>
-<h3 id="building-our-greedy-algorithm" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#building-our-greedy-algorithm">Building our greedy algorithm</a></h3>
-<p>The steps of the algorithm we&rsquo;ll use to solve our knapsack problem are:</p>
-<ol>
-<li>Sort items by worth, in descending order.</li>
-<li>Start with the highest worth item. Put items into the bag until the next item on the list cannot fit.</li>
-<li>Try to fill any remaining capacity with the next item on the list that can fit.</li>
-</ol>
-<p>If you read my <a href="https://victoria.dev/verbose/build-from-scratch/">article about solving problems and making paella</a>, you&rsquo;ll know that I always start by figuring out what the next most important question is. In this case, there are three main operations we need to figure out how to do:</p>
-<ul>
-<li>Sort items by worth.</li>
-<li>Put an item in the bag.</li>
-<li>Check to see if the bag is full.</li>
-</ul>
-<p>The first one is just a docs lookup away. Here&rsquo;s how we sort a slice in Go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">sort</span><span class="p">.</span><span class="nf">Slice</span><span class="p">(</span><span class="nx">is</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">worth</span> <span class="p">&gt;</span> <span class="nx">is</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">worth</span>
-<span class="p">})</span>
-</code></pre></div><p>The <code>sort.Slice()</code> function orders our items according to the less function we provide. In this case, it will order the highest worth items before the lowest worth items.</p>
-<p>Given that we don&rsquo;t want to put an item in the bag if it doesn&rsquo;t fit, we&rsquo;ll complete the last two tasks in reverse. First, we&rsquo;ll check to see if the item fits. If so, it goes in the bag.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">)</span> <span class="nf">addItem</span><span class="p">(</span><span class="nx">i</span> <span class="nx">item</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">b</span><span class="p">.</span><span class="nx">currItemsWeight</span><span class="o">+</span><span class="nx">i</span><span class="p">.</span><span class="nx">weight</span> <span class="o">&lt;=</span> <span class="nx">b</span><span class="p">.</span><span class="nx">maxItemsWeight</span> <span class="p">{</span>
-        <span class="nx">b</span><span class="p">.</span><span class="nx">currItemsWeight</span> <span class="o">+=</span> <span class="nx">i</span><span class="p">.</span><span class="nx">weight</span>
-        <span class="nx">b</span><span class="p">.</span><span class="nx">items</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">items</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">nil</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;could not fit item&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div><p>Notice the <code>*</code> in our first line there. That indicates that <code>bag</code> is a pointer receiver (as opposed to a value receiver). It&rsquo;s a concept that can be slightly confusing if you&rsquo;re new to Go. Here are <a href="https://github.com/golang/go/wiki/CodeReviewComments#receiver-type">some things to consider</a> that might help you decide when to use a value receiver and when to use a pointer receiver. For the purposes of our <code>addItem()</code> function, this case applies:</p>
-<blockquote>
-<p>If the method needs to mutate the receiver, the receiver must be a pointer.</p>
-</blockquote>
-<p>Our use of a pointer receiver tells our function we want to operate on <em>this specific bag in particular</em>, not a new bag. It&rsquo;s important because without it, every item would always fit in a newly created bag! A little detail like this can make the difference between code that works and code that keeps you up until 4am chugging Red Bull and muttering to yourself. (Go to bed on time even if your code doesn&rsquo;t work - you&rsquo;ll thank me later.)</p>
-<p>Now that we&rsquo;ve got our components, let&rsquo;s put together our greedy algorithm:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">greedy</span><span class="p">(</span><span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">b</span> <span class="nx">bag</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">sort</span><span class="p">.</span><span class="nf">Slice</span><span class="p">(</span><span class="nx">is</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">worth</span> <span class="p">&gt;</span> <span class="nx">is</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">worth</span>
-    <span class="p">})</span>
-
-    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">is</span> <span class="p">{</span>
-        <span class="nx">b</span><span class="p">.</span><span class="nf">addItem</span><span class="p">(</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
-    <span class="p">}</span>
-
-    <span class="nx">b</span><span class="p">.</span><span class="nx">totalWeight</span> <span class="p">=</span> <span class="nx">b</span><span class="p">.</span><span class="nx">bagWeight</span> <span class="o">+</span> <span class="nx">b</span><span class="p">.</span><span class="nx">currItemsWeight</span>
-
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">b</span><span class="p">.</span><span class="nx">items</span> <span class="p">{</span>
-        <span class="nx">b</span><span class="p">.</span><span class="nx">totalWorth</span> <span class="o">+=</span> <span class="nx">v</span><span class="p">.</span><span class="nx">worth</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>Then in our <code>main()</code> function, we&rsquo;ll create our bag, read in our data, and call our greedy algorithm. Here&rsquo;s what it looks like, all set up and ready to go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-
-    <span class="nx">minaal</span> <span class="o">:=</span> <span class="nx">bag</span><span class="p">{</span><span class="nx">bagWeight</span><span class="p">:</span> <span class="mi">1415</span><span class="p">,</span> <span class="nx">currItemsWeight</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">maxItemsWeight</span><span class="p">:</span> <span class="mi">5585</span><span class="p">}</span>
-    <span class="nx">itemList</span> <span class="o">:=</span> <span class="nf">readItems</span><span class="p">(</span><span class="s">&#34;objects.csv&#34;</span><span class="p">)</span>
-
-    <span class="nf">greedy</span><span class="p">(</span><span class="nx">itemList</span><span class="p">,</span> <span class="nx">minaal</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div><h3 id="greedy-algorithm-results" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#greedy-algorithm-results">Greedy algorithm results</a></h3>
-<p>So how does this algorithm do when it comes to efficiently packing our bag to maximize its total worth? Here&rsquo;s the result:</p>
-<p><strong>Total weight of bag and items:</strong> 6987g</p>
-<p><strong>Total worth of packed items:</strong> 716</p>
-<p>Here are the items our greedy algorithm chose, sorted by worth:</p>
-<table>
-<thead>
-<tr>
-<th>Item</th>
-<th>Worth</th>
-<th>Weight</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Lenovo X1 Carbon (5th Gen)</td>
-<td>40</td>
-<td>112</td>
-</tr>
-<tr>
-<td>10 pairs thongs</td>
-<td>39</td>
-<td>80</td>
-</tr>
-<tr>
-<td>5 Underarmour Strappy</td>
-<td>38</td>
-<td>305</td>
-</tr>
-<tr>
-<td>1 pair Uniqlo leggings</td>
-<td>37</td>
-<td>185</td>
-</tr>
-<tr>
-<td>2 Lululemon Cool Racerback</td>
-<td>36</td>
-<td>174</td>
-</tr>
-<tr>
-<td>Chargers and cables in Mini Bomber Travel Kit</td>
-<td>35</td>
-<td>665</td>
-</tr>
-<tr>
-<td>The Roost Stand</td>
-<td>34</td>
-<td>170</td>
-</tr>
-<tr>
-<td>ThinkPad Compact Bluetooth Keyboard with trackpoint</td>
-<td>33</td>
-<td>460</td>
-</tr>
-<tr>
-<td>Seagate Backup PlusSlim</td>
-<td>32</td>
-<td>159</td>
-</tr>
-<tr>
-<td>1 pair black denim shorts</td>
-<td>31</td>
-<td>197</td>
-</tr>
-<tr>
-<td>2 pairs Nike Pro shorts</td>
-<td>30</td>
-<td>112</td>
-</tr>
-<tr>
-<td>2 pairs Lululemon shorts</td>
-<td>29</td>
-<td>184</td>
-</tr>
-<tr>
-<td>Isabella T-Strap Croc sandals</td>
-<td>28</td>
-<td>200</td>
-</tr>
-<tr>
-<td>2 Underarmour HeatGear CoolSwitch tank tops</td>
-<td>27</td>
-<td>138</td>
-</tr>
-<tr>
-<td>5 pairs black socks</td>
-<td>26</td>
-<td>95</td>
-</tr>
-<tr>
-<td>2 pairs Injinji Women&rsquo;s Run Lightweight No-Show Toe Socks</td>
-<td>25</td>
-<td>54</td>
-</tr>
-<tr>
-<td>1 fancy tank top</td>
-<td>24</td>
-<td>71</td>
-</tr>
-<tr>
-<td>1 light and stretchylong-sleeve shirt (Gap Fit)</td>
-<td>23</td>
-<td>147</td>
-</tr>
-<tr>
-<td>Uniqlo Ultralight Down insulating jacket</td>
-<td>22</td>
-<td>235</td>
-</tr>
-<tr>
-<td>Patagonia Torrentshell</td>
-<td>21</td>
-<td>301</td>
-</tr>
-<tr>
-<td>Lightweight Merino Wool Buff</td>
-<td>20</td>
-<td>50</td>
-</tr>
-<tr>
-<td>1 LBD (H&amp;M)</td>
-<td>19</td>
-<td>174</td>
-</tr>
-<tr>
-<td>Field Notes Pitch Black Memo Book Dot-Graph</td>
-<td>18</td>
-<td>68</td>
-</tr>
-<tr>
-<td>Innergie PocketCell USB-C 6000mAh power bank</td>
-<td>17</td>
-<td>14</td>
-</tr>
-<tr>
-<td>JBL Reflect Mini Bluetooth Sport Headphones</td>
-<td>13</td>
-<td>14</td>
-</tr>
-<tr>
-<td>Oakley Latch Sunglasses</td>
-<td>11</td>
-<td>30</td>
-</tr>
-<tr>
-<td>Petzl E+LITE Emergency Headlamp</td>
-<td>8</td>
-<td>27</td>
-</tr>
-</tbody>
-</table>
-<p>It&rsquo;s clear that the greedy algorithm is a straightforward way to quickly find a feasible solution. For small data sets, it will probably be close to the optimal solution. The algorithm packed a total item worth of 716 (104 points less than the maximum possible value), while filling the bag with just 13g left over.</p>
-<p>As we learned earlier, the greedy algorithm doesn&rsquo;t improve upon the solution it returns. It simply adds the next highest worth item it can to the bag.</p>
-<p>Let&rsquo;s look at another method for solving the knapsack problem that will give us the optimal solution - the highest possible total worth under the weight limit.</p>
-<h2 id="dynamic-programming" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#dynamic-programming">Dynamic programming</a></h2>
-<p>The name &ldquo;dynamic programming&rdquo; can be a bit misleading. It&rsquo;s not a style of programming, as the name might cause you to infer, but simply another approach.</p>
-<p>Dynamic programming differs from the straightforward greedy algorithm in a few key ways. Firstly, a dynamic programming bag packing solution enumerates the entire solution space with all possibilities of item combinations that could be used to pack our bag. Where a greedy algorithm chooses the most optimal <em>local</em> solution, dynamic programming algorithms are able to find the most optimal <em>global</em> solution.</p>
-<p>Secondly, dynamic programming uses memoization to store the results of previously computed operations and returns the cached result when the operation occurs again. This allows it to &ldquo;remember&rdquo; previous combinations. This takes less time than it would to re-compute the answer again.</p>
-<h3 id="building-our-dynamic-programming-algorithm" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm</a></h3>
-<p>To use dynamic programming to find the optimal recipe for packing our bag, we&rsquo;ll need to:</p>
-<ol>
-<li>Create a matrix representing all subsets of the items (the solution space) with rows representing items and columns representing the bag&rsquo;s remaining weight capacity</li>
-<li>Loop through the matrix and calculate the worth that can be obtained by each combination of items at each stage of the bag&rsquo;s capacity</li>
-<li>Examine the completed matrix to determine which items to add to the bag in order to produce the maximum possible worth for the bag in total</li>
-</ol>
-<p>It will be most helpful to visualize our solution space. Here&rsquo;s a representation of what we&rsquo;re building with our code:</p>
-<figure>
-    <img src="knapsack-matrix.jpg"
-         alt="A sketch of the matrix with rows for items and columns for grams of weight."/> <figcaption>
-            <p>The empty knapsackian multiverse.</p>
-        </figcaption>
-</figure>
-
-<p>In Go, we can create this matrix as a slice of slices.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">matrix</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">numItems</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// rows representing items
-</span><span class="c1"></span><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">matrix</span> <span class="p">{</span>
-    <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">capacity</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// columns representing grams of weight
-</span><span class="c1"></span><span class="p">}</span>
-</code></pre></div><p>We&rsquo;ve padded the rows and columns by <code>1</code> so that the indicies match the item and weight numbers.</p>
-<p>Now that we&rsquo;ve created our matrix, we&rsquo;ll fill it by looping over the rows and the columns:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// loop through table rows
-</span><span class="c1"></span><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">numItems</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-    <span class="c1">// loop through table columns
-</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">w</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">w</span> <span class="o">&lt;=</span> <span class="nx">capacity</span><span class="p">;</span> <span class="nx">w</span><span class="o">++</span> <span class="p">{</span>
-        <span class="c1">// do stuff in each element
-</span><span class="c1"></span>    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>Then for each element, we&rsquo;ll calculate the worth value to ascribe to it. We do this with code that represents the following:</p>
-<blockquote>
-<p>If the item at the index matching the current row fits within the weight capacity represented by the current column, take the maximum of either:</p>
-<ol>
-<li>The total worth of the items already in the bag or,</li>
-<li>The total worth of all the items in the bag except the item at the previous row index, plus the new item&rsquo;s worth</li>
-</ol>
-</blockquote>
-<p>In other words, as our algorithm considers one of the items, we&rsquo;re asking it to decide whether this item added to the bag would produce a higher total worth than the last item it added to the bag, at the bag&rsquo;s current total weight. If this current item is a better choice, put it in - if not, leave it out.</p>
-<p>Here&rsquo;s the code that accomplishes this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// if weight of item matching this index can fit at the current capacity column...
-</span><span class="c1"></span><span class="k">if</span> <span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">weight</span> <span class="o">&lt;=</span> <span class="nx">w</span> <span class="p">{</span>
-    <span class="c1">// worth of this subset without this item
-</span><span class="c1"></span>    <span class="nx">valueOne</span> <span class="o">:=</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="p">])</span>
-    <span class="c1">// worth of this subset without the previous item, and this item instead
-</span><span class="c1"></span>    <span class="nx">valueTwo</span> <span class="o">:=</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">worth</span> <span class="o">+</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="o">-</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">weight</span><span class="p">])</span>
-    <span class="c1">// take maximum of either valueOne or valueTwo
-</span><span class="c1"></span>    <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span> <span class="p">=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nx">valueOne</span><span class="p">,</span> <span class="nx">valueTwo</span><span class="p">))</span>
-<span class="c1">// if the new worth is not more, carry over the previous worth
-</span><span class="c1"></span><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span> <span class="p">=</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div><p>This process of comparing item combinations will continue until every item has been considered at every possible stage of the bag&rsquo;s increasing total weight. When all the above have been considered, we&rsquo;ll have enumerated the solution space - filled the matrix - with all possible total worth values.</p>
-<p>We&rsquo;ll have a big chart of numbers, and in the last column at the last row we&rsquo;ll have our highest possible value.</p>
-<figure>
-    <img src="knapsack-matrix-filled.jpg"
-         alt="A strictly representative representation of the filled matrix."/> <figcaption>
-            <p>A strictly representative representation of the filled matrix.</p>
-        </figcaption>
-</figure>
-
-<p>That&rsquo;s great, but how do we find out which combination of items were put in the bag to achieve that worth?</p>
-<h3 id="getting-our-optimized-item-list" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#getting-our-optimized-item-list">Getting our optimized item list</a></h3>
-<p>To see which items combine to create our optimal packing list, we&rsquo;ll need to examine our matrix in reverse to the way we created it. Since we know the highest possible value is in the last row in the last column, we&rsquo;ll start there. To find the items, we:</p>
-<ol>
-<li>Get the value of the current cell</li>
-<li>Compare the value of the current cell to the value in the cell directly above it</li>
-<li>If the values differ, there was a change to the bag items; find the next cell to examine by moving backwards through the columns according to the current item&rsquo;s weight (find the value of the bag before this current item was added)</li>
-<li>If the values match, there was no change to the bag items; move up to the cell in the row above and repeat</li>
-</ol>
-<p>The nature of the action we&rsquo;re trying to achieve lends itself well to a recursive function. If you recall from <a href="https://victoria.dev/verbose/reduce-recursion-with-pie/">my previous article about making apple pie</a>, recursive functions are simply functions that call themselves under certain conditions. Here&rsquo;s what it looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">,</span> <span class="nx">i</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">w</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">matrix</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">w</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="k">return</span>
-    <span class="p">}</span>
-
-    <span class="nx">pick</span> <span class="o">:=</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nx">pick</span> <span class="o">!=</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span> <span class="p">{</span>
-        <span class="nx">b</span><span class="p">.</span><span class="nf">addItem</span><span class="p">(</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">w</span><span class="o">-</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">weight</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">matrix</span><span class="p">)</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">matrix</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>Our <code>checkItem()</code> function calls itself if the condition we described in step 4 is true. If step 3 is true, it also calls itself, but with different arguments.</p>
-<p>Recursive functions require a base case. In this example, we want the function to stop once we run out of values of worth to compare. Thus our base case is when either <code>i</code> or <code>w</code> are <code>0</code>.</p>
-<p>Here&rsquo;s how the dynamic programming approach looks when it&rsquo;s all put together:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">,</span> <span class="nx">i</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">w</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">matrix</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">w</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="k">return</span>
-    <span class="p">}</span>
-
-    <span class="nx">pick</span> <span class="o">:=</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nx">pick</span> <span class="o">!=</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span> <span class="p">{</span>
-        <span class="nx">b</span><span class="p">.</span><span class="nf">addItem</span><span class="p">(</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">w</span><span class="o">-</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">weight</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">matrix</span><span class="p">)</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">matrix</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">dynamic</span><span class="p">(</span><span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">)</span> <span class="o">*</span><span class="nx">bag</span> <span class="p">{</span>
-    <span class="nx">numItems</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">is</span><span class="p">)</span>          <span class="c1">// number of items in knapsack
-</span><span class="c1"></span>    <span class="nx">capacity</span> <span class="o">:=</span> <span class="nx">b</span><span class="p">.</span><span class="nx">maxItemsWeight</span> <span class="c1">// capacity of knapsack
-</span><span class="c1"></span>
-    <span class="c1">// create the empty matrix
-</span><span class="c1"></span>    <span class="nx">matrix</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">numItems</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// rows representing items
-</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">matrix</span> <span class="p">{</span>
-        <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">capacity</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// columns representing grams of weight
-</span><span class="c1"></span>    <span class="p">}</span>
-
-    <span class="c1">// loop through table rows
-</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">numItems</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="c1">// loop through table columns
-</span><span class="c1"></span>        <span class="k">for</span> <span class="nx">w</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">w</span> <span class="o">&lt;=</span> <span class="nx">capacity</span><span class="p">;</span> <span class="nx">w</span><span class="o">++</span> <span class="p">{</span>
-
-            <span class="c1">// if weight of item matching this index can fit at the current capacity column...
-</span><span class="c1"></span>            <span class="k">if</span> <span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">weight</span> <span class="o">&lt;=</span> <span class="nx">w</span> <span class="p">{</span>
-                <span class="c1">// worth of this subset without this item
-</span><span class="c1"></span>                <span class="nx">valueOne</span> <span class="o">:=</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="p">])</span>
-                <span class="c1">// worth of this subset without the previous item, and this item instead
-</span><span class="c1"></span>                <span class="nx">valueTwo</span> <span class="o">:=</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">worth</span> <span class="o">+</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="o">-</span><span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">weight</span><span class="p">])</span>
-                <span class="c1">// take maximum of either valueOne or valueTwo
-</span><span class="c1"></span>                <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span> <span class="p">=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nx">valueOne</span><span class="p">,</span> <span class="nx">valueTwo</span><span class="p">))</span>
-            <span class="c1">// if the new worth is not more, carry over the previous worth
-</span><span class="c1"></span>            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span> <span class="p">=</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="p">]</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">numItems</span><span class="p">,</span> <span class="nx">capacity</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">matrix</span><span class="p">)</span>
-
-    <span class="c1">// add other statistics to the bag
-</span><span class="c1"></span>    <span class="nx">b</span><span class="p">.</span><span class="nx">totalWorth</span> <span class="p">=</span> <span class="nx">matrix</span><span class="p">[</span><span class="nx">numItems</span><span class="p">][</span><span class="nx">capacity</span><span class="p">]</span>
-    <span class="nx">b</span><span class="p">.</span><span class="nx">totalWeight</span> <span class="p">=</span> <span class="nx">b</span><span class="p">.</span><span class="nx">bagWeight</span> <span class="o">+</span> <span class="nx">b</span><span class="p">.</span><span class="nx">currItemsWeight</span>
-
-    <span class="k">return</span> <span class="nx">b</span>
-<span class="p">}</span>
-</code></pre></div><h3 id="dynamic-programming-results" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#dynamic-programming-results">Dynamic programming results</a></h3>
-<p>We expect that the dynamic programming approach will give us a more optimized solution than the greedy algorithm. So did it? Here are the results:</p>
-<p><strong>Total weight of bag and items:</strong> 6982g</p>
-<p><strong>Total worth of packed items:</strong> 757</p>
-<p>Here are the items our dynamic programming algorithm chose, sorted by worth:</p>
-<table>
-<thead>
-<tr>
-<th>Item</th>
-<th>Worth</th>
-<th>Weight</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>10 pairs thongs</td>
-<td>39</td>
-<td>80</td>
-</tr>
-<tr>
-<td>5 Underarmour Strappy</td>
-<td>38</td>
-<td>305</td>
-</tr>
-<tr>
-<td>1 pair Uniqlo leggings</td>
-<td>37</td>
-<td>185</td>
-</tr>
-<tr>
-<td>2 Lululemon Cool Racerback</td>
-<td>36</td>
-<td>174</td>
-</tr>
-<tr>
-<td>Chargers and cables in Mini Bomber Travel Kit</td>
-<td>35</td>
-<td>665</td>
-</tr>
-<tr>
-<td>The Roost Stand</td>
-<td>34</td>
-<td>170</td>
-</tr>
-<tr>
-<td>ThinkPad Compact Bluetooth Keyboard with trackpoint</td>
-<td>33</td>
-<td>460</td>
-</tr>
-<tr>
-<td>Seagate Backup Plus Slim</td>
-<td>32</td>
-<td>159</td>
-</tr>
-<tr>
-<td>1 pair black denim shorts</td>
-<td>31</td>
-<td>197</td>
-</tr>
-<tr>
-<td>2 pairs Nike Pro shorts</td>
-<td>30</td>
-<td>112</td>
-</tr>
-<tr>
-<td>2 pairs Lululemon shorts</td>
-<td>29</td>
-<td>184</td>
-</tr>
-<tr>
-<td>Isabella T-Strap Croc sandals</td>
-<td>28</td>
-<td>200</td>
-</tr>
-<tr>
-<td>2 Underarmour HeatGear CoolSwitch tank tops</td>
-<td>27</td>
-<td>138</td>
-</tr>
-<tr>
-<td>5 pairs black socks</td>
-<td>26</td>
-<td>95</td>
-</tr>
-<tr>
-<td>2 pairs Injinji Women&rsquo;s Run Lightweight No-Show Toe Socks</td>
-<td>25</td>
-<td>54</td>
-</tr>
-<tr>
-<td>1 fancy tank top</td>
-<td>24</td>
-<td>71</td>
-</tr>
-<tr>
-<td>1 light and stretchy long-sleeve shirt (Gap Fit)</td>
-<td>23</td>
-<td>147</td>
-</tr>
-<tr>
-<td>Uniqlo Ultralight Down insulating jacket</td>
-<td>22</td>
-<td>235</td>
-</tr>
-<tr>
-<td>Patagonia Torrentshell</td>
-<td>21</td>
-<td>301</td>
-</tr>
-<tr>
-<td>Lightweight Merino Wool Buff</td>
-<td>20</td>
-<td>50</td>
-</tr>
-<tr>
-<td>1 LBD (H&amp;M)</td>
-<td>19</td>
-<td>174</td>
-</tr>
-<tr>
-<td>Field Notes Pitch Black Memo Book Dot-Graph</td>
-<td>18</td>
-<td>68</td>
-</tr>
-<tr>
-<td>Innergie PocketCell USB-C 6000mAh power bank</td>
-<td>17</td>
-<td>148</td>
-</tr>
-<tr>
-<td>Important papers</td>
-<td>16</td>
-<td>228</td>
-</tr>
-<tr>
-<td>Deuter First Aid Kit Active</td>
-<td>15</td>
-<td>144</td>
-</tr>
-<tr>
-<td>Stanley Classic Vacuum Camp Mug 16oz</td>
-<td>14</td>
-<td>454</td>
-</tr>
-<tr>
-<td>JBL Reflect Mini Bluetooth Sport Headphones</td>
-<td>13</td>
-<td>14</td>
-</tr>
-<tr>
-<td>Anker SoundCore nano Bluetooth Speaker</td>
-<td>12</td>
-<td>80</td>
-</tr>
-<tr>
-<td>Oakley Latch Sunglasses</td>
-<td>11</td>
-<td>30</td>
-</tr>
-<tr>
-<td>Ray Ban Wayfarer Classic</td>
-<td>10</td>
-<td>45</td>
-</tr>
-<tr>
-<td>Petzl E+LITE Emergency Headlamp</td>
-<td>8</td>
-<td>27</td>
-</tr>
-<tr>
-<td>Peak Design Cuff Camera Wrist Strap</td>
-<td>6</td>
-<td>26</td>
-</tr>
-<tr>
-<td>Travelon Micro Scale</td>
-<td>5</td>
-<td>125</td>
-</tr>
-<tr>
-<td>Humangear GoBites Duo</td>
-<td>3</td>
-<td>22</td>
-</tr>
-</tbody>
-</table>
-<p>There&rsquo;s an obvious improvement to our dynamic programming solution over what the greedy algorithm gave us. Our total worth of 757 is 41 points greater than the greedy algorithm&rsquo;s solution of 716, and for a few grams less weight too!</p>
-<h3 id="input-sort-order" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#input-sort-order">Input sort order</a></h3>
-<p>While testing my dynamic programming solution, I implemented the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffle algorithm</a> on the input before passing it into my function, just to ensure that the answer wasn&rsquo;t somehow dependent on the sort order of the input. Here&rsquo;s what the shuffle looks like in Go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Seed</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">UnixNano</span><span class="p">())</span>
-
-<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">itemList</span> <span class="p">{</span>
-    <span class="nx">j</span> <span class="o">:=</span> <span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div><p>Of course I then realized that Go 1.10 now has a built-in shuffle&hellip; it works precisely the same way and looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Shuffle</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">itemList</span><span class="p">),</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-<span class="p">})</span>
-</code></pre></div><p>So did the order in which the items were processed affect the outcome? Well&hellip;</p>
-<h4 id="suddenly-a-rogue-weight-appears" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#suddenly-a-rogue-weight-appears">Suddenly&hellip; a rogue weight appears!</a></h4>
-<p>As it turns out, in a way, the answer did depend on the order of the input. When I ran my dynamic programming algorithm several times, I sometimes saw a different total weight for the bag, though the total worth remained at 757. I initially thought this was a bug before examining the two sets of items that accompanied the two different total weight values. Everything was the same except for a few changes that collectively added up to a different item subset accounting for 14 of the 757 worth points.</p>
-<p>In this case, there were two equally optimal solutions based only on the success metric of the highest total possible worth. Shuffling the input seemed to affect the placement of the items in the matrix and thus, the path that the <code>checkItem()</code> function took as it went through the matrix to find the chosen items. Since the success metric of having the highest possible worth was the same in both item sets, we don&rsquo;t have a single unique solution - there&rsquo;s two!</p>
-<p>As an academic exercise, both these sets of items are correct answers. We may choose to optimize further by another metric, say, the total weight of all the items. The highest possible worth at the least possible weight could be seen as an ideal solution.</p>
-<p>Here&rsquo;s the second, lighter, dynamic programming result:</p>
-<p><strong>Total weight of bag and items:</strong> 6955g</p>
-<p><strong>Total worth of packed items:</strong> 757</p>
-<table>
-<thead>
-<tr>
-<th>Item</th>
-<th>Worth</th>
-<th>Weight</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>10 pairs thongs</td>
-<td>39</td>
-<td>80</td>
-</tr>
-<tr>
-<td>5 Underarmour Strappy</td>
-<td>38</td>
-<td>305</td>
-</tr>
-<tr>
-<td>1 pair Uniqlo leggings</td>
-<td>37</td>
-<td>185</td>
-</tr>
-<tr>
-<td>2 Lululemon Cool Racerback</td>
-<td>36</td>
-<td>174</td>
-</tr>
-<tr>
-<td>Chargers and cables in Mini Bomber Travel Kit</td>
-<td>35</td>
-<td>665</td>
-</tr>
-<tr>
-<td>The Roost Stand</td>
-<td>34</td>
-<td>170</td>
-</tr>
-<tr>
-<td>ThinkPad Compact Bluetooth Keyboard with trackpoint</td>
-<td>33</td>
-<td>460</td>
-</tr>
-<tr>
-<td>Seagate Backup Plus Slim</td>
-<td>32</td>
-<td>159</td>
-</tr>
-<tr>
-<td>1 pair black denim shorts</td>
-<td>31</td>
-<td>197</td>
-</tr>
-<tr>
-<td>2 pairs Nike Pro shorts</td>
-<td>30</td>
-<td>112</td>
-</tr>
-<tr>
-<td>2 pairs Lululemon shorts</td>
-<td>29</td>
-<td>184</td>
-</tr>
-<tr>
-<td>Isabella T-Strap Croc sandals</td>
-<td>28</td>
-<td>200</td>
-</tr>
-<tr>
-<td>2 Underarmour HeatGear CoolSwitch tank tops</td>
-<td>27</td>
-<td>138</td>
-</tr>
-<tr>
-<td>5 pairs black socks</td>
-<td>26</td>
-<td>95</td>
-</tr>
-<tr>
-<td>2 pairs Injinji Women&rsquo;s Run Lightweight No-Show Toe Socks</td>
-<td>25</td>
-<td>54</td>
-</tr>
-<tr>
-<td>1 fancy tank top</td>
-<td>24</td>
-<td>71</td>
-</tr>
-<tr>
-<td>1 light and stretchy long-sleeve shirt (Gap Fit)</td>
-<td>23</td>
-<td>147</td>
-</tr>
-<tr>
-<td>Uniqlo Ultralight Down insulating jacket</td>
-<td>22</td>
-<td>235</td>
-</tr>
-<tr>
-<td>Patagonia Torrentshell</td>
-<td>21</td>
-<td>301</td>
-</tr>
-<tr>
-<td>Lightweight Merino Wool Buff</td>
-<td>20</td>
-<td>50</td>
-</tr>
-<tr>
-<td>1 LBD (H&amp;M)</td>
-<td>19</td>
-<td>174</td>
-</tr>
-<tr>
-<td>Field Notes Pitch Black Memo Book Dot-Graph</td>
-<td>18</td>
-<td>68</td>
-</tr>
-<tr>
-<td>Innergie PocketCell USB-C 6000mAh power bank</td>
-<td>17</td>
-<td>148</td>
-</tr>
-<tr>
-<td>Important papers</td>
-<td>16</td>
-<td>228</td>
-</tr>
-<tr>
-<td>Deuter First Aid Kit Active</td>
-<td>15</td>
-<td>144</td>
-</tr>
-<tr>
-<td>JBL Reflect Mini Bluetooth Sport Headphones</td>
-<td>13</td>
-<td>14</td>
-</tr>
-<tr>
-<td>Anker SoundCore nano Bluetooth Speaker</td>
-<td>12</td>
-<td>80</td>
-</tr>
-<tr>
-<td>Oakley Latch Sunglasses</td>
-<td>11</td>
-<td>30</td>
-</tr>
-<tr>
-<td>Ray Ban Wayfarer Classic</td>
-<td>10</td>
-<td>45</td>
-</tr>
-<tr>
-<td>Zip bag of toiletries</td>
-<td>9</td>
-<td>236</td>
-</tr>
-<tr>
-<td>Petzl E+LITE Emergency Headlamp</td>
-<td>8</td>
-<td>27</td>
-</tr>
-<tr>
-<td>Peak Design Cuff Camera Wrist Strap</td>
-<td>6</td>
-<td>26</td>
-</tr>
-<tr>
-<td>Travelon Micro Scale</td>
-<td>5</td>
-<td>125</td>
-</tr>
-<tr>
-<td>BlitzWolf Bluetooth Tripod/Monopod</td>
-<td>4</td>
-<td>150</td>
-</tr>
-<tr>
-<td>Humangear GoBites Duo</td>
-<td>3</td>
-<td>22</td>
-</tr>
-<tr>
-<td>Vapur Bottle 1L</td>
-<td>1</td>
-<td>41</td>
-</tr>
-</tbody>
-</table>
-<h2 id="which-approach-is-better" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#which-approach-is-better">Which approach is better?</a></h2>
-<h3 id="go-benchmarking" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#go-benchmarking">Go benchmarking</a></h3>
-<p>The Go standard library&rsquo;s <code>testing</code> package makes it straightforward for us to <a href="https://golang.org/pkg/testing/#hdr-Benchmarks">benchmark</a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&rsquo;s a simple <code>main_test.go</code> file:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&#34;testing&#34;</span>
-<span class="p">)</span>
-
-<span class="kd">func</span> <span class="nf">Benchmark_greedy</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">itemList</span> <span class="o">:=</span> <span class="nf">readItems</span><span class="p">(</span><span class="s">&#34;objects.csv&#34;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">minaal</span> <span class="o">:=</span> <span class="nx">bag</span><span class="p">{</span><span class="nx">bagWeight</span><span class="p">:</span> <span class="mi">1415</span><span class="p">,</span> <span class="nx">currItemsWeight</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">maxItemsWeight</span><span class="p">:</span> <span class="mi">5585</span><span class="p">}</span>
-        <span class="nf">greedy</span><span class="p">(</span><span class="nx">itemList</span><span class="p">,</span> <span class="nx">minaal</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">Benchmark_dynamic</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">itemList</span> <span class="o">:=</span> <span class="nf">readItems</span><span class="p">(</span><span class="s">&#34;objects.csv&#34;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">minaal</span> <span class="o">:=</span> <span class="nx">bag</span><span class="p">{</span><span class="nx">bagWeight</span><span class="p">:</span> <span class="mi">1415</span><span class="p">,</span> <span class="nx">currItemsWeight</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">maxItemsWeight</span><span class="p">:</span> <span class="mi">5585</span><span class="p">}</span>
-        <span class="nf">dynamic</span><span class="p">(</span><span class="nx">itemList</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">minaal</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>We can run <code>go test -bench=. -benchmem</code> to see these results:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Benchmark_greedy-4       <span class="m">1000000</span>              <span class="m">1619</span> ns/op            <span class="m">2128</span> B/op          <span class="m">9</span> allocs/op
-Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m">1545322</span> ns/op         <span class="m">2020332</span> B/op         <span class="m">49</span> allocs/op
-</code></pre></div><h4 id="greedy-algorithm-performance" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#greedy-algorithm-performance">Greedy algorithm performance</a></h4>
-<p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.</p>
-<h4 id="dynamic-programming-performance" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#dynamic-programming-performance">Dynamic programming performance</a></h4>
-<p>The dynamic programming algorithm was run 1,000 times. Its speed was measured to be 1.545322 milliseconds or 0.001545322 seconds (translation: still pretty fast). It required 2,020,332 Bytes or 2-ish Megabytes, and 49 distinct memory allocations per iteration.</p>
-<h3 id="the-verdict" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#the-verdict">The verdict</a></h3>
-<p>Part of choosing the right approach to solving any programming problem is taking into account the size of the input data set. In this case, it&rsquo;s a small one. In this scenario, a one-pass greedy algorithm will always be faster and less resource-needy than dynamic programming, simply because it has fewer steps. Our greedy algorithm was almost two orders of magnitude faster and less memory-hungry than our dynamic programming algorithm.</p>
-<p>Not having those extra steps, however, means that getting the best possible solution from the greedy algorithm is unlikely.</p>
-<p>It&rsquo;s clear that the dynamic programming algorithm gave us better numbers: a lower weight, and higher overall worth.</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Greedy algorithm</th>
-<th>Dynamic programming</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Total weight:</strong></td>
-<td>6987g</td>
-<td>6955g</td>
-</tr>
-<tr>
-<td><strong>Total worth:</strong></td>
-<td>716</td>
-<td>757</td>
-</tr>
-</tbody>
-</table>
-<p>Where dynamic programming on small data sets lacks in performance, it makes up in optimization. The question then becomes whether that additional optimization is worth the performance cost.</p>
-<p>&ldquo;Better,&rdquo; of course, is a subjective judgement. If speed and low resource usage is our success metric, then the greedy algorithm is clearly better. If the total worth of items in the bag is our success metric, then dynamic programming is clearly better. However, our scenario is a practical one, and only one of these algorithm designs returned an answer I&rsquo;d choose. In optimizing for the overall greatest possible total worth of the items in the bag, the dynamic programming algorithm left out my highest-worth, but also heaviest, item: my laptop. The chargers and cables, Roost stand, and keyboard that were included aren&rsquo;t much use without it.</p>
-<h3 id="better-algorithm-design" class="anchor-link"><a href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#better-algorithm-design">Better algorithm design</a></h3>
-<p>There&rsquo;s a simple way to alter the dynamic programming approach so that the laptop is always included: we can modify the data so that the worth of the laptop is greater than the sum of the worth of all the other items. (Try it out!)</p>
-<p>Perhaps in re-designing the dynamic programming algorithm to be more practical, we might choose another success metric that better reflects an item&rsquo;s importance, instead of a subjective worth value. There are many possible metrics we can use to represent the value of an item. Here are a few examples of a good proxy:</p>
-<ul>
-<li>Amount of time spent using the item</li>
-<li>Initial cost of purchasing the item</li>
-<li>Cost of replacement if the item were lost today</li>
-<li>Dollar value of the product of using the item</li>
-</ul>
-<p>By the same token, the greedy algorithm&rsquo;s results might be improved with the use of one of these alternate metrics.</p>
-<p>On top of choosing an appropriate approach to solving the knapsack problem in general, it is helpful to design our algorithm in a way that translates the practicalities of a scenario into code.</p>
-<p>There are many considerations for better algorithm design beyond the scope of this introductory post. One of these is <strong>time complexity</strong>, and I&rsquo;ve <a href="/verbose/introduction-time-complexity/">written about it here</a>. A future algorithm may very well decide my bag&rsquo;s contents on the next trip, but we&rsquo;re not quite there yet. Stay tuned!</p>
-
-    </div>
-</article>
-
-<div id="up-container">
-    <a href="#" id="up">&#709;</a>
-</div>
-
-<div class="page-separator">
-    <hr />
-</div>
-
-
-<div id="webmentions"></div>
-
-
-<a href="https://brid.gy/publish/twitter"></a>
-<data class="p-bridgy-omit-link" value="false"></data>
-
-
-
-<div class="related">
-    <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
-    <ul role="menubar" id="article-list">
-        
-        
-
-<li role="none">
-    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">A coffee-break introduction to time complexity of algorithms</a>
-    <p>
-        A groundwork understanding of algorithm time complexity in about fifteen minutes.
-    </p>
-    
-    <p class="metadata">
-        
-        <a class="tag button" href="/tags/algorithms/">algorithms</a>
-        
-         ☕️ ☕️ ☕️
-        &nbsp;16 min read
-        
-    </p>
-    
-</li>
-
-
-
-        
-        
-
-<li role="none">
-    <a role="menuitem" class="article-link" href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/">Build your own serverless subscriber list with Go and AWS</a>
-    <p>
-        How to build your own newsletter list with DynamoDB and SES email sign up confirmations.
-    </p>
-    
-    <p class="metadata">
-        
-        <a class="tag button" href="/tags/api/">api</a>
-        
-         ☕️ ☕️
-        &nbsp;7 min read
-        
-    </p>
-    
-</li>
-
-
-
-        
-        
-
-        
-    </ul>
-    
-
-    <div class="page-separator">
-        <p class="back-link"><a href="/blog">
-                &lt;&lt; Back to blog</a>
-        </p>
-    </div>
-</div>
-
-            </div>
-
-            <footer class="container">
-                
-
-
-
-
-
-<div class="markdown bio h-card p-author">
-    
-    <strong><a href="https://victoria.dev/" class="u-url p-name">Victoria Drake</a></strong>
-    <figure class="profile title-avatar u-photo">
-    <img src="/img/victoria_headshot.jpg"
-         alt="Victoria&#39;s headshot"/> 
-</figure>
-
-<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award three years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p>
-<p><a href="/about">about</a> - <a href="mailto:hello@victoria.dev">email</a> - <a href="https://github.com/victoriadrake">github</a> - <a href="https://twitter.com/victoriadotdev">twitter</a> - <a href="https://www.linkedin.com/in/victoriadotdev/">linkedin</a></p>
-
-</div>
-
-
-
-
-            </footer>
-        </main>
-
-        
-        
-
-<script src="/js/webmention.min.js" data-wordcount="42" async></script>
-
-
-        <nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
-            <ul role="menubar">
-                
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/">
-                        <img src='/img/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/blog/">
-                        <img src='/img/quote.svg' alt='blog icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/about/">
-                        <img src='/img/profile.svg' alt='about page icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/coffee/">
-                        <img src='/img/coffee.svg' alt='coffee icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-                <li role="none" class="menu-item">
-                    <a role="menuitem"
-                        href="/bookshelf/">
-                        <img src='/img/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'></a >
-                </li>
-                
-            </ul>
-        </nav>
-    </body>
-
-</html>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="chrome=1"><meta name=HandheldFriendly content="True"><meta name=MobileOptimized content="320"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams."><title>Knapsack problem algorithms for my real-life carry-on knapsack | victoria.dev</title><link href=https://github.com/victoriadrake rel=me><link rel=webmention href=https://webmention.io/victoria.dev/webmention><link rel=pingback href=https://webmention.io/victoria.dev/xmlrpc><link rel=feed href=https://victoria.dev/neofeed><script async defer data-domain=victoria.dev src=https://p.victoria.dev/js/index.js></script><meta name=monetization content="$ilp.uphold.com/pBRfRwg2EJAe"><meta property="og:title" content="Knapsack problem algorithms for my real-life carry-on knapsack - victoria.dev"><meta property="og:type" content="website"><meta property="og:description" content="Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag."><meta property="og:url" content="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/"><meta property="og:site_name" content="victoria.dev"><meta property="og:image" content="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/cover_knapsack-doodle.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Knapsack problem algorithms for my real-life carry-on knapsack"><meta name=twitter:image content="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/cover_knapsack-doodle.png"><meta name=twitter:description content="Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag."><link rel="shortcut icon" href=/img/favicon.ico><link rel=stylesheet href=/css/main.min.b24a173485d1dc8d036f80df3a292a5f843b412cbceb66fff789eaff73266449.css integrity="sha256-skoXNIXR3I0Db4DfOikqX4Q7QSy862b/94nq/3MmZEk=" media=screen></head><body><header role=banner><nav aria-label="Victoria.dev main menu" id=menu><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon> hi</a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon> blog</a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon> about</a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon> buy me coffee</a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon> bookshelf</a></li><li role=none class=menu-item><a role=menuitem id=rss href=https://victoria.dev/index.xml rel=alternate type=application/rss+xml title="RSS for Knapsack problem algorithms for my real-life carry-on knapsack"><img src=/img/rss.svg alt="RSS icon" height=18px class=filter-icon> rss</a></li></ul></nav></header><main aria-role=main><div class=container><div id=cover-image><img src=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/cover_knapsack-doodle.png alt="cover image"></div><article><h1>Knapsack problem algorithms for my real-life carry-on knapsack</h1><p class=subtitle>Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag.</p><span><a class="tag button" href=/tags/algorithms/>algorithms
+</a>&nbsp;
+<a class="tag button" href=/tags/data/>data
+</a>&nbsp;
+<a class="tag button" href=/tags/go/>go
+</a>&nbsp;</span><p class=metadata id=date><span><a class="u-url dt-published" href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/>May 9, 2018</a></span>
+<span><em>Updated: Jan 17, 2021</em></span>
+<span>☕️ ☕️ ☕️ ☕️&nbsp;23 min read</span></p></p><div class=toc-dropdown><input type=checkbox id=toc-toggle>
+<label for=toc-toggle id=toggle><p class=toc-title><span class=toc-dropdown-icon><img src=/img/anchor.svg height=18px class=filter-icon></span>
+Jump to section...</p></label><nav id=TableOfContents><ul><li><a href=#the-knapsack-problem>The knapsack problem</a></li><li><a href=#the-set-up>The set up</a></li><li><a href=#data-structures>Data structures</a><ul><li><a href=#reading-in-a-file>Reading in a file</a></li><li><a href=#creating-a-struct>Creating a struct</a></li><li><a href=#parsing-and-storing-our-data>Parsing and storing our data</a></li></ul></li><li><a href=#greedy-algorithm>Greedy algorithm</a><ul><li><a href=#building-our-greedy-algorithm>Building our greedy algorithm</a></li><li><a href=#greedy-algorithm-results>Greedy algorithm results</a></li></ul></li><li><a href=#dynamic-programming>Dynamic programming</a><ul><li><a href=#building-our-dynamic-programming-algorithm>Building our dynamic programming algorithm</a></li><li><a href=#getting-our-optimized-item-list>Getting our optimized item list</a></li><li><a href=#dynamic-programming-results>Dynamic programming results</a></li><li><a href=#input-sort-order>Input sort order</a></li></ul></li><li><a href=#which-approach-is-better>Which approach is better?</a><ul><li><a href=#go-benchmarking>Go benchmarking</a></li><li><a href=#the-verdict>The verdict</a></li><li><a href=#better-algorithm-design>Better algorithm design</a></li></ul></li></ul></nav></div><div class=page-separator><hr></div><div class="markdown e-content"><h2 id=the-knapsack-problem class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#the-knapsack-problem>The knapsack problem</a></h2><p>I&rsquo;m a nomad and live out of one carry-on bag. This means that the total weight of all my worldly possessions must fall under airline cabin baggage weight limits - usually 10kg. On some smaller airlines, however, this weight limit drops to 7kg. Occasionally, I have to decide not to bring something with me to adjust to the smaller weight limit.</p><p>As a practical exercise, deciding what to leave behind (or get rid of altogether) entails laying out all my things and choosing which ones to keep. That decision is based on the item&rsquo;s usefulness to me (its worth) and its weight.</p><figure><img src=knapsack-stuff.jpeg alt="All my stuff."><figcaption><p>This is all my stuff, and my Minaal Carry-on bag.</p></figcaption></figure><p>Being a programmer, I&rsquo;m aware that decisions like this could be made more efficiently by a computer. It&rsquo;s done so frequently and so ubiquitously, in fact, that many will recognize this scenario as the classic <em>packing problem</em> or <em>knapsack problem.</em> How do I go about telling a computer to put as many important items in my bag as possible while coming in at or under a weight limit of 7kg? With algorithms! Yay!</p><p>I&rsquo;ll discuss two common approaches to solving the knapsack problem: one called a <em>greedy algorithm,</em> and another called <em>dynamic programming</em> (a little harder, but better, faster, stronger&mldr;).</p><p>Let&rsquo;s get to it.</p><h2 id=the-set-up class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#the-set-up>The set up</a></h2><p>I prepared my data in the form of a CSV file with three columns: the item&rsquo;s name (a string), a representation of its worth (an integer), and its weight in grams (an integer). There are 40 items in total. I represented worth by ranking each item from 40 to 1, with 40 being the most important and 1 equating with something like &ldquo;why do I even have this again?&rdquo; (If you&rsquo;ve never listed out all your possessions and ranked them by order of how useful they are to you, I highly recommend you try it. It can be a very revealing exercise.)</p><p><strong>Total weight of all items and bag:</strong> 9003g</p><p><strong>Bag weight:</strong> 1415g</p><p><strong>Airline limit:</strong> 7000g</p><p><strong>Maximum weight of items I can pack:</strong> 5585g</p><p><strong>Total possible worth of items:</strong> 820</p><p><strong>The challenge:</strong> Pack as many items as the limit allows while maximizing the total worth.</p><h2 id=data-structures class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#data-structures>Data structures</a></h2><h3 id=reading-in-a-file class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#reading-in-a-file>Reading in a file</a></h3><p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&rsquo;s <code>io/ioutil</code> package makes the first part straightforward.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kn>package</span> <span class=nx>main</span>
+
+<span class=kn>import</span> <span class=p>(</span>
+    <span class=s>&#34;fmt&#34;</span>
+    <span class=s>&#34;io/ioutil&#34;</span>
+<span class=p>)</span>
+
+<span class=kd>func</span> <span class=nf>check</span><span class=p>(</span><span class=nx>e</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+    <span class=k>if</span> <span class=nx>e</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+        <span class=nb>panic</span><span class=p>(</span><span class=nx>e</span><span class=p>)</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=kd>func</span> <span class=nf>readItems</span><span class=p>(</span><span class=nx>path</span> <span class=kt>string</span><span class=p>)</span> <span class=p>{</span>
+    <span class=nx>dat</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>ioutil</span><span class=p>.</span><span class=nf>ReadFile</span><span class=p>(</span><span class=nx>path</span><span class=p>)</span>
+    <span class=nf>check</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+    <span class=nx>fmt</span><span class=p>.</span><span class=nf>Print</span><span class=p>(</span><span class=nb>string</span><span class=p>(</span><span class=nx>dat</span><span class=p>))</span>
+<span class=p>}</span>
+</code></pre></div><p>The <code>ReadFile()</code> function takes a file path and returns the file&rsquo;s contents and an error (<code>nil</code> if the call is successful) so we&rsquo;ve also created a <code>check()</code> function to handle any errors that might be returned. In a real-world application we probably would want to do something more sophisticated than <code>panic</code>, but that&rsquo;s not important right now.</p><h3 id=creating-a-struct class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#creating-a-struct>Creating a struct</a></h3><p>Now that we&rsquo;ve got our data, we should probably do something with it. Since we&rsquo;re working with real-life items and a real-life bag, let&rsquo;s create some types to represent them and make it easier to conceptualize our program. A <code>struct</code> in Go is a typed collection of fields. Here are our two types:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>type</span> <span class=nx>item</span> <span class=kd>struct</span> <span class=p>{</span>
+    <span class=nx>name</span>          <span class=kt>string</span>
+    <span class=nx>worth</span><span class=p>,</span> <span class=nx>weight</span> <span class=kt>int</span>
+<span class=p>}</span>
+
+<span class=kd>type</span> <span class=nx>bag</span> <span class=kd>struct</span> <span class=p>{</span>
+    <span class=nx>bagWeight</span><span class=p>,</span> <span class=nx>currItemsWeight</span><span class=p>,</span> <span class=nx>maxItemsWeight</span><span class=p>,</span> <span class=nx>totalWeight</span> <span class=kt>int</span>
+    <span class=nx>items</span>                                                   <span class=p>[]</span><span class=nx>item</span>
+<span class=p>}</span>
+</code></pre></div><p>It is helpful to use field names that are very descriptive. You can see that the structs are set up just as we&rsquo;ve described the things they represent. An <code>item</code> has a <code>name</code> (string), and a <code>worth</code> and <code>weight</code> (integers). A <code>bag</code> has several fields of type <code>int</code> representing its attributes, and also has the ability to hold <code>items</code>, represented in the struct as a slice of <code>item</code> type thingamabobbers.</p><h3 id=parsing-and-storing-our-data class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#parsing-and-storing-our-data>Parsing and storing our data</a></h3><p>Several comprehensive Go packages exist that we could use to parse our CSV data&mldr; but where&rsquo;s the fun in that? Let&rsquo;s go basic with some string splitting and a for loop. Here&rsquo;s our updated <code>readItems()</code> function:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=nf>readItems</span><span class=p>(</span><span class=nx>path</span> <span class=kt>string</span><span class=p>)</span> <span class=p>[]</span><span class=nx>item</span> <span class=p>{</span>
+
+    <span class=nx>dat</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>ioutil</span><span class=p>.</span><span class=nf>ReadFile</span><span class=p>(</span><span class=nx>path</span><span class=p>)</span>
+    <span class=nf>check</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+
+    <span class=nx>lines</span> <span class=o>:=</span> <span class=nx>strings</span><span class=p>.</span><span class=nf>Split</span><span class=p>(</span><span class=nb>string</span><span class=p>(</span><span class=nx>dat</span><span class=p>),</span> <span class=s>&#34;\n&#34;</span><span class=p>)</span>
+
+    <span class=nx>itemList</span> <span class=o>:=</span> <span class=nb>make</span><span class=p>([]</span><span class=nx>item</span><span class=p>,</span> <span class=mi>0</span><span class=p>)</span>
+
+    <span class=k>for</span> <span class=nx>i</span><span class=p>,</span> <span class=nx>v</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>lines</span> <span class=p>{</span>
+        <span class=k>if</span> <span class=nx>i</span> <span class=o>==</span> <span class=mi>0</span> <span class=p>{</span>
+            <span class=k>continue</span>
+        <span class=p>}</span>
+        <span class=nx>s</span> <span class=o>:=</span> <span class=nx>strings</span><span class=p>.</span><span class=nf>Split</span><span class=p>(</span><span class=nx>v</span><span class=p>,</span> <span class=s>&#34;,&#34;</span><span class=p>)</span>
+        <span class=nx>newItemWorth</span><span class=p>,</span> <span class=nx>_</span> <span class=o>:=</span> <span class=nx>strconv</span><span class=p>.</span><span class=nf>Atoi</span><span class=p>(</span><span class=nx>s</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+        <span class=nx>newItemWeight</span><span class=p>,</span> <span class=nx>_</span> <span class=o>:=</span> <span class=nx>strconv</span><span class=p>.</span><span class=nf>Atoi</span><span class=p>(</span><span class=nx>s</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+        <span class=nx>newItem</span> <span class=o>:=</span> <span class=nx>item</span><span class=p>{</span><span class=nx>name</span><span class=p>:</span> <span class=nx>s</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=nx>worth</span><span class=p>:</span> <span class=nx>newItemWorth</span><span class=p>,</span> <span class=nx>weight</span><span class=p>:</span> <span class=nx>newItemWeight</span><span class=p>}</span>
+        <span class=nx>itemList</span> <span class=p>=</span> <span class=nb>append</span><span class=p>(</span><span class=nx>itemList</span><span class=p>,</span> <span class=nx>newItem</span><span class=p>)</span>
+    <span class=p>}</span>
+    <span class=k>return</span> <span class=nx>itemList</span>
+<span class=p>}</span>
+
+</code></pre></div><p>Using <code>strings.Split</code>, we split our <code>dat</code> on newlines. We then create an empty <code>itemList</code> to hold our items.</p><p>In our for loop, we skip the first line of our CSV file (the headers) then iterate over each line. We use <code>strconv.Atoi</code> (read &ldquo;A to i&rdquo;) to convert the values for each item&rsquo;s worth and weight into integers. We then create a <code>newItem</code> with these field values and append it to the <code>itemList</code>. Finally, we return <code>itemList</code>.</p><p>Here&rsquo;s what our set up looks like so far:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kn>package</span> <span class=nx>main</span>
+
+<span class=kn>import</span> <span class=p>(</span>
+    <span class=s>&#34;io/ioutil&#34;</span>
+    <span class=s>&#34;strconv&#34;</span>
+    <span class=s>&#34;strings&#34;</span>
+<span class=p>)</span>
+
+<span class=kd>type</span> <span class=nx>item</span> <span class=kd>struct</span> <span class=p>{</span>
+    <span class=nx>name</span>          <span class=kt>string</span>
+    <span class=nx>worth</span><span class=p>,</span> <span class=nx>weight</span> <span class=kt>int</span>
+<span class=p>}</span>
+
+<span class=kd>type</span> <span class=nx>bag</span> <span class=kd>struct</span> <span class=p>{</span>
+    <span class=nx>bagWeight</span><span class=p>,</span> <span class=nx>currItemsWeight</span><span class=p>,</span> <span class=nx>maxItemsWeight</span><span class=p>,</span> <span class=nx>totalWeight</span><span class=p>,</span> <span class=nx>totalWorth</span> <span class=kt>int</span>
+    <span class=nx>items</span>                                                               <span class=p>[]</span><span class=nx>item</span>
+<span class=p>}</span>
+
+<span class=kd>func</span> <span class=nf>check</span><span class=p>(</span><span class=nx>e</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+    <span class=k>if</span> <span class=nx>e</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+        <span class=nb>panic</span><span class=p>(</span><span class=nx>e</span><span class=p>)</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=kd>func</span> <span class=nf>readItems</span><span class=p>(</span><span class=nx>path</span> <span class=kt>string</span><span class=p>)</span> <span class=p>[]</span><span class=nx>item</span> <span class=p>{</span>
+
+    <span class=nx>dat</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>ioutil</span><span class=p>.</span><span class=nf>ReadFile</span><span class=p>(</span><span class=nx>path</span><span class=p>)</span>
+    <span class=nf>check</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+
+    <span class=nx>lines</span> <span class=o>:=</span> <span class=nx>strings</span><span class=p>.</span><span class=nf>Split</span><span class=p>(</span><span class=nb>string</span><span class=p>(</span><span class=nx>dat</span><span class=p>),</span> <span class=s>&#34;\n&#34;</span><span class=p>)</span>
+
+    <span class=nx>itemList</span> <span class=o>:=</span> <span class=nb>make</span><span class=p>([]</span><span class=nx>item</span><span class=p>,</span> <span class=mi>0</span><span class=p>)</span>
+
+    <span class=k>for</span> <span class=nx>i</span><span class=p>,</span> <span class=nx>v</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>lines</span> <span class=p>{</span>
+        <span class=k>if</span> <span class=nx>i</span> <span class=o>==</span> <span class=mi>0</span> <span class=p>{</span>
+            <span class=k>continue</span> <span class=c1>// skip the headers on the first line
+</span><span class=c1></span>        <span class=p>}</span>
+        <span class=nx>s</span> <span class=o>:=</span> <span class=nx>strings</span><span class=p>.</span><span class=nf>Split</span><span class=p>(</span><span class=nx>v</span><span class=p>,</span> <span class=s>&#34;,&#34;</span><span class=p>)</span>
+        <span class=nx>newItemWorth</span><span class=p>,</span> <span class=nx>_</span> <span class=o>:=</span> <span class=nx>strconv</span><span class=p>.</span><span class=nf>Atoi</span><span class=p>(</span><span class=nx>s</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+        <span class=nx>newItemWeight</span><span class=p>,</span> <span class=nx>_</span> <span class=o>:=</span> <span class=nx>strconv</span><span class=p>.</span><span class=nf>Atoi</span><span class=p>(</span><span class=nx>s</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+        <span class=nx>newItem</span> <span class=o>:=</span> <span class=nx>item</span><span class=p>{</span><span class=nx>name</span><span class=p>:</span> <span class=nx>s</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=nx>worth</span><span class=p>:</span> <span class=nx>newItemWorth</span><span class=p>,</span> <span class=nx>weight</span><span class=p>:</span> <span class=nx>newItemWeight</span><span class=p>}</span>
+        <span class=nx>itemList</span> <span class=p>=</span> <span class=nb>append</span><span class=p>(</span><span class=nx>itemList</span><span class=p>,</span> <span class=nx>newItem</span><span class=p>)</span>
+    <span class=p>}</span>
+    <span class=k>return</span> <span class=nx>itemList</span>
+<span class=p>}</span>
+</code></pre></div><p>Now that we&rsquo;ve got our data structures set up, let&rsquo;s get packing (🥁) on the first approach.</p><h2 id=greedy-algorithm class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#greedy-algorithm>Greedy algorithm</a></h2><p>A greedy algorithm is the most straightforward approach to solving the knapsack problem, in that it is a one-pass algorithm that constructs a single final solution. At each stage of the problem, the greedy algorithm picks the option that is locally optimal, meaning it looks like the most suitable option right now. It does not revise its previous choices as it progresses through our data set.</p><h3 id=building-our-greedy-algorithm class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#building-our-greedy-algorithm>Building our greedy algorithm</a></h3><p>The steps of the algorithm we&rsquo;ll use to solve our knapsack problem are:</p><ol><li>Sort items by worth, in descending order.</li><li>Start with the highest worth item. Put items into the bag until the next item on the list cannot fit.</li><li>Try to fill any remaining capacity with the next item on the list that can fit.</li></ol><p>If you read my <a href=https://victoria.dev/verbose/build-from-scratch/>article about solving problems and making paella</a>, you&rsquo;ll know that I always start by figuring out what the next most important question is. In this case, there are three main operations we need to figure out how to do:</p><ul><li>Sort items by worth.</li><li>Put an item in the bag.</li><li>Check to see if the bag is full.</li></ul><p>The first one is just a docs lookup away. Here&rsquo;s how we sort a slice in Go:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>sort</span><span class=p>.</span><span class=nf>Slice</span><span class=p>(</span><span class=nx>is</span><span class=p>,</span> <span class=kd>func</span><span class=p>(</span><span class=nx>i</span><span class=p>,</span> <span class=nx>j</span> <span class=kt>int</span><span class=p>)</span> <span class=kt>bool</span> <span class=p>{</span>
+    <span class=k>return</span> <span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=p>].</span><span class=nx>worth</span> <span class=p>&gt;</span> <span class=nx>is</span><span class=p>[</span><span class=nx>j</span><span class=p>].</span><span class=nx>worth</span>
+<span class=p>})</span>
+</code></pre></div><p>The <code>sort.Slice()</code> function orders our items according to the less function we provide. In this case, it will order the highest worth items before the lowest worth items.</p><p>Given that we don&rsquo;t want to put an item in the bag if it doesn&rsquo;t fit, we&rsquo;ll complete the last two tasks in reverse. First, we&rsquo;ll check to see if the item fits. If so, it goes in the bag.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=p>(</span><span class=nx>b</span> <span class=o>*</span><span class=nx>bag</span><span class=p>)</span> <span class=nf>addItem</span><span class=p>(</span><span class=nx>i</span> <span class=nx>item</span><span class=p>)</span> <span class=kt>error</span> <span class=p>{</span>
+    <span class=k>if</span> <span class=nx>b</span><span class=p>.</span><span class=nx>currItemsWeight</span><span class=o>+</span><span class=nx>i</span><span class=p>.</span><span class=nx>weight</span> <span class=o>&lt;=</span> <span class=nx>b</span><span class=p>.</span><span class=nx>maxItemsWeight</span> <span class=p>{</span>
+        <span class=nx>b</span><span class=p>.</span><span class=nx>currItemsWeight</span> <span class=o>+=</span> <span class=nx>i</span><span class=p>.</span><span class=nx>weight</span>
+        <span class=nx>b</span><span class=p>.</span><span class=nx>items</span> <span class=p>=</span> <span class=nb>append</span><span class=p>(</span><span class=nx>b</span><span class=p>.</span><span class=nx>items</span><span class=p>,</span> <span class=nx>i</span><span class=p>)</span>
+        <span class=k>return</span> <span class=kc>nil</span>
+    <span class=p>}</span>
+    <span class=k>return</span> <span class=nx>errors</span><span class=p>.</span><span class=nf>New</span><span class=p>(</span><span class=s>&#34;could not fit item&#34;</span><span class=p>)</span>
+<span class=p>}</span>
+</code></pre></div><p>Notice the <code>*</code> in our first line there. That indicates that <code>bag</code> is a pointer receiver (as opposed to a value receiver). It&rsquo;s a concept that can be slightly confusing if you&rsquo;re new to Go. Here are <a href=https://github.com/golang/go/wiki/CodeReviewComments#receiver-type>some things to consider</a> that might help you decide when to use a value receiver and when to use a pointer receiver. For the purposes of our <code>addItem()</code> function, this case applies:</p><blockquote><p>If the method needs to mutate the receiver, the receiver must be a pointer.</p></blockquote><p>Our use of a pointer receiver tells our function we want to operate on <em>this specific bag in particular</em>, not a new bag. It&rsquo;s important because without it, every item would always fit in a newly created bag! A little detail like this can make the difference between code that works and code that keeps you up until 4am chugging Red Bull and muttering to yourself. (Go to bed on time even if your code doesn&rsquo;t work - you&rsquo;ll thank me later.)</p><p>Now that we&rsquo;ve got our components, let&rsquo;s put together our greedy algorithm:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=nf>greedy</span><span class=p>(</span><span class=nx>is</span> <span class=p>[]</span><span class=nx>item</span><span class=p>,</span> <span class=nx>b</span> <span class=nx>bag</span><span class=p>)</span> <span class=p>{</span>
+    <span class=nx>sort</span><span class=p>.</span><span class=nf>Slice</span><span class=p>(</span><span class=nx>is</span><span class=p>,</span> <span class=kd>func</span><span class=p>(</span><span class=nx>i</span><span class=p>,</span> <span class=nx>j</span> <span class=kt>int</span><span class=p>)</span> <span class=kt>bool</span> <span class=p>{</span>
+        <span class=k>return</span> <span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=p>].</span><span class=nx>worth</span> <span class=p>&gt;</span> <span class=nx>is</span><span class=p>[</span><span class=nx>j</span><span class=p>].</span><span class=nx>worth</span>
+    <span class=p>})</span>
+
+    <span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>is</span> <span class=p>{</span>
+        <span class=nx>b</span><span class=p>.</span><span class=nf>addItem</span><span class=p>(</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=p>])</span>
+    <span class=p>}</span>
+
+    <span class=nx>b</span><span class=p>.</span><span class=nx>totalWeight</span> <span class=p>=</span> <span class=nx>b</span><span class=p>.</span><span class=nx>bagWeight</span> <span class=o>+</span> <span class=nx>b</span><span class=p>.</span><span class=nx>currItemsWeight</span>
+
+    <span class=k>for</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>v</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>b</span><span class=p>.</span><span class=nx>items</span> <span class=p>{</span>
+        <span class=nx>b</span><span class=p>.</span><span class=nx>totalWorth</span> <span class=o>+=</span> <span class=nx>v</span><span class=p>.</span><span class=nx>worth</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div><p>Then in our <code>main()</code> function, we&rsquo;ll create our bag, read in our data, and call our greedy algorithm. Here&rsquo;s what it looks like, all set up and ready to go:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+
+    <span class=nx>minaal</span> <span class=o>:=</span> <span class=nx>bag</span><span class=p>{</span><span class=nx>bagWeight</span><span class=p>:</span> <span class=mi>1415</span><span class=p>,</span> <span class=nx>currItemsWeight</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span> <span class=nx>maxItemsWeight</span><span class=p>:</span> <span class=mi>5585</span><span class=p>}</span>
+    <span class=nx>itemList</span> <span class=o>:=</span> <span class=nf>readItems</span><span class=p>(</span><span class=s>&#34;objects.csv&#34;</span><span class=p>)</span>
+
+    <span class=nf>greedy</span><span class=p>(</span><span class=nx>itemList</span><span class=p>,</span> <span class=nx>minaal</span><span class=p>)</span>
+<span class=p>}</span>
+</code></pre></div><h3 id=greedy-algorithm-results class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#greedy-algorithm-results>Greedy algorithm results</a></h3><p>So how does this algorithm do when it comes to efficiently packing our bag to maximize its total worth? Here&rsquo;s the result:</p><p><strong>Total weight of bag and items:</strong> 6987g</p><p><strong>Total worth of packed items:</strong> 716</p><p>Here are the items our greedy algorithm chose, sorted by worth:</p><table><thead><tr><th>Item</th><th>Worth</th><th>Weight</th></tr></thead><tbody><tr><td>Lenovo X1 Carbon (5th Gen)</td><td>40</td><td>112</td></tr><tr><td>10 pairs thongs</td><td>39</td><td>80</td></tr><tr><td>5 Underarmour Strappy</td><td>38</td><td>305</td></tr><tr><td>1 pair Uniqlo leggings</td><td>37</td><td>185</td></tr><tr><td>2 Lululemon Cool Racerback</td><td>36</td><td>174</td></tr><tr><td>Chargers and cables in Mini Bomber Travel Kit</td><td>35</td><td>665</td></tr><tr><td>The Roost Stand</td><td>34</td><td>170</td></tr><tr><td>ThinkPad Compact Bluetooth Keyboard with trackpoint</td><td>33</td><td>460</td></tr><tr><td>Seagate Backup PlusSlim</td><td>32</td><td>159</td></tr><tr><td>1 pair black denim shorts</td><td>31</td><td>197</td></tr><tr><td>2 pairs Nike Pro shorts</td><td>30</td><td>112</td></tr><tr><td>2 pairs Lululemon shorts</td><td>29</td><td>184</td></tr><tr><td>Isabella T-Strap Croc sandals</td><td>28</td><td>200</td></tr><tr><td>2 Underarmour HeatGear CoolSwitch tank tops</td><td>27</td><td>138</td></tr><tr><td>5 pairs black socks</td><td>26</td><td>95</td></tr><tr><td>2 pairs Injinji Women&rsquo;s Run Lightweight No-Show Toe Socks</td><td>25</td><td>54</td></tr><tr><td>1 fancy tank top</td><td>24</td><td>71</td></tr><tr><td>1 light and stretchylong-sleeve shirt (Gap Fit)</td><td>23</td><td>147</td></tr><tr><td>Uniqlo Ultralight Down insulating jacket</td><td>22</td><td>235</td></tr><tr><td>Patagonia Torrentshell</td><td>21</td><td>301</td></tr><tr><td>Lightweight Merino Wool Buff</td><td>20</td><td>50</td></tr><tr><td>1 LBD (H&M)</td><td>19</td><td>174</td></tr><tr><td>Field Notes Pitch Black Memo Book Dot-Graph</td><td>18</td><td>68</td></tr><tr><td>Innergie PocketCell USB-C 6000mAh power bank</td><td>17</td><td>14</td></tr><tr><td>JBL Reflect Mini Bluetooth Sport Headphones</td><td>13</td><td>14</td></tr><tr><td>Oakley Latch Sunglasses</td><td>11</td><td>30</td></tr><tr><td>Petzl E+LITE Emergency Headlamp</td><td>8</td><td>27</td></tr></tbody></table><p>It&rsquo;s clear that the greedy algorithm is a straightforward way to quickly find a feasible solution. For small data sets, it will probably be close to the optimal solution. The algorithm packed a total item worth of 716 (104 points less than the maximum possible value), while filling the bag with just 13g left over.</p><p>As we learned earlier, the greedy algorithm doesn&rsquo;t improve upon the solution it returns. It simply adds the next highest worth item it can to the bag.</p><p>Let&rsquo;s look at another method for solving the knapsack problem that will give us the optimal solution - the highest possible total worth under the weight limit.</p><h2 id=dynamic-programming class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#dynamic-programming>Dynamic programming</a></h2><p>The name &ldquo;dynamic programming&rdquo; can be a bit misleading. It&rsquo;s not a style of programming, as the name might cause you to infer, but simply another approach.</p><p>Dynamic programming differs from the straightforward greedy algorithm in a few key ways. Firstly, a dynamic programming bag packing solution enumerates the entire solution space with all possibilities of item combinations that could be used to pack our bag. Where a greedy algorithm chooses the most optimal <em>local</em> solution, dynamic programming algorithms are able to find the most optimal <em>global</em> solution.</p><p>Secondly, dynamic programming uses memoization to store the results of previously computed operations and returns the cached result when the operation occurs again. This allows it to &ldquo;remember&rdquo; previous combinations. This takes less time than it would to re-compute the answer again.</p><h3 id=building-our-dynamic-programming-algorithm class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#building-our-dynamic-programming-algorithm>Building our dynamic programming algorithm</a></h3><p>To use dynamic programming to find the optimal recipe for packing our bag, we&rsquo;ll need to:</p><ol><li>Create a matrix representing all subsets of the items (the solution space) with rows representing items and columns representing the bag&rsquo;s remaining weight capacity</li><li>Loop through the matrix and calculate the worth that can be obtained by each combination of items at each stage of the bag&rsquo;s capacity</li><li>Examine the completed matrix to determine which items to add to the bag in order to produce the maximum possible worth for the bag in total</li></ol><p>It will be most helpful to visualize our solution space. Here&rsquo;s a representation of what we&rsquo;re building with our code:</p><figure><img src=knapsack-matrix.jpg alt="A sketch of the matrix with rows for items and columns for grams of weight."><figcaption><p>The empty knapsackian multiverse.</p></figcaption></figure><p>In Go, we can create this matrix as a slice of slices.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>matrix</span> <span class=o>:=</span> <span class=nb>make</span><span class=p>([][]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>numItems</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span> <span class=c1>// rows representing items
+</span><span class=c1></span><span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>matrix</span> <span class=p>{</span>
+    <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span> <span class=p>=</span> <span class=nb>make</span><span class=p>([]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>capacity</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span> <span class=c1>// columns representing grams of weight
+</span><span class=c1></span><span class=p>}</span>
+</code></pre></div><p>We&rsquo;ve padded the rows and columns by <code>1</code> so that the indicies match the item and weight numbers.</p><p>Now that we&rsquo;ve created our matrix, we&rsquo;ll fill it by looping over the rows and the columns:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// loop through table rows
+</span><span class=c1></span><span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=mi>1</span><span class=p>;</span> <span class=nx>i</span> <span class=o>&lt;=</span> <span class=nx>numItems</span><span class=p>;</span> <span class=nx>i</span><span class=o>++</span> <span class=p>{</span>
+    <span class=c1>// loop through table columns
+</span><span class=c1></span>    <span class=k>for</span> <span class=nx>w</span> <span class=o>:=</span> <span class=mi>1</span><span class=p>;</span> <span class=nx>w</span> <span class=o>&lt;=</span> <span class=nx>capacity</span><span class=p>;</span> <span class=nx>w</span><span class=o>++</span> <span class=p>{</span>
+        <span class=c1>// do stuff in each element
+</span><span class=c1></span>    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div><p>Then for each element, we&rsquo;ll calculate the worth value to ascribe to it. We do this with code that represents the following:</p><blockquote><p>If the item at the index matching the current row fits within the weight capacity represented by the current column, take the maximum of either:</p><ol><li>The total worth of the items already in the bag or,</li><li>The total worth of all the items in the bag except the item at the previous row index, plus the new item&rsquo;s worth</li></ol></blockquote><p>In other words, as our algorithm considers one of the items, we&rsquo;re asking it to decide whether this item added to the bag would produce a higher total worth than the last item it added to the bag, at the bag&rsquo;s current total weight. If this current item is a better choice, put it in - if not, leave it out.</p><p>Here&rsquo;s the code that accomplishes this:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// if weight of item matching this index can fit at the current capacity column...
+</span><span class=c1></span><span class=k>if</span> <span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>].</span><span class=nx>weight</span> <span class=o>&lt;=</span> <span class=nx>w</span> <span class=p>{</span>
+    <span class=c1>// worth of this subset without this item
+</span><span class=c1></span>    <span class=nx>valueOne</span> <span class=o>:=</span> <span class=nb>float64</span><span class=p>(</span><span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>w</span><span class=p>])</span>
+    <span class=c1>// worth of this subset without the previous item, and this item instead
+</span><span class=c1></span>    <span class=nx>valueTwo</span> <span class=o>:=</span> <span class=nb>float64</span><span class=p>(</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>].</span><span class=nx>worth</span> <span class=o>+</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>w</span><span class=o>-</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>].</span><span class=nx>weight</span><span class=p>])</span>
+    <span class=c1>// take maximum of either valueOne or valueTwo
+</span><span class=c1></span>    <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span> <span class=p>=</span> <span class=nb>int</span><span class=p>(</span><span class=nx>math</span><span class=p>.</span><span class=nf>Max</span><span class=p>(</span><span class=nx>valueOne</span><span class=p>,</span> <span class=nx>valueTwo</span><span class=p>))</span>
+<span class=c1>// if the new worth is not more, carry over the previous worth
+</span><span class=c1></span><span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+    <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span> <span class=p>=</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span>
+<span class=p>}</span>
+</code></pre></div><p>This process of comparing item combinations will continue until every item has been considered at every possible stage of the bag&rsquo;s increasing total weight. When all the above have been considered, we&rsquo;ll have enumerated the solution space - filled the matrix - with all possible total worth values.</p><p>We&rsquo;ll have a big chart of numbers, and in the last column at the last row we&rsquo;ll have our highest possible value.</p><figure><img src=knapsack-matrix-filled.jpg alt="A strictly representative representation of the filled matrix."><figcaption><p>A strictly representative representation of the filled matrix.</p></figcaption></figure><p>That&rsquo;s great, but how do we find out which combination of items were put in the bag to achieve that worth?</p><h3 id=getting-our-optimized-item-list class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#getting-our-optimized-item-list>Getting our optimized item list</a></h3><p>To see which items combine to create our optimal packing list, we&rsquo;ll need to examine our matrix in reverse to the way we created it. Since we know the highest possible value is in the last row in the last column, we&rsquo;ll start there. To find the items, we:</p><ol><li>Get the value of the current cell</li><li>Compare the value of the current cell to the value in the cell directly above it</li><li>If the values differ, there was a change to the bag items; find the next cell to examine by moving backwards through the columns according to the current item&rsquo;s weight (find the value of the bag before this current item was added)</li><li>If the values match, there was no change to the bag items; move up to the cell in the row above and repeat</li></ol><p>The nature of the action we&rsquo;re trying to achieve lends itself well to a recursive function. If you recall from <a href=https://victoria.dev/verbose/reduce-recursion-with-pie/>my previous article about making apple pie</a>, recursive functions are simply functions that call themselves under certain conditions. Here&rsquo;s what it looks like:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=nf>checkItem</span><span class=p>(</span><span class=nx>b</span> <span class=o>*</span><span class=nx>bag</span><span class=p>,</span> <span class=nx>i</span> <span class=kt>int</span><span class=p>,</span> <span class=nx>w</span> <span class=kt>int</span><span class=p>,</span> <span class=nx>is</span> <span class=p>[]</span><span class=nx>item</span><span class=p>,</span> <span class=nx>matrix</span> <span class=p>[][]</span><span class=kt>int</span><span class=p>)</span> <span class=p>{</span>
+    <span class=k>if</span> <span class=nx>i</span> <span class=o>&lt;=</span> <span class=mi>0</span> <span class=o>||</span> <span class=nx>w</span> <span class=o>&lt;=</span> <span class=mi>0</span> <span class=p>{</span>
+        <span class=k>return</span>
+    <span class=p>}</span>
+
+    <span class=nx>pick</span> <span class=o>:=</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span>
+    <span class=k>if</span> <span class=nx>pick</span> <span class=o>!=</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span> <span class=p>{</span>
+        <span class=nx>b</span><span class=p>.</span><span class=nf>addItem</span><span class=p>(</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>])</span>
+        <span class=nf>checkItem</span><span class=p>(</span><span class=nx>b</span><span class=p>,</span> <span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=nx>w</span><span class=o>-</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>].</span><span class=nx>weight</span><span class=p>,</span> <span class=nx>is</span><span class=p>,</span> <span class=nx>matrix</span><span class=p>)</span>
+    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+        <span class=nf>checkItem</span><span class=p>(</span><span class=nx>b</span><span class=p>,</span> <span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=nx>w</span><span class=p>,</span> <span class=nx>is</span><span class=p>,</span> <span class=nx>matrix</span><span class=p>)</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div><p>Our <code>checkItem()</code> function calls itself if the condition we described in step 4 is true. If step 3 is true, it also calls itself, but with different arguments.</p><p>Recursive functions require a base case. In this example, we want the function to stop once we run out of values of worth to compare. Thus our base case is when either <code>i</code> or <code>w</code> are <code>0</code>.</p><p>Here&rsquo;s how the dynamic programming approach looks when it&rsquo;s all put together:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>func</span> <span class=nf>checkItem</span><span class=p>(</span><span class=nx>b</span> <span class=o>*</span><span class=nx>bag</span><span class=p>,</span> <span class=nx>i</span> <span class=kt>int</span><span class=p>,</span> <span class=nx>w</span> <span class=kt>int</span><span class=p>,</span> <span class=nx>is</span> <span class=p>[]</span><span class=nx>item</span><span class=p>,</span> <span class=nx>matrix</span> <span class=p>[][]</span><span class=kt>int</span><span class=p>)</span> <span class=p>{</span>
+    <span class=k>if</span> <span class=nx>i</span> <span class=o>&lt;=</span> <span class=mi>0</span> <span class=o>||</span> <span class=nx>w</span> <span class=o>&lt;=</span> <span class=mi>0</span> <span class=p>{</span>
+        <span class=k>return</span>
+    <span class=p>}</span>
+
+    <span class=nx>pick</span> <span class=o>:=</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span>
+    <span class=k>if</span> <span class=nx>pick</span> <span class=o>!=</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span> <span class=p>{</span>
+        <span class=nx>b</span><span class=p>.</span><span class=nf>addItem</span><span class=p>(</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>])</span>
+        <span class=nf>checkItem</span><span class=p>(</span><span class=nx>b</span><span class=p>,</span> <span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=nx>w</span><span class=o>-</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>].</span><span class=nx>weight</span><span class=p>,</span> <span class=nx>is</span><span class=p>,</span> <span class=nx>matrix</span><span class=p>)</span>
+    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+        <span class=nf>checkItem</span><span class=p>(</span><span class=nx>b</span><span class=p>,</span> <span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=nx>w</span><span class=p>,</span> <span class=nx>is</span><span class=p>,</span> <span class=nx>matrix</span><span class=p>)</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=kd>func</span> <span class=nf>dynamic</span><span class=p>(</span><span class=nx>is</span> <span class=p>[]</span><span class=nx>item</span><span class=p>,</span> <span class=nx>b</span> <span class=o>*</span><span class=nx>bag</span><span class=p>)</span> <span class=o>*</span><span class=nx>bag</span> <span class=p>{</span>
+    <span class=nx>numItems</span> <span class=o>:=</span> <span class=nb>len</span><span class=p>(</span><span class=nx>is</span><span class=p>)</span>          <span class=c1>// number of items in knapsack
+</span><span class=c1></span>    <span class=nx>capacity</span> <span class=o>:=</span> <span class=nx>b</span><span class=p>.</span><span class=nx>maxItemsWeight</span> <span class=c1>// capacity of knapsack
+</span><span class=c1></span>
+    <span class=c1>// create the empty matrix
+</span><span class=c1></span>    <span class=nx>matrix</span> <span class=o>:=</span> <span class=nb>make</span><span class=p>([][]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>numItems</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span> <span class=c1>// rows representing items
+</span><span class=c1></span>    <span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>matrix</span> <span class=p>{</span>
+        <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span> <span class=p>=</span> <span class=nb>make</span><span class=p>([]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>capacity</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span> <span class=c1>// columns representing grams of weight
+</span><span class=c1></span>    <span class=p>}</span>
+
+    <span class=c1>// loop through table rows
+</span><span class=c1></span>    <span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=mi>1</span><span class=p>;</span> <span class=nx>i</span> <span class=o>&lt;=</span> <span class=nx>numItems</span><span class=p>;</span> <span class=nx>i</span><span class=o>++</span> <span class=p>{</span>
+        <span class=c1>// loop through table columns
+</span><span class=c1></span>        <span class=k>for</span> <span class=nx>w</span> <span class=o>:=</span> <span class=mi>1</span><span class=p>;</span> <span class=nx>w</span> <span class=o>&lt;=</span> <span class=nx>capacity</span><span class=p>;</span> <span class=nx>w</span><span class=o>++</span> <span class=p>{</span>
+
+            <span class=c1>// if weight of item matching this index can fit at the current capacity column...
+</span><span class=c1></span>            <span class=k>if</span> <span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>].</span><span class=nx>weight</span> <span class=o>&lt;=</span> <span class=nx>w</span> <span class=p>{</span>
+                <span class=c1>// worth of this subset without this item
+</span><span class=c1></span>                <span class=nx>valueOne</span> <span class=o>:=</span> <span class=nb>float64</span><span class=p>(</span><span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>w</span><span class=p>])</span>
+                <span class=c1>// worth of this subset without the previous item, and this item instead
+</span><span class=c1></span>                <span class=nx>valueTwo</span> <span class=o>:=</span> <span class=nb>float64</span><span class=p>(</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>].</span><span class=nx>worth</span> <span class=o>+</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>w</span><span class=o>-</span><span class=nx>is</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>].</span><span class=nx>weight</span><span class=p>])</span>
+                <span class=c1>// take maximum of either valueOne or valueTwo
+</span><span class=c1></span>                <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span> <span class=p>=</span> <span class=nb>int</span><span class=p>(</span><span class=nx>math</span><span class=p>.</span><span class=nf>Max</span><span class=p>(</span><span class=nx>valueOne</span><span class=p>,</span> <span class=nx>valueTwo</span><span class=p>))</span>
+            <span class=c1>// if the new worth is not more, carry over the previous worth
+</span><span class=c1></span>            <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+                <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span> <span class=p>=</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>i</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>w</span><span class=p>]</span>
+            <span class=p>}</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+
+    <span class=nf>checkItem</span><span class=p>(</span><span class=nx>b</span><span class=p>,</span> <span class=nx>numItems</span><span class=p>,</span> <span class=nx>capacity</span><span class=p>,</span> <span class=nx>is</span><span class=p>,</span> <span class=nx>matrix</span><span class=p>)</span>
+
+    <span class=c1>// add other statistics to the bag
+</span><span class=c1></span>    <span class=nx>b</span><span class=p>.</span><span class=nx>totalWorth</span> <span class=p>=</span> <span class=nx>matrix</span><span class=p>[</span><span class=nx>numItems</span><span class=p>][</span><span class=nx>capacity</span><span class=p>]</span>
+    <span class=nx>b</span><span class=p>.</span><span class=nx>totalWeight</span> <span class=p>=</span> <span class=nx>b</span><span class=p>.</span><span class=nx>bagWeight</span> <span class=o>+</span> <span class=nx>b</span><span class=p>.</span><span class=nx>currItemsWeight</span>
+
+    <span class=k>return</span> <span class=nx>b</span>
+<span class=p>}</span>
+</code></pre></div><h3 id=dynamic-programming-results class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#dynamic-programming-results>Dynamic programming results</a></h3><p>We expect that the dynamic programming approach will give us a more optimized solution than the greedy algorithm. So did it? Here are the results:</p><p><strong>Total weight of bag and items:</strong> 6982g</p><p><strong>Total worth of packed items:</strong> 757</p><p>Here are the items our dynamic programming algorithm chose, sorted by worth:</p><table><thead><tr><th>Item</th><th>Worth</th><th>Weight</th></tr></thead><tbody><tr><td>10 pairs thongs</td><td>39</td><td>80</td></tr><tr><td>5 Underarmour Strappy</td><td>38</td><td>305</td></tr><tr><td>1 pair Uniqlo leggings</td><td>37</td><td>185</td></tr><tr><td>2 Lululemon Cool Racerback</td><td>36</td><td>174</td></tr><tr><td>Chargers and cables in Mini Bomber Travel Kit</td><td>35</td><td>665</td></tr><tr><td>The Roost Stand</td><td>34</td><td>170</td></tr><tr><td>ThinkPad Compact Bluetooth Keyboard with trackpoint</td><td>33</td><td>460</td></tr><tr><td>Seagate Backup Plus Slim</td><td>32</td><td>159</td></tr><tr><td>1 pair black denim shorts</td><td>31</td><td>197</td></tr><tr><td>2 pairs Nike Pro shorts</td><td>30</td><td>112</td></tr><tr><td>2 pairs Lululemon shorts</td><td>29</td><td>184</td></tr><tr><td>Isabella T-Strap Croc sandals</td><td>28</td><td>200</td></tr><tr><td>2 Underarmour HeatGear CoolSwitch tank tops</td><td>27</td><td>138</td></tr><tr><td>5 pairs black socks</td><td>26</td><td>95</td></tr><tr><td>2 pairs Injinji Women&rsquo;s Run Lightweight No-Show Toe Socks</td><td>25</td><td>54</td></tr><tr><td>1 fancy tank top</td><td>24</td><td>71</td></tr><tr><td>1 light and stretchy long-sleeve shirt (Gap Fit)</td><td>23</td><td>147</td></tr><tr><td>Uniqlo Ultralight Down insulating jacket</td><td>22</td><td>235</td></tr><tr><td>Patagonia Torrentshell</td><td>21</td><td>301</td></tr><tr><td>Lightweight Merino Wool Buff</td><td>20</td><td>50</td></tr><tr><td>1 LBD (H&M)</td><td>19</td><td>174</td></tr><tr><td>Field Notes Pitch Black Memo Book Dot-Graph</td><td>18</td><td>68</td></tr><tr><td>Innergie PocketCell USB-C 6000mAh power bank</td><td>17</td><td>148</td></tr><tr><td>Important papers</td><td>16</td><td>228</td></tr><tr><td>Deuter First Aid Kit Active</td><td>15</td><td>144</td></tr><tr><td>Stanley Classic Vacuum Camp Mug 16oz</td><td>14</td><td>454</td></tr><tr><td>JBL Reflect Mini Bluetooth Sport Headphones</td><td>13</td><td>14</td></tr><tr><td>Anker SoundCore nano Bluetooth Speaker</td><td>12</td><td>80</td></tr><tr><td>Oakley Latch Sunglasses</td><td>11</td><td>30</td></tr><tr><td>Ray Ban Wayfarer Classic</td><td>10</td><td>45</td></tr><tr><td>Petzl E+LITE Emergency Headlamp</td><td>8</td><td>27</td></tr><tr><td>Peak Design Cuff Camera Wrist Strap</td><td>6</td><td>26</td></tr><tr><td>Travelon Micro Scale</td><td>5</td><td>125</td></tr><tr><td>Humangear GoBites Duo</td><td>3</td><td>22</td></tr></tbody></table><p>There&rsquo;s an obvious improvement to our dynamic programming solution over what the greedy algorithm gave us. Our total worth of 757 is 41 points greater than the greedy algorithm&rsquo;s solution of 716, and for a few grams less weight too!</p><h3 id=input-sort-order class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#input-sort-order>Input sort order</a></h3><p>While testing my dynamic programming solution, I implemented the <a href=https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle>Fisher-Yates shuffle algorithm</a> on the input before passing it into my function, just to ensure that the answer wasn&rsquo;t somehow dependent on the sort order of the input. Here&rsquo;s what the shuffle looks like in Go:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>rand</span><span class=p>.</span><span class=nf>Seed</span><span class=p>(</span><span class=nx>time</span><span class=p>.</span><span class=nf>Now</span><span class=p>().</span><span class=nf>UnixNano</span><span class=p>())</span>
+
+<span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>itemList</span> <span class=p>{</span>
+    <span class=nx>j</span> <span class=o>:=</span> <span class=nx>rand</span><span class=p>.</span><span class=nf>Intn</span><span class=p>(</span><span class=nx>i</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span>
+    <span class=nx>itemList</span><span class=p>[</span><span class=nx>i</span><span class=p>],</span> <span class=nx>itemList</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>=</span> <span class=nx>itemList</span><span class=p>[</span><span class=nx>j</span><span class=p>],</span> <span class=nx>itemList</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span>
+<span class=p>}</span>
+</code></pre></div><p>Of course I then realized that Go 1.10 now has a built-in shuffle&mldr; it works precisely the same way and looks like this:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>rand</span><span class=p>.</span><span class=nf>Shuffle</span><span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=nx>itemList</span><span class=p>),</span> <span class=kd>func</span><span class=p>(</span><span class=nx>i</span><span class=p>,</span> <span class=nx>j</span> <span class=kt>int</span><span class=p>)</span> <span class=p>{</span>
+    <span class=nx>itemList</span><span class=p>[</span><span class=nx>i</span><span class=p>],</span> <span class=nx>itemList</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>=</span> <span class=nx>itemList</span><span class=p>[</span><span class=nx>j</span><span class=p>],</span> <span class=nx>itemList</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span>
+<span class=p>})</span>
+</code></pre></div><p>So did the order in which the items were processed affect the outcome? Well&mldr;</p><h4 id=suddenly-a-rogue-weight-appears class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#suddenly-a-rogue-weight-appears>Suddenly&mldr; a rogue weight appears!</a></h4><p>As it turns out, in a way, the answer did depend on the order of the input. When I ran my dynamic programming algorithm several times, I sometimes saw a different total weight for the bag, though the total worth remained at 757. I initially thought this was a bug before examining the two sets of items that accompanied the two different total weight values. Everything was the same except for a few changes that collectively added up to a different item subset accounting for 14 of the 757 worth points.</p><p>In this case, there were two equally optimal solutions based only on the success metric of the highest total possible worth. Shuffling the input seemed to affect the placement of the items in the matrix and thus, the path that the <code>checkItem()</code> function took as it went through the matrix to find the chosen items. Since the success metric of having the highest possible worth was the same in both item sets, we don&rsquo;t have a single unique solution - there&rsquo;s two!</p><p>As an academic exercise, both these sets of items are correct answers. We may choose to optimize further by another metric, say, the total weight of all the items. The highest possible worth at the least possible weight could be seen as an ideal solution.</p><p>Here&rsquo;s the second, lighter, dynamic programming result:</p><p><strong>Total weight of bag and items:</strong> 6955g</p><p><strong>Total worth of packed items:</strong> 757</p><table><thead><tr><th>Item</th><th>Worth</th><th>Weight</th></tr></thead><tbody><tr><td>10 pairs thongs</td><td>39</td><td>80</td></tr><tr><td>5 Underarmour Strappy</td><td>38</td><td>305</td></tr><tr><td>1 pair Uniqlo leggings</td><td>37</td><td>185</td></tr><tr><td>2 Lululemon Cool Racerback</td><td>36</td><td>174</td></tr><tr><td>Chargers and cables in Mini Bomber Travel Kit</td><td>35</td><td>665</td></tr><tr><td>The Roost Stand</td><td>34</td><td>170</td></tr><tr><td>ThinkPad Compact Bluetooth Keyboard with trackpoint</td><td>33</td><td>460</td></tr><tr><td>Seagate Backup Plus Slim</td><td>32</td><td>159</td></tr><tr><td>1 pair black denim shorts</td><td>31</td><td>197</td></tr><tr><td>2 pairs Nike Pro shorts</td><td>30</td><td>112</td></tr><tr><td>2 pairs Lululemon shorts</td><td>29</td><td>184</td></tr><tr><td>Isabella T-Strap Croc sandals</td><td>28</td><td>200</td></tr><tr><td>2 Underarmour HeatGear CoolSwitch tank tops</td><td>27</td><td>138</td></tr><tr><td>5 pairs black socks</td><td>26</td><td>95</td></tr><tr><td>2 pairs Injinji Women&rsquo;s Run Lightweight No-Show Toe Socks</td><td>25</td><td>54</td></tr><tr><td>1 fancy tank top</td><td>24</td><td>71</td></tr><tr><td>1 light and stretchy long-sleeve shirt (Gap Fit)</td><td>23</td><td>147</td></tr><tr><td>Uniqlo Ultralight Down insulating jacket</td><td>22</td><td>235</td></tr><tr><td>Patagonia Torrentshell</td><td>21</td><td>301</td></tr><tr><td>Lightweight Merino Wool Buff</td><td>20</td><td>50</td></tr><tr><td>1 LBD (H&M)</td><td>19</td><td>174</td></tr><tr><td>Field Notes Pitch Black Memo Book Dot-Graph</td><td>18</td><td>68</td></tr><tr><td>Innergie PocketCell USB-C 6000mAh power bank</td><td>17</td><td>148</td></tr><tr><td>Important papers</td><td>16</td><td>228</td></tr><tr><td>Deuter First Aid Kit Active</td><td>15</td><td>144</td></tr><tr><td>JBL Reflect Mini Bluetooth Sport Headphones</td><td>13</td><td>14</td></tr><tr><td>Anker SoundCore nano Bluetooth Speaker</td><td>12</td><td>80</td></tr><tr><td>Oakley Latch Sunglasses</td><td>11</td><td>30</td></tr><tr><td>Ray Ban Wayfarer Classic</td><td>10</td><td>45</td></tr><tr><td>Zip bag of toiletries</td><td>9</td><td>236</td></tr><tr><td>Petzl E+LITE Emergency Headlamp</td><td>8</td><td>27</td></tr><tr><td>Peak Design Cuff Camera Wrist Strap</td><td>6</td><td>26</td></tr><tr><td>Travelon Micro Scale</td><td>5</td><td>125</td></tr><tr><td>BlitzWolf Bluetooth Tripod/Monopod</td><td>4</td><td>150</td></tr><tr><td>Humangear GoBites Duo</td><td>3</td><td>22</td></tr><tr><td>Vapur Bottle 1L</td><td>1</td><td>41</td></tr></tbody></table><h2 id=which-approach-is-better class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#which-approach-is-better>Which approach is better?</a></h2><h3 id=go-benchmarking class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#go-benchmarking>Go benchmarking</a></h3><p>The Go standard library&rsquo;s <code>testing</code> package makes it straightforward for us to <a href=https://golang.org/pkg/testing/#hdr-Benchmarks>benchmark</a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&rsquo;s a simple <code>main_test.go</code> file:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kn>package</span> <span class=nx>main</span>
+
+<span class=kn>import</span> <span class=p>(</span>
+    <span class=s>&#34;testing&#34;</span>
+<span class=p>)</span>
+
+<span class=kd>func</span> <span class=nf>Benchmark_greedy</span><span class=p>(</span><span class=nx>b</span> <span class=o>*</span><span class=nx>testing</span><span class=p>.</span><span class=nx>B</span><span class=p>)</span> <span class=p>{</span>
+    <span class=nx>itemList</span> <span class=o>:=</span> <span class=nf>readItems</span><span class=p>(</span><span class=s>&#34;objects.csv&#34;</span><span class=p>)</span>
+    <span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=p>&lt;</span> <span class=nx>b</span><span class=p>.</span><span class=nx>N</span><span class=p>;</span> <span class=nx>i</span><span class=o>++</span> <span class=p>{</span>
+        <span class=nx>minaal</span> <span class=o>:=</span> <span class=nx>bag</span><span class=p>{</span><span class=nx>bagWeight</span><span class=p>:</span> <span class=mi>1415</span><span class=p>,</span> <span class=nx>currItemsWeight</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span> <span class=nx>maxItemsWeight</span><span class=p>:</span> <span class=mi>5585</span><span class=p>}</span>
+        <span class=nf>greedy</span><span class=p>(</span><span class=nx>itemList</span><span class=p>,</span> <span class=nx>minaal</span><span class=p>)</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=kd>func</span> <span class=nf>Benchmark_dynamic</span><span class=p>(</span><span class=nx>b</span> <span class=o>*</span><span class=nx>testing</span><span class=p>.</span><span class=nx>B</span><span class=p>)</span> <span class=p>{</span>
+    <span class=nx>itemList</span> <span class=o>:=</span> <span class=nf>readItems</span><span class=p>(</span><span class=s>&#34;objects.csv&#34;</span><span class=p>)</span>
+    <span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=p>&lt;</span> <span class=nx>b</span><span class=p>.</span><span class=nx>N</span><span class=p>;</span> <span class=nx>i</span><span class=o>++</span> <span class=p>{</span>
+        <span class=nx>minaal</span> <span class=o>:=</span> <span class=nx>bag</span><span class=p>{</span><span class=nx>bagWeight</span><span class=p>:</span> <span class=mi>1415</span><span class=p>,</span> <span class=nx>currItemsWeight</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span> <span class=nx>maxItemsWeight</span><span class=p>:</span> <span class=mi>5585</span><span class=p>}</span>
+        <span class=nf>dynamic</span><span class=p>(</span><span class=nx>itemList</span><span class=p>,</span> <span class=o>&amp;</span><span class=nx>minaal</span><span class=p>)</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div><p>We can run <code>go test -bench=. -benchmem</code> to see these results:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>Benchmark_greedy-4       <span class=m>1000000</span>              <span class=m>1619</span> ns/op            <span class=m>2128</span> B/op          <span class=m>9</span> allocs/op
+Benchmark_dynamic-4         <span class=m>1000</span>           <span class=m>1545322</span> ns/op         <span class=m>2020332</span> B/op         <span class=m>49</span> allocs/op
+</code></pre></div><h4 id=greedy-algorithm-performance class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#greedy-algorithm-performance>Greedy algorithm performance</a></h4><p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.</p><h4 id=dynamic-programming-performance class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#dynamic-programming-performance>Dynamic programming performance</a></h4><p>The dynamic programming algorithm was run 1,000 times. Its speed was measured to be 1.545322 milliseconds or 0.001545322 seconds (translation: still pretty fast). It required 2,020,332 Bytes or 2-ish Megabytes, and 49 distinct memory allocations per iteration.</p><h3 id=the-verdict class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#the-verdict>The verdict</a></h3><p>Part of choosing the right approach to solving any programming problem is taking into account the size of the input data set. In this case, it&rsquo;s a small one. In this scenario, a one-pass greedy algorithm will always be faster and less resource-needy than dynamic programming, simply because it has fewer steps. Our greedy algorithm was almost two orders of magnitude faster and less memory-hungry than our dynamic programming algorithm.</p><p>Not having those extra steps, however, means that getting the best possible solution from the greedy algorithm is unlikely.</p><p>It&rsquo;s clear that the dynamic programming algorithm gave us better numbers: a lower weight, and higher overall worth.</p><table><thead><tr><th></th><th>Greedy algorithm</th><th>Dynamic programming</th></tr></thead><tbody><tr><td><strong>Total weight:</strong></td><td>6987g</td><td>6955g</td></tr><tr><td><strong>Total worth:</strong></td><td>716</td><td>757</td></tr></tbody></table><p>Where dynamic programming on small data sets lacks in performance, it makes up in optimization. The question then becomes whether that additional optimization is worth the performance cost.</p><p>&ldquo;Better,&rdquo; of course, is a subjective judgement. If speed and low resource usage is our success metric, then the greedy algorithm is clearly better. If the total worth of items in the bag is our success metric, then dynamic programming is clearly better. However, our scenario is a practical one, and only one of these algorithm designs returned an answer I&rsquo;d choose. In optimizing for the overall greatest possible total worth of the items in the bag, the dynamic programming algorithm left out my highest-worth, but also heaviest, item: my laptop. The chargers and cables, Roost stand, and keyboard that were included aren&rsquo;t much use without it.</p><h3 id=better-algorithm-design class=anchor-link><a href=https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/#better-algorithm-design>Better algorithm design</a></h3><p>There&rsquo;s a simple way to alter the dynamic programming approach so that the laptop is always included: we can modify the data so that the worth of the laptop is greater than the sum of the worth of all the other items. (Try it out!)</p><p>Perhaps in re-designing the dynamic programming algorithm to be more practical, we might choose another success metric that better reflects an item&rsquo;s importance, instead of a subjective worth value. There are many possible metrics we can use to represent the value of an item. Here are a few examples of a good proxy:</p><ul><li>Amount of time spent using the item</li><li>Initial cost of purchasing the item</li><li>Cost of replacement if the item were lost today</li><li>Dollar value of the product of using the item</li></ul><p>By the same token, the greedy algorithm&rsquo;s results might be improved with the use of one of these alternate metrics.</p><p>On top of choosing an appropriate approach to solving the knapsack problem in general, it is helpful to design our algorithm in a way that translates the practicalities of a scenario into code.</p><p>There are many considerations for better algorithm design beyond the scope of this introductory post. One of these is <strong>time complexity</strong>, and I&rsquo;ve <a href=/verbose/introduction-time-complexity/>written about it here</a>. A future algorithm may very well decide my bag&rsquo;s contents on the next trip, but we&rsquo;re not quite there yet. Stay tuned!</p></div></article><div id=up-container><a href=# id=up>&#709;</a></div><div class=page-separator><hr></div><div id=webmentions></div><a href=https://brid.gy/publish/twitter></a><data class=p-bridgy-omit-link value=false></data><div class=related><code class=language-sql data-lang=sql>SELECT TOP 3 * FROM Related;</code><ul role=menubar id=article-list><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/>A coffee-break introduction to time complexity of algorithms</a><p>A groundwork understanding of algorithm time complexity in about fifteen minutes.</p><p class=metadata><a class="tag button" href=/tags/algorithms/>algorithms</a>
+☕️ ☕️ ☕️
+&nbsp;16 min read</p></li><li role=none><a role=menuitem class=article-link href=https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/>Build your own serverless subscriber list with Go and AWS</a><p>How to build your own newsletter list with DynamoDB and SES email sign up confirmations.</p><p class=metadata><a class="tag button" href=/tags/api/>api</a>
+☕️ ☕️
+&nbsp;7 min read</p></li></ul><div class=page-separator><p class=back-link><a href=/blog>&lt;&lt; Back to blog</a></p></div></div></div><footer class=container><div class="markdown bio h-card p-author"><strong><a href=https://victoria.dev/ class="u-url p-name">Victoria Drake</a></strong><figure class="profile title-avatar u-photo"><img src=/img/victoria_headshot.jpg alt="Victoria's headshot"></figure><p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award three years in a row from the freeCodeCamp non-profit, and is a recognized Distinguished Author on the DEV.to developer platform. She writes about software development, cybersecurity, and building happy and productive technical teams.</p><p><a href=/about>about</a> - <a href=mailto:hello@victoria.dev>email</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p></div></footer></main><script src=/js/webmention.min.js data-wordcount=42 async></script><nav aria-label="Victoria.dev menu for mobile" id=menu-mobile><ul role=menubar><li role=none class=menu-item><a role=menuitem href=/><img src=/img/bookmark.svg alt="home page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/blog/><img src=/img/quote.svg alt="blog icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/about/><img src=/img/profile.svg alt="about page icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/coffee/><img src=/img/coffee.svg alt="coffee icon" height=18px class=filter-icon></a></li><li role=none class=menu-item><a role=menuitem href=/bookshelf/><img src=/img/book.svg alt="bookshelf icon" height=18px class=filter-icon></a></li></ul></nav></body></html>
