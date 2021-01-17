@@ -89,8 +89,7 @@ A more detailed example:
     return document.currentScript.getAttribute("data-" + key) || dfl;
   }
 
-  var refurl = getCfg('page-url',
-    window.location.href.replace(/#.*$/, ''));
+  var refurl = getCfg('page-url', window.location.href.replace(/#.*$/, ''));
   var addurls = getCfg('add-urls', undefined);
   var containerID = getCfg('data-id', "webmentions");
   var textMaxWords = getCfg('wordcount');
@@ -134,12 +133,9 @@ A more detailed example:
   }
 
   function reactImage (r) {
-    var who = entities((r.author && r.author.name) ?
-      r.author.name :
-      r.url.split('/')[2]);
+    var who = entities((r.author && r.author.name) ? r.author.name : r.url.split('/')[2]);
     var response = reactTitle[r['wm-property']] || 'reacted';
-    var html = '<a class="reaction" rel="nofollow ugc" title="' + who + ' ' +
-      response + '" href="' + r[mentionSource] + '">';
+    var html = '<a class="reaction" rel="nofollow ugc" title="' + who + ' ' + response + '" href="' + r[mentionSource] + '">';
     if (r.author && r.author.photo) {
       html += '<img class="webmention__author__img" src="' + entities(r.author.photo) + '">';
     }
@@ -152,16 +148,15 @@ A more detailed example:
     return html;
   }
 
-    function publishDate (d) {
-        let dateobj = new Date(d)
-        let date = dateobj.toString()
-        console.log(date.substr(0,15))
-        // var options = { month: 'long'};
-        // let month = new Intl.DateTimeFormat('en-US', options).format(date)
-        // let html = '<span class="webmention__date">' + date.getDay() + ' ' + month + ' ' + date.getFullYear() + '</span>'
-        let html = '<span class="webmention__date">' + date.substr(0, 15) + '</span>'
-        return html
-    }
+  function publishDate (d) {
+    let dateobj = new Date(d)
+    let date = dateobj.toString()
+    // var options = { month: 'long'};
+    // let month = new Intl.DateTimeFormat('en-US', options).format(date)
+    // let html = '<span class="webmention__date">' + date.getDay() + ' ' + month + ' ' + date.getFullYear() + '</span>'
+    let html = '<span class="webmention__date">' + date.substr(0, 15) + '</span>'
+    return html
+  }
 
   // strip the protocol off a URL
   function stripurl (url) {
@@ -233,7 +228,7 @@ A more detailed example:
   function formatReactions (reacts) {
     var html = '<h2>Reactions</h2><ul class="reacts">';
 
-      reacts.forEach(function (r) {
+    reacts.forEach(function (r) {
       html += '<li><div class="webmention">';
       html += reactImage(r);
     });
@@ -266,7 +261,8 @@ A more detailed example:
   }
 
   window.addEventListener("load", function () {
-    var container = document.getElementById(containerID);
+    // const counter = document.getElementById("counter");
+    const container = document.getElementById(containerID);
     if (!container) {
       // no container, so do nothing
       return;
@@ -279,8 +275,7 @@ A more detailed example:
       })
     }
 
-    var apiURL = 'https://webmention.io/api/mentions.jf2?per-page=' +
-      maxWebmentions + '&sort-by=' + sortBy + '&sort-dir=' + sortDir;
+    var apiURL = 'https://webmention.io/api/mentions.jf2?per-page=' + maxWebmentions + '&sort-by=' + sortBy + '&sort-dir=' + sortDir;
 
     pages.forEach(function (path) {
       apiURL += '&target[]=' + encodeURIComponent('http:' + path) +
@@ -318,8 +313,12 @@ A more detailed example:
       if (collects.length > 0) {
         html += formatReactions(dedupe(collects));
       }
-
       container.innerHTML = html;
+      // Just show counts of webmentions
+      //   const count = comments.length + collects.length;
+      //   if (count > 0) {
+      //     counter.innerHTML = count;
+      //   }
     });
   });
 
