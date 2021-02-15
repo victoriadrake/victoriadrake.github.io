@@ -1,4 +1,114 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Victoria Drake 💜 RSS</title><link>https://victoria.dev/tags/docs/</link><description>☕ Friendly ~5min reads on cybersecurity and coding, with a tasty smattering of dev tips thrown in.</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><lastBuildDate>Mon, 14 Dec 2020 04:53:10 -0500</lastBuildDate><atom:link href="https://victoria.dev/tags/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Do I raise or return errors in Python?</title><link>https://victoria.dev/blog/do-i-raise-or-return-errors-in-python/</link><pubDate>Tue, 09 Feb 2021 05:34:48 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/do-i-raise-or-return-errors-in-python/</guid><description>Raise, return, and how to never fail silently in Python.</description><content:encoded>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Victoria Drake 💜 RSS</title><link>https://victoria.dev/tags/docs/</link><description>☕ Friendly ~5min reads on cybersecurity and coding, with a tasty smattering of dev tips thrown in.</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><lastBuildDate>Mon, 14 Dec 2020 04:53:10 -0500</lastBuildDate><atom:link href="https://victoria.dev/tags/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Create a self-hosted chat service with your own Matrix server</title><link>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</link><pubDate>Mon, 15 Feb 2021 01:38:07 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</guid><description>A speed-run introduction to Matrix via Dendrite.</description><content:encoded>
+&lt;img src="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/lightsail_443_hu1c332a8d4bf11fde5f0073b707077075_69304_640x0_resize_box_2.png" width="640" height="466"/>
+&lt;p>&lt;a href="https://matrix.org/docs/guides/introduction">Matrix&lt;/a> is an open standard for decentralized real-time communication. The &lt;a href="https://matrix.org/docs/spec/">specification&lt;/a> is production-ready and &lt;a href="https://matrix.org/bridges/">bridges&lt;/a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.&lt;/p>
+&lt;p>You can create your own self-hosted Matrix chat for as little as $3.50 USD per month on an &lt;a href="https://aws.amazon.com/lightsail/">AWS Lightsail&lt;/a> instance. Your homeserver can federate with other Matrix servers, giving you a reliable and fault-tolerant means of communication.&lt;/p>
+&lt;p>Matrix is most widely installed via its &lt;a href="https://matrix.org/docs/guides/installing-synapse">Synapse&lt;/a> homeserver implementation written in Python 3. Dendrite, its second-generation homeserver implementation written in Go, is currently released in beta. Dendrite will provide more memory efficiency and reliability out-of-the-box, making it an excellent choice for running on a virtual instance.&lt;/p>
+&lt;p>Here&amp;rsquo;s how to set up your own homeserver on AWS Lightsail with Dendrite. You can also &lt;a href="https://github.com/matrix-org/dendrite">contribute to Dendrite today&lt;/a>.&lt;/p>
+&lt;h2 id="create-a-lightsail-instance" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#create-a-lightsail-instance">Create a Lightsail instance&lt;/a>&lt;/h2>
+&lt;p>Spin up a new Lightsail instance on AWS with Debian as your operating system. It&amp;rsquo;s a good idea to create a new per-instance key for use with SSH. You can do this by with the SSH key pair manager on the instance creation page. Don&amp;rsquo;t forget to download your private key and &lt;code>.gitignore&lt;/code> your secrets.&lt;/p>
+&lt;p>Click &lt;strong>Create Instance.&lt;/strong> Wait for the status of your instance to change from &lt;strong>Pending&lt;/strong> to &lt;strong>Running&lt;/strong>, then click its name to see further information. You&amp;rsquo;ll need the Public IP address.&lt;/p>
+&lt;p>To enable people including yourself to connect to the instance, go to the Networking tab and add a firewall rule for HTTPS. This will open &lt;code>443&lt;/code> so you can connect over IPv4. You can also do this for IPv6.&lt;/p>
+&lt;h2 id="connect-dns" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#connect-dns">Connect DNS&lt;/a>&lt;/h2>
+&lt;p>Give your instance a catchier address by &lt;a href="https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX" target="_top">buying a domain at Namecheap&lt;/a>
+and setting up DNS records.&lt;/p>
+&lt;ol>
+&lt;li>On your domain management page in the &lt;strong>Nameservers&lt;/strong> section, choose &lt;strong>Namecheap BasicDNS&lt;/strong>.&lt;/li>
+&lt;li>On the &lt;strong>Advanced DNS&lt;/strong> tab, click &lt;strong>Add New Record&lt;/strong>.&lt;/li>
+&lt;/ol>
+&lt;p>Add an &lt;code>A Record&lt;/code> to your Lightsail Public IP. You can use a subdomain if you want one, for example,&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Type:&lt;/strong> &lt;code>A Record&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Host:&lt;/strong> &lt;code>matrix&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Value:&lt;/strong> &lt;code>13.59.251.229&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>This points &lt;code>matrix.example.org&lt;/code> to your Lightsail instance.&lt;/p>
+&lt;h2 id="set-up-your-matrix-homeserver" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#set-up-your-matrix-homeserver">Set up your Matrix homeserver&lt;/a>&lt;/h2>
+&lt;p>Change permissions on the private key you downloaded:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">chmod &lt;span class="m">600&lt;/span> &amp;lt;path/to/key&amp;gt;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then &lt;a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">ssh -i &amp;lt;path/to/key&amp;gt; admin@&amp;lt;public ip&amp;gt;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Welcome to your instance! You can make it more interesting by downloading some packages you&amp;rsquo;ll need for Dendrite. It&amp;rsquo;s a good idea ot use &lt;code>apt&lt;/code> for this, but first you&amp;rsquo;ll want to make sure you&amp;rsquo;re getting the latest stuff.&lt;/p>
+&lt;p>Change your &lt;a href="https://wiki.debian.org/SourcesList">sources list&lt;/a> in order to get the newest version of Go:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Delete everything except these two lines:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-vim" data-lang="vim">&lt;span class="nx">deb&lt;/span> &lt;span class="nx">http&lt;/span>:&lt;span class="sr">//&lt;/span>&lt;span class="nx">cdn&lt;/span>&lt;span class="p">-&lt;/span>&lt;span class="nx">aws&lt;/span>.&lt;span class="nx">deb&lt;/span>.&lt;span class="nx">debian&lt;/span>.&lt;span class="nx">org&lt;/span>/&lt;span class="nx">debian&lt;/span> &lt;span class="nx">buster&lt;/span> &lt;span class="nx">main&lt;/span>&lt;span class="err">
+&lt;/span>&lt;span class="err">&lt;/span>&lt;span class="nx">deb&lt;/span>&lt;span class="p">-&lt;/span>&lt;span class="nx">src&lt;/span> &lt;span class="nx">http&lt;/span>:&lt;span class="sr">//&lt;/span>&lt;span class="nx">cdn&lt;/span>&lt;span class="p">-&lt;/span>&lt;span class="nx">aws&lt;/span>.&lt;span class="nx">deb&lt;/span>.&lt;span class="nx">debian&lt;/span>.&lt;span class="nx">org&lt;/span>/&lt;span class="nx">debian&lt;/span> &lt;span class="nx">buster&lt;/span> &lt;span class="nx">main&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then replace the distributions:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-vim" data-lang="vim">&lt;span class="p">:&lt;/span>%&lt;span class="nx">s&lt;/span>&lt;span class="sr">/buster main/&lt;/span>&lt;span class="nx">testing&lt;/span> &lt;span class="nx">main&lt;/span> &lt;span class="nx">contrib&lt;/span> &lt;span class="nx">non&lt;/span>&lt;span class="p">-&lt;/span>&lt;span class="nx">free&lt;/span>/&lt;span class="nx">g&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Run &lt;code>sudo apt dist-upgrade&lt;/code>. If you&amp;rsquo;re asked about modified configuration files, choose the option to &amp;ldquo;keep the local version currently installed.&amp;rdquo;&lt;/p>
+&lt;p>Once the upgrade is finished, restart your instance with &lt;code>sudo shutdown -r now&lt;/code>.&lt;/p>
+&lt;p>Go make some coffee, then SSH back in. Get the packages you&amp;rsquo;ll need with:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo apt update
+sudo apt upgrade
+sudo apt install -y git golang nginx python3-certbot-nginx
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>You&amp;rsquo;re ready to get Dendrite.&lt;/p>
+&lt;h2 id="get-dendrite" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#get-dendrite">Get Dendrite&lt;/a>&lt;/h2>
+&lt;p>Clone &lt;a href="https://github.com/matrix-org/dendrite">Dendrite&lt;/a> and follow the &lt;a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started&lt;/a>. You&amp;rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&amp;rsquo;s how to set up a non-federating deployment to start:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
+&lt;span class="nb">cd&lt;/span> dendrite
+./build.sh
+&lt;span class="c1"># Generate a Matrix signing key for federation (required)&lt;/span>
+./bin/generate-keys --private-key matrix_key.pem
+&lt;span class="c1"># Generate a self-signed certificate (optional, but a valid TLS certificate is normally&lt;/span>
+&lt;span class="c1"># needed for Matrix federation/clients to work properly!)&lt;/span>
+./bin/generate-keys --tls-cert server.crt --tls-key server.key
+&lt;span class="c1"># Copy and modify the config file - you&amp;#39;ll need to set a server name and paths to the keys&lt;/span>
+&lt;span class="c1"># at the very least, along with setting up the database connection strings.&lt;/span>
+cp dendrite-config.yaml dendrite.yaml
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="configure-dendrite" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#configure-dendrite">Configure Dendrite&lt;/a>&lt;/h2>
+&lt;p>Modify the configuration file you just copied:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>At minimum, set:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>server name&lt;/code> to your shiny new domain name, e.g. &lt;code>matrix.example.org&lt;/code>&lt;/li>
+&lt;li>&lt;code>disable_federation&lt;/code> to true or false&lt;/li>
+&lt;li>&lt;code>registration_disabled&lt;/code> to true or false&lt;/li>
+&lt;/ul>
+&lt;p>You might like to read the &lt;a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ&lt;/a>.&lt;/p>
+&lt;h2 id="configure-nginx" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#configure-nginx">Configure nginx&lt;/a>&lt;/h2>
+&lt;p>Get the required packages if you didn&amp;rsquo;t already install them above:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Create your site&amp;rsquo;s configuration file under &lt;code>sites-available&lt;/code> with:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="nb">cd&lt;/span> /etc/nginx/sites-available
+ln -s /etc/nginx/sites-available/&amp;lt;sitename&amp;gt; /etc/nginx/sites-enabled/&amp;lt;sitename&amp;gt;
+sudo cp default &amp;lt;sitename&amp;gt;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Edit your site configuration. Delete the &lt;code>root&lt;/code> and &lt;code>index&lt;/code> lines if you don&amp;rsquo;t need them, and input your server name.&lt;/p>
+&lt;p>Your &lt;code>location&lt;/code> block should look like:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-nginx" data-lang="nginx">&lt;span class="k">location&lt;/span> &lt;span class="s">/&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;span class="kn">proxy_pass&lt;/span> &lt;span class="s">https://localhost:8448&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;span class="p">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Remove the &lt;code>default&lt;/code> with: &lt;code>sudo rm /etc/nginx/sites-enabled/default&lt;/code>.&lt;/p>
+&lt;h2 id="create-self-signed-certificates" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#create-self-signed-certificates">Create self-signed certificates&lt;/a>&lt;/h2>
+&lt;p>You can use &lt;a href="https://certbot.eff.org/">Certbot&lt;/a> to generate self-signed certificates with &lt;a href="https://letsencrypt.org/">Let&amp;rsquo;s Encrypt&lt;/a>.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo certbot --nginx -d &amp;lt;your.site.address&amp;gt;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>If you don&amp;rsquo;t want to give an email, add the &lt;code>--register-unsafely-without-email&lt;/code> flag.&lt;/p>
+&lt;p>Test your configuration and restart nginx with:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo nginx -t
+sudo systemctl restart nginx
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then start up your Matrix server.&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="c1"># Build and run the server:&lt;/span>
+./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included &lt;code>dendrite/bin/createuser&lt;/code>.&lt;/p>
+&lt;p>You can log on to your new homeserver with any &lt;a href="https://matrix.org/clients/">Matrix client&lt;/a>, or Matrix-capable applications like &lt;a href="https://www.pidgin.im/plugins/?publisher=all&amp;amp;query=&amp;amp;type=">Pidgin with the Matrix plugin&lt;/a>.&lt;/p>
+&lt;h2 id="other-troubleshooting" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#other-troubleshooting">Other troubleshooting&lt;/a>&lt;/h2>
+&lt;h3 id="log-files" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#log-files">Log files&lt;/a>&lt;/h3>
+&lt;p>If you get an error such as:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
+Couldn&amp;#39;t create directory /var/log/dendrite: &amp;#34;mkdir /var/log/dendrite: permission denied&amp;#34;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>You&amp;rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with &lt;code>sudo&lt;/code> whenever you can. Instead, create the necessary file with the right permissions:&lt;/p>
+&lt;div class="highlight">&lt;pre class="chroma">&lt;code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
+sudo chown admin:admin /var/log/dendrite
+&lt;span class="c1"># Build and run the server:&lt;/span>
+./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="unable-to-decrypt" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#unable-to-decrypt">Unable to decrypt&lt;/a>&lt;/h3>
+&lt;p>If you see: &lt;code>Unable to decrypt: The sender's device has not sent us the keys for this message.&lt;/code> you may need to verify a user (sometimes yourself).&lt;/p>
+&lt;ol>
+&lt;li>In your client, open the user&amp;rsquo;s profile. Click the lock icon if there is one, or otherwise look for a way to verify them.&lt;/li>
+&lt;li>You may be asked to see if some emojis presented to both users match if you&amp;rsquo;re using certain clients like Element.&lt;/li>
+&lt;li>You can then re-request encryption keys for any sent messages.&lt;/li>
+&lt;/ol>
+&lt;h2 id="set-up-your-own-matrix-server-today" class="anchor-link">&lt;a href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/#set-up-your-own-matrix-server-today">Set up your own Matrix server today&lt;/a>&lt;/h2>
+&lt;p>I hope you found this introduction to setting up your own Matrix homeserver to be helpful! If you have anything to add, feel free to &lt;a href="https://victoria.dev/blog/make-your-own-independent-website/">reply via Webmention&lt;/a>.&lt;/p></content:encoded><enclosure url="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/lightsail_443_hu1c332a8d4bf11fde5f0073b707077075_69304_640x0_resize_box_2.png" type="image/jpg"/></item><item><title>Do I raise or return errors in Python?</title><link>https://victoria.dev/blog/do-i-raise-or-return-errors-in-python/</link><pubDate>Tue, 09 Feb 2021 05:34:48 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/do-i-raise-or-return-errors-in-python/</guid><description>Raise, return, and how to never fail silently in Python.</description><content:encoded>
 &lt;p>I hear this question a lot: &amp;ldquo;Do I raise or return this error in Python?&amp;rdquo;&lt;/p>
 &lt;p>This is probably because the right answer will depend on your situation and the goals of your application logic. Either choice can help you ensure your Python code doesn&amp;rsquo;t fail silently, saving you and your teammates from having to hunt down deeply entrenched errors.&lt;/p>
 &lt;p>Here&amp;rsquo;s the difference between &lt;code>raise&lt;/code> and &lt;code>return&lt;/code> when handling failures in Python, and how to ensure your code doesn&amp;rsquo;t fail silently.&lt;/p>
