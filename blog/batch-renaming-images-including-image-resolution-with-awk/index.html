@@ -5,7 +5,7 @@
 <a class="tag button" href=/tags/ci/cd/>ci/cd
 </a>&nbsp;</span><p class=metadata id=date><time><a class="u-url dt-published" href=https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/>November 20, 2017</a></time>
 <span class=dt-updated>&nbsp;
-<em>Updated: Feb 28, 2021</em></span>
+<em>Updated: Mar 1, 2021</em></span>
 <span>☕️&nbsp;4 min read</span></p></p><div class=page-separator><hr></div><div class="markdown e-content"><p>The most recent item on my list of &ldquo;Geeky things I did that made me feel pretty awesome&rdquo; is an hour&rsquo;s adventure that culminated in this code:</p><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash>$ file IMG* <span class=p>|</span> awk <span class=s1>&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> <span class=p>|</span> <span class=k>while</span> <span class=nb>read</span> fn fr<span class=p>;</span> <span class=k>do</span> <span class=nb>echo</span> <span class=k>$(</span>rename -v <span class=s2>&#34;s/</span><span class=nv>$fn</span><span class=s2>/img_</span><span class=nv>$fr</span><span class=s2>/g&#34;</span> *<span class=k>)</span><span class=p>;</span> <span class=k>done</span>
 IMG_20170808_172653_425.jpg renamed as img_0_4032x3024.jpg
 IMG_20170808_173020_267.jpg renamed as img_1_3024x3506.jpg
