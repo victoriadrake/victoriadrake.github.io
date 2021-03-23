@@ -3,7 +3,7 @@
 <a class="tag button" href=/tags/ci/cd/>ci/cd
 </a>&nbsp;</span><p class=metadata id=date><time><a class="u-url dt-published" href=https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/>October 14, 2019</a></time>
 <span class=dt-updated>&nbsp;
-<em>Updated: Mar 22, 2021</em></span>
+<em>Updated: Mar 23, 2021</em></span>
 <span>☕️&nbsp;2 min read</span></p></p><div class=page-separator><hr></div><div class="markdown e-content"><p>Part of my Hugo site continuous deployment workflow is the processing of 210 images, at time of writing.</p><p>Here&rsquo;s my one-liner:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>find public/ -not -path <span class=s2>&#34;*/static/*&#34;</span> <span class=se>\(</span> -name <span class=s1>&#39;*.png&#39;</span> -o -name <span class=s1>&#39;*.jpg&#39;</span> -o -name <span class=s1>&#39;*.jpeg&#39;</span> <span class=se>\)</span> -print0 <span class=p>|</span> xargs -0 -P8 -n2 mogrify -strip -thumbnail <span class=s1>&#39;1000&gt;&#39;</span> -format jpg
 </code></pre></div><p>I use <code>find</code> to target only certain image file formats in certain directories. With <a href=https://www.imagemagick.org/script/mogrify.php><code>mogrify</code>, part of ImageMagick</a>, I resize only the images that are larger than a certain dimension, compress them, and strip the metadata. I tack on the <code>format</code> flag to create jpg copies of the images.</p><p>Here&rsquo;s the one-liner again (broken up for better reading):</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=c1># Look in the public/ directory</span>
 find public/ <span class=se>\
