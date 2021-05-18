@@ -108,13 +108,13 @@ A more detailed example:
   }
 
   const reactEmoji = {
-    'in-reply-to': '💬',
-    'like-of': '❤️',
-    'repost-of': '🔄',
-    'bookmark-of': '⭐️',
-    'mention-of': '💬',
-    rsvp: '📅',
-    'follow-of': '🐜'
+    'in-reply-to': '',
+    'like-of': '',
+    'repost-of': '',
+    'bookmark-of': '',
+    'mention-of': '',
+    rsvp: '',
+    'follow-of': ''
   }
 
   const rsvpEmoji = {
@@ -138,10 +138,10 @@ A more detailed example:
     if (r.author && r.author.photo) {
       html += '<img class="webmention__author__img" src="' + entities(r.author.photo) + '">'
     }
-    html += (reactEmoji[r['wm-property']] || '💥')
-    if (r.rsvp && rsvpEmoji[r.rsvp]) {
-      html += '<sub>' + rsvpEmoji[r.rsvp] + '</sub>'
-    }
+    // html += (reactEmoji[r['wm-property']] )
+    // if (r.rsvp && rsvpEmoji[r.rsvp]) {
+    //   html += '<sub>' + rsvpEmoji[r.rsvp] + '</sub>'
+    // }
     html += '</a>'
 
     return html
@@ -225,7 +225,7 @@ A more detailed example:
   }
 
   function formatReactions (reacts) {
-    let html = '<h2>Reactions</h2><ul class="reacts">'
+    let html = '<h2>Appreciation</h2><ul class="reacts">'
 
     reacts.forEach(function (r) {
       html += '<li><div class="webmention">'
