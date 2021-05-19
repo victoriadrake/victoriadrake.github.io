@@ -8,8 +8,6 @@ This repository serves my personal website and technical blog via GitHub Pages. 
 
 If you find a mistake or bug, I'd love to know so I can fix it! It would be very helpful if you open an issue, or [send me an email](mailto:hello@victoria.dev).
 
-If you benefit from my articles and open source work, I gladly accept contributions at [/coffee](https://victoria.dev/coffee). Cheers! ☕ ❤️
-
 As this is my personal blog, I do not currently invite guest posts.
 
 ## License
