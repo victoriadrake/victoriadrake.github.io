@@ -1,11 +1,12 @@
 {{ define "main" }}
 <section>
     {{ partial "h-card" . }}
+    {{ partial "subscribe" . }}
 </section>
-{{ partial "subscribe" . }}
-<nav aria-label="article list" class="markdown">
-    <ul role="menubar" id="article-list" class="h-feed">
-        {{ range first 1 (where .Site.Pages "Section" "blog") }}
+<section>
+    <nav aria-label="article list" class="markdown">
+        <ul role="menubar" id="article-list" class="h-feed">
+            {{ range first 1 (where .Site.Pages "Section" "blog") }}
         {{ partial "article-li" . }}
         {{ end }}
         {{ range (.Paginate (where .Site.Pages "Params.featured" true ) 6).Pages }}
@@ -23,4 +24,5 @@
 {{ if (fileExists $footer) }}
 {{ partial "footer" .}}
 {{ end }}
+</section>
 {{ end }}
