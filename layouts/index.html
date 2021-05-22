@@ -1,0 +1,26 @@
+{{ define "main" }}
+<section>
+    {{ partial "h-card" . }}
+</section>
+{{ partial "subscribe" . }}
+<nav aria-label="article list" class="markdown">
+    <ul role="menubar" id="article-list" class="h-feed">
+        {{ range first 1 (where .Site.Pages "Section" "blog") }}
+        {{ partial "article-li" . }}
+        {{ end }}
+        {{ range (.Paginate (where .Site.Pages "Params.featured" true ) 6).Pages }}
+        {{ partial "article-li" . }}
+        {{ end }}
+    </ul>
+</nav>
+<div class="centered cta">
+    <a href="/blog" class="button primary">and there's more</a>
+</div>
+{{ end }}
+
+{{ define "footer"}}
+{{ $footer := "layouts/partials/footer.html" }}
+{{ if (fileExists $footer) }}
+{{ partial "footer" .}}
+{{ end }}
+{{ end }}

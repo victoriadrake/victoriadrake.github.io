@@ -1,0 +1,157 @@
+baseURL: https://victoria.dev/
+languageCode: en-us
+title: victoria.dev
+theme: memex
+pygmentsCodeFences: true
+pygmentsUseClasses: true
+
+taxonomies:
+  series: series
+  tag: tags
+
+permalinks:
+  blog: :section/:title
+  neofeed: :section/:title
+
+frontmatter:
+  lastmod:
+    - lastmod
+    - :fileModTime
+    - :default
+
+author:
+  name: Victoria Drake
+  image: img/victoria_headshot.jpg
+  about: Victoria Drake, Director of Engineering, is building better cybersecurity and happy and productive technical teams.
+  email: hello@victoria.dev
+  domain: https://victoria.dev
+
+params:
+  logo: img/logo.png
+  dateFormat: January 2, 2006
+  dateTime: "02 Jan 2006 15:04 MST"
+  # customCSS: css/style.css # relative to ./static/
+  webmentionUrl: https://webmention.io/victoria.dev/webmention
+  pingbackUrl: https://webmention.io/victoria.dev/xmlrpc
+  # micropubUrl: https://example.com/.netlify/functions/micropub
+  # microsubUrl: https://aperture.p3k.io/microsub/example
+  # For IndieAuth
+  githubuser: victoriadrake
+  twitteruser: victoriadotdev
+  mastodon: https://mastodon.technology/@victoria
+  monetization: $ilp.uphold.com/pBRfRwg2EJAe
+  subscribeLink: https://api.victoria.dev/subscribe/
+  mainSections:
+    - blog
+    - neofeed
+
+neofeed:
+  recentLimit: 10 # How many items to load at once
+  title: "Victoria's Neofeed"
+  bio: "I geek out over cybersecurity, Linux, 90s Internet, and weird things that make code more efficient."
+
+menu:
+  main:
+    - name: hello
+      url: /
+      pre: "<img src='/icon/bookmark.svg' alt='home page icon' height='18px' class='filter-icon'>"
+      weight: 1
+    - name: blog
+      identifier: blog
+      url: /blog/
+      pre: "<img src='/icon/quote.svg' alt='blog icon' height='18px' class='filter-icon'>"
+      weight: 2
+    - name: about
+      identifier: about
+      url: /about/
+      pre: "<img src='/icon/profile.svg' alt='about page icon' height='18px' class='filter-icon'>"
+      weight: 3
+    - name: bookshelf
+      identifier: bookshelf
+      url: /bookshelf/
+      pre: "<img src='/icon/book.svg' alt='bookshelf icon' height='18px' class='filter-icon'>"
+      weight: 4
+  fourohfour:
+    - name: home
+      url: /
+    - name: valley of floating windows
+      url: /neofeed
+    - name: blogland
+      url: /blog
+    - name: colorful horizontal hills
+      url: /tags
+
+mediaTypes:
+  "application/atom+xml":
+    suffixes:
+      - "xml"
+
+outputFormats:
+  EMAIL:
+    name: "Email"
+    mediaType: "application/rss+xml"
+  Json:
+    name: "Json"
+    mediaType: "application/json"
+    baseName: "feed"
+    isPlainText: false
+    rel: "alternate"
+    isHTML: false
+    permalinkable: false
+  Atom:
+    name: "Atom"
+    mediaType: "application/atom+xml"
+    baseName: "atom"
+    isPlainText: false
+    rel: "alternate"
+    isHTML: false
+    permalinkable: false
+
+outputs:
+  home:
+    - HTML
+    - ATOM
+    - JSON
+    - RSS
+  page:
+    - HTML
+  blog:
+    - HTML
+    - RSS
+    - EMAIL
+  section:
+    - HTML
+    - RSS
+    - JSON
+  taxonomy:
+    - HTML
+  term:
+    - HTML
+    - ATOM
+    - JSON
+    - RSS
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
+
+related:
+  # Only include matches with rank >= threshold. This is a normalized rank between 0 and 100.
+  threshold: 80
+  # To get stable "See also" sections we, by default, exclude newer related pages.
+  includeNewer: true
+  # Will lower case keywords in both queries and in the indexes.
+  toLower: false
+  indices:
+    - name: "keywords"
+      weight: 100
+    - name: "author"
+      toLower: true
+      weight: 10
+    - name: "tags"
+      weight: 150
+    - name: "date"
+      weight: 10
+      pattern: "2006"
