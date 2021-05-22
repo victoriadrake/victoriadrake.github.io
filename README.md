@@ -4,6 +4,24 @@ Oh, hello there!
 
 This repository serves my personal website and technical blog via GitHub Pages. You can get to the front door by visiting [victoria.dev](https://victoria.dev).
 
+## How this works
+
+For details on how I built the site, see [About this site](https://victoria.dev/site/).
+
+A GitHub Action handles continuous deployment. It runs on a regular schedule and on each push to my `master` branch. It installs the latest version of [Hugo](https://gohugo.io/) in the workflow environment, builds the site, and [publishes](https://github.com/peaceiris/actions-gh-pages) it to GitHub Pages. The site content and theme [are provided](https://github.com/actions/checkout#Checkout-multiple-repos-private) as [Git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+
+I wrote another GitHub Action, [link-snitch](https://github.com/victoriadrake/link-snitch), to regularly check my site for broken links.
+
+I use the [pre-commit framework](https://pre-commit.com/) to run [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) to keep my content tidy.
+
+A [self-documenting Makefile](https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/) helps me work efficiently without having to remember a bunch of command-line flags.
+
+## IndieWeb
+
+See [Make your own independent website](https://victoria.dev/blog/make-your-own-independent-website/).
+
+[Webmentions](https://www.w3.org/TR/2017/REC-webmention-20170112/) are enabled and I've implemented [microformats2](https://microformats.org/wiki/Main_Page) markup. This makes this site compatible with social readers and other IndieWeb sites!
+
 ## Contributions
 
 If you find a mistake or bug, I'd love to know so I can fix it! It would be very helpful if you open an issue, or [send me an email](mailto:hello@victoria.dev).
