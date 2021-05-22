@@ -1,0 +1,18 @@
+name: Check for broken links
+
+on:
+  workflow_run:
+    workflows: ["CD"]
+    types: [completed]
+
+env:
+  URL: https://victoria.dev
+  CONFIG: hydra-config.json
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Report broken links
+        uses: victoriadrake/link-snitch@master
