@@ -16,7 +16,9 @@ jobs:
       - name: Check out master
         uses: actions/checkout@master
         with:
-          fetch-depth: 1
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.PTOKEN }}
       - name: Install latest Hugo
         run: |
           HUGO_VERSION=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | jq -r '.tag_name')
