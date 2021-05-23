@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .POSIX:
-.PHONY: help env install upgrade-hugo lint serve build start initial
+.PHONY: help env install upgrade-hugo serve build start initial
 
 help: ## Show this help
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -27,15 +27,6 @@ upgrade-hugo: ## Get the latest Hugo
 	cd .. && \
 	rm -rf tmp/
 	hugo version
-
-DATEOF:=$(shell date +%FT%T)
-
-entry: ## Launch $EDITOR with a new entry
-	printf '%b\n' "---\ntitle: $(shell uuidgen) \ndate: $(DATEOF) \ncategories: \ntags: \n---\n\n" > content/neofeed/$(DATEOF).md
-	$(EDITOR) content/neofeed/$(DATEOF).md
-
-lint: ## Lint files
-	pre-commit run --all-files
 
 serve: ## Run the local development server
 	hugo serve --enableGitInfo --disableFastRender --environment development
