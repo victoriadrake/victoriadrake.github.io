@@ -1,28 +1,28 @@
 {{ define "main" }}
-<section>
+<section id="index-card">
     {{ partial "h-card" . }}
-    {{ partial "subscribe" . }}
 </section>
 <section>
     <nav aria-label="article list" class="markdown">
         <ul role="menubar" id="article-list" class="h-feed">
             {{ range first 1 (where .Site.Pages "Section" "blog") }}
-        {{ partial "article-li" . }}
-        {{ end }}
-        {{ range (.Paginate (where .Site.Pages "Params.featured" true ) 6).Pages }}
-        {{ partial "article-li" . }}
-        {{ end }}
-    </ul>
-</nav>
-<div class="centered cta">
-    <a href="/blog" class="button primary">and there's more</a>
-</div>
+            {{ partial "article-li" . }}
+            {{ end }}
+            {{ range (.Paginate (where .Site.Pages "Params.featured" true ) 4).Pages }}
+            {{ partial "article-li" . }}
+            {{ end }}
+        </ul>
+    </nav>
+    {{ partial "subscribe" . }}
+</section>
 {{ end }}
 
-{{ define "footer"}}
-{{ $footer := "layouts/partials/footer.html" }}
-{{ if (fileExists $footer) }}
-{{ partial "footer" .}}
-{{ end }}
-</section>
+{{ define "footer" }}
+<div id="centered-footer">
+    {{ with.Site.Params.footerText }}<p class="metadata">{{ . }}</p>{{ end }}
+    <p class="centered metadata">Last build: {{ now.UTC.Format .Site.Params.dateTime }} at
+        {{ range .Site.Pages }}{{ $.Scratch.Add "words" .WordCount }}{{ end }}{{ printf "%d" ($.Scratch.Get "words") }}
+        words.
+    </p>
+</div>
 {{ end }}
