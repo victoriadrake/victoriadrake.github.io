@@ -1,4 +1,4 @@
-<feed xmlns="http://www.w3.org/2005/Atom"><title>go on victoria.dev</title><link href="https://victoria.dev/tags/go/feed.xml" rel="self"/><link href="https://victoria.dev/tags/go/"/><updated>2021-02-15T01:38:07-05:00</updated><id>https://victoria.dev/tags/go/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>go on victoria.dev</title><link href="https://victoria.dev/tags/go/feed.xml" rel="self"/><link href="https://victoria.dev/tags/go/"/><updated>2021-02-15T01:38:07-05:00</updated><id>https://victoria.dev/tags/go/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-07-21T13:43:26+00:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
 <p>You can create your own self-hosted Matrix chat for as little as $3.50 USD per month on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance. Your homeserver can federate with other Matrix servers, giving you a reliable and fault-tolerant means of communication.</p>
 <p>Matrix is most widely installed via its <a href="https://matrix.org/docs/guides/installing-synapse">Synapse</a> homeserver implementation written in Python 3. Dendrite, its second-generation homeserver implementation written in Go, is currently released in beta. Dendrite will provide more memory efficiency and reliability out-of-the-box, making it an excellent choice for running on a virtual instance.</p>
 <p>Here&rsquo;s how to set up your own homeserver on AWS Lightsail with Dendrite. You can also <a href="https://github.com/matrix-org/dendrite">contribute to Dendrite today</a>.</p>
@@ -22,27 +22,27 @@
 <p>This points <code>matrix.example.org</code> to your Lightsail instance.</p>
 <h2 id="set-up-your-matrix-homeserver">Set up your Matrix homeserver</h2>
 <p>Change permissions on the private key you downloaded:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
 </code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
 </code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea ot use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
 <p>Change your <a href="https://wiki.debian.org/SourcesList">sources list</a> in order to get the newest version of Go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
 </code></pre></div><p>Delete everything except these two lines:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
 </span><span class="err"></span><span class="nx">deb</span><span class="p">-</span><span class="nx">src</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
 </span></code></pre></div><p>Then replace the distributions:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
 </span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
 <p>Once the upgrade is finished, restart your instance with <code>sudo shutdown -r now</code>.</p>
 <p>Go make some coffee, then SSH back in. Get the packages you&rsquo;ll need with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo apt update
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt update
 sudo apt upgrade
 sudo apt install -y git golang nginx python3-certbot-nginx
 </code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
 <h2 id="get-dendrite">Get Dendrite</h2>
 <p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
 <span class="nb">cd</span> dendrite
 ./build.sh
 
@@ -58,7 +58,7 @@ sudo apt install -y git golang nginx python3-certbot-nginx
 cp dendrite-config.yaml dendrite.yaml
 </code></pre></div><h2 id="configure-dendrite">Configure Dendrite</h2>
 <p>Modify the configuration file you just copied:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
 </code></pre></div><p>At minimum, set:</p>
 <ul>
 <li><code>server name</code> to your shiny new domain name, e.g. <code>matrix.example.org</code></li>
@@ -68,36 +68,36 @@ cp dendrite-config.yaml dendrite.yaml
 <p>You might like to read the <a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ</a>.</p>
 <h2 id="configure-nginx">Configure nginx</h2>
 <p>Get the required packages if you didn&rsquo;t already install them above:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
 </code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
 ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
 sudo cp default &lt;sitename&gt;
 </code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
 <p>Your <code>location</code> block should look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-nginx" data-lang="nginx"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
     <span class="kn">proxy_pass</span> <span class="s">https://localhost:8448</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
 <h2 id="create-self-signed-certificates">Create self-signed certificates</h2>
 <p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
 </code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
 <p>Test your configuration and restart nginx with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo nginx -t
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo nginx -t
 sudo systemctl restart nginx
 </code></pre></div><p>Then start up your Matrix server.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Build and run the server:</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Build and run the server:</span>
 ./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
 </code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
 <p>You can log on to your new homeserver with any <a href="https://matrix.org/clients/">Matrix client</a>, or Matrix-capable applications like <a href="https://www.pidgin.im/plugins/?publisher=all&amp;query=&amp;type=">Pidgin with the Matrix plugin</a>.</p>
 <h2 id="other-troubleshooting">Other troubleshooting</h2>
 <h3 id="log-files">Log files</h3>
 <p>If you get an error such as:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
   Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
 </code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
 sudo chown admin:admin /var/log/dendrite
 
 <span class="c1"># Build and run the server:</span>
@@ -111,7 +111,7 @@ sudo chown admin:admin /var/log/dendrite
 </ol>
 <h2 id="set-up-your-own-matrix-server-today">Set up your own Matrix server today</h2>
 <p>I hope you found this introduction to setting up your own Matrix homeserver to be helpful! If you have anything to add, feel free to <a href="/blog/make-your-own-independent-website/">reply via Webmention</a>.</p>
-]]></content></entry><entry><title type="html">Build your own serverless subscriber list with Go and AWS</title><link href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/"/><id>https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/</id><author><name>Victoria Drake</name></author><published>2020-11-10T04:52:50-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>You can now subscribe to my email list on <a href="/">victoria.dev</a>! Here&rsquo;s how I lovingly built a subscription sign up flow with email confirmation that doesn&rsquo;t suck. You can too.</p>
+]]></content></entry><entry><title type="html">Build your own serverless subscriber list with Go and AWS</title><link href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/"/><id>https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/</id><author><name>Victoria Drake</name></author><published>2020-11-10T04:52:50-05:00</published><updated>2021-07-21T13:43:26+00:00</updated><content type="html"><![CDATA[<p>You can now subscribe to my email list on <a href="/">victoria.dev</a>! Here&rsquo;s how I lovingly built a subscription sign up flow with email confirmation that doesn&rsquo;t suck. You can too.</p>
 <h2 id="introducing-simple-subscribe">Introducing Simple Subscribe</h2>
 <p>If you&rsquo;re interested in managing your own mailing list or newsletter, you can set up Simple Subscribe on your own AWS resources to collect email addresses. This open source API is written in Go, and runs on AWS Lambda. Visitors to your site can sign up to your list, which is stored in a DynamoDB table, ready to be queried or exported at your leisure.</p>
 <p>When someone signs up, they&rsquo;ll receive an email asking them to confirm their subscription. This is sometimes called &ldquo;double opt-in,&rdquo; although I prefer the term &ldquo;verified.&rdquo; Simple Subscribe works on serverless infrastructure and uses an AWS Lambda to handle subscription, confirmation, and unsubscribe requests.</p>
@@ -198,14 +198,14 @@ sudo chown admin:admin /var/log/dendrite
 <h2 id="build-your-independent-subscriber-base">Build your independent subscriber base</h2>
 <p>Building your own subscriber list can be an empowering endeavor! Whether you intend to start a newsletter, send out notifications for new content, or want to create a community around your work, there&rsquo;s nothing more personal or direct than an email from me to you.</p>
 <p>I encourage you to start building your subscriber base with Simple Subscribe today! Like most of my work, it&rsquo;s open source and free for your personal use. Dive into the code at <a href="https://github.com/victoriadrake/simple-subscribe">the GitHub repository</a> or learn more at <a href="https://simplesubscribe.org">SimpleSubscribe.org</a>.</p>
-]]></content></entry><entry><title type="html">Go automate your GitHub profile README</title><link href="https://victoria.dev/blog/go-automate-your-github-profile-readme/"/><id>https://victoria.dev/blog/go-automate-your-github-profile-readme/</id><author><name>Victoria Drake</name></author><published>2020-07-25T10:51:15-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>GitHub&rsquo;s new profile page README feature is having the wonderful effect of bringing some personality to the Myspace pages of the developer Internet. Though Markdown lends itself best to standard static text content, that&rsquo;s not stopping creative folks from working to create a next-level README. You can include GIFs and images to add some motion and pizazz (they&rsquo;re covered in <a href="https://github.github.com/gfm/">GitHub Flavor Markdown</a>), but I&rsquo;m thinking of something a little more dynamic.</p>
+]]></content></entry><entry><title type="html">Go automate your GitHub profile README</title><link href="https://victoria.dev/blog/go-automate-your-github-profile-readme/"/><id>https://victoria.dev/blog/go-automate-your-github-profile-readme/</id><author><name>Victoria Drake</name></author><published>2020-07-25T10:51:15-04:00</published><updated>2021-07-21T13:43:26+00:00</updated><content type="html"><![CDATA[<p>GitHub&rsquo;s new profile page README feature is having the wonderful effect of bringing some personality to the Myspace pages of the developer Internet. Though Markdown lends itself best to standard static text content, that&rsquo;s not stopping creative folks from working to create a next-level README. You can include GIFs and images to add some motion and pizazz (they&rsquo;re covered in <a href="https://github.github.com/gfm/">GitHub Flavor Markdown</a>), but I&rsquo;m thinking of something a little more dynamic.</p>
 <p>At front-and-center on your GitHub profile, your README is a great opportunity to let folks know what you&rsquo;re about, what you find important, and to showcase some highlights of your work. You might like to show off your latest repositories, tweet, or blog post. Keeping it up to date doesn&rsquo;t have to be a pain either, thanks to continuous delivery tools like GitHub Actions.</p>
 <p>My current README refreshes itself daily with a link to my latest blog post. Here&rsquo;s how I&rsquo;m creating a self-updating <code>README.md</code> with Go and GitHub actions.</p>
 <h2 id="reading-and-writing-files-with-go">Reading and writing files with Go</h2>
 <p>I&rsquo;ve been writing a lot of Python lately, but for some things I really like using Go. You could say it&rsquo;s my go-to language for just-for-<code>func</code> projects. Sorry. Couldn&rsquo;t stop myself.</p>
 <p>To create my README.md, I&rsquo;m going to get some static content from an existing file, mash it together with some new dynamic content that we&rsquo;ll generate with Go, then bake the whole thing at 400 degrees until something awesome comes out.</p>
 <p>Here&rsquo;s how we read in a file called <code>static.md</code> and put it in <code>string</code> form:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Unwrap Markdown content
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Unwrap Markdown content
 </span><span class="c1"></span><span class="nx">content</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="s">&#34;static.md&#34;</span><span class="p">)</span>
 <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
     <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;cannot read file: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
@@ -215,7 +215,7 @@ sudo chown admin:admin /var/log/dendrite
 <span class="c1">// Make it a string
 </span><span class="c1"></span><span class="nx">stringyContent</span> <span class="o">:=</span> <span class="nb">string</span><span class="p">(</span><span class="nx">content</span><span class="p">)</span>
 </code></pre></div><p>The possibilities for your dynamic content are only limited by your imagination! Here, I&rsquo;ll use the <a href="https://github.com/mmcdole/gofeed"><code>github.com/mmcdole/gofeed</code> package</a> to read the RSS feed from my blog and get the newest post.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">fp</span> <span class="o">:=</span> <span class="nx">gofeed</span><span class="p">.</span><span class="nf">NewParser</span><span class="p">()</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">fp</span> <span class="o">:=</span> <span class="nx">gofeed</span><span class="p">.</span><span class="nf">NewParser</span><span class="p">()</span>
 <span class="nx">feed</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">fp</span><span class="p">.</span><span class="nf">ParseURL</span><span class="p">(</span><span class="s">&#34;https://victoria.dev/index.xml&#34;</span><span class="p">)</span>
 <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
     <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;error getting feed: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
@@ -223,11 +223,11 @@ sudo chown admin:admin /var/log/dendrite
 <span class="c1">// Get the freshest item
 </span><span class="c1"></span><span class="nx">rssItem</span> <span class="o">:=</span> <span class="nx">feed</span><span class="p">.</span><span class="nx">Items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </code></pre></div><p>To join these bits together and produce stringy goodness, we use <a href="https://golang.org/pkg/fmt/#Sprintf"><code>fmt.Sprintf()</code></a> to create a formatted string.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Whisk together static and dynamic content until stiff peaks form
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Whisk together static and dynamic content until stiff peaks form
 </span><span class="c1"></span><span class="nx">blog</span> <span class="o">:=</span> <span class="s">&#34;Read my latest blog post: **[&#34;</span> <span class="o">+</span> <span class="nx">rssItem</span><span class="p">.</span><span class="nx">Title</span> <span class="o">+</span> <span class="s">&#34;](&#34;</span> <span class="o">+</span> <span class="nx">rssItem</span><span class="p">.</span><span class="nx">Link</span> <span class="o">+</span> <span class="s">&#34;)**&#34;</span>
 <span class="nx">data</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;%s\n%s\n&#34;</span><span class="p">,</span> <span class="nx">stringyContent</span><span class="p">,</span> <span class="nx">blog</span><span class="p">)</span>
 </code></pre></div><p>Then to create a new file from this mix, we use <a href="https://golang.org/pkg/os/#Create"><code>os.Create()</code></a>. There are <a href="https://www.joeshaw.org/dont-defer-close-on-writable-files/">more things to know about deferring <code>file.Close()</code></a>, but we don&rsquo;t need to get into those details here. We&rsquo;ll add <code>file.Sync()</code> to ensure our README gets written.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Prepare file with a light coating of os
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Prepare file with a light coating of os
 </span><span class="c1"></span><span class="nx">file</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="s">&#34;README.md&#34;</span><span class="p">)</span>
 <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">err</span>
@@ -244,25 +244,25 @@ sudo chown admin:admin /var/log/dendrite
 <p>Mmmm, doesn&rsquo;t that smell good? 🍪 Let&rsquo;s make this happen on the daily with a GitHub Action.</p>
 <h2 id="running-your-go-program-on-a-schedule-with-actions">Running your Go program on a schedule with Actions</h2>
 <p>You can create a GitHub Action workflow that <a href="https://docs.github.com/en/actions/reference/events-that-trigger-workflows">triggers</a> both on a push to your <code>master</code> branch as well as on a daily schedule. Here&rsquo;s a slice of the <code>.github/workflows/update.yaml</code> that defines this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">on</span><span class="p">:</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">on</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span><span class="nt">push</span><span class="p">:</span><span class="w">
 </span><span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w">
 </span><span class="w">      </span>- <span class="l">master</span><span class="w">
 </span><span class="w">  </span><span class="nt">schedule</span><span class="p">:</span><span class="w">
 </span><span class="w">    </span>- <span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;0 11 * * *&#39;</span><span class="w">
 </span></code></pre></div><p>To run the Go program that rebuilds our README, we first need a copy of our files. We use <code>actions/checkout</code> for that:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">steps</span><span class="p">:</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">steps</span><span class="p">:</span><span class="w">
 </span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">🍽️ Get working copy</span><span class="w">
 </span><span class="w">      </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@master</span><span class="w">
 </span><span class="w">      </span><span class="nt">with</span><span class="p">:</span><span class="w">
 </span><span class="w">        </span><span class="nt">fetch-depth</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
 </span></code></pre></div><p>This step runs our Go program:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">🍳 Shake &amp; bake README</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">🍳 Shake &amp; bake README</span><span class="w">
 </span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
 </span><span class="sd">    cd ${GITHUB_WORKSPACE}/update/
 </span><span class="sd">    go run main.go</span><span class="w">    
 </span></code></pre></div><p>Finally, we push the updated files back to our repository. Learn more about the variables shown at <a href="https://docs.github.com/en/actions/configuring-and-managing-workflows/using-variables-and-secrets-in-a-workflow">Using variables and secrets in a workflow</a>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">🚀 Deploy</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">🚀 Deploy</span><span class="w">
 </span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
 </span><span class="sd">    git config user.name &#34;${GITHUB_ACTOR}&#34;
 </span><span class="sd">    git config user.email &#34;${GITHUB_ACTOR}@users.noreply.github.com&#34;
@@ -272,7 +272,7 @@ sudo chown admin:admin /var/log/dendrite
 </span></code></pre></div><p>View the full code for this Action workflow <a href="https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/.github/workflows/update.yaml">here in my README repository</a>.</p>
 <h2 id="go-forth-and-auto-update-your-readme">Go forth and auto-update your README</h2>
 <p>Congratulations and welcome to the cool kids' club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &ndash; just go easy on the GIFs, okay?</p>
-]]></content></entry><entry><title type="html">Hugo vs Jekyll: an epic battle of static site generator themes</title><link href="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/"/><id>https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/</id><author><name>Victoria Drake</name></author><published>2020-04-27T06:34:41-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>I recently took on the task of creating a documentation site theme for two projects. Both projects needed the same basic features, but one uses Jekyll while the other uses Hugo.</p>
+]]></content></entry><entry><title type="html">Hugo vs Jekyll: an epic battle of static site generator themes</title><link href="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/"/><id>https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/</id><author><name>Victoria Drake</name></author><published>2020-04-27T06:34:41-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>I recently took on the task of creating a documentation site theme for two projects. Both projects needed the same basic features, but one uses Jekyll while the other uses Hugo.</p>
 <p>In typical developer rationality, there was clearly only one option. I decided to create the same theme in both frameworks, and to give you, dear reader, a side-by-side comparison.</p>
 <p>This post isn&rsquo;t a comprehensive theme-building guide, but intended to familiarize you with the process of building a theme in either generator. Here&rsquo;s what we&rsquo;ll cover:</p>
 <ul>
@@ -305,7 +305,7 @@ sudo chown admin:admin /var/log/dendrite
 <h2 id="how-theme-files-are-organized">How theme files are organized</h2>
 <p>Jekyll supports gem-based themes, which users can install like any other Ruby gems. This method hides theme files in the gem, so for the purposes of this comparison, we aren&rsquo;t using gem-based themes.</p>
 <p>When you run <code>jekyll new-theme &lt;name&gt;</code>, Jekyll will scaffold a new theme for you. Here&rsquo;s what those files look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">.
 ├── assets
 ├── Gemfile
 ├── _includes
@@ -319,7 +319,7 @@ sudo chown admin:admin /var/log/dendrite
 └── &lt;name&gt;.gemspec
 </code></pre></div><p>The directory names are appropriately descriptive. The <code>_includes</code> directory is for small bits of code that you reuse in different places, in much the same way you&rsquo;d put butter on everything. (Just me?) The <code>_layouts</code> directory contains templates for different types of pages on your site. The <code>_sass</code> folder is for <a href="https://sass-lang.com/documentation/syntax">Sass</a> files used to build your site&rsquo;s stylesheet.</p>
 <p>You can scaffold a new Hugo theme by running <code>hugo new theme &lt;name&gt;</code>. It has these files:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">.
 ├── archetypes
 │   └── default.md
 ├── layouts
@@ -342,7 +342,7 @@ sudo chown admin:admin /var/log/dendrite
 <p>These directory structures aren&rsquo;t set in stone, as both site generators allow some measure of customization. For example, Jekyll lets you define <a href="https://jekyllrb.com/docs/collections/">collections</a>, and Hugo makes use of <a href="https://gohugo.io/content-management/page-bundles/">page bundles</a>. These features let you organize your content multiple ways, but for now, lets look at where to put some simple pages.</p>
 <h2 id="where-to-put-content">Where to put content</h2>
 <p>To create a site menu that looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md">Introduction
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-md" data-lang="md">Introduction
     Getting Started
     Configuration
     Deploying
@@ -352,7 +352,7 @@ Advanced Usage
     Help and Support
 </code></pre></div><p>You&rsquo;ll need two sections (&ldquo;Introduction&rdquo; and &ldquo;Advanced Usage&rdquo;) containing their respective subsections.</p>
 <p>Jekyll isn&rsquo;t strict with its content location. It expects pages in the root of your site, and will build whatever&rsquo;s there. Here&rsquo;s how you might organize these pages in your Jekyll site root:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">.
 ├── 404.html
 ├── assets
 ├── Gemfile
@@ -379,7 +379,7 @@ Advanced Usage
 
 </code></pre></div><p>You can change the location of the site source in your <a href="https://jekyllrb.com/docs/configuration/default/">Jekyll configuration</a>.</p>
 <p>In Hugo, all rendered content is expected in the <code>content/</code> folder. This prevents Hugo from trying to render pages you don&rsquo;t want, such as <code>404.html</code>, as site content. Here&rsquo;s how you might organize your <code>content/</code> directory in Hugo:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">.
 ├── _index.md
 ├── intro
 │   ├── config.md
@@ -397,16 +397,16 @@ Advanced Usage
 <p>Jekyll page templates are built with the <a href="https://jekyllrb.com/docs/liquid/">Liquid templating language</a>. It uses braces to output variable content to a page, such as the page&rsquo;s title: <code>{{ page.title }}</code>.</p>
 <p>Hugo&rsquo;s templates also use braces, but they&rsquo;re built with <a href="https://gohugo.io/templates/introduction/">Go Templates</a>. The syntax is similar, but different: <code>{{ .Title }}</code>.</p>
 <p>Both Liquid and Go Templates can handle logic. Liquid uses <em>tags</em> syntax to denote logic operations:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html">{% if user %}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html">{% if user %}
   Hello {{ user.name }}!
 {% endif %}
 </code></pre></div><p>And Go Templates places its functions and arguments in its braces syntax:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="p">{{</span> <span class="k">if</span> <span class="p">.</span><span class="nx">User</span> <span class="p">}}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="p">{{</span> <span class="k">if</span> <span class="p">.</span><span class="nx">User</span> <span class="p">}}</span>
     <span class="nx">Hello</span> <span class="p">{{</span> <span class="p">.</span><span class="nx">User</span> <span class="p">}}!</span>
 <span class="p">{{</span> <span class="nx">end</span> <span class="p">}}</span>
 </code></pre></div><p>Templating languages allow you to build one skeleton HTML page, then tell the site generator to put variable content in areas you define. Let&rsquo;s compare two possible <code>default</code> page templates for Jekyll and Hugo.</p>
 <p>Jekyll&rsquo;s scaffold <code>default</code> theme is bare, so we&rsquo;ll look at their starter theme <a href="https://github.com/jekyll/minima">Minima</a>. Here&rsquo;s <code>_layouts/default.html</code> in Jekyll (Liquid):</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&#34;{{ page.lang | default: site.lang | default: &#34;</span><span class="na">en</span><span class="err">&#34;</span> <span class="err">}}&#34;</span><span class="p">&gt;</span>
 
   {%- include head.html -%}
@@ -428,7 +428,7 @@ Advanced Usage
 <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 
 </code></pre></div><p>Here&rsquo;s Hugo&rsquo;s scaffold theme <code>layouts/_default/baseof.html</code> (Go Templates):</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
     {{- partial &#34;head.html&#34; . -}}
     <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
@@ -443,16 +443,16 @@ Advanced Usage
 <p>Now that you know how templating works, you can build the sidebar menu for the theme.</p>
 <h2 id="creating-a-top-level-menu-with-the-pages-object">Creating a top-level menu with the <code>pages</code> object</h2>
 <p>You can programmatically create a top-level menu from your pages. It will look like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md">Introduction
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-md" data-lang="md">Introduction
 Advanced Usage
 </code></pre></div><p>Let&rsquo;s start with Jekyll. You can display links to site pages in your Liquid template by iterating through the <code>site.pages</code> object that Jekyll provides and building a list:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
     {% for page in site.pages %}
     <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ page.url | absolute_url }}&#34;</span><span class="p">&gt;</span>{{ page.title }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
     {% endfor %}
 <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
 </code></pre></div><p>This returns all of the site&rsquo;s pages, including all the ones that you might not want, like <code>404.html</code>. You can filter for the pages you actually want with a couple more tags, such as conditionally including pages if they have a <code>section: true</code> parameter set:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
     {% for page in site.pages %}
     {%- if page.section -%}
     <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ page.url | absolute_url }}&#34;</span><span class="p">&gt;</span>{{ page.title }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
@@ -460,7 +460,7 @@ Advanced Usage
     {% endfor %}
 <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
 </code></pre></div><p>You can achieve the same effect with slightly less code in Hugo. Loop through Hugo&rsquo;s <code>.Pages</code> object using Go Template&rsquo;s <a href="https://golang.org/pkg/text/template/#hdr-Actions"><code>range</code> action</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
 {{ range .Pages }}
     <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
         <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{.Permalink}}&#34;</span><span class="p">&gt;</span>{{.Title}}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
@@ -470,7 +470,7 @@ Advanced Usage
 </code></pre></div><p>This template uses the <code>.Pages</code> object to return all the top-level pages in <code>content/</code> of your Hugo site. Since Hugo uses a specific folder for the site content you want rendered, there&rsquo;s no additional filtering necessary to build a simple menu of site pages.</p>
 <h2 id="creating-a-menu-with-nested-links-from-a-data-list">Creating a menu with nested links from a data list</h2>
 <p>Both site generators can use a separately defined data list of links to render a menu in your template. This is more suitable for creating nested links, like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md">Introduction
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-md" data-lang="md">Introduction
     Getting Started
     Configuration
     Deploying
@@ -479,7 +479,7 @@ Advanced Usage
     Customizing
     Help and Support
 </code></pre></div><p>Jekyll supports <a href="https://jekyllrb.com/docs/datafiles/">data files</a> in a few formats, including YAML. Here&rsquo;s the definition for the menu above in <code>_data/menu.yml</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">section</span><span class="p">:</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">section</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span>- <span class="nt">page</span><span class="p">:</span><span class="w"> </span><span class="l">Introduction</span><span class="w">
 </span><span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">/intro</span><span class="w">
 </span><span class="w">    </span><span class="nt">subsection</span><span class="p">:</span><span class="w">
@@ -499,7 +499,7 @@ Advanced Usage
 </span><span class="w">      </span>- <span class="nt">page</span><span class="p">:</span><span class="w"> </span><span class="l">Help and Support</span><span class="w">
 </span><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">/usage/support</span><span class="w">
 </span></code></pre></div><p>Here&rsquo;s how to render the data in the sidebar template:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html">{% for a in site.data.menu.section %}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html">{% for a in site.data.menu.section %}
 <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ a.url }}&#34;</span><span class="p">&gt;</span>{{ a.page }}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
     {% for b in a.subsection %}
@@ -509,7 +509,7 @@ Advanced Usage
 {% endfor %}
 </code></pre></div><p>This method allows you to build a custom menu, two nesting levels deep. The nesting levels are limited by the <code>for</code> loops in the template. For a recursive version that handles further levels of nesting, see <a href="https://jekyllrb.com/tutorials/navigation/#scenario-9-nested-tree-navigation-with-recursion">Nested tree navigation with recursion</a>.</p>
 <p>Hugo does something similar with its <a href="https://gohugo.io/templates/menu-templates/#section-menu-for-lazy-bloggers">menu templates</a>. You can define menu links in your <a href="https://gohugo.io/getting-started/configuration/">Hugo site config</a>, and even add useful properties that Hugo understands, like weighting. Here&rsquo;s a definition of the menu above in <code>config.yaml</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">sectionPagesMenu</span><span class="p">:</span><span class="w"> </span><span class="l">main</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">sectionPagesMenu</span><span class="p">:</span><span class="w"> </span><span class="l">main</span><span class="w">
 </span><span class="w">
 </span><span class="w"></span><span class="nt">menu</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w">
@@ -545,7 +545,7 @@ Advanced Usage
 </span><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">/usage/support/</span><span class="w">
 </span><span class="w">      </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="m">3</span><span class="w">
 </span></code></pre></div><p>Hugo uses the <code>identifier</code>, which must match the section name, along with the <code>parent</code> variable to handle nesting. Here&rsquo;s how to render the menu in the sidebar template:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
     {{ range .Site.Menus.main }}
     {{ if .HasChildren }}
     <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
@@ -569,7 +569,7 @@ Advanced Usage
 <h2 id="putting-the-template-together">Putting the template together</h2>
 <p>With your menu in your reusable sidebar bit (<code>_includes/sidebar.html</code> for Jekyll and <code>partials/sidebar.html</code> for Hugo), you can add it to the <code>default.html</code> template.</p>
 <p>In Jekyll:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&#34;{{ page.lang | default: site.lang | default: &#34;</span><span class="na">en</span><span class="err">&#34;</span> <span class="err">}}&#34;</span><span class="p">&gt;</span>
 
 {%- include head.html -%}
@@ -589,7 +589,7 @@ Advanced Usage
 
 <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </code></pre></div><p>In Hugo:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
 {{- partial &#34;head.html&#34; . -}}
 
@@ -609,7 +609,7 @@ Advanced Usage
 <p>Both site generators accept Sass for creating CSS stylesheets. Jekyll <a href="https://jekyllrb.com/docs/assets/">has Sass processing built in</a>, and Hugo uses <a href="https://gohugo.io/hugo-pipes/scss-sass/">Hugo Pipes</a>. Both options have some quirks.</p>
 <h3 id="sass-and-css-in-jekyll">Sass and CSS in Jekyll</h3>
 <p>To process a Sass file in Jekyll, create your style definitions in the <code>_sass</code> directory. For example, in a file at <code>_sass/style-definitions.scss</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-scss" data-lang="scss"><span class="nv">$background-color</span><span class="o">:</span> <span class="mh">#eef</span> <span class="k">!default</span><span class="p">;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-scss" data-lang="scss"><span class="nv">$background-color</span><span class="o">:</span> <span class="mh">#eef</span> <span class="k">!default</span><span class="p">;</span>
 <span class="nv">$text-color</span><span class="o">:</span> <span class="mh">#111</span> <span class="k">!default</span><span class="p">;</span>
 
 <span class="nt">body</span> <span class="p">{</span>
@@ -617,23 +617,23 @@ Advanced Usage
   <span class="na">color</span><span class="o">:</span> <span class="nv">$text-color</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div><p>Jekyll won&rsquo;t generate this file directly, as it only processes files with front matter. To create the end-result filepath for your site&rsquo;s stylesheet, use a placeholder with empty front matter where you want the <code>.css</code> file to appear. For example, <code>assets/css/style.scss</code>. In this file, simply import your styles:</p>
-<div class="highlight"><pre class="chroma"><code class="language-scss" data-lang="scss"><span class="o">---</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-scss" data-lang="scss"><span class="o">---</span>
 <span class="o">---</span>
 
 <span class="o">@</span><span class="nt">import</span> <span class="s2">&#34;style-definitions&#34;</span><span class="p">;</span>
 </code></pre></div><p>This rather hackish configuration has an upside: you can use Liquid template tags and variables in your placeholder file. This is a nice way to allow users to set variables from the site <code>_config.yml</code>, for example.</p>
 <p>The resulting CSS stylesheet in your generated site has the path <code>/assets/css/style.css</code>. You can link to it in your site&rsquo;s <code>head.html</code> using:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&#34;stylesheet&#34;</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ &#34;</span><span class="err">/</span><span class="na">assets</span><span class="err">/</span><span class="na">css</span><span class="err">/</span><span class="na">style</span><span class="err">.</span><span class="na">css</span><span class="err">&#34;</span> <span class="err">|</span> <span class="na">relative_url</span> <span class="err">}}&#34;</span> <span class="na">media</span><span class="o">=</span><span class="s">&#34;screen&#34;</span><span class="p">&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&#34;stylesheet&#34;</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ &#34;</span><span class="err">/</span><span class="na">assets</span><span class="err">/</span><span class="na">css</span><span class="err">/</span><span class="na">style</span><span class="err">.</span><span class="na">css</span><span class="err">&#34;</span> <span class="err">|</span> <span class="na">relative_url</span> <span class="err">}}&#34;</span> <span class="na">media</span><span class="o">=</span><span class="s">&#34;screen&#34;</span><span class="p">&gt;</span>
 </code></pre></div><h3 id="sass-and-hugo-pipes-in-hugo">Sass and Hugo Pipes in Hugo</h3>
 <p>Hugo uses <a href="https://gohugo.io/hugo-pipes/scss-sass/">Hugo Pipes</a> to process Sass to CSS. You can achieve this by using Hugo&rsquo;s asset processing function, <code>resources.ToCSS</code>, which expects a source in the <code>assets/</code> directory. It takes the SCSS file as an argument. With your style definitions in a Sass file at <code>assets/sass/style.scss</code>, here&rsquo;s how to get, process, and link your Sass in your theme&rsquo;s <code>head.html</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html">{{ $style := resources.Get &#34;/sass/style.scss&#34; | resources.ToCSS }}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html">{{ $style := resources.Get &#34;/sass/style.scss&#34; | resources.ToCSS }}
 <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&#34;stylesheet&#34;</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ $style.RelPermalink }}&#34;</span> <span class="na">media</span><span class="o">=</span><span class="s">&#34;screen&#34;</span><span class="p">&gt;</span>
 </code></pre></div><p>Hugo asset processing <a href="https://gohugo.io/troubleshooting/faq/#i-get-tocss--this-feature-is-not-available-in-your-current-hugo-version">requires extended Hugo</a>, which you may not have by default. You can get extended Hugo from the <a href="https://github.com/gohugoio/hugo/releases">releases page</a>.</p>
 <h2 id="configure-and-deploy-to-github-pages">Configure and deploy to GitHub Pages</h2>
 <p>Before your site generator can build your site, it needs a configuration file to set some necessary parameters. Configuration files live in the site root directory. Among other settings, you can declare the name of the theme to use when building the site.</p>
 <h3 id="configure-jekyll">Configure Jekyll</h3>
 <p>Here&rsquo;s a minimal <code>_config.yml</code> for Jekyll:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l">Your awesome title</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l">Your awesome title</span><span class="w">
 </span><span class="w"></span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l">&gt;-</span><span class="w"> </span><span class="c"># this means to ignore newlines until &#34;baseurl:&#34;</span><span class="w">
 </span><span class="w">  </span><span class="l">Write an awesome description for your new site here. You can edit this</span><span class="w">
 </span><span class="w">  </span><span class="l">line in _config.yml. It will appear in your document head meta (for</span><span class="w">
@@ -646,7 +646,7 @@ Advanced Usage
 <p>Jekyll has a <a href="https://jekyllrb.com/docs/configuration/default/">default configuration</a>, so any parameters added to your configuration file will override the defaults. Here are <a href="https://jekyllrb.com/docs/configuration/options/">additional configuration settings</a>.</p>
 <h3 id="configure-hugo">Configure Hugo</h3>
 <p>Here&rsquo;s a minimal example of Hugo&rsquo;s <code>config.yml</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">baseURL</span><span class="p">:</span><span class="w"> </span><span class="l">https://example.com/</span><span class="w"> </span><span class="c"># The full domain your site will live at</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">baseURL</span><span class="p">:</span><span class="w"> </span><span class="l">https://example.com/</span><span class="w"> </span><span class="c"># The full domain your site will live at</span><span class="w">
 </span><span class="w"></span><span class="nt">languageCode</span><span class="p">:</span><span class="w"> </span><span class="l">en-us</span><span class="w">
 </span><span class="w"></span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l">Hugo Docs Site</span><span class="w">
 </span><span class="w"></span><span class="nt">theme</span><span class="p">:</span><span class="w"> </span><span class="c"># theme name</span><span class="w">
@@ -669,7 +669,7 @@ Advanced Usage
 <p>From this developer&rsquo;s perspective, Jekyll is a workable choice for simple sites without complicated organizational needs. If you&rsquo;re looking to render some one-page posts in an <a href="https://jekyllrb.com/docs/themes/">available theme</a> and host with GitHub Pages, Jekyll will get you up and running fairly quickly.</p>
 <p>Personally, I use Hugo. I like the organizational capabilities of its Page Bundles, and it&rsquo;s backed by a dedicated and conscientious team that really seems to strive to facilitate convenience for their users. This is evident in Hugo&rsquo;s many functions, and handy tricks like <a href="https://gohugo.io/content-management/image-processing/">Image Processing</a> and <a href="https://gohugo.io/content-management/shortcodes/">Shortcodes</a>. They seem to release new fixes and versions about as often as I make a new cup of coffee.</p>
 <p>If you still can&rsquo;t decide, don&rsquo;t worry. Many themes are available for both Hugo and Jekyll! Start with one, switch later if you want. That&rsquo;s the benefit of having options.</p>
-]]></content></entry><entry><title type="html">Breaking bottlenecks 🍾</title><link href="https://victoria.dev/blog/breaking-bottlenecks/"/><id>https://victoria.dev/blog/breaking-bottlenecks/</id><author><name>Victoria Drake</name></author><published>2020-02-25T12:50:29-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p><em>I recently gave a lecture on the benefits of building non-blocking processes. This is a write-up of the full talk, minus any &ldquo;ums&rdquo; that may have occurred. You can <a href="https://victoria.dev/slides/bottlenecks">view the slides here</a>.</em></p>
+]]></content></entry><entry><title type="html">Breaking bottlenecks 🍾</title><link href="https://victoria.dev/blog/breaking-bottlenecks/"/><id>https://victoria.dev/blog/breaking-bottlenecks/</id><author><name>Victoria Drake</name></author><published>2020-02-25T12:50:29-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p><em>I recently gave a lecture on the benefits of building non-blocking processes. This is a write-up of the full talk, minus any &ldquo;ums&rdquo; that may have occurred. You can <a href="https://victoria.dev/slides/bottlenecks">view the slides here</a>.</em></p>
 <p>I&rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.</p>
 <p>OWASP is a great group doing important work. I&rsquo;ve seen this firsthand as part of the core team that produces the Web Security Testing Guide. However, while OWASP inspires in its large volunteer base, it lacks in the area of central organization.</p>
 <p>This lack of organization was most recently apparent in the group&rsquo;s website, <a href="https://owasp.org">OWASP.org</a>. A big organization with an even bigger website to match, OWASP.org enjoys hundreds of thousands of visitors. Unfortunately, many of its pages - individually managed by disparate projects - are infrequently updated. Some are abandoned. The website as a whole lacks a centralized quality assurance process, and as a result, OWASP.org is peppered with broken links.</p>
@@ -774,7 +774,7 @@ Advanced Usage
 <h2 id="bottleneck-network-latency">Bottleneck: network latency</h2>
 <p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
 <p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">      150 milliseconds
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">      150 milliseconds
  x 12,000 links
 ---------
 1,800,000 milliseconds (30 minutes)
@@ -796,7 +796,7 @@ Advanced Usage
 <p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p>
 <h2 id="tacos-and-threading">Tacos and threading</h2>
 <p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
 🌮   ╔══════════════╗
@@ -808,7 +808,7 @@ Advanced Usage
 🌮                                          🌳
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 </code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
 🌮
@@ -821,7 +821,7 @@ Advanced Usage
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 </code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p>
 <p>We can try splitting the queue:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
 🌮         🧑💵🧑💵🧑💵🧑💵
@@ -834,7 +834,7 @@ Advanced Usage
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 </code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p>
 <p>We could get two Bobs:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
 🌮                                          🌳
@@ -847,7 +847,7 @@ Advanced Usage
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 </code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p>
 <p>We can do even better than that:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮      🐹 🧑💵🧑💵
 🌮                                          🌳
@@ -862,7 +862,7 @@ Advanced Usage
 <p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p>
 <h2 id="setting-up-a-go-web-crawler">Setting up a Go web crawler</h2>
 <p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">startDomain</span>             <span class="kt">string</span>
     <span class="nx">brokenLinks</span>             <span class="p">[]</span><span class="nx">Result</span>
     <span class="nx">visitedLinks</span>            <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span>
@@ -882,7 +882,7 @@ Advanced Usage
     <span class="nx">code</span>   <span class="kt">int</span>
 <span class="p">}</span>
 </code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Extract links from HTML
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Extract links from HTML
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">parse</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span><span class="p">)</span> <span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="p">[]</span><span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">doc</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">html</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nf">NewReader</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
     <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
@@ -916,7 +916,7 @@ Advanced Usage
 <span class="p">}</span>
 </code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href="https://www.theregister.co.uk/2016/03/23/npm_left_pad_chaos/">the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p>
 <p>Here are snippets of the <code>main</code> function, where we pass in our starting URL and create a queue (or <a href="https://tour.golang.org/concurrency/2">channels</a>, in Go) to be filled with links for our goroutines to process.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="o">...</span>
     <span class="nx">startURL</span> <span class="o">:=</span> <span class="nx">flag</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="s">&#34;url&#34;</span><span class="p">,</span> <span class="s">&#34;http://example.com&#34;</span><span class="p">,</span> <span class="s">&#34;full URL of site&#34;</span><span class="p">)</span>
     <span class="o">...</span>
@@ -931,7 +931,7 @@ Advanced Usage
 
     <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
 </code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">toProcess</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">toProcess</span> <span class="p">{</span>
     <span class="nx">wg</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="nx">checker</span><span class="p">.</span><span class="nf">addWorker</span><span class="p">()</span>
     <span class="err">🐹</span> <span class="k">go</span> <span class="nf">worker</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">checker</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">wg</span><span class="p">,</span> <span class="nx">toProcess</span><span class="p">)</span>
@@ -943,21 +943,21 @@ Advanced Usage
 </code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
 <h2 id="did-we-do-the-thing-fast">Did we do the thing fast</h2>
 <p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
 
 real 17m34.084s
 user 11m40.761s
 sys     0m5.436s
 </code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
 <p>The multithreaded Python version did a bit better:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time python3 hydra.py https://victoria.dev
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time python3 hydra.py https://victoria.dev
 
 real 1m13.358s
 user 0m13.161s
 sys     0m2.826s
 </code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
 <p>How did Go do?</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">time ./go-link-check --url=https://victoria.dev
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time ./go-link-check --url=https://victoria.dev
 
 real 0m7.926s
 user 0m9.044s
@@ -966,7 +966,7 @@ sys     0m0.932s
 <h2 id="breaking-bottlenecks">Breaking bottlenecks</h2>
 <p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
 <p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p>
-]]></content></entry><entry><title type="html">A coffee-break introduction to time complexity of algorithms</title><link href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/"/><id>https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/</id><author><name>Victoria Drake</name></author><published>2018-05-30T14:08:28-04:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>Just like writing your very first <code>for</code> loop, understanding time complexity is an integral milestone to learning how to write efficient complex programs. Think of it as having a superpower that allows you to know exactly what type of program might be the most efficient in a particular situation - before even running a single line of code.</p>
+]]></content></entry><entry><title type="html">A coffee-break introduction to time complexity of algorithms</title><link href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/"/><id>https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/</id><author><name>Victoria Drake</name></author><published>2018-05-30T14:08:28-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>Just like writing your very first <code>for</code> loop, understanding time complexity is an integral milestone to learning how to write efficient complex programs. Think of it as having a superpower that allows you to know exactly what type of program might be the most efficient in a particular situation - before even running a single line of code.</p>
 <p>The fundamental concepts of complexity analysis are well worth studying. You&rsquo;ll be able to better understand how the code you&rsquo;re writing will interact with the program&rsquo;s input, and as a result, you&rsquo;ll spend a lot less wasted time writing slow and problematic code. It won&rsquo;t take long to go over all you need to know in order to start writing more efficient programs - in fact, we can do it in about fifteen minutes. You can go grab a coffee right now (or tea, if that&rsquo;s your thing) and I&rsquo;ll take you through it before your coffee break is over. Go ahead, I&rsquo;ll wait.</p>
 <p>All set? Let&rsquo;s do it!</p>
 <h2 id="what-is-time-complexity-anyway">What is &ldquo;time complexity&rdquo; anyway</h2>
@@ -997,7 +997,7 @@ sys     0m0.932s
 </figure>
 
 <p>Here&rsquo;s one example of a constant algorithm that takes the first item in a slice.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">takeCupcake</span><span class="p">(</span><span class="nx">cupcakes</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">takeCupcake</span><span class="p">(</span><span class="nx">cupcakes</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">cupcakes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div><figure><img src="cupcakes.png"
@@ -1014,13 +1014,13 @@ sys     0m0.932s
 </figure>
 
 <p>Here&rsquo;s an example of code with time complexity of <em>O</em>(<em>n</em>):</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
  <span class="k">for</span> <span class="nx">chip</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chip</span> <span class="o">&lt;=</span> <span class="nx">bowlOfChips</span><span class="p">;</span> <span class="nx">chip</span><span class="o">++</span> <span class="p">{</span>
   <span class="c1">// dip chip
 </span><span class="c1"></span> <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div><p>Here&rsquo;s another example of code with time complexity of <em>O</em>(<em>n</em>):</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
  <span class="k">for</span> <span class="nx">chip</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chip</span> <span class="o">&lt;=</span> <span class="nx">bowlOfChips</span><span class="p">;</span> <span class="nx">chip</span><span class="o">++</span> <span class="p">{</span>
   <span class="c1">// double dip chip
 </span><span class="c1"></span> <span class="p">}</span>
@@ -1038,7 +1038,7 @@ sys     0m0.932s
 </figure>
 
 <p>Now here&rsquo;s an example of code with time complexity of <em>O</em>(<em>n</em><sup>2</sup>):</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">pizzas</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">pizzas</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
  <span class="k">for</span> <span class="nx">pizza</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizza</span> <span class="o">&lt;=</span> <span class="nx">pizzas</span><span class="p">;</span> <span class="nx">pizza</span><span class="o">++</span> <span class="p">{</span>
   <span class="c1">// slice pizza
 </span><span class="c1"></span>  <span class="k">for</span> <span class="nx">slice</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">slice</span> <span class="o">&lt;=</span> <span class="nx">pizza</span><span class="p">;</span> <span class="nx">slice</span><span class="o">++</span> <span class="p">{</span>
@@ -1053,7 +1053,7 @@ sys     0m0.932s
 </figure>
 
 <p>Extending on the previous example, this code with three nested loops has time complexity of <em>O</em>(<em>n</em><sup>3</sup>):</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">boxesDelivered</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">boxesDelivered</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
  <span class="k">for</span> <span class="nx">pizzaBox</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizzaBox</span> <span class="o">&lt;=</span> <span class="nx">boxesDelivered</span><span class="p">;</span> <span class="nx">pizzaBox</span><span class="o">++</span> <span class="p">{</span>
   <span class="c1">// open box
 </span><span class="c1"></span>  <span class="k">for</span> <span class="nx">pizza</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizza</span> <span class="o">&lt;=</span> <span class="nx">pizzaBox</span><span class="p">;</span> <span class="nx">pizza</span><span class="o">++</span> <span class="p">{</span>
@@ -1116,7 +1116,7 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
 <h3 id="recursion-time-complexity">Recursion time complexity</h3>
 <p>As I described in my article <a href="/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">explaining recursion using apple pie</a>, a recursive function calls itself under specified conditions. Its time complexity depends on how many times the function is called and the time complexity of a single function call. In other words, it&rsquo;s the product of the number of times the function runs and a single execution&rsquo;s time complexity.</p>
 <p>Here&rsquo;s a recursive function that eats pies until no pies are left:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
  <span class="k">if</span> <span class="nx">pies</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
   <span class="k">return</span> <span class="nx">pies</span>
  <span class="p">}</span>
@@ -1134,7 +1134,7 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
 <p>So far, we&rsquo;ve talked about the time complexity of a few nested loops and some code examples. Most algorithms, however, are built from many combinations of these. How do we determine the time complexity of an algorithm containing many of these elements strung together?</p>
 <p>Easy. We can describe the total time complexity of the algorithm by finding the largest complexity among all of its parts. This is because the slowest part of the code is the bottleneck, and time complexity is concerned with describing the worst case for the algorithm&rsquo;s run time.</p>
 <p>Say we have a program for an office party. If our program looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
 
@@ -1215,7 +1215,7 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
 </table>
 <p>To describe the time complexity of the entire office party program, we choose the worst case. This program would have the time complexity <em>O</em>(<em>n</em><sup>3</sup>).</p>
 <p>Here&rsquo;s the office party soundtrack, just for fun.</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">Have cupcake number <span class="m">1</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">Have cupcake number <span class="m">1</span>
 Have some chips!
 No more chips.
 Pizza is here!
@@ -1274,29 +1274,29 @@ Food gone. Back to work!
 </table>
 <p>Keep in mind that time complexity is an approximation, and not a guarantee. We can save a lot of time and effort by immediately ruling out algorithm designs that are unlikely to suit our constraints, but we must also consider that Big O notation doesn&rsquo;t account for <strong>constant factors</strong>. Here&rsquo;s some code to illustrate.</p>
 <p>The following two algorithms both have <em>O</em>(<em>n</em>) time complexity.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">makeCoffee</span><span class="p">(</span><span class="nx">scoops</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">makeCoffee</span><span class="p">(</span><span class="nx">scoops</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
  <span class="k">for</span> <span class="nx">scoop</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">scoop</span> <span class="o">&lt;=</span> <span class="nx">scoops</span><span class="p">;</span> <span class="nx">scoop</span><span class="o">++</span> <span class="p">{</span>
   <span class="c1">// add instant coffee
 </span><span class="c1"></span> <span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">makeStrongCoffee</span><span class="p">(</span><span class="nx">scoops</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">makeStrongCoffee</span><span class="p">(</span><span class="nx">scoops</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
  <span class="k">for</span> <span class="nx">scoop</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">scoop</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="o">*</span><span class="nx">scoops</span><span class="p">;</span> <span class="nx">scoop</span><span class="o">++</span> <span class="p">{</span>
   <span class="c1">// add instant coffee
 </span><span class="c1"></span> <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div><p>The first function makes a cup of coffee with the number of scoops we ask for. The second function also makes a cup of coffee, but it triples the number of scoops we ask for. To see an illustrative example, let&rsquo;s ask both these functions for a cup of coffee with a million scoops.</p>
 <p>Here&rsquo;s the output of the Go test:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Benchmark_makeCoffee-4          <span class="m">1000000000</span>               0.29 ns/op
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Benchmark_makeCoffee-4          <span class="m">1000000000</span>               0.29 ns/op
 Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               0.86 ns/op
 </code></pre></div><p>Our first function, <code>makeCoffee</code>, completed in an average 0.29 nanoseconds. Our second function, <code>makeStrongCoffee</code>, completed in an average of 0.86 nanoseconds. While those may both seem like pretty small numbers, consider that the stronger coffee took near three times longer to make. This should make sense intuitively, since we asked it to triple the scoops. Big O notation alone wouldn&rsquo;t tell you this, since the constant factor of the tripled scoops isn&rsquo;t accounted for.</p>
 <h2 id="improve-time-complexity-of-existing-code">Improve time complexity of existing code</h2>
 <p>Becoming familiar with time complexity gives us the opportunity to write code, or refactor code, to be more efficient. To illustrate, I&rsquo;ll give a concrete example of one way we can refactor a bit of code to improve its time complexity.</p>
 <p>Let&rsquo;s say a bunch of people at the office want some pie. Some people want pie more than others. The amount that everyone wants some pie is represented by an <code>int</code> &gt; 0:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">diners</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">56</span><span class="p">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">diners</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">56</span><span class="p">}</span>
 </code></pre></div><p>Unfortunately, we&rsquo;re bootstrapped and there are only three forks to go around. Since we&rsquo;re a cooperative bunch, the three people who want pie the most will receive the forks to eat it with. Even though they&rsquo;ve all agreed on this, no one seems to want to sort themselves out and line up in an orderly fashion, so we&rsquo;ll have to make do with everybody jumbled about.</p>
 <p>Without sorting the list of diners, return the three largest integers in the slice.</p>
 <p>Here&rsquo;s a function that solves this problem and has <em>O</em>(<em>n</em><sup>2</sup>) time complexity:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">giveForks</span><span class="p">(</span><span class="nx">diners</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">giveForks</span><span class="p">(</span><span class="nx">diners</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
  <span class="c1">// make a slice to store diners who will receive forks
 </span><span class="c1"></span> <span class="kd">var</span> <span class="nx">withForks</span> <span class="p">[]</span><span class="kt">int</span>
  <span class="c1">// loop over three forks
@@ -1320,7 +1320,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <span class="p">}</span>
 </code></pre></div><p>This program works, and eventually returns diners <code>[88 87 56]</code>. Everyone gets a little impatient while it&rsquo;s running though, since it takes rather a long time (about 120 nanoseconds) just to hand out three forks, and the pie&rsquo;s getting cold. How could we improve it?</p>
 <p>By thinking about our approach in a slightly different way, we can refactor this program to have <em>O</em>(<em>n</em>) time complexity:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">giveForks</span><span class="p">(</span><span class="nx">diners</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">giveForks</span><span class="p">(</span><span class="nx">diners</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
  <span class="c1">// make a slice to store diners who will receive forks
 </span><span class="c1"></span> <span class="kd">var</span> <span class="nx">withForks</span> <span class="p">[]</span><span class="kt">int</span>
  <span class="c1">// create variables for each fork
@@ -1349,7 +1349,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <p>Diner <code>87</code> isn&rsquo;t greater than <code>first</code> which is currently <code>88</code>, but it is greater than <code>2</code> who has the <code>second</code> fork. So, the <code>second</code> fork goes to <code>87</code>. Diner <code>2</code> gets the <code>third</code> fork.</p>
 <p>Continuing in this violent and rapid fork exchange, diner <code>16</code> is then assigned the <code>third</code> fork instead of <code>2</code>, and so on.</p>
 <p>We can add a print statement in the loop to see how the fork assignments play out:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> <span class="m">0</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> <span class="m">0</span>
 <span class="m">2</span> <span class="m">0</span> <span class="m">0</span>
 <span class="m">88</span> <span class="m">2</span> <span class="m">0</span>
 <span class="m">88</span> <span class="m">87</span> <span class="m">2</span>
@@ -1374,7 +1374,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <li>Wikipedia: <a href="https://en.wikipedia.org/wiki/NP-hardness">NP-hardness</a></li>
 <li><a href="https://www.desmos.com/">Desmos graph calculator</a></li>
 </ol>
-]]></content></entry><entry><title type="html">Knapsack problem algorithms for my real-life carry-on knapsack</title><link href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/"/><id>https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/</id><author><name>Victoria Drake</name></author><published>2018-05-09T21:00:35-04:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<h2 id="the-knapsack-problem">The knapsack problem</h2>
+]]></content></entry><entry><title type="html">Knapsack problem algorithms for my real-life carry-on knapsack</title><link href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/"/><id>https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/</id><author><name>Victoria Drake</name></author><published>2018-05-09T21:00:35-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<h2 id="the-knapsack-problem">The knapsack problem</h2>
 <p>I&rsquo;m a nomad and live out of one carry-on bag. This means that the total weight of all my worldly possessions must fall under airline cabin baggage weight limits - usually 10kg. On some smaller airlines, however, this weight limit drops to 7kg. Occasionally, I have to decide not to bring something with me to adjust to the smaller weight limit.</p>
 <p>As a practical exercise, deciding what to leave behind (or get rid of altogether) entails laying out all my things and choosing which ones to keep. That decision is based on the item&rsquo;s usefulness to me (its worth) and its weight.</p>
 <figure><img src="knapsack-stuff.jpeg"
@@ -1397,7 +1397,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <h2 id="data-structures">Data structures</h2>
 <h3 id="reading-in-a-file">Reading in a file</h3>
 <p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&rsquo;s <code>io/ioutil</code> package makes the first part straightforward.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;fmt&#34;</span>
@@ -1418,7 +1418,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </code></pre></div><p>The <code>ReadFile()</code> function takes a file path and returns the file&rsquo;s contents and an error (<code>nil</code> if the call is successful) so we&rsquo;ve also created a <code>check()</code> function to handle any errors that might be returned. In a real-world application we probably would want to do something more sophisticated than <code>panic</code>, but that&rsquo;s not important right now.</p>
 <h3 id="creating-a-struct">Creating a struct</h3>
 <p>Now that we&rsquo;ve got our data, we should probably do something with it. Since we&rsquo;re working with real-life items and a real-life bag, let&rsquo;s create some types to represent them and make it easier to conceptualize our program. A <code>struct</code> in Go is a typed collection of fields. Here are our two types:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">item</span> <span class="kd">struct</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">item</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">name</span>          <span class="kt">string</span>
     <span class="nx">worth</span><span class="p">,</span> <span class="nx">weight</span> <span class="kt">int</span>
 <span class="p">}</span>
@@ -1430,7 +1430,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </code></pre></div><p>It is helpful to use field names that are very descriptive. You can see that the structs are set up just as we&rsquo;ve described the things they represent. An <code>item</code> has a <code>name</code> (string), and a <code>worth</code> and <code>weight</code> (integers). A <code>bag</code> has several fields of type <code>int</code> representing its attributes, and also has the ability to hold <code>items</code>, represented in the struct as a slice of <code>item</code> type thingamabobbers.</p>
 <h3 id="parsing-and-storing-our-data">Parsing and storing our data</h3>
 <p>Several comprehensive Go packages exist that we could use to parse our CSV data&hellip; but where&rsquo;s the fun in that? Let&rsquo;s go basic with some string splitting and a for loop. Here&rsquo;s our updated <code>readItems()</code> function:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">readItems</span><span class="p">(</span><span class="nx">path</span> <span class="kt">string</span><span class="p">)</span> <span class="p">[]</span><span class="nx">item</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">readItems</span><span class="p">(</span><span class="nx">path</span> <span class="kt">string</span><span class="p">)</span> <span class="p">[]</span><span class="nx">item</span> <span class="p">{</span>
 
     <span class="nx">dat</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span>
     <span class="nf">check</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
@@ -1455,7 +1455,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </code></pre></div><p>Using <code>strings.Split</code>, we split our <code>dat</code> on newlines. We then create an empty <code>itemList</code> to hold our items.</p>
 <p>In our for loop, we skip the first line of our CSV file (the headers) then iterate over each line. We use <code>strconv.Atoi</code> (read &ldquo;A to i&rdquo;) to convert the values for each item&rsquo;s worth and weight into integers. We then create a <code>newItem</code> with these field values and append it to the <code>itemList</code>. Finally, we return <code>itemList</code>.</p>
 <p>Here&rsquo;s what our set up looks like so far:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;io/ioutil&#34;</span>
@@ -1517,12 +1517,12 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <li>Check to see if the bag is full.</li>
 </ul>
 <p>The first one is just a docs lookup away. Here&rsquo;s how we sort a slice in Go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">sort</span><span class="p">.</span><span class="nf">Slice</span><span class="p">(</span><span class="nx">is</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">sort</span><span class="p">.</span><span class="nf">Slice</span><span class="p">(</span><span class="nx">is</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">worth</span> <span class="p">&gt;</span> <span class="nx">is</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">worth</span>
 <span class="p">})</span>
 </code></pre></div><p>The <code>sort.Slice()</code> function orders our items according to the less function we provide. In this case, it will order the highest worth items before the lowest worth items.</p>
 <p>Given that we don&rsquo;t want to put an item in the bag if it doesn&rsquo;t fit, we&rsquo;ll complete the last two tasks in reverse. First, we&rsquo;ll check to see if the item fits. If so, it goes in the bag.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">)</span> <span class="nf">addItem</span><span class="p">(</span><span class="nx">i</span> <span class="nx">item</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">)</span> <span class="nf">addItem</span><span class="p">(</span><span class="nx">i</span> <span class="nx">item</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">b</span><span class="p">.</span><span class="nx">currItemsWeight</span><span class="o">+</span><span class="nx">i</span><span class="p">.</span><span class="nx">weight</span> <span class="o">&lt;=</span> <span class="nx">b</span><span class="p">.</span><span class="nx">maxItemsWeight</span> <span class="p">{</span>
         <span class="nx">b</span><span class="p">.</span><span class="nx">currItemsWeight</span> <span class="o">+=</span> <span class="nx">i</span><span class="p">.</span><span class="nx">weight</span>
         <span class="nx">b</span><span class="p">.</span><span class="nx">items</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">items</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
@@ -1536,7 +1536,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </blockquote>
 <p>Our use of a pointer receiver tells our function we want to operate on <em>this specific bag in particular</em>, not a new bag. It&rsquo;s important because without it, every item would always fit in a newly created bag! A little detail like this can make the difference between code that works and code that keeps you up until 4am chugging Red Bull and muttering to yourself. (Go to bed on time even if your code doesn&rsquo;t work - you&rsquo;ll thank me later.)</p>
 <p>Now that we&rsquo;ve got our components, let&rsquo;s put together our greedy algorithm:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">greedy</span><span class="p">(</span><span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">b</span> <span class="nx">bag</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">greedy</span><span class="p">(</span><span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">b</span> <span class="nx">bag</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">sort</span><span class="p">.</span><span class="nf">Slice</span><span class="p">(</span><span class="nx">is</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">worth</span> <span class="p">&gt;</span> <span class="nx">is</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">worth</span>
     <span class="p">})</span>
@@ -1552,7 +1552,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div><p>Then in our <code>main()</code> function, we&rsquo;ll create our bag, read in our data, and call our greedy algorithm. Here&rsquo;s what it looks like, all set up and ready to go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
 
     <span class="nx">minaal</span> <span class="o">:=</span> <span class="nx">bag</span><span class="p">{</span><span class="nx">bagWeight</span><span class="p">:</span> <span class="mi">1415</span><span class="p">,</span> <span class="nx">currItemsWeight</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">maxItemsWeight</span><span class="p">:</span> <span class="mi">5585</span><span class="p">}</span>
     <span class="nx">itemList</span> <span class="o">:=</span> <span class="nf">readItems</span><span class="p">(</span><span class="s">&#34;objects.csv&#34;</span><span class="p">)</span>
@@ -1732,13 +1732,13 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </figure>
 
 <p>In Go, we can create this matrix as a slice of slices.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">matrix</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">numItems</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// rows representing items
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">matrix</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">numItems</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// rows representing items
 </span><span class="c1"></span><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">matrix</span> <span class="p">{</span>
     <span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">capacity</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// columns representing grams of weight
 </span><span class="c1"></span><span class="p">}</span>
 </code></pre></div><p>We&rsquo;ve padded the rows and columns by <code>1</code> so that the indicies match the item and weight numbers.</p>
 <p>Now that we&rsquo;ve created our matrix, we&rsquo;ll fill it by looping over the rows and the columns:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// loop through table rows
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// loop through table rows
 </span><span class="c1"></span><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">numItems</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
     <span class="c1">// loop through table columns
 </span><span class="c1"></span>    <span class="k">for</span> <span class="nx">w</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">w</span> <span class="o">&lt;=</span> <span class="nx">capacity</span><span class="p">;</span> <span class="nx">w</span><span class="o">++</span> <span class="p">{</span>
@@ -1755,7 +1755,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </blockquote>
 <p>In other words, as our algorithm considers one of the items, we&rsquo;re asking it to decide whether this item added to the bag would produce a higher total worth than the last item it added to the bag, at the bag&rsquo;s current total weight. If this current item is a better choice, put it in - if not, leave it out.</p>
 <p>Here&rsquo;s the code that accomplishes this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// if weight of item matching this index can fit at the current capacity column...
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// if weight of item matching this index can fit at the current capacity column...
 </span><span class="c1"></span><span class="k">if</span> <span class="nx">is</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">weight</span> <span class="o">&lt;=</span> <span class="nx">w</span> <span class="p">{</span>
     <span class="c1">// worth of this subset without this item
 </span><span class="c1"></span>    <span class="nx">valueOne</span> <span class="o">:=</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">matrix</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">w</span><span class="p">])</span>
@@ -1785,7 +1785,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <li>If the values match, there was no change to the bag items; move up to the cell in the row above and repeat</li>
 </ol>
 <p>The nature of the action we&rsquo;re trying to achieve lends itself well to a recursive function. If you recall from <a href="https://victoria.dev/verbose/reduce-recursion-with-pie/">my previous article about making apple pie</a>, recursive functions are simply functions that call themselves under certain conditions. Here&rsquo;s what it looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">,</span> <span class="nx">i</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">w</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">matrix</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">,</span> <span class="nx">i</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">w</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">matrix</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">w</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="k">return</span>
     <span class="p">}</span>
@@ -1801,7 +1801,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </code></pre></div><p>Our <code>checkItem()</code> function calls itself if the condition we described in step 4 is true. If step 3 is true, it also calls itself, but with different arguments.</p>
 <p>Recursive functions require a base case. In this example, we want the function to stop once we run out of values of worth to compare. Thus our base case is when either <code>i</code> or <code>w</code> are <code>0</code>.</p>
 <p>Here&rsquo;s how the dynamic programming approach looks when it&rsquo;s all put together:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">,</span> <span class="nx">i</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">w</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">matrix</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">checkItem</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">bag</span><span class="p">,</span> <span class="nx">i</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">w</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">is</span> <span class="p">[]</span><span class="nx">item</span><span class="p">,</span> <span class="nx">matrix</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">w</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="k">return</span>
     <span class="p">}</span>
@@ -2042,14 +2042,14 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <p>There&rsquo;s an obvious improvement to our dynamic programming solution over what the greedy algorithm gave us. Our total worth of 757 is 41 points greater than the greedy algorithm&rsquo;s solution of 716, and for a few grams less weight too!</p>
 <h3 id="input-sort-order">Input sort order</h3>
 <p>While testing my dynamic programming solution, I implemented the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffle algorithm</a> on the input before passing it into my function, just to ensure that the answer wasn&rsquo;t somehow dependent on the sort order of the input. Here&rsquo;s what the shuffle looks like in Go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Seed</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">UnixNano</span><span class="p">())</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Seed</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">UnixNano</span><span class="p">())</span>
 
 <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">itemList</span> <span class="p">{</span>
     <span class="nx">j</span> <span class="o">:=</span> <span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div><p>Of course I then realized that Go 1.10 now has a built-in shuffle&hellip; it works precisely the same way and looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Shuffle</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">itemList</span><span class="p">),</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Shuffle</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">itemList</span><span class="p">),</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
 <span class="p">})</span>
 </code></pre></div><p>So did the order in which the items were processed affect the outcome? Well&hellip;</p>
@@ -2254,7 +2254,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <h2 id="which-approach-is-better">Which approach is better?</h2>
 <h3 id="go-benchmarking">Go benchmarking</h3>
 <p>The Go standard library&rsquo;s <code>testing</code> package makes it straightforward for us to <a href="https://golang.org/pkg/testing/#hdr-Benchmarks">benchmark</a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&rsquo;s a simple <code>main_test.go</code> file:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s">&#34;testing&#34;</span>
@@ -2276,7 +2276,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div><p>We can run <code>go test -bench=. -benchmem</code> to see these results:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Benchmark_greedy-4       <span class="m">1000000</span>              <span class="m">1619</span> ns/op            <span class="m">2128</span> B/op          <span class="m">9</span> allocs/op
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Benchmark_greedy-4       <span class="m">1000000</span>              <span class="m">1619</span> ns/op            <span class="m">2128</span> B/op          <span class="m">9</span> allocs/op
 Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m">1545322</span> ns/op         <span class="m">2020332</span> B/op         <span class="m">49</span> allocs/op
 </code></pre></div><h4 id="greedy-algorithm-performance">Greedy algorithm performance</h4>
 <p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.</p>
@@ -2321,7 +2321,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <p>By the same token, the greedy algorithm&rsquo;s results might be improved with the use of one of these alternate metrics.</p>
 <p>On top of choosing an appropriate approach to solving the knapsack problem in general, it is helpful to design our algorithm in a way that translates the practicalities of a scenario into code.</p>
 <p>There are many considerations for better algorithm design beyond the scope of this introductory post. One of these is <strong>time complexity</strong>, and I&rsquo;ve <a href="/verbose/introduction-time-complexity/">written about it here</a>. A future algorithm may very well decide my bag&rsquo;s contents on the next trip, but we&rsquo;re not quite there yet. Stay tuned!</p>
-]]></content></entry><entry><title type="html">Why I&amp;#39;m automatically deleting my old tweets using AWS Lambda</title><link href="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/"/><id>https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-04-12T10:51:15-05:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p>
+]]></content></entry><entry><title type="html">Why I&amp;#39;m automatically deleting my old tweets using AWS Lambda</title><link href="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/"/><id>https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-04-12T10:51:15-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p>
 <p><a href="/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/#ephemeral-tweets"><em>Click here to skip to the code part.</em></a></p>
 <h2 id="stuff-and-opinions">Stuff and opinions</h2>
 <p>I&rsquo;ve only been a one-bag nomad for a little over a year and a half. Before that, I lived as most people do in an apartment or a house. I owned furniture, more clothing than I strictly needed, and enough &ldquo;stuff&rdquo; to fill at least a few moving boxes. If I went to live somewhere else, moving for school or family or work, I packed up all my things and brought them with me. Over the years, I accumulated more and more stuff.</p>
@@ -2337,7 +2337,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <h2 id="ephemeral-tweets">Ephemeral tweets</h2>
 <p>If you look at my Twitter profile page today, you&rsquo;ll see fewer tweets there than you have fingers (I hope). I&rsquo;m using <a href="https://github.com/victoriadrake/ephemeral">ephemeral</a> - a lightweight utility I wrote for use on <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> - to delete all my tweets older than a few days. I&rsquo;m doing this for the same reason that I don&rsquo;t hang on to stuff that I no longer use - that stuff isn&rsquo;t relevant to me anymore. It doesn&rsquo;t represent me, either.</p>
 <p>The code that makes up ephemeral is written in Go. AWS Lambda creates an environment for each Lambda function, so ephemeral utilizes environment variables for your private Twitter API keys and the maximum age of the tweets you want to keep, represented in hours, like <code>72h</code>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="p">(</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="p">(</span>
  <span class="nx">consumerKey</span>       <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_CONSUMER_KEY&#34;</span><span class="p">)</span>
  <span class="nx">consumerSecret</span>    <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_CONSUMER_SECRET&#34;</span><span class="p">)</span>
  <span class="nx">accessToken</span>       <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_ACCESS_TOKEN&#34;</span><span class="p">)</span>
@@ -2354,7 +2354,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
  <span class="k">return</span> <span class="nx">v</span>
 <span class="p">}</span>
 </code></pre></div><p>The program uses the <a href="https://github.com/ChimeraCoder/anaconda">anaconda</a> library. It fetches your timeline up to the Twitter API&rsquo;s limit of 200 tweets per request, then compares each tweet&rsquo;s date of creation to your <code>MAX_TWEET_AGE</code> variable to decide whether it&rsquo;s old enough to be deleted. After deleting all the expired tweets, the Lambda function terminates.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">deleteFromTimeline</span><span class="p">(</span><span class="nx">api</span> <span class="o">*</span><span class="nx">anaconda</span><span class="p">.</span><span class="nx">TwitterApi</span><span class="p">,</span> <span class="nx">ageLimit</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">deleteFromTimeline</span><span class="p">(</span><span class="nx">api</span> <span class="o">*</span><span class="nx">anaconda</span><span class="p">.</span><span class="nx">TwitterApi</span><span class="p">,</span> <span class="nx">ageLimit</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span> <span class="p">{</span>
  <span class="nx">timeline</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">getTimeline</span><span class="p">(</span><span class="nx">api</span><span class="p">)</span>
 
  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
@@ -2384,7 +2384,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <h2 id="why-use-twitter-at-all">Why use Twitter at all</h2>
 <p>In anticipation of the question, let me say that yes, I do use Twitter besides just as a bucket for my Lambda functions to fill and empty. It has its benefits, most related to what I perceive to be its original intended purpose: to be a means of near-instant communication for short, digestible pieces of information reaching a widespread pool of people.</p>
 <p>I use it as a way to keep tabs on what&rsquo;s happening <em>right now.</em> I use it to comment on, joke about, and commiserate with things tweeted by the people I follow <em>right now.</em> By keeping my timeline restricted to only the most recent few days, I feel like I&rsquo;m using Twitter more like it was meant to be used: a way to join the conversation and see what&rsquo;s happening in the world <em>right now</em> - instead of just another place to amass more &ldquo;stuff.&rdquo;</p>
-]]></content></entry><entry><title type="html">Running a free Twitter bot on AWS Lambda</title><link href="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/"/><id>https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-03-05T10:29:15-05:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>If you read <a href="/blog/about-time/">About time</a>, you&rsquo;ll know that I&rsquo;m a big believer in spending time now on building things that save time in the future. To this end I built a simple Twitter bot in Go that would occasionally post links to my articles and keep my account interesting even when I&rsquo;m too busy to use it. The tweets help drive traffic to my sites, and I don&rsquo;t have to lift a finger.</p>
+]]></content></entry><entry><title type="html">Running a free Twitter bot on AWS Lambda</title><link href="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/"/><id>https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-03-05T10:29:15-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>If you read <a href="/blog/about-time/">About time</a>, you&rsquo;ll know that I&rsquo;m a big believer in spending time now on building things that save time in the future. To this end I built a simple Twitter bot in Go that would occasionally post links to my articles and keep my account interesting even when I&rsquo;m too busy to use it. The tweets help drive traffic to my sites, and I don&rsquo;t have to lift a finger.</p>
 <p>I ran the bot on an Amazon EC2 instance for about a month. My AWS usage has historically been pretty inexpensive (less than the price of a coffee in most of North America), so I was surprised when the little instance I was using racked up a bill 90% bigger than the month before. I don&rsquo;t think AWS is expensive, to be clear, but still&hellip; I&rsquo;m cheap. I want my Twitter bot, and I want it for less.</p>
 <p>I&rsquo;d been meaning to explore AWS Lamda, and figured this was a good opportunity. Unlike an EC2 instance that is constantly running (and charging you for it), Lambda charges you per request and according to the duration of time your function takes to run. There&rsquo;s a free tier, too, and the first 1 million requests, plus a certain amount of compute time, are free. Roughly translated to running a Twitter bot that posts for you, say, twice a day, your monthly cost for using Lambda would total&hellip; carry the one&hellip; nothing. I&rsquo;ve been running my Lambda function for a couple weeks now, completely free.</p>
 <p>When recently it came to me to take the reigns of the <a href="https://twitter.com/freeCodeCampTO">@freeCodeCampTO</a> Twitter, I decided to employ a similar strategy, and also use this opportunity to document the process for you, dear reader.</p>
@@ -2400,9 +2400,9 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <p>The important thing to keep in mind is that Lambda runs a function once in response to an event that you define. The most widely applicable trigger is a simple cron expression, but there are many other trigger events you can hook up. You can get an overview <a href="https://aws.amazon.com/lambda/">here</a>.</p>
 <h2 id="write-a-lambda-function">Write a Lambda function</h2>
 <p>I found this really straightforward to do in Go. First, grab the <a href="https://github.com/aws/aws-lambda-go">aws-lambda-go</a> library:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">go get github.com/aws/aws-lambda-go/lambda
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">go get github.com/aws/aws-lambda-go/lambda
 </code></pre></div><p>Then make this your <code>func main()</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
  <span class="nx">lambda</span><span class="p">.</span><span class="nf">Start</span><span class="p">(</span><span class="nx">tweetFeed</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div><p>Where <code>tweetFeed</code> is the name of the function that makes everything happen. While I won&rsquo;t go into writing the whole Twitter bot here, you can view my code <a href="https://gist.github.com/victoriadrake/7859dab68df87e28f40d6715d08383c7">on GitHub</a>.</p>
@@ -2425,7 +2425,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <p>You can upload your function code as a zip file on the configuration screen. Since we&rsquo;re using Go, you&rsquo;ll want to <code>go build</code> first, then zip the resulting executable before uploading that to Lambda.</p>
 <p>&hellip;Of course I&rsquo;m not going to do that manually every time I want to tweak my function. That&rsquo;s what <code>awscli</code> and this bash script is for!</p>
 <p><code>update.sh</code></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">go build <span class="o">&amp;&amp;</span> <span class="se">\
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">go build <span class="o">&amp;&amp;</span> <span class="se">\
 </span><span class="se"></span>zip fcc-tweet.zip fcc-tweet <span class="o">&amp;&amp;</span> <span class="se">\
 </span><span class="se"></span>rm fcc-tweet <span class="o">&amp;&amp;</span> <span class="se">\
 </span><span class="se"></span>aws lambda update-function-code --function-name fcc-tweet --zip-file fileb://fcc-tweet.zip <span class="o">&amp;&amp;</span> <span class="se">\

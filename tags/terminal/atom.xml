@@ -1,4 +1,4 @@
-<feed xmlns="http://www.w3.org/2005/Atom"><title>terminal on victoria.dev</title><link href="https://victoria.dev/tags/terminal/feed.xml" rel="self"/><link href="https://victoria.dev/tags/terminal/"/><updated>2021-02-15T01:38:07-05:00</updated><id>https://victoria.dev/tags/terminal/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>terminal on victoria.dev</title><link href="https://victoria.dev/tags/terminal/feed.xml" rel="self"/><link href="https://victoria.dev/tags/terminal/"/><updated>2021-02-15T01:38:07-05:00</updated><id>https://victoria.dev/tags/terminal/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-07-21T13:43:26+00:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
 <p>You can create your own self-hosted Matrix chat for as little as $3.50 USD per month on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance. Your homeserver can federate with other Matrix servers, giving you a reliable and fault-tolerant means of communication.</p>
 <p>Matrix is most widely installed via its <a href="https://matrix.org/docs/guides/installing-synapse">Synapse</a> homeserver implementation written in Python 3. Dendrite, its second-generation homeserver implementation written in Go, is currently released in beta. Dendrite will provide more memory efficiency and reliability out-of-the-box, making it an excellent choice for running on a virtual instance.</p>
 <p>Here&rsquo;s how to set up your own homeserver on AWS Lightsail with Dendrite. You can also <a href="https://github.com/matrix-org/dendrite">contribute to Dendrite today</a>.</p>
@@ -22,27 +22,27 @@
 <p>This points <code>matrix.example.org</code> to your Lightsail instance.</p>
 <h2 id="set-up-your-matrix-homeserver">Set up your Matrix homeserver</h2>
 <p>Change permissions on the private key you downloaded:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
 </code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
 </code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea ot use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
 <p>Change your <a href="https://wiki.debian.org/SourcesList">sources list</a> in order to get the newest version of Go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
 </code></pre></div><p>Delete everything except these two lines:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
 </span><span class="err"></span><span class="nx">deb</span><span class="p">-</span><span class="nx">src</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
 </span></code></pre></div><p>Then replace the distributions:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
 </span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
 <p>Once the upgrade is finished, restart your instance with <code>sudo shutdown -r now</code>.</p>
 <p>Go make some coffee, then SSH back in. Get the packages you&rsquo;ll need with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo apt update
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt update
 sudo apt upgrade
 sudo apt install -y git golang nginx python3-certbot-nginx
 </code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
 <h2 id="get-dendrite">Get Dendrite</h2>
 <p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
 <span class="nb">cd</span> dendrite
 ./build.sh
 
@@ -58,7 +58,7 @@ sudo apt install -y git golang nginx python3-certbot-nginx
 cp dendrite-config.yaml dendrite.yaml
 </code></pre></div><h2 id="configure-dendrite">Configure Dendrite</h2>
 <p>Modify the configuration file you just copied:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
 </code></pre></div><p>At minimum, set:</p>
 <ul>
 <li><code>server name</code> to your shiny new domain name, e.g. <code>matrix.example.org</code></li>
@@ -68,36 +68,36 @@ cp dendrite-config.yaml dendrite.yaml
 <p>You might like to read the <a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ</a>.</p>
 <h2 id="configure-nginx">Configure nginx</h2>
 <p>Get the required packages if you didn&rsquo;t already install them above:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
 </code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
 ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
 sudo cp default &lt;sitename&gt;
 </code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
 <p>Your <code>location</code> block should look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-nginx" data-lang="nginx"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
     <span class="kn">proxy_pass</span> <span class="s">https://localhost:8448</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
 <h2 id="create-self-signed-certificates">Create self-signed certificates</h2>
 <p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
 </code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
 <p>Test your configuration and restart nginx with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo nginx -t
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo nginx -t
 sudo systemctl restart nginx
 </code></pre></div><p>Then start up your Matrix server.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Build and run the server:</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Build and run the server:</span>
 ./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
 </code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
 <p>You can log on to your new homeserver with any <a href="https://matrix.org/clients/">Matrix client</a>, or Matrix-capable applications like <a href="https://www.pidgin.im/plugins/?publisher=all&amp;query=&amp;type=">Pidgin with the Matrix plugin</a>.</p>
 <h2 id="other-troubleshooting">Other troubleshooting</h2>
 <h3 id="log-files">Log files</h3>
 <p>If you get an error such as:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
   Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
 </code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
 sudo chown admin:admin /var/log/dendrite
 
 <span class="c1"># Build and run the server:</span>
@@ -111,26 +111,26 @@ sudo chown admin:admin /var/log/dendrite
 </ol>
 <h2 id="set-up-your-own-matrix-server-today">Set up your own Matrix server today</h2>
 <p>I hope you found this introduction to setting up your own Matrix homeserver to be helpful! If you have anything to add, feel free to <a href="/blog/make-your-own-independent-website/">reply via Webmention</a>.</p>
-]]></content></entry><entry><title type="html">Deceptively simple search-and-replace across multiple files</title><link href="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/"/><id>https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/</id><author><name>Victoria Drake</name></author><published>2020-08-25T04:48:39-06:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>While a multitude of methods exist to search for and replace words in a single file, what do you do when you&rsquo;ve got a string to update across multiple unrelated files, all with different names? You harness the power of command line tools, of course!</p>
+]]></content></entry><entry><title type="html">Deceptively simple search-and-replace across multiple files</title><link href="https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/"/><id>https://victoria.dev/blog/deceptively-simple-search-and-replace-across-multiple-files/</id><author><name>Victoria Drake</name></author><published>2020-08-25T04:48:39-06:00</published><updated>2021-07-21T13:43:26+00:00</updated><content type="html"><![CDATA[<p>While a multitude of methods exist to search for and replace words in a single file, what do you do when you&rsquo;ve got a string to update across multiple unrelated files, all with different names? You harness the power of command line tools, of course!</p>
 <p>First, you&rsquo;ll need to <code>find</code> all the files you want to change. Stringing together what are effectively search queries for <code>find</code> is really only limited by your imagination. Here&rsquo;s a simple example that finds Python files:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -name <span class="s1">&#39;*.py&#39;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find . -name <span class="s1">&#39;*.py&#39;</span>
 </code></pre></div><p>The <code>-name</code> test searches for a pattern, such as all files ending in <code>.py</code>, but <code>find</code> can do a lot more with other test conditions, including <code>-regex</code> tests. Run <code>find --help</code> to see the multitude of options.</p>
 <p>Further tune your search by using <code>grep</code> to get only the files that contain the string you want to change, such as by adding:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">grep -le <span class="s1">&#39;\&lt;a whale\&gt;&#39;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">grep -le <span class="s1">&#39;\&lt;a whale\&gt;&#39;</span>
 </code></pre></div><p>The <code>-l</code> option gives you just the file names for all files containing a pattern (denoted with <code>-e</code>) that match &ldquo;a whale&rdquo;.</p>
 <p>Using Vim&rsquo;s impressive <code>:bufdo</code> lets you run the same command across multiple buffers, interactively working with all of these files without the tedium of opening, saving, and closing each file, one at a time.</p>
 <p>Let&rsquo;s plug your powerful <code>find</code>+<code>grep</code> results into Vim with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">vim <span class="sb">`</span>find . -name <span class="s1">&#39;*.py&#39;</span> <span class="se">\
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">vim <span class="sb">`</span>find . -name <span class="s1">&#39;*.py&#39;</span> <span class="se">\
 </span><span class="se"></span>-exec grep -le <span class="s1">&#39;\&lt;a whale\&gt;&#39;</span> <span class="o">{}</span> <span class="se">\;</span><span class="sb">`</span>
 </code></pre></div><p>Using backtick-expansion to pass our search to Vim opens up multiple buffers ready to go. (Do <code>:h backtick-expansion</code> in Vim for more.) Now you can apply the Vim command <code>:bufdo</code> to all of these files and perform actions such as interactive search-and-replace:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> %<span class="nx">s</span><span class="sr">/a whale/</span><span class="nx">a</span> <span class="nx">bowl</span> <span class="nx">of</span> <span class="nx">petunias</span>/<span class="nx">gce</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> %<span class="nx">s</span><span class="sr">/a whale/</span><span class="nx">a</span> <span class="nx">bowl</span> <span class="nx">of</span> <span class="nx">petunias</span>/<span class="nx">gce</span><span class="err">
 </span></code></pre></div><p>The <code>g</code> for &ldquo;global&rdquo; will change occurrences of the pattern on all lines. The <code>e</code> will omit errors if the pattern is not found. The <code>c</code> option makes this interactive; if you&rsquo;re feeling confident, you can omit it to make the changes without reviewing each one.</p>
 <p>If one of the patterns contains a <code>/</code> character, you can substitute the separator in the above command to make it more readable. Vim will assume the character following the <code>%s</code> is the separator, so for example:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> %<span class="nx">s_a</span> <span class="nx">whale_a</span> <span class="nx">bowl</span> <span class="nx">of</span> <span class="nx">peonies</span>/<span class="nx">petunias_gce</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> %<span class="nx">s_a</span> <span class="nx">whale_a</span> <span class="nx">bowl</span> <span class="nx">of</span> <span class="nx">peonies</span>/<span class="nx">petunias_gce</span><span class="err">
 </span></code></pre></div><p>When you&rsquo;ve finished going through all the buffers, save all the work you&rsquo;ve completed with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> <span class="nx">wq</span><span class="p">!</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span><span class="nx">bufdo</span> <span class="nx">wq</span><span class="p">!</span><span class="err">
 </span></code></pre></div><p>Then bask in the glory of your saved time and effort.</p>
-]]></content></entry><entry><title type="html">Look mom, I&amp;#39;m a GitHub Action Hero</title><link href="https://victoria.dev/blog/look-mom-im-a-github-action-hero/"/><id>https://victoria.dev/blog/look-mom-im-a-github-action-hero/</id><author><name>Victoria Drake</name></author><published>2020-06-27T09:06:33-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>GitHub recently interviewed me for their blog editorial entitled <a href="https://github.blog/2020-06-26-github-action-hero-victoria-drake/">GitHub Action Hero: Victoria Drake</a>. Here&rsquo;s a behind-the-scenes peek at the original interview questions and my answers.</p>
+]]></content></entry><entry><title type="html">Look mom, I&amp;#39;m a GitHub Action Hero</title><link href="https://victoria.dev/blog/look-mom-im-a-github-action-hero/"/><id>https://victoria.dev/blog/look-mom-im-a-github-action-hero/</id><author><name>Victoria Drake</name></author><published>2020-06-27T09:06:33-04:00</published><updated>2021-07-21T13:43:26+00:00</updated><content type="html"><![CDATA[<p>GitHub recently interviewed me for their blog editorial entitled <a href="https://github.blog/2020-06-26-github-action-hero-victoria-drake/">GitHub Action Hero: Victoria Drake</a>. Here&rsquo;s a behind-the-scenes peek at the original interview questions and my answers.</p>
 <h2 id="what-is-the-name-of-your-action-please-include-a-link-too">What is the name of your Action? Please include a link too.</h2>
 <p>Among the several Actions I&rsquo;ve built, I have two current favorites. One is <a href="https://github.com/victoriadrake/hugo-remote">hugo-remote</a>, which lets you continuously deploy a Hugo static site from a private source repository to a public GitHub Pages repository. This keeps the contents of the source repository private, such as your unreleased drafts, while still allowing you to have a public open source site using GitHub Pages.</p>
 <p>The second is <a href="https://github.com/victoriadrake/django-security-check">django-security-check</a>. It&rsquo;s an effortless way to continuously check that your production Django application is free from a variety of security misconfigurations. You can think of it as your little CI/CD helper for busy projects &ndash; a security linter!</p>
@@ -152,7 +152,7 @@ sudo chown admin:admin /var/log/dendrite
 <h2 id="anything-else-you-would-like-to-share-about-your-experience-any-stories-or-lessons-learned-through-building-your-action">Anything else you would like to share about your experience? Any stories or lessons learned through building your Action?</h2>
 <p>I&rsquo;m happiest when I&rsquo;m solving a challenge that makes developing secure software less challenging in the future, both for myself and for the technology organization I&rsquo;m leading. With tools like GitHub Actions, a lot of mental overhead can be offloaded to automatic processes &ndash; like getting a whole other brain, for free! This can massively help organizations that are ready to scale up their development output.</p>
 <p>In the realm of cybersecurity, not only does creating portable and reusable software make developers' lives easier, it helps to make whole workflows repeatable, which in turn makes software development processes more secure. With smart processes in place, technical teams are happier. As an inevitable result, they&rsquo;ll build better software for customers, too.</p>
-]]></content></entry><entry><title type="html">Command line tricks for managing your messy open source repository</title><link href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/"/><id>https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/</id><author><name>Victoria Drake</name></author><published>2020-02-17T08:05:06-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>Effective collaboration, especially in open source software development, starts with effective organization. To make sure that nothing gets missed, the general rule, &ldquo;one issue, one pull request&rdquo; is a nice rule of thumb.</p>
+]]></content></entry><entry><title type="html">Command line tricks for managing your messy open source repository</title><link href="https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/"/><id>https://victoria.dev/blog/command-line-tricks-for-managing-your-messy-open-source-repository/</id><author><name>Victoria Drake</name></author><published>2020-02-17T08:05:06-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>Effective collaboration, especially in open source software development, starts with effective organization. To make sure that nothing gets missed, the general rule, &ldquo;one issue, one pull request&rdquo; is a nice rule of thumb.</p>
 <p>Instead of opening an issue with a large scope like, &ldquo;Fix all the broken links in the documentation,&rdquo; open source projects will have more luck attracting contributors with several smaller and more manageable issues. In the preceding example, you might scope broken links by section or by page. This allows more contributors to jump in and dedicate small windows of their time, rather than waiting for one person to take on a larger and more tedious contribution effort.</p>
 <p>Smaller scoped issues also help project maintainers see where work has been completed and where it hasn&rsquo;t. This reduces the chances that some part of the issue is missed, assumed to be completed, and later leads to bugs or security vulnerabilities.</p>
 <p>That&rsquo;s all well and good; but what if you&rsquo;ve already opened several massively-scoped issues, some PRs have already been submitted or merged, and you currently have no idea where the work started or stopped?</p>
@@ -168,44 +168,44 @@ sudo chown admin:admin /var/log/dendrite
 </ul>
 <h2 id="interactive-search-and-replace-with-vim">Interactive search-and-replace with <code>vim</code></h2>
 <p>You can open a file in Vim, then interactively search and replace with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/\&lt;word\&gt;/</span><span class="nx">newword</span>/<span class="nx">gc</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/\&lt;word\&gt;/</span><span class="nx">newword</span>/<span class="nx">gc</span><span class="err">
 </span></code></pre></div><p>The <code>%</code> indicates to look in all lines of the current file; <code>s</code> is for substitute; <code>\&lt;word\&gt;</code> matches the whole word; and the <code>g</code> for &ldquo;global&rdquo; is for every occurrence. The <code>c</code> at the end will let you view and confirm each change before it&rsquo;s made. You can run it automatically, and much faster, without <code>c</code>; however, you put yourself at risk of complicating things if you&rsquo;ve made a pattern-matching error.</p>
 <h2 id="find-dead-links-in-markdown-files-with-a-node-module">Find dead links in Markdown files with a node module</h2>
 <p>The <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> node module has a great <a href="https://github.com/tcort/markdown-link-check#command-line-tool">CLI buddy</a>.</p>
 <p>I use this so often I turned it into a <a href="/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/#bash-functions">Bash alias function</a>. To do the same, add this to your <code>.bashrc</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Markdown link check in a folder, recursive</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Markdown link check in a folder, recursive</span>
 <span class="k">function</span> mlc <span class="o">()</span> <span class="o">{</span>
     find <span class="nv">$1</span> -name <span class="se">\*</span>.md -exec markdown-link-check -p <span class="o">{}</span> <span class="se">\;</span>
 <span class="o">}</span>
 </code></pre></div><p>Then run with <code>mlc &lt;filename&gt;</code>.</p>
 <h2 id="list-subdirectories-with-or-without-a-git-repository-with-find">List subdirectories with or without a git repository with <code>find</code></h2>
 <p>Print all subdirectories that are git repositories, or in other words, have a <code>.git</code> in them:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -maxdepth <span class="m">1</span> -type d -exec <span class="nb">test</span> -e <span class="s1">&#39;{}/.git&#39;</span> <span class="s1">&#39;;&#39;</span> -printf <span class="s2">&#34;is git repo: %p\n&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find . -maxdepth <span class="m">1</span> -type d -exec <span class="nb">test</span> -e <span class="s1">&#39;{}/.git&#39;</span> <span class="s1">&#39;;&#39;</span> -printf <span class="s2">&#34;is git repo: %p\n&#34;</span>
 </code></pre></div><p>To print all subdirectories that are not git repositories, negate the test with <code>!</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -maxdepth <span class="m">1</span> -type d -exec <span class="nb">test</span> <span class="s1">&#39;!&#39;</span> -e <span class="s1">&#39;{}/.git&#39;</span> <span class="s1">&#39;;&#39;</span> -printf <span class="s2">&#34;not git repo: %p\n&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find . -maxdepth <span class="m">1</span> -type d -exec <span class="nb">test</span> <span class="s1">&#39;!&#39;</span> -e <span class="s1">&#39;{}/.git&#39;</span> <span class="s1">&#39;;&#39;</span> -printf <span class="s2">&#34;not git repo: %p\n&#34;</span>
 </code></pre></div><h2 id="pull-multiple-git-repositories-from-a-list-with-xargs">Pull multiple git repositories from a list with <code>xargs</code></h2>
 <p>I initially used this as part of <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">automatically re-creating my laptop with Bash scripts</a>, but it&rsquo;s pretty handy when you&rsquo;re working with cloud instances or Dockerfiles.</p>
 <p>Given a file, <code>repos.txt</code> with a repository’s SSH link on each line (and your SSH keys set up), run:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">xargs -n1 git clone &lt; repos.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">xargs -n1 git clone &lt; repos.txt
 </code></pre></div><p>If you want to pull and push many repositories, I previously wrote about <a href="/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/">how to use a Bash one-liner to manage your repositories</a>.</p>
 <h2 id="list-issues-by-number-with-jot">List issues by number with <code>jot</code></h2>
 <p>I&rsquo;m a co-author and maintainer for the <a href="https://github.com/OWASP/wstg/">OWASP Web Security Testing Guide</a> repository where I recently took one large issue (yup, it was &ldquo;Fix all the broken links in the documentation&rdquo; - how&rsquo;d you guess?) and broke it up into several smaller, more manageable issues. A whole thirty-seven smaller, more manageable issues.</p>
 <p>I wanted to enumerate all the issues that the original one became, but the idea of typing out thirty-seven issue numbers (#275 through #312) seemed awfully tedious and time-consuming. So, in natural programmer fashion, I spent the same amount of time I would have used to type out all those numbers and crafted a way to automate it instead.</p>
 <p>The <code>jot</code> utility (<code>apt install athena-jot</code>) is a tiny tool that&rsquo;s a big help when you want to print out some numbers. Just tell it how many you want, and where to start and stop.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># jot [ reps [ begin [ end ] ] ]</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># jot [ reps [ begin [ end ] ] ]</span>
 jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</span>
 </code></pre></div><p>This prints each number, inclusively, from 275 to 312 on a new line. To make these into issue number notations that GitHub and many other platforms automatically recognize and turn into links, you can pipe the output to <code>awk</code>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</span> <span class="p">|</span> awk <span class="s1">&#39;{printf &#34;#&#34;$0&#34;, &#34;}&#39;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</span> <span class="p">|</span> awk <span class="s1">&#39;{printf &#34;#&#34;$0&#34;, &#34;}&#39;</span>
 
 <span class="c1">#275, #276, #277, #278, #279, #280, #281, #282, #283, #284, #285, #286, #287, #288, #289, #290, #291, #292, #293, #295, #296, #297, #298, #299, #300, #301, #302, #303, #304, #305, #306, #307, #308, #309, #310, #311, #312</span>
 </code></pre></div><p>You can also use <code>jot</code> to generate random or redundant data, mainly for development or testing purposes.</p>
 <h2 id="cli-powered-open-source-organization">CLI-powered open source organization</h2>
 <p>A well-organized open source repository is a well-maintained open source project. Save this post for handy reference, and use your newfound CLI superpowers for good! 🚀</p>
-]]></content></entry><entry><title type="html">The surprisingly difficult task of printing newlines in a terminal</title><link href="https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/"/><id>https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/</id><author><name>Victoria Drake</name></author><published>2019-12-04T09:17:35-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>Surprisingly, getting computers to give humans readable output is no easy feat. With the introduction of <a href="https://en.wikipedia.org/wiki/Standard_streams">standard streams</a> and specifically standard output, programs gained a way to talk to each other using plain text streams; humanizing and displaying stdout is another matter. Technology throughout the computing age has tried to solve this problem, from the use of <a href="https://en.wikipedia.org/wiki/Computer_terminal#Early_VDUs">ASCII characters in video computer displays</a> to modern shell commands like <code>echo</code> and <code>printf</code>.</p>
+]]></content></entry><entry><title type="html">The surprisingly difficult task of printing newlines in a terminal</title><link href="https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/"/><id>https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/</id><author><name>Victoria Drake</name></author><published>2019-12-04T09:17:35-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>Surprisingly, getting computers to give humans readable output is no easy feat. With the introduction of <a href="https://en.wikipedia.org/wiki/Standard_streams">standard streams</a> and specifically standard output, programs gained a way to talk to each other using plain text streams; humanizing and displaying stdout is another matter. Technology throughout the computing age has tried to solve this problem, from the use of <a href="https://en.wikipedia.org/wiki/Computer_terminal#Early_VDUs">ASCII characters in video computer displays</a> to modern shell commands like <code>echo</code> and <code>printf</code>.</p>
 <p>These advancements have not been seamless. The job of printing output to a terminal is fraught with quirks for programmers to navigate, as exemplified by the deceptively nontrivial task of expanding an <a href="https://en.wikipedia.org/wiki/Escape_sequence">escape sequence</a> to print newlines. The expansion of the placeholder <code>\n</code> can be accomplished in a multitude of ways, each with its own unique history and complications.</p>
 <h2 id="using-echo">Using <code>echo</code></h2>
 <p>From its appearance in <a href="https://en.wikipedia.org/wiki/Multics">Multics</a> to its modern-day Unix-like system ubiquity, <code>echo</code> remains a familiar tool for getting your terminal to say &ldquo;Hello world!&rdquo; Unfortunately, inconsistent implementations across operating systems make its usage tricky. Where <code>echo</code> on some systems will automatically expand escape sequences, others require the <code>-e</code> option to do the same:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;the study of European nerves is \neurology&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;the study of European nerves is \neurology&#34;</span>
 <span class="c1"># the study of European nerves is \neurology</span>
 
 <span class="nb">echo</span> -e <span class="s2">&#34;the study of European nerves is \neurology&#34;</span>
@@ -215,14 +215,14 @@ jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</sp
 <p>In modern systems, it is retained only to provide compatibility with the many programs that still use it. The <a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/echo.html#tag_20_37_16">POSIX specification recommends</a> the use of <code>printf</code> in new programs.</p>
 <h2 id="using-printf">Using <code>printf</code></h2>
 <p>Since 4th <a href="https://en.wikipedia.org/wiki/Research_Unix#Versions">Edition</a> Unix, the portable <a href="https://en.wikipedia.org/wiki/Printf_(Unix)"><code>printf</code> command</a> has essentially been the new and better <code>echo</code>. It allows you to use <a href="https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholder_specification">format specifiers</a> to humanize input. To interpret backslash escape sequences, use <code>%b</code>. The character sequence <code>\n</code> ensures the output ends with a newline:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s2">&#34;%b\n&#34;</span> <span class="s2">&#34;Many females in Oble are \noblewomen&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s2">&#34;%b\n&#34;</span> <span class="s2">&#34;Many females in Oble are \noblewomen&#34;</span>
 <span class="c1"># Many females in Oble are</span>
 <span class="c1"># oblewomen</span>
 </code></pre></div><p>Though <code>printf</code> has further options that make it a far more powerful replacement of <code>echo</code>, this utility is not foolproof and can be vulnerable to an <a href="https://en.wikipedia.org/wiki/Uncontrolled_format_string">uncontrolled format string</a> attack. It&rsquo;s important for programmers to ensure they <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">carefully handle user input</a>.</p>
 <h2 id="putting-newlines-in-variables">Putting newlines in variables</h2>
 <p>In an effort to improve portability amongst compilers, the <a href="https://en.wikipedia.org/wiki/ANSI_C">ANSI C Standard</a> was established in 1983. With <a href="https://www.gnu.org/software/bash/manual/html_node/ANSI_002dC-Quoting.html#ANSI_002dC-Quoting">ANSI-C quoting</a> using <code>$'...'</code>, <a href="https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences">escape sequences</a> are replaced in output according to the standard.</p>
 <p>This allows us to store strings with newlines in variables that are printed with the newlines interpreted. You can do this by setting the variable, then calling it with <code>printf</code> using <code>$</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">puns</span><span class="o">=</span><span class="s1">$&#39;\number\narrow\nether\nice&#39;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">puns</span><span class="o">=</span><span class="s1">$&#39;\number\narrow\nether\nice&#39;</span>
 
 <span class="nb">printf</span> <span class="s2">&#34;%b\n&#34;</span> <span class="s2">&#34;These words started with n but don&#39;t make </span><span class="nv">$puns</span><span class="s2">&#34;</span>
 
@@ -234,7 +234,7 @@ jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</sp
 </code></pre></div><p>The expanded variable is single-quoted, which is passed literally to <code>printf</code>. As always, it is important to properly handle the input.</p>
 <h2 id="bonus-round-shell-parameter-expansion">Bonus round: shell parameter expansion</h2>
 <p>In my article explaining <a href="/blog/bash-and-shell-expansions-lazy-list-making/">Bash and braces</a>, I covered the magic of <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion</a>. We can use one expansion, <code>${parameter@operator}</code>, to interpret escape sequences, too. We use <code>printf</code>&rsquo;s <code>%s</code> specifier to print as a string, and the <code>E</code> operator will properly expand the escape sequences in our variable:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s2">&#34;%s\n&#34;</span> <span class="si">${</span><span class="nv">puns</span><span class="p">@E</span><span class="si">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s2">&#34;%s\n&#34;</span> <span class="si">${</span><span class="nv">puns</span><span class="p">@E</span><span class="si">}</span>
 
 <span class="c1"># umber</span>
 <span class="c1"># arrow</span>
@@ -243,7 +243,7 @@ jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</sp
 </code></pre></div><h2 id="the-ongoing-challenge-of-humanizing-output">The ongoing challenge of humanizing output</h2>
 <p><a href="https://en.wikipedia.org/wiki/String_interpolation">String interpolation</a> continues to be a chewy problem for programmers. Besides getting languages and shells to agree on what certain placeholders mean, properly using the correct escape sequences requires an eye for detail.</p>
 <p>Poor string interpolation can lead to silly-looking output, as well as introduce security vulnerabilities, such as from <a href="https://en.wikipedia.org/wiki/Code_injection">injection attacks</a>. Until the next evolution of the terminal has us talking in emojis, we&rsquo;d best pay attention when printing output for humans.</p>
-]]></content></entry><entry><title type="html">Bash and shell expansions: lazy list-making</title><link href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/"/><id>https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/</id><author><name>Victoria Drake</name></author><published>2019-11-18T07:07:24-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>It&rsquo;s that time of year again! When stores start putting up colourful sparkly lit-up plastic bits, we all begin to feel a little festive, and by festive I mean let&rsquo;s go shopping. Specifically, holiday gift shopping! (Gifts for yourself are still gifts, technically.)</p>
+]]></content></entry><entry><title type="html">Bash and shell expansions: lazy list-making</title><link href="https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/"/><id>https://victoria.dev/blog/bash-and-shell-expansions-lazy-list-making/</id><author><name>Victoria Drake</name></author><published>2019-11-18T07:07:24-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>It&rsquo;s that time of year again! When stores start putting up colourful sparkly lit-up plastic bits, we all begin to feel a little festive, and by festive I mean let&rsquo;s go shopping. Specifically, holiday gift shopping! (Gifts for yourself are still gifts, technically.)</p>
 <p>Just so this doesn&rsquo;t all go completely madcap, you ought to make some gift lists. Bash can help.</p>
 <h2 id="brace-expansion">Brace expansion</h2>
 <p>These are not braces: <code>()</code></p>
@@ -251,29 +251,29 @@ jot <span class="m">37</span> <span class="m">275</span> <span class="m">312</sp
 <p><em>These</em> are braces: <code>{}</code></p>
 <p>Braces tell Bash to do something with the arbitrary string or strings it finds between them. Multiple strings are comma-separated: <code>{a,b,c}</code>. You can also add an optional preamble and postscript to be attached to each expanded result. Mostly, this can save some typing, such as with common file paths and extensions.</p>
 <p>Let&rsquo;s make some lists for each person we want to give stuff to. The following commands are equivalent:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">touch /home/me/gift-lists/Amy.txt /home/me/gift-lists/Bryan.txt /home/me/gift-lists/Charlie.txt
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">touch /home/me/gift-lists/<span class="o">{</span>Amy,Bryan,Charlie<span class="o">}</span>.txt
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">tree gift-lists
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">touch /home/me/gift-lists/Amy.txt /home/me/gift-lists/Bryan.txt /home/me/gift-lists/Charlie.txt
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">touch /home/me/gift-lists/<span class="o">{</span>Amy,Bryan,Charlie<span class="o">}</span>.txt
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">tree gift-lists
 
 /home/me/gift-lists
 ├── Amy.txt
 ├── Bryan.txt
 └── Charlie.txt
 </code></pre></div><p>Oh darn, &ldquo;Bryan&rdquo; spells his name with an &ldquo;i.&rdquo; I can fix that.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">mv /home/me/gift-lists/<span class="o">{</span>Bryan,Brian<span class="o">}</span>.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">mv /home/me/gift-lists/<span class="o">{</span>Bryan,Brian<span class="o">}</span>.txt
 
 renamed <span class="s1">&#39;/home/me/gift-lists/Bryan.txt&#39;</span> -&gt; <span class="s1">&#39;/home/me/gift-lists/Brian.txt&#39;</span>
 </code></pre></div><h2 id="shell-parameter-expansions">Shell parameter expansions</h2>
 <p><a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">Shell parameter expansion</a> allows us to make all sorts of changes to parameters enclosed in braces, like manipulate and substitute text.</p>
 <p>There are a few stocking stuffers that all our giftees deserve. Let&rsquo;s make that a variable:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">STUFF</span><span class="o">=</span><span class="s1">$&#39;socks\nlump of coal\nwhite chocolate&#39;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">STUFF</span><span class="o">=</span><span class="s1">$&#39;socks\nlump of coal\nwhite chocolate&#39;</span>
 
 <span class="nb">echo</span> <span class="s2">&#34;</span><span class="nv">$STUFF</span><span class="s2">&#34;</span>
 socks
 lump of coal
 white chocolate
 </code></pre></div><p>Now to add these items to each of our lists with some help from <a href="https://en.wikipedia.org/wiki/Tee_(command)">the <code>tee</code> command</a> to get <code>echo</code> and expansions to play nice.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="nv">$STUFF</span><span class="s2">&#34;</span> <span class="p">|</span> tee <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="nv">$STUFF</span><span class="s2">&#34;</span> <span class="p">|</span> tee <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
 cat <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
@@ -288,7 +288,7 @@ lump of coal
 white chocolate
 </code></pre></div><h3 id="pattern-match-substitution">Pattern match substitution</h3>
 <p>On second thought, maybe the lump of coal isn&rsquo;t such a nice gift. You can replace it with something better using a pattern match substitution in the form of <code>${parameter/pattern/string}</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">STUFF</span><span class="p">/lump of coal/candy cane</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> tee <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">STUFF</span><span class="p">/lump of coal/candy cane</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> tee <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
 cat <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
@@ -304,7 +304,7 @@ white chocolate
 </code></pre></div><p>This replaces the first instance of &ldquo;lump of coal&rdquo; with &ldquo;candy cane.&rdquo; To replace all instances (if there were multiple), use <code>${parameter//pattern/string}</code>. This doesn&rsquo;t change our <code>$STUFF</code> variable, so we can still reuse the original list for someone naughty later.</p>
 <h3 id="substrings">Substrings</h3>
 <p>While we&rsquo;re improving things, our giftees may not all like white chocolate. We&rsquo;d better add some regular chocolate to our lists just in case. Since I&rsquo;m super lazy, I&rsquo;m just going to hit the up arrow and modify a previous Bash command. Luckily, the last word in the <code>$STUFF</code> variable is  &ldquo;chocolate,&rdquo; which is nine characters long, so I&rsquo;ll tell Bash to keep just that part using <code>${parameter:offset}</code>. I&rsquo;ll use <code>tee</code>&rsquo;s <code>-a</code> flag to <code>a</code>ppend to my existing lists:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">STUFF</span><span class="p">: -9</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> tee -a <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">STUFF</span><span class="p">: -9</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> tee -a <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
 cat <span class="o">{</span>Amy,Brian,Charlie<span class="o">}</span>.txt
 
@@ -342,11 +342,11 @@ chocolate
 <p>There! Now our base lists are finished. Let&rsquo;s have some eggnog.</p>
 <h3 id="testing-variables">Testing variables</h3>
 <p>You know, it may be the eggnog, but I think I started a list for Amy yesterday and stored it in a variable that I might have called <code>amy</code>. Let&rsquo;s see if I did. I&rsquo;ll use the <code>${parameter:?word}</code> expansion. It&rsquo;ll write <code>word</code> to standard error and exit if there&rsquo;s no <code>amy</code> parameter.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">amy</span><span class="p">:?no such</span><span class="si">}</span><span class="s2">&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">amy</span><span class="p">:?no such</span><span class="si">}</span><span class="s2">&#34;</span>
 
 bash: amy: no such
 </code></pre></div><p>I guess not. Maybe it was Brian instead?</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">brian</span><span class="p">:?no such</span><span class="si">}</span><span class="s2">&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">brian</span><span class="p">:?no such</span><span class="si">}</span><span class="s2">&#34;</span>
 
 Lederhosen
 </code></pre></div><p>You can also:</p>
@@ -374,7 +374,7 @@ Lederhosen
 </table>
 <h3 id="changing-case">Changing case</h3>
 <p>That&rsquo;s right! Brian said he wanted some lederhosen and so I made myself a note. This is pretty important, so I&rsquo;ll add it to Brian&rsquo;s list in capital letters with the <code>${parameter^^pattern}</code> expansion. The <code>pattern</code> part is optional. We&rsquo;re only writing to Brian&rsquo;s list, so I&rsquo;ll just use <code>&gt;&gt;</code> instead of <code>tee -a</code>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">brian</span><span class="p">^^</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Brian.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">brian</span><span class="p">^^</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Brian.txt
 
 cat Brian.txt
 
@@ -408,12 +408,12 @@ LEDERHOSEN
 </table>
 <h3 id="expanding-arrays">Expanding arrays</h3>
 <p>You know what, all this gift-listing business is a lot of work. I&rsquo;m just going to make <a href="https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Arrays">an array</a> of things I saw at the store:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">gifts</span><span class="o">=(</span>sweater gameboy wagon pillows chestnuts hairbrush<span class="o">)</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">gifts</span><span class="o">=(</span>sweater gameboy wagon pillows chestnuts hairbrush<span class="o">)</span>
 </code></pre></div><p>I can use substring expansion in the form of <code>${parameter:offset:length}</code> to make this simple. I&rsquo;ll add the first two to Amy&rsquo;s list, the middle two to Brian&rsquo;s, and the last two to Charlie&rsquo;s. I&rsquo;ll  use <code>printf</code> to help with newlines.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s1">&#39;%s\n&#39;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">gifts</span><span class="p">[@]:</span><span class="nv">0</span><span class="p">:</span><span class="nv">2</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Amy.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s1">&#39;%s\n&#39;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">gifts</span><span class="p">[@]:</span><span class="nv">0</span><span class="p">:</span><span class="nv">2</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Amy.txt
 <span class="nb">printf</span> <span class="s1">&#39;%s\n&#39;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">gifts</span><span class="p">[@]:</span><span class="nv">2</span><span class="p">:</span><span class="nv">2</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Brian.txt
 <span class="nb">printf</span> <span class="s1">&#39;%s\n&#39;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">gifts</span><span class="p">[@]: -2</span><span class="si">}</span><span class="s2">&#34;</span> &gt;&gt; Charlie.txt
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">cat Amy.txt
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">cat Amy.txt
 
 socks
 candy cane
@@ -441,7 +441,7 @@ chocolate
 chestnuts
 hairbrush
 </code></pre></div><p>There! Now we&rsquo;ve got a comprehensive set of super personalized gift lists. Thanks Bash! Too bad it can&rsquo;t do the shopping for us, too.</p>
-]]></content></entry><entry><title type="html">A cron job that could save you from a ransomware attack</title><link href="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/"/><id>https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/</id><author><name>Victoria Drake</name></author><published>2019-11-13T08:27:31-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>It&rsquo;s 2019, and ransomware has become a thing.</p>
+]]></content></entry><entry><title type="html">A cron job that could save you from a ransomware attack</title><link href="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/"/><id>https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/</id><author><name>Victoria Drake</name></author><published>2019-11-13T08:27:31-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>It&rsquo;s 2019, and ransomware has become a thing.</p>
 <p>Systems that interact with the public, like companies, educational institutions, and public services, are most susceptible. While delivery methods for ransomware vary from the physical realm to communication via social sites and email, all methods only require one person to make one mistake in order for ransomware to proliferate.</p>
 <p>Ransomware, as you may have heard, is a malicious program that encrypts your files, rendering them unreadable and useless to you. It can include instructions for paying a ransom, usually by sending cryptocurrency, in order to obtain the decryption key. Successful ransomware attacks typically exploit vital, time-sensitive systems. Victims like public services and medical facilities are more likely to have poor or zero recovery processes, leaving governments or insurance providers to reward attackers with ransom payments.</p>
 <p>Individuals, especially less-than-tech-savvy ones, are no less at risk. Ransomware can occlude personal documents and family photos that may only exist on one machine.</p>
@@ -449,7 +449,7 @@ hairbrush
 <p>You could achieve this with a straightforward system like plugging in an external hard drive and dragging files over once a day, but this method has a few hurdles. Manually transferring files may be slow or incomplete, and besides, you&rsquo;ll first have to remember to do it.</p>
 <p>In my constant pursuit of automating all the things, there&rsquo;s one tool I often return to for its simplicity and reliability: <code>cron</code>. Cron does one thing, and does it well: it runs commands on a schedule.</p>
 <p>I first used it a few months shy of three years ago (Have I really been blogging that long?!) to create <a href="/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/">custom desktop notifications on Linux</a>. Using the crontab configuration file, which you can edit by running <code>crontab -e</code>, you can specify a schedule for running any commands you like. Here&rsquo;s what the scheduling syntax looks like, from the <a href="https://en.wikipedia.org/wiki/Cron">Wikipedia cron page</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># ┌───────────── minute (0 - 59)</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># ┌───────────── minute (0 - 59)</span>
 <span class="c1"># │ ┌───────────── hour (0 - 23)</span>
 <span class="c1"># │ │ ┌───────────── day of the month (1 - 31)</span>
 <span class="c1"># │ │ │ ┌───────────── month (1 - 12)</span>
@@ -459,16 +459,16 @@ hairbrush
 <span class="c1"># │ │ │ │ │</span>
 <span class="c1"># * * * * * command to execute</span>
 </code></pre></div><p>For example, a cron job that runs every day at 00:00 would look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> * * *
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> * * *
 </code></pre></div><p>To run a job every twelve hours, the syntax is:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> */12 * * *
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> */12 * * *
 </code></pre></div><p>This <a href="https://crontab.guru/">great tool</a> can help you wrap your head around the cron scheduling syntax.</p>
 <p>What&rsquo;s a scheduler have to do with backing up? By itself, not much. The simple beauty of cron is that it runs commands - any shell commands, and any scripts that you&rsquo;d normally run on the command line. As you may have gleaned from my other posts, I&rsquo;m of the strong opinion that you can do just about anything on the command line, including backing up your files. Options for storage in this area are plentiful, from near-to-free local and cloud options, as well as paid managed services too numerous to list. For CLI tooling, we have utilitarian classics like <code>rsync</code>, and CLI tools for specific cloud providers like AWS.</p>
 <h2 id="backing-up-with-rsync">Backing up with <code>rsync</code></h2>
 <p><a href="https://en.wikipedia.org/wiki/Rsync">The <code>rsync</code> utility</a> is a classic choice, and can back up your files to an external hard drive or remote server while making intelligent determinations about which files to update. It uses file size and modification times to recognize file changes, and then only transfers changed files, saving time and bandwidth.</p>
 <p>The <a href="https://download.samba.org/pub/rsync/rsync.html"><code>rsync</code> syntax</a> can be a little nuanced; for example, a trailing forward slash will copy just the contents of the directory, instead of the directory itself. I found examples to be helpful in understanding the usage and syntax.</p>
 <p>Here&rsquo;s one for backing up a local directory to a local destination, such as an external hard drive:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rsync -a /home/user/directory /media/user/destination
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">rsync -a /home/user/directory /media/user/destination
 </code></pre></div><p>The first argument is the source, and the second is the destination. Reversing these in the above example would copy files from the mounted drive to the local home directory.</p>
 <p>The <code>a</code> flag for archive mode is one of <code>rsync</code>&rsquo;s superpowers. Equivalent to flags <code>-rlptgoD</code>, it:</p>
 <ul>
@@ -477,29 +477,29 @@ hairbrush
 <li>Copies device and special files (<code>D</code>).</li>
 </ul>
 <p>Here&rsquo;s another example, this time for backing up the contents of a local directory to a directory on a remote server using SSH:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
 </code></pre></div><p>The <code>v</code> flag turns on verbose output, which is helpful if you like realtime feedback on which files are being transferred. During large transfers, however, it can tend to slow things down. The <code>z</code> flag can help with that, as it indicates that files should be compressed during transfer.</p>
 <p>The <code>e</code> flag, followed by <code>ssh</code>, tells <code>rsync</code> to use SSH according to the destination instructions provided in the final argument.</p>
 <h2 id="backing-up-with-aws-cli">Backing up with AWS CLI</h2>
 <p>Amazon Web Services offers a command line interface tool for doing just about everything with your AWS set up, including a straightforward <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/sync.html"><code>s3 sync</code> command</a> for recursively copying new and updated files to your S3 storage buckets. As a storage method for back up data, S3 is a stable and inexpensive choice. You can even <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html">turn on versioning in your bucket</a>.</p>
 <p>The <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/index.html#directory-and-s3-prefix-operations">syntax for interacting with directories</a> is fairly straightforward, and you can directly indicate your S3 bucket as an <code>S3Uri</code> argument in the form of <code>s3://mybucket/mykey</code>. To back up a local directory to your S3 bucket, the command is:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">aws s3 sync /home/user/directory s3://mybucket
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">aws s3 sync /home/user/directory s3://mybucket
 </code></pre></div><p>Similar to <code>rsync</code>, reversing the source and destination would download files from the S3 bucket.</p>
 <p>The <code>sync</code> command is intuitive by default. It will guess the mime type of uploaded files, as well as include files discovered by following symlinks. A variety of options exist to control these and other defaults, even including flags to specify the server-side encryption to be used.</p>
 <h2 id="setting-up-your-cronjob-back-up">Setting up your cronjob back up</h2>
 <p>You can edit your machine&rsquo;s cron file by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">crontab -e
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">crontab -e
 </code></pre></div><p>Intuitive as it may be, it&rsquo;s worth mentioning that your back up commands will only run when your computer is turned on and the cron daemon is running. With this in mind, choose a schedule for your cronjob that aligns with times when your machine is powered on, and maybe not overloaded with other work.</p>
 <p>To back up to an S3 bucket every day at 8AM, for example, you&rsquo;d put a line in your crontab that looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">8</span> * * * aws s3 sync /home/user/directory s3://mybucket
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">8</span> * * * aws s3 sync /home/user/directory s3://mybucket
 </code></pre></div><p>If you&rsquo;re curious whether your cron job is currently running, find the PID of cron with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">pstree -ap <span class="p">|</span> grep cron
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">pstree -ap <span class="p">|</span> grep cron
 </code></pre></div><p>Then run <code>pstree -ap &lt;PID&gt;</code>.</p>
 <p>This rabbit hole goes deeper; a quick search can reveal different ways of organizing and scheduling cronjobs, or help you find different utilities to run cronjobs when your computer is asleep. To protect against the possibility of ransomware-affected files being transferred to your back up, incrementally separated archives are a good idea. In essence, however, this basic set up is all you really need to create a reliable, automatic back up system.</p>
 <h2 id="dont-feed-the-trolls">Don&rsquo;t feed the trolls</h2>
 <p>Humans are fallible; that&rsquo;s why cyberattacks work. The success of a ransomware attack depends on the victim having no choice but to pay up in order to return to business as usual. A highly accessible recent back up undermines attackers who depend on us being unprepared. By blowing away a system and restoring from yesterday&rsquo;s back up, we may lose a day of progress; ransomers, however, gain nothing at all.</p>
 <p>For further resources on ransomware defense for users and organizations, check out <a href="https://www.us-cert.gov/Ransomware">CISA&rsquo;s advice on ransomware</a>.</p>
-]]></content></entry><entry><title type="html">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</title><link href="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/"/><id>https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/</id><author><name>Victoria Drake</name></author><published>2019-10-28T08:28:52-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>Agnostic tooling is the clever notion that you should be able to run your code in various environments. With many continuous integration and continuous development (CI/CD) apps available, agnostic tooling gives developers a big advantage: portability.</p>
+]]></content></entry><entry><title type="html">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</title><link href="https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/"/><id>https://victoria.dev/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/</id><author><name>Victoria Drake</name></author><published>2019-10-28T08:28:52-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>Agnostic tooling is the clever notion that you should be able to run your code in various environments. With many continuous integration and continuous development (CI/CD) apps available, agnostic tooling gives developers a big advantage: portability.</p>
 <p>Of course, having your CI/CD work <em>everywhere</em> is a tall order. Popular <a href="https://github.com/marketplace/category/continuous-integration">CI apps for GitHub repositories</a> alone use a multitude of configuration languages spanning <a href="https://groovy-lang.org/syntax.html">Groovy</a>, <a href="https://yaml.org/">YAML</a>, <a href="https://github.com/toml-lang/toml">TOML</a>, <a href="https://json.org/">JSON</a>, and more&hellip; all with differing syntax, of course. Porting workflows from one tool to another is more than a one-cup-of-coffee process.</p>
 <p>The introduction of <a href="https://github.com/features/actions">GitHub Actions</a> has the potential to add yet another tool to the mix; or, for the right set up, greatly simplify a CI/CD workflow.</p>
 <p>Prior to this article, I accomplished my CD flow with several lashed-together apps. I used AWS Lambda to trigger site builds on a schedule. I had Netlify build on push triggers, as well as run image optimization, and then push my site to the public Pages repository. I used Travis CI in the public repository to test the HTML. All this worked in conjunction with GitHub Pages, which actually hosts the site.</p>
@@ -513,7 +513,7 @@ hairbrush
 <p>To our point on portability, my magic Makefile is stored right in the repository root. Since it&rsquo;s included with the code, I can run the Makefile locally on any system where I can clone the repository, provided I set the environment variables. Using GitHub Actions as my CI/CD tool is as straightforward as making Make go worky-worky.</p>
 <p>I found the <a href="https://help.github.com/en/articles/workflow-syntax-for-github-actions">GitHub Actions workflow syntax guide</a> to be pretty straightforward, though also lengthy on options. Here&rsquo;s the necessary set up for getting the Makefile to run.</p>
 <p>The workflow file at <code>.github/workflows/make-master.yml</code> contains the following:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">make-master</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">make-master</span><span class="w">
 </span><span class="w">
 </span><span class="w"></span><span class="nt">on</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span><span class="nt">push</span><span class="p">:</span><span class="w">
@@ -539,7 +539,7 @@ hairbrush
 <p>Once the <code>make-master.yml</code> file is in your repository, either of your triggers will cause Actions to run your Makefile. To see how the last run went, you can also <a href="https://help.github.com/en/articles/configuring-a-workflow#adding-a-workflow-status-badge-to-your-repository">add a fun badge</a> to the README.</p>
 <h3 id="one-hacky-thing">One hacky thing</h3>
 <p>Because the Makefile runs on every push to <code>master</code>, I sometimes would get errors when the site build had no changes. When Git, via <a href="/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">my Makefile</a>, attempted to commit to the Pages repository, no changes were detected and the commit would fail annoyingly:</p>
-<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">nothing to commit, working tree clean
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">nothing to commit, working tree clean
 On branch master
 Your branch is up to date with &#39;origin/master&#39;.
 
@@ -551,14 +551,14 @@ make: *** [deploy] Error 1
 <h2 id="environment-and-variables">Environment and variables</h2>
 <p>You can define the <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources">virtual environment</a> for your workflow to run in using the <code>runs-on</code> syntax. The <del>obvious best choice</del> one I chose is Ubuntu. Using <code>ubuntu-latest</code> gets me the most updated version, whatever that happens to be when you&rsquo;re reading this.</p>
 <p>GitHub sets some <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables">default environment variables</a> for workflows. The <a href="https://github.com/actions/checkout"><code>actions/checkout</code> action</a> with <code>fetch-depth: 1</code> creates a copy of just the most recent commit your repository in the <code>GITHUB_WORKSPACE</code> variable. This allows the workflow to access the Makefile at <code>GITHUB_WORKSPACE/Makefile</code>. Without using the checkout action, the Makefile won&rsquo;t be found, and I get an error that looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">make: *** No rule to make target &#39;all&#39;.  Stop.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">make: *** No rule to make target &#39;all&#39;.  Stop.
 Running Makefile
 ##[error]Process completed with exit code 2.
 </code></pre></div><p>While there is a <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/authenticating-with-the-github_token">default <code>GITHUB_TOKEN</code> secret</a>, this is not the one I used. The default is only locally scoped to the current repository. To be able to push to my separate GitHub Pages repository, I created a <a href="https://github.com/settings/tokens">personal access token</a> scoped to <code>public_repo</code> and pass it in as the <code>secrets.TOKEN</code> encrypted variable. For a step-by-step, see <a href="https://help.github.com/en/github/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets">Creating and using encrypted secrets</a>.</p>
 <h2 id="portable-tooling">Portable tooling</h2>
 <p>The nice thing about using a simple Makefile to define the bulk of my CI/CD process is that it&rsquo;s completely portable. I can run a Makefile anywhere I have access to an environment, which is most CI/CD apps, virtual instances, and, of course, on my local machine.</p>
 <p>One of the reasons I like GitHub Actions is that getting my Makefile to run was pretty straightforward. I think the syntax is well done - easy to read, and intuitive when it comes to finding an option you&rsquo;re looking for. For someone already using GitHub Pages, Actions provides a pretty seamless CD experience; and if that should ever change, I can run my Makefile elsewhere. ¯\_(ツ)_/¯</p>
-]]></content></entry><entry><title type="html">A portable Makefile for continuous delivery with Hugo and GitHub Pages</title><link href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/"/><id>https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/</id><author><name>Victoria Drake</name></author><published>2019-10-21T09:09:06-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>Fun fact: I first launched this GitHub Pages site 1,018 days ago.</p>
+]]></content></entry><entry><title type="html">A portable Makefile for continuous delivery with Hugo and GitHub Pages</title><link href="https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/"/><id>https://victoria.dev/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/</id><author><name>Victoria Drake</name></author><published>2019-10-21T09:09:06-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>Fun fact: I first launched this GitHub Pages site 1,018 days ago.</p>
 <p>Since then, we&rsquo;ve grown together. From early cringe-worthy commit messages, through eighty-six versions of <a href="https://gohugo.io/">Hugo</a>, and up until last week, a less-than-streamlined multi-app continuous integration and deployment (CI/CD) workflow.</p>
 <p>If you know me at all, you know I love to automate things. I&rsquo;ve been using a combination of AWS Lambda, Netlify, and Travis CI to automatically build and publish this site. My workflow for the task includes:</p>
 <ul>
@@ -575,7 +575,7 @@ Running Makefile
 <p>The writing of rules mostly comes down to shell commands, which is the main reason Makefiles are as portable as they are. The best part is that you can do pretty much <em>anything</em> in a terminal, and certainly handle all the workflow steps listed above.</p>
 <h2 id="my-continuous-deployment-makefile">My continuous deployment Makefile</h2>
 <p>Here&rsquo;s the portable Makefile that handles my workflow. Yes, I put emojis in there. I&rsquo;m a monster.</p>
-<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">.POSIX</span><span class="o">:</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">.POSIX</span><span class="o">:</span>
 <span class="nv">DESTDIR</span><span class="o">=</span>public
 <span class="nv">HUGO_VERSION</span><span class="o">=</span>0.58.3
 
@@ -644,7 +644,7 @@ Running Makefile
 <p>If you&rsquo;re familiar with command line, most of this may look familiar. Here are a couple bits that might warrant a little explanation.</p>
 <h3 id="checking-if-a-program-is-already-installed">Checking if a program is already installed</h3>
 <p>I think this bit is pretty tidy:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="k">if</span> ! <span class="o">[</span> -x <span class="s2">&#34;</span><span class="nv">$$</span><span class="s2">(command -v hugo)&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span><span class="se">\
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="k">if</span> ! <span class="o">[</span> -x <span class="s2">&#34;</span><span class="nv">$$</span><span class="s2">(command -v hugo)&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span><span class="se">\
 </span><span class="se"></span>...
 <span class="k">fi</span>
 </code></pre></div><p>I use a negated <code>if</code> conditional in conjunction with <code>command -v</code> to check if an executable (<code>-x</code>) called <code>hugo</code> exists. If one is not present, the script gets the specified version of Hugo and installs it. <a href="https://stackoverflow.com/a/677212">This Stack Overflow answer</a> has a nice summation of why <code>command -v</code> is a more portable choice than <code>which</code>.</p>
@@ -653,15 +653,15 @@ Running Makefile
 <p>There are a few different ways to achieve this same task, one of which, theoretically, is to take advantage of Make&rsquo;s <a href="https://en.wikipedia.org/wiki/Make_(software)#Suffix_rules">suffix rules</a> to run commands only on image files. I find the shell script to be more readable.</p>
 <h3 id="using-dockerized-htmlproofer">Using Dockerized HTMLProofer</h3>
 <p>HTMLProofer is installed with <code>gem</code>, and uses Ruby and <a href="https://nokogiri.org/tutorials/ensuring_well_formed_markup.html">Nokogiri</a>, which adds up to a lot of installation time for a CI workflow. Thankfully, <a href="https://github.com/18F">18F</a> has a <a href="https://github.com/18F/html-proofer-docker">Dockerized version</a> that is much faster to implement. Its usage requires starting the container with the built site directory <a href="https://docs.docker.com/storage/volumes/#start-a-container-with-a-volume">mounted as a data volume</a>, which is easily achieved by appending to the <code>docker run</code> command.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run -v /absolute/path/to/site/:/mounted-site 18fgsa/html-proofer /mounted-site
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">docker run -v /absolute/path/to/site/:/mounted-site 18fgsa/html-proofer /mounted-site
 </code></pre></div><p>In my Makefile, I specify the absolute site path using the <a href="https://help.github.com/en/articles/virtual-environments-for-github-actions#environment-variables">default environment variable</a> <code>GITHUB_WORKSPACE</code>. I&rsquo;ll dive into this and other GitHub Actions features in the next post.</p>
 <p>In the meantime, happy Making!</p>
-]]></content></entry><entry><title type="html">How to quickly batch resize, compress, and convert images with a Bash one-liner</title><link href="https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/"/><id>https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/</id><author><name>Victoria Drake</name></author><published>2019-10-14T08:27:49-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>Part of my Hugo site continuous deployment workflow is the processing of 210 images, at time of writing.</p>
+]]></content></entry><entry><title type="html">How to quickly batch resize, compress, and convert images with a Bash one-liner</title><link href="https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/"/><id>https://victoria.dev/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/</id><author><name>Victoria Drake</name></author><published>2019-10-14T08:27:49-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>Part of my Hugo site continuous deployment workflow is the processing of 210 images, at time of writing.</p>
 <p>Here&rsquo;s my one-liner:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find public/ -not -path <span class="s2">&#34;*/static/*&#34;</span> <span class="se">\(</span> -name <span class="s1">&#39;*.png&#39;</span> -o -name <span class="s1">&#39;*.jpg&#39;</span> -o -name <span class="s1">&#39;*.jpeg&#39;</span> <span class="se">\)</span> -print0 <span class="p">|</span> xargs -0 -P8 -n2 mogrify -strip -thumbnail <span class="s1">&#39;1000&gt;&#39;</span> -format jpg
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find public/ -not -path <span class="s2">&#34;*/static/*&#34;</span> <span class="se">\(</span> -name <span class="s1">&#39;*.png&#39;</span> -o -name <span class="s1">&#39;*.jpg&#39;</span> -o -name <span class="s1">&#39;*.jpeg&#39;</span> <span class="se">\)</span> -print0 <span class="p">|</span> xargs -0 -P8 -n2 mogrify -strip -thumbnail <span class="s1">&#39;1000&gt;&#39;</span> -format jpg
 </code></pre></div><p>I use <code>find</code> to target only certain image file formats in certain directories. With <a href="https://www.imagemagick.org/script/mogrify.php"><code>mogrify</code>, part of ImageMagick</a>, I resize only the images that are larger than a certain dimension, compress them, and strip the metadata. I tack on the <code>format</code> flag to create jpg copies of the images.</p>
 <p>Here&rsquo;s the one-liner again (broken up for better reading):</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Look in the public/ directory</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Look in the public/ directory</span>
 find public/ <span class="se">\
 </span><span class="se"></span><span class="c1"># Ignore directories called &#34;static&#34; regardless of location</span>
 -not -path <span class="s2">&#34;*/static/*&#34;</span> <span class="se">\
@@ -676,15 +676,15 @@ mogrify -strip <span class="se">\
 </span><span class="se"></span><span class="c1"># Convert the files to jpg format</span>
 -format jpg
 </code></pre></div><p>That&rsquo;s it. That&rsquo;s the post.</p>
-]]></content></entry><entry><title type="html">How to do twice as much with half the keystrokes using `.bashrc`</title><link href="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/"/><id>https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/</id><author><name>Victoria Drake</name></author><published>2019-08-21T09:17:02-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>In my <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">recent post about setting up Ubuntu with Bash scripts</a>, I briefly alluded to the magic of <code>.bashrc</code>. This didn&rsquo;t really do it justice, so here&rsquo;s a quick post that offers a bit more detail about what the Bash configuration file can do.</p>
+]]></content></entry><entry><title type="html">How to do twice as much with half the keystrokes using `.bashrc`</title><link href="https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/"/><id>https://victoria.dev/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/</id><author><name>Victoria Drake</name></author><published>2019-08-21T09:17:02-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>In my <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">recent post about setting up Ubuntu with Bash scripts</a>, I briefly alluded to the magic of <code>.bashrc</code>. This didn&rsquo;t really do it justice, so here&rsquo;s a quick post that offers a bit more detail about what the Bash configuration file can do.</p>
 <p>My current configuration hugely improves my workflow, and saves me well over 50% of the keystrokes I would have to employ without it! Let&rsquo;s look at some examples of aliases, functions, and prompt configurations that can improve our workflow by helping us be more efficient with fewer key presses.</p>
 <h2 id="bash-aliases">Bash aliases</h2>
 <p>A smartly written <code>.bashrc</code> can save a whole lot of keystrokes. You can take advantage of this in the literal sense by using <a href="https://www.gnu.org/software/bash/manual/html_node/Aliases.html">bash aliases</a>, or strings that expand to larger commands. For an indicative example, here is a Bash alias for copying files in the terminal:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Always copy contents of directories (r)ecursively and explain (v) what was done</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Always copy contents of directories (r)ecursively and explain (v) what was done</span>
 <span class="nb">alias</span> <span class="nv">cp</span><span class="o">=</span><span class="s1">&#39;cp -rv&#39;</span>
 </code></pre></div><p>The <code>alias</code> command defines the string you&rsquo;ll type, followed by what that string will expand to. You can override existing commands like <code>cp</code> above. On its own, the <code>cp</code> command will only copy files, not directories, and succeeds silently. With this alias, you need not remember to pass those two flags, nor <code>cd</code> or <code>ls</code> the location of our copied file to confirm that it&rsquo;s there! Now, just those two key presses (for <code>c</code> and <code>d</code>) will do all of that for us.</p>
 <p>Here are a few more <code>.bashrc</code> aliases for passing flags with common functions.</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># List contents with colors for file types, (A)lmost all hidden files (without . and ..), in (C)olumns, with class indicators (F)</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># List contents with colors for file types, (A)lmost all hidden files (without . and ..), in (C)olumns, with class indicators (F)</span>
 <span class="nb">alias</span> <span class="nv">ls</span><span class="o">=</span><span class="s1">&#39;ls --color=auto -ACF&#39;</span>
 <span class="c1"># List contents with colors for file types, (a)ll hidden entries (including . and ..), use (l)ong listing format, with class indicators (F)</span>
 <span class="nb">alias</span> <span class="nv">ll</span><span class="o">=</span><span class="s1">&#39;ls --color=auto -alF&#39;</span>
@@ -696,14 +696,14 @@ mogrify -strip <span class="se">\
 <span class="c1"># Always try to (c)ontinue getting a partially-downloaded file</span>
 <span class="nb">alias</span> <span class="nv">wget</span><span class="o">=</span><span class="s1">&#39;wget -c&#39;</span>
 </code></pre></div><p>Aliases come in handy when you want to avoid typing long commands, too. Here are a few I use when working with Python environments:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">alias</span> <span class="nv">pym</span><span class="o">=</span><span class="s1">&#39;python3 manage.py&#39;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">alias</span> <span class="nv">pym</span><span class="o">=</span><span class="s1">&#39;python3 manage.py&#39;</span>
 <span class="nb">alias</span> <span class="nv">mkenv</span><span class="o">=</span><span class="s1">&#39;python3 -m venv env&#39;</span>
 <span class="nb">alias</span> <span class="nv">startenv</span><span class="o">=</span><span class="s1">&#39;source env/bin/activate &amp;&amp; which python3&#39;</span>
 <span class="nb">alias</span> <span class="nv">stopenv</span><span class="o">=</span><span class="s1">&#39;deactivate&#39;</span>
 </code></pre></div><p>For further inspiration on ways Bash aliases can save time, I highly recommend <a href="https://www.digitalocean.com/community/tutorials/an-introduction-to-useful-bash-aliases-and-functions">the examples in this article</a>.</p>
 <h2 id="bash-functions">Bash functions</h2>
 <p>One downside of the aliases above is that they&rsquo;re rather static - they&rsquo;ll always expand to exactly the text declared. For a Bash alias that takes arguments, you&rsquo;ll need to create a function. You can do this like so:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Show contents of the directory after changing to it</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Show contents of the directory after changing to it</span>
 <span class="k">function</span> <span class="nb">cd</span> <span class="o">()</span> <span class="o">{</span>
     <span class="nb">builtin</span> <span class="nb">cd</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span>
     ls -ACF
@@ -712,7 +712,7 @@ mogrify -strip <span class="se">\
 <p>Bash functions are very useful when it comes to downloading or upgrading software, too.</p>
 <h3 id="bash-function-for-downloading-extended-hugo">Bash function for downloading extended Hugo</h3>
 <p>Thanks to the static site generator Hugo&rsquo;s excellent ship frequency, I previously spent at least a few minutes every couple weeks <a href="https://gohugo.io/categories/releases">downloading the new extended version</a>. With a Bash function, I only need to pass in the version number, and the upgrade happens in a few seconds.</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Hugo install or upgrade</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Hugo install or upgrade</span>
 <span class="k">function</span> gethugo <span class="o">()</span> <span class="o">{</span>
     wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>/hugo_extended_<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>_Linux-64bit.tar.gz
     tar xf tmp/hugo_extended_<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>_Linux-64bit.tar.gz -C tmp/
@@ -723,7 +723,7 @@ mogrify -strip <span class="se">\
 </code></pre></div><p>The <code>$@</code> notation simply takes all the arguments given, replacing its spot in the function. To run the above function and download Hugo version 0.57.2, you use the command <code>gethugo 0.57.2</code>.</p>
 <h3 id="bash-function-for-downloading-a-specific-go-version">Bash function for downloading a specific Go version</h3>
 <p>I&rsquo;ve got one for <a href="https://golang.org/">Golang</a>, too:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="k">function</span> getgolang <span class="o">()</span> <span class="o">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="k">function</span> getgolang <span class="o">()</span> <span class="o">{</span>
     sudo rm -rf /usr/local/go
     wget -q -P tmp/ https://dl.google.com/go/go<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>.linux-amd64.tar.gz
     sudo tar -C /usr/local -xzf tmp/go<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>.linux-amd64.tar.gz
@@ -732,7 +732,7 @@ mogrify -strip <span class="se">\
 <span class="o">}</span>
 </code></pre></div><h3 id="bash-function-for-adding-a-gitlab-remote">Bash function for adding a GitLab remote</h3>
 <p>Or how about a function that adds a remote origin URL for GitLab to the current repository?</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="k">function</span> glab <span class="o">()</span> <span class="o">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="k">function</span> glab <span class="o">()</span> <span class="o">{</span>
     git remote set-url origin --add git@gitlab.com:<span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>/<span class="s2">&#34;</span><span class="si">${</span><span class="nv">PWD</span><span class="p">##*/</span><span class="si">}</span><span class="s2">&#34;</span>.git
     git remote -v
 <span class="o">}</span>
@@ -740,7 +740,7 @@ mogrify -strip <span class="se">\
 <p>Bash functions are really only limited by the possibilities of scripting, of which there are, practically, few limits. If there&rsquo;s anything you do on a frequent basis that requires typing a few lines into a terminal, you can probably create a Bash function for it!</p>
 <h2 id="bash-prompt">Bash prompt</h2>
 <p>Besides directory contents, it&rsquo;s also useful to see the full path of the directory we&rsquo;re in. The Bash prompt can show us this path, along with other useful information like our current Git branch. To make it more readable, you can define colours for each part of the prompt. Here&rsquo;s how you can set up our prompt in <code>.bashrc</code> to accomplish this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Colour codes are cumbersome, so let&#39;s name them</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># Colour codes are cumbersome, so let&#39;s name them</span>
 <span class="nv">txtcyn</span><span class="o">=</span><span class="s1">&#39;\[\e[0;96m\]&#39;</span> <span class="c1"># Cyan</span>
 <span class="nv">txtpur</span><span class="o">=</span><span class="s1">&#39;\[\e[0;35m\]&#39;</span> <span class="c1"># Purple</span>
 <span class="nv">txtwht</span><span class="o">=</span><span class="s1">&#39;\[\e[0;37m\]&#39;</span> <span class="c1"># White</span>
@@ -760,7 +760,7 @@ gitBranch<span class="o">()</span> <span class="o">{</span>
 <span class="c1"># Build the prompt</span>
 <span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">pathC</span><span class="si">}</span><span class="s2">\w </span><span class="si">${</span><span class="nv">gitC</span><span class="si">}</span><span class="s2">\$(gitBranch) </span><span class="si">${</span><span class="nv">pointerC</span><span class="si">}</span><span class="s2">\$</span><span class="si">${</span><span class="nv">normalC</span><span class="si">}</span><span class="s2"> &#34;</span>
 </code></pre></div><p>Result:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">~/github/myrepo <span class="o">(</span>master<span class="o">)</span> $
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">~/github/myrepo <span class="o">(</span>master<span class="o">)</span> $
 </code></pre></div><p>Naming the colours helps to easily identify where one colour starts and stops, and where the next one begins. The prompt that you see in our terminal is defined by the string following <code>export PS1</code>, with each component of the prompt set with an <a href="https://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/bash-prompt-escape-sequences.html">escape sequence</a>. Let&rsquo;s break that down:</p>
 <ul>
 <li><code>\w</code> displays the current working directory,</li>
@@ -771,20 +771,20 @@ gitBranch<span class="o">()</span> <span class="o">{</span>
 <p>Here are a few options that put information front and centre and can help us to work more efficiently.</p>
 <h3 id="for-the-procrastination-averse">For the procrastination-averse</h3>
 <p>Username and current time with seconds, in 24-hour HH:MM:SS format:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">userC</span><span class="si">}</span><span class="s2">\u </span><span class="si">${</span><span class="nv">normalC</span><span class="si">}</span><span class="s2">at \t &gt;&#34;</span>
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">user at 09:35:55 &gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">userC</span><span class="si">}</span><span class="s2">\u </span><span class="si">${</span><span class="nv">normalC</span><span class="si">}</span><span class="s2">at \t &gt;&#34;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">user at 09:35:55 &gt;
 </code></pre></div><h3 id="for-those-who-always-like-to-know-where-they-stand">For those who always like to know where they stand</h3>
 <p>Full file path on a separate line, and username:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">pathC</span><span class="si">}</span><span class="s2">\w</span><span class="si">${</span><span class="nv">normalC</span><span class="si">}</span><span class="s2">\n\u:&#34;</span>
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">~/github/myrepo
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">pathC</span><span class="si">}</span><span class="s2">\w</span><span class="si">${</span><span class="nv">normalC</span><span class="si">}</span><span class="s2">\n\u:&#34;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">~/github/myrepo
 user:
 </code></pre></div><h3 id="for-the-minimalist">For the minimalist</h3>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;&gt;&#34;</span>
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;&gt;&#34;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">&gt;
 </code></pre></div><p>We can build many practical prompts with just the basic escape sequences; once you start to integrate functions with prompts, as in the Git branch example, things can get really complicated. Whether this amount of complication is an addition or a detriment to your productivity, only you can know for sure!</p>
 <p>Many fancy Bash prompts are possible with programs readily available with a quick search. I&rsquo;ve intentionally not provided samples here because, well, if you can tend to get as excited about this stuff as I can, it might be a couple hours before you get back to what you were doing before you started reading this post, and I just can&rsquo;t have that on my conscience. 🥺</p>
 <p>We&rsquo;ve hopefully struck a nice balance now between time invested and usefulness gained from our Bash configuration file! I hope you use your newly-recovered keystroke capacity for good.</p>
-]]></content></entry><entry><title type="html">How to set up a fresh Ubuntu desktop using only dotfiles and bash scripts</title><link href="https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/"/><id>https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/</id><author><name>Victoria Drake</name></author><published>2019-08-19T07:58:18-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>One of my most favorite things about open source files on GitHub is the ability to see how others do (what some people might call) mundane things, like set up their <code>.bashrc</code> and other dotfiles. While I&rsquo;m not as enthusiastic about ricing as I was when I first came to the Linux side, I still get pretty excited when I find a config setting that makes things prettier and faster, and thus, better.</p>
+]]></content></entry><entry><title type="html">How to set up a fresh Ubuntu desktop using only dotfiles and bash scripts</title><link href="https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/"/><id>https://victoria.dev/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/</id><author><name>Victoria Drake</name></author><published>2019-08-19T07:58:18-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>One of my most favorite things about open source files on GitHub is the ability to see how others do (what some people might call) mundane things, like set up their <code>.bashrc</code> and other dotfiles. While I&rsquo;m not as enthusiastic about ricing as I was when I first came to the Linux side, I still get pretty excited when I find a config setting that makes things prettier and faster, and thus, better.</p>
 <p>I recently came across a few such things, particularly in <a href="https://github.com/tomnomnom">Tom Hudson&rsquo;s</a> dotfiles. Tom seems to like to script things, and some of those things include automatically setting up symlinks, and installing Ubuntu repository applications and other programs. This got me thinking. Could I automate the set up of a new machine to replicate my current one?</p>
 <p>Being someone generally inclined to take things apart in order to see how they work, I know I&rsquo;ve messed up my laptop on occasion. (Usually when I&rsquo;m away from home, and my backup hard drive isn&rsquo;t.) On those rare but really inconvenient situations when my computer becomes a shell of its former self, (ba-dum-ching) it&rsquo;d be quite nice to have a fast, simple way of putting Humpty Dumpty back together again, just the way I like.</p>
 <p>In contrast to creating a <a href="https://askubuntu.com/questions/19901/how-to-make-a-disk-image-and-restore-from-it-later">disk image and restoring it later</a>, a collection of bash scripts is easier to create, maintain, and move around. They require no special utilities, only an external transportation method. It&rsquo;s like passing along the recipe, instead of the whole bundt cake. (Mmm, cake.)</p>
@@ -823,7 +823,7 @@ user:
 <p>Having modular scripts (one for symlinks, two for installing programs, another for desktop settings) is useful for both keeping things organized and for being able to run some but not all of the automated set up. For instance, if I were to set up a VPS in which I only use the command line, I wouldn&rsquo;t need to bother with installing graphical programs or desktop settings.</p>
 <p>In cases where I do want to run all the scripts, however, doing so one-by-one is a little tedious. Thankfully, since bash scripts can themselves be run by terminal commands, we can simply write another master script to run them all!</p>
 <p>Here&rsquo;s my master script to handle the set up of a new Ubuntu desktop machine:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="cp">#!/bin/bash
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="cp">#!/bin/bash
 </span><span class="cp"></span>
 ./symlink.sh
 ./aptinstall.sh
@@ -842,35 +842,35 @@ figlet <span class="s2">&#34;... and we&#39;re back!&#34;</span> <span class="p"
 <p>You may have noticed that, while our desktop now looks and runs familiarly, these scripts don&rsquo;t cover one very important area: our files. Hopefully, you have a back up method for those that involves some form of reliable external hardware. If not, and if you tend to put your work in external repository hosts like GitHub or GitLab, I do have a way to <a href="/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/">automatically clone and back up your GitHub repositories with bash one-liners</a>.</p>
 <p>Relying on external repository hosts doesn&rsquo;t offer 100% coverage, however. Files that you wouldn&rsquo;t put in an externally hosted repository (private or otherwise) consequently can&rsquo;t be pulled. Git ignored objects that can&rsquo;t be generated from included files, like private keys and secrets, will not be recreated. Those files, however, are likely small enough that you could fit a whole bunch on a couple encrypted USB flash drives (and if you don&rsquo;t have private key backups, maybe you ought to do that first?).</p>
 <p>That said, I hope this post has given you at least some inspiration as to how dotfiles and bash scripts can help to automate setting up a fresh desktop. If you come up with some settings you find useful, please help others discover them by sharing your dotfiles, too!</p>
-]]></content></entry><entry><title type="html">How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</title><link href="https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/"/><id>https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/</id><author><name>Victoria Drake</name></author><published>2019-08-06T10:55:19-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>Few things are more satisfying to me than one elegant line of Bash that automates hours of tedious work. As part of some recent explorations into <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">automatically re-creating my laptop with Bash scripts</a>, I wanted to find a way to easily clone my GitHub-hosted repositories to a new machine. After a bit of digging around, I wrote a one-liner that did just that. Then, in the spirit of not putting all our eggs in the same basket, I wrote another one-liner to automatically create and push to GitLab-hosted backups as well. Here they are.</p>
+]]></content></entry><entry><title type="html">How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</title><link href="https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/"/><id>https://victoria.dev/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/</id><author><name>Victoria Drake</name></author><published>2019-08-06T10:55:19-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>Few things are more satisfying to me than one elegant line of Bash that automates hours of tedious work. As part of some recent explorations into <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">automatically re-creating my laptop with Bash scripts</a>, I wanted to find a way to easily clone my GitHub-hosted repositories to a new machine. After a bit of digging around, I wrote a one-liner that did just that. Then, in the spirit of not putting all our eggs in the same basket, I wrote another one-liner to automatically create and push to GitLab-hosted backups as well. Here they are.</p>
 <h2 id="a-bash-one-liner-to-clone-all-your-github-repositories">A Bash one-liner to clone all your GitHub repositories</h2>
 <p>Caveat: you&rsquo;ll need a list of the GitHub repositories you want to clone. The good thing about that is it gives you full agency to choose just the repositories you want on your machine, instead of going in whole-hog.</p>
 <p>You can easily clone GitHub repositories without entering your password each time by using HTTPS with your <a href="https://help.github.com/en/articles/caching-your-github-password-in-git">15-minute cached credentials</a> or, my preferred method, by <a href="https://help.github.com/en/articles/connecting-to-github-with-ssh">connecting to GitHub with SSH</a>. For brevity I&rsquo;ll assume we&rsquo;re going with the latter, and our SSH keys are set up.</p>
 <p>Given a list of GitHub URLs in the file <code>gh-repos.txt</code>, like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">git@github.com:username/first-repository.git
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">git@github.com:username/first-repository.git
 git@github.com:username/second-repository.git
 git@github.com:username/third-repository.git
 </code></pre></div><p>We run:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">xargs -n1 git clone &lt; gh-repos.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">xargs -n1 git clone &lt; gh-repos.txt
 </code></pre></div><p>This clones all the repositories on the list into the current folder. This same one-liner works for GitLab repositories as well, if you substitute the appropriate URLs.</p>
 <h3 id="whats-going-on-here">What&rsquo;s going on here</h3>
 <p>There are two halves to this one-liner: the input, counterintuitively on the right side, and the part that makes stuff happen, on the left. We could make the order of these parts more intuitive (maybe?) by writing the same command like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">&lt;gh-repos.txt xargs -n1 git clone
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">&lt;gh-repos.txt xargs -n1 git clone
 </code></pre></div><p>To run a command for each line of our input, <code>gh-repos.txt</code>, we use <code>xargs -n1</code>. The tool <code>xargs</code> reads items from input and executes any commands it finds (it will <code>echo</code> if it doesn&rsquo;t find any). By default, it assumes that items are separated by spaces; new lines also works and makes our list easier to read. The flag <code>-n1</code> tells <code>xargs</code> to use <code>1</code> argument, or in our case, one line, per command. We build our command with <code>git clone</code>, which <code>xargs</code> then executes for each line. Ta-da.</p>
 <h2 id="a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab">A Bash one-liner to create and push many repositories on GitLab</h2>
 <p>GitLab, unlike GitHub, lets us do this nifty thing where we don&rsquo;t have to use the website to make a new repository first. We can <a href="https://gitlab.com/help/gitlab-basics/create-project#push-to-create-a-new-project">create a new GitLab repository from our terminal</a>. The newly created repository defaults to being set as Private, so if we want to make it Public on GitLab, we&rsquo;ll have to do that manually later.</p>
 <p>The GitLab docs tell us to push to create a new project using <code>git push --set-upstream</code>, but I don&rsquo;t find this to be very convenient for using GitLab as a backup. As I work with my repositories in the future, I&rsquo;d like to run one command that pushes to both GitHub <em>and</em> GitLab without additional effort on my part.</p>
 <p>To make this Bash one-liner work, we&rsquo;ll also need a list of repository URLs for GitLab (ones that don&rsquo;t exist yet). We can easily do this by copying our GitHub repository list, opening it up with Vim, and doing a <a href="https://vim.fandom.com/wiki/Search_and_replace">search-and-replace</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">cp gh-repos.txt gl-repos.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">cp gh-repos.txt gl-repos.txt
 vim gl-repos.txt
 :%s/<span class="se">\&lt;</span>github<span class="se">\&gt;</span>/gitlab/g
 :wq
 </code></pre></div><p>This produces <code>gl-repos.txt</code>, which looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">git@gitlab.com:username/first-repository.git
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">git@gitlab.com:username/first-repository.git
 git@gitlab.com:username/second-repository.git
 git@gitlab.com:username/third-repository.git
 </code></pre></div><p>We can create these repositories on GitLab, add the URLs as remotes, and push our code to the new repositories by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">awk -F<span class="s1">&#39;\/|(\.git)&#39;</span> <span class="s1">&#39;{system(&#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;)}&#39;</span> gl-repos.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">awk -F<span class="s1">&#39;\/|(\.git)&#39;</span> <span class="s1">&#39;{system(&#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;)}&#39;</span> gl-repos.txt
 </code></pre></div><p>Hang tight and I&rsquo;ll explain it; for now, take note that <code>~/FULL/PATH/</code> should be the full path to the directory containing our GitHub repositories.</p>
 <p>We do have to make note of a couple assumptions:</p>
 <ol>
@@ -880,7 +880,7 @@ git@gitlab.com:username/third-repository.git
 <p>The one-liner could be expanded to handle these assumptions, but it is the humble opinion of the author that at that point, we really ought to be writing a Bash script.</p>
 <h3 id="whats-going-on-here-1">What&rsquo;s going on here</h3>
 <p>Our Bash one-liner uses each line (or URL) in the <code>gl-repos.txt</code> file as input. With <code>awk</code>, it splits off the name of the directory containing the repository on our local machine, and uses these pieces of information to build our larger command. If we were to <code>print</code> the output of <code>awk</code>, we&rsquo;d see:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">cd</span> ~/FULL/PATH/first-repository <span class="o">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/first-repository.git <span class="o">&amp;&amp;</span> git push
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">cd</span> ~/FULL/PATH/first-repository <span class="o">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/first-repository.git <span class="o">&amp;&amp;</span> git push
 <span class="nb">cd</span> ~/FULL/PATH/second-repository <span class="o">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/second-repository.git <span class="o">&amp;&amp;</span> git push
 <span class="nb">cd</span> ~/FULL/PATH/third-repository <span class="o">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/third-repository.git <span class="o">&amp;&amp;</span> git push
 </code></pre></div><p>Let&rsquo;s look at how we build this command.</p>
@@ -893,16 +893,16 @@ git@gitlab.com:username/third-repository.git
 <li><code>(\.git)</code> is the capture group at the end of our URL that matches &ldquo;.git&rdquo;, with an escaped <code>.</code> character. This is a bit of a cheat, as &ldquo;.git&rdquo; isn&rsquo;t strictly splitting anything (there&rsquo;s nothing on the other side) but it&rsquo;s an easy way for us to take this bit off.</li>
 </ul>
 <p>Once we&rsquo;ve told <code>awk</code> where to split, we can grab the right substring with the <a href="https://www.gnu.org/software/gawk/manual/html_node/Fields.html#index-_0024-_0028dollar-sign_0029_002c-_0024-field-operator">field operator</a>. We refer to our fields with a <code>$</code> character, then by the field&rsquo;s column number. In our example, we want the second field, <code>$2</code>. Here&rsquo;s what all the substrings look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">1: git@gitlab.com:username
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">1: git@gitlab.com:username
 2: first-repository
 </code></pre></div><p>To use the whole string, or in our case, the whole URL, we use the field operator <code>$0</code>. To write the command, we just substitute the field operators for the repository name and URL. Running this with <code>print</code> as we&rsquo;re building it can help to make sure we&rsquo;ve got all the spaces right.</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">awk -F<span class="s1">&#39;\/|(\.git)&#39;</span> <span class="s1">&#39;{print &#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;}&#39;</span> gl-repos.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">awk -F<span class="s1">&#39;\/|(\.git)&#39;</span> <span class="s1">&#39;{print &#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;}&#39;</span> gl-repos.txt
 </code></pre></div><h4 id="running-the-command">Running the command</h4>
 <p>We build our command inside the parenthesis of <code>system()</code>. By using this as the output of <code>awk</code>, each command will run as soon as it is built and output. The <code>system()</code> function creates a <a href="https://en.wikipedia.org/wiki/Child_process">child process</a> that executes our command, then returns once the command is completed. In plain English, this lets us perform the Git commands on each repository, one-by-one, without breaking from our main process in which <code>awk</code> is doing things with our input file. Here&rsquo;s our final command again, all put together.</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">awk -F<span class="s1">&#39;\/|(\.git)&#39;</span> <span class="s1">&#39;{system(&#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;)}&#39;</span> gl-repos.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">awk -F<span class="s1">&#39;\/|(\.git)&#39;</span> <span class="s1">&#39;{system(&#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;)}&#39;</span> gl-repos.txt
 </code></pre></div><h4 id="using-our-backups">Using our backups</h4>
 <p>By adding the GitLab URLs as remotes, we&rsquo;ve simplified the process of pushing to both externally hosted repositories. If we run <code>git remote -v</code> in one of our repository directories, we&rsquo;ll see:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">origin  git@github.com:username/first-repository.git <span class="o">(</span>fetch<span class="o">)</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">origin  git@github.com:username/first-repository.git <span class="o">(</span>fetch<span class="o">)</span>
 origin  git@github.com:username/first-repository.git <span class="o">(</span>push<span class="o">)</span>
 origin  git@gitlab.com:username/first-repository.git <span class="o">(</span>push<span class="o">)</span>
 </code></pre></div><p>Now, simply running <code>git push</code> without arguments will push the current branch to both remote repositories.</p>
@@ -912,7 +912,7 @@ origin  git@gitlab.com:username/first-repository.git <span class="o">(</span>pus
 <p>In terms of an easy-to-understand, maintainable, and approachable tool, Bash one-liners suck. They&rsquo;re usually more complicated to write than a Bash script using <code>if</code> or <code>while</code> loops, and certainly more complicated to read. It&rsquo;s likely that when we write them, we&rsquo;ll miss a single quote or closing parenthesis somewhere; and as I hope this post demonstrates, they can take quite a bit of explaining, too. So why use them?</p>
 <p>Imagine reading a recipe for baking a cake, step by step. You understand the methods and ingredients, and gather your supplies. Then, as you think about it, you begin to realize that if you just throw all the ingredients at the oven in precisely the right order, a cake will instantly materialize. You try it, and it works!</p>
 <p>That would be pretty satisfying, wouldn&rsquo;t it?</p>
-]]></content></entry><entry><title type="html">A quick guide to changing your GitHub username</title><link href="https://victoria.dev/blog/a-quick-guide-to-changing-your-github-username/"/><id>https://victoria.dev/blog/a-quick-guide-to-changing-your-github-username/</id><author><name>Victoria Drake</name></author><published>2019-07-28T15:19:13-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>This being the 2,38947234th and probably last time I&rsquo;ll change my username, (marriage is permanent, right?) I thought I&rsquo;d better write a quick post on how this transition can be achieved as smoothly as possible. You can read <a href="https://help.github.com/en/articles/changing-your-github-username">official instructions on how to change your GitHub username</a> here, and they will tell you how to do it and what happens. The following is a quick guide to some things to consider <em>afterwards.</em></p>
+]]></content></entry><entry><title type="html">A quick guide to changing your GitHub username</title><link href="https://victoria.dev/blog/a-quick-guide-to-changing-your-github-username/"/><id>https://victoria.dev/blog/a-quick-guide-to-changing-your-github-username/</id><author><name>Victoria Drake</name></author><published>2019-07-28T15:19:13-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>This being the 2,38947234th and probably last time I&rsquo;ll change my username, (marriage is permanent, right?) I thought I&rsquo;d better write a quick post on how this transition can be achieved as smoothly as possible. You can read <a href="https://help.github.com/en/articles/changing-your-github-username">official instructions on how to change your GitHub username</a> here, and they will tell you how to do it and what happens. The following is a quick guide to some things to consider <em>afterwards.</em></p>
 <h2 id="where-to-make-changes">Where to make changes</h2>
 <ol>
 <li>Change username in <a href="https://github.com/settings/admin">GitHub account settings.</a></li>
@@ -938,7 +938,7 @@ origin  git@gitlab.com:username/first-repository.git <span class="o">(</span>pus
 <p>This will recursively (<code>r</code>) search all files for strings matching the whole (<code>w</code>) pattern (<code>e</code>) provided and prefix results with the line numbers (<code>n</code>) so you can easily find them.</p>
 <p>Using <code>find</code> and <code>sed</code> can make these changes much faster. See <a href="/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/">this article on search and replace</a>.</p>
 <p>Enjoy your new handle! (I hope it sticks.)</p>
-]]></content></entry><entry><title type="html">Git commit practices your future self will thank you for</title><link href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/"/><id>https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/</id><author><name>Victoria Drake</name></author><published>2018-08-06T08:54:56-04:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>A history of clean commits can be evidence of a lot of things: attention to detail, good work ethic, and genuine investment in the project. What do your Git commits say about you?</p>
+]]></content></entry><entry><title type="html">Git commit practices your future self will thank you for</title><link href="https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/"/><id>https://victoria.dev/blog/git-commit-practices-your-future-self-will-thank-you-for/</id><author><name>Victoria Drake</name></author><published>2018-08-06T08:54:56-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>A history of clean commits can be evidence of a lot of things: attention to detail, good work ethic, and genuine investment in the project. What do your Git commits say about you?</p>
 <p>Here&rsquo;s how you can create and maintain a clean and orderly Git commit history using <a href="#write-great-git-commit-messages-with-a-template">message templates</a>, <a href="#one-change-per-commit-how-to-squash-git-commits">learning how to squash commits</a>, <a href="#git-stash">using git stash</a>, and <a href="#tag-release-versions-using-annotated-git-tags">creating annotated commit tags</a>.</p>
 <h2 id="what-it-means-to-commit-responsibly">What it means to commit responsibly</h2>
 <p>Whether our code will be seen by the entire open source community or just future versions of ourselves, either one will be grateful if we commit responsibly today. Being responsible can mean a lot of things to different people, so I enlisted some of <a href="https://mastodon.technology/@victoria/">mastodon.technology</a> and <a href="https://dev.to/victoria/what-does-it-mean-to-commit-responsibly-22mi">dev.to</a> to help round out my list. From those (really great) threads, I distilled these main points:</p>
@@ -967,10 +967,10 @@ What effects does the patch have?</p>
 </blockquote>
 <p>This can be a lot to remember to cover, but there&rsquo;s a slick way to have these prompts at hand right when you need it. You can set up a commit message template by using the <code>commit.template</code> <a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration">configuration value</a>.</p>
 <p>To set it, configure Git to use a template file (for example, <code>.gitmessage</code> in your home directory), then create the template file with Vim:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global commit.template ~/.gitmessage
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git config --global commit.template ~/.gitmessage
 vim ~/.gitmessage
 </code></pre></div><p>When we run <code>git commit</code> without the <code>-m</code> message flag, the editor will open with our helpful template ready to go. Here&rsquo;s my commit message template:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">## If applied, this commit will...
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">## If applied, this commit will...
 ## [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
 
 
@@ -981,7 +981,7 @@ vim ~/.gitmessage
 ## What side effects does this change have?
 -
 </code></pre></div><p>I&rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-txt" data-lang="txt">Fix #16 missing CSS variables
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Fix #16 missing CSS variables
 - Fix for unstyled elements
 - Add background color, height for code blocks
 - Only affects highlight class
@@ -989,7 +989,7 @@ vim ~/.gitmessage
 <p>Issue trackers in <a href="https://help.github.com/articles/closing-issues-using-keywords/">GitHub</a> and <a href="https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html">Bitbucket</a> both recognize the keywords <code>close</code>, <code>fix</code>, and <code>resolve</code> followed immediately by the issue or pull request number. These keywords conveniently help us close the referenced issue or pull request, and this helps maintain a clear trail of changes. <a href="https://docs.gitlab.com/ee/user/project/issues/crosslinking_issues.html">GitLab</a>, and issue trackers like <a href="https://confluence.atlassian.com/jirasoftwarecloud/referencing-issues-in-your-development-work-777002789.html">Jira</a> offer similar functionalities.</p>
 <h3 id="use-helpful-vim-settings-for-git-commit-messages">Use helpful Vim settings for git commit messages</h3>
 <p>By adding a few lines to our Vim configuration, we can make writing great git commit messages easy. We can add these lines to <code>~/.vimrc</code> to turn on syntax highlighting in general, and spell check and text wrapping for commit messages in particular:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vimrc" data-lang="vimrc"><span class="c">&#34; Filetype detection, plugins, and indent rules</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vimrc" data-lang="vimrc"><span class="c">&#34; Filetype detection, plugins, and indent rules</span><span class="err">
 </span><span class="err"></span><span class="nx">filetype</span> <span class="nx">plugin</span> <span class="nx">indent</span> <span class="nx">on</span><span class="err">
 </span><span class="err"></span><span class="c">
 </span><span class="c">&#34; Syntax highlighting</span><span class="err">
@@ -1010,7 +1010,7 @@ vim ~/.gitmessage
 <p>Here&rsquo;s the main point. If you&rsquo;ve pushed messy commits to a public repository, I say go right ahead and leave them be, instead of complicating things further. (We all learn from our embarrassments, especially the public ones - I&rsquo;m looking at you, past-Vicky.) If your messy commits currently only exist on your local version, great! We can tidy them up into one clean, well-described commit that we&rsquo;ll be proud to push, and no one will be the wiser.</p>
 <p>There are a couple different ways to squash commits, and choosing the appropriate one depends on what we need to achieve.</p>
 <p>The following examples are illustrated using <code>git log --graph</code>, with some options for brevity. We can set a handy alias to see this log format in our terminal with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global alias.plog <span class="s2">&#34;log --graph --pretty=format:&#39;%h -%d %s %n&#39; --abbrev-commit --date=relative --branches&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git config --global alias.plog <span class="s2">&#34;log --graph --pretty=format:&#39;%h -%d %s %n&#39; --abbrev-commit --date=relative --branches&#34;</span>
 </code></pre></div><p>Then we just do <code>git plog</code> to see the pretty log.</p>
 <h3 id="method-1-one-commit-to-rule-the-master-branch">Method #1: one commit to rule the master branch</h3>
 <p>This is appropriate when:</p>
@@ -1020,7 +1020,7 @@ vim ~/.gitmessage
 <li>We don&rsquo;t want to preserve history of branches or changes we haven&rsquo;t yet pushed</li>
 </ul>
 <p>This method takes a Git tree that looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">*   3e8fd79 - (HEAD -&gt; master) Fix a thing
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">*   3e8fd79 - (HEAD -&gt; master) Fix a thing
 |
 *   4f0d387 - Tweak something
 |
@@ -1039,11 +1039,11 @@ vim ~/.gitmessage
 |
 * 0e3fa32 (origin/master, origin/HEAD) Update theme
 </code></pre></div><p>And makes it look like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 7f9a127 - (HEAD -&gt; master) Add new article
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 7f9a127 - (HEAD -&gt; master) Add new article
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
 </code></pre></div><p>Here&rsquo;s how to do it - hold on to your hoverboards, it&rsquo;s super complicated:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git reset --soft origin/master
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git reset --soft origin/master
 git commit
 </code></pre></div><p>Yup that&rsquo;s all. We can delete the unwanted branch with <code>git branch -D new-article</code>.</p>
 <h3 id="method-2-not-_that_-much">Method #2: not <em>that</em> much</h3>
@@ -1053,7 +1053,7 @@ git commit
 <li>We want to open a pull request to merge a branch</li>
 </ul>
 <p>This method takes a Git tree that looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 13a070f - (HEAD -&gt; new-article) Finish new article
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 13a070f - (HEAD -&gt; new-article) Finish new article
 |
 * 78e728a - Edit article draft
 |
@@ -1068,20 +1068,20 @@ git commit
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
 </code></pre></div><p>And makes it look like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 90da69a - (HEAD -&gt; new-article) Add new article
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 90da69a - (HEAD -&gt; new-article) Add new article
 |
 | * 65af7e7 - (master) Add social media link
 |/
 |
 * 0e3fa32 - (origin/master, origin/HEAD) Update theme
 </code></pre></div><p>To squash the last five commits on branch <code>new-article</code> into one, we use:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git reset --soft HEAD~5
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git reset --soft HEAD~5
 git commit -m <span class="s2">&#34;New message for the combined commit&#34;</span>
 </code></pre></div><p>Where <code>--soft</code> leaves our files untouched and staged, and <code>5</code> can be thought of as &ldquo;the number of previous commits I want to combine.&rdquo;</p>
 <p>We can then do <code>git merge master</code> and create our pull request.</p>
 <h3 id="method-3-getting-picky">Method #3: getting picky</h3>
 <p>Say we had a really confusing afternoon and our Git tree looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* dc89918 - (HEAD -&gt; master) Add link
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* dc89918 - (HEAD -&gt; master) Add link
 |
 * 9b6780f - Update image asset
 |
@@ -1106,12 +1106,12 @@ git commit -m <span class="s2">&#34;New message for the combined commit&#34;</sp
 <li>We want to delete or reorder specific commits</li>
 </ul>
 <p>Git <code>rebase</code> is a powerful tool, and handy once we&rsquo;ve got the hang of it. To change all the commits since <code>origin/master</code>, we do:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git rebase -i origin/master
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git rebase -i origin/master
 </code></pre></div><p>Or, we can do:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git rebase -i 0e3fa32
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git rebase -i 0e3fa32
 </code></pre></div><p>Where the commit hash is the last commit we want to retain as-is.</p>
 <p>The <code>-i</code> option lets us run the interactive rebase tool, which launches our editor with, essentially, a script for us to modify. We&rsquo;ll see a list of our commits in reverse order to the git log, with the oldest at the top:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">pick 90da69a Add new article
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">pick 90da69a Add new article
 pick 033dee7 Fix typo
 pick ccec365 Update list page
 pick 6379956 Fix CSS bug
@@ -1139,14 +1139,14 @@ pick dc89918 Add link
 #
 ~
 </code></pre></div><p>The comments give us a handy guide as to what we&rsquo;re able to do. For now, let&rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">pick 90da69a Add new article
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">pick 90da69a Add new article
 squash 033dee7 Fix typo
 pick ccec365 Update list page
 squash 6379956 Fix CSS bug
 squash 9b6780f Update image asset
 squash dc89918 Add link
 </code></pre></div><p>Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text"># This is a combination of 2 commits.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"># This is a combination of 2 commits.
 # This is the 1st commit message:
 
 Add new article
@@ -1172,7 +1172,7 @@ Fix typo
 #
 ~
 </code></pre></div><p>Here&rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&hellip;</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">[detached HEAD 3cbad01] Add new article
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">[detached HEAD 3cbad01] Add new article
  1 file changed, 129 insertions(+), 19 deletions(-)
 Auto-merging content/dir/file.md
 CONFLICT (content): Merge conflict in content/dir/file.md
@@ -1186,7 +1186,7 @@ To abort and get back to the state before &#34;git rebase&#34;, run &#34;git reb
 Could not apply ccec365... Update list page
 </code></pre></div><p>Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with <code>git rebase --continue</code>. Our interactive rebase picks up where it left off.</p>
 <p>Once all the squashing is done, our Git tree looks like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 3564b8c - (HEAD -&gt; master) Update list page
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 3564b8c - (HEAD -&gt; master) Update list page
 |
 * 3cbad01 - Add new article
 |
@@ -1195,9 +1195,9 @@ Could not apply ccec365... Update list page
 <h2 id="git-stash">Git stash</h2>
 <p>If we&rsquo;re in the middle of some work and it&rsquo;s not a good time to commit, but we need to switch branches, <a href="https://git-scm.com/book/en/v1/Git-Tools-Stashing">stashing</a> can be a good option. Stashing lets us save our unfinished work without needing to create a half-assed commit. It&rsquo;s like that pile of paper on your desk representing all the stuff you&rsquo;ve been in the middle of doing since two weeks ago. Yup, that one.</p>
 <p>It&rsquo;s as easy as typing <code>git stash</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">Saved working directory and index state WIP on master: 3564b8c Update list page
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">Saved working directory and index state WIP on master: 3564b8c Update list page
 </code></pre></div><p>The dirty work we&rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&rsquo;s in our stash stack, we do <code>git stash list</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">stash@{0}: WIP on master: 3564b8c Update list page
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">stash@{0}: WIP on master: 3564b8c Update list page
 stash@{1}: WIP on master: 90da69a Add new article
 stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 </code></pre></div><p>To restore our work in progress, we use <code>git stash apply</code>. Git will try and apply our most recent stashed work. To apply an older stash, we use <code>git stash apply stash@{1}</code> where <code>1</code> is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.</p>
@@ -1205,7 +1205,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 <p>We can also use <code>git stash pop</code> to apply the most recent stash and then immediately remove it from the stack.</p>
 <h2 id="tag-release-versions-using-annotated-git-tags">Tag release versions using annotated Git tags</h2>
 <p>In the spirit of having a beautiful, clean Git history, there&rsquo;s one more thing we can do to help make our commit log inspire infinite joy in its viewers. If you&rsquo;ve never heard of <code>git tag</code>, your master branch history might look like this&hellip;</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 0377782 - Update theme
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 0377782 - Update theme
 |
 * ecf8128 - Add about page (#25)
 |
@@ -1217,7 +1217,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 |
 * 233e23f - Add main content (#6)
 </code></pre></div><p>Wouldn&rsquo;t it be nice if it looked like this instead?</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">* 0377782 - (tag: v2.1.0) Update theme
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 0377782 - (tag: v2.1.0) Update theme
 |
 * ecf8128 - Add about page (#25)
 |
@@ -1243,17 +1243,17 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 <li>Avoid conflicting tag names</li>
 </ul>
 <p>To create an annotated Git tag and attach it to our current (last) commit, we do:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git tag -a v1.2.0 -m <span class="s2">&#34;Clever release title&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git tag -a v1.2.0 -m <span class="s2">&#34;Clever release title&#34;</span>
 </code></pre></div><p>This tags the commit on our local repository. To push all annotated tags to the remote, we do:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git push --follow-tags
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git push --follow-tags
 </code></pre></div><p>We can also set our Git configuration to push our annotated tags by default:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git config --global push.followTags <span class="nb">true</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git config --global push.followTags <span class="nb">true</span>
 </code></pre></div><p>If we then want to skip pushing tags this time, we pass <code>--no-follow-tags</code>.</p>
 <h2 id="practice-responsible-commits">Practice responsible commits</h2>
 <p>A little time invested in getting familiar with these tools and practices can make your commits even more useful and well-crafted. With a little practice, these processes will become second nature. You can make it even easier by creating a personal commit checklist on paper to keep handy while you work - or if that isn&rsquo;t fun enough, <a href="/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">make it an interactive pre-commit hook.</a></p>
 <p>Creating clean, useful, and responsible Git commits says a lot about you. Especially in remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.</p>
 <p>If you enjoyed this post, there&rsquo;s a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. <a href="https://victoria.dev">Subscribe on victoria.dev</a> to see new articles first, and check out the ones below!</p>
-]]></content></entry><entry><title type="html">An automatic interactive pre-commit checklist, in the style of infomercials</title><link href="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/"/><id>https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</id><author><name>Victoria Drake</name></author><published>2018-07-23T09:38:09-04:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>What&rsquo;s that, you say? You&rsquo;ve become tired of regular old boring <em>paper checklists?</em> Well, my friend, today is your lucky day! You, yes, <em>you,</em> can become the proud owner of a brand-spanking-new <em>automatic interactive pre-commit hook checklist!</em> You&rsquo;re gonna love this! Your life will be so much easier! Just wait until your friends see you.</p>
+]]></content></entry><entry><title type="html">An automatic interactive pre-commit checklist, in the style of infomercials</title><link href="https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/"/><id>https://victoria.dev/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</id><author><name>Victoria Drake</name></author><published>2018-07-23T09:38:09-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>What&rsquo;s that, you say? You&rsquo;ve become tired of regular old boring <em>paper checklists?</em> Well, my friend, today is your lucky day! You, yes, <em>you,</em> can become the proud owner of a brand-spanking-new <em>automatic interactive pre-commit hook checklist!</em> You&rsquo;re gonna love this! Your life will be so much easier! Just wait until your friends see you.</p>
 <h2 id="whats-a-pre-commit-hook">What&rsquo;s a pre-commit hook</h2>
 <p>Did you know that nearly <em>1 out of 5 coders</em> are too embarrassed to ask this question? Don&rsquo;t worry, it&rsquo;s perfectly normal. In the next 60 seconds we&rsquo;ll tell you all you need to know to pre-commit with confidence.</p>
 <p>A <a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks">Git hook</a> is a feature of Git that triggers custom scripts at useful moments. They can be used for all kinds of reasons to help you automate your work, and best of all, you already have them! In every repository that you initialize with <code>git init</code>, you&rsquo;ll have a set of example scripts living in <code>.git/hooks</code>. They all end with <code>.sample</code> and activating them is as easy as renaming the file to remove the <code>.sample</code> part.</p>
@@ -1263,7 +1263,7 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 <p>I only want the best for my family and my commits, and that&rsquo;s why I choose an interactive pre-commit checklist. Not only is it fun to use, it helps to keep my projects safe from unexpected off-spec mistakes!</p>
 <p>It&rsquo;s so easy! I just write a bash script that can read user input, and plop it into <code>.git/hooks</code> as a file named <code>pre-commit</code>. Then I do <code>chmod +x .git/hooks/pre-commit</code> to make it executable, and I&rsquo;m done!</p>
 <p>Oh look, here comes an example bash script now!</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="cp">#!/bin/sh
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="cp">#!/bin/sh
 </span><span class="cp"></span>
 <span class="nb">echo</span> <span class="s2">&#34;Would you like to play a game?&#34;</span>
 
@@ -1295,8 +1295,8 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 <span class="nb">exec</span> &lt;<span class="p">&amp;</span>-
 </code></pre></div><h2 id="take-my-money">Take my money</h2>
 <p>Don&rsquo;t delay! Take advantage <em>right now</em> of this generous <em>one-time offer!</em> An interactive pre-commit hook checklist can be yours, today, for the low, low price of&hellip; free? Wait, who wrote this script?</p>
-]]></content></entry><entry><title type="html">Batch renaming images, including image resolution, with awk</title><link href="https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/"/><id>https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/</id><author><name>Victoria Drake</name></author><published>2017-11-20T13:59:30-05:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>The most recent item on my list of &ldquo;Geeky things I did that made me feel pretty awesome&rdquo; is an hour&rsquo;s adventure that culminated in this code:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ file IMG* <span class="p">|</span> awk <span class="s1">&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> fn fr<span class="p">;</span> <span class="k">do</span> <span class="nb">echo</span> <span class="k">$(</span>rename -v <span class="s2">&#34;s/</span><span class="nv">$fn</span><span class="s2">/img_</span><span class="nv">$fr</span><span class="s2">/g&#34;</span> *<span class="k">)</span><span class="p">;</span> <span class="k">done</span>
+]]></content></entry><entry><title type="html">Batch renaming images, including image resolution, with awk</title><link href="https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/"/><id>https://victoria.dev/blog/batch-renaming-images-including-image-resolution-with-awk/</id><author><name>Victoria Drake</name></author><published>2017-11-20T13:59:30-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>The most recent item on my list of &ldquo;Geeky things I did that made me feel pretty awesome&rdquo; is an hour&rsquo;s adventure that culminated in this code:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">$ file IMG* <span class="p">|</span> awk <span class="s1">&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> fn fr<span class="p">;</span> <span class="k">do</span> <span class="nb">echo</span> <span class="k">$(</span>rename -v <span class="s2">&#34;s/</span><span class="nv">$fn</span><span class="s2">/img_</span><span class="nv">$fr</span><span class="s2">/g&#34;</span> *<span class="k">)</span><span class="p">;</span> <span class="k">done</span>
 IMG_20170808_172653_425.jpg renamed as img_0_4032x3024.jpg
 IMG_20170808_173020_267.jpg renamed as img_1_3024x3506.jpg
 IMG_20170808_173130_616.jpg renamed as img_2_3024x3779.jpg
@@ -1318,11 +1318,11 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 <p>We&rsquo;ll come back to this later.</p>
 <h2 id="get-file-information">Get file information</h2>
 <p>When I run <code>$ file IMG_20170808_172653_425.jpg</code> in the image directory, I get this output:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">IMG_20170808_172653_425.jpg: JPEG image data, baseline, precision 8, 4032x3024, frames <span class="m">3</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">IMG_20170808_172653_425.jpg: JPEG image data, baseline, precision 8, 4032x3024, frames <span class="m">3</span>
 </code></pre></div><p>Since we can get the image resolution (&ldquo;4032x3024&rdquo; above), we know that we&rsquo;ll be able to use it in our new filename.</p>
 <h2 id="isolate-the-information-we-want">Isolate the information we want</h2>
 <p>I love <code>awk</code> for its simplicity. It takes lines of text and makes individual bits of information available to us with built in variables that we can then refer to as column numbers denoted by <code>$1</code>, <code>$2</code>, etc. By default, <code>awk</code> splits up columns on whitespace. To take the example above:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">|              1               |   2  |   3   |   4   |     5     |     6     | 7  |      8     |   9    | 10 |
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">|              1               |   2  |   3   |   4   |     5     |     6     | 7  |      8     |   9    | 10 |
 -------------------------------------------------------------------------------------------------------------
 | IMG_20170808_172653_425.jpg: | JPEG | image | data, | baseline, | precision | 8, | 4032x3024, | frames | 3  |
 </code></pre></div><p>We can denote different values to use as a splitter with, for example, <code>-F','</code> if we wanted to use commas as the column divisions. For our current project, spaces are fine.</p>
@@ -1341,9 +1341,9 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 <p>To run our <code>rename</code> commands as if we&rsquo;d manually entered them in the terminal one by one, we can use <code>echo $(some command)</code>. Finally, <code>done</code> ends our <code>while</code> loop.</p>
 <h2 id="bonus-round-rainbow-output">Bonus round: rainbow output</h2>
 <p>I wasn&rsquo;t kidding with that <a href="https://github.com/tehmaze/lolcat">&ldquo;rainbow-coloured&rdquo; bit&hellip;</a></p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">p install lolcat
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">p install lolcat
 </code></pre></div><p>Here&rsquo;s our full code:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">le IMG* <span class="p">|</span> awk <span class="s1">&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> fn fs<span class="p">;</span> <span class="k">do</span> <span class="nb">echo</span> <span class="k">$(</span>rename -v <span class="s2">&#34;s/</span><span class="nv">$fn</span><span class="s2">/img_</span><span class="nv">$fs</span><span class="s2">/g&#34;</span> *<span class="k">)</span><span class="p">;</span> <span class="k">done</span> <span class="p">|</span> lolcat
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">le IMG* <span class="p">|</span> awk <span class="s1">&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> fn fs<span class="p">;</span> <span class="k">do</span> <span class="nb">echo</span> <span class="k">$(</span>rename -v <span class="s2">&#34;s/</span><span class="nv">$fn</span><span class="s2">/img_</span><span class="nv">$fs</span><span class="s2">/g&#34;</span> *<span class="k">)</span><span class="p">;</span> <span class="k">done</span> <span class="p">|</span> lolcat
 </code></pre></div><p>Enjoy!</p>
 ]]></content></entry><entry><title type="html">How to replace a string with sed in current and recursive subdirectories</title><link href="https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/"/><id>https://victoria.dev/blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/</id><author><name>Victoria Drake</name></author><published>2017-05-06T20:04:53+08:00</published><updated>2020-11-22T20:04:53+08:00</updated><content type="html"><![CDATA[<p>Rebranding? Moving to <a href="/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/">a new domain</a> or <a href="/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/">static site</a>? I&rsquo;ve had more than a few of these situations myself! Here&rsquo;s how <code>sed</code> can help make these changes easier.</p>
 <h2 id="update-a-string-in-multiple-files-with-sed">Update a string in multiple files with <code>sed</code></h2>
@@ -1355,13 +1355,13 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 <p>Here&rsquo;s how!</p>
 <h2 id="current-directory-non-recursive">Current directory, non-recursive</h2>
 <p><em>Non-recursive</em> means sed won&rsquo;t change files in any subdirectories of the current folder.</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">.
 ├── index.html        # Change this file
 └── blog
     ├── list.html     # Don&#39;t change
     └── single.html   # these files
 </code></pre></div><p>Run this command to search all the files in your current directory and replace a given string. For example, to replace all occurrences of &ldquo;foo&rdquo; with &ldquo;bar&rdquo;:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *
 </code></pre></div><p>Here&rsquo;s what each component of the command does:</p>
 <ul>
 <li><code>-i</code> will change the original, and stands for &ldquo;in-place.&rdquo;</li>
@@ -1372,25 +1372,25 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 <li><code>*</code> denotes all file types. (No more rhymes. What a tease.)</li>
 </ul>
 <p>You can limit the operation to one file type, such as <code>txt</code>, by using:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *.txt
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sed -i -- <span class="s1">&#39;s/foo/bar/g&#39;</span> *.txt
 </code></pre></div><h2 id="current-directory-and-subdirectories-recursive">Current directory and subdirectories, recursive</h2>
 <p>You can supplement <code>sed</code> with <code>find</code> to expand your scope to all of the current folder&rsquo;s subdirectories. This will include any hidden files.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
 </code></pre></div><p>To ignore hidden files (such as <code>.git</code>) you can pass the negation modifier <code>-not -path '*/\.*'</code>, like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -not -path <span class="s1">&#39;*/\.*&#39;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find . -type f -not -path <span class="s1">&#39;*/\.*&#39;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
 </code></pre></div><p>This will exclude any file that has the string <code>/.</code> in its path.</p>
 <p>You can also limit this operation to file names that end in a certain extension, like Markdown:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -name <span class="s2">&#34;*.md&#34;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find . -type f -name <span class="s2">&#34;*.md&#34;</span> -exec sed -i <span class="s1">&#39;s/foo/bar/g&#39;</span> <span class="o">{}</span> +
 </code></pre></div><h2 id="working-with-urls-change-the-separator">Working with URLs: change the separator</h2>
 <p>If you want to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&hellip;</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="se">\
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="se">\
 </span><span class="se"></span><span class="s1">&#39;s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g&#39;</span> <span class="o">{}</span> +
 </code></pre></div><p>You can avoid confusion and mistakes by changing the separator to any non-conflicting character. The character that follows the <code>s</code> will be treated as the separator. In this case, using a <code>,</code> or <code>_</code> would do. This doesn&rsquo;t require escaping and is much more readable:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="se">\
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">find . -type f -exec sed -i <span class="se">\
 </span><span class="se"></span><span class="s1">&#39;s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g&#39;</span> <span class="o">{}</span> +
 </code></pre></div><h2 id="command-line-superpowers-for-all">Command-line superpowers for all!</h2>
 <p>I hope this was helpful! If you like this post, there&rsquo;s a lot more where that came from. I write about all sorts of ways to save time with tricks for your terminal. There&rsquo;s some below!</p>
-]]></content></entry><entry><title type="html">How I created custom desktop notifications using terminal and cron</title><link href="https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/"/><id>https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/</id><author><name>Victoria Drake</name></author><published>2017-02-21T10:48:38+07:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>In my last post I talked about moving from Windows 10 to running i3 on Linux, built up from Debian Base System. Among other things, this change has taught me about the benefits of using basic tools and running a minimal, lightweight system. You can achieve a lot of functionality with just command line tools and simple utilities. One example I&rsquo;d like to illustrate in this post is setting up desktop notifications.</p>
+]]></content></entry><entry><title type="html">How I created custom desktop notifications using terminal and cron</title><link href="https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/"/><id>https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/</id><author><name>Victoria Drake</name></author><published>2017-02-21T10:48:38+07:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>In my last post I talked about moving from Windows 10 to running i3 on Linux, built up from Debian Base System. Among other things, this change has taught me about the benefits of using basic tools and running a minimal, lightweight system. You can achieve a lot of functionality with just command line tools and simple utilities. One example I&rsquo;d like to illustrate in this post is setting up desktop notifications.</p>
 <p>I use <a href="https://dunst-project.org/">dunst</a> for desktop notifications. It&rsquo;s a simple, lightweight tool that is easy to configure, doesn&rsquo;t have many dependencies, and can be used across various distributions.</p>
 <h2 id="battery-statuslow-battery-notification">Battery status/low battery notification</h2>
 <p>I was looking for a simple, versatile set up to create notifications for my battery status without having to rely on separate, standalone GUI apps or services. In my search I came across a simple one-line cron task that seemed to be the perfect fit. I adapted it to my purpose and it looks like this:</p>
@@ -1428,7 +1428,7 @@ Shows a desktop notification with <code>-u critical</code> (critical urgency), <
 <h2 id="additional-notifications-with-command-line-tools">Additional notifications with command line tools</h2>
 <p>With cron and just a few combinations of simple command line tools, you can create interesting and useful notifications. Consider the following:</p>
 <h3 id="periodically-check-your-dhcp-address">Periodically check your dhcp address</h3>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">*/60 * * * * journalctl <span class="p">|</span> awk -F: <span class="s1">&#39;/dhcp/ &amp;&amp; /address/ { print $5 }&#39;</span> <span class="p">|</span> tail -1 <span class="p">|</span> xargs -ri env <span class="nv">DISPLAY</span><span class="o">=</span>:0 notify-send -a <span class="s2">&#34;dhcp address&#34;</span> -u normal <span class="s2">&#34;{}&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">*/60 * * * * journalctl <span class="p">|</span> awk -F: <span class="s1">&#39;/dhcp/ &amp;&amp; /address/ { print $5 }&#39;</span> <span class="p">|</span> tail -1 <span class="p">|</span> xargs -ri env <span class="nv">DISPLAY</span><span class="o">=</span>:0 notify-send -a <span class="s2">&#34;dhcp address&#34;</span> -u normal <span class="s2">&#34;{}&#34;</span>
 </code></pre></div><p>Which does the following:
 <code>*/60 * * * *</code>
 Every 60 minutes.</p>
@@ -1441,7 +1441,7 @@ Take the last line of the output.</p>
 <p><code>| xargs -ri env DISPLAY=:0 notify-send -a &quot;dhcp address&quot; -u normal &quot;{}&quot;</code>
 Create the desktop notification including the output.</p>
 <h3 id="periodically-display-the-time-and-date">Periodically display the time and date</h3>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">*/60 * * * * timedatectl status <span class="p">|</span> awk -F<span class="se">\n</span> <span class="s1">&#39;/Local time/ { print }&#39;</span> <span class="p">|</span> xargs -ri env <span class="nv">DISPLAY</span><span class="o">=</span>:0 notify-send -a <span class="s2">&#34;Current Time&#34;</span> -u normal <span class="s2">&#34;{}&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">*/60 * * * * timedatectl status <span class="p">|</span> awk -F<span class="se">\n</span> <span class="s1">&#39;/Local time/ { print }&#39;</span> <span class="p">|</span> xargs -ri env <span class="nv">DISPLAY</span><span class="o">=</span>:0 notify-send -a <span class="s2">&#34;Current Time&#34;</span> -u normal <span class="s2">&#34;{}&#34;</span>
 </code></pre></div><h3 id="system-log-activity">System log activity</h3>
 <p>You can also search your system logs (try <code>journalctl</code>) for any number of things using awk, enabling you to get periodic notifications of virtually any logged events.</p>
 <h2 id="experiment">Experiment</h2>

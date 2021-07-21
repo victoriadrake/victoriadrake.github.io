@@ -1,4 +1,4 @@
-<feed xmlns="http://www.w3.org/2005/Atom"><title>aws on victoria.dev</title><link href="https://victoria.dev/tags/aws/feed.xml" rel="self"/><link href="https://victoria.dev/tags/aws/"/><updated>2021-02-15T01:38:07-05:00</updated><id>https://victoria.dev/tags/aws/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>aws on victoria.dev</title><link href="https://victoria.dev/tags/aws/feed.xml" rel="self"/><link href="https://victoria.dev/tags/aws/"/><updated>2021-02-15T01:38:07-05:00</updated><id>https://victoria.dev/tags/aws/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-07-21T13:43:26+00:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
 <p>You can create your own self-hosted Matrix chat for as little as $3.50 USD per month on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance. Your homeserver can federate with other Matrix servers, giving you a reliable and fault-tolerant means of communication.</p>
 <p>Matrix is most widely installed via its <a href="https://matrix.org/docs/guides/installing-synapse">Synapse</a> homeserver implementation written in Python 3. Dendrite, its second-generation homeserver implementation written in Go, is currently released in beta. Dendrite will provide more memory efficiency and reliability out-of-the-box, making it an excellent choice for running on a virtual instance.</p>
 <p>Here&rsquo;s how to set up your own homeserver on AWS Lightsail with Dendrite. You can also <a href="https://github.com/matrix-org/dendrite">contribute to Dendrite today</a>.</p>
@@ -22,27 +22,27 @@
 <p>This points <code>matrix.example.org</code> to your Lightsail instance.</p>
 <h2 id="set-up-your-matrix-homeserver">Set up your Matrix homeserver</h2>
 <p>Change permissions on the private key you downloaded:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
 </code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
 </code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea ot use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
 <p>Change your <a href="https://wiki.debian.org/SourcesList">sources list</a> in order to get the newest version of Go:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
 </code></pre></div><p>Delete everything except these two lines:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
 </span><span class="err"></span><span class="nx">deb</span><span class="p">-</span><span class="nx">src</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
 </span></code></pre></div><p>Then replace the distributions:</p>
-<div class="highlight"><pre class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
 </span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
 <p>Once the upgrade is finished, restart your instance with <code>sudo shutdown -r now</code>.</p>
 <p>Go make some coffee, then SSH back in. Get the packages you&rsquo;ll need with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo apt update
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt update
 sudo apt upgrade
 sudo apt install -y git golang nginx python3-certbot-nginx
 </code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
 <h2 id="get-dendrite">Get Dendrite</h2>
 <p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
 <span class="nb">cd</span> dendrite
 ./build.sh
 
@@ -58,7 +58,7 @@ sudo apt install -y git golang nginx python3-certbot-nginx
 cp dendrite-config.yaml dendrite.yaml
 </code></pre></div><h2 id="configure-dendrite">Configure Dendrite</h2>
 <p>Modify the configuration file you just copied:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
 </code></pre></div><p>At minimum, set:</p>
 <ul>
 <li><code>server name</code> to your shiny new domain name, e.g. <code>matrix.example.org</code></li>
@@ -68,36 +68,36 @@ cp dendrite-config.yaml dendrite.yaml
 <p>You might like to read the <a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ</a>.</p>
 <h2 id="configure-nginx">Configure nginx</h2>
 <p>Get the required packages if you didn&rsquo;t already install them above:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
 </code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
 ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
 sudo cp default &lt;sitename&gt;
 </code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
 <p>Your <code>location</code> block should look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-nginx" data-lang="nginx"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
     <span class="kn">proxy_pass</span> <span class="s">https://localhost:8448</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
 <h2 id="create-self-signed-certificates">Create self-signed certificates</h2>
 <p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
 </code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
 <p>Test your configuration and restart nginx with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo nginx -t
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo nginx -t
 sudo systemctl restart nginx
 </code></pre></div><p>Then start up your Matrix server.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Build and run the server:</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Build and run the server:</span>
 ./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
 </code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
 <p>You can log on to your new homeserver with any <a href="https://matrix.org/clients/">Matrix client</a>, or Matrix-capable applications like <a href="https://www.pidgin.im/plugins/?publisher=all&amp;query=&amp;type=">Pidgin with the Matrix plugin</a>.</p>
 <h2 id="other-troubleshooting">Other troubleshooting</h2>
 <h3 id="log-files">Log files</h3>
 <p>If you get an error such as:</p>
-<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
   Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
 </code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
 sudo chown admin:admin /var/log/dendrite
 
 <span class="c1"># Build and run the server:</span>
@@ -111,7 +111,7 @@ sudo chown admin:admin /var/log/dendrite
 </ol>
 <h2 id="set-up-your-own-matrix-server-today">Set up your own Matrix server today</h2>
 <p>I hope you found this introduction to setting up your own Matrix homeserver to be helpful! If you have anything to add, feel free to <a href="/blog/make-your-own-independent-website/">reply via Webmention</a>.</p>
-]]></content></entry><entry><title type="html">Build your own serverless subscriber list with Go and AWS</title><link href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/"/><id>https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/</id><author><name>Victoria Drake</name></author><published>2020-11-10T04:52:50-05:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>You can now subscribe to my email list on <a href="/">victoria.dev</a>! Here&rsquo;s how I lovingly built a subscription sign up flow with email confirmation that doesn&rsquo;t suck. You can too.</p>
+]]></content></entry><entry><title type="html">Build your own serverless subscriber list with Go and AWS</title><link href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/"/><id>https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/</id><author><name>Victoria Drake</name></author><published>2020-11-10T04:52:50-05:00</published><updated>2021-07-21T13:43:26+00:00</updated><content type="html"><![CDATA[<p>You can now subscribe to my email list on <a href="/">victoria.dev</a>! Here&rsquo;s how I lovingly built a subscription sign up flow with email confirmation that doesn&rsquo;t suck. You can too.</p>
 <h2 id="introducing-simple-subscribe">Introducing Simple Subscribe</h2>
 <p>If you&rsquo;re interested in managing your own mailing list or newsletter, you can set up Simple Subscribe on your own AWS resources to collect email addresses. This open source API is written in Go, and runs on AWS Lambda. Visitors to your site can sign up to your list, which is stored in a DynamoDB table, ready to be queried or exported at your leisure.</p>
 <p>When someone signs up, they&rsquo;ll receive an email asking them to confirm their subscription. This is sometimes called &ldquo;double opt-in,&rdquo; although I prefer the term &ldquo;verified.&rdquo; Simple Subscribe works on serverless infrastructure and uses an AWS Lambda to handle subscription, confirmation, and unsubscribe requests.</p>
@@ -198,7 +198,7 @@ sudo chown admin:admin /var/log/dendrite
 <h2 id="build-your-independent-subscriber-base">Build your independent subscriber base</h2>
 <p>Building your own subscriber list can be an empowering endeavor! Whether you intend to start a newsletter, send out notifications for new content, or want to create a community around your work, there&rsquo;s nothing more personal or direct than an email from me to you.</p>
 <p>I encourage you to start building your subscriber base with Simple Subscribe today! Like most of my work, it&rsquo;s open source and free for your personal use. Dive into the code at <a href="https://github.com/victoriadrake/simple-subscribe">the GitHub repository</a> or learn more at <a href="https://simplesubscribe.org">SimpleSubscribe.org</a>.</p>
-]]></content></entry><entry><title type="html">A cron job that could save you from a ransomware attack</title><link href="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/"/><id>https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/</id><author><name>Victoria Drake</name></author><published>2019-11-13T08:27:31-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>It&rsquo;s 2019, and ransomware has become a thing.</p>
+]]></content></entry><entry><title type="html">A cron job that could save you from a ransomware attack</title><link href="https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/"/><id>https://victoria.dev/blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/</id><author><name>Victoria Drake</name></author><published>2019-11-13T08:27:31-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>It&rsquo;s 2019, and ransomware has become a thing.</p>
 <p>Systems that interact with the public, like companies, educational institutions, and public services, are most susceptible. While delivery methods for ransomware vary from the physical realm to communication via social sites and email, all methods only require one person to make one mistake in order for ransomware to proliferate.</p>
 <p>Ransomware, as you may have heard, is a malicious program that encrypts your files, rendering them unreadable and useless to you. It can include instructions for paying a ransom, usually by sending cryptocurrency, in order to obtain the decryption key. Successful ransomware attacks typically exploit vital, time-sensitive systems. Victims like public services and medical facilities are more likely to have poor or zero recovery processes, leaving governments or insurance providers to reward attackers with ransom payments.</p>
 <p>Individuals, especially less-than-tech-savvy ones, are no less at risk. Ransomware can occlude personal documents and family photos that may only exist on one machine.</p>
@@ -206,7 +206,7 @@ sudo chown admin:admin /var/log/dendrite
 <p>You could achieve this with a straightforward system like plugging in an external hard drive and dragging files over once a day, but this method has a few hurdles. Manually transferring files may be slow or incomplete, and besides, you&rsquo;ll first have to remember to do it.</p>
 <p>In my constant pursuit of automating all the things, there&rsquo;s one tool I often return to for its simplicity and reliability: <code>cron</code>. Cron does one thing, and does it well: it runs commands on a schedule.</p>
 <p>I first used it a few months shy of three years ago (Have I really been blogging that long?!) to create <a href="/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/">custom desktop notifications on Linux</a>. Using the crontab configuration file, which you can edit by running <code>crontab -e</code>, you can specify a schedule for running any commands you like. Here&rsquo;s what the scheduling syntax looks like, from the <a href="https://en.wikipedia.org/wiki/Cron">Wikipedia cron page</a>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># ┌───────────── minute (0 - 59)</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># ┌───────────── minute (0 - 59)</span>
 <span class="c1"># │ ┌───────────── hour (0 - 23)</span>
 <span class="c1"># │ │ ┌───────────── day of the month (1 - 31)</span>
 <span class="c1"># │ │ │ ┌───────────── month (1 - 12)</span>
@@ -216,16 +216,16 @@ sudo chown admin:admin /var/log/dendrite
 <span class="c1"># │ │ │ │ │</span>
 <span class="c1"># * * * * * command to execute</span>
 </code></pre></div><p>For example, a cron job that runs every day at 00:00 would look like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> * * *
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> * * *
 </code></pre></div><p>To run a job every twelve hours, the syntax is:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> */12 * * *
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> */12 * * *
 </code></pre></div><p>This <a href="https://crontab.guru/">great tool</a> can help you wrap your head around the cron scheduling syntax.</p>
 <p>What&rsquo;s a scheduler have to do with backing up? By itself, not much. The simple beauty of cron is that it runs commands - any shell commands, and any scripts that you&rsquo;d normally run on the command line. As you may have gleaned from my other posts, I&rsquo;m of the strong opinion that you can do just about anything on the command line, including backing up your files. Options for storage in this area are plentiful, from near-to-free local and cloud options, as well as paid managed services too numerous to list. For CLI tooling, we have utilitarian classics like <code>rsync</code>, and CLI tools for specific cloud providers like AWS.</p>
 <h2 id="backing-up-with-rsync">Backing up with <code>rsync</code></h2>
 <p><a href="https://en.wikipedia.org/wiki/Rsync">The <code>rsync</code> utility</a> is a classic choice, and can back up your files to an external hard drive or remote server while making intelligent determinations about which files to update. It uses file size and modification times to recognize file changes, and then only transfers changed files, saving time and bandwidth.</p>
 <p>The <a href="https://download.samba.org/pub/rsync/rsync.html"><code>rsync</code> syntax</a> can be a little nuanced; for example, a trailing forward slash will copy just the contents of the directory, instead of the directory itself. I found examples to be helpful in understanding the usage and syntax.</p>
 <p>Here&rsquo;s one for backing up a local directory to a local destination, such as an external hard drive:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rsync -a /home/user/directory /media/user/destination
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">rsync -a /home/user/directory /media/user/destination
 </code></pre></div><p>The first argument is the source, and the second is the destination. Reversing these in the above example would copy files from the mounted drive to the local home directory.</p>
 <p>The <code>a</code> flag for archive mode is one of <code>rsync</code>&rsquo;s superpowers. Equivalent to flags <code>-rlptgoD</code>, it:</p>
 <ul>
@@ -234,29 +234,29 @@ sudo chown admin:admin /var/log/dendrite
 <li>Copies device and special files (<code>D</code>).</li>
 </ul>
 <p>Here&rsquo;s another example, this time for backing up the contents of a local directory to a directory on a remote server using SSH:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
 </code></pre></div><p>The <code>v</code> flag turns on verbose output, which is helpful if you like realtime feedback on which files are being transferred. During large transfers, however, it can tend to slow things down. The <code>z</code> flag can help with that, as it indicates that files should be compressed during transfer.</p>
 <p>The <code>e</code> flag, followed by <code>ssh</code>, tells <code>rsync</code> to use SSH according to the destination instructions provided in the final argument.</p>
 <h2 id="backing-up-with-aws-cli">Backing up with AWS CLI</h2>
 <p>Amazon Web Services offers a command line interface tool for doing just about everything with your AWS set up, including a straightforward <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/sync.html"><code>s3 sync</code> command</a> for recursively copying new and updated files to your S3 storage buckets. As a storage method for back up data, S3 is a stable and inexpensive choice. You can even <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html">turn on versioning in your bucket</a>.</p>
 <p>The <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/index.html#directory-and-s3-prefix-operations">syntax for interacting with directories</a> is fairly straightforward, and you can directly indicate your S3 bucket as an <code>S3Uri</code> argument in the form of <code>s3://mybucket/mykey</code>. To back up a local directory to your S3 bucket, the command is:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">aws s3 sync /home/user/directory s3://mybucket
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">aws s3 sync /home/user/directory s3://mybucket
 </code></pre></div><p>Similar to <code>rsync</code>, reversing the source and destination would download files from the S3 bucket.</p>
 <p>The <code>sync</code> command is intuitive by default. It will guess the mime type of uploaded files, as well as include files discovered by following symlinks. A variety of options exist to control these and other defaults, even including flags to specify the server-side encryption to be used.</p>
 <h2 id="setting-up-your-cronjob-back-up">Setting up your cronjob back up</h2>
 <p>You can edit your machine&rsquo;s cron file by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">crontab -e
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">crontab -e
 </code></pre></div><p>Intuitive as it may be, it&rsquo;s worth mentioning that your back up commands will only run when your computer is turned on and the cron daemon is running. With this in mind, choose a schedule for your cronjob that aligns with times when your machine is powered on, and maybe not overloaded with other work.</p>
 <p>To back up to an S3 bucket every day at 8AM, for example, you&rsquo;d put a line in your crontab that looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">8</span> * * * aws s3 sync /home/user/directory s3://mybucket
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">8</span> * * * aws s3 sync /home/user/directory s3://mybucket
 </code></pre></div><p>If you&rsquo;re curious whether your cron job is currently running, find the PID of cron with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">pstree -ap <span class="p">|</span> grep cron
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">pstree -ap <span class="p">|</span> grep cron
 </code></pre></div><p>Then run <code>pstree -ap &lt;PID&gt;</code>.</p>
 <p>This rabbit hole goes deeper; a quick search can reveal different ways of organizing and scheduling cronjobs, or help you find different utilities to run cronjobs when your computer is asleep. To protect against the possibility of ransomware-affected files being transferred to your back up, incrementally separated archives are a good idea. In essence, however, this basic set up is all you really need to create a reliable, automatic back up system.</p>
 <h2 id="dont-feed-the-trolls">Don&rsquo;t feed the trolls</h2>
 <p>Humans are fallible; that&rsquo;s why cyberattacks work. The success of a ransomware attack depends on the victim having no choice but to pay up in order to return to business as usual. A highly accessible recent back up undermines attackers who depend on us being unprepared. By blowing away a system and restoring from yesterday&rsquo;s back up, we may lose a day of progress; ransomers, however, gain nothing at all.</p>
 <p>For further resources on ransomware defense for users and organizations, check out <a href="https://www.us-cert.gov/Ransomware">CISA&rsquo;s advice on ransomware</a>.</p>
-]]></content></entry><entry><title type="html">Migrating to the cloud but without screwing it up, or how to move house</title><link href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/"/><id>https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/</id><author><name>Victoria Drake</name></author><published>2019-09-23T08:03:12-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>For an application that&rsquo;s ready to scale, not using managed cloud architecture these days is like insisting on digging your own well for water. It&rsquo;s far more labour-intensive, requires buying all your own equipment, takes a lot more time, and there&rsquo;s a higher chance you&rsquo;re going to get it wrong because you don&rsquo;t personally have a whole lot of experience digging wells, anyway.</p>
+]]></content></entry><entry><title type="html">Migrating to the cloud but without screwing it up, or how to move house</title><link href="https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/"/><id>https://victoria.dev/blog/migrating-to-the-cloud-but-without-screwing-it-up-or-how-to-move-house/</id><author><name>Victoria Drake</name></author><published>2019-09-23T08:03:12-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>For an application that&rsquo;s ready to scale, not using managed cloud architecture these days is like insisting on digging your own well for water. It&rsquo;s far more labour-intensive, requires buying all your own equipment, takes a lot more time, and there&rsquo;s a higher chance you&rsquo;re going to get it wrong because you don&rsquo;t personally have a whole lot of experience digging wells, anyway.</p>
 <p>That said - let&rsquo;s just get this out of the way first - there is no cloud. It&rsquo;s just someone else&rsquo;s computer.</p>
 <p>Of course, these days, cloud services go far beyond the utility we&rsquo;d expect from a single computer. Besides being able to quickly set up and utilize the kind of computing power that previously required a new office lease agreement to house, there are now a multitude of monitoring, management, and analysis tools at our giddy fingertips. While it&rsquo;s important to understand that the cloud isn&rsquo;t a better option in every case, for applications that can take advantage of it, we can do more, do it faster, and do it for less money than if we were to insist on building our own on-premises infrastructure.</p>
 <p>That&rsquo;s all great, and easily said; moving to the cloud, however, can look from the outset like a pretty daunting task. How, exactly, do we go about shifting what may be years of on-premises data and built-up systems to <em>someone else&rsquo;s computer?</em> You know, without being able to see it, touch it, and without completely screwing up our stuff.</p>
@@ -317,7 +317,7 @@ sudo chown admin:admin /var/log/dendrite
 <p>I hope this article has enabled a more practical understanding of how cloud migration can be achieved. With thorough preparation, it&rsquo;s possible to take advantage of all the cloud has to offer, with minimal hassle to get there.</p>
 <p>My thanks to the AWS Solutions Architects who presented at Pop-Up Loft and shared their knowledge on these topics, in particular: Chandra Kapireddy, Stephen Moon, John Franklin, Michael Alpaugh, and Priyanka Mahankali.</p>
 <p>One last nugget of wisdom, courtesy of John: &ldquo;Friends don&rsquo;t let friends use DMS to create schema objects.&rdquo;</p>
-]]></content></entry><entry><title type="html">How to set up OpenVPN on AWS EC2 and fix DNS leaks on Ubuntu 18.04 LTS</title><link href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/"/><id>https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/</id><author><name>Victoria Drake</name></author><published>2019-08-26T09:01:23-04:00</published><updated>2021-07-20T13:47:55+00:00</updated><content type="html"><![CDATA[<p>Rolling your own Virtual Private Network (VPN) is complicated. I put a lot of time and effort into setting up OpenVPN on my own AWS EC2 instance, yet was still delighted to outsource the ongoing maintenance when I found <a href="/blog/vpn">my preferred privacy-focused VPN</a>.</p>
+]]></content></entry><entry><title type="html">How to set up OpenVPN on AWS EC2 and fix DNS leaks on Ubuntu 18.04 LTS</title><link href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/"/><id>https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/</id><author><name>Victoria Drake</name></author><published>2019-08-26T09:01:23-04:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>Rolling your own Virtual Private Network (VPN) is complicated. I put a lot of time and effort into setting up OpenVPN on my own AWS EC2 instance, yet was still delighted to outsource the ongoing maintenance when I found <a href="/blog/vpn">my preferred privacy-focused VPN</a>.</p>
 <p>That said, there&rsquo;s no better way to strive for maximum privacy than a VPN service you control, configure, and maintain yourself. Here&rsquo;s a step-by-step tutorial for <a href="#set-up-openvpn-on-aws-ec2">setting up your own OpenVPN on AWS EC2</a>, and <a href="#what-a-dns-leak-looks-like">how to check for and fix DNS leaks</a>.</p>
 <h2 id="set-up-openvpn-on-aws-ec2">Set up OpenVPN on AWS EC2</h2>
 <p>This post will cover how to set up the <a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE/">OpenVPN Access Server</a> product on AWS Marketplace, running on an <a href="https://aws.amazon.com/ec2/">Amazon EC2 instance</a>. Then, you&rsquo;ll look at how to fix a <a href="https://gitlab.gnome.org/GNOME/NetworkManager-openvpn/issues/10">known NetworkManager bug in Ubuntu 18.04 that might cause DNS leaks</a>. The whole process should take about fifteen minutes, so grab a ☕ and let&rsquo;s be configuration superheroes.</p>
@@ -368,11 +368,11 @@ sudo chown admin:admin /var/log/dendrite
 <h3 id="3-initialize-openvpn-on-the-ec2-server">3. Initialize OpenVPN on the EC2 server</h3>
 <p>First, you&rsquo;ll need to connect to the EC2 instance via your terminal. You&rsquo;ll use the private key you created earlier.</p>
 <p>Open a new terminal window and navigate to the directory containing the private key <code>.pem</code> file. You&rsquo;ll need to set its permissions with:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo chmod <span class="m">400</span> &lt;name&gt;.pem
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo chmod <span class="m">400</span> &lt;name&gt;.pem
 </code></pre></div><p>Be sure to substitute <code>&lt;name&gt;</code> with the name of your key.</p>
 <p>This sets the file permissions to <code>-r--------</code> so that it can only be read by the user (you). It may help to protect the private key from read and write operations by other users, but more importantly, will prevent AWS from throwing an error when you try to connect to your instance.</p>
 <p>We can now do just that by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;name&gt;.pem openvpnas@&lt;elastic ip&gt;
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;name&gt;.pem openvpnas@&lt;elastic ip&gt;
 </code></pre></div><p>The user <code>openvpnas</code> is set up by the OpenVPN Access Server to allow you to connect to your instance. Replace <code>&lt;elastic ip&gt;</code> with the Elastic IP address you just associated.</p>
 <p>We may get a message saying that the authenticity of your host can&rsquo;t be established. As long as you&rsquo;ve typed the Elastic IP correctly, go ahead and answer <strong>yes</strong> to the prompt.</p>
 <p>Upon the initial connection to the OpenVPN instance, a set up wizard called <strong>Initial Configuration Tool</strong> should automatically run. (If, for some reason, it doesn&rsquo;t, or you panic-mashed a button, you can restart it with <code>sudo ovpn-init –ec2</code>.) You&rsquo;ll be asked to accept the agreement, then the wizard will help to walk you through some configuration settings for your VPN server.</p>
@@ -382,14 +382,14 @@ sudo chown admin:admin /var/log/dendrite
 <p>These answers depend on your privacy goals for your VPN.</p>
 <p>When asked for your <strong>OpenVPN-AS license key</strong>, you can leave it blank to use the VPN with up to two clients. If you&rsquo;ve purchased a key, enter it here.</p>
 <p>Once the configuration wizard finishes running, you should see the message &ldquo;Initial Configuration Complete!&rdquo; Before you move on, you should set a password for your server&rsquo;s administration account. To do this, run:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo passwd openvpn
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo passwd openvpn
 </code></pre></div><p>Then enter your chosen password twice. Now we&rsquo;re ready to get connected!</p>
 <p>To close the SSH connection, type <code>exit</code>.</p>
 <h3 id="4-connect-the-client-to-the-vpn">4. Connect the client to the VPN</h3>
 <p>To connect your client (in this case, your laptop) to the VPN and start reaping the benefits, you&rsquo;ll need to do two things; first, obtain your connection profile; second, install the <code>openvpn</code> daemon.</p>
 <h4 id="1-get-your-ovpn-connection-profile">1. Get your <code>.ovpn</code> connection profile</h4>
 <p>You&rsquo;ll need to download a connection profile; this is like a personal configuration file with information, including keys, that the VPN server will need to allow your connection. You can do this by logging in with the password you just set at your Elastic IP address, port 943. This looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">https://&lt;elastic ip&gt;:943/
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">https://&lt;elastic ip&gt;:943/
 </code></pre></div><p>The <code>https</code> part is important; without it, the instance won&rsquo;t send any data.</p>
 <p>When you go to this URL, you may see a page warning you that this site&rsquo;s certificate issuer is unknown or invalid. As long as you&rsquo;ve typed your Elastic IP correctly, it&rsquo;s safe to proceed. If you&rsquo;re using Firefox, click <strong>Advanced</strong>, and then <strong>Accept the Risk and Continue</strong>. In Chrome, click <strong>Advanced</strong>, then <strong>Proceed</strong> to the elastic IP.</p>
 <p><img src="13-warning.jpg#screenshot" alt="Security warning page"></p>
@@ -398,12 +398,12 @@ sudo chown admin:admin /var/log/dendrite
 <p>When you click the link, a file named <code>client.ovpn</code> will download.</p>
 <h4 id="2-install-and-start-openvpn-on-your-ubuntu-1804-client">2. Install and start <code>openvpn</code> on your Ubuntu 18.04 client</h4>
 <p>The <code>openvpn</code> daemon will allow your client to connect to your VPN server. It can be installed through the default Ubuntu repositories. Run:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo apt install openvpn
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install openvpn
 </code></pre></div><p>In order for OpenVPN to automatically start when you boot up your computer, you&rsquo;ll need to rename and move the connection profile file. I suggest using a <a href="https://en.wikipedia.org/wiki/Symbolic_link">symlink</a> to accomplish this, as it leaves your original file more easily accessible for editing, and allows you to store it in any directory you choose. You can create a symlink by running this command in the directory where your file is located:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo ln -s client.ovpn /etc/openvpn/&lt;name&gt;.conf
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo ln -s client.ovpn /etc/openvpn/&lt;name&gt;.conf
 </code></pre></div><p>This creates a symbolic link for the connection profile in the appropriate folder for <code>systemd</code> to find it. The <code>&lt;name&gt;</code> can be anything. When the Linux kernel has booted, <code>systemd</code> is used to initialize the services and daemons that the user has set up to run; one of these will now be OpenVPN. Renaming the file with the extension <code>.conf</code> will let the <code>openvpn</code> daemon know to use it as your connection file.</p>
 <p>For now, you can manually start and connect to OpenVPN by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo openvpn --config client.ovpn
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo openvpn --config client.ovpn
 </code></pre></div><p>You&rsquo;ll be asked for a username and password, which will be the same credentials you used before. Once the service finishes starting up, you&rsquo;ll see &ldquo;Initialization Sequence Complete.&rdquo; If you now visit <a href="https://www.dnsleaktest.com/">the DNS leak test website</a>, you should see the Elastic IP and the location of your EC2 server. Yay!</p>
 <p>If you&rsquo;re on a later version of Ubuntu, you may check for DNS leaks by clicking on one of the test buttons. If all the ISPs shown are Amazon and none are your own service provider&rsquo;s, congratulations! No leaks! You can move on to <a href="#3-set-up-openvpn-as-networkmanager-system-connection">Step 3 in the second section</a> below, after which, you&rsquo;ll be finished.</p>
 <p>If you&rsquo;re using Ubuntu 18.04 LTS, however, we&rsquo;re not yet done.</p>
@@ -411,7 +411,7 @@ sudo chown admin:admin /var/log/dendrite
 <p>Sites like <a href="https://dnsleaktest.com/">the DNS leak test website</a> can help you check your configuration and see if the Internet knows more about your location than you&rsquo;d like. On the main page you&rsquo;ll see a big hello, your IP address, and your location, so far as can be determined.</p>
 <p>If you have a DNS leak, you can see what it looks like by clicking on one of the test buttons on the <a href="https://www.dnsleaktest.com/">the DNS leak test page</a>. When you do, you&rsquo;ll see not only your Amazon.com IP addresses, but also your own ISP and location.</p>
 <p>You can also see the leak by running <code>systemd-resolve --status</code> in your terminal. Your results will contain two lines under different interfaces that both have entries for DNS Servers. It&rsquo;ll look something like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Link <span class="m">7</span> <span class="o">(</span>tun0<span class="o">)</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Link <span class="m">7</span> <span class="o">(</span>tun0<span class="o">)</span>
       Current Scopes: DNS
        LLMNR setting: yes
 MulticastDNS setting: no
@@ -433,11 +433,11 @@ MulticastDNS setting: no
 <p>Luckily, there is a fix that you can implement. You&rsquo;ll need to install a few helpers from the Ubuntu repositories, update your configuration file, then set up OpenVPN using NetworkManager. Let&rsquo;s do it!</p>
 <h3 id="1-install-some-helpers">1. Install some helpers</h3>
 <p>To properly integrate OpenVPN with <code>systemd-resolved</code>, you&rsquo;ll need a bit more help. In a terminal, run:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo apt install -y openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install -y openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
 </code></pre></div><p>This will install a helper script that integrates OpenVPN and <code>systemd-resolved</code>, a NetworkManager plugin for OpenVPN, and its GUI counterpart for GNOME desktop environment.</p>
 <h3 id="2-add-dns-implementation-to-your-connection-profile">2. Add DNS implementation to your connection profile</h3>
 <p>You&rsquo;ll need to edit the connection profile file you downloaded earlier. Since it&rsquo;s symbolically linked, you can accomplish this by changing the <code>.ovpn</code> file, wherever it&rsquo;s stored. Run <code>vim &lt;name&gt;.ovpn</code> to open it in Vim, then add the following lines at the bottom. Explanation in the comments:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Allow OpenVPN to call user-defined scripts</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Allow OpenVPN to call user-defined scripts</span>
 script-security <span class="m">2</span>
 <span class="c1"># Tell systemd-resolved to send all DNS queries over the VPN</span>
 dhcp-option DOMAIN-ROUTE .
@@ -459,22 +459,22 @@ down-pre
 <p>Add your username and password for the server (<code>openvpn</code> and the password you set in <a href="#3-initialize-openvpn-on-the-ec2-server">the first section&rsquo;s Step 3</a>), and your user key password (the same one again, if you&rsquo;ve followed this tutorial), then click the &ldquo;Add&rdquo; button.</p>
 <h3 id="4-edit-your-openvpn-networkmanager-configuration">4. Edit your OpenVPN NetworkManager configuration</h3>
 <p>Nearly there! Now that you&rsquo;ve added the VPN as a NetworkManager connection, you&rsquo;ll need to make a quick change to it. You can see a list of NetworkManager connections by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">ls -la /etc/NetworkManager/system-connections/*
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ls -la /etc/NetworkManager/system-connections/*
 </code></pre></div><p>The one for your VPN is probably called <code>openvpn</code>, so let&rsquo;s edit it by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/NetworkManager/system-connections/openvpn
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/NetworkManager/system-connections/openvpn
 </code></pre></div><p>Under <code>[ipv4]</code>, you&rsquo;ll need to add the line <code>dns-priority=-42</code>. It should end up looking like this:</p>
 <p><img src="18-connsettings.jpg#screenshot" alt="Connection settings for ipv4"></p>
 <p>Setting a negative number is a workaround that prioritizes this DNS server. The actual number is arbitrary (<code>-1</code> should also work) but I like 42. ¯\_(ツ)_/¯</p>
 <h3 id="5-restart-connect-profit">5. Restart, connect, profit</h3>
 <p>In a terminal, run:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo service network-manager restart
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo service network-manager restart
 </code></pre></div><p>Then in the Network Settings, click the magic button that turns on the VPN:</p>
 <p><img src="19-vpnon.jpg#screenshot" alt="Network Settings window"></p>
 <p>Finally, visit <a href="https://www.dnsleaktest.com/">the DNS leak test website</a> and click on <strong>Extended test</strong> to verify the fix. If everything&rsquo;s working properly, you should now see a list containing only your VPN ISP.</p>
 <p><img src="20-noleaks.png#screenshot" alt="Successful DNS leak test results"></p>
 <p>And we&rsquo;re done! Congratulations on rolling your very own VPN server and stopping DNS leaks with OpenVPN. Enjoy surfing in (relative) privacy. Now your only worry at the local coffeeshop is who&rsquo;s watching you surf from the seat behind you.</p>
 <p>If you enjoyed this post, there&rsquo;s a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. <a href="https://victoria.dev">Subscribe on victoria.dev</a> to see new articles first.</p>
-]]></content></entry><entry><title type="html">Why I&amp;#39;m automatically deleting my old tweets using AWS Lambda</title><link href="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/"/><id>https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-04-12T10:51:15-05:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p>
+]]></content></entry><entry><title type="html">Why I&amp;#39;m automatically deleting my old tweets using AWS Lambda</title><link href="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/"/><id>https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-04-12T10:51:15-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p>
 <p><a href="/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/#ephemeral-tweets"><em>Click here to skip to the code part.</em></a></p>
 <h2 id="stuff-and-opinions">Stuff and opinions</h2>
 <p>I&rsquo;ve only been a one-bag nomad for a little over a year and a half. Before that, I lived as most people do in an apartment or a house. I owned furniture, more clothing than I strictly needed, and enough &ldquo;stuff&rdquo; to fill at least a few moving boxes. If I went to live somewhere else, moving for school or family or work, I packed up all my things and brought them with me. Over the years, I accumulated more and more stuff.</p>
@@ -490,7 +490,7 @@ down-pre
 <h2 id="ephemeral-tweets">Ephemeral tweets</h2>
 <p>If you look at my Twitter profile page today, you&rsquo;ll see fewer tweets there than you have fingers (I hope). I&rsquo;m using <a href="https://github.com/victoriadrake/ephemeral">ephemeral</a> - a lightweight utility I wrote for use on <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> - to delete all my tweets older than a few days. I&rsquo;m doing this for the same reason that I don&rsquo;t hang on to stuff that I no longer use - that stuff isn&rsquo;t relevant to me anymore. It doesn&rsquo;t represent me, either.</p>
 <p>The code that makes up ephemeral is written in Go. AWS Lambda creates an environment for each Lambda function, so ephemeral utilizes environment variables for your private Twitter API keys and the maximum age of the tweets you want to keep, represented in hours, like <code>72h</code>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="p">(</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="p">(</span>
  <span class="nx">consumerKey</span>       <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_CONSUMER_KEY&#34;</span><span class="p">)</span>
  <span class="nx">consumerSecret</span>    <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_CONSUMER_SECRET&#34;</span><span class="p">)</span>
  <span class="nx">accessToken</span>       <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_ACCESS_TOKEN&#34;</span><span class="p">)</span>
@@ -507,7 +507,7 @@ down-pre
  <span class="k">return</span> <span class="nx">v</span>
 <span class="p">}</span>
 </code></pre></div><p>The program uses the <a href="https://github.com/ChimeraCoder/anaconda">anaconda</a> library. It fetches your timeline up to the Twitter API&rsquo;s limit of 200 tweets per request, then compares each tweet&rsquo;s date of creation to your <code>MAX_TWEET_AGE</code> variable to decide whether it&rsquo;s old enough to be deleted. After deleting all the expired tweets, the Lambda function terminates.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">deleteFromTimeline</span><span class="p">(</span><span class="nx">api</span> <span class="o">*</span><span class="nx">anaconda</span><span class="p">.</span><span class="nx">TwitterApi</span><span class="p">,</span> <span class="nx">ageLimit</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">deleteFromTimeline</span><span class="p">(</span><span class="nx">api</span> <span class="o">*</span><span class="nx">anaconda</span><span class="p">.</span><span class="nx">TwitterApi</span><span class="p">,</span> <span class="nx">ageLimit</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span> <span class="p">{</span>
  <span class="nx">timeline</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">getTimeline</span><span class="p">(</span><span class="nx">api</span><span class="p">)</span>
 
  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
@@ -537,7 +537,7 @@ down-pre
 <h2 id="why-use-twitter-at-all">Why use Twitter at all</h2>
 <p>In anticipation of the question, let me say that yes, I do use Twitter besides just as a bucket for my Lambda functions to fill and empty. It has its benefits, most related to what I perceive to be its original intended purpose: to be a means of near-instant communication for short, digestible pieces of information reaching a widespread pool of people.</p>
 <p>I use it as a way to keep tabs on what&rsquo;s happening <em>right now.</em> I use it to comment on, joke about, and commiserate with things tweeted by the people I follow <em>right now.</em> By keeping my timeline restricted to only the most recent few days, I feel like I&rsquo;m using Twitter more like it was meant to be used: a way to join the conversation and see what&rsquo;s happening in the world <em>right now</em> - instead of just another place to amass more &ldquo;stuff.&rdquo;</p>
-]]></content></entry><entry><title type="html">Running a free Twitter bot on AWS Lambda</title><link href="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/"/><id>https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-03-05T10:29:15-05:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>If you read <a href="/blog/about-time/">About time</a>, you&rsquo;ll know that I&rsquo;m a big believer in spending time now on building things that save time in the future. To this end I built a simple Twitter bot in Go that would occasionally post links to my articles and keep my account interesting even when I&rsquo;m too busy to use it. The tweets help drive traffic to my sites, and I don&rsquo;t have to lift a finger.</p>
+]]></content></entry><entry><title type="html">Running a free Twitter bot on AWS Lambda</title><link href="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/"/><id>https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-03-05T10:29:15-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>If you read <a href="/blog/about-time/">About time</a>, you&rsquo;ll know that I&rsquo;m a big believer in spending time now on building things that save time in the future. To this end I built a simple Twitter bot in Go that would occasionally post links to my articles and keep my account interesting even when I&rsquo;m too busy to use it. The tweets help drive traffic to my sites, and I don&rsquo;t have to lift a finger.</p>
 <p>I ran the bot on an Amazon EC2 instance for about a month. My AWS usage has historically been pretty inexpensive (less than the price of a coffee in most of North America), so I was surprised when the little instance I was using racked up a bill 90% bigger than the month before. I don&rsquo;t think AWS is expensive, to be clear, but still&hellip; I&rsquo;m cheap. I want my Twitter bot, and I want it for less.</p>
 <p>I&rsquo;d been meaning to explore AWS Lamda, and figured this was a good opportunity. Unlike an EC2 instance that is constantly running (and charging you for it), Lambda charges you per request and according to the duration of time your function takes to run. There&rsquo;s a free tier, too, and the first 1 million requests, plus a certain amount of compute time, are free. Roughly translated to running a Twitter bot that posts for you, say, twice a day, your monthly cost for using Lambda would total&hellip; carry the one&hellip; nothing. I&rsquo;ve been running my Lambda function for a couple weeks now, completely free.</p>
 <p>When recently it came to me to take the reigns of the <a href="https://twitter.com/freeCodeCampTO">@freeCodeCampTO</a> Twitter, I decided to employ a similar strategy, and also use this opportunity to document the process for you, dear reader.</p>
@@ -553,9 +553,9 @@ down-pre
 <p>The important thing to keep in mind is that Lambda runs a function once in response to an event that you define. The most widely applicable trigger is a simple cron expression, but there are many other trigger events you can hook up. You can get an overview <a href="https://aws.amazon.com/lambda/">here</a>.</p>
 <h2 id="write-a-lambda-function">Write a Lambda function</h2>
 <p>I found this really straightforward to do in Go. First, grab the <a href="https://github.com/aws/aws-lambda-go">aws-lambda-go</a> library:</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">go get github.com/aws/aws-lambda-go/lambda
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">go get github.com/aws/aws-lambda-go/lambda
 </code></pre></div><p>Then make this your <code>func main()</code>:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
  <span class="nx">lambda</span><span class="p">.</span><span class="nf">Start</span><span class="p">(</span><span class="nx">tweetFeed</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div><p>Where <code>tweetFeed</code> is the name of the function that makes everything happen. While I won&rsquo;t go into writing the whole Twitter bot here, you can view my code <a href="https://gist.github.com/victoriadrake/7859dab68df87e28f40d6715d08383c7">on GitHub</a>.</p>
@@ -578,7 +578,7 @@ down-pre
 <p>You can upload your function code as a zip file on the configuration screen. Since we&rsquo;re using Go, you&rsquo;ll want to <code>go build</code> first, then zip the resulting executable before uploading that to Lambda.</p>
 <p>&hellip;Of course I&rsquo;m not going to do that manually every time I want to tweak my function. That&rsquo;s what <code>awscli</code> and this bash script is for!</p>
 <p><code>update.sh</code></p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">go build <span class="o">&amp;&amp;</span> <span class="se">\
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">go build <span class="o">&amp;&amp;</span> <span class="se">\
 </span><span class="se"></span>zip fcc-tweet.zip fcc-tweet <span class="o">&amp;&amp;</span> <span class="se">\
 </span><span class="se"></span>rm fcc-tweet <span class="o">&amp;&amp;</span> <span class="se">\
 </span><span class="se"></span>aws lambda update-function-code --function-name fcc-tweet --zip-file fileb://fcc-tweet.zip <span class="o">&amp;&amp;</span> <span class="se">\
@@ -626,7 +626,7 @@ down-pre
 <p><img src="lambda-09.png#screenshot" alt="Set cron expression rule"></p>
 <h2 id="watch-it-go">Watch it go</h2>
 <p>That&rsquo;s all you need to get your Lambda function up and running! Now you can sit back, relax, and do more important things than share your RSS links on Twitter.</p>
-]]></content></entry><entry><title type="html">Moving to a new domain without breaking old links with AWS &amp;amp; Disqus</title><link href="https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/"/><id>https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/</id><author><name>Victoria Drake</name></author><published>2018-01-10T08:56:20-05:00</published><updated>2021-07-20T13:47:54+00:00</updated><content type="html"><![CDATA[<p>I started blogging about my nomadic travels last year, and so far the habit has stuck. Like all side projects, I won&rsquo;t typically invest heavily in setting up web properties before I can be reasonably certain that such an investment is worth my time or enjoyment. In other words: don&rsquo;t buy the domain until you&rsquo;ve proven to yourself that you&rsquo;ll stick with it!</p>
+]]></content></entry><entry><title type="html">Moving to a new domain without breaking old links with AWS &amp;amp; Disqus</title><link href="https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/"/><id>https://victoria.dev/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/</id><author><name>Victoria Drake</name></author><published>2018-01-10T08:56:20-05:00</published><updated>2021-07-21T13:43:25+00:00</updated><content type="html"><![CDATA[<p>I started blogging about my nomadic travels last year, and so far the habit has stuck. Like all side projects, I won&rsquo;t typically invest heavily in setting up web properties before I can be reasonably certain that such an investment is worth my time or enjoyment. In other words: don&rsquo;t buy the domain until you&rsquo;ve proven to yourself that you&rsquo;ll stick with it!</p>
 <p>After some months of regular posting I felt I was ready to commit (short courtship, I know, but we&rsquo;re all adults here) and I bought a dedicated domain, <a href="https://heronebag.com">herOneBag.com</a>.</p>
 <p>Up until recently, my #NomadLyfe blog was just a subdirectory of my main personal site. Now it&rsquo;s all grown up and ready to strike out into the world alone! Here&rsquo;s the setup for the site:</p>
 <ul>
@@ -645,7 +645,7 @@ down-pre
 <p><img src="aws-redirect.png#screenshot" alt="Redirection rules placement"></p>
 <p>There are a few examples given, but none that represent the redirect I want. In addition to changing the prefix of the object key, we&rsquo;re also changing the domain. The latter is achieved with the <code>&lt;HostName&gt;</code> tag.</p>
 <p>To redirect requests for the old blog URL to the new top level domain, we&rsquo;ll use the code below.</p>
-<div class="highlight"><pre class="chroma"><code class="language-xml" data-lang="xml"><span class="nt">&lt;RoutingRules&gt;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="nt">&lt;RoutingRules&gt;</span>
   <span class="nt">&lt;RoutingRule&gt;</span>
     <span class="nt">&lt;Condition&gt;</span>
       <span class="nt">&lt;KeyPrefixEquals&gt;</span>oldblog/<span class="nt">&lt;/KeyPrefixEquals&gt;</span>
