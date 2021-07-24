@@ -8,31 +8,32 @@
     <managingEditor>{{.}}{{ with $.Site.Author.name }} ({{.}}){{end}}</managingEditor>{{end}}{{ with .Site.Author.email }}
     <webMaster>{{.}}{{ with $.Site.Author.name }} ({{.}}){{end}}</webMaster>{{end}}{{ with .Site.Copyright }}
     <copyright>{{.}}</copyright>{{end}}{{ if not .Date.IsZero }}
-    <lastBuildDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>{{ end }}
+    <lastBuildDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | htmlUnescape }}</lastBuildDate>{{ end }}
     {{ with .OutputFormats.Get "RSS" }}
-        {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
+        {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | htmlUnescape }}
     {{ end }}
     {{ range (where .Site.Pages "Section" "blog") }}
     <item>
       <title>{{ .Title | plainify }}</title>
       <link>{{ .Permalink }}</link>
-      <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+      <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | htmlUnescape }}</pubDate>
       {{ with .Site.Author.email }}<author>{{.}}{{ with $.Site.Author.name }} ({{.}}){{end}}</author>{{end}}
       <guid>{{ .Permalink }}</guid>
       <description>{{ .Params.description }}</description>
       <content:encoded>
+        {{ printf "<![CDATA[" | htmlUnescape }}
         {{ $img := (.Resources.ByType "image").GetMatch "cover**" }}
         {{ with $img }}
         {{ $img := .Resize "640x" }}
-        {{ printf "<![CDATA[<img src=\"%s\" width=\"%d\" height=\"%d\"/>]]>" $img.Permalink $img.Width $img.Height | safeHTML }}
+        {{ printf "<img src=\"%s\" width=\"%d\" height=\"%d\"/>" $img.Permalink $img.Width $img.Height | htmlUnescape }}
         {{ else }}
         {{ $img := (.Resources.ByType "image").GetMatch "**" }}
         {{ with $img }}
         {{ $img := .Resize "640x" }}
-        {{ printf "<![CDATA[<img src=\"%s\" width=\"%d\" height=\"%d\"/>]]>" $img.Permalink $img.Width $img.Height | safeHTML }}
+        {{ printf "<img src=\"%s\" width=\"%d\" height=\"%d\"/>" $img.Permalink $img.Width $img.Height | htmlUnescape }}
         {{ end }}
         {{ end }}
-        {{ printf "<![CDATA[" }}{{ .Content | htmlUnescape }}{{ printf "]]>" }}
+        {{ .Content | htmlUnescape }}{{ printf "]]>" | htmlUnescape }}
       </content:encoded>
         {{ $img := (.Resources.ByType "image").GetMatch "cover**" }}
         {{ with $img }}
