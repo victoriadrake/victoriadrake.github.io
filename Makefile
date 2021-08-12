@@ -28,7 +28,7 @@ upgrade-hugo: ## Get the latest Hugo
 	rm -rf tmp/
 	hugo version
 
-serve: ## Run the local development server
+dev: ## Run the local development server
 	hugo serve --enableGitInfo --disableFastRender --environment development
 
 future: ## Run the local development server in the future
