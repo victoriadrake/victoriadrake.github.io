@@ -25,7 +25,7 @@ tags:
     - privacy
     - protocol
     - python
-    - tech team
+    - leadership
     - terminal
     - websites
 images: cover.png
