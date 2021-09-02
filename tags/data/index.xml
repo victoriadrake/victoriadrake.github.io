@@ -1189,7 +1189,7 @@ title: Search me!
 <p>When a duplicate subscription request is received, the database item is matched on the <code>email</code> only. If an existing line item is found, its <code>id</code> and <code>timestamp</code> are overridden, which updates the existing database record and avoids flooding your table with duplicate requests.</p>
 <h3 id="verifying-email-addresses">Verifying email addresses</h3>
 <p>After submitting the form, the intended subscriber then receives an email from SES containing a link. This link is built using the <code>email</code> and <code>id</code> from the table, and takes the format:</p>
-<pre><code class="language-url" data-lang="url">&lt;BASE_URL&gt;&lt;VERIFY_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
+<pre tabindex="0"><code class="language-url" data-lang="url">&lt;BASE_URL&gt;&lt;VERIFY_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
 </code></pre><p>In this set up, the <code>id</code> is a UUID that acts as a secret token. It provides an identifier that you can match that is sufficiently complex and hard to guess. This approach deters people from subscribing with email addresses they don&rsquo;t control.</p>
 <p>Visiting the link sends a request to your verification endpoint with the <code>email</code> and <code>id</code> in the query string. This time, it&rsquo;s important to compare both the incoming <code>email</code> and <code>id</code> values to the database record. This verifies that the recipient of the confirmation email is initiating the request.</p>
 <p>The verification endpoint ensures that these values match an item in your database, then performs another update operation to set <code>confirm</code> to <code>true</code>, and update the timestamp. The item now looks like:</p>
@@ -1216,7 +1216,7 @@ title: Search me!
 <p>Since data for requested subscriptions (where <code>confirm</code> is <code>false</code>) is stored in the table alongside confirmed subscriptions, it&rsquo;s important to differentiate this data when querying for email addresses to send to. You&rsquo;ll want to ensure you only return emails where <code>confirm</code> is <code>true</code>.</p>
 <h2 id="providing-unsubscribe-links">Providing unsubscribe links</h2>
 <p>Similar to verifying an email address, Simple Subscribe uses <code>email</code> and <code>id</code> as arguments to the function that deletes an item from your DynamoDB table in order to unsubscribe an email address. To allow people to remove themselves from your list, you&rsquo;ll need to provide a URL in each email you send that includes their <code>email</code> and <code>id</code> as a query string to the unsubscribe endpoint. It would look something like:</p>
-<pre><code class="language-url" data-lang="url">&lt;BASE_URL&gt;&lt;UNSUBSCRIBE_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
+<pre tabindex="0"><code class="language-url" data-lang="url">&lt;BASE_URL&gt;&lt;UNSUBSCRIBE_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
 </code></pre><p>When the link is clicked, the query string is passed to the unsubscribe endpoint. If the provided <code>email</code> and <code>id</code> match a database item, that item will be deleted.</p>
 <p>Proving a method for your subscribers to automatically remove themselves from your list, without any human intervention necessary, is part of an ethical and respectful philosophy towards handling the data that&rsquo;s been entrusted to you.</p>
 <h2 id="caring-for-your-data">Caring for your data</h2>
@@ -4382,14 +4382,14 @@ mogrify -strip <span class="se">\
 <p>Some common web servers can also act as reverse proxies, often with just a minimal and straightforward configuration change. While the best choice for your particular architecture is unknown to me, I will offer a couple common examples here.</p>
 <h3 id="using-nginx-as-a-reverse-proxy">Using NGINX as a reverse proxy</h3>
 <p>NGINX uses the <code>proxy_pass</code> directive in its <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/">configuration file</a> (<code>nginx.conf</code> by default) to turn itself into a reverse proxy server. The set up requires the following lines to be placed in the configuration file:</p>
-<pre><code class="language-conf" data-lang="conf">location /requested/path/ {
+<pre tabindex="0"><code class="language-conf" data-lang="conf">location /requested/path/ {
     proxy_pass http://www.example.com/target/path/;
 }
 </code></pre><p>This specifies that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The target can be a domain name or an IP address, the latter with or without a port.</p>
 <p>The full <a href="https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/">guide to using NGINX as a reverse proxy</a> is part of the NGINX documentation.</p>
 <h3 id="using-apache-httpd-as-a-reverse-proxy">Using Apache httpd as a reverse proxy</h3>
 <p>Apache httpd similarly requires some straightforward configuration to act as a reverse proxy server. In the <a href="https://httpd.apache.org/docs/current/configuring.html">configuration file</a>, usually <code>httpd.conf</code>, set the following directives:</p>
-<pre><code class="language-conf" data-lang="conf">ProxyPass &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
+<pre tabindex="0"><code class="language-conf" data-lang="conf">ProxyPass &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
 ProxyPassReverse &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
 </code></pre><p>The <code>ProxyPass</code> directive ensures that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The <code>ProxyPassReverse</code> directive ensures that the headers sent by the web server are modified to point to the reverse proxy server instead.</p>
 <p>The full <a href="https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html">reverse proxy guide for Apache HTTP server</a> is available in their documentation.</p>
@@ -8333,7 +8333,7 @@ Add the mount instruction to the file. The syntax is in the format: [windows dis
 <p>I use <a href="https://dunst-project.org/">dunst</a> for desktop notifications. It&rsquo;s a simple, lightweight tool that is easy to configure, doesn&rsquo;t have many dependencies, and can be used across various distributions.</p>
 <h2 id="battery-statuslow-battery-notification">Battery status/low battery notification</h2>
 <p>I was looking for a simple, versatile set up to create notifications for my battery status without having to rely on separate, standalone GUI apps or services. In my search I came across a simple one-line cron task that seemed to be the perfect fit. I adapted it to my purpose and it looks like this:</p>
-<pre><code class="language-conf" data-lang="conf"># m h  dom mon dow   command
+<pre tabindex="0"><code class="language-conf" data-lang="conf"># m h  dom mon dow   command
 */5 * * * * acpi --battery | awk -F, '/Discharging/ { if (int($2) &lt; 20) print }' | xargs -ri env DISPLAY=:0 notify-send -u critical -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&quot; -t 3000 &quot;{}\nBattery low!&quot;
 </code></pre><blockquote>
 <p><em>Psst&hellip; <a href="https://crontab.guru/">here&rsquo;s a great tool</a> for formatting your crontab times.</em></p>
@@ -8356,7 +8356,7 @@ Run the following utility in the specified display, in this case, the first disp
 <p><code>notify-send -u critical -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&quot; -t 3000 &quot;{}\nLow battery!&quot;</code>
 Shows a desktop notification with <code>-u critical</code> (critical urgency), <code>-i</code> (the specified icon), <code>-t 3000</code> (display time/expires after 3000 milliseconds), and finally <code>{}</code> (the output of awk, replaced by xargs).</p>
 <p>Not bad for a one-liner! I made a few modifications for different states of my battery. Here they all are in my crontab:</p>
-<pre><code class="language-conf" data-lang="conf"># m h  dom mon dow   command
+<pre tabindex="0"><code class="language-conf" data-lang="conf"># m h  dom mon dow   command
 */5 * * * * acpi --battery | awk -F, '/Discharging/ { if ( (int($2) &lt; 30) &amp;&amp; (int($2) &gt; 15) ) print }' | xargs -ri env DISPLAY=:0 notify-send -a &quot;Battery status&quot; -u normal -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-low.png&quot; -t 3000 &quot;{}\nBattery low!&quot;
 */5 * * * * acpi --battery | awk -F, '/Discharging/ { if (int($2) &lt; 15) print }' | xargs -ri env DISPLAY=:0 notify-send -a &quot;Battery status&quot; -u critical -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&quot; -t 3000 &quot;{}\nSeriously, plug me in.&quot;
 */60 * * * * acpi --battery | awk -F, '/Discharging/ { if (int($2) &gt; 30) print }' | xargs -ri env DISPLAY=:0 notify-send -a &quot;Battery status&quot; -u normal -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-ok.png&quot; &quot;{}&quot;
@@ -8424,7 +8424,7 @@ Create the desktop notification including the output.</p>
 <p>If you&rsquo;re new to Linux or to coding, these are basically the technical user&rsquo;s version of &ldquo;File &gt; Preferences&rdquo; in <a href="https://en.wikipedia.org/wiki/Graphical_user_interface">GUI programs</a>. Depending on the application you&rsquo;re configuring, there are a few different formats and languages. Thankfully, there are ample config file samples available with a simple web search.</p>
 <h2 id="where-the-heck-do-all-these-config-files-go">Where the heck do all these config files go</h2>
 <p>I found some differing file paths. The below are mine and work:</p>
-<pre><code class="language-conf" data-lang="conf">systemd event handlers:   /etc/systemd/logind.conf
+<pre tabindex="0"><code class="language-conf" data-lang="conf">systemd event handlers:   /etc/systemd/logind.conf
 For URxvt:                ~/.Xdefaults
 For i3wm:                 ~/.config/i3/config
 For i3bar:                ~/.config/i3status/config/i3status.conf
@@ -8456,7 +8456,7 @@ $ id newusername
 </code></pre></div><p>If you previously set your background image in i3 and it disappears, don&rsquo;t forget to check the filepath in your config file.</p>
 <h2 id="how-do-i-get-networkmanager-and-dropbox-to-start-automatically">How do I get NetworkManager and Dropbox to start automatically</h2>
 <p>Dropbox for Linux supposedly has an autostart setting where you can type <code>dropbox autostart y</code> into a terminal and it&rsquo;ll listen. This didn&rsquo;t work for me. Instead, I added any applications I wanted to start automatically upon login to my i3 config file with this syntax:</p>
-<pre><code class="language-conf" data-lang="conf"># start apps automatically
+<pre tabindex="0"><code class="language-conf" data-lang="conf"># start apps automatically
 exec --no-startup-id /usr/bin/nm-applet
 exec --no-startup-id dropbox start
 </code></pre><p>In the above, <code>exec</code> is &ldquo;execute&rdquo;, <code>--no-startup-id</code> basically saves you from watching your cursor do the spinny loading thing, and the last component of the command is the filepath to the program or the syntax to start it, as if typing it into the terminal.</p>
@@ -8469,13 +8469,13 @@ exec --no-startup-id dropbox start
 <h2 id="how-do-i-get-my-vpn-status-to-show-in-i3bar">How do I get my VPN status to show in i3bar</h2>
 <p>Locate your i3status config file. If you don&rsquo;t have one yet, you can use an awesome template like <a href="https://github.com/victoriadrake/i3-linux-config-tokyo-rice">mine</a>.</p>
 <p>Edit the filepath in the following section of code:</p>
-<pre><code class="language-conf" data-lang="conf">run_watch VPN {
+<pre tabindex="0"><code class="language-conf" data-lang="conf">run_watch VPN {
         pidfile = &quot;sys/class/net/yourspecialsetting0&quot;
 }
 </code></pre><p>Where &ldquo;yourspecialsetting&rdquo; is any one of <code>tap</code>/<code>tun</code>/<code>tun tap</code> depending on your VPN settings. If you don&rsquo;t know which it is, you can find out in the VPN configuration settings under VPN &gt; Advanced &gt; &ldquo;Set virtual device type&rdquo;.</p>
 <h2 id="how-do-i-get-my-print-screenbacklight-controlvolume-keys-to-work">How do I get my Print Screen/backlight control/volume keys to work</h2>
 <p>I used key bindings in my i3 config file. The tricky part was finding out what controlled the particular function (and on some occasions, having to install something to control the function).</p>
-<pre><code class="language-conf" data-lang="conf"># brightness adjustment (pre-defined levels)
+<pre tabindex="0"><code class="language-conf" data-lang="conf"># brightness adjustment (pre-defined levels)
 bindsym $mod+Shift+F6 exec xrandr --output eDP-1 --brightness 1
 bindsym $mod+F6       exec xrandr --output eDP-1 --brightness 0.8
 bindsym $mod+F5       exec xrandr --output eDP-1 --brightness 0.5
@@ -8626,7 +8626,7 @@ print<span class="o">(</span>tabs_incl_tip<span class="o">)</span>
 <p>My first pass at this program consisted of two goals: 1) successfully pull up a stream of tweets based on my search parameters, and 2) print them. The relevant line for achieving the second goal is:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="nb">print</span><span class="p">(</span><span class="n">tweet</span><span class="p">)</span>
 </code></pre></div><p>I opened up the terminal and typed <code>python tweet_stream.py</code> to run the program. After a brief pause it returned this error:</p>
-<pre><code class="language-system" data-lang="system">return codecs.charmap_encode(input,self.errors,encoding_map)[0]
+<pre tabindex="0"><code class="language-system" data-lang="system">return codecs.charmap_encode(input,self.errors,encoding_map)[0]
 UnicodeEncodeError: 'charmap' codec can't encode characters in position 1270-1271: character maps to &lt;undefined&gt;
 </code></pre><p>The short explanation is that Windows 10 doesn&rsquo;t play well with Python&rsquo;s default output encoding, UTF-8. (I&rsquo;m making my way through <a href="https://docs.python.org/3.6/howto/unicode.html">Python&rsquo;s documentation on Unicode</a>, which is rather long but truly fascinating to me.)</p>
 <p>I explored installing a Linux shell with updated Python so I could use Bash. While that&rsquo;s a good eventual idea for programming in general, it&rsquo;s definitely a big diversion from the topic at hand. Instead, I implemented a program-specific fix using a much faster and less complicated method: convert the tweets to ASCII before they display in the Windows 10 terminal.</p>

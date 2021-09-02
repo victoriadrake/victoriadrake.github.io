@@ -92,7 +92,7 @@ websites
 <p class=metadata id=date>
 <time class="hidden dt-published">2019-09-16 09:35:28 -0400 -0400</time>
 <a class=u-url href=https://victoria.dev/blog/how-users-and-applications-stay-safe-on-the-internet-its-proxy-servers-all-the-way-down/>September 16, 2019</a>
-<span class=dt-updated>&nbsp;<em>Updated: Sep 1, 2021</em></span>
+<span class=dt-updated>&nbsp;<em>Updated: Sep 2, 2021</em></span>
 <span>&nbsp;9 min read</span>
 </p>
 </p>
@@ -143,14 +143,14 @@ websites
 <p>Some common web servers can also act as reverse proxies, often with just a minimal and straightforward configuration change. While the best choice for your particular architecture is unknown to me, I will offer a couple common examples here.</p>
 <h3 id=using-nginx-as-a-reverse-proxy>Using NGINX as a reverse proxy</h3>
 <p>NGINX uses the <code>proxy_pass</code> directive in its <a href=https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/>configuration file</a> (<code>nginx.conf</code> by default) to turn itself into a reverse proxy server. The set up requires the following lines to be placed in the configuration file:</p>
-<pre><code class=language-conf data-lang=conf>location /requested/path/ {
+<pre tabindex=0><code class=language-conf data-lang=conf>location /requested/path/ {
     proxy_pass http://www.example.com/target/path/;
 }
 </code></pre><p>This specifies that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The target can be a domain name or an IP address, the latter with or without a port.</p>
 <p>The full <a href=https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/>guide to using NGINX as a reverse proxy</a> is part of the NGINX documentation.</p>
 <h3 id=using-apache-httpd-as-a-reverse-proxy>Using Apache httpd as a reverse proxy</h3>
 <p>Apache httpd similarly requires some straightforward configuration to act as a reverse proxy server. In the <a href=https://httpd.apache.org/docs/current/configuring.html>configuration file</a>, usually <code>httpd.conf</code>, set the following directives:</p>
-<pre><code class=language-conf data-lang=conf>ProxyPass &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
+<pre tabindex=0><code class=language-conf data-lang=conf>ProxyPass &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
 ProxyPassReverse &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
 </code></pre><p>The <code>ProxyPass</code> directive ensures that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The <code>ProxyPassReverse</code> directive ensures that the headers sent by the web server are modified to point to the reverse proxy server instead.</p>
 <p>The full <a href=https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html>reverse proxy guide for Apache HTTP server</a> is available in their documentation.</p>

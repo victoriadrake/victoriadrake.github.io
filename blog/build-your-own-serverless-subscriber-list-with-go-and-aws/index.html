@@ -107,7 +107,7 @@ websites
 <p class=metadata id=date>
 <time class="hidden dt-published">2020-11-10 04:52:50 -0500 -0500</time>
 <a class=u-url href=https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/>November 10, 2020</a>
-<span class=dt-updated>&nbsp;<em>Updated: Sep 1, 2021</em></span>
+<span class=dt-updated>&nbsp;<em>Updated: Sep 2, 2021</em></span>
 <span>&nbsp;7 min read</span>
 </p>
 </p>
@@ -164,7 +164,7 @@ websites
 <p>When a duplicate subscription request is received, the database item is matched on the <code>email</code> only. If an existing line item is found, its <code>id</code> and <code>timestamp</code> are overridden, which updates the existing database record and avoids flooding your table with duplicate requests.</p>
 <h3 id=verifying-email-addresses>Verifying email addresses</h3>
 <p>After submitting the form, the intended subscriber then receives an email from SES containing a link. This link is built using the <code>email</code> and <code>id</code> from the table, and takes the format:</p>
-<pre><code class=language-url data-lang=url>&lt;BASE_URL&gt;&lt;VERIFY_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
+<pre tabindex=0><code class=language-url data-lang=url>&lt;BASE_URL&gt;&lt;VERIFY_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
 </code></pre><p>In this set up, the <code>id</code> is a UUID that acts as a secret token. It provides an identifier that you can match that is sufficiently complex and hard to guess. This approach deters people from subscribing with email addresses they don&rsquo;t control.</p>
 <p>Visiting the link sends a request to your verification endpoint with the <code>email</code> and <code>id</code> in the query string. This time, it&rsquo;s important to compare both the incoming <code>email</code> and <code>id</code> values to the database record. This verifies that the recipient of the confirmation email is initiating the request.</p>
 <p>The verification endpoint ensures that these values match an item in your database, then performs another update operation to set <code>confirm</code> to <code>true</code>, and update the timestamp. The item now looks like:</p>
@@ -191,7 +191,7 @@ websites
 <p>Since data for requested subscriptions (where <code>confirm</code> is <code>false</code>) is stored in the table alongside confirmed subscriptions, it&rsquo;s important to differentiate this data when querying for email addresses to send to. You&rsquo;ll want to ensure you only return emails where <code>confirm</code> is <code>true</code>.</p>
 <h2 id=providing-unsubscribe-links>Providing unsubscribe links</h2>
 <p>Similar to verifying an email address, Simple Subscribe uses <code>email</code> and <code>id</code> as arguments to the function that deletes an item from your DynamoDB table in order to unsubscribe an email address. To allow people to remove themselves from your list, you&rsquo;ll need to provide a URL in each email you send that includes their <code>email</code> and <code>id</code> as a query string to the unsubscribe endpoint. It would look something like:</p>
-<pre><code class=language-url data-lang=url>&lt;BASE_URL&gt;&lt;UNSUBSCRIBE_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
+<pre tabindex=0><code class=language-url data-lang=url>&lt;BASE_URL&gt;&lt;UNSUBSCRIBE_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
 </code></pre><p>When the link is clicked, the query string is passed to the unsubscribe endpoint. If the provided <code>email</code> and <code>id</code> match a database item, that item will be deleted.</p>
 <p>Proving a method for your subscribers to automatically remove themselves from your list, without any human intervention necessary, is part of an ethical and respectful philosophy towards handling the data that&rsquo;s been entrusted to you.</p>
 <h2 id=caring-for-your-data>Caring for your data</h2>

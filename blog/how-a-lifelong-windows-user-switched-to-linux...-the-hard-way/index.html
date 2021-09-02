@@ -86,7 +86,7 @@ linux
 <p class=metadata id=date>
 <time class="hidden dt-published">2017-02-06 14:23:59 +0700 +0700</time>
 <a class=u-url href=https://victoria.dev/blog/how-a-lifelong-windows-user-switched-to-linux...-the-hard-way/>February 6, 2017</a>
-<span class=dt-updated>&nbsp;<em>Updated: Sep 1, 2021</em></span>
+<span class=dt-updated>&nbsp;<em>Updated: Sep 2, 2021</em></span>
 <span>&nbsp;7 min read</span>
 </p>
 </p>
@@ -132,7 +132,7 @@ linux
 <p>If you&rsquo;re new to Linux or to coding, these are basically the technical user&rsquo;s version of &ldquo;File > Preferences&rdquo; in <a href=https://en.wikipedia.org/wiki/Graphical_user_interface>GUI programs</a>. Depending on the application you&rsquo;re configuring, there are a few different formats and languages. Thankfully, there are ample config file samples available with a simple web search.</p>
 <h2 id=where-the-heck-do-all-these-config-files-go>Where the heck do all these config files go</h2>
 <p>I found some differing file paths. The below are mine and work:</p>
-<pre><code class=language-conf data-lang=conf>systemd event handlers:   /etc/systemd/logind.conf
+<pre tabindex=0><code class=language-conf data-lang=conf>systemd event handlers:   /etc/systemd/logind.conf
 For URxvt:                ~/.Xdefaults
 For i3wm:                 ~/.config/i3/config
 For i3bar:                ~/.config/i3status/config/i3status.conf
@@ -164,7 +164,7 @@ $ id newusername
 </code></pre></div><p>If you previously set your background image in i3 and it disappears, don&rsquo;t forget to check the filepath in your config file.</p>
 <h2 id=how-do-i-get-networkmanager-and-dropbox-to-start-automatically>How do I get NetworkManager and Dropbox to start automatically</h2>
 <p>Dropbox for Linux supposedly has an autostart setting where you can type <code>dropbox autostart y</code> into a terminal and it&rsquo;ll listen. This didn&rsquo;t work for me. Instead, I added any applications I wanted to start automatically upon login to my i3 config file with this syntax:</p>
-<pre><code class=language-conf data-lang=conf># start apps automatically
+<pre tabindex=0><code class=language-conf data-lang=conf># start apps automatically
 exec --no-startup-id /usr/bin/nm-applet
 exec --no-startup-id dropbox start
 </code></pre><p>In the above, <code>exec</code> is &ldquo;execute&rdquo;, <code>--no-startup-id</code> basically saves you from watching your cursor do the spinny loading thing, and the last component of the command is the filepath to the program or the syntax to start it, as if typing it into the terminal.</p>
@@ -177,13 +177,13 @@ exec --no-startup-id dropbox start
 <h2 id=how-do-i-get-my-vpn-status-to-show-in-i3bar>How do I get my VPN status to show in i3bar</h2>
 <p>Locate your i3status config file. If you don&rsquo;t have one yet, you can use an awesome template like <a href=https://github.com/victoriadrake/i3-linux-config-tokyo-rice>mine</a>.</p>
 <p>Edit the filepath in the following section of code:</p>
-<pre><code class=language-conf data-lang=conf>run_watch VPN {
+<pre tabindex=0><code class=language-conf data-lang=conf>run_watch VPN {
         pidfile = &quot;sys/class/net/yourspecialsetting0&quot;
 }
 </code></pre><p>Where &ldquo;yourspecialsetting&rdquo; is any one of <code>tap</code>/<code>tun</code>/<code>tun tap</code> depending on your VPN settings. If you don&rsquo;t know which it is, you can find out in the VPN configuration settings under VPN > Advanced > &ldquo;Set virtual device type&rdquo;.</p>
 <h2 id=how-do-i-get-my-print-screenbacklight-controlvolume-keys-to-work>How do I get my Print Screen/backlight control/volume keys to work</h2>
 <p>I used key bindings in my i3 config file. The tricky part was finding out what controlled the particular function (and on some occasions, having to install something to control the function).</p>
-<pre><code class=language-conf data-lang=conf># brightness adjustment (pre-defined levels)
+<pre tabindex=0><code class=language-conf data-lang=conf># brightness adjustment (pre-defined levels)
 bindsym $mod+Shift+F6 exec xrandr --output eDP-1 --brightness 1
 bindsym $mod+F6       exec xrandr --output eDP-1 --brightness 0.8
 bindsym $mod+F5       exec xrandr --output eDP-1 --brightness 0.5

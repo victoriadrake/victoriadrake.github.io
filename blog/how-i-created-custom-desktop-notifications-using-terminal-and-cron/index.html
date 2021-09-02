@@ -89,7 +89,7 @@ linux
 <p class=metadata id=date>
 <time class="hidden dt-published">2017-02-21 10:48:38 +0700 +0700</time>
 <a class=u-url href=https://victoria.dev/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/>February 21, 2017</a>
-<span class=dt-updated>&nbsp;<em>Updated: Sep 1, 2021</em></span>
+<span class=dt-updated>&nbsp;<em>Updated: Sep 2, 2021</em></span>
 <span>&nbsp;6 min read</span>
 </p>
 </p>
@@ -101,7 +101,7 @@ linux
 <p>I use <a href=https://dunst-project.org/>dunst</a> for desktop notifications. It&rsquo;s a simple, lightweight tool that is easy to configure, doesn&rsquo;t have many dependencies, and can be used across various distributions.</p>
 <h2 id=battery-statuslow-battery-notification>Battery status/low battery notification</h2>
 <p>I was looking for a simple, versatile set up to create notifications for my battery status without having to rely on separate, standalone GUI apps or services. In my search I came across a simple one-line cron task that seemed to be the perfect fit. I adapted it to my purpose and it looks like this:</p>
-<pre><code class=language-conf data-lang=conf># m h  dom mon dow   command
+<pre tabindex=0><code class=language-conf data-lang=conf># m h  dom mon dow   command
 */5 * * * * acpi --battery | awk -F, '/Discharging/ { if (int($2) &lt; 20) print }' | xargs -ri env DISPLAY=:0 notify-send -u critical -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&quot; -t 3000 &quot;{}\nBattery low!&quot;
 </code></pre><blockquote>
 <p><em>Psst&mldr; <a href=https://crontab.guru/>here&rsquo;s a great tool</a> for formatting your crontab times.</em></p>
@@ -124,7 +124,7 @@ Run the following utility in the specified display, in this case, the first disp
 <p><code>notify-send -u critical -i "/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png" -t 3000 "{}\nLow battery!"</code>
 Shows a desktop notification with <code>-u critical</code> (critical urgency), <code>-i</code> (the specified icon), <code>-t 3000</code> (display time/expires after 3000 milliseconds), and finally <code>{}</code> (the output of awk, replaced by xargs).</p>
 <p>Not bad for a one-liner! I made a few modifications for different states of my battery. Here they all are in my crontab:</p>
-<pre><code class=language-conf data-lang=conf># m h  dom mon dow   command
+<pre tabindex=0><code class=language-conf data-lang=conf># m h  dom mon dow   command
 */5 * * * * acpi --battery | awk -F, '/Discharging/ { if ( (int($2) &lt; 30) &amp;&amp; (int($2) &gt; 15) ) print }' | xargs -ri env DISPLAY=:0 notify-send -a &quot;Battery status&quot; -u normal -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-low.png&quot; -t 3000 &quot;{}\nBattery low!&quot;
 */5 * * * * acpi --battery | awk -F, '/Discharging/ { if (int($2) &lt; 15) print }' | xargs -ri env DISPLAY=:0 notify-send -a &quot;Battery status&quot; -u critical -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-critical.png&quot; -t 3000 &quot;{}\nSeriously, plug me in.&quot;
 */60 * * * * acpi --battery | awk -F, '/Discharging/ { if (int($2) &gt; 30) print }' | xargs -ri env DISPLAY=:0 notify-send -a &quot;Battery status&quot; -u normal -i &quot;/usr/share/icons/Paper/16x16/status/xfce-battery-ok.png&quot; &quot;{}&quot;
