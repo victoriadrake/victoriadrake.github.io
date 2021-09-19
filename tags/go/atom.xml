@@ -2,12 +2,10 @@
 <p>You can create your own self-hosted Matrix chat for as little as $3.50 USD per month on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance. Your homeserver can federate with other Matrix servers, giving you a reliable and fault-tolerant means of communication.</p>
 <p>Matrix is most widely installed via its <a href="https://matrix.org/docs/guides/installing-synapse">Synapse</a> homeserver implementation written in Python 3. Dendrite, its second-generation homeserver implementation written in Go, is currently released in beta. Dendrite will provide more memory efficiency and reliability out-of-the-box, making it an excellent choice for running on a virtual instance.</p>
 <p>Here&rsquo;s how to set up your own homeserver on AWS Lightsail with Dendrite. You can also <a href="https://github.com/matrix-org/dendrite">contribute to Dendrite today</a>.</p>
-<h2 id="create-a-lightsail-instance">Create a Lightsail instance</h2>
-<p>Spin up a new Lightsail instance on AWS with Debian as your operating system. It&rsquo;s a good idea to create a new per-instance key for use with SSH. You can do this by with the SSH key pair manager on the instance creation page. Don&rsquo;t forget to download your private key and <code>.gitignore</code> your secrets.</p>
+<h2 id="create-a-lightsail-instance"><a href="#create-a-lightsail-instance">Create a Lightsail instance</a></h2><p>Spin up a new Lightsail instance on AWS with Debian as your operating system. It&rsquo;s a good idea to create a new per-instance key for use with SSH. You can do this by with the SSH key pair manager on the instance creation page. Don&rsquo;t forget to download your private key and <code>.gitignore</code> your secrets.</p>
 <p>Click <strong>Create Instance.</strong> Wait for the status of your instance to change from <strong>Pending</strong> to <strong>Running</strong>, then click its name to see further information. You&rsquo;ll need the Public IP address.</p>
 <p>To enable people including yourself to connect to the instance, go to the Networking tab and add a firewall rule for HTTPS. This will open <code>443</code> so you can connect over IPv4. You can also do this for IPv6.</p>
-<h2 id="connect-dns">Connect DNS</h2>
-<p>Give your instance a catchier address by <a href="https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX" target="_top">buying a domain at Namecheap</a>
+<h2 id="connect-dns"><a href="#connect-dns">Connect DNS</a></h2><p>Give your instance a catchier address by <a href="https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX" target="_top">buying a domain at Namecheap</a>
  and setting up DNS records.</p>
 <ol>
 <li>On your domain management page in the <strong>Nameservers</strong> section, choose <strong>Namecheap BasicDNS</strong>.</li>
@@ -20,8 +18,7 @@
 <li><strong>Value:</strong> <code>13.59.251.229</code></li>
 </ul>
 <p>This points <code>matrix.example.org</code> to your Lightsail instance.</p>
-<h2 id="set-up-your-matrix-homeserver">Set up your Matrix homeserver</h2>
-<p>Change permissions on the private key you downloaded:</p>
+<h2 id="set-up-your-matrix-homeserver"><a href="#set-up-your-matrix-homeserver">Set up your Matrix homeserver</a></h2><p>Change permissions on the private key you downloaded:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
 </code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
@@ -40,8 +37,7 @@
 sudo apt upgrade
 sudo apt install -y git golang nginx python3-certbot-nginx
 </code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
-<h2 id="get-dendrite">Get Dendrite</h2>
-<p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
+<h2 id="get-dendrite"><a href="#get-dendrite">Get Dendrite</a></h2><p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
 <span class="nb">cd</span> dendrite
 ./build.sh
@@ -56,8 +52,7 @@ sudo apt install -y git golang nginx python3-certbot-nginx
 <span class="c1"># Copy and modify the config file - you&#39;ll need to set a server name and paths to the keys</span>
 <span class="c1"># at the very least, along with setting up the database connection strings.</span>
 cp dendrite-config.yaml dendrite.yaml
-</code></pre></div><h2 id="configure-dendrite">Configure Dendrite</h2>
-<p>Modify the configuration file you just copied:</p>
+</code></pre></div><h2 id="configure-dendrite"><a href="#configure-dendrite">Configure Dendrite</a></h2><p>Modify the configuration file you just copied:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
 </code></pre></div><p>At minimum, set:</p>
 <ul>
@@ -66,8 +61,7 @@ cp dendrite-config.yaml dendrite.yaml
 <li><code>registration_disabled</code> to true or false</li>
 </ul>
 <p>You might like to read the <a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ</a>.</p>
-<h2 id="configure-nginx">Configure nginx</h2>
-<p>Get the required packages if you didn&rsquo;t already install them above:</p>
+<h2 id="configure-nginx"><a href="#configure-nginx">Configure nginx</a></h2><p>Get the required packages if you didn&rsquo;t already install them above:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
 </code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
@@ -79,8 +73,7 @@ sudo cp default &lt;sitename&gt;
     <span class="kn">proxy_pass</span> <span class="s">https://localhost:8448</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
-<h2 id="create-self-signed-certificates">Create self-signed certificates</h2>
-<p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
+<h2 id="create-self-signed-certificates"><a href="#create-self-signed-certificates">Create self-signed certificates</a></h2><p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
 </code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
 <p>Test your configuration and restart nginx with:</p>
@@ -91,9 +84,7 @@ sudo systemctl restart nginx
 ./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
 </code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
 <p>You can log on to your new homeserver with any <a href="https://matrix.org/clients/">Matrix client</a>, or Matrix-capable applications like <a href="https://www.pidgin.im/plugins/?publisher=all&amp;query=&amp;type=">Pidgin with the Matrix plugin</a>.</p>
-<h2 id="other-troubleshooting">Other troubleshooting</h2>
-<h3 id="log-files">Log files</h3>
-<p>If you get an error such as:</p>
+<h2 id="other-troubleshooting"><a href="#other-troubleshooting">Other troubleshooting</a></h2><h3 id="log-files"><a href="#log-files">Log files</a></h3><p>If you get an error such as:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
   Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
 </code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
@@ -102,22 +93,18 @@ sudo chown admin:admin /var/log/dendrite
 
 <span class="c1"># Build and run the server:</span>
 ./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
-</code></pre></div><h3 id="unable-to-decrypt">Unable to decrypt</h3>
-<p>If you see: <code>Unable to decrypt: The sender's device has not sent us the keys for this message.</code> you may need to verify a user (sometimes yourself).</p>
+</code></pre></div><h3 id="unable-to-decrypt"><a href="#unable-to-decrypt">Unable to decrypt</a></h3><p>If you see: <code>Unable to decrypt: The sender's device has not sent us the keys for this message.</code> you may need to verify a user (sometimes yourself).</p>
 <ol>
 <li>In your client, open the user&rsquo;s profile. Click the lock icon if there is one, or otherwise look for a way to verify them.</li>
 <li>You may be asked to see if some emojis presented to both users match if you&rsquo;re using certain clients like Element.</li>
 <li>You can then re-request encryption keys for any sent messages.</li>
 </ol>
-<h2 id="set-up-your-own-matrix-server-today">Set up your own Matrix server today</h2>
-<p>I hope you found this introduction to setting up your own Matrix homeserver to be helpful! If you have anything to add, feel free to <a href="/blog/make-your-own-independent-website/">reply via Webmention</a>.</p>
+<h2 id="set-up-your-own-matrix-server-today"><a href="#set-up-your-own-matrix-server-today">Set up your own Matrix server today</a></h2><p>I hope you found this introduction to setting up your own Matrix homeserver to be helpful! If you have anything to add, feel free to <a href="/blog/make-your-own-independent-website/">reply via Webmention</a>.</p>
 ]]></content></entry><entry><title type="html">Build your own serverless subscriber list with Go and AWS</title><link href="https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/"/><id>https://victoria.dev/blog/build-your-own-serverless-subscriber-list-with-go-and-aws/</id><author><name>Victoria Drake</name></author><published>2020-11-10T04:52:50-05:00</published><updated>2020-11-10T04:52:50-05:00</updated><content type="html"><![CDATA[<p>You can now subscribe to my email list on <a href="/">victoria.dev</a>! Here&rsquo;s how I lovingly built a subscription sign up flow with email confirmation that doesn&rsquo;t suck. You can too.</p>
-<h2 id="introducing-simple-subscribe">Introducing Simple Subscribe</h2>
-<p>If you&rsquo;re interested in managing your own mailing list or newsletter, you can set up Simple Subscribe on your own AWS resources to collect email addresses. This open source API is written in Go, and runs on AWS Lambda. Visitors to your site can sign up to your list, which is stored in a DynamoDB table, ready to be queried or exported at your leisure.</p>
+<h2 id="introducing-simple-subscribe"><a href="#introducing-simple-subscribe">Introducing Simple Subscribe</a></h2><p>If you&rsquo;re interested in managing your own mailing list or newsletter, you can set up Simple Subscribe on your own AWS resources to collect email addresses. This open source API is written in Go, and runs on AWS Lambda. Visitors to your site can sign up to your list, which is stored in a DynamoDB table, ready to be queried or exported at your leisure.</p>
 <p>When someone signs up, they&rsquo;ll receive an email asking them to confirm their subscription. This is sometimes called &ldquo;double opt-in,&rdquo; although I prefer the term &ldquo;verified.&rdquo; Simple Subscribe works on serverless infrastructure and uses an AWS Lambda to handle subscription, confirmation, and unsubscribe requests.</p>
 <p>You can find the <a href="https://github.com/victoriadrake/simple-subscribe">Simple Subscribe project, with its fully open-source code, on GitHub</a>. I encourage you to pull up the code and follow along! In this post I&rsquo;ll share each build step, the thought process behind the API&rsquo;s single-responsibility functions, and security considerations for an AWS project like this one.</p>
-<h2 id="building-a-verified-subscription-flow">Building a verified subscription flow</h2>
-<p>A non-verified email sign up process is straightforward. Someone puts their email into a box on your website, then that email goes into your database. However, if I&rsquo;ve taught you anything about <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">not trusting user input</a>, the very idea of a non-verified sign up process should raise your hackles. Spam may be great when fried in a sandwich, but no fun when it&rsquo;s running up your AWS bill.</p>
+<h2 id="building-a-verified-subscription-flow"><a href="#building-a-verified-subscription-flow">Building a verified subscription flow</a></h2><p>A non-verified email sign up process is straightforward. Someone puts their email into a box on your website, then that email goes into your database. However, if I&rsquo;ve taught you anything about <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">not trusting user input</a>, the very idea of a non-verified sign up process should raise your hackles. Spam may be great when fried in a sandwich, but no fun when it&rsquo;s running up your AWS bill.</p>
 <p>While you can use a strategy like a CAPTCHA or puzzle for is-it-a-human verification, these can create enough friction to turn away your potential subscribers. Instead, a confirmation email can help to ensure both address correctness and user sentience.</p>
 <p>To build a subscription flow with email confirmation, create single-responsibility functions that satisfy each logical step. Those are:</p>
 <ol>
@@ -129,8 +116,7 @@ sudo chown admin:admin /var/log/dendrite
 <p>To achieve each of these goals, Simple Subscribe uses the <a href="https://docs.aws.amazon.com/sdk-for-go/api/">official AWS SDK for Go</a> to interact with DynamoDB and SES.</p>
 <p>At each stage, consider what the data looks like and how you store it. This can help to handle conundrums like, &ldquo;What happens if someone tries to subscribe twice?&rdquo; or even <a href="/blog/if-you-want-to-build-a-treehouse-start-at-the-bottom/">threat-modeling</a> such as, &ldquo;What if someone subscribes with an email they don&rsquo;t own?&rdquo;</p>
 <p>Ready? Let&rsquo;s break down each step and see how the magic happens.</p>
-<h3 id="subscribing">Subscribing</h3>
-<p>The subscription process begins with a humble web form, like the one on my site&rsquo;s main page. A form input with attributes <code>type=&quot;email&quot; required</code> helps with validation, <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email#Validation">thanks to the browser</a>. When submitted, the form sends a GET request to the Simple Subscribe subscription endpoint.</p>
+<h3 id="subscribing"><a href="#subscribing">Subscribing</a></h3><p>The subscription process begins with a humble web form, like the one on my site&rsquo;s main page. A form input with attributes <code>type=&quot;email&quot; required</code> helps with validation, <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email#Validation">thanks to the browser</a>. When submitted, the form sends a GET request to the Simple Subscribe subscription endpoint.</p>
 <p>Simple Subscribe receives a GET request to this endpoint with a query string containing the intended subscriber&rsquo;s email. It then generates an <code>id</code> value and adds both <code>email</code> and <code>id</code> to your DynamoDB table.</p>
 <p>The table item now looks like:</p>
 <table>
@@ -158,8 +144,7 @@ sudo chown admin:admin /var/log/dendrite
 <p>With that in mind, it would be prudent to handle subscription requests for the same email by performing an update instead of adding a new line. Simple Subscribe actually uses the same function to either add or update a database item. This is typically referred to as, &ldquo;update or insert.&rdquo;</p>
 <p>In a database like SQLite this is accomplished with the <a href="https://www.sqlite.org/lang_UPSERT.html">UPSERT syntax</a>. In the case of DynamoDB, you use an update operation. For the <a href="https://docs.aws.amazon.com/sdk-for-go/api/service/dynamodb/">Go SDK</a>, its syntax is <code>UpdateItem</code>.</p>
 <p>When a duplicate subscription request is received, the database item is matched on the <code>email</code> only. If an existing line item is found, its <code>id</code> and <code>timestamp</code> are overridden, which updates the existing database record and avoids flooding your table with duplicate requests.</p>
-<h3 id="verifying-email-addresses">Verifying email addresses</h3>
-<p>After submitting the form, the intended subscriber then receives an email from SES containing a link. This link is built using the <code>email</code> and <code>id</code> from the table, and takes the format:</p>
+<h3 id="verifying-email-addresses"><a href="#verifying-email-addresses">Verifying email addresses</a></h3><p>After submitting the form, the intended subscriber then receives an email from SES containing a link. This link is built using the <code>email</code> and <code>id</code> from the table, and takes the format:</p>
 <pre tabindex="0"><code class="language-url" data-lang="url">&lt;BASE_URL&gt;&lt;VERIFY_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
 </code></pre><p>In this set up, the <code>id</code> is a UUID that acts as a secret token. It provides an identifier that you can match that is sufficiently complex and hard to guess. This approach deters people from subscribing with email addresses they don&rsquo;t control.</p>
 <p>Visiting the link sends a request to your verification endpoint with the <code>email</code> and <code>id</code> in the query string. This time, it&rsquo;s important to compare both the incoming <code>email</code> and <code>id</code> values to the database record. This verifies that the recipient of the confirmation email is initiating the request.</p>
@@ -182,27 +167,22 @@ sudo chown admin:admin /var/log/dendrite
 </tr>
 </tbody>
 </table>
-<h3 id="querying-for-emails">Querying for emails</h3>
-<p>You can now query your table to build your email list. Depending on your email sending solution, you might do this manually, with another Lambda, or even from the command line.</p>
+<h3 id="querying-for-emails"><a href="#querying-for-emails">Querying for emails</a></h3><p>You can now query your table to build your email list. Depending on your email sending solution, you might do this manually, with another Lambda, or even from the command line.</p>
 <p>Since data for requested subscriptions (where <code>confirm</code> is <code>false</code>) is stored in the table alongside confirmed subscriptions, it&rsquo;s important to differentiate this data when querying for email addresses to send to. You&rsquo;ll want to ensure you only return emails where <code>confirm</code> is <code>true</code>.</p>
-<h2 id="providing-unsubscribe-links">Providing unsubscribe links</h2>
-<p>Similar to verifying an email address, Simple Subscribe uses <code>email</code> and <code>id</code> as arguments to the function that deletes an item from your DynamoDB table in order to unsubscribe an email address. To allow people to remove themselves from your list, you&rsquo;ll need to provide a URL in each email you send that includes their <code>email</code> and <code>id</code> as a query string to the unsubscribe endpoint. It would look something like:</p>
+<h2 id="providing-unsubscribe-links"><a href="#providing-unsubscribe-links">Providing unsubscribe links</a></h2><p>Similar to verifying an email address, Simple Subscribe uses <code>email</code> and <code>id</code> as arguments to the function that deletes an item from your DynamoDB table in order to unsubscribe an email address. To allow people to remove themselves from your list, you&rsquo;ll need to provide a URL in each email you send that includes their <code>email</code> and <code>id</code> as a query string to the unsubscribe endpoint. It would look something like:</p>
 <pre tabindex="0"><code class="language-url" data-lang="url">&lt;BASE_URL&gt;&lt;UNSUBSCRIBE_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
 </code></pre><p>When the link is clicked, the query string is passed to the unsubscribe endpoint. If the provided <code>email</code> and <code>id</code> match a database item, that item will be deleted.</p>
 <p>Proving a method for your subscribers to automatically remove themselves from your list, without any human intervention necessary, is part of an ethical and respectful philosophy towards handling the data that&rsquo;s been entrusted to you.</p>
-<h2 id="caring-for-your-data">Caring for your data</h2>
-<p>Once you decide to accept other people&rsquo;s data, it becomes your responsibility to care for it. This is applicable to everything you build. For Simple Subscribe, it means maintaining the security of your database, and periodically pruning your table.</p>
+<h2 id="caring-for-your-data"><a href="#caring-for-your-data">Caring for your data</a></h2><p>Once you decide to accept other people&rsquo;s data, it becomes your responsibility to care for it. This is applicable to everything you build. For Simple Subscribe, it means maintaining the security of your database, and periodically pruning your table.</p>
 <p>In order to avoid retaining email addresses where <code>confirm</code> is <code>false</code> past a certain time frame, it would be a good idea to set up a cleaning function that runs on a regular schedule. This can be achieved manually, with an AWS Lambda function, or using the command line.</p>
 <p>To clean up, find database items where <code>confirm</code> is <code>false</code> and <code>timestamp</code> is older than a particular point in time. Depending on your use case and request volumes, the frequency at which you choose to clean up will vary.</p>
 <p>Also depending on your use case, you may wish to keep backups of your data. If you are particularly concerned about data integrity, you can explore <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backuprestore_HowItWorks.html">On-Demand Backup</a> or <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html">Point-in-Time Recovery</a> for DynamoDB.</p>
-<h2 id="build-your-independent-subscriber-base">Build your independent subscriber base</h2>
-<p>Building your own subscriber list can be an empowering endeavor! Whether you intend to start a newsletter, send out notifications for new content, or want to create a community around your work, there&rsquo;s nothing more personal or direct than an email from me to you.</p>
+<h2 id="build-your-independent-subscriber-base"><a href="#build-your-independent-subscriber-base">Build your independent subscriber base</a></h2><p>Building your own subscriber list can be an empowering endeavor! Whether you intend to start a newsletter, send out notifications for new content, or want to create a community around your work, there&rsquo;s nothing more personal or direct than an email from me to you.</p>
 <p>I encourage you to start building your subscriber base with Simple Subscribe today! Like most of my work, it&rsquo;s open source and free for your personal use. Dive into the code at <a href="https://github.com/victoriadrake/simple-subscribe">the GitHub repository</a> or learn more at <a href="https://simplesubscribe.org">SimpleSubscribe.org</a>.</p>
 ]]></content></entry><entry><title type="html">Go automate your GitHub profile README</title><link href="https://victoria.dev/blog/go-automate-your-github-profile-readme/"/><id>https://victoria.dev/blog/go-automate-your-github-profile-readme/</id><author><name>Victoria Drake</name></author><published>2020-07-25T10:51:15-04:00</published><updated>2020-07-25T10:51:15-04:00</updated><content type="html"><![CDATA[<p>GitHub&rsquo;s new profile page README feature is having the wonderful effect of bringing some personality to the Myspace pages of the developer Internet. Though Markdown lends itself best to standard static text content, that&rsquo;s not stopping creative folks from working to create a next-level README. You can include GIFs and images to add some motion and pizazz (they&rsquo;re covered in <a href="https://github.github.com/gfm/">GitHub Flavor Markdown</a>), but I&rsquo;m thinking of something a little more dynamic.</p>
 <p>At front-and-center on your GitHub profile, your README is a great opportunity to let folks know what you&rsquo;re about, what you find important, and to showcase some highlights of your work. You might like to show off your latest repositories, tweet, or blog post. Keeping it up to date doesn&rsquo;t have to be a pain either, thanks to continuous delivery tools like GitHub Actions.</p>
 <p>My current README refreshes itself daily with a link to my latest blog post. Here&rsquo;s how I&rsquo;m creating a self-updating <code>README.md</code> with Go and GitHub actions.</p>
-<h2 id="reading-and-writing-files-with-go">Reading and writing files with Go</h2>
-<p>I&rsquo;ve been writing a lot of Python lately, but for some things I really like using Go. You could say it&rsquo;s my go-to language for just-for-<code>func</code> projects. Sorry. Couldn&rsquo;t stop myself.</p>
+<h2 id="reading-and-writing-files-with-go"><a href="#reading-and-writing-files-with-go">Reading and writing files with Go</a></h2><p>I&rsquo;ve been writing a lot of Python lately, but for some things I really like using Go. You could say it&rsquo;s my go-to language for just-for-<code>func</code> projects. Sorry. Couldn&rsquo;t stop myself.</p>
 <p>To create my README.md, I&rsquo;m going to get some static content from an existing file, mash it together with some new dynamic content that we&rsquo;ll generate with Go, then bake the whole thing at 400 degrees until something awesome comes out.</p>
 <p>Here&rsquo;s how we read in a file called <code>static.md</code> and put it in <code>string</code> form:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Unwrap Markdown content
@@ -242,8 +222,7 @@ sudo chown admin:admin /var/log/dendrite
 <span class="k">return</span> <span class="nx">file</span><span class="p">.</span><span class="nf">Sync</span><span class="p">()</span>
 </code></pre></div><p>View the full code <a href="https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/update/main.go">here in my README repository</a>.</p>
 <p>Mmmm, doesn&rsquo;t that smell good? 🍪 Let&rsquo;s make this happen on the daily with a GitHub Action.</p>
-<h2 id="running-your-go-program-on-a-schedule-with-actions">Running your Go program on a schedule with Actions</h2>
-<p>You can create a GitHub Action workflow that <a href="https://docs.github.com/en/actions/reference/events-that-trigger-workflows">triggers</a> both on a push to your <code>master</code> branch as well as on a daily schedule. Here&rsquo;s a slice of the <code>.github/workflows/update.yaml</code> that defines this:</p>
+<h2 id="running-your-go-program-on-a-schedule-with-actions"><a href="#running-your-go-program-on-a-schedule-with-actions">Running your Go program on a schedule with Actions</a></h2><p>You can create a GitHub Action workflow that <a href="https://docs.github.com/en/actions/reference/events-that-trigger-workflows">triggers</a> both on a push to your <code>master</code> branch as well as on a daily schedule. Here&rsquo;s a slice of the <code>.github/workflows/update.yaml</code> that defines this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">on</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span><span class="nt">push</span><span class="p">:</span><span class="w">
 </span><span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w">
@@ -270,8 +249,7 @@ sudo chown admin:admin /var/log/dendrite
 </span><span class="sd">    git commit -am &#34;Update dynamic content&#34;
 </span><span class="sd">    git push --all -f https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git</span><span class="w">    
 </span></code></pre></div><p>View the full code for this Action workflow <a href="https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/.github/workflows/update.yaml">here in my README repository</a>.</p>
-<h2 id="go-forth-and-auto-update-your-readme">Go forth and auto-update your README</h2>
-<p>Congratulations and welcome to the cool kids' club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &ndash; just go easy on the GIFs, okay?</p>
+<h2 id="go-forth-and-auto-update-your-readme"><a href="#go-forth-and-auto-update-your-readme">Go forth and auto-update your README</a></h2><p>Congratulations and welcome to the cool kids' club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &ndash; just go easy on the GIFs, okay?</p>
 ]]></content></entry><entry><title type="html">Hugo vs Jekyll: an epic battle of static site generator themes</title><link href="https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/"/><id>https://victoria.dev/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/</id><author><name>Victoria Drake</name></author><published>2020-04-27T06:34:41-04:00</published><updated>2020-04-27T06:34:41-04:00</updated><content type="html"><![CDATA[<p>I recently took on the task of creating a documentation site theme for two projects. Both projects needed the same basic features, but one uses Jekyll while the other uses Hugo.</p>
 <p>In typical developer rationality, there was clearly only one option. I decided to create the same theme in both frameworks, and to give you, dear reader, a side-by-side comparison.</p>
 <p>This post isn&rsquo;t a comprehensive theme-building guide, but intended to familiarize you with the process of building a theme in either generator. Here&rsquo;s what we&rsquo;ll cover:</p>
@@ -304,8 +282,7 @@ sudo chown admin:admin /var/log/dendrite
 </p></p>
 <p>If you&rsquo;re planning to build-along, it may be helpful to serve the theme locally as you build it; both generators offer this functionality. For Jekyll, run <code>jekyll serve</code>, and for Hugo, <code>hugo serve</code>.</p>
 <p>There are two main elements: the main content area, and the all-important sidebar menu. To create them, you&rsquo;ll need template files that tell the site generator how to generate the HTML page. To organize theme template files in a sensible way, you first need to know what directory structure the site generator expects.</p>
-<h2 id="how-theme-files-are-organized">How theme files are organized</h2>
-<p>Jekyll supports gem-based themes, which users can install like any other Ruby gems. This method hides theme files in the gem, so for the purposes of this comparison, we aren&rsquo;t using gem-based themes.</p>
+<h2 id="how-theme-files-are-organized"><a href="#how-theme-files-are-organized">How theme files are organized</a></h2><p>Jekyll supports gem-based themes, which users can install like any other Ruby gems. This method hides theme files in the gem, so for the purposes of this comparison, we aren&rsquo;t using gem-based themes.</p>
 <p>When you run <code>jekyll new-theme &lt;name&gt;</code>, Jekyll will scaffold a new theme for you. Here&rsquo;s what those files look like:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">.
 ├── assets
@@ -342,8 +319,7 @@ sudo chown admin:admin /var/log/dendrite
 └── theme.toml
 </code></pre></div><p>You can see some similarities. Hugo&rsquo;s page template files are tucked into <code>layouts/</code>. Note that the <code>_default</code> page type has files for a <code>list.html</code> and a <code>single.html</code>. Unlike Jekyll, Hugo uses these specific file names to distinguish between <a href="https://gohugo.io/templates/lists/">list pages</a> (like a page with links to all your blog posts on it) and <a href="https://gohugo.io/templates/single-page-templates/">single pages</a> (like one of your blog posts). The <code>layouts/partials/</code> directory contains the buttery reusable bits, and stylesheet files have a spot picked out in <code>static/css/</code>.</p>
 <p>These directory structures aren&rsquo;t set in stone, as both site generators allow some measure of customization. For example, Jekyll lets you define <a href="https://jekyllrb.com/docs/collections/">collections</a>, and Hugo makes use of <a href="https://gohugo.io/content-management/page-bundles/">page bundles</a>. These features let you organize your content multiple ways, but for now, lets look at where to put some simple pages.</p>
-<h2 id="where-to-put-content">Where to put content</h2>
-<p>To create a site menu that looks like this:</p>
+<h2 id="where-to-put-content"><a href="#where-to-put-content">Where to put content</a></h2><p>To create a site menu that looks like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-md" data-lang="md">Introduction
     Getting Started
     Configuration
@@ -395,8 +371,7 @@ Advanced Usage
     └── support.md
 </code></pre></div><p>To Hugo, <code>_index.md</code> and <code>index.md</code> mean different things. It can be helpful to know what kind of <a href="https://gohugo.io/content-management/page-bundles/">Page Bundle</a> you want for each section: Leaf, which has no children, or Branch.</p>
 <p>Now that you have some idea of where to put things, let&rsquo;s look at how to build a page template.</p>
-<h2 id="how-templating-works">How templating works</h2>
-<p>Jekyll page templates are built with the <a href="https://jekyllrb.com/docs/liquid/">Liquid templating language</a>. It uses braces to output variable content to a page, such as the page&rsquo;s title: <code>{{ page.title }}</code>.</p>
+<h2 id="how-templating-works"><a href="#how-templating-works">How templating works</a></h2><p>Jekyll page templates are built with the <a href="https://jekyllrb.com/docs/liquid/">Liquid templating language</a>. It uses braces to output variable content to a page, such as the page&rsquo;s title: <code>{{ page.title }}</code>.</p>
 <p>Hugo&rsquo;s templates also use braces, but they&rsquo;re built with <a href="https://gohugo.io/templates/introduction/">Go Templates</a>. The syntax is similar, but different: <code>{{ .Title }}</code>.</p>
 <p>Both Liquid and Go Templates can handle logic. Liquid uses <em>tags</em> syntax to denote logic operations:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html">{% if user %}
@@ -443,8 +418,7 @@ Advanced Usage
 <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </code></pre></div><p>Different syntax, same idea. Both templates pull in reusable bits for <code>head.html</code>, <code>header.html</code>, and <code>footer.html</code>. These show up on a lot of pages, so it makes sense not to have to repeat yourself. Both templates also have a spot for the main content, though the Jekyll template uses a variable (<code>{{ content }}</code>) while Hugo uses a block (<code>{{- block &quot;main&quot; . }}{{- end }}</code>). <a href="https://gohugo.io/templates/base/#readout">Blocks</a> are just another way Hugo lets you define reusable bits.</p>
 <p>Now that you know how templating works, you can build the sidebar menu for the theme.</p>
-<h2 id="creating-a-top-level-menu-with-the-pages-object">Creating a top-level menu with the <code>pages</code> object</h2>
-<p>You can programmatically create a top-level menu from your pages. It will look like this:</p>
+<h2 id="creating-a-top-level-menu-with-the-pages-object"><a href="#creating-a-top-level-menu-with-the-pages-object">Creating a top-level menu with the <code>pages</code> object</a></h2><p>You can programmatically create a top-level menu from your pages. It will look like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-md" data-lang="md">Introduction
 Advanced Usage
 </code></pre></div><p>Let&rsquo;s start with Jekyll. You can display links to site pages in your Liquid template by iterating through the <code>site.pages</code> object that Jekyll provides and building a list:</p>
@@ -470,8 +444,7 @@ Advanced Usage
 {{ end }}
 <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
 </code></pre></div><p>This template uses the <code>.Pages</code> object to return all the top-level pages in <code>content/</code> of your Hugo site. Since Hugo uses a specific folder for the site content you want rendered, there&rsquo;s no additional filtering necessary to build a simple menu of site pages.</p>
-<h2 id="creating-a-menu-with-nested-links-from-a-data-list">Creating a menu with nested links from a data list</h2>
-<p>Both site generators can use a separately defined data list of links to render a menu in your template. This is more suitable for creating nested links, like this:</p>
+<h2 id="creating-a-menu-with-nested-links-from-a-data-list"><a href="#creating-a-menu-with-nested-links-from-a-data-list">Creating a menu with nested links from a data list</a></h2><p>Both site generators can use a separately defined data list of links to render a menu in your template. This is more suitable for creating nested links, like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-md" data-lang="md">Introduction
     Getting Started
     Configuration
@@ -568,8 +541,7 @@ Advanced Usage
     {{ end }}
 <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
 </code></pre></div><p>The <code>range</code> function iterates over the menu data, and Hugo&rsquo;s <code>.Children</code> variable handles nested pages for you.</p>
-<h2 id="putting-the-template-together">Putting the template together</h2>
-<p>With your menu in your reusable sidebar bit (<code>_includes/sidebar.html</code> for Jekyll and <code>partials/sidebar.html</code> for Hugo), you can add it to the <code>default.html</code> template.</p>
+<h2 id="putting-the-template-together"><a href="#putting-the-template-together">Putting the template together</a></h2><p>With your menu in your reusable sidebar bit (<code>_includes/sidebar.html</code> for Jekyll and <code>partials/sidebar.html</code> for Hugo), you can add it to the <code>default.html</code> template.</p>
 <p>In Jekyll:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&#34;{{ page.lang | default: site.lang | default: &#34;</span><span class="na">en</span><span class="err">&#34;</span> <span class="err">}}&#34;</span><span class="p">&gt;</span>
@@ -607,10 +579,8 @@ Advanced Usage
 
 <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </code></pre></div><p>When the site is generated, each page will contain all the code from your <code>sidebar.html</code>.</p>
-<h2 id="create-a-stylesheet">Create a stylesheet</h2>
-<p>Both site generators accept Sass for creating CSS stylesheets. Jekyll <a href="https://jekyllrb.com/docs/assets/">has Sass processing built in</a>, and Hugo uses <a href="https://gohugo.io/hugo-pipes/scss-sass/">Hugo Pipes</a>. Both options have some quirks.</p>
-<h3 id="sass-and-css-in-jekyll">Sass and CSS in Jekyll</h3>
-<p>To process a Sass file in Jekyll, create your style definitions in the <code>_sass</code> directory. For example, in a file at <code>_sass/style-definitions.scss</code>:</p>
+<h2 id="create-a-stylesheet"><a href="#create-a-stylesheet">Create a stylesheet</a></h2><p>Both site generators accept Sass for creating CSS stylesheets. Jekyll <a href="https://jekyllrb.com/docs/assets/">has Sass processing built in</a>, and Hugo uses <a href="https://gohugo.io/hugo-pipes/scss-sass/">Hugo Pipes</a>. Both options have some quirks.</p>
+<h3 id="sass-and-css-in-jekyll"><a href="#sass-and-css-in-jekyll">Sass and CSS in Jekyll</a></h3><p>To process a Sass file in Jekyll, create your style definitions in the <code>_sass</code> directory. For example, in a file at <code>_sass/style-definitions.scss</code>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-scss" data-lang="scss"><span class="nv">$background-color</span><span class="o">:</span> <span class="mh">#eef</span> <span class="k">!default</span><span class="p">;</span>
 <span class="nv">$text-color</span><span class="o">:</span> <span class="mh">#111</span> <span class="k">!default</span><span class="p">;</span>
 
@@ -626,15 +596,12 @@ Advanced Usage
 </code></pre></div><p>This rather hackish configuration has an upside: you can use Liquid template tags and variables in your placeholder file. This is a nice way to allow users to set variables from the site <code>_config.yml</code>, for example.</p>
 <p>The resulting CSS stylesheet in your generated site has the path <code>/assets/css/style.css</code>. You can link to it in your site&rsquo;s <code>head.html</code> using:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&#34;stylesheet&#34;</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ &#34;</span><span class="err">/</span><span class="na">assets</span><span class="err">/</span><span class="na">css</span><span class="err">/</span><span class="na">style</span><span class="err">.</span><span class="na">css</span><span class="err">&#34;</span> <span class="err">|</span> <span class="na">relative_url</span> <span class="err">}}&#34;</span> <span class="na">media</span><span class="o">=</span><span class="s">&#34;screen&#34;</span><span class="p">&gt;</span>
-</code></pre></div><h3 id="sass-and-hugo-pipes-in-hugo">Sass and Hugo Pipes in Hugo</h3>
-<p>Hugo uses <a href="https://gohugo.io/hugo-pipes/scss-sass/">Hugo Pipes</a> to process Sass to CSS. You can achieve this by using Hugo&rsquo;s asset processing function, <code>resources.ToCSS</code>, which expects a source in the <code>assets/</code> directory. It takes the SCSS file as an argument. With your style definitions in a Sass file at <code>assets/sass/style.scss</code>, here&rsquo;s how to get, process, and link your Sass in your theme&rsquo;s <code>head.html</code>:</p>
+</code></pre></div><h3 id="sass-and-hugo-pipes-in-hugo"><a href="#sass-and-hugo-pipes-in-hugo">Sass and Hugo Pipes in Hugo</a></h3><p>Hugo uses <a href="https://gohugo.io/hugo-pipes/scss-sass/">Hugo Pipes</a> to process Sass to CSS. You can achieve this by using Hugo&rsquo;s asset processing function, <code>resources.ToCSS</code>, which expects a source in the <code>assets/</code> directory. It takes the SCSS file as an argument. With your style definitions in a Sass file at <code>assets/sass/style.scss</code>, here&rsquo;s how to get, process, and link your Sass in your theme&rsquo;s <code>head.html</code>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html">{{ $style := resources.Get &#34;/sass/style.scss&#34; | resources.ToCSS }}
 <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&#34;stylesheet&#34;</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;{{ $style.RelPermalink }}&#34;</span> <span class="na">media</span><span class="o">=</span><span class="s">&#34;screen&#34;</span><span class="p">&gt;</span>
 </code></pre></div><p>Hugo asset processing <a href="https://gohugo.io/troubleshooting/faq/#i-get-tocss--this-feature-is-not-available-in-your-current-hugo-version">requires extended Hugo</a>, which you may not have by default. You can get extended Hugo from the <a href="https://github.com/gohugoio/hugo/releases">releases page</a>.</p>
-<h2 id="configure-and-deploy-to-github-pages">Configure and deploy to GitHub Pages</h2>
-<p>Before your site generator can build your site, it needs a configuration file to set some necessary parameters. Configuration files live in the site root directory. Among other settings, you can declare the name of the theme to use when building the site.</p>
-<h3 id="configure-jekyll">Configure Jekyll</h3>
-<p>Here&rsquo;s a minimal <code>_config.yml</code> for Jekyll:</p>
+<h2 id="configure-and-deploy-to-github-pages"><a href="#configure-and-deploy-to-github-pages">Configure and deploy to GitHub Pages</a></h2><p>Before your site generator can build your site, it needs a configuration file to set some necessary parameters. Configuration files live in the site root directory. Among other settings, you can declare the name of the theme to use when building the site.</p>
+<h3 id="configure-jekyll"><a href="#configure-jekyll">Configure Jekyll</a></h3><p>Here&rsquo;s a minimal <code>_config.yml</code> for Jekyll:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l">Your awesome title</span><span class="w">
 </span><span class="w"></span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l">&gt;-</span><span class="w"> </span><span class="c"># this means to ignore newlines until &#34;baseurl:&#34;</span><span class="w">
 </span><span class="w">  </span><span class="l">Write an awesome description for your new site here. You can edit this</span><span class="w">
@@ -646,20 +613,17 @@ Advanced Usage
 </span><span class="w"></span><span class="nt">remote_theme</span><span class="p">:</span><span class="w"> </span><span class="c"># for themes hosted on GitHub, when used with GitHub Pages</span><span class="w">
 </span></code></pre></div><p>With <code>remote_theme</code>, any <a href="https://help.github.com/en/github/working-with-github-pages/adding-a-theme-to-your-github-pages-site-using-jekyll#adding-a-jekyll-theme-in-your-sites-_configyml-file">Jekyll theme hosted on GitHub can be used</a> with sites hosted on GitHub Pages.</p>
 <p>Jekyll has a <a href="https://jekyllrb.com/docs/configuration/default/">default configuration</a>, so any parameters added to your configuration file will override the defaults. Here are <a href="https://jekyllrb.com/docs/configuration/options/">additional configuration settings</a>.</p>
-<h3 id="configure-hugo">Configure Hugo</h3>
-<p>Here&rsquo;s a minimal example of Hugo&rsquo;s <code>config.yml</code>:</p>
+<h3 id="configure-hugo"><a href="#configure-hugo">Configure Hugo</a></h3><p>Here&rsquo;s a minimal example of Hugo&rsquo;s <code>config.yml</code>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">baseURL</span><span class="p">:</span><span class="w"> </span><span class="l">https://example.com/</span><span class="w"> </span><span class="c"># The full domain your site will live at</span><span class="w">
 </span><span class="w"></span><span class="nt">languageCode</span><span class="p">:</span><span class="w"> </span><span class="l">en-us</span><span class="w">
 </span><span class="w"></span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l">Hugo Docs Site</span><span class="w">
 </span><span class="w"></span><span class="nt">theme</span><span class="p">:</span><span class="w"> </span><span class="c"># theme name</span><span class="w">
 </span></code></pre></div><p>Hugo makes no assumptions, so if a necessary parameter is missing, you&rsquo;ll see a warning when building or serving your site. Here are <a href="https://gohugo.io/getting-started/configuration/#all-configuration-settings">all configuration settings for Hugo</a>.</p>
-<h3 id="deploy-to-github-pages">Deploy to GitHub Pages</h3>
-<p>Both generators build your site with a command.</p>
+<h3 id="deploy-to-github-pages"><a href="#deploy-to-github-pages">Deploy to GitHub Pages</a></h3><p>Both generators build your site with a command.</p>
 <p>For Jekyll, use <code>jekyll build</code>. See <a href="https://jekyllrb.com/docs/configuration/options/#build-command-options">further build options here</a>.</p>
 <p>For Hugo, use <code>hugo</code>. You can run <code>hugo help</code> or see <a href="https://gohugo.io/getting-started/usage/#test-installation">further build options here</a>.</p>
 <p>You&rsquo;ll have to choose the source for your GitHub Pages site; once done, your site will update each time you push a new build. Of course, you can also automate your GitHub Pages build using GitHub Actions. Here&rsquo;s one for <a href="https://github.com/victoriadrake/hugo-latest-cd">building and deploying with Hugo</a>, and one for <a href="https://github.com/victoriadrake/jekyll-cd">building and deploying Jekyll</a>.</p>
-<h2 id="showtime">Showtime</h2>
-<p>All the substantial differences between these two generators are under the hood; all the same, let&rsquo;s take a look at the finished themes, in two color variations.</p>
+<h2 id="showtime"><a href="#showtime">Showtime</a></h2><p>All the substantial differences between these two generators are under the hood; all the same, let&rsquo;s take a look at the finished themes, in two color variations.</p>
 <p>Here&rsquo;s Hugo:</p>
 <p><p class="md-image">
   <img class="u-photo" src="ogd_hugo.png" alt="OpenGitDocs theme for Hugo"  />
@@ -669,8 +633,7 @@ Advanced Usage
   <img class="u-photo" src="ogd_jekyll.png" alt="OpenGitDocs theme for Jekyll"  />
 </p></p>
 <p>Spiffy!</p>
-<h2 id="wait-who-won">Wait who won</h2>
-<p>🤷</p>
+<h2 id="wait-who-won"><a href="#wait-who-won">Wait who won</a></h2><p>🤷</p>
 <p>Both Hugo and Jekyll have their quirks and conveniences.</p>
 <p>From this developer&rsquo;s perspective, Jekyll is a workable choice for simple sites without complicated organizational needs. If you&rsquo;re looking to render some one-page posts in an <a href="https://jekyllrb.com/docs/themes/">available theme</a> and host with GitHub Pages, Jekyll will get you up and running fairly quickly.</p>
 <p>Personally, I use Hugo. I like the organizational capabilities of its Page Bundles, and it&rsquo;s backed by a dedicated and conscientious team that really seems to strive to facilitate convenience for their users. This is evident in Hugo&rsquo;s many functions, and handy tricks like <a href="https://gohugo.io/content-management/image-processing/">Image Processing</a> and <a href="https://gohugo.io/content-management/shortcodes/">Shortcodes</a>. They seem to release new fixes and versions about as often as I make a new cup of coffee.</p>
@@ -679,11 +642,9 @@ Advanced Usage
 <p>I&rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.</p>
 <p>OWASP is a great group doing important work. I&rsquo;ve seen this firsthand as part of the core team that produces the Web Security Testing Guide. However, while OWASP inspires in its large volunteer base, it lacks in the area of central organization.</p>
 <p>This lack of organization was most recently apparent in the group&rsquo;s website, <a href="https://owasp.org">OWASP.org</a>. A big organization with an even bigger website to match, OWASP.org enjoys hundreds of thousands of visitors. Unfortunately, many of its pages - individually managed by disparate projects - are infrequently updated. Some are abandoned. The website as a whole lacks a centralized quality assurance process, and as a result, OWASP.org is peppered with broken links.</p>
-<h2 id="the-trouble-with-broken-links">The trouble with broken links</h2>
-<p>Customers don&rsquo;t like broken links; attackers really do. That&rsquo;s because broken links are a security vulnerability. Broken links can signal opportunities for attacks like <a href="https://edoverflow.com/2017/broken-link-hijacking/">broken link hijacking</a> and <a href="https://www.hackerone.com/blog/Guide-Subdomain-Takeovers">subdomain takeovers</a>. At their least effective, these attacks can be embarrassing; at their worst, severely damaging to businesses and organizations. One OWASP group, the Application Security Verification Standard (ASVS) project, writes about <a href="https://github.com/OWASP/ASVS/blob/d9e0ac99828ef3c1e9233bd8a1f691f2a6958aa3/4.0/en/0x18-V10-Malicious.md#v103-deployed-application-integrity-controls">integrity controls</a> that can help to mitigate the likelihood of these attacks. This knowledge, unfortunately, has not yet propagated throughout the rest of OWASP yet.</p>
+<h2 id="the-trouble-with-broken-links"><a href="#the-trouble-with-broken-links">The trouble with broken links</a></h2><p>Customers don&rsquo;t like broken links; attackers really do. That&rsquo;s because broken links are a security vulnerability. Broken links can signal opportunities for attacks like <a href="https://edoverflow.com/2017/broken-link-hijacking/">broken link hijacking</a> and <a href="https://www.hackerone.com/blog/Guide-Subdomain-Takeovers">subdomain takeovers</a>. At their least effective, these attacks can be embarrassing; at their worst, severely damaging to businesses and organizations. One OWASP group, the Application Security Verification Standard (ASVS) project, writes about <a href="https://github.com/OWASP/ASVS/blob/d9e0ac99828ef3c1e9233bd8a1f691f2a6958aa3/4.0/en/0x18-V10-Malicious.md#v103-deployed-application-integrity-controls">integrity controls</a> that can help to mitigate the likelihood of these attacks. This knowledge, unfortunately, has not yet propagated throughout the rest of OWASP yet.</p>
 <p>This is the story of how I created a fast and efficient tool to help OWASP solve this problem.</p>
-<h2 id="the-job">The job</h2>
-<p>I took on the task of creating a program that could run as part of a CI/CD process to detect and report broken links. The program needed to:</p>
+<h2 id="the-job"><a href="#the-job">The job</a></h2><p>I took on the task of creating a program that could run as part of a CI/CD process to detect and report broken links. The program needed to:</p>
 <ul>
 <li>Find and enumerate all the broken links on OWASP.org in a report.</li>
 <li>Keep track of the parent pages the broken links were on so they could be fixed.</li>
@@ -691,8 +652,7 @@ Advanced Usage
 </ul>
 <p>Essentially; I need to build a web crawler.</p>
 <p>My original journey through this process was also in Python, as that was a comfortable language choice for everyone in the OWASP group. Personally, I prefer to use Go for higher performance as it offers more convenient concurrency primitives. Between the task and this talk, I wrote three programs: a prototype single-thread Python program, a multithreaded Python program, and a Go program using goroutines. We&rsquo;ll see a comparison of how each worked out near the end of the talk - first, let&rsquo;s explore how to build a web crawler.</p>
-<h2 id="prototyping-a-web-crawler">Prototyping a web crawler</h2>
-<p>Here&rsquo;s what our web crawler will need to do:</p>
+<h2 id="prototyping-a-web-crawler"><a href="#prototyping-a-web-crawler">Prototyping a web crawler</a></h2><p>Here&rsquo;s what our web crawler will need to do:</p>
 <ol>
 <li>Get the HTML data of the first page of the website (for example, <code>https://victoria.dev</code>)</li>
 <li>Check all of the links on the page
@@ -711,8 +671,7 @@ Advanced Usage
 
 <p>As you can see, the nodes &ldquo;GET page&rdquo; -&gt; &ldquo;HTML&rdquo; -&gt; &ldquo;Parse links&rdquo; -&gt; &ldquo;Valid link&rdquo; -&gt; &ldquo;Check visited&rdquo; all form a loop. These are what enable our web crawler to continue crawling until all the links on the site have been accounted for in the &ldquo;Check visited&rdquo; node. When the crawler encounters links it&rsquo;s already checked, it will &ldquo;Stop.&rdquo; This loop will become more important in a moment.</p>
 <p>For now, the question on everyone&rsquo;s mind (I hope): how do we make it fast?</p>
-<h2 id="how-fast-can-you-do-the-thing">How fast can you do the thing</h2>
-<p>Here are some approximate timings for tasks performed on a typical PC:</p>
+<h2 id="how-fast-can-you-do-the-thing"><a href="#how-fast-can-you-do-the-thing">How fast can you do the thing</a></h2><p>Here are some approximate timings for tasks performed on a typical PC:</p>
 <table>
 <thead>
 <tr>
@@ -777,20 +736,17 @@ Advanced Usage
 <p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. They typically crop up now and then in articles titled along the lines of, &ldquo;Latency numbers every developer should know.&rdquo;</p>
 <p>Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
 <p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
-<h2 id="bottleneck-network-latency">Bottleneck: network latency</h2>
-<p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
+<h2 id="bottleneck-network-latency"><a href="#bottleneck-network-latency">Bottleneck: network latency</a></h2><p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
 <p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">      150 milliseconds
  x 12,000 links
 ---------
 1,800,000 milliseconds (30 minutes)
 </code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
-<h3 id="feedback-loops">Feedback loops</h3>
-<p>I previously wrote about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p>
+<h3 id="feedback-loops"><a href="#feedback-loops">Feedback loops</a></h3><p>I previously wrote about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p>
 <p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&rsquo;m waiting on a process that&rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke <code>master</code> (hopefully <code>staging</code>).</p>
 <p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&rsquo;ve got a slow and inefficient company.</p>
-<h3 id="the-cost-of-bottlenecks">The cost of bottlenecks</h3>
-<p>To add insult to injury, not only are you waiting on a bottlenecked process to run; you&rsquo;re also paying to wait. Take the serverless example - AWS Lambda, for instance. Here&rsquo;s a chart showing the cost of functions by compute time and CPU usage.</p>
+<h3 id="the-cost-of-bottlenecks"><a href="#the-cost-of-bottlenecks">The cost of bottlenecks</a></h3><p>To add insult to injury, not only are you waiting on a bottlenecked process to run; you&rsquo;re also paying to wait. Take the serverless example - AWS Lambda, for instance. Here&rsquo;s a chart showing the cost of functions by compute time and CPU usage.</p>
 <figure><img src="lambda-chart.png"
          alt="Chart showing Total Lambda compute cost by function execution"/><figcaption>
             <p>Source: <a href="https://serverless.com/blog/understanding-and-controlling-aws-lambda-costs/">Understanding and Controlling AWS Lambda Costs</a></p>
@@ -800,8 +756,7 @@ Advanced Usage
 <p>Again, the numbers change over the years, but the main concepts remain the same: the bigger the function and the longer its compute time, the bigger the cost. For applications taking advantage of serverless, these costs can add up dramatically.</p>
 <p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.</p>
 <p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p>
-<h2 id="tacos-and-threading">Tacos and threading</h2>
-<p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
+<h2 id="tacos-and-threading"><a href="#tacos-and-threading">Tacos and threading</a></h2><p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 🌮                                          🌳
 🌮
@@ -866,8 +821,7 @@ Advanced Usage
 🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
 </code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
 <p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p>
-<h2 id="setting-up-a-go-web-crawler">Setting up a Go web crawler</h2>
-<p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
+<h2 id="setting-up-a-go-web-crawler"><a href="#setting-up-a-go-web-crawler">Setting up a Go web crawler</a></h2><p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">startDomain</span>             <span class="kt">string</span>
     <span class="nx">brokenLinks</span>             <span class="p">[]</span><span class="nx">Result</span>
@@ -947,8 +901,7 @@ Advanced Usage
 <span class="p">}</span>
 <span class="nx">wg</span><span class="p">.</span><span class="nf">Wait</span><span class="p">()</span>
 </code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
-<h2 id="did-we-do-the-thing-fast">Did we do the thing fast</h2>
-<p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
+<h2 id="did-we-do-the-thing-fast"><a href="#did-we-do-the-thing-fast">Did we do the thing fast</a></h2><p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
 
 real 17m34.084s
@@ -969,14 +922,12 @@ real 0m7.926s
 user 0m9.044s
 sys     0m0.932s
 </code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
-<h2 id="breaking-bottlenecks">Breaking bottlenecks</h2>
-<p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
+<h2 id="breaking-bottlenecks"><a href="#breaking-bottlenecks">Breaking bottlenecks</a></h2><p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
 <p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p>
 ]]></content></entry><entry><title type="html">A coffee-break introduction to time complexity of algorithms</title><link href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/"/><id>https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/</id><author><name>Victoria Drake</name></author><published>2018-05-30T14:08:28-04:00</published><updated>2018-05-30T14:08:28-04:00</updated><content type="html"><![CDATA[<p>Just like writing your very first <code>for</code> loop, understanding time complexity is an integral milestone to learning how to write efficient complex programs. Think of it as having a superpower that allows you to know exactly what type of program might be the most efficient in a particular situation - before even running a single line of code.</p>
 <p>The fundamental concepts of complexity analysis are well worth studying. You&rsquo;ll be able to better understand how the code you&rsquo;re writing will interact with the program&rsquo;s input, and as a result, you&rsquo;ll spend a lot less wasted time writing slow and problematic code. It won&rsquo;t take long to go over all you need to know in order to start writing more efficient programs - in fact, we can do it in about fifteen minutes. You can go grab a coffee right now (or tea, if that&rsquo;s your thing) and I&rsquo;ll take you through it before your coffee break is over. Go ahead, I&rsquo;ll wait.</p>
 <p>All set? Let&rsquo;s do it!</p>
-<h2 id="what-is-time-complexity-anyway">What is &ldquo;time complexity&rdquo; anyway</h2>
-<p>The time complexity of an algorithm is an <strong>approximation</strong> of how long that algorithm will take to process some input. It describes the efficiency of the algorithm by the magnitude of its operations. This is different than the number of times an operation repeats; I&rsquo;ll expand on that later. Generally, the fewer operations the algorithm has, the faster it will be.</p>
+<h2 id="what-is-time-complexity-anyway"><a href="#what-is-time-complexity-anyway">What is &ldquo;time complexity&rdquo; anyway</a></h2><p>The time complexity of an algorithm is an <strong>approximation</strong> of how long that algorithm will take to process some input. It describes the efficiency of the algorithm by the magnitude of its operations. This is different than the number of times an operation repeats; I&rsquo;ll expand on that later. Generally, the fewer operations the algorithm has, the faster it will be.</p>
 <p>We write about time complexity using <a href="https://en.wikipedia.org/wiki/Big_O_notation">Big O notation</a>, which looks something like <em>O</em>(<em>n</em>). There&rsquo;s rather a lot of math involved in its formal definition, but informally we can say that Big O notation gives us our algorithm&rsquo;s approximate run time in the <strong>worst case</strong>, or in other words, its upper bound.<sup>[<a href="#references">2</a>]</sup> It is inherently relative and comparative.<sup>[<a href="#references">3</a>]</sup> We&rsquo;re describing the algorithm&rsquo;s efficiency relative to the increasing size of its input data, <em>n</em>. If the input is a string, then <em>n</em> is the length of the string. If it&rsquo;s a list of integers, <em>n</em> is the length of the list.</p>
 <p>It&rsquo;s easiest to picture what Big O notation represents with a graph:</p>
 <figure class="screenshot"><img src="graph.png"
@@ -990,16 +941,13 @@ sys     0m0.932s
 <li>Time complexity is an approximation</li>
 <li>An algorithm&rsquo;s time complexity approximates its worst case run time</li>
 </ul>
-<h2 id="determining-time-complexity">Determining time complexity</h2>
-<p>There are different classes of complexity that we can use to quickly understand an algorithm. I&rsquo;ll illustrate some of these classes using nested loops and other examples.</p>
-<h2 id="polynomial-time-complexity">Polynomial time complexity</h2>
-<p>A <strong>polynomial</strong>, from the Greek <em>poly</em> meaning &ldquo;many,&rdquo; and Latin <em>nomen</em> meaning &ldquo;name,&rdquo; describes an expression comprised of constant variables, and addition, multiplication, and exponentiation to a non-negative integer power.<sup>[<a href="#references">4</a>]</sup> That&rsquo;s a super math-y way to say that it contains variables usually denoted by letters and symbols that look like these:</p>
+<h2 id="determining-time-complexity"><a href="#determining-time-complexity">Determining time complexity</a></h2><p>There are different classes of complexity that we can use to quickly understand an algorithm. I&rsquo;ll illustrate some of these classes using nested loops and other examples.</p>
+<h2 id="polynomial-time-complexity"><a href="#polynomial-time-complexity">Polynomial time complexity</a></h2><p>A <strong>polynomial</strong>, from the Greek <em>poly</em> meaning &ldquo;many,&rdquo; and Latin <em>nomen</em> meaning &ldquo;name,&rdquo; describes an expression comprised of constant variables, and addition, multiplication, and exponentiation to a non-negative integer power.<sup>[<a href="#references">4</a>]</sup> That&rsquo;s a super math-y way to say that it contains variables usually denoted by letters and symbols that look like these:</p>
 <p><p class="md-image">
   <img class="u-photo" src="polynomial.png" alt="A polynomial example"  />
 </p></p>
 <p>The below classes describe polynomial algorithms. Some have food examples.</p>
-<h3 id="constant">Constant</h3>
-<p>A <strong>constant time</strong> algorithm doesn&rsquo;t change its running time in response to the input data. No matter the size of the data it receives, the algorithm takes the same amount of time to run. We denote this as a time complexity of <em>O</em>(1).</p>
+<h3 id="constant"><a href="#constant">Constant</a></h3><p>A <strong>constant time</strong> algorithm doesn&rsquo;t change its running time in response to the input data. No matter the size of the data it receives, the algorithm takes the same amount of time to run. We denote this as a time complexity of <em>O</em>(1).</p>
 <figure class="screenshot"><img src="graph%281%29.png"
          alt="A graph showing constant time complexity."/>
 </figure>
@@ -1015,8 +963,7 @@ sys     0m0.932s
 </figure>
 
 <p>With this constant-time algorithm, no matter how many cupcakes are on offer, you just get the first one. Oh well. Flavours are overrated anyway.</p>
-<h3 id="linear">Linear</h3>
-<p>The running duration of a <strong>linear</strong> algorithm is constant. It will process the input in <em>n</em> number of operations. This is often the best possible (most efficient) case for time complexity where all the data must be examined.</p>
+<h3 id="linear"><a href="#linear">Linear</a></h3><p>The running duration of a <strong>linear</strong> algorithm is constant. It will process the input in <em>n</em> number of operations. This is often the best possible (most efficient) case for time complexity where all the data must be examined.</p>
 <figure class="screenshot"><img src="graph%28n%29.png"
          alt="A graph showing linear time complexity."/>
 </figure>
@@ -1040,8 +987,7 @@ sys     0m0.932s
         </figcaption>
 </figure>
 
-<h3 id="quadratic">Quadratic</h3>
-<figure class="screenshot"><img src="graph%28n2%29.png"
+<h3 id="quadratic"><a href="#quadratic">Quadratic</a></h3><figure class="screenshot"><img src="graph%28n2%29.png"
          alt="A graph showing quadratic time complexity"/>
 </figure>
 
@@ -1055,8 +1001,7 @@ sys     0m0.932s
  <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div><p>Because there are two nested loops, or nested linear operations, the algorithm process the input <em>n</em><sup>2</sup> times.</p>
-<h3 id="cubic">Cubic</h3>
-<figure class="screenshot"><img src="graph%28n3%29.png"
+<h3 id="cubic"><a href="#cubic">Cubic</a></h3><figure class="screenshot"><img src="graph%28n3%29.png"
          alt="A graph showing cubic time complexity"/>
 </figure>
 
@@ -1078,8 +1023,7 @@ sys     0m0.932s
         </figcaption>
 </figure>
 
-<h3 id="logarithmic">Logarithmic</h3>
-<p>A <strong>logarithmic</strong> algorithm is one that reduces the size of the input at every step.
+<h3 id="logarithmic"><a href="#logarithmic">Logarithmic</a></h3><p>A <strong>logarithmic</strong> algorithm is one that reduces the size of the input at every step.
 We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log</strong>, the logarithm function, is this shape:</p>
 <figure class="screenshot"><img src="graph%28logn%29.png"
          alt="A graph showing logarithmic time complexity"/>
@@ -1098,31 +1042,26 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
 </ol>
 <p>I find the clearest analogy for understanding binary search is imagining the process of locating a book in a bookstore aisle. If the books are organized by author&rsquo;s last name and you want to find &ldquo;Terry Pratchett,&rdquo; you know you need to look for the &ldquo;P&rdquo; section.</p>
 <p>You can approach the shelf at any point along the aisle and look at the author&rsquo;s last name there. If you&rsquo;re looking at a book by Neil Gaiman, you know you can ignore all the rest of the books to your left, since no letters that come before &ldquo;G&rdquo; in the alphabet happen to be &ldquo;P.&rdquo; You would then move down the aisle to the right any amount, and repeat this process until you&rsquo;ve found the Terry Pratchett section, which should be rather sizable if you&rsquo;re at any decent bookstore because wow did he write a lot of books.</p>
-<h3 id="quasilinear">Quasilinear</h3>
-<figure class="screenshot"><img src="graph%28nlogn%29.png"
+<h3 id="quasilinear"><a href="#quasilinear">Quasilinear</a></h3><figure class="screenshot"><img src="graph%28nlogn%29.png"
          alt="A graph showing quasilinear time complexity"/>
 </figure>
 
 <p>Often seen with sorting algorithms, the time complexity <em>O</em>(<em>n</em> log <em>n</em>) can describe a data structure where each operation takes <em>O</em>(log <em>n</em>) time. One example of this is <a href="https://en.wikipedia.org/wiki/Quicksort">quick sort</a>, a divide-and-conquer algorithm.</p>
 <p>Quick sort works by dividing up an unsorted array into smaller chunks that are easier to process. It sorts the sub-arrays, and thus the whole array. Think about it like trying to put a deck of cards in order. It&rsquo;s faster if you split up the cards and get five friends to help you.</p>
-<h3 id="non-polynomial-time-complexity">Non-polynomial time complexity</h3>
-<p>The below classes of algorithms are non-polynomial.</p>
-<h3 id="factorial">Factorial</h3>
-<figure class="screenshot"><img src="graph%28nfac%29.png"
+<h3 id="non-polynomial-time-complexity"><a href="#non-polynomial-time-complexity">Non-polynomial time complexity</a></h3><p>The below classes of algorithms are non-polynomial.</p>
+<h3 id="factorial"><a href="#factorial">Factorial</a></h3><figure class="screenshot"><img src="graph%28nfac%29.png"
          alt="A graph showing factorial time complexity"/>
 </figure>
 
 <p>An algorithm with time complexity <em>O</em>(<em>n</em>!) often iterates through all permutations of the input elements. One common example is a <a href="https://en.wikipedia.org/wiki/Brute-force_search">brute-force search</a> seen in the <a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem#Computing_a_solution">travelling salesman problem</a>. It tries to find the least costly path between a number of points by enumerating all possible permutations and finding the ones with the lowest cost.</p>
-<h3 id="exponential">Exponential</h3>
-<p>An <strong>exponential</strong> algorithm often also iterates through all subsets of the input elements. It is denoted <em>O</em>(2<sup><em>n</em></sup>) and is often seen in brute-force algorithms. It is similar to factorial time except in its rate of growth, which as you may not be surprised to hear, is exponential. The larger the data set, the more steep the curve becomes.</p>
+<h3 id="exponential"><a href="#exponential">Exponential</a></h3><p>An <strong>exponential</strong> algorithm often also iterates through all subsets of the input elements. It is denoted <em>O</em>(2<sup><em>n</em></sup>) and is often seen in brute-force algorithms. It is similar to factorial time except in its rate of growth, which as you may not be surprised to hear, is exponential. The larger the data set, the more steep the curve becomes.</p>
 <figure class="screenshot"><img src="graph%282n%29.png"
          alt="A graph showing exponential time complexity"/>
 </figure>
 
 <p>In cryptography, a brute-force attack may systematically check all possible elements of a password by iterating through subsets. Using an exponential algorithm to do this, it becomes incredibly resource-expensive to brute-force crack a long password versus a shorter one. This is one reason that a long password is considered more secure than a shorter one.</p>
 <p>There are further time complexity classes less commonly seen that I won&rsquo;t cover here, but you can read about these and find examples in <a href="https://en.wikipedia.org/wiki/Time_complexity#Table_of_common_time_complexities">this handy table</a>.</p>
-<h3 id="recursion-time-complexity">Recursion time complexity</h3>
-<p>As I described in my article <a href="/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">explaining recursion using apple pie</a>, a recursive function calls itself under specified conditions. Its time complexity depends on how many times the function is called and the time complexity of a single function call. In other words, it&rsquo;s the product of the number of times the function runs and a single execution&rsquo;s time complexity.</p>
+<h3 id="recursion-time-complexity"><a href="#recursion-time-complexity">Recursion time complexity</a></h3><p>As I described in my article <a href="/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">explaining recursion using apple pie</a>, a recursive function calls itself under specified conditions. Its time complexity depends on how many times the function is called and the time complexity of a single function call. In other words, it&rsquo;s the product of the number of times the function runs and a single execution&rsquo;s time complexity.</p>
 <p>Here&rsquo;s a recursive function that eats pies until no pies are left:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
  <span class="k">if</span> <span class="nx">pies</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
@@ -1138,8 +1077,7 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
         </figcaption>
 </figure>
 
-<h3 id="worst-case-time-complexity">Worst case time complexity</h3>
-<p>So far, we&rsquo;ve talked about the time complexity of a few nested loops and some code examples. Most algorithms, however, are built from many combinations of these. How do we determine the time complexity of an algorithm containing many of these elements strung together?</p>
+<h3 id="worst-case-time-complexity"><a href="#worst-case-time-complexity">Worst case time complexity</a></h3><p>So far, we&rsquo;ve talked about the time complexity of a few nested loops and some code examples. Most algorithms, however, are built from many combinations of these. How do we determine the time complexity of an algorithm containing many of these elements strung together?</p>
 <p>Easy. We can describe the total time complexity of the algorithm by finding the largest complexity among all of its parts. This is because the slowest part of the code is the bottleneck, and time complexity is concerned with describing the worst case for the algorithm&rsquo;s run time.</p>
 <p>Say we have a program for an office party. If our program looks like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
@@ -1233,8 +1171,7 @@ Eating pie...
 Eating pie...
 Someone ate all the pies!
 Food gone. Back to work!
-</code></pre></div><h2 id="p-vs-np-np-complete-and-np-hard">P vs NP, NP-complete, and NP-hard</h2>
-<p>You may come across these terms in your explorations of time complexity. Informally, <strong>P</strong> (for Polynomial time), is a class of problems that is quick to solve. <strong>NP</strong>, for Nondeterministic Polynomial time, is a class of problems where the answer can be quickly verified in polynomial time. NP encompasses P, but also another class of problems called <strong>NP-complete</strong>, for which no fast solution is known.<sup>[<a href="#references">5</a>]</sup> Outside of NP but still including NP-complete is yet another class called <strong>NP-hard</strong>, which includes problems that no one has been able to verifiably solve with polynomial algorithms.<sup>[<a href="#references">6</a>]</sup></p>
+</code></pre></div><h2 id="p-vs-np-np-complete-and-np-hard"><a href="#p-vs-np-np-complete-and-np-hard">P vs NP, NP-complete, and NP-hard</a></h2><p>You may come across these terms in your explorations of time complexity. Informally, <strong>P</strong> (for Polynomial time), is a class of problems that is quick to solve. <strong>NP</strong>, for Nondeterministic Polynomial time, is a class of problems where the answer can be quickly verified in polynomial time. NP encompasses P, but also another class of problems called <strong>NP-complete</strong>, for which no fast solution is known.<sup>[<a href="#references">5</a>]</sup> Outside of NP but still including NP-complete is yet another class called <strong>NP-hard</strong>, which includes problems that no one has been able to verifiably solve with polynomial algorithms.<sup>[<a href="#references">6</a>]</sup></p>
 <figure class="screenshot"><img src="pnpeuler.svg"
          alt="Euler diagram"/><figcaption>
             <p>P vs NP Euler diagram, <a href="https://commons.wikimedia.org/w/index.php?curid=3532181">by Behnam Esfahbod, CC BY-SA 3.0</a></p>
@@ -1243,8 +1180,7 @@ Food gone. Back to work!
 
 <p><a href="https://en.wikipedia.org/wiki/P_versus_NP_problem">P versus NP</a> is an unsolved, open question in computer science.</p>
 <p>Anyway, you don&rsquo;t generally need to know about NP and NP-hard problems to begin taking advantage of understanding time complexity. They&rsquo;re a whole other Pandora&rsquo;s box.</p>
-<h2 id="approximate-the-efficiency-of-an-algorithm-before-you-write-the-code">Approximate the efficiency of an algorithm before you write the code</h2>
-<p>So far, we&rsquo;ve identified some different time complexity classes and how we might determine which one an algorithm falls into. So how does this help us before we&rsquo;ve written any code to evaluate?</p>
+<h2 id="approximate-the-efficiency-of-an-algorithm-before-you-write-the-code"><a href="#approximate-the-efficiency-of-an-algorithm-before-you-write-the-code">Approximate the efficiency of an algorithm before you write the code</a></h2><p>So far, we&rsquo;ve identified some different time complexity classes and how we might determine which one an algorithm falls into. So how does this help us before we&rsquo;ve written any code to evaluate?</p>
 <p>By combining a little knowledge of time complexity with an awareness of the size of our input data, we can take a guess at an efficient algorithm for processing our data within a given time constraint. We can base our estimation on the fact that a modern computer can perform some hundreds of millions of operations in a second.<sup>[<a href="#references">1</a>]</sup> The following table from the <a href="#references">Competitive Programmer&rsquo;s Handbook</a> offers some estimates on required time complexity to process the respective input size in a time limit of one second.</p>
 <table>
 <thead>
@@ -1297,8 +1233,7 @@ Food gone. Back to work!
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Benchmark_makeCoffee-4          <span class="m">1000000000</span>               0.29 ns/op
 Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               0.86 ns/op
 </code></pre></div><p>Our first function, <code>makeCoffee</code>, completed in an average 0.29 nanoseconds. Our second function, <code>makeStrongCoffee</code>, completed in an average of 0.86 nanoseconds. While those may both seem like pretty small numbers, consider that the stronger coffee took near three times longer to make. This should make sense intuitively, since we asked it to triple the scoops. Big O notation alone wouldn&rsquo;t tell you this, since the constant factor of the tripled scoops isn&rsquo;t accounted for.</p>
-<h2 id="improve-time-complexity-of-existing-code">Improve time complexity of existing code</h2>
-<p>Becoming familiar with time complexity gives us the opportunity to write code, or refactor code, to be more efficient. To illustrate, I&rsquo;ll give a concrete example of one way we can refactor a bit of code to improve its time complexity.</p>
+<h2 id="improve-time-complexity-of-existing-code"><a href="#improve-time-complexity-of-existing-code">Improve time complexity of existing code</a></h2><p>Becoming familiar with time complexity gives us the opportunity to write code, or refactor code, to be more efficient. To illustrate, I&rsquo;ll give a concrete example of one way we can refactor a bit of code to improve its time complexity.</p>
 <p>Let&rsquo;s say a bunch of people at the office want some pie. Some people want pie more than others. The amount that everyone wants some pie is represented by an <code>int</code> &gt; 0:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">diners</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">56</span><span class="p">}</span>
 </code></pre></div><p>Unfortunately, we&rsquo;re bootstrapped and there are only three forks to go around. Since we&rsquo;re a cooperative bunch, the three people who want pie the most will receive the forks to eat it with. Even though they&rsquo;ve all agreed on this, no one seems to want to sort themselves out and line up in an orderly fashion, so we&rsquo;ll have to make do with everybody jumbled about.</p>
@@ -1371,8 +1306,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </code></pre></div><p>This program is much faster, and the whole epic struggle for fork domination is over in 47 nanoseconds.</p>
 <p>As you can see, with a little change in perspective and some refactoring, we&rsquo;ve made this simple bit of code faster and more efficient.</p>
 <p>Well, it looks like our fifteen minute coffee break is up! I hope I&rsquo;ve given you a comprehensive introduction to calculating time complexity. Time to get back to work, hopefully applying your new knowledge to write more effective code! Or maybe just sound smart at your next office party. :)</p>
-<h2 id="references">References</h2>
-<p>&ldquo;If I have seen further it is by standing on the shoulders of Giants.&rdquo; &ndash;Isaac Newton, 1675</p>
+<h2 id="references"><a href="#references">References</a></h2><p>&ldquo;If I have seen further it is by standing on the shoulders of Giants.&rdquo; &ndash;Isaac Newton, 1675</p>
 <ol>
 <li>Antti Laaksonen. <em><a href="https://cses.fi/book.pdf">Competitive Programmer&rsquo;s Handbook (pdf)</a>,</em> 2017</li>
 <li>Wikipedia: <a href="https://en.wikipedia.org/wiki/Big_O_notation">Big O notation</a></li>
@@ -1382,8 +1316,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <li>Wikipedia: <a href="https://en.wikipedia.org/wiki/NP-hardness">NP-hardness</a></li>
 <li><a href="https://www.desmos.com/">Desmos graph calculator</a></li>
 </ol>
-]]></content></entry><entry><title type="html">Knapsack problem algorithms for my real-life carry-on knapsack</title><link href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/"/><id>https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/</id><author><name>Victoria Drake</name></author><published>2018-05-09T21:00:35-04:00</published><updated>2018-05-09T21:00:35-04:00</updated><content type="html"><![CDATA[<h2 id="the-knapsack-problem">The knapsack problem</h2>
-<p>I&rsquo;m a nomad and live out of one carry-on bag. This means that the total weight of all my worldly possessions must fall under airline cabin baggage weight limits - usually 10kg. On some smaller airlines, however, this weight limit drops to 7kg. Occasionally, I have to decide not to bring something with me to adjust to the smaller weight limit.</p>
+]]></content></entry><entry><title type="html">Knapsack problem algorithms for my real-life carry-on knapsack</title><link href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/"/><id>https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/</id><author><name>Victoria Drake</name></author><published>2018-05-09T21:00:35-04:00</published><updated>2018-05-09T21:00:35-04:00</updated><content type="html"><![CDATA[<h2 id="the-knapsack-problem"><a href="#the-knapsack-problem">The knapsack problem</a></h2><p>I&rsquo;m a nomad and live out of one carry-on bag. This means that the total weight of all my worldly possessions must fall under airline cabin baggage weight limits - usually 10kg. On some smaller airlines, however, this weight limit drops to 7kg. Occasionally, I have to decide not to bring something with me to adjust to the smaller weight limit.</p>
 <p>As a practical exercise, deciding what to leave behind (or get rid of altogether) entails laying out all my things and choosing which ones to keep. That decision is based on the item&rsquo;s usefulness to me (its worth) and its weight.</p>
 <figure><img src="knapsack-stuff.jpeg"
          alt="All my stuff."/><figcaption>
@@ -1394,17 +1327,14 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <p>Being a programmer, I&rsquo;m aware that decisions like this could be made more efficiently by a computer. It&rsquo;s done so frequently and so ubiquitously, in fact, that many will recognize this scenario as the classic <em>packing problem</em> or <em>knapsack problem.</em> How do I go about telling a computer to put as many important items in my bag as possible while coming in at or under a weight limit of 7kg? With algorithms! Yay!</p>
 <p>I&rsquo;ll discuss two common approaches to solving the knapsack problem: one called a <em>greedy algorithm,</em> and another called <em>dynamic programming</em> (a little harder, but better, faster, stronger&hellip;).</p>
 <p>Let&rsquo;s get to it.</p>
-<h2 id="the-set-up">The set up</h2>
-<p>I prepared my data in the form of a CSV file with three columns: the item&rsquo;s name (a string), a representation of its worth (an integer), and its weight in grams (an integer). There are 40 items in total. I represented worth by ranking each item from 40 to 1, with 40 being the most important and 1 equating with something like &ldquo;why do I even have this again?&rdquo; (If you&rsquo;ve never listed out all your possessions and ranked them by order of how useful they are to you, I highly recommend you try it. It can be a very revealing exercise.)</p>
+<h2 id="the-set-up"><a href="#the-set-up">The set up</a></h2><p>I prepared my data in the form of a CSV file with three columns: the item&rsquo;s name (a string), a representation of its worth (an integer), and its weight in grams (an integer). There are 40 items in total. I represented worth by ranking each item from 40 to 1, with 40 being the most important and 1 equating with something like &ldquo;why do I even have this again?&rdquo; (If you&rsquo;ve never listed out all your possessions and ranked them by order of how useful they are to you, I highly recommend you try it. It can be a very revealing exercise.)</p>
 <p><strong>Total weight of all items and bag:</strong> 9003g</p>
 <p><strong>Bag weight:</strong> 1415g</p>
 <p><strong>Airline limit:</strong> 7000g</p>
 <p><strong>Maximum weight of items I can pack:</strong> 5585g</p>
 <p><strong>Total possible worth of items:</strong> 820</p>
 <p><strong>The challenge:</strong> Pack as many items as the limit allows while maximizing the total worth.</p>
-<h2 id="data-structures">Data structures</h2>
-<h3 id="reading-in-a-file">Reading in a file</h3>
-<p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&rsquo;s <code>io/ioutil</code> package makes the first part straightforward.</p>
+<h2 id="data-structures"><a href="#data-structures">Data structures</a></h2><h3 id="reading-in-a-file"><a href="#reading-in-a-file">Reading in a file</a></h3><p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&rsquo;s <code>io/ioutil</code> package makes the first part straightforward.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
@@ -1424,8 +1354,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="nx">fmt</span><span class="p">.</span><span class="nf">Print</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">dat</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div><p>The <code>ReadFile()</code> function takes a file path and returns the file&rsquo;s contents and an error (<code>nil</code> if the call is successful) so we&rsquo;ve also created a <code>check()</code> function to handle any errors that might be returned. In a real-world application we probably would want to do something more sophisticated than <code>panic</code>, but that&rsquo;s not important right now.</p>
-<h3 id="creating-a-struct">Creating a struct</h3>
-<p>Now that we&rsquo;ve got our data, we should probably do something with it. Since we&rsquo;re working with real-life items and a real-life bag, let&rsquo;s create some types to represent them and make it easier to conceptualize our program. A <code>struct</code> in Go is a typed collection of fields. Here are our two types:</p>
+<h3 id="creating-a-struct"><a href="#creating-a-struct">Creating a struct</a></h3><p>Now that we&rsquo;ve got our data, we should probably do something with it. Since we&rsquo;re working with real-life items and a real-life bag, let&rsquo;s create some types to represent them and make it easier to conceptualize our program. A <code>struct</code> in Go is a typed collection of fields. Here are our two types:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">item</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">name</span>          <span class="kt">string</span>
     <span class="nx">worth</span><span class="p">,</span> <span class="nx">weight</span> <span class="kt">int</span>
@@ -1436,8 +1365,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="nx">items</span>                                                   <span class="p">[]</span><span class="nx">item</span>
 <span class="p">}</span>
 </code></pre></div><p>It is helpful to use field names that are very descriptive. You can see that the structs are set up just as we&rsquo;ve described the things they represent. An <code>item</code> has a <code>name</code> (string), and a <code>worth</code> and <code>weight</code> (integers). A <code>bag</code> has several fields of type <code>int</code> representing its attributes, and also has the ability to hold <code>items</code>, represented in the struct as a slice of <code>item</code> type thingamabobbers.</p>
-<h3 id="parsing-and-storing-our-data">Parsing and storing our data</h3>
-<p>Several comprehensive Go packages exist that we could use to parse our CSV data&hellip; but where&rsquo;s the fun in that? Let&rsquo;s go basic with some string splitting and a for loop. Here&rsquo;s our updated <code>readItems()</code> function:</p>
+<h3 id="parsing-and-storing-our-data"><a href="#parsing-and-storing-our-data">Parsing and storing our data</a></h3><p>Several comprehensive Go packages exist that we could use to parse our CSV data&hellip; but where&rsquo;s the fun in that? Let&rsquo;s go basic with some string splitting and a for loop. Here&rsquo;s our updated <code>readItems()</code> function:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">readItems</span><span class="p">(</span><span class="nx">path</span> <span class="kt">string</span><span class="p">)</span> <span class="p">[]</span><span class="nx">item</span> <span class="p">{</span>
 
     <span class="nx">dat</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span>
@@ -1509,10 +1437,8 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="k">return</span> <span class="nx">itemList</span>
 <span class="p">}</span>
 </code></pre></div><p>Now that we&rsquo;ve got our data structures set up, let&rsquo;s get packing (🥁) on the first approach.</p>
-<h2 id="greedy-algorithm">Greedy algorithm</h2>
-<p>A greedy algorithm is the most straightforward approach to solving the knapsack problem, in that it is a one-pass algorithm that constructs a single final solution. At each stage of the problem, the greedy algorithm picks the option that is locally optimal, meaning it looks like the most suitable option right now. It does not revise its previous choices as it progresses through our data set.</p>
-<h3 id="building-our-greedy-algorithm">Building our greedy algorithm</h3>
-<p>The steps of the algorithm we&rsquo;ll use to solve our knapsack problem are:</p>
+<h2 id="greedy-algorithm"><a href="#greedy-algorithm">Greedy algorithm</a></h2><p>A greedy algorithm is the most straightforward approach to solving the knapsack problem, in that it is a one-pass algorithm that constructs a single final solution. At each stage of the problem, the greedy algorithm picks the option that is locally optimal, meaning it looks like the most suitable option right now. It does not revise its previous choices as it progresses through our data set.</p>
+<h3 id="building-our-greedy-algorithm"><a href="#building-our-greedy-algorithm">Building our greedy algorithm</a></h3><p>The steps of the algorithm we&rsquo;ll use to solve our knapsack problem are:</p>
 <ol>
 <li>Sort items by worth, in descending order.</li>
 <li>Start with the highest worth item. Put items into the bag until the next item on the list cannot fit.</li>
@@ -1567,8 +1493,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 
     <span class="nf">greedy</span><span class="p">(</span><span class="nx">itemList</span><span class="p">,</span> <span class="nx">minaal</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre></div><h3 id="greedy-algorithm-results">Greedy algorithm results</h3>
-<p>So how does this algorithm do when it comes to efficiently packing our bag to maximize its total worth? Here&rsquo;s the result:</p>
+</code></pre></div><h3 id="greedy-algorithm-results"><a href="#greedy-algorithm-results">Greedy algorithm results</a></h3><p>So how does this algorithm do when it comes to efficiently packing our bag to maximize its total worth? Here&rsquo;s the result:</p>
 <p><strong>Total weight of bag and items:</strong> 6987g</p>
 <p><strong>Total worth of packed items:</strong> 716</p>
 <p>Here are the items our greedy algorithm chose, sorted by worth:</p>
@@ -1721,12 +1646,10 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <p>It&rsquo;s clear that the greedy algorithm is a straightforward way to quickly find a feasible solution. For small data sets, it will probably be close to the optimal solution. The algorithm packed a total item worth of 716 (104 points less than the maximum possible value), while filling the bag with just 13g left over.</p>
 <p>As we learned earlier, the greedy algorithm doesn&rsquo;t improve upon the solution it returns. It simply adds the next highest worth item it can to the bag.</p>
 <p>Let&rsquo;s look at another method for solving the knapsack problem that will give us the optimal solution - the highest possible total worth under the weight limit.</p>
-<h2 id="dynamic-programming">Dynamic programming</h2>
-<p>The name &ldquo;dynamic programming&rdquo; can be a bit misleading. It&rsquo;s not a style of programming, as the name might cause you to infer, but simply another approach.</p>
+<h2 id="dynamic-programming"><a href="#dynamic-programming">Dynamic programming</a></h2><p>The name &ldquo;dynamic programming&rdquo; can be a bit misleading. It&rsquo;s not a style of programming, as the name might cause you to infer, but simply another approach.</p>
 <p>Dynamic programming differs from the straightforward greedy algorithm in a few key ways. Firstly, a dynamic programming bag packing solution enumerates the entire solution space with all possibilities of item combinations that could be used to pack our bag. Where a greedy algorithm chooses the most optimal <em>local</em> solution, dynamic programming algorithms are able to find the most optimal <em>global</em> solution.</p>
 <p>Secondly, dynamic programming uses memoization to store the results of previously computed operations and returns the cached result when the operation occurs again. This allows it to &ldquo;remember&rdquo; previous combinations. This takes less time than it would to re-compute the answer again.</p>
-<h3 id="building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm</h3>
-<p>To use dynamic programming to find the optimal recipe for packing our bag, we&rsquo;ll need to:</p>
+<h3 id="building-our-dynamic-programming-algorithm"><a href="#building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm</a></h3><p>To use dynamic programming to find the optimal recipe for packing our bag, we&rsquo;ll need to:</p>
 <ol>
 <li>Create a matrix representing all subsets of the items (the solution space) with rows representing items and columns representing the bag&rsquo;s remaining weight capacity</li>
 <li>Loop through the matrix and calculate the worth that can be obtained by each combination of items at each stage of the bag&rsquo;s capacity</li>
@@ -1784,8 +1707,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </figure>
 
 <p>That&rsquo;s great, but how do we find out which combination of items were put in the bag to achieve that worth?</p>
-<h3 id="getting-our-optimized-item-list">Getting our optimized item list</h3>
-<p>To see which items combine to create our optimal packing list, we&rsquo;ll need to examine our matrix in reverse to the way we created it. Since we know the highest possible value is in the last row in the last column, we&rsquo;ll start there. To find the items, we:</p>
+<h3 id="getting-our-optimized-item-list"><a href="#getting-our-optimized-item-list">Getting our optimized item list</a></h3><p>To see which items combine to create our optimal packing list, we&rsquo;ll need to examine our matrix in reverse to the way we created it. Since we know the highest possible value is in the last row in the last column, we&rsquo;ll start there. To find the items, we:</p>
 <ol>
 <li>Get the value of the current cell</li>
 <li>Compare the value of the current cell to the value in the cell directly above it</li>
@@ -1861,8 +1783,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 
     <span class="k">return</span> <span class="nx">b</span>
 <span class="p">}</span>
-</code></pre></div><h3 id="dynamic-programming-results">Dynamic programming results</h3>
-<p>We expect that the dynamic programming approach will give us a more optimized solution than the greedy algorithm. So did it? Here are the results:</p>
+</code></pre></div><h3 id="dynamic-programming-results"><a href="#dynamic-programming-results">Dynamic programming results</a></h3><p>We expect that the dynamic programming approach will give us a more optimized solution than the greedy algorithm. So did it? Here are the results:</p>
 <p><strong>Total weight of bag and items:</strong> 6982g</p>
 <p><strong>Total worth of packed items:</strong> 757</p>
 <p>Here are the items our dynamic programming algorithm chose, sorted by worth:</p>
@@ -2048,8 +1969,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </tbody>
 </table>
 <p>There&rsquo;s an obvious improvement to our dynamic programming solution over what the greedy algorithm gave us. Our total worth of 757 is 41 points greater than the greedy algorithm&rsquo;s solution of 716, and for a few grams less weight too!</p>
-<h3 id="input-sort-order">Input sort order</h3>
-<p>While testing my dynamic programming solution, I implemented the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffle algorithm</a> on the input before passing it into my function, just to ensure that the answer wasn&rsquo;t somehow dependent on the sort order of the input. Here&rsquo;s what the shuffle looks like in Go:</p>
+<h3 id="input-sort-order"><a href="#input-sort-order">Input sort order</a></h3><p>While testing my dynamic programming solution, I implemented the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffle algorithm</a> on the input before passing it into my function, just to ensure that the answer wasn&rsquo;t somehow dependent on the sort order of the input. Here&rsquo;s what the shuffle looks like in Go:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Seed</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">UnixNano</span><span class="p">())</span>
 
 <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">itemList</span> <span class="p">{</span>
@@ -2061,8 +1981,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
 <span class="p">})</span>
 </code></pre></div><p>So did the order in which the items were processed affect the outcome? Well&hellip;</p>
-<h4 id="suddenly-a-rogue-weight-appears">Suddenly&hellip; a rogue weight appears!</h4>
-<p>As it turns out, in a way, the answer did depend on the order of the input. When I ran my dynamic programming algorithm several times, I sometimes saw a different total weight for the bag, though the total worth remained at 757. I initially thought this was a bug before examining the two sets of items that accompanied the two different total weight values. Everything was the same except for a few changes that collectively added up to a different item subset accounting for 14 of the 757 worth points.</p>
+<h4 id="suddenly-a-rogue-weight-appears"><a href="#suddenly-a-rogue-weight-appears">Suddenly&hellip; a rogue weight appears!</a></h4><p>As it turns out, in a way, the answer did depend on the order of the input. When I ran my dynamic programming algorithm several times, I sometimes saw a different total weight for the bag, though the total worth remained at 757. I initially thought this was a bug before examining the two sets of items that accompanied the two different total weight values. Everything was the same except for a few changes that collectively added up to a different item subset accounting for 14 of the 757 worth points.</p>
 <p>In this case, there were two equally optimal solutions based only on the success metric of the highest total possible worth. Shuffling the input seemed to affect the placement of the items in the matrix and thus, the path that the <code>checkItem()</code> function took as it went through the matrix to find the chosen items. Since the success metric of having the highest possible worth was the same in both item sets, we don&rsquo;t have a single unique solution - there&rsquo;s two!</p>
 <p>As an academic exercise, both these sets of items are correct answers. We may choose to optimize further by another metric, say, the total weight of all the items. The highest possible worth at the least possible weight could be seen as an ideal solution.</p>
 <p>Here&rsquo;s the second, lighter, dynamic programming result:</p>
@@ -2259,9 +2178,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </tr>
 </tbody>
 </table>
-<h2 id="which-approach-is-better">Which approach is better?</h2>
-<h3 id="go-benchmarking">Go benchmarking</h3>
-<p>The Go standard library&rsquo;s <code>testing</code> package makes it straightforward for us to <a href="https://golang.org/pkg/testing/#hdr-Benchmarks">benchmark</a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&rsquo;s a simple <code>main_test.go</code> file:</p>
+<h2 id="which-approach-is-better"><a href="#which-approach-is-better">Which approach is better?</a></h2><h3 id="go-benchmarking"><a href="#go-benchmarking">Go benchmarking</a></h3><p>The Go standard library&rsquo;s <code>testing</code> package makes it straightforward for us to <a href="https://golang.org/pkg/testing/#hdr-Benchmarks">benchmark</a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&rsquo;s a simple <code>main_test.go</code> file:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
@@ -2286,12 +2203,9 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </code></pre></div><p>We can run <code>go test -bench=. -benchmem</code> to see these results:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Benchmark_greedy-4       <span class="m">1000000</span>              <span class="m">1619</span> ns/op            <span class="m">2128</span> B/op          <span class="m">9</span> allocs/op
 Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m">1545322</span> ns/op         <span class="m">2020332</span> B/op         <span class="m">49</span> allocs/op
-</code></pre></div><h4 id="greedy-algorithm-performance">Greedy algorithm performance</h4>
-<p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.</p>
-<h4 id="dynamic-programming-performance">Dynamic programming performance</h4>
-<p>The dynamic programming algorithm was run 1,000 times. Its speed was measured to be 1.545322 milliseconds or 0.001545322 seconds (translation: still pretty fast). It required 2,020,332 Bytes or 2-ish Megabytes, and 49 distinct memory allocations per iteration.</p>
-<h3 id="the-verdict">The verdict</h3>
-<p>Part of choosing the right approach to solving any programming problem is taking into account the size of the input data set. In this case, it&rsquo;s a small one. In this scenario, a one-pass greedy algorithm will always be faster and less resource-needy than dynamic programming, simply because it has fewer steps. Our greedy algorithm was almost two orders of magnitude faster and less memory-hungry than our dynamic programming algorithm.</p>
+</code></pre></div><h4 id="greedy-algorithm-performance"><a href="#greedy-algorithm-performance">Greedy algorithm performance</a></h4><p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.</p>
+<h4 id="dynamic-programming-performance"><a href="#dynamic-programming-performance">Dynamic programming performance</a></h4><p>The dynamic programming algorithm was run 1,000 times. Its speed was measured to be 1.545322 milliseconds or 0.001545322 seconds (translation: still pretty fast). It required 2,020,332 Bytes or 2-ish Megabytes, and 49 distinct memory allocations per iteration.</p>
+<h3 id="the-verdict"><a href="#the-verdict">The verdict</a></h3><p>Part of choosing the right approach to solving any programming problem is taking into account the size of the input data set. In this case, it&rsquo;s a small one. In this scenario, a one-pass greedy algorithm will always be faster and less resource-needy than dynamic programming, simply because it has fewer steps. Our greedy algorithm was almost two orders of magnitude faster and less memory-hungry than our dynamic programming algorithm.</p>
 <p>Not having those extra steps, however, means that getting the best possible solution from the greedy algorithm is unlikely.</p>
 <p>It&rsquo;s clear that the dynamic programming algorithm gave us better numbers: a lower weight, and higher overall worth.</p>
 <table>
@@ -2317,8 +2231,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 </table>
 <p>Where dynamic programming on small data sets lacks in performance, it makes up in optimization. The question then becomes whether that additional optimization is worth the performance cost.</p>
 <p>&ldquo;Better,&rdquo; of course, is a subjective judgement. If speed and low resource usage is our success metric, then the greedy algorithm is clearly better. If the total worth of items in the bag is our success metric, then dynamic programming is clearly better. However, our scenario is a practical one, and only one of these algorithm designs returned an answer I&rsquo;d choose. In optimizing for the overall greatest possible total worth of the items in the bag, the dynamic programming algorithm left out my highest-worth, but also heaviest, item: my laptop. The chargers and cables, Roost stand, and keyboard that were included aren&rsquo;t much use without it.</p>
-<h3 id="better-algorithm-design">Better algorithm design</h3>
-<p>There&rsquo;s a simple way to alter the dynamic programming approach so that the laptop is always included: we can modify the data so that the worth of the laptop is greater than the sum of the worth of all the other items. (Try it out!)</p>
+<h3 id="better-algorithm-design"><a href="#better-algorithm-design">Better algorithm design</a></h3><p>There&rsquo;s a simple way to alter the dynamic programming approach so that the laptop is always included: we can modify the data so that the worth of the laptop is greater than the sum of the worth of all the other items. (Try it out!)</p>
 <p>Perhaps in re-designing the dynamic programming algorithm to be more practical, we might choose another success metric that better reflects an item&rsquo;s importance, instead of a subjective worth value. There are many possible metrics we can use to represent the value of an item. Here are a few examples of a good proxy:</p>
 <ul>
 <li>Amount of time spent using the item</li>
@@ -2331,19 +2244,16 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <p>There are many considerations for better algorithm design beyond the scope of this introductory post. One of these is <strong>time complexity</strong>, and I&rsquo;ve <a href="/verbose/introduction-time-complexity/">written about it here</a>. A future algorithm may very well decide my bag&rsquo;s contents on the next trip, but we&rsquo;re not quite there yet. Stay tuned!</p>
 ]]></content></entry><entry><title type="html">Why I&amp;#39;m automatically deleting my old tweets using AWS Lambda</title><link href="https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/"/><id>https://victoria.dev/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-04-12T10:51:15-05:00</published><updated>2018-04-12T10:51:15-05:00</updated><content type="html"><![CDATA[<p>From now on, my tweets are ephemeral. Here’s why I’m deleting all my old tweets, and the AWS Lambda function I’m using to do all this for free.</p>
 <p><a href="/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/#ephemeral-tweets"><em>Click here to skip to the code part.</em></a></p>
-<h2 id="stuff-and-opinions">Stuff and opinions</h2>
-<p>I&rsquo;ve only been a one-bag nomad for a little over a year and a half. Before that, I lived as most people do in an apartment or a house. I owned furniture, more clothing than I strictly needed, and enough &ldquo;stuff&rdquo; to fill at least a few moving boxes. If I went to live somewhere else, moving for school or family or work, I packed up all my things and brought them with me. Over the years, I accumulated more and more stuff.</p>
+<h2 id="stuff-and-opinions"><a href="#stuff-and-opinions">Stuff and opinions</a></h2><p>I&rsquo;ve only been a one-bag nomad for a little over a year and a half. Before that, I lived as most people do in an apartment or a house. I owned furniture, more clothing than I strictly needed, and enough &ldquo;stuff&rdquo; to fill at least a few moving boxes. If I went to live somewhere else, moving for school or family or work, I packed up all my things and brought them with me. Over the years, I accumulated more and more stuff.</p>
 <p>Adopting what many would call a minimalist lifestyle has rapidly changed a lot of my longstanding views. Giving away all my stuff (an idea I once thought to be interesting in principle but practically a little bit ridiculous) has become normal. It&rsquo;s normal for me, now, to not own things that I don&rsquo;t use on a regular basis. I don&rsquo;t keep wall shelves packed with old books or dishes or clothing or childhood toys because those items aren&rsquo;t relevant to me anymore. I just keep fond memories, instead.</p>
 <p>Imagine, for a moment, that I still lived in a house. Imagine that in that house, on the fridge, is a drawing I made when I was six-years-old. In the bottom right corner of that drawing scribbled in green crayon are the words &ldquo;broccoli is dumb - Victoria, Age 6.&rdquo;</p>
 <p>If you were in my house and saw that drawing on the fridge, would you assume that the statement &ldquo;broccoli is dumb&rdquo; comprised an accurate and current account of my opinions on broccoli? Of course not. I was six when I wrote that. I&rsquo;ve had plenty of time to change my mind.</p>
-<h2 id="social-media-isnt-social">Social media isn&rsquo;t social</h2>
-<p>I have a friend whom I&rsquo;ve known since we were both in kindergarten. We went through grade school together, then spoke to and saw each other on infrequent occasions across the years. We&rsquo;re both adults now. Sometimes when we chat, we&rsquo;ll recall some amusing memory from when we were younger. The nature of memory being what it is, I have no illusion that what we recall is recounted with much accuracy. Our impressions of things that happened - mistakes we made and moments of victory alike - are coloured by the experiences we&rsquo;ve had since then, and all the things we&rsquo;ve learned. An awkward moment at a school colleague&rsquo;s birthday party becomes an example of a child learning to socialize, instead of the world-ending moment of embarrassment it probably felt like at the time.</p>
+<h2 id="social-media-isnt-social"><a href="#social-media-isnt-social">Social media isn&rsquo;t social</a></h2><p>I have a friend whom I&rsquo;ve known since we were both in kindergarten. We went through grade school together, then spoke to and saw each other on infrequent occasions across the years. We&rsquo;re both adults now. Sometimes when we chat, we&rsquo;ll recall some amusing memory from when we were younger. The nature of memory being what it is, I have no illusion that what we recall is recounted with much accuracy. Our impressions of things that happened - mistakes we made and moments of victory alike - are coloured by the experiences we&rsquo;ve had since then, and all the things we&rsquo;ve learned. An awkward moment at a school colleague&rsquo;s birthday party becomes an example of a child learning to socialize, instead of the world-ending moment of embarrassment it probably felt like at the time.</p>
 <p>This is how memory works. In a sense, it gets updated, as well it should. People living in small communities remember things that their neighbour did many years ago, but recall them in the context of who their neighbour is now, and what their current relationship is like. This re-colouring of history is an important part of how people <a href="https://www.smithsonianmag.com/science-nature/how-our-brains-make-memories-14466850/">heal</a>, <a href="http://news.feinberg.northwestern.edu/2014/02/memory_rewrite/">make good decisions</a>, and <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3709095/">socialize</a>.</p>
 <p>Social media does not do this. Your perfectly preserved tweet from five days or five years ago can be recalled with absolute accuracy. For most people, this is not particularly worrying. We tend to tweet about pretty mundane things - things that pop into mind when we&rsquo;re bored and want someone to notice us. Individually, usually, our old tweets are pretty insignificant. In aggregate, however, they paint a pretty complete picture of a person&rsquo;s random, unintentionally telling thoughts. This is the problem.</p>
 <p>The assumption made of things written in social media and on Twitter specifically is a very different assumption than you might make about someone&rsquo;s notepad scribble from last week. I&rsquo;m not endeavoring to speculate why - I&rsquo;ve just seen enough cases of someone getting publicly flogged for something they posted years ago to know that it does happen. This is weird. If you wouldn&rsquo;t assume that a notepad scribble from last week or a crayon drawing from decades ago reflects the essence of who someone is <em>now,</em> why would you assume that an old tweet does?</p>
 <p>You are not the same person you were last month - you&rsquo;ve seen things, read things, understood and learned things that have, in some small way, changed you. While a person may have the same sense of self and identity through most of their life, even this grows and changes over the years. We change our opinions, our desires, our habits. We are not stagnant beings, and we should not let ourselves be represented as such, however unintentionally.</p>
-<h2 id="ephemeral-tweets">Ephemeral tweets</h2>
-<p>If you look at my Twitter profile page today, you&rsquo;ll see fewer tweets there than you have fingers (I hope). I&rsquo;m using <a href="https://github.com/victoriadrake/ephemeral">ephemeral</a> - a lightweight utility I wrote for use on <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> - to delete all my tweets older than a few days. I&rsquo;m doing this for the same reason that I don&rsquo;t hang on to stuff that I no longer use - that stuff isn&rsquo;t relevant to me anymore. It doesn&rsquo;t represent me, either.</p>
+<h2 id="ephemeral-tweets"><a href="#ephemeral-tweets">Ephemeral tweets</a></h2><p>If you look at my Twitter profile page today, you&rsquo;ll see fewer tweets there than you have fingers (I hope). I&rsquo;m using <a href="https://github.com/victoriadrake/ephemeral">ephemeral</a> - a lightweight utility I wrote for use on <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> - to delete all my tweets older than a few days. I&rsquo;m doing this for the same reason that I don&rsquo;t hang on to stuff that I no longer use - that stuff isn&rsquo;t relevant to me anymore. It doesn&rsquo;t represent me, either.</p>
 <p>The code that makes up ephemeral is written in Go. AWS Lambda creates an environment for each Lambda function, so ephemeral utilizes environment variables for your private Twitter API keys and the maximum age of the tweets you want to keep, represented in hours, like <code>72h</code>.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="p">(</span>
  <span class="nx">consumerKey</span>       <span class="p">=</span> <span class="nf">getenv</span><span class="p">(</span><span class="s">&#34;TWITTER_CONSUMER_KEY&#34;</span><span class="p">)</span>
@@ -2389,16 +2299,14 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <p>For a use case like this, AWS Lambda has a free tier that costs nothing. If you&rsquo;re any level of developer, it&rsquo;s an extremely useful tool to become familiar with. For a full walkthrough with screenshots of how to set up a Lambda function that tweets for you, you can read <a href="/blog/running-a-free-twitter-bot-on-aws-lambda/">this article</a>. The set up for ephemeral is the same, it just has an opposite function. :)</p>
 <p>I forked ephemeral from Adam Drake&rsquo;s <a href="https://github.com/adamdrake/harold">Harold</a>, a Twitter tool that has many useful functions beyond keeping your timeline trimmed. If you have more than 200 tweets to delete at first pass, please use Harold to do that first. You can run Harold with the <code>deletetimeline</code> flag from your terminal.</p>
 <p>You may like to first <a href="https://twitter.com/settings/your_twitter_data">download all your tweets before deleting them</a> for sentimental value.</p>
-<h2 id="why-use-twitter-at-all">Why use Twitter at all</h2>
-<p>In anticipation of the question, let me say that yes, I do use Twitter besides just as a bucket for my Lambda functions to fill and empty. It has its benefits, most related to what I perceive to be its original intended purpose: to be a means of near-instant communication for short, digestible pieces of information reaching a widespread pool of people.</p>
+<h2 id="why-use-twitter-at-all"><a href="#why-use-twitter-at-all">Why use Twitter at all</a></h2><p>In anticipation of the question, let me say that yes, I do use Twitter besides just as a bucket for my Lambda functions to fill and empty. It has its benefits, most related to what I perceive to be its original intended purpose: to be a means of near-instant communication for short, digestible pieces of information reaching a widespread pool of people.</p>
 <p>I use it as a way to keep tabs on what&rsquo;s happening <em>right now.</em> I use it to comment on, joke about, and commiserate with things tweeted by the people I follow <em>right now.</em> By keeping my timeline restricted to only the most recent few days, I feel like I&rsquo;m using Twitter more like it was meant to be used: a way to join the conversation and see what&rsquo;s happening in the world <em>right now</em> - instead of just another place to amass more &ldquo;stuff.&rdquo;</p>
 ]]></content></entry><entry><title type="html">Running a free Twitter bot on AWS Lambda</title><link href="https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/"/><id>https://victoria.dev/blog/running-a-free-twitter-bot-on-aws-lambda/</id><author><name>Victoria Drake</name></author><published>2018-03-05T10:29:15-05:00</published><updated>2018-03-05T10:29:15-05:00</updated><content type="html"><![CDATA[<p>If you read <a href="/blog/about-time/">About time</a>, you&rsquo;ll know that I&rsquo;m a big believer in spending time now on building things that save time in the future. To this end I built a simple Twitter bot in Go that would occasionally post links to my articles and keep my account interesting even when I&rsquo;m too busy to use it. The tweets help drive traffic to my sites, and I don&rsquo;t have to lift a finger.</p>
 <p>I ran the bot on an Amazon EC2 instance for about a month. My AWS usage has historically been pretty inexpensive (less than the price of a coffee in most of North America), so I was surprised when the little instance I was using racked up a bill 90% bigger than the month before. I don&rsquo;t think AWS is expensive, to be clear, but still&hellip; I&rsquo;m cheap. I want my Twitter bot, and I want it for less.</p>
 <p>I&rsquo;d been meaning to explore AWS Lamda, and figured this was a good opportunity. Unlike an EC2 instance that is constantly running (and charging you for it), Lambda charges you per request and according to the duration of time your function takes to run. There&rsquo;s a free tier, too, and the first 1 million requests, plus a certain amount of compute time, are free. Roughly translated to running a Twitter bot that posts for you, say, twice a day, your monthly cost for using Lambda would total&hellip; carry the one&hellip; nothing. I&rsquo;ve been running my Lambda function for a couple weeks now, completely free.</p>
 <p>When recently it came to me to take the reigns of the <a href="https://twitter.com/freeCodeCampTO">@freeCodeCampTO</a> Twitter, I decided to employ a similar strategy, and also use this opportunity to document the process for you, dear reader.</p>
 <p>So if you&rsquo;re currently using a full-time running instance for a task that could be served by a cron job, this is the article for you. I&rsquo;ll cover how to write your function for Lambda, how to get it set up to run automatically, and as a sweet little bonus, a handy bash script that updates your function from the command line whenever you need to make a change. Let&rsquo;s do it!</p>
-<h2 id="is-lambda-right-for-you">Is Lambda right for you</h2>
-<p>When I wrote the code for my Twitter bot in Go, I intended to have it run on an AWS instance and borrowed heavily from <a href="https://github.com/campoy/justforfunc/tree/master/14-twitterbot">Francesc&rsquo;s awesome Just for Func episode</a>. Some time later I modified it to randomly choose an article from my RSS feeds and tweet the link, twice a day. I wanted to do something similar for the @freeCodeCampTO bot, and have it tweet an inspiring quote about programming every morning.</p>
+<h2 id="is-lambda-right-for-you"><a href="#is-lambda-right-for-you">Is Lambda right for you</a></h2><p>When I wrote the code for my Twitter bot in Go, I intended to have it run on an AWS instance and borrowed heavily from <a href="https://github.com/campoy/justforfunc/tree/master/14-twitterbot">Francesc&rsquo;s awesome Just for Func episode</a>. Some time later I modified it to randomly choose an article from my RSS feeds and tweet the link, twice a day. I wanted to do something similar for the @freeCodeCampTO bot, and have it tweet an inspiring quote about programming every morning.</p>
 <p>This is a good use case for Lambda because:</p>
 <ul>
 <li>The program should execute once</li>
@@ -2406,18 +2314,15 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <li>It doesn&rsquo;t need to run constantly</li>
 </ul>
 <p>The important thing to keep in mind is that Lambda runs a function once in response to an event that you define. The most widely applicable trigger is a simple cron expression, but there are many other trigger events you can hook up. You can get an overview <a href="https://aws.amazon.com/lambda/">here</a>.</p>
-<h2 id="write-a-lambda-function">Write a Lambda function</h2>
-<p>I found this really straightforward to do in Go. First, grab the <a href="https://github.com/aws/aws-lambda-go">aws-lambda-go</a> library:</p>
+<h2 id="write-a-lambda-function"><a href="#write-a-lambda-function">Write a Lambda function</a></h2><p>I found this really straightforward to do in Go. First, grab the <a href="https://github.com/aws/aws-lambda-go">aws-lambda-go</a> library:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">go get github.com/aws/aws-lambda-go/lambda
 </code></pre></div><p>Then make this your <code>func main()</code>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
  <span class="nx">lambda</span><span class="p">.</span><span class="nf">Start</span><span class="p">(</span><span class="nx">tweetFeed</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div><p>Where <code>tweetFeed</code> is the name of the function that makes everything happen. While I won&rsquo;t go into writing the whole Twitter bot here, you can view my code <a href="https://gist.github.com/victoriadrake/7859dab68df87e28f40d6715d08383c7">on GitHub</a>.</p>
-<h2 id="setting-up-aws-lambda">Setting up AWS Lambda</h2>
-<p>I&rsquo;m assuming you already have an AWS account. If not, first things first here: <a href="https://aws.amazon.com/free">https://aws.amazon.com/free</a></p>
-<h3 id="1-create-your-function">1. Create your function</h3>
-<p>Find AWS Lambda in the list of services, then look for this shiny button:</p>
+<h2 id="setting-up-aws-lambda"><a href="#setting-up-aws-lambda">Setting up AWS Lambda</a></h2><p>I&rsquo;m assuming you already have an AWS account. If not, first things first here: <a href="https://aws.amazon.com/free">https://aws.amazon.com/free</a></p>
+<h3 id="1-create-your-function"><a href="#1-create-your-function">1. Create your function</a></h3><p>Find AWS Lambda in the list of services, then look for this shiny button:</p>
 <p><p class="md-image">
   <img class="u-photo" src="lambda-01.png#screenshot" alt="Create function"  />
 </p></p>
@@ -2427,8 +2332,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <p><p class="md-image">
   <img class="u-photo" src="lambda-02.png#screenshot" alt="Author from scratch"  />
 </p></p>
-<h3 id="2-configure-your-function">2. Configure your function</h3>
-<p>You&rsquo;ll see a screen for configuring your new function. Under <strong>Handler</strong> enter the name of your Go program.</p>
+<h3 id="2-configure-your-function"><a href="#2-configure-your-function">2. Configure your function</a></h3><p>You&rsquo;ll see a screen for configuring your new function. Under <strong>Handler</strong> enter the name of your Go program.</p>
 <p><p class="md-image">
   <img class="u-photo" src="lambda-03.png#screenshot" alt="Configure your function"  />
 </p></p>
@@ -2437,8 +2341,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
   <img class="u-photo" src="lambda-04.png#screenshot" alt="Environment variables"  />
 </p></p>
 <p>No further settings are necessary for this use case. Click <strong>Save</strong> at the top of the page.</p>
-<h3 id="3-upload-your-code">3. Upload your code</h3>
-<p>You can upload your function code as a zip file on the configuration screen. Since we&rsquo;re using Go, you&rsquo;ll want to <code>go build</code> first, then zip the resulting executable before uploading that to Lambda.</p>
+<h3 id="3-upload-your-code"><a href="#3-upload-your-code">3. Upload your code</a></h3><p>You can upload your function code as a zip file on the configuration screen. Since we&rsquo;re using Go, you&rsquo;ll want to <code>go build</code> first, then zip the resulting executable before uploading that to Lambda.</p>
 <p>&hellip;Of course I&rsquo;m not going to do that manually every time I want to tweak my function. That&rsquo;s what <code>awscli</code> and this bash script is for!</p>
 <p><code>update.sh</code></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">go build <span class="o">&amp;&amp;</span> <span class="se">\
@@ -2448,8 +2351,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 </span><span class="se"></span>rm fcc-tweet.zip
 </code></pre></div><p>Now whenever I make a tweak, I just run <code>bash update.sh</code>.</p>
 <p>If you&rsquo;re not already using <a href="https://aws.amazon.com/cli/">AWS Command Line Interface</a>, do <code>pip install awscli</code> and thank me later. Find instructions for getting set up and configured in a few minutes <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html">here</a> under <strong>Quick Configuration</strong>.</p>
-<h3 id="4-test-your-function">4. Test your function</h3>
-<p>Wanna see it go? Of course you do! Click &ldquo;Configure test events&rdquo; in the dropdown at the top.</p>
+<h3 id="4-test-your-function"><a href="#4-test-your-function">4. Test your function</a></h3><p>Wanna see it go? Of course you do! Click &ldquo;Configure test events&rdquo; in the dropdown at the top.</p>
 <p><p class="md-image">
   <img class="u-photo" src="lambda-05.png#screenshot" alt="Configure test events"  />
 </p></p>
@@ -2461,8 +2363,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <p><p class="md-image">
   <img class="u-photo" src="lambda-07.png#screenshot" alt="Test success notification"  />
 </p></p>
-<h3 id="5-set-up-cloudwatch-events">5. Set up CloudWatch Events</h3>
-<p>To run our function as we would a cron job - as a regularly scheduled time-based event - we&rsquo;ll use CloudWatch. Click <strong>CloudWatch Events</strong> in the <strong>Designer</strong> sidebar.</p>
+<h3 id="5-set-up-cloudwatch-events"><a href="#5-set-up-cloudwatch-events">5. Set up CloudWatch Events</a></h3><p>To run our function as we would a cron job - as a regularly scheduled time-based event - we&rsquo;ll use CloudWatch. Click <strong>CloudWatch Events</strong> in the <strong>Designer</strong> sidebar.</p>
 <p><p class="md-image">
   <img class="u-photo" src="lambda-08.png#screenshot" alt="CloudWatch Events trigger"  />
 </p></p>
@@ -2497,6 +2398,5 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 <p><p class="md-image">
   <img class="u-photo" src="lambda-09.png#screenshot" alt="Set cron expression rule"  />
 </p></p>
-<h2 id="watch-it-go">Watch it go</h2>
-<p>That&rsquo;s all you need to get your Lambda function up and running! Now you can sit back, relax, and do more important things than share your RSS links on Twitter.</p>
+<h2 id="watch-it-go"><a href="#watch-it-go">Watch it go</a></h2><p>That&rsquo;s all you need to get your Lambda function up and running! Now you can sit back, relax, and do more important things than share your RSS links on Twitter.</p>
 ]]></content></entry></feed>

@@ -15,7 +15,7 @@ Measuring productivity with GitHub issues | victoria.dev
 <link rel=me href=https://github.com/victoriadrake>
 <link rel=me href=https://twitter.com/victoriadotdev>
 <link rel=me href=https://mastodon.technology/@victoria>
-<link rel=stylesheet href=https://victoria.dev/css/style.min.62c15a90d70b846c729cd1085b26b1bf6f96ea9b303650d5774416ab86c073c8.css integrity="sha256-YsFakNcLhGxynNEIWyaxv2+W6pswNlDVd0QWq4bAc8g=" crossorigin=anonymous media=screen>
+<link rel=stylesheet href=https://victoria.dev/css/style.min.190d01f481f9662f8242a42a57fce946cf3459334c50748057eb7eb410cd7b99.css integrity="sha256-GQ0B9IH5Zi+CQqQqV/zpRs80WTNMUHSAV+t+tBDNe5k=" crossorigin=anonymous media=screen>
 <link rel=webmention href=https://webmention.io/victoria.dev/webmention>
 <link rel=pingback href=https://webmention.io/victoria.dev/xmlrpc>
 <meta property="og:url" content="https://victoria.dev/">
@@ -33,16 +33,12 @@ Measuring productivity with GitHub issues | victoria.dev
 <img src=/icon/bookmark.svg alt="home page icon" height=18px class=filter-icon>&nbsp;hello</a>
 </li>
 <li role=none class=menu-item>
-<a role=menuitem href=/blog/>
-<img src=/icon/quote.svg alt="blog icon" height=18px class=filter-icon>&nbsp;blog</a>
-</li>
-<li role=none class=menu-item>
 <a role=menuitem href=/about/>
 <img src=/icon/profile.svg alt="about page icon" height=18px class=filter-icon>&nbsp;about</a>
 </li>
 <li role=none class=menu-item>
-<a role=menuitem href=/bookshelf/>
-<img src=/icon/book.svg alt="bookshelf icon" height=18px class=filter-icon>&nbsp;bookshelf</a>
+<a role=menuitem href=/blog/>
+<img src=/icon/quote.svg alt="blog icon" height=18px class=filter-icon>&nbsp;blog</a>
 </li>
 </ul>
 </nav>
@@ -53,16 +49,12 @@ Measuring productivity with GitHub issues | victoria.dev
 <img src=/icon/bookmark.svg alt="home page icon" height=18px class=filter-icon></a>
 </li>
 <li role=none class=menu-item>
-<a role=menuitem href=/blog/>
-<img src=/icon/quote.svg alt="blog icon" height=18px class=filter-icon></a>
-</li>
-<li role=none class=menu-item>
 <a role=menuitem href=/about/>
 <img src=/icon/profile.svg alt="about page icon" height=18px class=filter-icon></a>
 </li>
 <li role=none class=menu-item>
-<a role=menuitem href=/bookshelf/>
-<img src=/icon/book.svg alt="bookshelf icon" height=18px class=filter-icon></a>
+<a role=menuitem href=/blog/>
+<img src=/icon/quote.svg alt="blog icon" height=18px class=filter-icon></a>
 </li>
 </ul>
 </nav>
@@ -97,23 +89,20 @@ api
 <a class=u-url href=https://victoria.dev/blog/measuring-productivity-with-github-issues/>August 30, 2021</a>
 <span>&nbsp;4 min read</span>
 </p>
-</p>
 <div class=page-separator>
 <hr>
 </div>
 <div class="markdown e-content">
 <p>How long does it take for a bug to get squashed, or for a pull request to be merged? What kind of issues take the longest to close?</p>
 <p>Most organizations want to improve productivity and output, but few technical teams seem to take a data-driven approach to discovering productivity bottlenecks. If you&rsquo;re looking to improve development velocity, a couple key metrics could help your team get unblocked. Here&rsquo;s how you can apply a smidge of data science to visualize how your repository is doing, and where improvements can be made.</p>
-<h2 id=getting-quality-data>Getting quality data</h2>
-<p>The first and most difficult part, as any data scientist would likely tell you, is ensuring the quality of your data. It&rsquo;s especially important to consider consistency: are dates throughout the dataset presented in a consistent format? Have tags or labels been applied under consistent rules? Does the dataset contain repeated values, empty values, or unmatched types?</p>
+<h2 id=getting-quality-data><a href=#getting-quality-data>Getting quality data</a></h2><p>The first and most difficult part, as any data scientist would likely tell you, is ensuring the quality of your data. It&rsquo;s especially important to consider consistency: are dates throughout the dataset presented in a consistent format? Have tags or labels been applied under consistent rules? Does the dataset contain repeated values, empty values, or unmatched types?</p>
 <p>If your repository has previously changed up processes or standards, consider the timeframe of the data you collect. If labeling issues is done arbitrarily, those may not be a useful feature. While cleaning data is outside the scope of this article, I can, at least, help you painlessly collect it.</p>
 <p>I wrote a straightforward <a href=https://github.com/victoriadrake/got-issues/>Python utility</a> that uses the GitHub API to pull data for any repository. You can use this on the command line and output the data to a file. It uses the <a href=https://docs.github.com/en/rest/reference/issues#list-repository-issues>list repository issues endpoint (docs)</a>, which, perhaps confusingly, includes both issues and pull requests (PRs) for the repository. I get my data like this:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>$ python fetch.py -h
 usage: fetch.py <span class=o>[</span>-h<span class=o>]</span> <span class=o>[</span>--token TOKEN<span class=o>]</span> repository months
 $ python fetch.py OWASP/wstg <span class=m>24</span> &gt; data.json
 </code></pre></div><p>Using the GitHub API means less worry about standardization, for example, all the dates are expressed as ISO 8601. Now that you have some data to process, it&rsquo;s time to play with Pandas.</p>
-<h2 id=plotting-with-pandas>Plotting with Pandas</h2>
-<p>You can use a <a href=https://jupyter.org/>Jupyter Notebook</a> to do some simple calculations and data visualization.</p>
+<h2 id=plotting-with-pandas><a href=#plotting-with-pandas>Plotting with Pandas</a></h2><p>You can use a <a href=https://jupyter.org/>Jupyter Notebook</a> to do some simple calculations and data visualization.</p>
 <p>First, create the Notebook file:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>touch stats.ipynb
 </code></pre></div><p>Open the file in your favorite IDE, or in your browser by running <code>jupyter notebook</code>.</p>
@@ -143,8 +132,7 @@ max               102 days 20:56:30
 <img class=u-photo src=plot.png alt="Histogram for mypy issues over the last six months">
 </p></p>
 <p>It would be interesting to visualize other repository data, such as its most frequent contributors, or most often used labels. Does a relationship exist between the author or reviewers of an issue and how quickly it is resolved? Does the presence of particular labels predict anything about the duration of the issue?</p>
-<h2 id=you-aim-for-what-you-measure>You aim for what you measure</h2>
-<p>Now that you have some data-driven superpowers, remember that it comes with great responsibility. Deciding what to measure is just as, if not more, important than measuring it.</p>
+<h2 id=you-aim-for-what-you-measure><a href=#you-aim-for-what-you-measure>You aim for what you measure</a></h2><p>Now that you have some data-driven superpowers, remember that it comes with great responsibility. Deciding what to measure is just as, if not more, important than measuring it.</p>
 <p>Consider how to translate the numbers you gather into productivity improvements. For example, if your metric is closing issues and PRs faster, what actions can you take to encourage the right behavior in your teams? I&rsquo;d suggest encouraging issues to be clearly defined, and pull requests to be small and have a well-contained scope, making them easier to understand and review.</p>
 <p>To prepare to accurately take measurements for your repository, establish consistent standards for labels, tags, milestones, and other features you might want to examine. Remember that meaningful results are more easily gleaned from higher quality data.</p>
 <p>Finally, have fun exercising your data science skills. Who knows what you can discover and improve upon next!</p>
@@ -212,12 +200,11 @@ How to be a responsible leader even while you're away.
 <figure class=profile>
 <img class=u-photo alt="Victoria Drake" src=/img/victoria_headshot.jpg>
 </figure>
-<h1 class=p-name>Victoria Drake</h1>
-</address>
-<p class=p-note>
-<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award three years in a row from the freeCodeCamp non-profit, and was recognized two years in a row as a Distinguished Author on the DEV.to developer platform. She writes and educates programmers and business leaders about cybersecurity, software development, and building happy and productive technical teams.</p>
+<div class=p-note>
+<h1>Victoria Drake</h1>
+<p>Victoria Drake is an experienced software engineer with a unique background in technical and executive leadership. She loves to help technology teams raise programming proficiency and streamline development processes. Victoria is an award-winning technical author and open source community mentor. She serves as core maintainer and co-author for the OWASP Web Security Testing Guide.</p>
 <p><a href=/about>about</a> - <a href=/contact>contact</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p>
-</p>
+</div>
 </div>
 </div>
 </footer>

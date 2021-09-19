@@ -2,12 +2,10 @@
 <p>A number of my readers have been kind enough to tell me that you find my blog useful, but there&rsquo;s something that you don&rsquo;t know. Up until I recently implemented a search feature on <a href="/">victoria.dev</a>, I had been my own unhappiest user.</p>
 <p>My blog exists for all to read, but it&rsquo;s also my own personal Internet brain. I frequently pull up a post I&rsquo;ve written when trying to re-discover some bit of knowledge that I may have had the foresight to record. Without a search, finding it again took a few clicks and more than a few guesses. Now, all my previous discoveries are conveniently at my fingertips, ready to be rolled into even more future work.</p>
 <p>If you&rsquo;d like to make your own personal Internet brain more useful, here&rsquo;s how you can implement your own search feature on your static Hugo site.</p>
-<h2 id="get-lunr">Get Lunr</h2>
-<p>While you can <a href="https://lunrjs.com/guides/getting_started.html">install lunr.js</a> via npm or include it from a CDN, I chose to vendorize it to minimize network impact. This means I host it from my own site files by placing the library in Hugo&rsquo;s <code>static</code> directory.</p>
+<h2 id="get-lunr"><a href="#get-lunr">Get Lunr</a></h2><p>While you can <a href="https://lunrjs.com/guides/getting_started.html">install lunr.js</a> via npm or include it from a CDN, I chose to vendorize it to minimize network impact. This means I host it from my own site files by placing the library in Hugo&rsquo;s <code>static</code> directory.</p>
 <p>You can save your visitors some bandwidth by minifying <code>lunr.js</code>, which I did just by <a href="https://github.com/olivernn/lunr.js">downloading lunr.js from source</a> and using the <a href="https://github.com/olback/es6-css-minify">JS &amp; CSS Minifier Visual Studio Code extension</a> on the file. That brought the size down roughly 60% from 97.5 KB to 39.35 KB.</p>
 <p>Save this as <code>static/js/lunr.min.js</code>.</p>
-<h2 id="create-a-search-form-partial">Create a search form partial</h2>
-<p>To easily place your search form wherever you like on your site, create the form as a partial template at <code>layouts/partials/search-form.html</code></p>
+<h2 id="create-a-search-form-partial"><a href="#create-a-search-form-partial">Create a search form partial</a></h2><p>To easily place your search form wherever you like on your site, create the form as a partial template at <code>layouts/partials/search-form.html</code></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">form</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;search&#34;</span>
     <span class="na">action</span><span class="o">=</span><span class="s">&#39;{{ with .GetPage &#34;/search&#34; }}{{.Permalink}}{{end}}&#39;</span> <span class="na">method</span><span class="o">=</span><span class="s">&#34;get&#34;</span><span class="p">&gt;</span>
     <span class="p">&lt;</span><span class="nt">label</span> <span class="na">hidden</span> <span class="na">for</span><span class="o">=</span><span class="s">&#34;search-input&#34;</span><span class="p">&gt;</span>Search site<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
@@ -17,8 +15,7 @@
 <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
 </code></pre></div><p>Include your search form in other templates with:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">{{ partial &#34;search-form.html&#34; . }}
-</code></pre></div><h2 id="create-a-search-page">Create a search page</h2>
-<p>For your search to be useful, you&rsquo;ll need a way to trigger one. You can create a (static!) <code>/search</code> page that responds to a GET request, runs your search, and displays results.</p>
+</code></pre></div><h2 id="create-a-search-page"><a href="#create-a-search-page">Create a search page</a></h2><p>For your search to be useful, you&rsquo;ll need a way to trigger one. You can create a (static!) <code>/search</code> page that responds to a GET request, runs your search, and displays results.</p>
 <p>Here&rsquo;s how to create a Hugo template file for a search page and get it to render.</p>
 <p>Create <code>layouts/search/list.html</code> with the following minimum markup, assuming you&rsquo;re <a href="https://gohugo.io/templates/base">inheriting from a base template</a>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html">{{ define &#34;main&#34; }}
@@ -36,8 +33,7 @@ title: Search me!
 ---
 </code></pre></div><p>You can run <code>hugo serve</code> and navigate to <code>/search</code> to see if everything builds as expected.</p>
 <p>A few libraries exist to help you build a search index and implement Lunr. You can find them <a href="https://gohugo.io/tools/search/">here on the Hugo site</a>. If you want to fully understand the process, however, you&rsquo;ll find it&rsquo;s not complicated do this without additional dependencies, thanks to the power of Hugo&rsquo;s static site processing.</p>
-<h2 id="build-your-search-index">Build your search index</h2>
-<p>Here&rsquo;s how to build an index for Lunr to search using Hugo&rsquo;s template rendering power. Use <code>range</code> to loop over the pages you want to make searchable, and capture your desired parameters in an array of documents. One way to do this is to create <code>layouts/partials/search-index.html</code> with:</p>
+<h2 id="build-your-search-index"><a href="#build-your-search-index">Build your search index</a></h2><p>Here&rsquo;s how to build an index for Lunr to search using Hugo&rsquo;s template rendering power. Use <code>range</code> to loop over the pages you want to make searchable, and capture your desired parameters in an array of documents. One way to do this is to create <code>layouts/partials/search-index.html</code> with:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
 <span class="nb">window</span><span class="p">.</span><span class="nx">store</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1">// You can specify your blog section only:
@@ -60,14 +56,11 @@ title: Search me!
 <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;/js/search.js&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
 </code></pre></div><p>When Hugo renders your site, it will build your search index in much the same way as <a href="https://gohugo.io/templates/lists#what-is-a-list-page-template">a List page</a> is built, creating a document for each page with its parameters.</p>
 <p>The last piece of the puzzle is the code to handle the search process: taking the search query, getting Lunr to perform the search, and displaying the results.</p>
-<h2 id="perform-the-search-and-show-results">Perform the search and show results</h2>
-<p>Create <code>static/js/search.js</code> to hold the JavaScript that ties it all together. This file has three main tasks: get the search query, perform the search with Lunr, and display the results.</p>
-<h3 id="get-query-parameters-with-javascript">Get query parameters with JavaScript</h3>
-<p>This part&rsquo;s straightforward thanks to <a href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams">URLSearchParams</a>:</p>
+<h2 id="perform-the-search-and-show-results"><a href="#perform-the-search-and-show-results">Perform the search and show results</a></h2><p>Create <code>static/js/search.js</code> to hold the JavaScript that ties it all together. This file has three main tasks: get the search query, perform the search with Lunr, and display the results.</p>
+<h3 id="get-query-parameters-with-javascript"><a href="#get-query-parameters-with-javascript">Get query parameters with JavaScript</a></h3><p>This part&rsquo;s straightforward thanks to <a href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams">URLSearchParams</a>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kr">const</span> <span class="nx">params</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">URLSearchParams</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">search</span><span class="p">)</span>
 <span class="kr">const</span> <span class="nx">query</span> <span class="o">=</span> <span class="nx">params</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;q&#39;</span><span class="p">)</span>
-</code></pre></div><h3 id="search-for-the-query-with-lunr">Search for the query with Lunr</h3>
-<p>Define and configure an <a href="https://lunrjs.com/guides/getting_started.html#creating-an-index">index for Lunr</a>. This tells Lunr what you&rsquo;d like to search with, and you can optionally <code>boost</code> elements that are more important.</p>
+</code></pre></div><h3 id="search-for-the-query-with-lunr"><a href="#search-for-the-query-with-lunr">Search for the query with Lunr</a></h3><p>Define and configure an <a href="https://lunrjs.com/guides/getting_started.html#creating-an-index">index for Lunr</a>. This tells Lunr what you&rsquo;d like to search with, and you can optionally <code>boost</code> elements that are more important.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kr">const</span> <span class="nx">idx</span> <span class="o">=</span> <span class="nx">lunr</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
     <span class="c1">// Search these fields
 </span><span class="c1"></span>    <span class="k">this</span><span class="p">.</span><span class="nx">ref</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span>
@@ -92,8 +85,7 @@ title: Search me!
 <span class="p">})</span>
 </code></pre></div><p>You can then execute the search and store results with:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kr">const</span> <span class="nx">results</span> <span class="o">=</span> <span class="nx">idx</span><span class="p">.</span><span class="nx">search</span><span class="p">(</span><span class="nx">query</span><span class="p">)</span>
-</code></pre></div><h3 id="display-results">Display results</h3>
-<p>You&rsquo;ll need a function that builds a list of results and displays them on your search page. Recall the <code>id</code> you gave your <code>ul</code> element in <code>layouts/search/list.html</code> and store it as a variable:</p>
+</code></pre></div><h3 id="display-results"><a href="#display-results">Display results</a></h3><p>You&rsquo;ll need a function that builds a list of results and displays them on your search page. Recall the <code>id</code> you gave your <code>ul</code> element in <code>layouts/search/list.html</code> and store it as a variable:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kr">const</span> <span class="nx">searchResults</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">)</span>
 </code></pre></div><p>If a search results in some results (🥁), you can iterate over them and build a <code>&lt;li&gt;</code> element for each one.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="k">if</span> <span class="p">(</span><span class="nx">results</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Length greater than 0 is truthy
@@ -121,8 +113,7 @@ title: Search me!
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="k">else</span> <span class="p">{</span>
     <span class="nx">searchResults</span><span class="p">.</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s1">&#39;No results found.&#39;</span>
 <span class="p">}</span>
-</code></pre></div><h3 id="full-code-for-searchjs">Full code for search.js</h3>
-<p>Here&rsquo;s what <code>static/js/search.js</code> could look like in full.</p>
+</code></pre></div><h3 id="full-code-for-searchjs"><a href="#full-code-for-searchjs">Full code for search.js</a></h3><p>Here&rsquo;s what <code>static/js/search.js</code> could look like in full.</p>
 <details>
 <summary>search.js full code</summary>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js">
@@ -179,15 +170,12 @@ title: Search me!
 
 
 </code></pre></div></details>
-<h2 id="make-it-go">Make it go</h2>
-<p>You now have Lunr, the search index, and the code that displays results. Since these are all included in <code>layouts/partials/search-index.html</code>, add this partial on all pages with a search form. In your page footer, place:</p>
+<h2 id="make-it-go"><a href="#make-it-go">Make it go</a></h2><p>You now have Lunr, the search index, and the code that displays results. Since these are all included in <code>layouts/partials/search-index.html</code>, add this partial on all pages with a search form. In your page footer, place:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">{{ partial &#34;search-index.html&#34; . }}
 </code></pre></div><p>You can see what this looks like when it&rsquo;s all put together by trying it out <a href="/blog">on my blog</a>.</p>
-<h2 id="make-it-go-faster">Make it go faster</h2>
-<p>Since your site is static, it&rsquo;s possible to <a href="https://lunrjs.com/guides/index_prebuilding.html">pre-build your search index</a> as a JSON data file for Lunr to load. This is where those <a href="https://gohugo.io/tools/search/">aforementioned libraries</a> may be helpful, since a JSON-formatted search index would need to be built outside of running <code>hugo</code> to generate your site.</p>
+<h2 id="make-it-go-faster"><a href="#make-it-go-faster">Make it go faster</a></h2><p>Since your site is static, it&rsquo;s possible to <a href="https://lunrjs.com/guides/index_prebuilding.html">pre-build your search index</a> as a JSON data file for Lunr to load. This is where those <a href="https://gohugo.io/tools/search/">aforementioned libraries</a> may be helpful, since a JSON-formatted search index would need to be built outside of running <code>hugo</code> to generate your site.</p>
 <p>You can maximize your search speed by minifying assets, and minimizing computationally expensive or blocking JavaScript in your code.</p>
-<h2 id="static-sites-get-search-too">Static sites get search, too!</h2>
-<p>I hope this helps you make your Internet brain more useful for yourself and others, too! Don&rsquo;t worry if you haven&rsquo;t got the time to implement a search feature today &ndash; you can find this tutorial again when you visit <a href="/blog">victoria.dev</a> and search for this post! 🥁</p>
+<h2 id="static-sites-get-search-too"><a href="#static-sites-get-search-too">Static sites get search, too!</a></h2><p>I hope this helps you make your Internet brain more useful for yourself and others, too! Don&rsquo;t worry if you haven&rsquo;t got the time to implement a search feature today &ndash; you can find this tutorial again when you visit <a href="/blog">victoria.dev</a> and search for this post! 🥁</p>
 ]]></content></entry><entry><title type="html">Adorable bookmarklets want to help delete your social media data</title><link href="https://victoria.dev/blog/adorable-bookmarklets-want-to-help-delete-your-social-media-data/"/><id>https://victoria.dev/blog/adorable-bookmarklets-want-to-help-delete-your-social-media-data/</id><author><name>Victoria Drake</name></author><published>2018-06-14T13:12:02-04:00</published><updated>2018-06-14T13:12:02-04:00</updated><content type="html"><![CDATA[<p>A little while ago I wrote about <a href="/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/">a Lambda function I called ephemeral</a> for deleting my old tweets. While it&rsquo;s a great project for someone familiar with or wanting to learn to use Lambda, it isn&rsquo;t simple for a non-technical person to set up. There are services out there that will delete your tweets for you, but require your access credentials. There didn&rsquo;t seem to be anything that provided convenience without also requiring authentication.</p>
 <p>So, I went oldschool and created the ephemeral bookmarklet.</p>
 <p>If that didn&rsquo;t make you instantly nostalgic, a <a href="https://en.wikipedia.org/wiki/Bookmarklet">bookmarklet</a> is a little application that lives as a bookmark in your web browser. You &ldquo;install&rdquo; it by dragging the link to your bookmarks toolbar, or right-clicking on the link and choosing &ldquo;Bookmark this link&rdquo; (Firefox). You click it to execute the program on the current page.</p>
@@ -252,8 +240,7 @@ f d w
 <p>Okay, how about this: I&rsquo;m going to teach you how to make paella!</p>
 <p><em>And</em> you&rsquo;ll have written a function that does <em>the stuff I mentioned above</em>, just like I did for a freeCodeCamp challenge.</p>
 <p>I promise there&rsquo;s an overarching moral lesson that will benefit you every day for the rest of your life. Or at least, feed you for one night. Let&rsquo;s get started.</p>
-<h2 id="the-only-thing-i-know-about-paella-is-that-its-an-emoticon">The only thing I know about paella is that it&rsquo;s an emoticon</h2>
-<figure><img src="solve-unicode-paella.jpg"
+<h2 id="the-only-thing-i-know-about-paella-is-that-its-an-emoticon"><a href="#the-only-thing-i-know-about-paella-is-that-its-an-emoticon">The only thing I know about paella is that it&rsquo;s an emoticon</a></h2><figure><img src="solve-unicode-paella.jpg"
          alt="Unicode paella emoji."/><figcaption>
             <p>Unless you&rsquo;re reading this on a Samsung phone, in which case you&rsquo;re looking at a Korean hotpot.</p>
         </figcaption>
@@ -267,8 +254,7 @@ f d w
 </blockquote>
 <p>At this point, you&rsquo;re probably full of questions. Do I need to talk to a Valencian? Should I take an online course on the history of Spain? What type of paella should I try to make? What is the common opinion of modern chefs when it comes to paella types?</p>
 <p>If you set out with the intention of answering all these questions, one thing is certain: you&rsquo;ll never end up actually making paella. You&rsquo;ll spend hours upon hours typing questions into search engines and years later wake up with a Masters in Valencian Cuisine.</p>
-<h2 id="the-most-important-question-method">The &ldquo;Most Important Question&rdquo; method</h2>
-<p>When I talk to myself out loud in public (doesn&rsquo;t everyone?) I refer to this as &ldquo;MIQ&rdquo; (rhymes with &ldquo;Nick&rdquo;). I also imagine MIQ to be a rather crunchy and quite adorable anthropomorphized tortilla chip. Couldn&rsquo;t tell you why.</p>
+<h2 id="the-most-important-question-method"><a href="#the-most-important-question-method">The &ldquo;Most Important Question&rdquo; method</a></h2><p>When I talk to myself out loud in public (doesn&rsquo;t everyone?) I refer to this as &ldquo;MIQ&rdquo; (rhymes with &ldquo;Nick&rdquo;). I also imagine MIQ to be a rather crunchy and quite adorable anthropomorphized tortilla chip. Couldn&rsquo;t tell you why.</p>
 <p><p class="md-image">
   <img class="u-photo" src="solve-miq.png#center" alt="MIQ the chip."  />
 </p></p>
@@ -295,8 +281,7 @@ f d w
         </figcaption>
 </figure>
 
-<h2 id="i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites">I still know nothing about calculating the orbital periods of satellites</h2>
-<p>Okay. Let&rsquo;s examine the problem:</p>
+<h2 id="i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites"><a href="#i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites">I still know nothing about calculating the orbital periods of satellites</a></h2><p>Okay. Let&rsquo;s examine the problem:</p>
 <blockquote>
 <p>Return a new array that transforms the element&rsquo;s average altitude into their orbital periods.</p>
 <p>The array will contain objects in the format {name: &lsquo;name&rsquo;, avgAlt: avgAlt}.</p>
@@ -349,8 +334,7 @@ f d w
 <span class="p">}</span>
 </code></pre></div><p>If you need a refresher on iterating through arrays, have a look at my <a href="/blog/iterating-over-objects-and-arrays-frequent-errors/">article on iterating, featuring breakfast arrays</a>! (5 minutes read)</p>
 <p>Don&rsquo;t look now, but you just gained the ability to calculate the orbital period of satellites. You could even do it <em>while</em> making paella, if you wanted to. Seriously. Put it on your resume.</p>
-<h2 id="tldr-the-overarching-moral-lesson">Tl;dr: the overarching moral lesson</h2>
-<p>Whether it&rsquo;s cooking, coding, or anything else, problems may at first seem confusing, insurmountable, or downright boring. If you&rsquo;re faced with such a challenge, just remember: they&rsquo;re a lot more digestible with a side of bite-sized MIQ chips.</p>
+<h2 id="tldr-the-overarching-moral-lesson"><a href="#tldr-the-overarching-moral-lesson">Tl;dr: the overarching moral lesson</a></h2><p>Whether it&rsquo;s cooking, coding, or anything else, problems may at first seem confusing, insurmountable, or downright boring. If you&rsquo;re faced with such a challenge, just remember: they&rsquo;re a lot more digestible with a side of bite-sized MIQ chips.</p>
 <p><p class="md-image">
   <img class="u-photo" src="solve-miq-bowl.png#center" alt="Bowl of MIQs."  />
 </p></p>
@@ -440,8 +424,7 @@ peanut butter mayo sandwich
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">arr</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">[[</span><span class="mi">4</span><span class="p">]]]]</span>
 </code></pre></div><p>We want to produce this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">flat</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
-</code></pre></div><h2 id="using-for-loops-and-if-statements">Using for loops and if statements</h2>
-<p>Naively, if we know the maximum number of nested arrays we&rsquo;ll encounter (there are 4 in this example), we can use <code>for</code> loops to iterate through each array item, then <code>if</code> statements to check if each item is in itself an array, and so on&hellip;</p>
+</code></pre></div><h2 id="using-for-loops-and-if-statements"><a href="#using-for-loops-and-if-statements">Using for loops and if statements</a></h2><p>Naively, if we know the maximum number of nested arrays we&rsquo;ll encounter (there are 4 in this example), we can use <code>for</code> loops to iterate through each array item, then <code>if</code> statements to check if each item is in itself an array, and so on&hellip;</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">flatten</span><span class="p">()</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">flat</span> <span class="o">=</span> <span class="p">[];</span>
     <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="nx">arr</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
@@ -469,8 +452,7 @@ peanut butter mayo sandwich
 
 <span class="c1">// [1, 2, 3, 4]
 </span></code></pre></div><p>&hellip;Which works, but of course looks ridiculous. Besides looking ridiculous, a) it only works if we know how many nested arrays we&rsquo;ll process, b) it&rsquo;s hard to read and harder to understand, and c) can you imagine having to debug this mess?! (Gee, I think there&rsquo;s an extra <code>i</code> somewhere.)</p>
-<h2 id="using-reduce">Using reduce</h2>
-<p>JavaScript has a couple methods we can use to make our code a little less ridiculous. One of these is <code>reduce()</code> and it looks like this:</p>
+<h2 id="using-reduce"><a href="#using-reduce">Using reduce</a></h2><p>JavaScript has a couple methods we can use to make our code a little less ridiculous. One of these is <code>reduce()</code> and it looks like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">flat</span> <span class="o">=</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">done</span><span class="p">,</span><span class="nx">curr</span><span class="p">){</span>
     <span class="k">return</span> <span class="nx">done</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">curr</span><span class="p">);</span>
 <span class="p">},</span> <span class="p">[]);</span>
@@ -489,8 +471,7 @@ The reduce() method applies a function against an accumulator and each element i
 </figure>
 
 <p>In our above example, the pile of apples is our array, <code>arr</code>. Our basket is <code>done</code>, the accumulator. The initial value of <code>done</code> is an empty array, which we see as <code>[]</code> at the end of our reduce function. The apple that our out-of-work dev is currently shining, you guessed it, is <code>curr</code>. Once Adam processes the current apple, he places it into the basket (<code>.concat()</code>). When there are no more apples in the pile, he returns the basket of polished apples to us, and then probably goes home to his cat, or something.</p>
-<h2 id="using-reduce-recursively-to-address-nested-arrays">Using reduce recursively to address nested arrays</h2>
-<p>So that&rsquo;s all well and good, and now we have a basket of polished apples. But we still have some nested arrays to deal with. Going back to our analogy, let&rsquo;s say that some of the apples in the pile are in boxes. Within each box there could be more apples, and/or more boxes containing smaller, cuter apples.</p>
+<h2 id="using-reduce-recursively-to-address-nested-arrays"><a href="#using-reduce-recursively-to-address-nested-arrays">Using reduce recursively to address nested arrays</a></h2><p>So that&rsquo;s all well and good, and now we have a basket of polished apples. But we still have some nested arrays to deal with. Going back to our analogy, let&rsquo;s say that some of the apples in the pile are in boxes. Within each box there could be more apples, and/or more boxes containing smaller, cuter apples.</p>
 <figure><img src="recursion-nested-apples.jpg"
          alt="Box within a box within a box with apples"/><figcaption>
             <p>Adorable, slightly skewed apples just want to be loved/eaten.</p>
@@ -545,8 +526,7 @@ The reduce() method applies a function against an accumulator and each element i
 
 ]]></content></entry><entry><title type="html">Iterating over objects and arrays: frequent errors</title><link href="https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/"/><id>https://victoria.dev/blog/iterating-over-objects-and-arrays-frequent-errors/</id><author><name>Victoria Drake</name></author><published>2017-05-16T10:46:46+07:00</published><updated>2017-05-16T10:46:46+07:00</updated><content type="html"><![CDATA[<p>Here&rsquo;s <del>some complaining</del> a quick overview of some code that has confounded me more than once. I&rsquo;m told even very experienced developers encounter these situations regularly, so if you find yourself on your third cup of coffee scratching your head over why your code is doing exactly what you told it to do (and not what you <em>want</em> it to do), maybe this post can help you.</p>
 <p>The example code is JavaScript, since that&rsquo;s what I&rsquo;ve been working in lately, but I believe the concepts to be pretty universal.</p>
-<h2 id="quick-reference-for-equivalent-statements">Quick reference for equivalent statements</h2>
-<table>
+<h2 id="quick-reference-for-equivalent-statements"><a href="#quick-reference-for-equivalent-statements">Quick reference for equivalent statements</a></h2><table>
 <thead>
 <tr>
 <th>This&hellip;</th>
@@ -580,8 +560,7 @@ The reduce() method applies a function against an accumulator and each element i
 </tr>
 </tbody>
 </table>
-<h2 id="quick-reference-for-logical-statements">Quick reference for logical statements</h2>
-<table>
+<h2 id="quick-reference-for-logical-statements"><a href="#quick-reference-for-logical-statements">Quick reference for logical statements</a></h2><table>
 <thead>
 <tr>
 <th>This&hellip;</th>
@@ -615,8 +594,7 @@ The reduce() method applies a function against an accumulator and each element i
 </tr>
 </tbody>
 </table>
-<h2 id="objects">Objects</h2>
-<p>Given a breakfast object that looks like this:</p>
+<h2 id="objects"><a href="#objects">Objects</a></h2><p>Given a breakfast object that looks like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">breakfast</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;eggs&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
     <span class="s1">&#39;waffles&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
@@ -630,8 +608,7 @@ The reduce() method applies a function against an accumulator and each element i
 <p><p class="md-image">
   <img class="u-photo" src="cover.png#center" alt="Breakfast object."  />
 </p></p>
-<h3 id="iterate-over-object-properties">Iterate over object properties</h3>
-<p>We can iterate through each breakfast item using a for loop as follows:</p>
+<h3 id="iterate-over-object-properties"><a href="#iterate-over-object-properties">Iterate over object properties</a></h3><p>We can iterate through each breakfast item using a for loop as follows:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="nx">item</span> <span class="k">in</span> <span class="nx">breakfast</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;item: &#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
 <span class="p">}</span>
@@ -640,8 +617,7 @@ The reduce() method applies a function against an accumulator and each element i
 item: waffles
 item: fruit
 item: coffee
-</code></pre></div><h3 id="get-object-property-value">Get object property value</h3>
-<p>We can access the value of the property or nested properties (in this example, the number of items) like this:</p>
+</code></pre></div><h3 id="get-object-property-value"><a href="#get-object-property-value">Get object property value</a></h3><p>We can access the value of the property or nested properties (in this example, the number of items) like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many waffles? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;waffles&#39;</span><span class="p">])</span>
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many strawberries? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;fruit&#39;</span><span class="p">][</span><span class="s1">&#39;strawberries&#39;</span><span class="p">])</span>
 </code></pre></div><p>Or equivalent syntax:</p>
@@ -650,8 +626,7 @@ item: coffee
 </code></pre></div><p>This produces:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">How many waffles?  <span class="m">2</span>
 How many strawberries?  <span class="m">1</span>
-</code></pre></div><h3 id="get-object-property-from-the-value">Get object property from the value</h3>
-<p>If instead I want to access the property via the value, for example, to find out which items are served in twos, I can do so by iterating like this:</p>
+</code></pre></div><h3 id="get-object-property-from-the-value"><a href="#get-object-property-from-the-value">Get object property from the value</a></h3><p>If instead I want to access the property via the value, for example, to find out which items are served in twos, I can do so by iterating like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="nx">item</span> <span class="k">in</span> <span class="nx">breakfast</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">breakfast</span><span class="p">[</span><span class="nx">item</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Two of: &#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
@@ -660,8 +635,7 @@ How many strawberries?  <span class="m">1</span>
 </code></pre></div><p>Which gives us:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Two of:  eggs
 Two of:  waffles
-</code></pre></div><h3 id="alter-nested-property-values">Alter nested property values</h3>
-<p>Say I want to increase the number of fruits in breakfast, because sugar is bad for me and I like things that are bad for me. I can do that like this:</p>
+</code></pre></div><h3 id="alter-nested-property-values"><a href="#alter-nested-property-values">Alter nested property values</a></h3><p>Say I want to increase the number of fruits in breakfast, because sugar is bad for me and I like things that are bad for me. I can do that like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">fruits</span> <span class="o">=</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;fruit&#39;</span><span class="p">];</span>
 <span class="k">for</span> <span class="p">(</span><span class="nx">f</span> <span class="k">in</span> <span class="nx">fruits</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">fruits</span><span class="p">[</span><span class="nx">f</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
@@ -669,15 +643,13 @@ Two of:  waffles
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">fruits</span><span class="p">);</span>
 </code></pre></div><p>Which gives us:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="o">{</span> blueberries: 6, strawberries: <span class="m">2</span> <span class="o">}</span>
-</code></pre></div><h2 id="arrays">Arrays</h2>
-<p>Given an array of waffles that looks like this:</p>
+</code></pre></div><h2 id="arrays"><a href="#arrays">Arrays</a></h2><p>Given an array of waffles that looks like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">wafflesIAte</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">11</span> <span class="p">];</span>
 </code></pre></div><p>Or like this:</p>
 <p><p class="md-image">
   <img class="u-photo" src="iteration-waffles.png" alt="Waffle array."  />
 </p></p>
-<h3 id="iterate-through-array-items">Iterate through array items</h3>
-<p>We can iterate through each item in the array using a for loop:</p>
+<h3 id="iterate-through-array-items"><a href="#iterate-through-array-items">Iterate through array items</a></h3><p>We can iterate through each item in the array using a for loop:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">wafflesIAte</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;array index: &#39;</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;item from array: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
@@ -701,18 +673,15 @@ item from array:  <span class="m">11</span>
 <code>i</code> in the above context is a placeholder; we could substitute anything we like (<code>x</code>, <code>n</code>, <code>underpants</code>, etc). It simply denotes each instance of the iteration.</p>
 <p><code>i &lt; wafflesIAte.length</code> tells our for loop to continue as long as <code>i</code> is less than the array&rsquo;s length (in this case, 7).</p>
 <p><code>i++</code> is equivalent to <code>i+1</code> and means we&rsquo;re incrementing through our array by one each time. We could also use <code>i+2</code> to proceed with every other item in the array, for example.</p>
-<h3 id="access-array-item-by-index">Access array item by index</h3>
-<p>We can specify an item in the array using the array index, written as <code>wafflesIAte[i]</code> where <code>i</code> is any index of the array. This gives the item at that location.</p>
+<h3 id="access-array-item-by-index"><a href="#access-array-item-by-index">Access array item by index</a></h3><p>We can specify an item in the array using the array index, written as <code>wafflesIAte[i]</code> where <code>i</code> is any index of the array. This gives the item at that location.</p>
 <p>Array index always starts with <code>0</code>, which is accessed with <code>wafflesIAte[0]</code>. Using <code>wafflesIAte[1]</code> gives us the second item in the array, which is &ldquo;3&rdquo;.</p>
-<h3 id="ways-to-get-mixed-up-over-arrays">Ways to get mixed up over arrays</h3>
-<p>Remember that <code>wafflesIAte.length</code> and the index of the last item in the array are different. The former is 7, the latter is <code>6</code>.</p>
+<h3 id="ways-to-get-mixed-up-over-arrays"><a href="#ways-to-get-mixed-up-over-arrays">Ways to get mixed up over arrays</a></h3><p>Remember that <code>wafflesIAte.length</code> and the index of the last item in the array are different. The former is 7, the latter is <code>6</code>.</p>
 <p>When incrementing <code>i</code>, remember that <code>[i+1]</code> and <code>[i]+1</code> are different:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[i+1] gives next array index: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="p">]);</span>
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[i]+1 gives index value + 1: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
 </code></pre></div><p>Produces:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="o">[</span>i+1<span class="o">]</span> gives next array index:  <span class="m">3</span>
 <span class="o">[</span>i<span class="o">]</span>+1 gives index value + 1:  <span class="m">2</span>
-</code></pre></div><h2 id="practice-makes-better">Practice makes&hellip; better</h2>
-<p>The more often you code and correct your errors, the better you&rsquo;ll remember it next time!</p>
+</code></pre></div><h2 id="practice-makes-better"><a href="#practice-makes-better">Practice makes&hellip; better</a></h2><p>The more often you code and correct your errors, the better you&rsquo;ll remember it next time!</p>
 <p>That&rsquo;s all for now. If you have a correction, best practice, or another common error for me to add, please let me know!</p>
 ]]></content></entry></feed>

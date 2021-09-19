@@ -15,7 +15,7 @@ How to replace a string with sed in current and recursive subdirectories | victo
 <link rel=me href=https://github.com/victoriadrake>
 <link rel=me href=https://twitter.com/victoriadotdev>
 <link rel=me href=https://mastodon.technology/@victoria>
-<link rel=stylesheet href=https://victoria.dev/css/style.min.62c15a90d70b846c729cd1085b26b1bf6f96ea9b303650d5774416ab86c073c8.css integrity="sha256-YsFakNcLhGxynNEIWyaxv2+W6pswNlDVd0QWq4bAc8g=" crossorigin=anonymous media=screen>
+<link rel=stylesheet href=https://victoria.dev/css/style.min.190d01f481f9662f8242a42a57fce946cf3459334c50748057eb7eb410cd7b99.css integrity="sha256-GQ0B9IH5Zi+CQqQqV/zpRs80WTNMUHSAV+t+tBDNe5k=" crossorigin=anonymous media=screen>
 <link rel=webmention href=https://webmention.io/victoria.dev/webmention>
 <link rel=pingback href=https://webmention.io/victoria.dev/xmlrpc>
 <meta property="og:url" content="https://victoria.dev/">
@@ -33,16 +33,12 @@ How to replace a string with sed in current and recursive subdirectories | victo
 <img src=/icon/bookmark.svg alt="home page icon" height=18px class=filter-icon>&nbsp;hello</a>
 </li>
 <li role=none class=menu-item>
-<a role=menuitem href=/blog/>
-<img src=/icon/quote.svg alt="blog icon" height=18px class=filter-icon>&nbsp;blog</a>
-</li>
-<li role=none class=menu-item>
 <a role=menuitem href=/about/>
 <img src=/icon/profile.svg alt="about page icon" height=18px class=filter-icon>&nbsp;about</a>
 </li>
 <li role=none class=menu-item>
-<a role=menuitem href=/bookshelf/>
-<img src=/icon/book.svg alt="bookshelf icon" height=18px class=filter-icon>&nbsp;bookshelf</a>
+<a role=menuitem href=/blog/>
+<img src=/icon/quote.svg alt="blog icon" height=18px class=filter-icon>&nbsp;blog</a>
 </li>
 </ul>
 </nav>
@@ -53,16 +49,12 @@ How to replace a string with sed in current and recursive subdirectories | victo
 <img src=/icon/bookmark.svg alt="home page icon" height=18px class=filter-icon></a>
 </li>
 <li role=none class=menu-item>
-<a role=menuitem href=/blog/>
-<img src=/icon/quote.svg alt="blog icon" height=18px class=filter-icon></a>
-</li>
-<li role=none class=menu-item>
 <a role=menuitem href=/about/>
 <img src=/icon/profile.svg alt="about page icon" height=18px class=filter-icon></a>
 </li>
 <li role=none class=menu-item>
-<a role=menuitem href=/bookshelf/>
-<img src=/icon/book.svg alt="bookshelf icon" height=18px class=filter-icon></a>
+<a role=menuitem href=/blog/>
+<img src=/icon/quote.svg alt="blog icon" height=18px class=filter-icon></a>
 </li>
 </ul>
 </nav>
@@ -92,21 +84,18 @@ terminal
 <span class=dt-updated>&nbsp;<em>Updated: Nov 22, 2020</em></span>
 <span>&nbsp;3 min read</span>
 </p>
-</p>
 <div class=page-separator>
 <hr>
 </div>
 <div class="markdown e-content">
 <p>Rebranding? Moving to <a href=/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/>a new domain</a> or <a href=/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/>static site</a>? I&rsquo;ve had more than a few of these situations myself! Here&rsquo;s how <code>sed</code> can help make these changes easier.</p>
-<h2 id=update-a-string-in-multiple-files-with-sed>Update a string in multiple files with <code>sed</code></h2>
-<p>Meet your new friend <code>sed</code>. This amazingly powerful tool lives in your terminal and is available to be totally underused for things like finding and replacing strings in files. You&rsquo;ve got two levels of intensity to choose from:</p>
+<h2 id=update-a-string-in-multiple-files-with-sed><a href=#update-a-string-in-multiple-files-with-sed>Update a string in multiple files with <code>sed</code></a></h2><p>Meet your new friend <code>sed</code>. This amazingly powerful tool lives in your terminal and is available to be totally underused for things like finding and replacing strings in files. You&rsquo;ve got two levels of intensity to choose from:</p>
 <ul>
 <li>Non-recursive: Just the files in my current directory.</li>
 <li>Recursive: This directory and all the subdirectories it contains, with <em>maximum prejudice.</em></li>
 </ul>
 <p>Here&rsquo;s how!</p>
-<h2 id=current-directory-non-recursive>Current directory, non-recursive</h2>
-<p><em>Non-recursive</em> means sed won&rsquo;t change files in any subdirectories of the current folder.</p>
+<h2 id=current-directory-non-recursive><a href=#current-directory-non-recursive>Current directory, non-recursive</a></h2><p><em>Non-recursive</em> means sed won&rsquo;t change files in any subdirectories of the current folder.</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>.
 ├── index.html        # Change this file
 └── blog
@@ -125,23 +114,20 @@ terminal
 </ul>
 <p>You can limit the operation to one file type, such as <code>txt</code>, by using:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>sed -i -- <span class=s1>&#39;s/foo/bar/g&#39;</span> *.txt
-</code></pre></div><h2 id=current-directory-and-subdirectories-recursive>Current directory and subdirectories, recursive</h2>
-<p>You can supplement <code>sed</code> with <code>find</code> to expand your scope to all of the current folder&rsquo;s subdirectories. This will include any hidden files.</p>
+</code></pre></div><h2 id=current-directory-and-subdirectories-recursive><a href=#current-directory-and-subdirectories-recursive>Current directory and subdirectories, recursive</a></h2><p>You can supplement <code>sed</code> with <code>find</code> to expand your scope to all of the current folder&rsquo;s subdirectories. This will include any hidden files.</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{}</span> +
 </code></pre></div><p>To ignore hidden files (such as <code>.git</code>) you can pass the negation modifier <code>-not -path '*/\.*'</code>, like this:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -not -path <span class=s1>&#39;*/\.*&#39;</span> -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{}</span> +
 </code></pre></div><p>This will exclude any file that has the string <code>/.</code> in its path.</p>
 <p>You can also limit this operation to file names that end in a certain extension, like Markdown:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -name <span class=s2>&#34;*.md&#34;</span> -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><h2 id=working-with-urls-change-the-separator>Working with URLs: change the separator</h2>
-<p>If you want to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&mldr;</p>
+</code></pre></div><h2 id=working-with-urls-change-the-separator><a href=#working-with-urls-change-the-separator>Working with URLs: change the separator</a></h2><p>If you want to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&mldr;</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=se>\
 </span><span class=se></span><span class=s1>&#39;s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g&#39;</span> <span class=o>{}</span> +
 </code></pre></div><p>You can avoid confusion and mistakes by changing the separator to any non-conflicting character. The character that follows the <code>s</code> will be treated as the separator. In this case, using a <code>,</code> or <code>_</code> would do. This doesn&rsquo;t require escaping and is much more readable:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=se>\
 </span><span class=se></span><span class=s1>&#39;s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><h2 id=command-line-superpowers-for-all>Command-line superpowers for all!</h2>
-<p>I hope this was helpful! If you like this post, there&rsquo;s a lot more where that came from. I write about all sorts of ways to save time with tricks for your terminal. There&rsquo;s some below!</p>
+</code></pre></div><h2 id=command-line-superpowers-for-all><a href=#command-line-superpowers-for-all>Command-line superpowers for all!</a></h2><p>I hope this was helpful! If you like this post, there&rsquo;s a lot more where that came from. I write about all sorts of ways to save time with tricks for your terminal. There&rsquo;s some below!</p>
 </div>
 <a class=hidden href=https://brid.gy/publish/twitter></a>
 <a class=hidden href=https://brid.gy/publish/mastodon></a>
@@ -206,12 +192,11 @@ A speed-run introduction to Matrix via Dendrite.
 <figure class=profile>
 <img class=u-photo alt="Victoria Drake" src=/img/victoria_headshot.jpg>
 </figure>
-<h1 class=p-name>Victoria Drake</h1>
-</address>
-<p class=p-note>
-<p>Victoria Drake is a Director of Engineering in Washington, DC. She is a core maintainer and co-author for the Open Web Application Security Project (OWASP) Web Security Testing Guide. She earned the annual Top Contributor award three years in a row from the freeCodeCamp non-profit, and was recognized two years in a row as a Distinguished Author on the DEV.to developer platform. She writes and educates programmers and business leaders about cybersecurity, software development, and building happy and productive technical teams.</p>
+<div class=p-note>
+<h1>Victoria Drake</h1>
+<p>Victoria Drake is an experienced software engineer with a unique background in technical and executive leadership. She loves to help technology teams raise programming proficiency and streamline development processes. Victoria is an award-winning technical author and open source community mentor. She serves as core maintainer and co-author for the OWASP Web Security Testing Guide.</p>
 <p><a href=/about>about</a> - <a href=/contact>contact</a> - <a href=https://github.com/victoriadrake>github</a> - <a href=https://twitter.com/victoriadotdev>twitter</a> - <a href=https://www.linkedin.com/in/victoriadotdev/>linkedin</a></p>
-</p>
+</div>
 </div>
 </div>
 </footer>

@@ -1,8 +1,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>algorithms on victoria.dev</title><link href="https://victoria.dev/tags/algorithms/feed.xml" rel="self"/><link href="https://victoria.dev/tags/algorithms/"/><updated>2020-10-19T04:02:27-04:00</updated><id>https://victoria.dev/tags/algorithms/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained</title><link href="https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/"/><id>https://victoria.dev/blog/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/</id><author><name>Victoria Drake</name></author><published>2020-10-19T04:02:27-04:00</published><updated>2020-10-19T04:02:27-04:00</updated><content type="html"><![CDATA[<p>Setting up new Wi-Fi? Picking the type of password you need can seem like an arbitrary choice. After all, WEP, WPA, WPA2, and WPA3 all have mostly the same letters in them. A password is a password, so what&rsquo;s the difference?</p>
 <p>About 60 seconds to billions of years, as it turns out.</p>
 <p>All Wi-Fi encryption is not created equal. Let&rsquo;s explore what makes these four acronyms so different, and how you can best protect your home and organization Wi-Fi.</p>
-<h2 id="wired-equivalent-privacy-wep">Wired Equivalent Privacy (WEP)</h2>
-<p>In the beginning, there was WEP.</p>
+<h2 id="wired-equivalent-privacy-wep"><a href="#wired-equivalent-privacy-wep">Wired Equivalent Privacy (WEP)</a></h2><p>In the beginning, there was WEP.</p>
 <figure><img src="wep.png"
          alt="cartoon of WEP letters"/><figcaption>
             <p>Not to be confused with the name of a certain rap song.</p>
@@ -19,8 +18,7 @@
 <p>Combined with the use of RC4, this left WEP particularly susceptible to <a href="https://en.wikipedia.org/wiki/Related-key_attack">related-key attack</a>. In the case of 128-bit WEP, your Wi-Fi password can be cracked by publicly-available tools in a matter of around <a href="https://shawnhogan.com/2006/08/how-to-crack-128-bit-wireless-networks.html">60 seconds</a> to <a href="https://www.networkcomputing.com/wireless-infrastructure/fbi-teaches-lesson-how-break-wi-fi-networks">three minutes</a>.</p>
 <p>While some devices came to offer 152-bit or 256-bit WEP variants, this failed to solve the fundamental problems of WEP&rsquo;s underlying encryption mechanism.</p>
 <p>So, yeah. Let&rsquo;s not do that anymore.</p>
-<h2 id="wi-fi-protected-access-wpa">Wi-Fi Protected Access (WPA)</h2>
-<p><p class="md-image">
+<h2 id="wi-fi-protected-access-wpa"><a href="#wi-fi-protected-access-wpa">Wi-Fi Protected Access (WPA)</a></h2><p><p class="md-image">
   <img class="u-photo" src="wpa.png" alt="WPA illustration"  />
 </p></p>
 <p>A new, interim standard sought to temporarily &ldquo;patch&rdquo; the problem of WEP&rsquo;s (lack of) security. The name <a href="https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access">Wi-Fi Protected Access (WPA)</a> certainly <em>sounds</em> more secure, so that&rsquo;s a good start; however, WPA first started out with another, more descriptive name.</p>
@@ -29,35 +27,30 @@
 <p>Unfortunately, in order to preserve compatibility with the existing hardware that WPA was meant to &ldquo;patch,&rdquo; TKIP retained the use of the same underlying encryption mechanism as WEP &ndash; the RC4 stream cipher. While it certainly improved on the weaknesses of WEP, TKIP eventually proved vulnerable to new attacks that <a href="https://en.wikipedia.org/wiki/Temporal_Key_Integrity_Protocol#Security">extended previous attacks on WEP</a>. These attacks take a little longer to execute by comparison: for example, <a href="http://dl.aircrack-ng.org/breakingwepandwpa.pdf">twelve minutes</a> in the case of one, and <a href="https://www.rc4nomore.com/">52 hours</a> in another. This is more than sufficient, however, to deem TKIP no longer secure.</p>
 <p>WPA, or TKIP, has since been deprecated as well. So let&rsquo;s also not do that anymore.</p>
 <p>Which brings us to&hellip;</p>
-<h2 id="wi-fi-protected-access-ii-wpa2">Wi-Fi Protected Access II (WPA2)</h2>
-<p><p class="md-image">
+<h2 id="wi-fi-protected-access-ii-wpa2"><a href="#wi-fi-protected-access-ii-wpa2">Wi-Fi Protected Access II (WPA2)</a></h2><p><p class="md-image">
   <img class="u-photo" src="wpa2.png" alt="WPA2 illustration"  />
 </p></p>
 <p>Rather than spend the effort to come up with an entirely new name, the improved <a href="https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access#WPA2">Wi-Fi Protected Access II (WPA2)</a> standard instead focuses on using a new underlying cipher. Instead of the RC4 stream cipher, WPA2 employs a block cipher called <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">Advanced Encryption Standard (AES)</a> to form the basis of its encryption protocol. The protocol itself, abbreviated <a href="https://en.wikipedia.org/wiki/CCMP_(cryptography)">CCMP</a>, draws most of its security from the length of its rather long name (I&rsquo;m kidding): Counter Mode Cipher Block Chaining Message Authentication Code Protocol, which shortens to Counter Mode CBC-MAC Protocol, or CCM mode Protocol, or CCMP. 🤷</p>
 <p><a href="https://en.wikipedia.org/wiki/CCM_mode">CCM mode</a> is essentially a combination of a few good ideas. It provides data confidentiality through <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29">CTR mode, or counter mode</a>. To vastly oversimplify, this adds complexity to plaintext data by encrypting the successive values of a count sequence that does not repeat. CCM also integrates <a href="https://en.wikipedia.org/wiki/CBC-MAC">CBC-MAC</a>, a block cipher method for constructing a MAC.</p>
 <p>AES itself is on good footing. The AES specification was established in 2001 by the U.S. National Institute of Standards and Technology (NIST) after a five-year competitive selection process during which fifteen proposals for algorithm designs were evaluated. As a result of this process, a family of ciphers called Rijndael (Dutch) was selected, and a subset of these became AES. For the better part of two decades, AES has been used to protect every-day Internet traffic as well as <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#Security">certain levels of classified information in the U.S. Government</a>.</p>
 <p>While <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#Known_attacks">possible attacks on AES</a> have been described, none have yet been proven to be practical in real-world use. The fastest <a href="https://web.archive.org/web/20141230025103/http://research.microsoft.com/en-us/projects/cryptanalysis/aesbc.pdf">attack on AES</a> in public knowledge is a <a href="https://en.wikipedia.org/wiki/Key-recovery_attack">key-recovery attack</a> that improved on brute-forcing AES by a factor of about four. How long would it take? Some <a href="https://web.archive.org/web/20150108165723/https://blog.agilebits.com/2011/08/18/aes-encryption-isnt-cracked/">billions of years</a>.</p>
-<h2 id="wi-fi-protected-access-iii-wpa3">Wi-Fi Protected Access III (WPA3)</h2>
-<p><p class="md-image">
+<h2 id="wi-fi-protected-access-iii-wpa3"><a href="#wi-fi-protected-access-iii-wpa3">Wi-Fi Protected Access III (WPA3)</a></h2><p><p class="md-image">
   <img class="u-photo" src="wpa3.png" alt="WPA3 illustration"  />
 </p></p>
 <p>The next installment of the WPA trilogy has been <a href="https://www.wi-fi.org/download.php?file=/sites/default/files/private/Certification_Overview_v5.2_0.pdf">required for new devices</a> since July 1, 2020. Expected to further enhance the security of WPA2, the <a href="https://www.wi-fi.org/news-events/newsroom/wi-fi-alliance-introduces-wi-fi-certified-wpa3-security">WPA3 standard</a> seeks to improve password security by being more resilient to word list or <a href="https://en.wikipedia.org/wiki/Dictionary_attack">dictionary attacks</a>.</p>
 <p>Unlike its predecessors, WPA3 will also offer <a href="https://en.wikipedia.org/wiki/Forward_secrecy">forward secrecy</a>. This adds the considerable benefit of protecting previously exchanged information even if a long-term secret key is compromised. Forward secrecy is already provided by protocols like TLS by using asymmetric keys to establish shared keys. You can learn <a href="/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/">more about TLS in this post</a>.</p>
 <p>As WPA2 has not been deprecated, both WPA2 and WPA3 remain your top choices for Wi-Fi security.</p>
-<h2 id="if-the-other-ones-suck-why-are-they-still-around">If the other ones suck, why are they still around?</h2>
-<p>You may be wondering why your access point even allows you to choose an option other than WPA2 or WPA3. The likely reason is that you&rsquo;re using legacy hardware, which is what tech people call your mom&rsquo;s router.</p>
+<h2 id="if-the-other-ones-suck-why-are-they-still-around"><a href="#if-the-other-ones-suck-why-are-they-still-around">If the other ones suck, why are they still around?</a></h2><p>You may be wondering why your access point even allows you to choose an option other than WPA2 or WPA3. The likely reason is that you&rsquo;re using legacy hardware, which is what tech people call your mom&rsquo;s router.</p>
 <p>Since the deprecation of WEP and WPA occurred (in old-people terms) rather recently, it&rsquo;s possible in large organizations as well as your parent&rsquo;s house to find older hardware that still uses these protocols. Even newer hardware may have a business need to support these older protocols.</p>
 <p>While I may be able to convince you to invest in a shiny new top-of-the-line Wi-Fi appliance, most organizations are a different story. Unfortunately, many just aren&rsquo;t yet cognizant of the important role cybersecurity plays in meeting customer needs and boosting that bottom line. Additionally, switching to newer protocols may require new internal hardware or firmware upgrades. Especially on complex systems in large organizations, upgrading devices can be financially or strategically difficult.</p>
-<h2 id="boost-your-wi-fi-security">Boost your Wi-Fi security</h2>
-<p>If it&rsquo;s an option, choose WPA2 or WPA3. Cybersecurity is a field that evolves by the day, and getting stuck in the past can have dire consequences.</p>
+<h2 id="boost-your-wi-fi-security"><a href="#boost-your-wi-fi-security">Boost your Wi-Fi security</a></h2><p>If it&rsquo;s an option, choose WPA2 or WPA3. Cybersecurity is a field that evolves by the day, and getting stuck in the past can have dire consequences.</p>
 <p>If you can&rsquo;t use WPA2 or WPA3, do the best you can to take additional security measures. The best bang for your buck is to use a Virtual Private Network (VPN). Using a VPN is a good idea no matter which type of Wi-Fi encryption you have. On open Wi-Fi (coffee shops) and using WEP, it&rsquo;s plain irresponsible to go without a VPN. Kind of like shouting out your bank details as you order your second cappuccino.</p>
 <figure><img src="cafewifi.png"
          alt="A cartoon of shouting out your bank details at a coffeeshop."/>
 </figure>
 <p>Choose a VPN provider that offers a feature like <a href="https://www.xvinlink.com/features/network-lock?a_fid=victoria&data1=www">ExpressVPN's Network Lock</a> with automatic connection. This is a kill switch that blocks your network traffic if your VPN becomes disconnected, preventing you from accidentally transmitting information on an insecure connection like open Wi-Fi or WEP. I personally use ExpressVPN. Their auto-connect feature works well on Linux, and I never worry about remembering to start it up first. I wrote more about <a href="/blog/vpn">choosing a VPN in this post</a>.</p>
 <p>When possible, ensure you only connect to known networks that you or your organization control. Many cybersecurity attacks are executed when victims connect to an imitation public Wi-Fi access point, also called an evil twin attack, or Wi-Fi phishing. These fake hotspots are easily created using publicly accessible programs and tools. A VPN can help mitigate damage from these attacks as well, but it&rsquo;s always better not to take the risk. If you travel often, consider purchasing a portable hotspot that uses a cellular data plan, or using data SIM cards for all your devices.</p>
-<h2 id="much-more-than-just-acronyms">Much more than just acronyms</h2>
-<p>WEP, WPA, WPA2, and WPA3 mean a lot more than a bunch of similar letters &ndash; in some cases, it&rsquo;s a difference of billions of years minus about 60 seconds.</p>
+<h2 id="much-more-than-just-acronyms"><a href="#much-more-than-just-acronyms">Much more than just acronyms</a></h2><p>WEP, WPA, WPA2, and WPA3 mean a lot more than a bunch of similar letters &ndash; in some cases, it&rsquo;s a difference of billions of years minus about 60 seconds.</p>
 <p>On more of a now-ish timescale, I hope I&rsquo;ve taught you something new about the security of your Wi-Fi and how you can improve it!</p>
 <p>If you&rsquo;d like to thank me, you can <a href="https://www.xvinlink.com/?a_fid=victoria&data1=www">protect yourself with ExpressVPN</a> with my referral. I only refer products I use personally, and this one is solid.</p>
 <p>Know someone who&rsquo;d benefit from some beefed up cybersecurity? Share the <a href="/blog/your-cybersecurity-starter-pack/">cybersecurity starter pack</a>!</p>
@@ -70,15 +63,13 @@
 <li>How can we communicate securely?</li>
 </ul>
 <p>Here&rsquo;s how TLS works, explained in plain English. As with many successful interactions, it begins with a handshake.</p>
-<h2 id="getting-to-know-you">Getting to know you</h2>
-<p>The basic process of a <a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_handshake">TLS handshake</a> involves a client, such as your web browser, and a server, such as one hosting a website, establishing some ground rules for communication. It begins with the client saying hello. Literally. It&rsquo;s called a <em>ClientHello</em> message.</p>
+<h2 id="getting-to-know-you"><a href="#getting-to-know-you">Getting to know you</a></h2><p>The basic process of a <a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_handshake">TLS handshake</a> involves a client, such as your web browser, and a server, such as one hosting a website, establishing some ground rules for communication. It begins with the client saying hello. Literally. It&rsquo;s called a <em>ClientHello</em> message.</p>
 <p>The <em>ClientHello</em> message tells the server which TLS protocol version and <em>cipher suites</em> it supports. While &ldquo;cipher suite&rdquo; sounds like a fancy hotel upgrade, it just refers to a set of algorithms that can be used to secure communications. The server, in a similarly named <em>ServerHello</em> message, chooses the protocol version and cipher suite to use from the choices offered. Other data may also be sent, for example, a <em>session ID</em> if the server supports resuming a previous handshake.</p>
 <p><p class="md-image">
   <img class="u-photo" src="hello-hello.png" alt="A cartoon of a client and server saying hello"  />
 </p></p>
 <p>Depending on the cipher suite chosen, the client and server exchange further information in order to establish a shared secret. Often, this process moves the exchange from <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">asymmetric cryptography</a> to <a href="https://en.wikipedia.org/wiki/Symmetric-key_algorithm">symmetric cryptography</a> with varying levels of complexity. Let&rsquo;s explore these concepts at a general level and see why they matter to TLS.</p>
-<h2 id="asymmetric-beginnings">Asymmetric beginnings</h2>
-<p>This is asymmetry:</p>
+<h2 id="asymmetric-beginnings"><a href="#asymmetric-beginnings">Asymmetric beginnings</a></h2><p>This is asymmetry:</p>
 <figure><img src="asymmetry-eggs.jpeg"
          alt="A small egg and a big egg"/><figcaption>
             <p>Small egg, big egg.</p>
@@ -89,8 +80,7 @@
 <p>In an asymmetric cryptographic system, you use a pair of keys in order to achieve authentication. These keys are asymmetric. One key is your public key, which, as you would guess, is public. The other is your private key, which &ndash; well, you know.</p>
 <p>Typically, during the TLS handshake, the server will provide its public key via its digital certificate, sometimes still called its <em>SSL certificate</em>, though TLS replaces the deprecated Secure Sockets Layer (SSL) protocol. Digital certificates are provided and verified by trusted third parties known as <a href="https://en.wikipedia.org/wiki/Certificate_authority">Certificate Authorities (CA)</a>, which are a whole other article in themselves.</p>
 <p>While anyone may encrypt a message using your public key, only your private key can then decrypt that message. The security of asymmetric cryptography relies only on your private key staying private, hence the asymmetry. It&rsquo;s also asymmetric in the sense that it&rsquo;s a one-way trip. Alice can send messages encrypted with your public key to you, but neither of your keys will help you send an encrypted message to Alice.</p>
-<h2 id="symmetric-secrets">Symmetric secrets</h2>
-<p>Asymmetric cryptography also requires more computational resources than symmetric cryptography. Thus when a TLS handshake begins with an asymmetric exchange, the client and server will use this initial communication to establish a shared secret, sometimes called a <em>session key</em>. This key is symmetric, meaning that both parties use the same shared secret and must maintain that secrecy for the encryption to be secure.</p>
+<h2 id="symmetric-secrets"><a href="#symmetric-secrets">Symmetric secrets</a></h2><p>Asymmetric cryptography also requires more computational resources than symmetric cryptography. Thus when a TLS handshake begins with an asymmetric exchange, the client and server will use this initial communication to establish a shared secret, sometimes called a <em>session key</em>. This key is symmetric, meaning that both parties use the same shared secret and must maintain that secrecy for the encryption to be secure.</p>
 <figure><img src="asym-vs-sym.png"
          alt="A cartoon of public-key cryptography vs. shared-key cryptography"/><figcaption>
             <p>Wise man say: share your public key, but keep your shared keys private.</p>
@@ -98,13 +88,11 @@
 </figure>
 
 <p>By using the initial asymmetric communication to establish a session key, the client and server can rely on the session key being known only to them. For the rest of the session, they&rsquo;ll both use this same shared key to encrypt and decrypt messages, which speeds up communication.</p>
-<h2 id="secure-sessions">Secure sessions</h2>
-<p>A TLS handshake may use asymmetric cryptography or other cipher suites to establish the shared session key. Once the session key is established, the handshaking portion is complete and the session begins.</p>
+<h2 id="secure-sessions"><a href="#secure-sessions">Secure sessions</a></h2><p>A TLS handshake may use asymmetric cryptography or other cipher suites to establish the shared session key. Once the session key is established, the handshaking portion is complete and the session begins.</p>
 <p>The <em>session</em> is the duration of encrypted communication between the client and server. During this time, messages are encrypted and decrypted using the session key that only the client and server have. This ensures that communication is secure.</p>
 <p>The integrity of exchanged information is maintained by using a checksum. Messages exchanged using session keys have a <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message authentication code (MAC)</a> attached. This is not the same thing as your device&rsquo;s <a href="https://en.wikipedia.org/wiki/MAC_address">MAC address</a>. The MAC is generated and verified using the session key. Because of this, either party can detect if a message has been changed before being received. This solves the fundamental question, &ldquo;How do I know this message from you hasn&rsquo;t been tampered with?&rdquo;</p>
 <p>Sessions can end deliberately, due to network disconnection, or from the client staying idle for too long. Once a session ends, it must be re-established via a new handshake or through previously established secrets called <em>session IDs</em> that allow resuming a session.</p>
-<h2 id="tls-and-you">TLS and you</h2>
-<p>Let&rsquo;s recap:</p>
+<h2 id="tls-and-you"><a href="#tls-and-you">TLS and you</a></h2><p>Let&rsquo;s recap:</p>
 <ul>
 <li>TLS is a cryptographic protocol for providing secure communication.</li>
 <li>The process of creating a secure connection begins with a handshake.</li>
@@ -116,8 +104,7 @@
 ]]></content></entry><entry><title type="html">A coffee-break introduction to time complexity of algorithms</title><link href="https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/"/><id>https://victoria.dev/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/</id><author><name>Victoria Drake</name></author><published>2018-05-30T14:08:28-04:00</published><updated>2018-05-30T14:08:28-04:00</updated><content type="html"><![CDATA[<p>Just like writing your very first <code>for</code> loop, understanding time complexity is an integral milestone to learning how to write efficient complex programs. Think of it as having a superpower that allows you to know exactly what type of program might be the most efficient in a particular situation - before even running a single line of code.</p>
 <p>The fundamental concepts of complexity analysis are well worth studying. You&rsquo;ll be able to better understand how the code you&rsquo;re writing will interact with the program&rsquo;s input, and as a result, you&rsquo;ll spend a lot less wasted time writing slow and problematic code. It won&rsquo;t take long to go over all you need to know in order to start writing more efficient programs - in fact, we can do it in about fifteen minutes. You can go grab a coffee right now (or tea, if that&rsquo;s your thing) and I&rsquo;ll take you through it before your coffee break is over. Go ahead, I&rsquo;ll wait.</p>
 <p>All set? Let&rsquo;s do it!</p>
-<h2 id="what-is-time-complexity-anyway">What is &ldquo;time complexity&rdquo; anyway</h2>
-<p>The time complexity of an algorithm is an <strong>approximation</strong> of how long that algorithm will take to process some input. It describes the efficiency of the algorithm by the magnitude of its operations. This is different than the number of times an operation repeats; I&rsquo;ll expand on that later. Generally, the fewer operations the algorithm has, the faster it will be.</p>
+<h2 id="what-is-time-complexity-anyway"><a href="#what-is-time-complexity-anyway">What is &ldquo;time complexity&rdquo; anyway</a></h2><p>The time complexity of an algorithm is an <strong>approximation</strong> of how long that algorithm will take to process some input. It describes the efficiency of the algorithm by the magnitude of its operations. This is different than the number of times an operation repeats; I&rsquo;ll expand on that later. Generally, the fewer operations the algorithm has, the faster it will be.</p>
 <p>We write about time complexity using <a href="https://en.wikipedia.org/wiki/Big_O_notation">Big O notation</a>, which looks something like <em>O</em>(<em>n</em>). There&rsquo;s rather a lot of math involved in its formal definition, but informally we can say that Big O notation gives us our algorithm&rsquo;s approximate run time in the <strong>worst case</strong>, or in other words, its upper bound.<sup>[<a href="#references">2</a>]</sup> It is inherently relative and comparative.<sup>[<a href="#references">3</a>]</sup> We&rsquo;re describing the algorithm&rsquo;s efficiency relative to the increasing size of its input data, <em>n</em>. If the input is a string, then <em>n</em> is the length of the string. If it&rsquo;s a list of integers, <em>n</em> is the length of the list.</p>
 <p>It&rsquo;s easiest to picture what Big O notation represents with a graph:</p>
 <figure class="screenshot"><img src="graph.png"
@@ -131,16 +118,13 @@
 <li>Time complexity is an approximation</li>
 <li>An algorithm&rsquo;s time complexity approximates its worst case run time</li>
 </ul>
-<h2 id="determining-time-complexity">Determining time complexity</h2>
-<p>There are different classes of complexity that we can use to quickly understand an algorithm. I&rsquo;ll illustrate some of these classes using nested loops and other examples.</p>
-<h2 id="polynomial-time-complexity">Polynomial time complexity</h2>
-<p>A <strong>polynomial</strong>, from the Greek <em>poly</em> meaning &ldquo;many,&rdquo; and Latin <em>nomen</em> meaning &ldquo;name,&rdquo; describes an expression comprised of constant variables, and addition, multiplication, and exponentiation to a non-negative integer power.<sup>[<a href="#references">4</a>]</sup> That&rsquo;s a super math-y way to say that it contains variables usually denoted by letters and symbols that look like these:</p>
+<h2 id="determining-time-complexity"><a href="#determining-time-complexity">Determining time complexity</a></h2><p>There are different classes of complexity that we can use to quickly understand an algorithm. I&rsquo;ll illustrate some of these classes using nested loops and other examples.</p>
+<h2 id="polynomial-time-complexity"><a href="#polynomial-time-complexity">Polynomial time complexity</a></h2><p>A <strong>polynomial</strong>, from the Greek <em>poly</em> meaning &ldquo;many,&rdquo; and Latin <em>nomen</em> meaning &ldquo;name,&rdquo; describes an expression comprised of constant variables, and addition, multiplication, and exponentiation to a non-negative integer power.<sup>[<a href="#references">4</a>]</sup> That&rsquo;s a super math-y way to say that it contains variables usually denoted by letters and symbols that look like these:</p>
 <p><p class="md-image">
   <img class="u-photo" src="polynomial.png" alt="A polynomial example"  />
 </p></p>
 <p>The below classes describe polynomial algorithms. Some have food examples.</p>
-<h3 id="constant">Constant</h3>
-<p>A <strong>constant time</strong> algorithm doesn&rsquo;t change its running time in response to the input data. No matter the size of the data it receives, the algorithm takes the same amount of time to run. We denote this as a time complexity of <em>O</em>(1).</p>
+<h3 id="constant"><a href="#constant">Constant</a></h3><p>A <strong>constant time</strong> algorithm doesn&rsquo;t change its running time in response to the input data. No matter the size of the data it receives, the algorithm takes the same amount of time to run. We denote this as a time complexity of <em>O</em>(1).</p>
 <figure class="screenshot"><img src="graph%281%29.png"
          alt="A graph showing constant time complexity."/>
 </figure>
@@ -156,8 +140,7 @@
 </figure>
 
 <p>With this constant-time algorithm, no matter how many cupcakes are on offer, you just get the first one. Oh well. Flavours are overrated anyway.</p>
-<h3 id="linear">Linear</h3>
-<p>The running duration of a <strong>linear</strong> algorithm is constant. It will process the input in <em>n</em> number of operations. This is often the best possible (most efficient) case for time complexity where all the data must be examined.</p>
+<h3 id="linear"><a href="#linear">Linear</a></h3><p>The running duration of a <strong>linear</strong> algorithm is constant. It will process the input in <em>n</em> number of operations. This is often the best possible (most efficient) case for time complexity where all the data must be examined.</p>
 <figure class="screenshot"><img src="graph%28n%29.png"
          alt="A graph showing linear time complexity."/>
 </figure>
@@ -181,8 +164,7 @@
         </figcaption>
 </figure>
 
-<h3 id="quadratic">Quadratic</h3>
-<figure class="screenshot"><img src="graph%28n2%29.png"
+<h3 id="quadratic"><a href="#quadratic">Quadratic</a></h3><figure class="screenshot"><img src="graph%28n2%29.png"
          alt="A graph showing quadratic time complexity"/>
 </figure>
 
@@ -196,8 +178,7 @@
  <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div><p>Because there are two nested loops, or nested linear operations, the algorithm process the input <em>n</em><sup>2</sup> times.</p>
-<h3 id="cubic">Cubic</h3>
-<figure class="screenshot"><img src="graph%28n3%29.png"
+<h3 id="cubic"><a href="#cubic">Cubic</a></h3><figure class="screenshot"><img src="graph%28n3%29.png"
          alt="A graph showing cubic time complexity"/>
 </figure>
 
@@ -219,8 +200,7 @@
         </figcaption>
 </figure>
 
-<h3 id="logarithmic">Logarithmic</h3>
-<p>A <strong>logarithmic</strong> algorithm is one that reduces the size of the input at every step.
+<h3 id="logarithmic"><a href="#logarithmic">Logarithmic</a></h3><p>A <strong>logarithmic</strong> algorithm is one that reduces the size of the input at every step.
 We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log</strong>, the logarithm function, is this shape:</p>
 <figure class="screenshot"><img src="graph%28logn%29.png"
          alt="A graph showing logarithmic time complexity"/>
@@ -239,31 +219,26 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
 </ol>
 <p>I find the clearest analogy for understanding binary search is imagining the process of locating a book in a bookstore aisle. If the books are organized by author&rsquo;s last name and you want to find &ldquo;Terry Pratchett,&rdquo; you know you need to look for the &ldquo;P&rdquo; section.</p>
 <p>You can approach the shelf at any point along the aisle and look at the author&rsquo;s last name there. If you&rsquo;re looking at a book by Neil Gaiman, you know you can ignore all the rest of the books to your left, since no letters that come before &ldquo;G&rdquo; in the alphabet happen to be &ldquo;P.&rdquo; You would then move down the aisle to the right any amount, and repeat this process until you&rsquo;ve found the Terry Pratchett section, which should be rather sizable if you&rsquo;re at any decent bookstore because wow did he write a lot of books.</p>
-<h3 id="quasilinear">Quasilinear</h3>
-<figure class="screenshot"><img src="graph%28nlogn%29.png"
+<h3 id="quasilinear"><a href="#quasilinear">Quasilinear</a></h3><figure class="screenshot"><img src="graph%28nlogn%29.png"
          alt="A graph showing quasilinear time complexity"/>
 </figure>
 
 <p>Often seen with sorting algorithms, the time complexity <em>O</em>(<em>n</em> log <em>n</em>) can describe a data structure where each operation takes <em>O</em>(log <em>n</em>) time. One example of this is <a href="https://en.wikipedia.org/wiki/Quicksort">quick sort</a>, a divide-and-conquer algorithm.</p>
 <p>Quick sort works by dividing up an unsorted array into smaller chunks that are easier to process. It sorts the sub-arrays, and thus the whole array. Think about it like trying to put a deck of cards in order. It&rsquo;s faster if you split up the cards and get five friends to help you.</p>
-<h3 id="non-polynomial-time-complexity">Non-polynomial time complexity</h3>
-<p>The below classes of algorithms are non-polynomial.</p>
-<h3 id="factorial">Factorial</h3>
-<figure class="screenshot"><img src="graph%28nfac%29.png"
+<h3 id="non-polynomial-time-complexity"><a href="#non-polynomial-time-complexity">Non-polynomial time complexity</a></h3><p>The below classes of algorithms are non-polynomial.</p>
+<h3 id="factorial"><a href="#factorial">Factorial</a></h3><figure class="screenshot"><img src="graph%28nfac%29.png"
          alt="A graph showing factorial time complexity"/>
 </figure>
 
 <p>An algorithm with time complexity <em>O</em>(<em>n</em>!) often iterates through all permutations of the input elements. One common example is a <a href="https://en.wikipedia.org/wiki/Brute-force_search">brute-force search</a> seen in the <a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem#Computing_a_solution">travelling salesman problem</a>. It tries to find the least costly path between a number of points by enumerating all possible permutations and finding the ones with the lowest cost.</p>
-<h3 id="exponential">Exponential</h3>
-<p>An <strong>exponential</strong> algorithm often also iterates through all subsets of the input elements. It is denoted <em>O</em>(2<sup><em>n</em></sup>) and is often seen in brute-force algorithms. It is similar to factorial time except in its rate of growth, which as you may not be surprised to hear, is exponential. The larger the data set, the more steep the curve becomes.</p>
+<h3 id="exponential"><a href="#exponential">Exponential</a></h3><p>An <strong>exponential</strong> algorithm often also iterates through all subsets of the input elements. It is denoted <em>O</em>(2<sup><em>n</em></sup>) and is often seen in brute-force algorithms. It is similar to factorial time except in its rate of growth, which as you may not be surprised to hear, is exponential. The larger the data set, the more steep the curve becomes.</p>
 <figure class="screenshot"><img src="graph%282n%29.png"
          alt="A graph showing exponential time complexity"/>
 </figure>
 
 <p>In cryptography, a brute-force attack may systematically check all possible elements of a password by iterating through subsets. Using an exponential algorithm to do this, it becomes incredibly resource-expensive to brute-force crack a long password versus a shorter one. This is one reason that a long password is considered more secure than a shorter one.</p>
 <p>There are further time complexity classes less commonly seen that I won&rsquo;t cover here, but you can read about these and find examples in <a href="https://en.wikipedia.org/wiki/Time_complexity#Table_of_common_time_complexities">this handy table</a>.</p>
-<h3 id="recursion-time-complexity">Recursion time complexity</h3>
-<p>As I described in my article <a href="/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">explaining recursion using apple pie</a>, a recursive function calls itself under specified conditions. Its time complexity depends on how many times the function is called and the time complexity of a single function call. In other words, it&rsquo;s the product of the number of times the function runs and a single execution&rsquo;s time complexity.</p>
+<h3 id="recursion-time-complexity"><a href="#recursion-time-complexity">Recursion time complexity</a></h3><p>As I described in my article <a href="/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">explaining recursion using apple pie</a>, a recursive function calls itself under specified conditions. Its time complexity depends on how many times the function is called and the time complexity of a single function call. In other words, it&rsquo;s the product of the number of times the function runs and a single execution&rsquo;s time complexity.</p>
 <p>Here&rsquo;s a recursive function that eats pies until no pies are left:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
  <span class="k">if</span> <span class="nx">pies</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
@@ -279,8 +254,7 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
         </figcaption>
 </figure>
 
-<h3 id="worst-case-time-complexity">Worst case time complexity</h3>
-<p>So far, we&rsquo;ve talked about the time complexity of a few nested loops and some code examples. Most algorithms, however, are built from many combinations of these. How do we determine the time complexity of an algorithm containing many of these elements strung together?</p>
+<h3 id="worst-case-time-complexity"><a href="#worst-case-time-complexity">Worst case time complexity</a></h3><p>So far, we&rsquo;ve talked about the time complexity of a few nested loops and some code examples. Most algorithms, however, are built from many combinations of these. How do we determine the time complexity of an algorithm containing many of these elements strung together?</p>
 <p>Easy. We can describe the total time complexity of the algorithm by finding the largest complexity among all of its parts. This is because the slowest part of the code is the bottleneck, and time complexity is concerned with describing the worst case for the algorithm&rsquo;s run time.</p>
 <p>Say we have a program for an office party. If our program looks like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
@@ -374,8 +348,7 @@ Eating pie...
 Eating pie...
 Someone ate all the pies!
 Food gone. Back to work!
-</code></pre></div><h2 id="p-vs-np-np-complete-and-np-hard">P vs NP, NP-complete, and NP-hard</h2>
-<p>You may come across these terms in your explorations of time complexity. Informally, <strong>P</strong> (for Polynomial time), is a class of problems that is quick to solve. <strong>NP</strong>, for Nondeterministic Polynomial time, is a class of problems where the answer can be quickly verified in polynomial time. NP encompasses P, but also another class of problems called <strong>NP-complete</strong>, for which no fast solution is known.<sup>[<a href="#references">5</a>]</sup> Outside of NP but still including NP-complete is yet another class called <strong>NP-hard</strong>, which includes problems that no one has been able to verifiably solve with polynomial algorithms.<sup>[<a href="#references">6</a>]</sup></p>
+</code></pre></div><h2 id="p-vs-np-np-complete-and-np-hard"><a href="#p-vs-np-np-complete-and-np-hard">P vs NP, NP-complete, and NP-hard</a></h2><p>You may come across these terms in your explorations of time complexity. Informally, <strong>P</strong> (for Polynomial time), is a class of problems that is quick to solve. <strong>NP</strong>, for Nondeterministic Polynomial time, is a class of problems where the answer can be quickly verified in polynomial time. NP encompasses P, but also another class of problems called <strong>NP-complete</strong>, for which no fast solution is known.<sup>[<a href="#references">5</a>]</sup> Outside of NP but still including NP-complete is yet another class called <strong>NP-hard</strong>, which includes problems that no one has been able to verifiably solve with polynomial algorithms.<sup>[<a href="#references">6</a>]</sup></p>
 <figure class="screenshot"><img src="pnpeuler.svg"
          alt="Euler diagram"/><figcaption>
             <p>P vs NP Euler diagram, <a href="https://commons.wikimedia.org/w/index.php?curid=3532181">by Behnam Esfahbod, CC BY-SA 3.0</a></p>
@@ -384,8 +357,7 @@ Food gone. Back to work!
 
 <p><a href="https://en.wikipedia.org/wiki/P_versus_NP_problem">P versus NP</a> is an unsolved, open question in computer science.</p>
 <p>Anyway, you don&rsquo;t generally need to know about NP and NP-hard problems to begin taking advantage of understanding time complexity. They&rsquo;re a whole other Pandora&rsquo;s box.</p>
-<h2 id="approximate-the-efficiency-of-an-algorithm-before-you-write-the-code">Approximate the efficiency of an algorithm before you write the code</h2>
-<p>So far, we&rsquo;ve identified some different time complexity classes and how we might determine which one an algorithm falls into. So how does this help us before we&rsquo;ve written any code to evaluate?</p>
+<h2 id="approximate-the-efficiency-of-an-algorithm-before-you-write-the-code"><a href="#approximate-the-efficiency-of-an-algorithm-before-you-write-the-code">Approximate the efficiency of an algorithm before you write the code</a></h2><p>So far, we&rsquo;ve identified some different time complexity classes and how we might determine which one an algorithm falls into. So how does this help us before we&rsquo;ve written any code to evaluate?</p>
 <p>By combining a little knowledge of time complexity with an awareness of the size of our input data, we can take a guess at an efficient algorithm for processing our data within a given time constraint. We can base our estimation on the fact that a modern computer can perform some hundreds of millions of operations in a second.<sup>[<a href="#references">1</a>]</sup> The following table from the <a href="#references">Competitive Programmer&rsquo;s Handbook</a> offers some estimates on required time complexity to process the respective input size in a time limit of one second.</p>
 <table>
 <thead>
@@ -438,8 +410,7 @@ Food gone. Back to work!
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Benchmark_makeCoffee-4          <span class="m">1000000000</span>               0.29 ns/op
 Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               0.86 ns/op
 </code></pre></div><p>Our first function, <code>makeCoffee</code>, completed in an average 0.29 nanoseconds. Our second function, <code>makeStrongCoffee</code>, completed in an average of 0.86 nanoseconds. While those may both seem like pretty small numbers, consider that the stronger coffee took near three times longer to make. This should make sense intuitively, since we asked it to triple the scoops. Big O notation alone wouldn&rsquo;t tell you this, since the constant factor of the tripled scoops isn&rsquo;t accounted for.</p>
-<h2 id="improve-time-complexity-of-existing-code">Improve time complexity of existing code</h2>
-<p>Becoming familiar with time complexity gives us the opportunity to write code, or refactor code, to be more efficient. To illustrate, I&rsquo;ll give a concrete example of one way we can refactor a bit of code to improve its time complexity.</p>
+<h2 id="improve-time-complexity-of-existing-code"><a href="#improve-time-complexity-of-existing-code">Improve time complexity of existing code</a></h2><p>Becoming familiar with time complexity gives us the opportunity to write code, or refactor code, to be more efficient. To illustrate, I&rsquo;ll give a concrete example of one way we can refactor a bit of code to improve its time complexity.</p>
 <p>Let&rsquo;s say a bunch of people at the office want some pie. Some people want pie more than others. The amount that everyone wants some pie is represented by an <code>int</code> &gt; 0:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">diners</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">56</span><span class="p">}</span>
 </code></pre></div><p>Unfortunately, we&rsquo;re bootstrapped and there are only three forks to go around. Since we&rsquo;re a cooperative bunch, the three people who want pie the most will receive the forks to eat it with. Even though they&rsquo;ve all agreed on this, no one seems to want to sort themselves out and line up in an orderly fashion, so we&rsquo;ll have to make do with everybody jumbled about.</p>
@@ -512,8 +483,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </code></pre></div><p>This program is much faster, and the whole epic struggle for fork domination is over in 47 nanoseconds.</p>
 <p>As you can see, with a little change in perspective and some refactoring, we&rsquo;ve made this simple bit of code faster and more efficient.</p>
 <p>Well, it looks like our fifteen minute coffee break is up! I hope I&rsquo;ve given you a comprehensive introduction to calculating time complexity. Time to get back to work, hopefully applying your new knowledge to write more effective code! Or maybe just sound smart at your next office party. :)</p>
-<h2 id="references">References</h2>
-<p>&ldquo;If I have seen further it is by standing on the shoulders of Giants.&rdquo; &ndash;Isaac Newton, 1675</p>
+<h2 id="references"><a href="#references">References</a></h2><p>&ldquo;If I have seen further it is by standing on the shoulders of Giants.&rdquo; &ndash;Isaac Newton, 1675</p>
 <ol>
 <li>Antti Laaksonen. <em><a href="https://cses.fi/book.pdf">Competitive Programmer&rsquo;s Handbook (pdf)</a>,</em> 2017</li>
 <li>Wikipedia: <a href="https://en.wikipedia.org/wiki/Big_O_notation">Big O notation</a></li>
@@ -523,8 +493,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <li>Wikipedia: <a href="https://en.wikipedia.org/wiki/NP-hardness">NP-hardness</a></li>
 <li><a href="https://www.desmos.com/">Desmos graph calculator</a></li>
 </ol>
-]]></content></entry><entry><title type="html">Knapsack problem algorithms for my real-life carry-on knapsack</title><link href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/"/><id>https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/</id><author><name>Victoria Drake</name></author><published>2018-05-09T21:00:35-04:00</published><updated>2018-05-09T21:00:35-04:00</updated><content type="html"><![CDATA[<h2 id="the-knapsack-problem">The knapsack problem</h2>
-<p>I&rsquo;m a nomad and live out of one carry-on bag. This means that the total weight of all my worldly possessions must fall under airline cabin baggage weight limits - usually 10kg. On some smaller airlines, however, this weight limit drops to 7kg. Occasionally, I have to decide not to bring something with me to adjust to the smaller weight limit.</p>
+]]></content></entry><entry><title type="html">Knapsack problem algorithms for my real-life carry-on knapsack</title><link href="https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/"/><id>https://victoria.dev/blog/knapsack-problem-algorithms-for-my-real-life-carry-on-knapsack/</id><author><name>Victoria Drake</name></author><published>2018-05-09T21:00:35-04:00</published><updated>2018-05-09T21:00:35-04:00</updated><content type="html"><![CDATA[<h2 id="the-knapsack-problem"><a href="#the-knapsack-problem">The knapsack problem</a></h2><p>I&rsquo;m a nomad and live out of one carry-on bag. This means that the total weight of all my worldly possessions must fall under airline cabin baggage weight limits - usually 10kg. On some smaller airlines, however, this weight limit drops to 7kg. Occasionally, I have to decide not to bring something with me to adjust to the smaller weight limit.</p>
 <p>As a practical exercise, deciding what to leave behind (or get rid of altogether) entails laying out all my things and choosing which ones to keep. That decision is based on the item&rsquo;s usefulness to me (its worth) and its weight.</p>
 <figure><img src="knapsack-stuff.jpeg"
          alt="All my stuff."/><figcaption>
@@ -535,17 +504,14 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <p>Being a programmer, I&rsquo;m aware that decisions like this could be made more efficiently by a computer. It&rsquo;s done so frequently and so ubiquitously, in fact, that many will recognize this scenario as the classic <em>packing problem</em> or <em>knapsack problem.</em> How do I go about telling a computer to put as many important items in my bag as possible while coming in at or under a weight limit of 7kg? With algorithms! Yay!</p>
 <p>I&rsquo;ll discuss two common approaches to solving the knapsack problem: one called a <em>greedy algorithm,</em> and another called <em>dynamic programming</em> (a little harder, but better, faster, stronger&hellip;).</p>
 <p>Let&rsquo;s get to it.</p>
-<h2 id="the-set-up">The set up</h2>
-<p>I prepared my data in the form of a CSV file with three columns: the item&rsquo;s name (a string), a representation of its worth (an integer), and its weight in grams (an integer). There are 40 items in total. I represented worth by ranking each item from 40 to 1, with 40 being the most important and 1 equating with something like &ldquo;why do I even have this again?&rdquo; (If you&rsquo;ve never listed out all your possessions and ranked them by order of how useful they are to you, I highly recommend you try it. It can be a very revealing exercise.)</p>
+<h2 id="the-set-up"><a href="#the-set-up">The set up</a></h2><p>I prepared my data in the form of a CSV file with three columns: the item&rsquo;s name (a string), a representation of its worth (an integer), and its weight in grams (an integer). There are 40 items in total. I represented worth by ranking each item from 40 to 1, with 40 being the most important and 1 equating with something like &ldquo;why do I even have this again?&rdquo; (If you&rsquo;ve never listed out all your possessions and ranked them by order of how useful they are to you, I highly recommend you try it. It can be a very revealing exercise.)</p>
 <p><strong>Total weight of all items and bag:</strong> 9003g</p>
 <p><strong>Bag weight:</strong> 1415g</p>
 <p><strong>Airline limit:</strong> 7000g</p>
 <p><strong>Maximum weight of items I can pack:</strong> 5585g</p>
 <p><strong>Total possible worth of items:</strong> 820</p>
 <p><strong>The challenge:</strong> Pack as many items as the limit allows while maximizing the total worth.</p>
-<h2 id="data-structures">Data structures</h2>
-<h3 id="reading-in-a-file">Reading in a file</h3>
-<p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&rsquo;s <code>io/ioutil</code> package makes the first part straightforward.</p>
+<h2 id="data-structures"><a href="#data-structures">Data structures</a></h2><h3 id="reading-in-a-file"><a href="#reading-in-a-file">Reading in a file</a></h3><p>Before we can begin thinking about how to solve the knapsack problem, we have to solve the problem of reading in and storing our data. Thankfully, the Go standard library&rsquo;s <code>io/ioutil</code> package makes the first part straightforward.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
@@ -565,8 +531,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="nx">fmt</span><span class="p">.</span><span class="nf">Print</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">dat</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div><p>The <code>ReadFile()</code> function takes a file path and returns the file&rsquo;s contents and an error (<code>nil</code> if the call is successful) so we&rsquo;ve also created a <code>check()</code> function to handle any errors that might be returned. In a real-world application we probably would want to do something more sophisticated than <code>panic</code>, but that&rsquo;s not important right now.</p>
-<h3 id="creating-a-struct">Creating a struct</h3>
-<p>Now that we&rsquo;ve got our data, we should probably do something with it. Since we&rsquo;re working with real-life items and a real-life bag, let&rsquo;s create some types to represent them and make it easier to conceptualize our program. A <code>struct</code> in Go is a typed collection of fields. Here are our two types:</p>
+<h3 id="creating-a-struct"><a href="#creating-a-struct">Creating a struct</a></h3><p>Now that we&rsquo;ve got our data, we should probably do something with it. Since we&rsquo;re working with real-life items and a real-life bag, let&rsquo;s create some types to represent them and make it easier to conceptualize our program. A <code>struct</code> in Go is a typed collection of fields. Here are our two types:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">item</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">name</span>          <span class="kt">string</span>
     <span class="nx">worth</span><span class="p">,</span> <span class="nx">weight</span> <span class="kt">int</span>
@@ -577,8 +542,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="nx">items</span>                                                   <span class="p">[]</span><span class="nx">item</span>
 <span class="p">}</span>
 </code></pre></div><p>It is helpful to use field names that are very descriptive. You can see that the structs are set up just as we&rsquo;ve described the things they represent. An <code>item</code> has a <code>name</code> (string), and a <code>worth</code> and <code>weight</code> (integers). A <code>bag</code> has several fields of type <code>int</code> representing its attributes, and also has the ability to hold <code>items</code>, represented in the struct as a slice of <code>item</code> type thingamabobbers.</p>
-<h3 id="parsing-and-storing-our-data">Parsing and storing our data</h3>
-<p>Several comprehensive Go packages exist that we could use to parse our CSV data&hellip; but where&rsquo;s the fun in that? Let&rsquo;s go basic with some string splitting and a for loop. Here&rsquo;s our updated <code>readItems()</code> function:</p>
+<h3 id="parsing-and-storing-our-data"><a href="#parsing-and-storing-our-data">Parsing and storing our data</a></h3><p>Several comprehensive Go packages exist that we could use to parse our CSV data&hellip; but where&rsquo;s the fun in that? Let&rsquo;s go basic with some string splitting and a for loop. Here&rsquo;s our updated <code>readItems()</code> function:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">readItems</span><span class="p">(</span><span class="nx">path</span> <span class="kt">string</span><span class="p">)</span> <span class="p">[]</span><span class="nx">item</span> <span class="p">{</span>
 
     <span class="nx">dat</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span>
@@ -650,10 +614,8 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="k">return</span> <span class="nx">itemList</span>
 <span class="p">}</span>
 </code></pre></div><p>Now that we&rsquo;ve got our data structures set up, let&rsquo;s get packing (🥁) on the first approach.</p>
-<h2 id="greedy-algorithm">Greedy algorithm</h2>
-<p>A greedy algorithm is the most straightforward approach to solving the knapsack problem, in that it is a one-pass algorithm that constructs a single final solution. At each stage of the problem, the greedy algorithm picks the option that is locally optimal, meaning it looks like the most suitable option right now. It does not revise its previous choices as it progresses through our data set.</p>
-<h3 id="building-our-greedy-algorithm">Building our greedy algorithm</h3>
-<p>The steps of the algorithm we&rsquo;ll use to solve our knapsack problem are:</p>
+<h2 id="greedy-algorithm"><a href="#greedy-algorithm">Greedy algorithm</a></h2><p>A greedy algorithm is the most straightforward approach to solving the knapsack problem, in that it is a one-pass algorithm that constructs a single final solution. At each stage of the problem, the greedy algorithm picks the option that is locally optimal, meaning it looks like the most suitable option right now. It does not revise its previous choices as it progresses through our data set.</p>
+<h3 id="building-our-greedy-algorithm"><a href="#building-our-greedy-algorithm">Building our greedy algorithm</a></h3><p>The steps of the algorithm we&rsquo;ll use to solve our knapsack problem are:</p>
 <ol>
 <li>Sort items by worth, in descending order.</li>
 <li>Start with the highest worth item. Put items into the bag until the next item on the list cannot fit.</li>
@@ -708,8 +670,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 
     <span class="nf">greedy</span><span class="p">(</span><span class="nx">itemList</span><span class="p">,</span> <span class="nx">minaal</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre></div><h3 id="greedy-algorithm-results">Greedy algorithm results</h3>
-<p>So how does this algorithm do when it comes to efficiently packing our bag to maximize its total worth? Here&rsquo;s the result:</p>
+</code></pre></div><h3 id="greedy-algorithm-results"><a href="#greedy-algorithm-results">Greedy algorithm results</a></h3><p>So how does this algorithm do when it comes to efficiently packing our bag to maximize its total worth? Here&rsquo;s the result:</p>
 <p><strong>Total weight of bag and items:</strong> 6987g</p>
 <p><strong>Total worth of packed items:</strong> 716</p>
 <p>Here are the items our greedy algorithm chose, sorted by worth:</p>
@@ -862,12 +823,10 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 <p>It&rsquo;s clear that the greedy algorithm is a straightforward way to quickly find a feasible solution. For small data sets, it will probably be close to the optimal solution. The algorithm packed a total item worth of 716 (104 points less than the maximum possible value), while filling the bag with just 13g left over.</p>
 <p>As we learned earlier, the greedy algorithm doesn&rsquo;t improve upon the solution it returns. It simply adds the next highest worth item it can to the bag.</p>
 <p>Let&rsquo;s look at another method for solving the knapsack problem that will give us the optimal solution - the highest possible total worth under the weight limit.</p>
-<h2 id="dynamic-programming">Dynamic programming</h2>
-<p>The name &ldquo;dynamic programming&rdquo; can be a bit misleading. It&rsquo;s not a style of programming, as the name might cause you to infer, but simply another approach.</p>
+<h2 id="dynamic-programming"><a href="#dynamic-programming">Dynamic programming</a></h2><p>The name &ldquo;dynamic programming&rdquo; can be a bit misleading. It&rsquo;s not a style of programming, as the name might cause you to infer, but simply another approach.</p>
 <p>Dynamic programming differs from the straightforward greedy algorithm in a few key ways. Firstly, a dynamic programming bag packing solution enumerates the entire solution space with all possibilities of item combinations that could be used to pack our bag. Where a greedy algorithm chooses the most optimal <em>local</em> solution, dynamic programming algorithms are able to find the most optimal <em>global</em> solution.</p>
 <p>Secondly, dynamic programming uses memoization to store the results of previously computed operations and returns the cached result when the operation occurs again. This allows it to &ldquo;remember&rdquo; previous combinations. This takes less time than it would to re-compute the answer again.</p>
-<h3 id="building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm</h3>
-<p>To use dynamic programming to find the optimal recipe for packing our bag, we&rsquo;ll need to:</p>
+<h3 id="building-our-dynamic-programming-algorithm"><a href="#building-our-dynamic-programming-algorithm">Building our dynamic programming algorithm</a></h3><p>To use dynamic programming to find the optimal recipe for packing our bag, we&rsquo;ll need to:</p>
 <ol>
 <li>Create a matrix representing all subsets of the items (the solution space) with rows representing items and columns representing the bag&rsquo;s remaining weight capacity</li>
 <li>Loop through the matrix and calculate the worth that can be obtained by each combination of items at each stage of the bag&rsquo;s capacity</li>
@@ -925,8 +884,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </figure>
 
 <p>That&rsquo;s great, but how do we find out which combination of items were put in the bag to achieve that worth?</p>
-<h3 id="getting-our-optimized-item-list">Getting our optimized item list</h3>
-<p>To see which items combine to create our optimal packing list, we&rsquo;ll need to examine our matrix in reverse to the way we created it. Since we know the highest possible value is in the last row in the last column, we&rsquo;ll start there. To find the items, we:</p>
+<h3 id="getting-our-optimized-item-list"><a href="#getting-our-optimized-item-list">Getting our optimized item list</a></h3><p>To see which items combine to create our optimal packing list, we&rsquo;ll need to examine our matrix in reverse to the way we created it. Since we know the highest possible value is in the last row in the last column, we&rsquo;ll start there. To find the items, we:</p>
 <ol>
 <li>Get the value of the current cell</li>
 <li>Compare the value of the current cell to the value in the cell directly above it</li>
@@ -1002,8 +960,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 
     <span class="k">return</span> <span class="nx">b</span>
 <span class="p">}</span>
-</code></pre></div><h3 id="dynamic-programming-results">Dynamic programming results</h3>
-<p>We expect that the dynamic programming approach will give us a more optimized solution than the greedy algorithm. So did it? Here are the results:</p>
+</code></pre></div><h3 id="dynamic-programming-results"><a href="#dynamic-programming-results">Dynamic programming results</a></h3><p>We expect that the dynamic programming approach will give us a more optimized solution than the greedy algorithm. So did it? Here are the results:</p>
 <p><strong>Total weight of bag and items:</strong> 6982g</p>
 <p><strong>Total worth of packed items:</strong> 757</p>
 <p>Here are the items our dynamic programming algorithm chose, sorted by worth:</p>
@@ -1189,8 +1146,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </tbody>
 </table>
 <p>There&rsquo;s an obvious improvement to our dynamic programming solution over what the greedy algorithm gave us. Our total worth of 757 is 41 points greater than the greedy algorithm&rsquo;s solution of 716, and for a few grams less weight too!</p>
-<h3 id="input-sort-order">Input sort order</h3>
-<p>While testing my dynamic programming solution, I implemented the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffle algorithm</a> on the input before passing it into my function, just to ensure that the answer wasn&rsquo;t somehow dependent on the sort order of the input. Here&rsquo;s what the shuffle looks like in Go:</p>
+<h3 id="input-sort-order"><a href="#input-sort-order">Input sort order</a></h3><p>While testing my dynamic programming solution, I implemented the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffle algorithm</a> on the input before passing it into my function, just to ensure that the answer wasn&rsquo;t somehow dependent on the sort order of the input. Here&rsquo;s what the shuffle looks like in Go:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">rand</span><span class="p">.</span><span class="nf">Seed</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">UnixNano</span><span class="p">())</span>
 
 <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">itemList</span> <span class="p">{</span>
@@ -1202,8 +1158,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
     <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">itemList</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
 <span class="p">})</span>
 </code></pre></div><p>So did the order in which the items were processed affect the outcome? Well&hellip;</p>
-<h4 id="suddenly-a-rogue-weight-appears">Suddenly&hellip; a rogue weight appears!</h4>
-<p>As it turns out, in a way, the answer did depend on the order of the input. When I ran my dynamic programming algorithm several times, I sometimes saw a different total weight for the bag, though the total worth remained at 757. I initially thought this was a bug before examining the two sets of items that accompanied the two different total weight values. Everything was the same except for a few changes that collectively added up to a different item subset accounting for 14 of the 757 worth points.</p>
+<h4 id="suddenly-a-rogue-weight-appears"><a href="#suddenly-a-rogue-weight-appears">Suddenly&hellip; a rogue weight appears!</a></h4><p>As it turns out, in a way, the answer did depend on the order of the input. When I ran my dynamic programming algorithm several times, I sometimes saw a different total weight for the bag, though the total worth remained at 757. I initially thought this was a bug before examining the two sets of items that accompanied the two different total weight values. Everything was the same except for a few changes that collectively added up to a different item subset accounting for 14 of the 757 worth points.</p>
 <p>In this case, there were two equally optimal solutions based only on the success metric of the highest total possible worth. Shuffling the input seemed to affect the placement of the items in the matrix and thus, the path that the <code>checkItem()</code> function took as it went through the matrix to find the chosen items. Since the success metric of having the highest possible worth was the same in both item sets, we don&rsquo;t have a single unique solution - there&rsquo;s two!</p>
 <p>As an academic exercise, both these sets of items are correct answers. We may choose to optimize further by another metric, say, the total weight of all the items. The highest possible worth at the least possible weight could be seen as an ideal solution.</p>
 <p>Here&rsquo;s the second, lighter, dynamic programming result:</p>
@@ -1400,9 +1355,7 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </tr>
 </tbody>
 </table>
-<h2 id="which-approach-is-better">Which approach is better?</h2>
-<h3 id="go-benchmarking">Go benchmarking</h3>
-<p>The Go standard library&rsquo;s <code>testing</code> package makes it straightforward for us to <a href="https://golang.org/pkg/testing/#hdr-Benchmarks">benchmark</a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&rsquo;s a simple <code>main_test.go</code> file:</p>
+<h2 id="which-approach-is-better"><a href="#which-approach-is-better">Which approach is better?</a></h2><h3 id="go-benchmarking"><a href="#go-benchmarking">Go benchmarking</a></h3><p>The Go standard library&rsquo;s <code>testing</code> package makes it straightforward for us to <a href="https://golang.org/pkg/testing/#hdr-Benchmarks">benchmark</a> these two approaches. We can find out how long it takes each algorithm to run, and how much memory each uses. Here&rsquo;s a simple <code>main_test.go</code> file:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
@@ -1427,12 +1380,9 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </code></pre></div><p>We can run <code>go test -bench=. -benchmem</code> to see these results:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Benchmark_greedy-4       <span class="m">1000000</span>              <span class="m">1619</span> ns/op            <span class="m">2128</span> B/op          <span class="m">9</span> allocs/op
 Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m">1545322</span> ns/op         <span class="m">2020332</span> B/op         <span class="m">49</span> allocs/op
-</code></pre></div><h4 id="greedy-algorithm-performance">Greedy algorithm performance</h4>
-<p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.</p>
-<h4 id="dynamic-programming-performance">Dynamic programming performance</h4>
-<p>The dynamic programming algorithm was run 1,000 times. Its speed was measured to be 1.545322 milliseconds or 0.001545322 seconds (translation: still pretty fast). It required 2,020,332 Bytes or 2-ish Megabytes, and 49 distinct memory allocations per iteration.</p>
-<h3 id="the-verdict">The verdict</h3>
-<p>Part of choosing the right approach to solving any programming problem is taking into account the size of the input data set. In this case, it&rsquo;s a small one. In this scenario, a one-pass greedy algorithm will always be faster and less resource-needy than dynamic programming, simply because it has fewer steps. Our greedy algorithm was almost two orders of magnitude faster and less memory-hungry than our dynamic programming algorithm.</p>
+</code></pre></div><h4 id="greedy-algorithm-performance"><a href="#greedy-algorithm-performance">Greedy algorithm performance</a></h4><p>After running the greedy algorithm 1,000,000 times, the speed of the algorithm was reliably measured to be 0.001619 milliseconds (translation: very fast). It required 2128 Bytes or 2-ish kilobytes of memory and 9 distinct memory allocations per iteration.</p>
+<h4 id="dynamic-programming-performance"><a href="#dynamic-programming-performance">Dynamic programming performance</a></h4><p>The dynamic programming algorithm was run 1,000 times. Its speed was measured to be 1.545322 milliseconds or 0.001545322 seconds (translation: still pretty fast). It required 2,020,332 Bytes or 2-ish Megabytes, and 49 distinct memory allocations per iteration.</p>
+<h3 id="the-verdict"><a href="#the-verdict">The verdict</a></h3><p>Part of choosing the right approach to solving any programming problem is taking into account the size of the input data set. In this case, it&rsquo;s a small one. In this scenario, a one-pass greedy algorithm will always be faster and less resource-needy than dynamic programming, simply because it has fewer steps. Our greedy algorithm was almost two orders of magnitude faster and less memory-hungry than our dynamic programming algorithm.</p>
 <p>Not having those extra steps, however, means that getting the best possible solution from the greedy algorithm is unlikely.</p>
 <p>It&rsquo;s clear that the dynamic programming algorithm gave us better numbers: a lower weight, and higher overall worth.</p>
 <table>
@@ -1458,8 +1408,7 @@ Benchmark_dynamic-4         <span class="m">1000</span>           <span class="m
 </table>
 <p>Where dynamic programming on small data sets lacks in performance, it makes up in optimization. The question then becomes whether that additional optimization is worth the performance cost.</p>
 <p>&ldquo;Better,&rdquo; of course, is a subjective judgement. If speed and low resource usage is our success metric, then the greedy algorithm is clearly better. If the total worth of items in the bag is our success metric, then dynamic programming is clearly better. However, our scenario is a practical one, and only one of these algorithm designs returned an answer I&rsquo;d choose. In optimizing for the overall greatest possible total worth of the items in the bag, the dynamic programming algorithm left out my highest-worth, but also heaviest, item: my laptop. The chargers and cables, Roost stand, and keyboard that were included aren&rsquo;t much use without it.</p>
-<h3 id="better-algorithm-design">Better algorithm design</h3>
-<p>There&rsquo;s a simple way to alter the dynamic programming approach so that the laptop is always included: we can modify the data so that the worth of the laptop is greater than the sum of the worth of all the other items. (Try it out!)</p>
+<h3 id="better-algorithm-design"><a href="#better-algorithm-design">Better algorithm design</a></h3><p>There&rsquo;s a simple way to alter the dynamic programming approach so that the laptop is always included: we can modify the data so that the worth of the laptop is greater than the sum of the worth of all the other items. (Try it out!)</p>
 <p>Perhaps in re-designing the dynamic programming algorithm to be more practical, we might choose another success metric that better reflects an item&rsquo;s importance, instead of a subjective worth value. There are many possible metrics we can use to represent the value of an item. Here are a few examples of a good proxy:</p>
 <ul>
 <li>Amount of time spent using the item</li>
@@ -1524,8 +1473,7 @@ f d w
 <p>Okay, how about this: I&rsquo;m going to teach you how to make paella!</p>
 <p><em>And</em> you&rsquo;ll have written a function that does <em>the stuff I mentioned above</em>, just like I did for a freeCodeCamp challenge.</p>
 <p>I promise there&rsquo;s an overarching moral lesson that will benefit you every day for the rest of your life. Or at least, feed you for one night. Let&rsquo;s get started.</p>
-<h2 id="the-only-thing-i-know-about-paella-is-that-its-an-emoticon">The only thing I know about paella is that it&rsquo;s an emoticon</h2>
-<figure><img src="solve-unicode-paella.jpg"
+<h2 id="the-only-thing-i-know-about-paella-is-that-its-an-emoticon"><a href="#the-only-thing-i-know-about-paella-is-that-its-an-emoticon">The only thing I know about paella is that it&rsquo;s an emoticon</a></h2><figure><img src="solve-unicode-paella.jpg"
          alt="Unicode paella emoji."/><figcaption>
             <p>Unless you&rsquo;re reading this on a Samsung phone, in which case you&rsquo;re looking at a Korean hotpot.</p>
         </figcaption>
@@ -1539,8 +1487,7 @@ f d w
 </blockquote>
 <p>At this point, you&rsquo;re probably full of questions. Do I need to talk to a Valencian? Should I take an online course on the history of Spain? What type of paella should I try to make? What is the common opinion of modern chefs when it comes to paella types?</p>
 <p>If you set out with the intention of answering all these questions, one thing is certain: you&rsquo;ll never end up actually making paella. You&rsquo;ll spend hours upon hours typing questions into search engines and years later wake up with a Masters in Valencian Cuisine.</p>
-<h2 id="the-most-important-question-method">The &ldquo;Most Important Question&rdquo; method</h2>
-<p>When I talk to myself out loud in public (doesn&rsquo;t everyone?) I refer to this as &ldquo;MIQ&rdquo; (rhymes with &ldquo;Nick&rdquo;). I also imagine MIQ to be a rather crunchy and quite adorable anthropomorphized tortilla chip. Couldn&rsquo;t tell you why.</p>
+<h2 id="the-most-important-question-method"><a href="#the-most-important-question-method">The &ldquo;Most Important Question&rdquo; method</a></h2><p>When I talk to myself out loud in public (doesn&rsquo;t everyone?) I refer to this as &ldquo;MIQ&rdquo; (rhymes with &ldquo;Nick&rdquo;). I also imagine MIQ to be a rather crunchy and quite adorable anthropomorphized tortilla chip. Couldn&rsquo;t tell you why.</p>
 <p><p class="md-image">
   <img class="u-photo" src="solve-miq.png#center" alt="MIQ the chip."  />
 </p></p>
@@ -1567,8 +1514,7 @@ f d w
         </figcaption>
 </figure>
 
-<h2 id="i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites">I still know nothing about calculating the orbital periods of satellites</h2>
-<p>Okay. Let&rsquo;s examine the problem:</p>
+<h2 id="i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites"><a href="#i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites">I still know nothing about calculating the orbital periods of satellites</a></h2><p>Okay. Let&rsquo;s examine the problem:</p>
 <blockquote>
 <p>Return a new array that transforms the element&rsquo;s average altitude into their orbital periods.</p>
 <p>The array will contain objects in the format {name: &lsquo;name&rsquo;, avgAlt: avgAlt}.</p>
@@ -1621,8 +1567,7 @@ f d w
 <span class="p">}</span>
 </code></pre></div><p>If you need a refresher on iterating through arrays, have a look at my <a href="/blog/iterating-over-objects-and-arrays-frequent-errors/">article on iterating, featuring breakfast arrays</a>! (5 minutes read)</p>
 <p>Don&rsquo;t look now, but you just gained the ability to calculate the orbital period of satellites. You could even do it <em>while</em> making paella, if you wanted to. Seriously. Put it on your resume.</p>
-<h2 id="tldr-the-overarching-moral-lesson">Tl;dr: the overarching moral lesson</h2>
-<p>Whether it&rsquo;s cooking, coding, or anything else, problems may at first seem confusing, insurmountable, or downright boring. If you&rsquo;re faced with such a challenge, just remember: they&rsquo;re a lot more digestible with a side of bite-sized MIQ chips.</p>
+<h2 id="tldr-the-overarching-moral-lesson"><a href="#tldr-the-overarching-moral-lesson">Tl;dr: the overarching moral lesson</a></h2><p>Whether it&rsquo;s cooking, coding, or anything else, problems may at first seem confusing, insurmountable, or downright boring. If you&rsquo;re faced with such a challenge, just remember: they&rsquo;re a lot more digestible with a side of bite-sized MIQ chips.</p>
 <p><p class="md-image">
   <img class="u-photo" src="solve-miq-bowl.png#center" alt="Bowl of MIQs."  />
 </p></p>
