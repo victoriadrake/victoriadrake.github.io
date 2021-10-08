@@ -1,4 +1,178 @@
-<feed xmlns="http://www.w3.org/2005/Atom"><title>aws on victoria.dev</title><link href="https://victoria.dev/tags/aws/feed.xml" rel="self"/><link href="https://victoria.dev/tags/aws/"/><updated>2021-02-15T01:38:07-05:00</updated><id>https://victoria.dev/tags/aws/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-02-15T01:38:07-05:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>aws on victoria.dev</title><link href="https://victoria.dev/tags/aws/feed.xml" rel="self"/><link href="https://victoria.dev/tags/aws/"/><updated>2021-10-07T11:01:13+00:00</updated><id>https://victoria.dev/tags/aws/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Set up a Pi-hole VPN on an AWS Lightsail instance</title><link href="https://victoria.dev/blog/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/"/><id>https://victoria.dev/blog/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/</id><author><name>Victoria Drake</name></author><published>2021-10-07T11:01:13+00:00</published><updated>2021-10-07T11:01:13+00:00</updated><content type="html"><![CDATA[<p>I&rsquo;ve written a fair bit in the past about the <a href="/tags/privacy">whys of online privacy</a>, and <a href="/tags/cybersecurity">a lot about staying safe online</a>. Chances are, if a search brought you here, you&rsquo;re well-past why. Let&rsquo;s go straight on to how.</p>
+<p>This guide will walk you through setting up <a href="https://pi-hole.net/">Pi-hole</a> on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance that acts as your VPN thanks to <a href="https://openvpn.net/">OpenVPN</a>. It&rsquo;s a more succinct version of the <a href="https://docs.pi-hole.net/guides/vpn/openvpn/overview/">official Pi-hole docs for OpenVPN</a>, made specifically for Lightsail with a few tips and tricks added in, because you deserve it.</p>
+<h2 id="create-and-connect-to-a-lightsail-instance"><a href="#create-and-connect-to-a-lightsail-instance">Create and connect to a Lightsail instance</a></h2><ol>
+<li>
+<p>Log in or sign up to AWS and <a href="https://lightsail.aws.amazon.com/ls/webapp/home/instances">create a Lightsail Instance</a>.</p>
+</li>
+<li>
+<p>Under <strong>Select a platform</strong>, choose <strong>Linux/Unix</strong>.</p>
+</li>
+<li>
+<p>Under <strong>Select a blueprint</strong>, choose the <strong>OS Only</strong> button.</p>
+</li>
+<li>
+<p>Select the latest <a href="https://docs.pi-hole.net/main/prerequisites/#supported-operating-systems">officially supported Ubuntu server</a>.</p>
+</li>
+<li>
+<p>You can save a tidbit of effort by putting the following into the <strong>Launch script</strong> box:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Update installed packages</span>
+sudo apt-get update
+sudo apt-get upgrade -y
+</code></pre></div></li>
+<li>
+<p>Create a new SSH key for this server and ensure you download the <code>.pem</code>.</p>
+</li>
+<li>
+<p>Choose your plan. The $3.50 USD instance is sufficient.</p>
+</li>
+<li>
+<p>Give it a name then click <strong>Create instance</strong>.</p>
+</li>
+<li>
+<p>Stare eagerly at the page until the instance status is <strong>Running</strong>, then go to the <strong>Networking</strong> tab.</p>
+</li>
+<li>
+<p>Create a <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/understanding-static-ip-addresses-in-amazon-lightsail">Static IP</a> and attach it to your new instance. Remember that static IP addresses are free only while attached to an instance.</p>
+</li>
+<li>
+<p>Click on your instance name to return to its dashboard. Go back to the <strong>Networking</strong> tab. It&rsquo;ll look a bit different now.</p>
+</li>
+<li>
+<p>Under <strong>IPv6 networking</strong>, click the toggle to turn it off (unless you know what you are doing and you want IPv6 for some reason. Most of y&rsquo;all don&rsquo;t need it).</p>
+</li>
+<li>
+<p>Under <strong>IPv4 Firewall</strong>, delete the rule for <code>HTTP</code>.</p>
+</li>
+<li>
+<p>Click <strong>Add rule</strong>. In the <strong>Application</strong> dropdown, choose <strong>Custom</strong>.</p>
+<ul>
+<li>For <strong>Protocol</strong>, choose <strong>UDP</strong>.</li>
+<li>In the <strong>Port or range</strong> input, enter a UDP port for the OpenVPN server to run on. (It&rsquo;s typically <code>1194</code>, which you can choose to use, but you might like a different number for security purposes. Port range is <code>0-65535</code>.)</li>
+</ul>
+</li>
+<li>
+<p>Connect using SSH and your new key pair, either <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">in your terminal</a> or on the <strong>Connect</strong> tab with the <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/lightsail-how-to-connect-to-your-instance-virtual-private-server">browser-based client</a>.</p>
+</li>
+</ol>
+<h2 id="install-openvpn-on-your-server"><a href="#install-openvpn-on-your-server">Install OpenVPN on your server</a></h2><p>After connecting to your server using SSH, install OpenVPN on your server.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Download OpenVPN</span>
+wget https://git.io/vpn -O openvpn-install.sh
+chmod <span class="m">755</span> openvpn-install.sh
+sudo ./openvpn-install.sh
+</code></pre></div><p>You&rsquo;ll see:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Welcome to this OpenVPN road warrior installer!
+
+This server is behind NAT. What is the public IPv4 address or hostname?
+Public IPv4 address / hostname [x.xx.xxx.xxx]:
+</code></pre></div><p>&hellip;where the default option is your static IP that you set up earlier. Hit return to accept this. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Which protocol should OpenVPN use?
+    1) UDP (recommended)
+    2) TCP
+Protocol [1]: 1
+</code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">What port should OpenVPN listen to?
+Port [1194]: #####
+</code></pre></div><p>Enter the UDP port number you chose earlier. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Select a DNS server for the clients:
+    1) Current system resolvers
+    2) Google
+    3) 1.1.1.1
+    4) OpenDNS
+    5) Quad9
+    6) AdGuard
+DNS server [1]: 1
+</code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Enter a name for the first client:
+Name [client]: pihole
+</code></pre></div><p>The Pi-hole will be the client. Name it as you like then <code>Press any key to continue...</code></p>
+<p>OpenVPN will set itself up. Confirm that <code>tun0</code> has the interface address <code>10.8.0.1/24</code> with the following command:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ip addr show tun0
+</code></pre></div><p>This ensures that the Pi-hole will be set up properly. Now, about that:</p>
+<h2 id="install-and-configure-pi-hole"><a href="#install-and-configure-pi-hole">Install and configure Pi-hole</a></h2><p>On your Lightsail instance, install Pi-hole.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Download and install Pi-hole</span>
+curl -sSL https://install.pi-hole.net <span class="p">|</span> bash
+</code></pre></div><p>This runs the Pi-hole automated installer. You&rsquo;ll see some prompts which you can answer using the enter key, arrow keys, tab, and space bar for selecting an option.</p>
+<p>The important things:</p>
+<ol>
+<li>When you see <strong>Choose An Interface</strong>, ensure you pick <code>tun0</code>. It isn&rsquo;t the default selection.</li>
+<li>You&rsquo;ll need to set the <strong>IPv4 address</strong> to the interface address you viewed previously using the <code>ip addr</code> command: <code>10.8.0.1/24</code>. This ensures the Pi-hole uses the VPN.</li>
+</ol>
+<blockquote>
+<p><em>At time of writing,</em> the second item above wasn&rsquo;t presented as an option in the automated installer. After the Pi-hole installer finishes, manually change the IP address by editing the configuration file:</p>
+<p><code>&gt; sudo vim /etc/pihole/setupVars.conf</code></p>
+<p>Change the <code>IPV4_ADDRESS</code> to <code>10.8.0.1/24</code> and save the file. Restart the Pi-hole with: <code>pihole restartdns</code>.</p>
+</blockquote>
+<p>If you mess up, you can redo the configuration with <code>pihole reconfigure</code>.</p>
+<p>Finally, you&rsquo;ll configure the VPN to use the Pi-hole.</p>
+<h2 id="configure-openvpn"><a href="#configure-openvpn">Configure OpenVPN</a></h2><p>Confirm the address of the <code>tun0</code> interface with:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ip a <span class="p">|</span> grep -C <span class="m">1</span> <span class="s1">&#39;tun0&#39;</span>
+</code></pre></div><p>You should see: <code>inet 10.8.0.1/24</code> in there.</p>
+<p>Edit the OpenVPN config file with:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/openvpn/server/server.conf
+</code></pre></div><p>Change the line that starts with <code>push &quot;dhcp-option</code>&hellip; to use the Pi-hole&rsquo;s IP address that you confirmed above:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">push</span> <span class="s2">&#34;dhcp-option DNS 10.8.0.1&#34;</span><span class="err">
+</span></code></pre></div><p>If any other lines start with <code>push &quot;dhcp-option</code>&hellip;, comment those out.</p>
+<p>If you want to log OpenVPN traffic, add these lines to the end of the file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">log</span> <span class="sr">/var/</span><span class="nx">log</span>/<span class="nx">openvpn</span>.<span class="nx">log</span><span class="err">
+</span><span class="err"></span><span class="nx">verb</span> <span class="m">3</span><span class="err">
+</span></code></pre></div><p>Save the config. If you forgot to open Vim with <code>sudo</code>, use the <code>tee</code> trick: <code>:w !sudo tee %</code>, then <code>O</code>, then <code>:q!</code>.</p>
+<p>Restart OpenVPN with <code>sudo systemctl restart openvpn-server@server</code>.</p>
+<h3 id="configure-firewall"><a href="#configure-firewall">Configure firewall</a></h3><p>Run the following to control traffic to the server <a href="https://docs.pi-hole.net/guides/vpn/openvpn/firewall/">as described here</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo iptables -I INPUT -i tun0 -j ACCEPT
+sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">53</span> -j ACCEPT
+sudo iptables -A INPUT -i tun0 -p udp --destination-port <span class="m">53</span> -j ACCEPT
+sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">80</span> -j ACCEPT
+sudo iptables -A INPUT -p tcp --destination-port <span class="m">22</span> -j ACCEPT
+sudo iptables -A INPUT -p tcp --destination-port <span class="m">1194</span> -j ACCEPT
+sudo iptables -A INPUT -p udp --destination-port <span class="m">1194</span> -j ACCEPT
+sudo iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -I INPUT -i lo -j ACCEPT
+sudo iptables -P INPUT DROP
+
+<span class="c1"># Optionally, also block HTTPS advertisements while you&#39;re here.</span>
+sudo iptables -A INPUT -p udp --dport <span class="m">80</span> -j REJECT --reject-with icmp-port-unreachable
+sudo iptables -A INPUT -p tcp --dport <span class="m">443</span> -j REJECT --reject-with tcp-reset
+sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --reject-with icmp-port-unreachable
+</code></pre></div><p>You can review the results with <code>sudo iptables -L --line-numbers</code>.</p>
+<p><strong>These are only stored in memory</strong> before you save them, so test out your set up on your client now to see if it all works as expected.</p>
+<h3 id="test-your-client-connection"><a href="#test-your-client-connection">Test your client connection</a></h3><p>To test your configuration, try adding a client (the phone or computer that will connect to the VPN).</p>
+<ol>
+<li>Run the OpenVPN script again: <code>sudo ./openvpn-install.sh</code> and choose <strong>1) Add a new client</strong>. Give it a name; you may find it helps to name it by the device, e.g. &ldquo;phone&rdquo;. This creates a file that ends in <code>.ovpn</code>. You need to place this file on your client to use it.</li>
+<li>Install the appropriate <a href="https://duckduckgo.com/?q=OpenVPN+App">OpenVPN app</a> for your device.</li>
+<li>Transfer the <code>.ovpn</code> file you just obtained to the device if you haven&rsquo;t already. Follow instructions in your app (try under <strong>FAQ</strong>) for importing the <code>.ovpn</code> file and activating the VPN.</li>
+<li>Ensure it seems to connect properly. If you <a href="https://duckduckgo.com/?t=ffab&amp;q=what's+my+ip">go to DuckDuckGo.com and search for &ldquo;What&rsquo;s my IP&rdquo;</a>, you should see the location of your Lightsail instance. For a more in-depth test, <a href="https://browserleaks.com/ip">check for DNS leaks at BrowserLeaks.com</a>.</li>
+</ol>
+<p>Try browsing for a while. You can also view the Pi-hole dashboard by visiting <code>http://pi.hole/admin/</code> on this device.</p>
+<p>If everything seems all right, go on to saving the configuration on your instance.</p>
+<h3 id="save-iptables"><a href="#save-iptables">Save <code>iptables</code></a></h3><p>Save the <code>iptables</code> you created earlier using the <code>tee</code> command to achieve the second permission.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo iptables-save <span class="p">|</span> sudo tee /etc/pihole/rules.v4
+</code></pre></div><p>You&rsquo;re finished with configuration on your Lightsail instance. If you wish to disconnect now, you can just type <code>exit</code>.</p>
+<h2 id="future-tasks"><a href="#future-tasks">Future tasks</a></h2><p>You&rsquo;re done with the set up! You now have your very own personal VPN with a Pi-hole keeping you safe from nasty trackers. Here are some references for operations you might like to come back to in the future:</p>
+<ul>
+<li>Reconnect to your Lightsail instance with SSH:
+<ul>
+<li><code>ssh -i /path/to/private-key.pem ubuntu@public-ip-address</code></li>
+</ul>
+</li>
+<li>Set a password for the web interface dashboard:
+<ul>
+<li><code>pihole -a -p</code></li>
+</ul>
+</li>
+<li>Access the web interface dashboard:
+<ul>
+<li>Connect to the VPN, then visit <code>http://pi.hole/admin/</code></li>
+</ul>
+</li>
+<li>Update the Pi-hole:
+<ul>
+<li><code>pihole -up</code></li>
+</ul>
+</li>
+<li>Add a new client (<a href="https://docs.pi-hole.net/guides/vpn/openvpn/clients/">for iOS, Linux, or Windows</a>, or <a href="https://docs.pi-hole.net/guides/vpn/openvpn/android-client/">for Android</a>)</li>
+</ul>
+<p>Enjoy your new, more secure and peaceful Internet! If you found this guide helpful, please share it with someone else.</p>
+]]></content></entry><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-02-15T01:38:07-05:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
 <p>You can create your own self-hosted Matrix chat for as little as $3.50 USD per month on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance. Your homeserver can federate with other Matrix servers, giving you a reliable and fault-tolerant means of communication.</p>
 <p>Matrix is most widely installed via its <a href="https://matrix.org/docs/guides/installing-synapse">Synapse</a> homeserver implementation written in Python 3. Dendrite, its second-generation homeserver implementation written in Go, is currently released in beta. Dendrite will provide more memory efficiency and reliability out-of-the-box, making it an excellent choice for running on a virtual instance.</p>
 <p>Here&rsquo;s how to set up your own homeserver on AWS Lightsail with Dendrite. You can also <a href="https://github.com/matrix-org/dendrite">contribute to Dendrite today</a>.</p>
@@ -286,8 +460,8 @@ sudo chown admin:admin /var/log/dendrite
 <h2 id="preparation-is-essential-to-a-smooth-migration"><a href="#preparation-is-essential-to-a-smooth-migration">Preparation is essential to a smooth migration</a></h2><p>I hope this article has enabled a more practical understanding of how cloud migration can be achieved. With thorough preparation, it&rsquo;s possible to take advantage of all the cloud has to offer, with minimal hassle to get there.</p>
 <p>My thanks to the AWS Solutions Architects who presented at Pop-Up Loft and shared their knowledge on these topics, in particular: Chandra Kapireddy, Stephen Moon, John Franklin, Michael Alpaugh, and Priyanka Mahankali.</p>
 <p>One last nugget of wisdom, courtesy of John: &ldquo;Friends don&rsquo;t let friends use DMS to create schema objects.&rdquo;</p>
-]]></content></entry><entry><title type="html">How to set up OpenVPN on AWS EC2 and fix DNS leaks on Ubuntu 18.04 LTS</title><link href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/"/><id>https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/</id><author><name>Victoria Drake</name></author><published>2019-08-26T09:01:23-04:00</published><updated>2019-08-26T09:01:23-04:00</updated><content type="html"><![CDATA[<p>Rolling your own Virtual Private Network (VPN) is complicated. I put a lot of time and effort into setting up OpenVPN on my own AWS EC2 instance, yet was still delighted to outsource the ongoing maintenance when I found <a href="/blog/vpn">my preferred privacy-focused VPN</a>.</p>
-<p>That said, there&rsquo;s no better way to strive for maximum privacy than a VPN service you control, configure, and maintain yourself. Here&rsquo;s a step-by-step tutorial for <a href="#set-up-openvpn-on-aws-ec2">setting up your own OpenVPN on AWS EC2</a>, and <a href="#what-a-dns-leak-looks-like">how to check for and fix DNS leaks</a>.</p>
+]]></content></entry><entry><title type="html">How to set up OpenVPN on AWS EC2 and fix DNS leaks on Ubuntu 18.04 LTS</title><link href="https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/"/><id>https://victoria.dev/blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/</id><author><name>Victoria Drake</name></author><published>2019-08-26T09:01:23-04:00</published><updated>2019-08-26T09:01:23-04:00</updated><content type="html"><![CDATA[<p>There&rsquo;s no better way to strive for maximum privacy than a VPN service you control, configure, and maintain yourself. Here&rsquo;s a step-by-step tutorial for <a href="#set-up-openvpn-on-aws-ec2">setting up your own OpenVPN on AWS EC2</a>, and <a href="#what-a-dns-leak-looks-like">how to check for and fix DNS leaks</a>.</p>
+<p>For a VPN that also blocks ads and trackers, you can <a href="/blog/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/">set up a Pi-hole VPN on an AWS Lightsail instance</a> instead.</p>
 <h2 id="set-up-openvpn-on-aws-ec2"><a href="#set-up-openvpn-on-aws-ec2">Set up OpenVPN on AWS EC2</a></h2><p>This post will cover how to set up the <a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE/">OpenVPN Access Server</a> product on AWS Marketplace, running on an <a href="https://aws.amazon.com/ec2/">Amazon EC2 instance</a>. Then, you&rsquo;ll look at how to fix a <a href="https://gitlab.gnome.org/GNOME/NetworkManager-openvpn/issues/10">known NetworkManager bug in Ubuntu 18.04 that might cause DNS leaks</a>. The whole process should take about fifteen minutes, so grab a ☕ and let&rsquo;s be configuration superheroes.</p>
 <p><em>Note: IDs and IP addresses shown for demonstration in this tutorial are invalid.</em></p>
 <h3 id="1-launch-the-openvpn-access-server-on-aws-marketplace"><a href="#1-launch-the-openvpn-access-server-on-aws-marketplace">1. Launch the OpenVPN Access Server on AWS Marketplace</a></h3><p>The <a href="https://aws.amazon.com/marketplace/pp/B00MI40CAE">OpenVPN Access Server</a> is available on AWS Marketplace. The Bring Your Own License (BYOL) model doesn&rsquo;t actually require a license for up to two connected devices; to connect more clients, you can get <a href="https://aws.amazon.com/marketplace/seller-profile/ref=srh_res_product_vendor?ie=UTF8&amp;id=aac3a8a3-2823-483c-b5aa-60022894b89d">bundled billing</a> for five, ten, or twenty-five clients, or <a href="https://openvpn.net/pricing/">purchase a minimum of ten OpenVPN licenses a la carte</a> for $15/device/year. For most of us, the two free connected devices will suffice; and if using an EC2 Micro instance, your set up will be <a href="https://aws.amazon.com/free/">AWS Free Tier eligible</a> as well.</p>
