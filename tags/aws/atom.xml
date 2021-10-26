@@ -139,7 +139,7 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 <ol>
 <li>Run the OpenVPN script again: <code>sudo ./openvpn-install.sh</code> and choose <strong>1) Add a new client</strong>. Give it a name; you may find it helps to name it by the device, e.g. &ldquo;phone&rdquo;. This creates a file that ends in <code>.ovpn</code>. You need to place this file on your client to use it.</li>
 <li>Install the appropriate <a href="https://duckduckgo.com/?q=OpenVPN+App">OpenVPN app</a> for your device.</li>
-<li>Transfer the <code>.ovpn</code> file you just obtained to the device if you haven&rsquo;t already. Follow instructions in your app (try under <strong>FAQ</strong>) for importing the <code>.ovpn</code> file and activating the VPN.</li>
+<li>Transfer the <code>.ovpn</code> file you just obtained to the device if you haven&rsquo;t already. (See <a href="#future-tasks">future tasks</a> for a way to copy the file to your host machine.) Follow instructions in your app (try under <strong>FAQ</strong>) for importing the <code>.ovpn</code> file and activating the VPN.</li>
 <li>Ensure it seems to connect properly. If you <a href="https://duckduckgo.com/?t=ffab&amp;q=what's+my+ip">go to DuckDuckGo.com and search for &ldquo;What&rsquo;s my IP&rdquo;</a>, you should see the location of your Lightsail instance. For a more in-depth test, <a href="https://browserleaks.com/ip">check for DNS leaks at BrowserLeaks.com</a>.</li>
 </ol>
 <p>Try browsing for a while. You can also view the Pi-hole dashboard by visiting <code>http://pi.hole/admin/</code> on this device.</p>
@@ -170,6 +170,11 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 </ul>
 </li>
 <li>Add a new client (<a href="https://docs.pi-hole.net/guides/vpn/openvpn/clients/">for iOS, Linux, or Windows</a>, or <a href="https://docs.pi-hole.net/guides/vpn/openvpn/android-client/">for Android</a>)</li>
+<li>Copy the <code>.ovpn</code> file for a client to your host machine (run on the host machine):
+<ul>
+<li><code>ssh -i /path/to/private-key.pem ubuntu@public-ip-address 'sudo cat /path/on/lightsail/client.ovpn' &gt; /path/on/host/client.ovpn</code></li>
+</ul>
+</li>
 <li>Beef up that block list! Here&rsquo;s my favorite resource for updating your Pi-hole <a href="https://docs.pi-hole.net/database/gravity/#adlist-table-adlist">adlist table</a>: <a href="https://firebog.net/">The Big Blocklist Collection</a></li>
 </ul>
 <p>Enjoy your new, more secure and peaceful Internet! If you found this guide helpful, please share it with someone else.</p>
