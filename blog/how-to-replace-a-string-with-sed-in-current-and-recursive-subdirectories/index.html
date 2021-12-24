@@ -89,19 +89,19 @@ terminal
 <hr>
 </div>
 <div class="markdown e-content">
-<p>Rebranding? Moving to <a href=/blog/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus/>a new domain</a> or <a href=/blog/hosting-your-static-site-with-aws-s3-route-53-and-cloudfront/>static site</a>? I&rsquo;ve had more than a few of these situations myself! Here&rsquo;s how <code>sed</code> can help make these changes easier.</p>
-<h2 id=update-a-string-in-multiple-files-with-sed><a href=#update-a-string-in-multiple-files-with-sed>Update a string in multiple files with <code>sed</code></a></h2><p>Meet your new friend <code>sed</code>. This amazingly powerful tool lives in your terminal and is available to be totally underused for things like finding and replacing strings in files. You&rsquo;ve got two levels of intensity to choose from:</p>
+<p>Meet your new friend <code>sed</code>. This amazingly powerful CLI tool lives is available to be totally underused for things like finding and replacing strings in files.</p>
+<h2 id=update-a-string-in-multiple-files-with-sed><a href=#update-a-string-in-multiple-files-with-sed>Update a string in multiple files with <code>sed</code></a></h2><p>You&rsquo;ve got two levels of intensity to choose from:</p>
 <ul>
-<li>Non-recursive: Just the files in my current directory.</li>
-<li>Recursive: This directory and all the subdirectories it contains, with <em>maximum prejudice.</em></li>
+<li><strong>Non-recursive:</strong> Just the files in my current directory.</li>
+<li><strong>Recursive:</strong> This directory and all the subdirectories it contains, with <em>maximum prejudice.</em></li>
 </ul>
 <p>Here&rsquo;s how!</p>
 <h2 id=current-directory-non-recursive><a href=#current-directory-non-recursive>Current directory, non-recursive</a></h2><p><em>Non-recursive</em> means sed won&rsquo;t change files in any subdirectories of the current folder.</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>.
 ├── index.html        # Change this file
 └── blog
-    ├── list.html     # Don&#39;t change
-    └── single.html   # these files
+    ├── list.html     # Don&#39;t change
+    └── single.html   # these files
 </code></pre></div><p>Run this command to search all the files in your current directory and replace a given string. For example, to replace all occurrences of &ldquo;foo&rdquo; with &ldquo;bar&rdquo;:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>sed -i -- <span class=s1>&#39;s/foo/bar/g&#39;</span> *
 </code></pre></div><p>Here&rsquo;s what each component of the command does:</p>
@@ -113,7 +113,7 @@ terminal
 <li><code>g</code> as in &ldquo;global&rdquo; means &ldquo;all occurrences, please.&rdquo;</li>
 <li><code>*</code> denotes all file types. (No more rhymes. What a tease.)</li>
 </ul>
-<p>You can limit the operation to one file type, such as <code>txt</code>, by using:</p>
+<p>You can limit the operation to one file type, such as <code>txt</code>, by using a matching pattern:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>sed -i -- <span class=s1>&#39;s/foo/bar/g&#39;</span> *.txt
 </code></pre></div><h2 id=current-directory-and-subdirectories-recursive><a href=#current-directory-and-subdirectories-recursive>Current directory and subdirectories, recursive</a></h2><p>You can supplement <code>sed</code> with <code>find</code> to expand your scope to all of the current folder&rsquo;s subdirectories. This will include any hidden files.</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{}</span> +
@@ -122,13 +122,16 @@ terminal
 </code></pre></div><p>This will exclude any file that has the string <code>/.</code> in its path.</p>
 <p>You can also limit this operation to file names that end in a certain extension, like Markdown:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -name <span class=s2>&#34;*.md&#34;</span> -exec sed -i <span class=s1>&#39;s/foo/bar/g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><h2 id=working-with-urls-change-the-separator><a href=#working-with-urls-change-the-separator>Working with URLs: change the separator</a></h2><p>If you want to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&mldr;</p>
+</code></pre></div><h2 id=replacing-urls-change-the-separator><a href=#replacing-urls-change-the-separator>Replacing URLs: change the separator</a></h2><p>If you want to update a URL, the <code>/</code> separator in your strings will need escaping. It ends up looking like this&mldr;</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=se>\
 </span><span class=se></span><span class=s1>&#39;s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g&#39;</span> <span class=o>{}</span> +
 </code></pre></div><p>You can avoid confusion and mistakes by changing the separator to any non-conflicting character. The character that follows the <code>s</code> will be treated as the separator. In this case, using a <code>,</code> or <code>_</code> would do. This doesn&rsquo;t require escaping and is much more readable:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-sh data-lang=sh>find . -type f -exec sed -i <span class=se>\
 </span><span class=se></span><span class=s1>&#39;s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g&#39;</span> <span class=o>{}</span> +
-</code></pre></div><h2 id=command-line-superpowers-for-all><a href=#command-line-superpowers-for-all>Command-line superpowers for all!</a></h2><p>I hope this was helpful! If you like this post, there&rsquo;s a lot more where that came from. I write about all sorts of ways to save time with tricks for your terminal. There&rsquo;s some below!</p>
+</code></pre></div><p>I write about time-saving terminal tricks and how to improve productivity as a software developer. You can get these tips right in your inbox by signing up below!</p>
+<div class="form-container centered" id=subscribe>
+<iframe src=https://victoriadrake.substack.com/embed width=480 height=320 style="border:1px solid #eee;background-color:transparent!important" frameborder=0 scrolling=no></iframe>
+</div>
 </div>
 <a class=hidden href=https://brid.gy/publish/twitter></a>
 <a class=hidden href=https://brid.gy/publish/mastodon></a>
