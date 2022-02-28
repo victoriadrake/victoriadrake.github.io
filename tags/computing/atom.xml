@@ -23,7 +23,7 @@
 <p>Here&rsquo;s why the Internet Protocol Suite, or TCP/IP, is an imaginary rainbow layer cake.</p>
 <h2 id="layers-are-imaginary"><a href="#layers-are-imaginary">Layers are imaginary</a></h2><p>If you consider the general nature of a rainbow layer sponge cake, it&rsquo;s mostly made up of soft, melt-in-your mouth vanilla-y goodness. This goodness is in itself comprised of something along the lines of eggs, butter, flour, and sweetener.</p>
 <p><p class="md-image">
-  <img class="u-photo" src="free-cake.png" alt="Cartoon of a slice of rainbow layer cake, reads &amp;ldquo;Yay! Free cake!&amp;quot;"  />
+  <img class="u-photo" src="free-cake.png" alt="Cartoon of a slice of rainbow layer cake, reads &amp;ldquo;Yay! Free cake!&amp;rdquo;"  />
 </p></p>
 <p>There isn&rsquo;t much to distinguish one layer of a rainbow sponge cake from another. Often, the only difference between layers is the food-coloring and a bit of frosting. When you think about it, it&rsquo;s all cake from top to bottom. The rainbow layers are only there because the baker thought they ought to be.</p>
 <p>Similar to cake ingredients, layers in the context of computer networking are mostly composed of protocols, algorithms, and configurations, with some data sprinkled in. It can be easier to talk about computer networking if its many functions are split up into groups, so certain people came up with descriptions of layers, which we call network models. TCP/IP is just one network model among others. In this sense, layers are concepts, not things.</p>
@@ -262,52 +262,52 @@
 <p>Since the main bottleneck for Hydra is I/O and not the processing to be done by the CPU, I&rsquo;m better served by using multiple threads.</p>
 <h2 id="multiple-threads"><a href="#multiple-threads">Multiple threads</a></h2><p>Fittingly named, Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor"><code>ThreadPoolExecutor</code></a> uses a pool of threads to execute asynchronous tasks. Also a subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a>, it uses a defined number of maximum worker threads (at least five by default, according to the formula <code>min(32, os.cpu_count() + 4)</code>) and reuses idle threads before starting new ones, making it pretty efficient.</p>
 <p>Here is a snippet of Hydra with comments showing how Hydra uses <code>ThreadPoolExecutor</code> to achieve parallel multithreaded bliss:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="c1"># Create the Checker class</span>
-<span class="k">class</span> <span class="nc">Checker</span><span class="p">:</span>
-    <span class="c1"># Queue of links to be checked</span>
-    <span class="n">TO_PROCESS</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
-    <span class="c1"># Maximum workers to run</span>
-    <span class="n">THREADS</span> <span class="o">=</span> <span class="mi">100</span>
-    <span class="c1"># Maximum seconds to wait for HTTP response</span>
-    <span class="n">TIMEOUT</span> <span class="o">=</span> <span class="mi">60</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
-        <span class="o">...</span>
-        <span class="c1"># Create the thread pool</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">THREADS</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># Run until the TO_PROCESS queue is empty</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">target_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TO_PROCESS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="c1"># If we haven&#39;t already checked this link</span>
-            <span class="k">if</span> <span class="n">target_url</span><span class="p">[</span><span class="s2">&#34;url&#34;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">visited</span><span class="p">:</span>
-                <span class="c1"># Mark it as visited</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target_url</span><span class="p">[</span><span class="s2">&#34;url&#34;</span><span class="p">])</span>
-                <span class="c1"># Submit the link to the pool</span>
-                <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_url</span><span class="p">,</span> <span class="n">target_url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_future</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-</code></pre></div><p>You can view the full code in <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&rsquo;s GitHub repository</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="c1"># Create the Checker class</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Checker</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Queue of links to be checked</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TO_PROCESS</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Maximum workers to run</span>
+</span></span><span class="line"><span class="cl">    <span class="n">THREADS</span> <span class="o">=</span> <span class="mi">100</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Maximum seconds to wait for HTTP response</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TIMEOUT</span> <span class="o">=</span> <span class="mi">60</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="o">...</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># Create the thread pool</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">THREADS</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Run until the TO_PROCESS queue is empty</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">target_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TO_PROCESS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="c1"># If we haven&#39;t already checked this link</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">target_url</span><span class="p">[</span><span class="s2">&#34;url&#34;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">visited</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="c1"># Mark it as visited</span>
+</span></span><span class="line"><span class="cl">                <span class="bp">self</span><span class="o">.</span><span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target_url</span><span class="p">[</span><span class="s2">&#34;url&#34;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">                <span class="c1"># Submit the link to the pool</span>
+</span></span><span class="line"><span class="cl">                <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_url</span><span class="p">,</span> <span class="n">target_url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">job</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_future</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span>
+</span></span><span class="line"><span class="cl">        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</span></span></code></pre></div><p>You can view the full code in <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&rsquo;s GitHub repository</a>.</p>
 <h2 id="single-thread-to-multithread"><a href="#single-thread-to-multithread">Single thread to multithread</a></h2><p>If you&rsquo;d like to see the full effect, I compared the run times for checking my website between a prototype single-thread program, and the <del>multiheaded</del>multithreaded Hydra.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
-
-real    17m34.084s
-user    11m40.761s
-sys     0m5.436s
-
-
-time python3 hydra.py https://victoria.dev
-
-real    0m15.729s
-user    0m11.071s
-sys     0m2.526s
-</code></pre></div><p>The single-thread program, which blocks on I/O, ran in about seventeen minutes. When I first ran the multithreaded version, it finished in 1m13.358s - after some profiling and tuning, it took a little under sixteen seconds. Again, the exact times don&rsquo;t mean all that much; they&rsquo;ll vary depending on factors such as the size of the site being crawled, your network speed, and your program&rsquo;s balance between the overhead of thread management and the benefits of parallelism.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">time python3 slow-link-check.py https://victoria.dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real    17m34.084s
+</span></span><span class="line"><span class="cl">user    11m40.761s
+</span></span><span class="line"><span class="cl">sys     0m5.436s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">time python3 hydra.py https://victoria.dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real    0m15.729s
+</span></span><span class="line"><span class="cl">user    0m11.071s
+</span></span><span class="line"><span class="cl">sys     0m2.526s
+</span></span></code></pre></div><p>The single-thread program, which blocks on I/O, ran in about seventeen minutes. When I first ran the multithreaded version, it finished in 1m13.358s - after some profiling and tuning, it took a little under sixteen seconds. Again, the exact times don&rsquo;t mean all that much; they&rsquo;ll vary depending on factors such as the size of the site being crawled, your network speed, and your program&rsquo;s balance between the overhead of thread management and the benefits of parallelism.</p>
 <p>The more important thing, and the result I&rsquo;ll take any day, is a program that runs some orders of magnitude faster.</p>
 ]]></content></entry><entry><title type="html">Breaking bottlenecks 🍾</title><link href="https://victoria.dev/blog/breaking-bottlenecks/"/><id>https://victoria.dev/blog/breaking-bottlenecks/</id><author><name>Victoria Drake</name></author><published>2020-02-25T12:50:29-05:00</published><updated>2020-02-25T12:50:29-05:00</updated><content type="html"><![CDATA[<p><em>I recently gave a lecture on the benefits of building non-blocking processes. This is a write-up of the full talk, minus any &ldquo;ums&rdquo; that may have occurred. You can <a href="https://victoria.dev/slides/bottlenecks">view the slides here</a>.</em></p>
 <p>I&rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.</p>
@@ -409,11 +409,11 @@ sys     0m2.526s
 <p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
 <h2 id="bottleneck-network-latency"><a href="#bottleneck-network-latency">Bottleneck: network latency</a></h2><p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
 <p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">      150 milliseconds
- x 12,000 links
----------
-1,800,000 milliseconds (30 minutes)
-</code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">      150 milliseconds
+</span></span><span class="line"><span class="cl"> x 12,000 links
+</span></span><span class="line"><span class="cl">---------
+</span></span><span class="line"><span class="cl">1,800,000 milliseconds (30 minutes)
+</span></span></code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
 <h3 id="feedback-loops"><a href="#feedback-loops">Feedback loops</a></h3><p>I previously wrote about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p>
 <p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&rsquo;m waiting on a process that&rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke <code>master</code> (hopefully <code>staging</code>).</p>
 <p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&rsquo;ve got a slow and inefficient company.</p>
@@ -428,171 +428,171 @@ sys     0m2.526s
 <p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.</p>
 <p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p>
 <h2 id="tacos-and-threading"><a href="#tacos-and-threading">Tacos and threading</a></h2><p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮
-🌮   ╔══════════════╗
-🌮      Hi I&#39;m Bob                          🌳
-🌮   ╚══════════════╝ \
-🌮                     🐹 🌮
-🌮
-🌮
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮
-🌮
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵
-🌮
-🌮
-🌮
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮   ╔══════════════╗
+</span></span><span class="line"><span class="cl">🌮      Hi I&#39;m Bob                          🌳
+</span></span><span class="line"><span class="cl">🌮   ╚══════════════╝ \
+</span></span><span class="line"><span class="cl">🌮                     🐹 🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p>
 <p>We can try splitting the queue:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮
-🌮         🧑💵🧑💵🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹
-🌮
-🌮         🧑💵🧑💵🧑💵🧑💵🧑💵
-🌮
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮         🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮         🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p>
 <p>We could get two Bobs:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵
-🌮                                          🌳
-🌮
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p>
 <p>We can do even better than that:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵🧑💵
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
 <p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p>
 <h2 id="setting-up-a-go-web-crawler"><a href="#setting-up-a-go-web-crawler">Setting up a Go web crawler</a></h2><p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">startDomain</span>             <span class="kt">string</span>
-    <span class="nx">brokenLinks</span>             <span class="p">[]</span><span class="nx">Result</span>
-    <span class="nx">visitedLinks</span>            <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span>
-    <span class="nx">workerCount</span><span class="p">,</span> <span class="nx">maxWorkers</span> <span class="kt">int</span>
-    <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
-<span class="p">}</span>
-<span class="o">...</span>
-<span class="c1">// Page allows us to retain parent and sublinks
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Page</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">parent</span><span class="p">,</span> <span class="nx">loc</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span>
-<span class="p">}</span>
-
-<span class="c1">// Result adds error information for the report
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Result</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Page</span>
-    <span class="nx">reason</span> <span class="kt">string</span>
-    <span class="nx">code</span>   <span class="kt">int</span>
-<span class="p">}</span>
-</code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Extract links from HTML
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">parse</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span><span class="p">)</span> <span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="p">[]</span><span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">doc</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">html</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nf">NewReader</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
-    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Could not parse: &#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="nx">goodLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="nx">badLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-    <span class="kd">var</span> <span class="nx">f</span> <span class="kd">func</span><span class="p">(</span><span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span>
-    <span class="nx">f</span> <span class="p">=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">n</span> <span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Type</span> <span class="o">==</span> <span class="nx">html</span><span class="p">.</span><span class="nx">ElementNode</span> <span class="o">&amp;&amp;</span> <span class="nf">checkKey</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">n</span><span class="p">.</span><span class="nx">Data</span><span class="p">))</span> <span class="p">{</span>
-            <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Attr</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="nf">checkAttr</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Key</span><span class="p">))</span> <span class="p">{</span>
-                    <span class="nx">j</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">formatURL</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Val</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-                        <span class="nx">badLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">badLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
-
-                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                        <span class="nx">goodLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
-                    <span class="p">}</span>
-                    <span class="k">break</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="k">for</span> <span class="nx">c</span> <span class="o">:=</span> <span class="nx">n</span><span class="p">.</span><span class="nx">FirstChild</span><span class="p">;</span> <span class="nx">c</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">;</span> <span class="nx">c</span> <span class="p">=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">NextSibling</span> <span class="p">{</span>
-            <span class="nf">f</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="nf">f</span><span class="p">(</span><span class="nx">doc</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">badLinks</span>
-<span class="p">}</span>
-</code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href="https://www.theregister.com/2016/03/23/npm_left_pad_chaos/">the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">startDomain</span>             <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">brokenLinks</span>             <span class="p">[]</span><span class="nx">Result</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">visitedLinks</span>            <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">workerCount</span><span class="p">,</span> <span class="nx">maxWorkers</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// Page allows us to retain parent and sublinks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Page</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">parent</span><span class="p">,</span> <span class="nx">loc</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Result adds error information for the report
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Result</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">Page</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">reason</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">code</span>   <span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// Extract links from HTML
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">parse</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span><span class="p">)</span> <span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="p">[]</span><span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">doc</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">html</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nf">NewReader</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Could not parse: &#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">goodLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">badLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="nx">f</span> <span class="kd">func</span><span class="p">(</span><span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">f</span> <span class="p">=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">n</span> <span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Type</span> <span class="o">==</span> <span class="nx">html</span><span class="p">.</span><span class="nx">ElementNode</span> <span class="o">&amp;&amp;</span> <span class="nf">checkKey</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">n</span><span class="p">.</span><span class="nx">Data</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Attr</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="nf">checkAttr</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Key</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="nx">j</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">formatURL</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Val</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="nx">badLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">badLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="nx">goodLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">break</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="nx">c</span> <span class="o">:=</span> <span class="nx">n</span><span class="p">.</span><span class="nx">FirstChild</span><span class="p">;</span> <span class="nx">c</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">;</span> <span class="nx">c</span> <span class="p">=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">NextSibling</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">f</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">f</span><span class="p">(</span><span class="nx">doc</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">badLinks</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href="https://www.theregister.com/2016/03/23/npm_left_pad_chaos/">the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p>
 <p>Here are snippets of the <code>main</code> function, where we pass in our starting URL and create a queue (or <a href="https://tour.golang.org/concurrency/2">channels</a>, in Go) to be filled with links for our goroutines to process.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="nx">startURL</span> <span class="o">:=</span> <span class="nx">flag</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="s">&#34;url&#34;</span><span class="p">,</span> <span class="s">&#34;http://example.com&#34;</span><span class="p">,</span> <span class="s">&#34;full URL of site&#34;</span><span class="p">)</span>
-    <span class="o">...</span>
-
-    <span class="nx">firstPage</span> <span class="o">:=</span> <span class="nx">Page</span><span class="p">{</span>
-        <span class="nx">parent</span><span class="p">:</span> <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
-        <span class="nx">loc</span><span class="p">:</span>    <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
-    <span class="p">}</span>
-
-    <span class="nx">toProcess</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">Page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="nx">toProcess</span> <span class="o">&lt;-</span> <span class="nx">firstPage</span>
-
-    <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
-</code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">toProcess</span> <span class="p">{</span>
-    <span class="nx">wg</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="nx">checker</span><span class="p">.</span><span class="nf">addWorker</span><span class="p">()</span>
-    <span class="err">🐹</span> <span class="k">go</span> <span class="nf">worker</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">checker</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">wg</span><span class="p">,</span> <span class="nx">toProcess</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">workerCount</span> <span class="p">&gt;</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">maxWorkers</span> <span class="p">{</span>
-        <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span> <span class="c1">// throttle down
-</span><span class="c1"></span>    <span class="p">}</span>
-<span class="p">}</span>
-<span class="nx">wg</span><span class="p">.</span><span class="nf">Wait</span><span class="p">()</span>
-</code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">startURL</span> <span class="o">:=</span> <span class="nx">flag</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="s">&#34;url&#34;</span><span class="p">,</span> <span class="s">&#34;http://example.com&#34;</span><span class="p">,</span> <span class="s">&#34;full URL of site&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">firstPage</span> <span class="o">:=</span> <span class="nx">Page</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">parent</span><span class="p">:</span> <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">loc</span><span class="p">:</span>    <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">toProcess</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">Page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">toProcess</span> <span class="o">&lt;-</span> <span class="nx">firstPage</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+</span></span></code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">toProcess</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">wg</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">checker</span><span class="p">.</span><span class="nf">addWorker</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="err">🐹</span> <span class="k">go</span> <span class="nf">worker</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">checker</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">wg</span><span class="p">,</span> <span class="nx">toProcess</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">workerCount</span> <span class="p">&gt;</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">maxWorkers</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span> <span class="c1">// throttle down
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">wg</span><span class="p">.</span><span class="nf">Wait</span><span class="p">()</span>
+</span></span></code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
 <h2 id="did-we-do-the-thing-fast"><a href="#did-we-do-the-thing-fast">Did we do the thing fast</a></h2><p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
-
-real 17m34.084s
-user 11m40.761s
-sys     0m5.436s
-</code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">time python3 slow-link-check.py https://victoria.dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real 17m34.084s
+</span></span><span class="line"><span class="cl">user 11m40.761s
+</span></span><span class="line"><span class="cl">sys     0m5.436s
+</span></span></code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
 <p>The multithreaded Python version did a bit better:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time python3 hydra.py https://victoria.dev
-
-real 1m13.358s
-user 0m13.161s
-sys     0m2.826s
-</code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">time python3 hydra.py https://victoria.dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real 1m13.358s
+</span></span><span class="line"><span class="cl">user 0m13.161s
+</span></span><span class="line"><span class="cl">sys     0m2.826s
+</span></span></code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
 <p>How did Go do?</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time ./go-link-check --url=https://victoria.dev
-
-real 0m7.926s
-user 0m9.044s
-sys     0m0.932s
-</code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">time ./go-link-check --url=https://victoria.dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real 0m7.926s
+</span></span><span class="line"><span class="cl">user 0m9.044s
+</span></span><span class="line"><span class="cl">sys     0m0.932s
+</span></span></code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
 <h2 id="breaking-bottlenecks"><a href="#breaking-bottlenecks">Breaking bottlenecks</a></h2><p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
 <p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p>
 ]]></content></entry><entry><title type="html">Concurrency, parallelism, and the many threads of Santa Claus 🎅</title><link href="https://victoria.dev/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/"/><id>https://victoria.dev/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/</id><author><name>Victoria Drake</name></author><published>2019-12-23T19:29:01-05:00</published><updated>2019-12-23T19:29:01-05:00</updated><content type="html"><![CDATA[<p>Consider the following: Santa brings toys to all the good girls and boys.</p>
@@ -624,7 +624,7 @@ sys     0m0.932s
 </p></p>
 <p>Elves working in parallel can also employ concurrency. One elf can still tackle only one task at a time, so it&rsquo;s most efficient to have multiple elves concurrently producing presents.</p>
 <p>Of course, if Santa&rsquo;s workshop has, say, two-and-a-half million elves, each elf would only need to finish a maximum of one present per day. In this case, working sequentially doesn&rsquo;t detract from the workshop&rsquo;s efficiency. There would still be 7,668.26 elves left over to fetch coffee and lunch.</p>
-<h2 id="santa-claus-and-threading"><a href="#santa-claus-and-threading">Santa Claus, and threading</a></h2><p>After all the elves' hard work is done, it&rsquo;s up to Santa Claus to deliver the presents &ndash; all 907,208,752 of them.</p>
+<h2 id="santa-claus-and-threading"><a href="#santa-claus-and-threading">Santa Claus, and threading</a></h2><p>After all the elves&rsquo; hard work is done, it&rsquo;s up to Santa Claus to deliver the presents &ndash; all 907,208,752 of them.</p>
 <p>Santa doesn&rsquo;t need to make a visit to every kid; just to the one household tree. So how many trees does Santa need to visit? Again with broad generalization, we&rsquo;ll say that the average number of children per household worldwide is <a href="https://en.wikipedia.org/wiki/Demographics_of_the_world#Total_fertility_rate">2.45, based on the year&rsquo;s predicted fertility rates</a>. That makes 370,289,286.4 houses to visit. Let&rsquo;s round that up to 370,289,287.</p>
 <p>How long does Santa have? The lore says one night, which means one earthly rotation, and thus 24 hours. <a href="https://www.noradsanta.org/">NORAD confirms</a>.</p>
 <p>This means Santa must visit 370,289,287 households in 24 hours (86,400 seconds), at a rate of 4,285.75 households per second, nevermind the time it takes to put presents under the tree and grab a cookie.</p>
@@ -687,10 +687,10 @@ sys     0m0.932s
 </figure>
 
 <p>Here&rsquo;s one example of a constant algorithm that takes the first item in a slice.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">takeCupcake</span><span class="p">(</span><span class="nx">cupcakes</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">cupcakes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div><figure><img src="cupcakes.png"
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">takeCupcake</span><span class="p">(</span><span class="nx">cupcakes</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">cupcakes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><figure><img src="cupcakes.png"
          alt="Types of cupcakes"/><figcaption>
             <p>Choice of flavours are: vanilla cupcake, strawberry cupcake, mint chocolate cupcake, lemon cupcake, and wibbly wobbly, timey wimey cupcake.</p>
         </figcaption>
@@ -703,18 +703,18 @@ sys     0m0.932s
 </figure>
 
 <p>Here&rsquo;s an example of code with time complexity of <em>O</em>(<em>n</em>):</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
- <span class="k">for</span> <span class="nx">chip</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chip</span> <span class="o">&lt;=</span> <span class="nx">bowlOfChips</span><span class="p">;</span> <span class="nx">chip</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// dip chip
-</span><span class="c1"></span> <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>Here&rsquo;s another example of code with time complexity of <em>O</em>(<em>n</em>):</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
- <span class="k">for</span> <span class="nx">chip</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chip</span> <span class="o">&lt;=</span> <span class="nx">bowlOfChips</span><span class="p">;</span> <span class="nx">chip</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// double dip chip
-</span><span class="c1"></span> <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>It doesn&rsquo;t matter whether the code inside the loop executes once, twice, or any number of times. Both these loops process the input by a constant factor of <em>n</em>, and thus can be described as linear.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">for</span> <span class="nx">chip</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chip</span> <span class="o">&lt;=</span> <span class="nx">bowlOfChips</span><span class="p">;</span> <span class="nx">chip</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// dip chip
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Here&rsquo;s another example of code with time complexity of <em>O</em>(<em>n</em>):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">for</span> <span class="nx">chip</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chip</span> <span class="o">&lt;=</span> <span class="nx">bowlOfChips</span><span class="p">;</span> <span class="nx">chip</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// double dip chip
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>It doesn&rsquo;t matter whether the code inside the loop executes once, twice, or any number of times. Both these loops process the input by a constant factor of <em>n</em>, and thus can be described as linear.</p>
 <figure><img src="dip.png"
          alt="Lifeguard MIQ the chip says no double dipping"/><figcaption>
             <p>Don&rsquo;t double dip in a shared bowl.</p>
@@ -726,32 +726,32 @@ sys     0m0.932s
 </figure>
 
 <p>Now here&rsquo;s an example of code with time complexity of <em>O</em>(<em>n</em><sup>2</sup>):</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">pizzas</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
- <span class="k">for</span> <span class="nx">pizza</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizza</span> <span class="o">&lt;=</span> <span class="nx">pizzas</span><span class="p">;</span> <span class="nx">pizza</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// slice pizza
-</span><span class="c1"></span>  <span class="k">for</span> <span class="nx">slice</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">slice</span> <span class="o">&lt;=</span> <span class="nx">pizza</span><span class="p">;</span> <span class="nx">slice</span><span class="o">++</span> <span class="p">{</span>
-   <span class="c1">// eat slice of pizza
-</span><span class="c1"></span>  <span class="p">}</span>
- <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>Because there are two nested loops, or nested linear operations, the algorithm process the input <em>n</em><sup>2</sup> times.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">pizzas</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">for</span> <span class="nx">pizza</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizza</span> <span class="o">&lt;=</span> <span class="nx">pizzas</span><span class="p">;</span> <span class="nx">pizza</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// slice pizza
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="nx">slice</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">slice</span> <span class="o">&lt;=</span> <span class="nx">pizza</span><span class="p">;</span> <span class="nx">slice</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// eat slice of pizza
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Because there are two nested loops, or nested linear operations, the algorithm process the input <em>n</em><sup>2</sup> times.</p>
 <h3 id="cubic"><a href="#cubic">Cubic</a></h3><figure class="screenshot"><img src="graph%28n3%29.png"
          alt="A graph showing cubic time complexity"/>
 </figure>
 
 <p>Extending on the previous example, this code with three nested loops has time complexity of <em>O</em>(<em>n</em><sup>3</sup>):</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">boxesDelivered</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
- <span class="k">for</span> <span class="nx">pizzaBox</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizzaBox</span> <span class="o">&lt;=</span> <span class="nx">boxesDelivered</span><span class="p">;</span> <span class="nx">pizzaBox</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// open box
-</span><span class="c1"></span>  <span class="k">for</span> <span class="nx">pizza</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizza</span> <span class="o">&lt;=</span> <span class="nx">pizzaBox</span><span class="p">;</span> <span class="nx">pizza</span><span class="o">++</span> <span class="p">{</span>
-   <span class="c1">// slice pizza
-</span><span class="c1"></span>   <span class="k">for</span> <span class="nx">slice</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">slice</span> <span class="o">&lt;=</span> <span class="nx">pizza</span><span class="p">;</span> <span class="nx">slice</span><span class="o">++</span> <span class="p">{</span>
-    <span class="c1">// eat slice of pizza
-</span><span class="c1"></span>   <span class="p">}</span>
-  <span class="p">}</span>
- <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><figure><img src="unsliced.png"
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">boxesDelivered</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">for</span> <span class="nx">pizzaBox</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizzaBox</span> <span class="o">&lt;=</span> <span class="nx">boxesDelivered</span><span class="p">;</span> <span class="nx">pizzaBox</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// open box
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="nx">pizza</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizza</span> <span class="o">&lt;=</span> <span class="nx">pizzaBox</span><span class="p">;</span> <span class="nx">pizza</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// slice pizza
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">for</span> <span class="nx">slice</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">slice</span> <span class="o">&lt;=</span> <span class="nx">pizza</span><span class="p">;</span> <span class="nx">slice</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// eat slice of pizza
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><figure><img src="unsliced.png"
          alt="A pizza pie in a box with a pizza slicer dependency"/><figcaption>
             <p>Seriously though, who delivers unsliced pizza??</p>
         </figcaption>
@@ -797,13 +797,13 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
 <p>There are further time complexity classes less commonly seen that I won&rsquo;t cover here, but you can read about these and find examples in <a href="https://en.wikipedia.org/wiki/Time_complexity#Table_of_common_time_complexities">this handy table</a>.</p>
 <h3 id="recursion-time-complexity"><a href="#recursion-time-complexity">Recursion time complexity</a></h3><p>As I described in my article <a href="/blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/">explaining recursion using apple pie</a>, a recursive function calls itself under specified conditions. Its time complexity depends on how many times the function is called and the time complexity of a single function call. In other words, it&rsquo;s the product of the number of times the function runs and a single execution&rsquo;s time complexity.</p>
 <p>Here&rsquo;s a recursive function that eats pies until no pies are left:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
- <span class="k">if</span> <span class="nx">pies</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">pies</span>
- <span class="p">}</span>
- <span class="k">return</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div><p>The time complexity of a single execution is constant. No matter how many pies are input, the program will do the same thing: check to see if the input is 0. If so, return, and if not, call itself with one fewer pie.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">if</span> <span class="nx">pies</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">pies</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The time complexity of a single execution is constant. No matter how many pies are input, the program will do the same thing: check to see if the input is 0. If so, return, and if not, call itself with one fewer pie.</p>
 <p>The initial number of pies could be any number, and we need to process all of them, so we can describe the input as <em>n</em>. Thus, the time complexity of this recursive function is the product <em>O</em>(<em>n</em>).</p>
 <figure><img src="piespile.png"
          alt="A pile of pizza boxes with pies to be eaten"/><figcaption>
@@ -814,54 +814,54 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
 <h3 id="worst-case-time-complexity"><a href="#worst-case-time-complexity">Worst case time complexity</a></h3><p>So far, we&rsquo;ve talked about the time complexity of a few nested loops and some code examples. Most algorithms, however, are built from many combinations of these. How do we determine the time complexity of an algorithm containing many of these elements strung together?</p>
 <p>Easy. We can describe the total time complexity of the algorithm by finding the largest complexity among all of its parts. This is because the slowest part of the code is the bottleneck, and time complexity is concerned with describing the worst case for the algorithm&rsquo;s run time.</p>
 <p>Say we have a program for an office party. If our program looks like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
-
-<span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
-
-<span class="kd">func</span> <span class="nf">takeCupcake</span><span class="p">(</span><span class="nx">cupcakes</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
- <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Have cupcake number&#34;</span><span class="p">,</span><span class="nx">cupcakes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
- <span class="k">return</span> <span class="nx">cupcakes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
- <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Have some chips!&#34;</span><span class="p">)</span>
- <span class="k">for</span> <span class="nx">chip</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chip</span> <span class="o">&lt;=</span> <span class="nx">bowlOfChips</span><span class="p">;</span> <span class="nx">chip</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// dip chip
-</span><span class="c1"></span> <span class="p">}</span>
- <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;No more chips.&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">boxesDelivered</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
- <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Pizza is here!&#34;</span><span class="p">)</span>
- <span class="k">for</span> <span class="nx">pizzaBox</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizzaBox</span> <span class="o">&lt;=</span> <span class="nx">boxesDelivered</span><span class="p">;</span> <span class="nx">pizzaBox</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// open box
-</span><span class="c1"></span>  <span class="k">for</span> <span class="nx">pizza</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizza</span> <span class="o">&lt;=</span> <span class="nx">pizzaBox</span><span class="p">;</span> <span class="nx">pizza</span><span class="o">++</span> <span class="p">{</span>
-   <span class="c1">// slice pizza
-</span><span class="c1"></span>   <span class="k">for</span> <span class="nx">slice</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">slice</span> <span class="o">&lt;=</span> <span class="nx">pizza</span><span class="p">;</span> <span class="nx">slice</span><span class="o">++</span> <span class="p">{</span>
-    <span class="c1">// eat slice of pizza
-</span><span class="c1"></span>   <span class="p">}</span>
-  <span class="p">}</span>
- <span class="p">}</span>
- <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Pizza is gone.&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
- <span class="k">if</span> <span class="nx">pies</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-  <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Someone ate all the pies!&#34;</span><span class="p">)</span>
-  <span class="k">return</span> <span class="nx">pies</span>
- <span class="p">}</span>
- <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Eating pie...&#34;</span><span class="p">)</span>
- <span class="k">return</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
- <span class="nf">takeCupcake</span><span class="p">([]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">})</span>
- <span class="nf">eatChips</span><span class="p">(</span><span class="mi">23</span><span class="p">)</span>
- <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
- <span class="nf">eatPies</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
- <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Food gone. Back to work!&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div><p>We can describe the time complexity of all the code by the complexity of its most complex part. This program is made up of functions we&rsquo;ve already seen, with the following time complexity classes:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">takeCupcake</span><span class="p">(</span><span class="nx">cupcakes</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Have cupcake number&#34;</span><span class="p">,</span><span class="nx">cupcakes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="nx">cupcakes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">eatChips</span><span class="p">(</span><span class="nx">bowlOfChips</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Have some chips!&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="k">for</span> <span class="nx">chip</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">chip</span> <span class="o">&lt;=</span> <span class="nx">bowlOfChips</span><span class="p">;</span> <span class="nx">chip</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// dip chip
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;No more chips.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="nx">boxesDelivered</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Pizza is here!&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="k">for</span> <span class="nx">pizzaBox</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizzaBox</span> <span class="o">&lt;=</span> <span class="nx">boxesDelivered</span><span class="p">;</span> <span class="nx">pizzaBox</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// open box
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="nx">pizza</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">pizza</span> <span class="o">&lt;=</span> <span class="nx">pizzaBox</span><span class="p">;</span> <span class="nx">pizza</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// slice pizza
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">for</span> <span class="nx">slice</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">slice</span> <span class="o">&lt;=</span> <span class="nx">pizza</span><span class="p">;</span> <span class="nx">slice</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// eat slice of pizza
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Pizza is gone.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">if</span> <span class="nx">pies</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Someone ate all the pies!&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">pies</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Eating pie...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="nf">eatPies</span><span class="p">(</span><span class="nx">pies</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="nf">takeCupcake</span><span class="p">([]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl"> <span class="nf">eatChips</span><span class="p">(</span><span class="mi">23</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="nf">pizzaDelivery</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="nf">eatPies</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Food gone. Back to work!&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>We can describe the time complexity of all the code by the complexity of its most complex part. This program is made up of functions we&rsquo;ve already seen, with the following time complexity classes:</p>
 <table>
 <thead>
 <tr>
@@ -895,17 +895,17 @@ We denote this time complexity as <em>O</em>(log <em>n</em>), where <strong>log<
 </table>
 <p>To describe the time complexity of the entire office party program, we choose the worst case. This program would have the time complexity <em>O</em>(<em>n</em><sup>3</sup>).</p>
 <p>Here&rsquo;s the office party soundtrack, just for fun.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">Have cupcake number <span class="m">1</span>
-Have some chips!
-No more chips.
-Pizza is here!
-Pizza is gone.
-Eating pie...
-Eating pie...
-Eating pie...
-Someone ate all the pies!
-Food gone. Back to work!
-</code></pre></div><h2 id="p-vs-np-np-complete-and-np-hard"><a href="#p-vs-np-np-complete-and-np-hard">P vs NP, NP-complete, and NP-hard</a></h2><p>You may come across these terms in your explorations of time complexity. Informally, <strong>P</strong> (for Polynomial time), is a class of problems that is quick to solve. <strong>NP</strong>, for Nondeterministic Polynomial time, is a class of problems where the answer can be quickly verified in polynomial time. NP encompasses P, but also another class of problems called <strong>NP-complete</strong>, for which no fast solution is known.<sup>[<a href="#references">5</a>]</sup> Outside of NP but still including NP-complete is yet another class called <strong>NP-hard</strong>, which includes problems that no one has been able to verifiably solve with polynomial algorithms.<sup>[<a href="#references">6</a>]</sup></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">Have cupcake number <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Have some chips!
+</span></span><span class="line"><span class="cl">No more chips.
+</span></span><span class="line"><span class="cl">Pizza is here!
+</span></span><span class="line"><span class="cl">Pizza is gone.
+</span></span><span class="line"><span class="cl">Eating pie...
+</span></span><span class="line"><span class="cl">Eating pie...
+</span></span><span class="line"><span class="cl">Eating pie...
+</span></span><span class="line"><span class="cl">Someone ate all the pies!
+</span></span><span class="line"><span class="cl">Food gone. Back to work!
+</span></span></code></pre></div><h2 id="p-vs-np-np-complete-and-np-hard"><a href="#p-vs-np-np-complete-and-np-hard">P vs NP, NP-complete, and NP-hard</a></h2><p>You may come across these terms in your explorations of time complexity. Informally, <strong>P</strong> (for Polynomial time), is a class of problems that is quick to solve. <strong>NP</strong>, for Nondeterministic Polynomial time, is a class of problems where the answer can be quickly verified in polynomial time. NP encompasses P, but also another class of problems called <strong>NP-complete</strong>, for which no fast solution is known.<sup>[<a href="#references">5</a>]</sup> Outside of NP but still including NP-complete is yet another class called <strong>NP-hard</strong>, which includes problems that no one has been able to verifiably solve with polynomial algorithms.<sup>[<a href="#references">6</a>]</sup></p>
 <figure class="screenshot"><img src="pnpeuler.svg"
          alt="Euler diagram"/><figcaption>
             <p>P vs NP Euler diagram, <a href="https://commons.wikimedia.org/w/index.php?curid=3532181">by Behnam Esfahbod, CC BY-SA 3.0</a></p>
@@ -952,92 +952,92 @@ Food gone. Back to work!
 </table>
 <p>Keep in mind that time complexity is an approximation, and not a guarantee. We can save a lot of time and effort by immediately ruling out algorithm designs that are unlikely to suit our constraints, but we must also consider that Big O notation doesn&rsquo;t account for <strong>constant factors</strong>. Here&rsquo;s some code to illustrate.</p>
 <p>The following two algorithms both have <em>O</em>(<em>n</em>) time complexity.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">makeCoffee</span><span class="p">(</span><span class="nx">scoops</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
- <span class="k">for</span> <span class="nx">scoop</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">scoop</span> <span class="o">&lt;=</span> <span class="nx">scoops</span><span class="p">;</span> <span class="nx">scoop</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// add instant coffee
-</span><span class="c1"></span> <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">makeStrongCoffee</span><span class="p">(</span><span class="nx">scoops</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
- <span class="k">for</span> <span class="nx">scoop</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">scoop</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="o">*</span><span class="nx">scoops</span><span class="p">;</span> <span class="nx">scoop</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// add instant coffee
-</span><span class="c1"></span> <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>The first function makes a cup of coffee with the number of scoops we ask for. The second function also makes a cup of coffee, but it triples the number of scoops we ask for. To see an illustrative example, let&rsquo;s ask both these functions for a cup of coffee with a million scoops.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">makeCoffee</span><span class="p">(</span><span class="nx">scoops</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">for</span> <span class="nx">scoop</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">scoop</span> <span class="o">&lt;=</span> <span class="nx">scoops</span><span class="p">;</span> <span class="nx">scoop</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// add instant coffee
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">makeStrongCoffee</span><span class="p">(</span><span class="nx">scoops</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">for</span> <span class="nx">scoop</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">scoop</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="o">*</span><span class="nx">scoops</span><span class="p">;</span> <span class="nx">scoop</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// add instant coffee
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The first function makes a cup of coffee with the number of scoops we ask for. The second function also makes a cup of coffee, but it triples the number of scoops we ask for. To see an illustrative example, let&rsquo;s ask both these functions for a cup of coffee with a million scoops.</p>
 <p>Here&rsquo;s the output of the Go test:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Benchmark_makeCoffee-4          <span class="m">1000000000</span>               0.29 ns/op
-Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               0.86 ns/op
-</code></pre></div><p>Our first function, <code>makeCoffee</code>, completed in an average 0.29 nanoseconds. Our second function, <code>makeStrongCoffee</code>, completed in an average of 0.86 nanoseconds. While those may both seem like pretty small numbers, consider that the stronger coffee took near three times longer to make. This should make sense intuitively, since we asked it to triple the scoops. Big O notation alone wouldn&rsquo;t tell you this, since the constant factor of the tripled scoops isn&rsquo;t accounted for.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">Benchmark_makeCoffee-4          <span class="m">1000000000</span>               0.29 ns/op
+</span></span><span class="line"><span class="cl">Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               0.86 ns/op
+</span></span></code></pre></div><p>Our first function, <code>makeCoffee</code>, completed in an average 0.29 nanoseconds. Our second function, <code>makeStrongCoffee</code>, completed in an average of 0.86 nanoseconds. While those may both seem like pretty small numbers, consider that the stronger coffee took near three times longer to make. This should make sense intuitively, since we asked it to triple the scoops. Big O notation alone wouldn&rsquo;t tell you this, since the constant factor of the tripled scoops isn&rsquo;t accounted for.</p>
 <h2 id="improve-time-complexity-of-existing-code"><a href="#improve-time-complexity-of-existing-code">Improve time complexity of existing code</a></h2><p>Becoming familiar with time complexity gives us the opportunity to write code, or refactor code, to be more efficient. To illustrate, I&rsquo;ll give a concrete example of one way we can refactor a bit of code to improve its time complexity.</p>
 <p>Let&rsquo;s say a bunch of people at the office want some pie. Some people want pie more than others. The amount that everyone wants some pie is represented by an <code>int</code> &gt; 0:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">diners</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">56</span><span class="p">}</span>
-</code></pre></div><p>Unfortunately, we&rsquo;re bootstrapped and there are only three forks to go around. Since we&rsquo;re a cooperative bunch, the three people who want pie the most will receive the forks to eat it with. Even though they&rsquo;ve all agreed on this, no one seems to want to sort themselves out and line up in an orderly fashion, so we&rsquo;ll have to make do with everybody jumbled about.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">diners</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">56</span><span class="p">}</span>
+</span></span></code></pre></div><p>Unfortunately, we&rsquo;re bootstrapped and there are only three forks to go around. Since we&rsquo;re a cooperative bunch, the three people who want pie the most will receive the forks to eat it with. Even though they&rsquo;ve all agreed on this, no one seems to want to sort themselves out and line up in an orderly fashion, so we&rsquo;ll have to make do with everybody jumbled about.</p>
 <p>Without sorting the list of diners, return the three largest integers in the slice.</p>
 <p>Here&rsquo;s a function that solves this problem and has <em>O</em>(<em>n</em><sup>2</sup>) time complexity:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">giveForks</span><span class="p">(</span><span class="nx">diners</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
- <span class="c1">// make a slice to store diners who will receive forks
-</span><span class="c1"></span> <span class="kd">var</span> <span class="nx">withForks</span> <span class="p">[]</span><span class="kt">int</span>
- <span class="c1">// loop over three forks
-</span><span class="c1"></span> <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-  <span class="c1">// variables to keep track of the highest integer and where it is
-</span><span class="c1"></span>  <span class="kd">var</span> <span class="nx">max</span><span class="p">,</span> <span class="nx">maxIndex</span> <span class="kt">int</span>
-  <span class="c1">// loop over the diners slice
-</span><span class="c1"></span>  <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">diners</span> <span class="p">{</span>
-   <span class="c1">// if this integer is higher than max, update max and maxIndex
-</span><span class="c1"></span>   <span class="k">if</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">max</span> <span class="p">{</span>
-    <span class="nx">max</span> <span class="p">=</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span>
-    <span class="nx">maxIndex</span> <span class="p">=</span> <span class="nx">n</span>
-   <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="c1">// remove the highest integer from the diners slice for the next loop
-</span><span class="c1"></span>  <span class="nx">diners</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">diners</span><span class="p">[:</span><span class="nx">maxIndex</span><span class="p">],</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">maxIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">...</span><span class="p">)</span>
-  <span class="c1">// keep track of who gets a fork
-</span><span class="c1"></span>  <span class="nx">withForks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">withForks</span><span class="p">,</span> <span class="nx">max</span><span class="p">)</span>
- <span class="p">}</span>
- <span class="k">return</span> <span class="nx">withForks</span>
-<span class="p">}</span>
-</code></pre></div><p>This program works, and eventually returns diners <code>[88 87 56]</code>. Everyone gets a little impatient while it&rsquo;s running though, since it takes rather a long time (about 120 nanoseconds) just to hand out three forks, and the pie&rsquo;s getting cold. How could we improve it?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">giveForks</span><span class="p">(</span><span class="nx">diners</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// make a slice to store diners who will receive forks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="kd">var</span> <span class="nx">withForks</span> <span class="p">[]</span><span class="kt">int</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// loop over three forks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// variables to keep track of the highest integer and where it is
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kd">var</span> <span class="nx">max</span><span class="p">,</span> <span class="nx">maxIndex</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// loop over the diners slice
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">diners</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// if this integer is higher than max, update max and maxIndex
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">if</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">max</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">max</span> <span class="p">=</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">maxIndex</span> <span class="p">=</span> <span class="nx">n</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// remove the highest integer from the diners slice for the next loop
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">diners</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">diners</span><span class="p">[:</span><span class="nx">maxIndex</span><span class="p">],</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">maxIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">...</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// keep track of who gets a fork
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">withForks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">withForks</span><span class="p">,</span> <span class="nx">max</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="nx">withForks</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>This program works, and eventually returns diners <code>[88 87 56]</code>. Everyone gets a little impatient while it&rsquo;s running though, since it takes rather a long time (about 120 nanoseconds) just to hand out three forks, and the pie&rsquo;s getting cold. How could we improve it?</p>
 <p>By thinking about our approach in a slightly different way, we can refactor this program to have <em>O</em>(<em>n</em>) time complexity:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">giveForks</span><span class="p">(</span><span class="nx">diners</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
- <span class="c1">// make a slice to store diners who will receive forks
-</span><span class="c1"></span> <span class="kd">var</span> <span class="nx">withForks</span> <span class="p">[]</span><span class="kt">int</span>
- <span class="c1">// create variables for each fork
-</span><span class="c1"></span> <span class="kd">var</span> <span class="nx">first</span><span class="p">,</span> <span class="nx">second</span><span class="p">,</span> <span class="nx">third</span> <span class="kt">int</span>
- <span class="c1">// loop over the diners
-</span><span class="c1"></span> <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">diners</span> <span class="p">{</span>
-  <span class="c1">// assign the forks
-</span><span class="c1"></span>  <span class="k">if</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">first</span> <span class="p">{</span>
-   <span class="nx">third</span> <span class="p">=</span> <span class="nx">second</span>
-   <span class="nx">second</span> <span class="p">=</span> <span class="nx">first</span>
-   <span class="nx">first</span> <span class="p">=</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">second</span> <span class="p">{</span>
-   <span class="nx">third</span> <span class="p">=</span> <span class="nx">second</span>
-   <span class="nx">second</span> <span class="p">=</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">third</span> <span class="p">{</span>
-   <span class="nx">third</span> <span class="p">=</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-  <span class="p">}</span>
- <span class="p">}</span>
- <span class="c1">// list the final result of who gets a fork
-</span><span class="c1"></span> <span class="nx">withForks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">withForks</span><span class="p">,</span> <span class="nx">first</span><span class="p">,</span> <span class="nx">second</span><span class="p">,</span> <span class="nx">third</span><span class="p">)</span>
- <span class="k">return</span> <span class="nx">withForks</span>
-<span class="p">}</span>
-</code></pre></div><p>Here&rsquo;s how the new program works:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">giveForks</span><span class="p">(</span><span class="nx">diners</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// make a slice to store diners who will receive forks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="kd">var</span> <span class="nx">withForks</span> <span class="p">[]</span><span class="kt">int</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// create variables for each fork
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="kd">var</span> <span class="nx">first</span><span class="p">,</span> <span class="nx">second</span><span class="p">,</span> <span class="nx">third</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// loop over the diners
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">diners</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// assign the forks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">first</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="nx">third</span> <span class="p">=</span> <span class="nx">second</span>
+</span></span><span class="line"><span class="cl">   <span class="nx">second</span> <span class="p">=</span> <span class="nx">first</span>
+</span></span><span class="line"><span class="cl">   <span class="nx">first</span> <span class="p">=</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">second</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="nx">third</span> <span class="p">=</span> <span class="nx">second</span>
+</span></span><span class="line"><span class="cl">   <span class="nx">second</span> <span class="p">=</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">third</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="nx">third</span> <span class="p">=</span> <span class="nx">diners</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// list the final result of who gets a fork
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="nx">withForks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">withForks</span><span class="p">,</span> <span class="nx">first</span><span class="p">,</span> <span class="nx">second</span><span class="p">,</span> <span class="nx">third</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="nx">withForks</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Here&rsquo;s how the new program works:</p>
 <p>Initially, diner <code>2</code> (the first in the list) is assigned the <code>first</code> fork. The other forks remain unassigned.</p>
 <p>Then, diner <code>88</code> is assigned the first fork instead. Diner <code>2</code> gets the <code>second</code> one.</p>
 <p>Diner <code>87</code> isn&rsquo;t greater than <code>first</code> which is currently <code>88</code>, but it is greater than <code>2</code> who has the <code>second</code> fork. So, the <code>second</code> fork goes to <code>87</code>. Diner <code>2</code> gets the <code>third</code> fork.</p>
 <p>Continuing in this violent and rapid fork exchange, diner <code>16</code> is then assigned the <code>third</code> fork instead of <code>2</code>, and so on.</p>
 <p>We can add a print statement in the loop to see how the fork assignments play out:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> <span class="m">0</span>
-<span class="m">2</span> <span class="m">0</span> <span class="m">0</span>
-<span class="m">88</span> <span class="m">2</span> <span class="m">0</span>
-<span class="m">88</span> <span class="m">87</span> <span class="m">2</span>
-<span class="m">88</span> <span class="m">87</span> <span class="m">16</span>
-<span class="m">88</span> <span class="m">87</span> <span class="m">42</span>
-<span class="m">88</span> <span class="m">87</span> <span class="m">42</span>
-<span class="m">88</span> <span class="m">87</span> <span class="m">42</span>
-<span class="m">88</span> <span class="m">87</span> <span class="m">42</span>
-<span class="m">88</span> <span class="m">87</span> <span class="m">43</span>
-<span class="o">[</span><span class="m">88</span> <span class="m">87</span> 56<span class="o">]</span>
-</code></pre></div><p>This program is much faster, and the whole epic struggle for fork domination is over in 47 nanoseconds.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="m">0</span> <span class="m">0</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="m">2</span> <span class="m">0</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="m">88</span> <span class="m">2</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="m">88</span> <span class="m">87</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="m">88</span> <span class="m">87</span> <span class="m">16</span>
+</span></span><span class="line"><span class="cl"><span class="m">88</span> <span class="m">87</span> <span class="m">42</span>
+</span></span><span class="line"><span class="cl"><span class="m">88</span> <span class="m">87</span> <span class="m">42</span>
+</span></span><span class="line"><span class="cl"><span class="m">88</span> <span class="m">87</span> <span class="m">42</span>
+</span></span><span class="line"><span class="cl"><span class="m">88</span> <span class="m">87</span> <span class="m">42</span>
+</span></span><span class="line"><span class="cl"><span class="m">88</span> <span class="m">87</span> <span class="m">43</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span><span class="m">88</span> <span class="m">87</span> 56<span class="o">]</span>
+</span></span></code></pre></div><p>This program is much faster, and the whole epic struggle for fork domination is over in 47 nanoseconds.</p>
 <p>As you can see, with a little change in perspective and some refactoring, we&rsquo;ve made this simple bit of code faster and more efficient.</p>
 <p>Well, it looks like our fifteen minute coffee break is up! I hope I&rsquo;ve given you a comprehensive introduction to calculating time complexity. Time to get back to work, hopefully applying your new knowledge to write more effective code! Or maybe just sound smart at your next office party. :)</p>
 <h2 id="references"><a href="#references">References</a></h2><p>&ldquo;If I have seen further it is by standing on the shoulders of Giants.&rdquo; &ndash;Isaac Newton, 1675</p>
@@ -1121,81 +1121,81 @@ Benchmark_makeStrongCoffee-4    <span class="m">1000000000</span>               
 </tbody>
 </table>
 <h2 id="objects"><a href="#objects">Objects</a></h2><p>Given a breakfast object that looks like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">breakfast</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;eggs&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s1">&#39;waffles&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s1">&#39;fruit&#39;</span><span class="o">:</span> <span class="p">{</span>
-        <span class="s1">&#39;blueberries&#39;</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s1">&#39;strawberries&#39;</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="s1">&#39;coffee&#39;</span><span class="o">:</span> <span class="mi">1</span>
-<span class="p">}</span>
-</code></pre></div><p>Or like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">breakfast</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;eggs&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;waffles&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;fruit&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="s1">&#39;blueberries&#39;</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s1">&#39;strawberries&#39;</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;coffee&#39;</span><span class="o">:</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Or like this:</p>
 <p><p class="md-image">
   <img class="u-photo" src="cover.png#center" alt="Breakfast object."  />
 </p></p>
 <h3 id="iterate-over-object-properties"><a href="#iterate-over-object-properties">Iterate over object properties</a></h3><p>We can iterate through each breakfast item using a for loop as follows:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="nx">item</span> <span class="k">in</span> <span class="nx">breakfast</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;item: &#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div><p>This produces:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">item: eggs
-item: waffles
-item: fruit
-item: coffee
-</code></pre></div><h3 id="get-object-property-value"><a href="#get-object-property-value">Get object property value</a></h3><p>We can access the value of the property or nested properties (in this example, the number of items) like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many waffles? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;waffles&#39;</span><span class="p">])</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many strawberries? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;fruit&#39;</span><span class="p">][</span><span class="s1">&#39;strawberries&#39;</span><span class="p">])</span>
-</code></pre></div><p>Or equivalent syntax:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many waffles? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">.</span><span class="nx">waffles</span><span class="p">)</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many strawberries? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">.</span><span class="nx">fruit</span><span class="p">.</span><span class="nx">strawberries</span><span class="p">)</span>
-</code></pre></div><p>This produces:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">How many waffles?  <span class="m">2</span>
-How many strawberries?  <span class="m">1</span>
-</code></pre></div><h3 id="get-object-property-from-the-value"><a href="#get-object-property-from-the-value">Get object property from the value</a></h3><p>If instead I want to access the property via the value, for example, to find out which items are served in twos, I can do so by iterating like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="nx">item</span> <span class="k">in</span> <span class="nx">breakfast</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">breakfast</span><span class="p">[</span><span class="nx">item</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Two of: &#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>Which gives us:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Two of:  eggs
-Two of:  waffles
-</code></pre></div><h3 id="alter-nested-property-values"><a href="#alter-nested-property-values">Alter nested property values</a></h3><p>Say I want to increase the number of fruits in breakfast, because sugar is bad for me and I like things that are bad for me. I can do that like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">fruits</span> <span class="o">=</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;fruit&#39;</span><span class="p">];</span>
-<span class="k">for</span> <span class="p">(</span><span class="nx">f</span> <span class="k">in</span> <span class="nx">fruits</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">fruits</span><span class="p">[</span><span class="nx">f</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">fruits</span><span class="p">);</span>
-</code></pre></div><p>Which gives us:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="o">{</span> blueberries: 6, strawberries: <span class="m">2</span> <span class="o">}</span>
-</code></pre></div><h2 id="arrays"><a href="#arrays">Arrays</a></h2><p>Given an array of waffles that looks like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">wafflesIAte</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">11</span> <span class="p">];</span>
-</code></pre></div><p>Or like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="nx">item</span> <span class="k">in</span> <span class="nx">breakfast</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;item: &#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>This produces:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">item: eggs
+</span></span><span class="line"><span class="cl">item: waffles
+</span></span><span class="line"><span class="cl">item: fruit
+</span></span><span class="line"><span class="cl">item: coffee
+</span></span></code></pre></div><h3 id="get-object-property-value"><a href="#get-object-property-value">Get object property value</a></h3><p>We can access the value of the property or nested properties (in this example, the number of items) like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many waffles? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;waffles&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many strawberries? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;fruit&#39;</span><span class="p">][</span><span class="s1">&#39;strawberries&#39;</span><span class="p">])</span>
+</span></span></code></pre></div><p>Or equivalent syntax:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many waffles? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">.</span><span class="nx">waffles</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;How many strawberries? &#39;</span><span class="p">,</span> <span class="nx">breakfast</span><span class="p">.</span><span class="nx">fruit</span><span class="p">.</span><span class="nx">strawberries</span><span class="p">)</span>
+</span></span></code></pre></div><p>This produces:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">How many waffles?  <span class="m">2</span>
+</span></span><span class="line"><span class="cl">How many strawberries?  <span class="m">1</span>
+</span></span></code></pre></div><h3 id="get-object-property-from-the-value"><a href="#get-object-property-from-the-value">Get object property from the value</a></h3><p>If instead I want to access the property via the value, for example, to find out which items are served in twos, I can do so by iterating like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="nx">item</span> <span class="k">in</span> <span class="nx">breakfast</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">breakfast</span><span class="p">[</span><span class="nx">item</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Two of: &#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Which gives us:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">Two of:  eggs
+</span></span><span class="line"><span class="cl">Two of:  waffles
+</span></span></code></pre></div><h3 id="alter-nested-property-values"><a href="#alter-nested-property-values">Alter nested property values</a></h3><p>Say I want to increase the number of fruits in breakfast, because sugar is bad for me and I like things that are bad for me. I can do that like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">fruits</span> <span class="o">=</span> <span class="nx">breakfast</span><span class="p">[</span><span class="s1">&#39;fruit&#39;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="nx">f</span> <span class="k">in</span> <span class="nx">fruits</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fruits</span><span class="p">[</span><span class="nx">f</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">fruits</span><span class="p">);</span>
+</span></span></code></pre></div><p>Which gives us:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="o">{</span> blueberries: 6, strawberries: <span class="m">2</span> <span class="o">}</span>
+</span></span></code></pre></div><h2 id="arrays"><a href="#arrays">Arrays</a></h2><p>Given an array of waffles that looks like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">wafflesIAte</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">11</span> <span class="p">];</span>
+</span></span></code></pre></div><p>Or like this:</p>
 <p><p class="md-image">
   <img class="u-photo" src="iteration-waffles.png" alt="Waffle array."  />
 </p></p>
 <h3 id="iterate-through-array-items"><a href="#iterate-through-array-items">Iterate through array items</a></h3><p>We can iterate through each item in the array using a for loop:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">wafflesIAte</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;array index: &#39;</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;item from array: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
-<span class="p">}</span>
-</code></pre></div><p>This produces:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">array index:  <span class="m">0</span>
-item from array:  <span class="m">1</span>
-array index:  <span class="m">1</span>
-item from array:  <span class="m">3</span>
-array index:  <span class="m">2</span>
-item from array:  <span class="m">2</span>
-array index:  <span class="m">3</span>
-item from array:  <span class="m">0</span>
-array index:  <span class="m">4</span>
-item from array:  <span class="m">5</span>
-array index:  <span class="m">5</span>
-item from array:  <span class="m">2</span>
-array index:  <span class="m">6</span>
-item from array:  <span class="m">11</span>
-</code></pre></div><p>Some things to remember:
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">wafflesIAte</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;array index: &#39;</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;item from array: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>This produces:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">array index:  <span class="m">0</span>
+</span></span><span class="line"><span class="cl">item from array:  <span class="m">1</span>
+</span></span><span class="line"><span class="cl">array index:  <span class="m">1</span>
+</span></span><span class="line"><span class="cl">item from array:  <span class="m">3</span>
+</span></span><span class="line"><span class="cl">array index:  <span class="m">2</span>
+</span></span><span class="line"><span class="cl">item from array:  <span class="m">2</span>
+</span></span><span class="line"><span class="cl">array index:  <span class="m">3</span>
+</span></span><span class="line"><span class="cl">item from array:  <span class="m">0</span>
+</span></span><span class="line"><span class="cl">array index:  <span class="m">4</span>
+</span></span><span class="line"><span class="cl">item from array:  <span class="m">5</span>
+</span></span><span class="line"><span class="cl">array index:  <span class="m">5</span>
+</span></span><span class="line"><span class="cl">item from array:  <span class="m">2</span>
+</span></span><span class="line"><span class="cl">array index:  <span class="m">6</span>
+</span></span><span class="line"><span class="cl">item from array:  <span class="m">11</span>
+</span></span></code></pre></div><p>Some things to remember:
 <code>i</code> in the above context is a placeholder; we could substitute anything we like (<code>x</code>, <code>n</code>, <code>underpants</code>, etc). It simply denotes each instance of the iteration.</p>
 <p><code>i &lt; wafflesIAte.length</code> tells our for loop to continue as long as <code>i</code> is less than the array&rsquo;s length (in this case, 7).</p>
 <p><code>i++</code> is equivalent to <code>i+1</code> and means we&rsquo;re incrementing through our array by one each time. We could also use <code>i+2</code> to proceed with every other item in the array, for example.</p>
@@ -1203,11 +1203,11 @@ item from array:  <span class="m">11</span>
 <p>Array index always starts with <code>0</code>, which is accessed with <code>wafflesIAte[0]</code>. Using <code>wafflesIAte[1]</code> gives us the second item in the array, which is &ldquo;3&rdquo;.</p>
 <h3 id="ways-to-get-mixed-up-over-arrays"><a href="#ways-to-get-mixed-up-over-arrays">Ways to get mixed up over arrays</a></h3><p>Remember that <code>wafflesIAte.length</code> and the index of the last item in the array are different. The former is 7, the latter is <code>6</code>.</p>
 <p>When incrementing <code>i</code>, remember that <code>[i+1]</code> and <code>[i]+1</code> are different:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[i+1] gives next array index: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="p">]);</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[i]+1 gives index value + 1: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
-</code></pre></div><p>Produces:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="o">[</span>i+1<span class="o">]</span> gives next array index:  <span class="m">3</span>
-<span class="o">[</span>i<span class="o">]</span>+1 gives index value + 1:  <span class="m">2</span>
-</code></pre></div><h2 id="practice-makes-better"><a href="#practice-makes-better">Practice makes&hellip; better</a></h2><p>The more often you code and correct your errors, the better you&rsquo;ll remember it next time!</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[i+1] gives next array index: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[i]+1 gives index value + 1: &#39;</span><span class="p">,</span> <span class="nx">wafflesIAte</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+</span></span></code></pre></div><p>Produces:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="o">[</span>i+1<span class="o">]</span> gives next array index:  <span class="m">3</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>i<span class="o">]</span>+1 gives index value + 1:  <span class="m">2</span>
+</span></span></code></pre></div><h2 id="practice-makes-better"><a href="#practice-makes-better">Practice makes&hellip; better</a></h2><p>The more often you code and correct your errors, the better you&rsquo;ll remember it next time!</p>
 <p>That&rsquo;s all for now. If you have a correction, best practice, or another common error for me to add, please let me know!</p>
 ]]></content></entry></feed>

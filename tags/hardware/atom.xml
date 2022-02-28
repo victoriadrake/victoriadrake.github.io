@@ -90,28 +90,28 @@
 <p>Since bash scripts are just a collection of commands that we could run individually in the terminal, creating a script to install all our desired programs is as straightforward as putting all the commands into a script file. I chose to organize my installation scripts between the default repositories, which are installed by <a href="https://github.com/victoriadrake/dotfiles/blob/ubuntu-19.10/scripts/aptinstall.sh">my <code>aptinstall.sh</code> script</a>, and programs that involve external sources, handled with <a href="https://github.com/victoriadrake/dotfiles/blob/ubuntu-19.10/scripts/programs.sh">my <code>programs.sh</code> script</a>.</p>
 <h2 id="setting-up-the-desktop-environment"><a href="#setting-up-the-desktop-environment">Setting up the desktop environment</a></h2><p>On the recent occasions when I&rsquo;ve gotten a fresh desktop (intentionally or otherwise) I always seem to forget how long it takes to remember, find, and then change all the desktop environment settings. Keyboard shortcuts, workspaces, sound settings, night mode&hellip; it adds up!</p>
 <p>Thankfully, all these settings have to be stored somewhere in a non-graphical format, which means that if we can discover how that&rsquo;s done, we can likely find a way to easily manipulate the settings with a bash script. Lo and behold the terminal command, <code>gsettings list-recursively</code>.</p>
-<p>There are a heck of a lot of settings for GNOME desktop environment. We can make the list easier to scroll through (if, like me, you&rsquo;re sometimes the type of person to say &ldquo;Just let me look at everything and figure out what I want!&quot;) by piping to <code>less</code>: <code>gsettings list-recursively | less</code>. Alternatively, if we have an inkling as to what we might be looking for, we can use <code>grep</code>: <code>gsettings list-recursively | grep 'keyboard'</code>.</p>
+<p>There are a heck of a lot of settings for GNOME desktop environment. We can make the list easier to scroll through (if, like me, you&rsquo;re sometimes the type of person to say &ldquo;Just let me look at everything and figure out what I want!&rdquo;) by piping to <code>less</code>: <code>gsettings list-recursively | less</code>. Alternatively, if we have an inkling as to what we might be looking for, we can use <code>grep</code>: <code>gsettings list-recursively | grep 'keyboard'</code>.</p>
 <p>We can manipulate our settings with the <code>gsettings set</code> command. It can sometimes be difficult to find the syntax for the setting we want, so when we&rsquo;re first building our script, I recommend using the GUI to make the changes, then finding the <code>gsettings</code> line we changed and recording its value.</p>
 <p>For some inspiration, you can view <a href="https://github.com/victoriadrake/dotfiles/blob/ubuntu-19.10/scripts/desktop.sh">my <code>desktop.sh</code> settings script on GitHub</a>.</p>
 <h2 id="putting-it-all-together"><a href="#putting-it-all-together">Putting it all together</a></h2><p>Having modular scripts (one for symlinks, two for installing programs, another for desktop settings) is useful for both keeping things organized and for being able to run some but not all of the automated set up. For instance, if I were to set up a VPS in which I only use the command line, I wouldn&rsquo;t need to bother with installing graphical programs or desktop settings.</p>
 <p>In cases where I do want to run all the scripts, however, doing so one-by-one is a little tedious. Thankfully, since bash scripts can themselves be run by terminal commands, we can simply write another master script to run them all!</p>
 <p>Here&rsquo;s my master script to handle the set up of a new Ubuntu desktop machine:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="cp">#!/bin/bash
-</span><span class="cp"></span>
-./symlink.sh
-./aptinstall.sh
-./programs.sh
-./desktop.sh
-
-<span class="c1">## Get all upgrades</span>
-sudo apt upgrade -y
-
-<span class="c1">## See our bash changes</span>
-<span class="nb">source</span> ~/.bashrc
-
-<span class="c1">## Fun hello</span>
-figlet <span class="s2">&#34;... and we&#39;re back!&#34;</span> <span class="p">|</span> lolcat
-</code></pre></div><p>I threw in the upgrade line for good measure. It will make sure that the programs installed on our fresh desktop have the latest updates. Now a simple, single bash command will take care of everything!</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl">./symlink.sh
+</span></span><span class="line"><span class="cl">./aptinstall.sh
+</span></span><span class="line"><span class="cl">./programs.sh
+</span></span><span class="line"><span class="cl">./desktop.sh
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">## Get all upgrades</span>
+</span></span><span class="line"><span class="cl">sudo apt upgrade -y
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">## See our bash changes</span>
+</span></span><span class="line"><span class="cl"><span class="nb">source</span> ~/.bashrc
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">## Fun hello</span>
+</span></span><span class="line"><span class="cl">figlet <span class="s2">&#34;... and we&#39;re back!&#34;</span> <span class="p">|</span> lolcat
+</span></span></code></pre></div><p>I threw in the upgrade line for good measure. It will make sure that the programs installed on our fresh desktop have the latest updates. Now a simple, single bash command will take care of everything!</p>
 <p>You may have noticed that, while our desktop now looks and runs familiarly, these scripts don&rsquo;t cover one very important area: our files. Hopefully, you have a back up method for those that involves some form of reliable external hardware. If not, and if you tend to put your work in external repository hosts like GitHub or GitLab, I do have a way to <a href="/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/">automatically clone and back up your GitHub repositories with bash one-liners</a>.</p>
 <p>Relying on external repository hosts doesn&rsquo;t offer 100% coverage, however. Files that you wouldn&rsquo;t put in an externally hosted repository (private or otherwise) consequently can&rsquo;t be pulled. Git ignored objects that can&rsquo;t be generated from included files, like private keys and secrets, will not be recreated. Those files, however, are likely small enough that you could fit a whole bunch on a couple encrypted USB flash drives (and if you don&rsquo;t have private key backups, maybe you ought to do that first?).</p>
 <p>That said, I hope this post has given you at least some inspiration as to how dotfiles and bash scripts can help to automate setting up a fresh desktop. If you come up with some settings you find useful, please help others discover them by sharing your dotfiles, too!</p>

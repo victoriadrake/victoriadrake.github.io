@@ -27,36 +27,36 @@
 <h2 id="getting-quality-data"><a href="#getting-quality-data">Getting quality data</a></h2><p>The first and most difficult part, as any data scientist would likely tell you, is ensuring the quality of your data. It&rsquo;s especially important to consider consistency: are dates throughout the dataset presented in a consistent format? Have tags or labels been applied under consistent rules? Does the dataset contain repeated values, empty values, or unmatched types?</p>
 <p>If your repository has previously changed up processes or standards, consider the timeframe of the data you collect. If labeling issues is done arbitrarily, those may not be a useful feature. While cleaning data is outside the scope of this article, I can, at least, help you painlessly collect it.</p>
 <p>I wrote a straightforward <a href="https://github.com/victoriadrake/got-issues/">Python utility</a> that uses the GitHub API to pull data for any repository. You can use this on the command line and output the data to a file. It uses the <a href="https://docs.github.com/en/rest/reference/issues#list-repository-issues">list repository issues endpoint (docs)</a>, which, perhaps confusingly, includes both issues and pull requests (PRs) for the repository. I get my data like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">$ python fetch.py -h
-usage: fetch.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--token TOKEN<span class="o">]</span> repository months
-$ python fetch.py OWASP/wstg <span class="m">24</span> &gt; data.json
-</code></pre></div><p>Using the GitHub API means less worry about standardization, for example, all the dates are expressed as ISO 8601. Now that you have some data to process, it&rsquo;s time to play with Pandas.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ python fetch.py -h
+</span></span><span class="line"><span class="cl">usage: fetch.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--token TOKEN<span class="o">]</span> repository months
+</span></span><span class="line"><span class="cl">$ python fetch.py OWASP/wstg <span class="m">24</span> &gt; data.json
+</span></span></code></pre></div><p>Using the GitHub API means less worry about standardization, for example, all the dates are expressed as ISO 8601. Now that you have some data to process, it&rsquo;s time to play with Pandas.</p>
 <h2 id="plotting-with-pandas"><a href="#plotting-with-pandas">Plotting with Pandas</a></h2><p>You can use a <a href="https://jupyter.org/">Jupyter Notebook</a> to do some simple calculations and data visualization.</p>
 <p>First, create the Notebook file:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">touch stats.ipynb
-</code></pre></div><p>Open the file in your favorite IDE, or in your browser by running <code>jupyter notebook</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">touch stats.ipynb
+</span></span></code></pre></div><p>Open the file in your favorite IDE, or in your browser by running <code>jupyter notebook</code>.</p>
 <p>In the first code cell, import Pandas and load your data:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="s2">&#34;data.json&#34;</span><span class="p">)</span>
-<span class="n">data</span>
-</code></pre></div><p>You can then run that cell to see a preview of the data you collected.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="s2">&#34;data.json&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">data</span>
+</span></span></code></pre></div><p>You can then run that cell to see a preview of the data you collected.</p>
 <p>Pandas is a <a href="https://pandas.pydata.org/pandas-docs/stable/index.html">well-documented</a> data analysis library. With a little imagination and a few keyword searches, you can begin to measure all kinds of repository metrics. For this walk-through, here&rsquo;s how you can calculate and create a graph that shows the number of days an issue or PR remains open in your repository.</p>
 <p>Create a new code cell and, for each item in your <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html">Series</a>, subtract the date it was closed from the date it was created:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="n">duration</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">closed_at</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">created_at</span><span class="p">)</span>
-<span class="n">duration</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
-</code></pre></div><p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.describe.html"><code>Series.describe()</code></a> will give you some summary statistics that look something like these (from <a href="https://github.com/python/mypy">mypy on GitHub</a>):</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">count                           514
-mean      5 days 08:04:17.239299610
-std      14 days 12:04:22.979308668
-min                 0 days 00:00:09
-25%          0 days 00:47:46.250000
-50%                 0 days 06:18:47
-75%          2 days 20:22:49.250000
-max               102 days 20:56:30
-</code></pre></div><p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.plot.html?"><code>Series.plot()</code></a> uses a specified plotting backend (<code>matplotlib</code> by default) to visualize your data. A histogram can be a helpful way to examine issue duration:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="n">duration</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">days</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&#34;hist&#34;</span><span class="p">)</span>
-</code></pre></div><p>This will plot a histogram that represents the frequency distribution of issues over days, which is one way you can tell how long most issues take to close. For example, mypy seems to handle the majority of issues and PRs within 10 days, with some outliers taking more than three months:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="n">duration</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">closed_at</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">created_at</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">duration</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</span></span></code></pre></div><p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.describe.html"><code>Series.describe()</code></a> will give you some summary statistics that look something like these (from <a href="https://github.com/python/mypy">mypy on GitHub</a>):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">count                           514
+</span></span><span class="line"><span class="cl">mean      5 days 08:04:17.239299610
+</span></span><span class="line"><span class="cl">std      14 days 12:04:22.979308668
+</span></span><span class="line"><span class="cl">min                 0 days 00:00:09
+</span></span><span class="line"><span class="cl">25%          0 days 00:47:46.250000
+</span></span><span class="line"><span class="cl">50%                 0 days 06:18:47
+</span></span><span class="line"><span class="cl">75%          2 days 20:22:49.250000
+</span></span><span class="line"><span class="cl">max               102 days 20:56:30
+</span></span></code></pre></div><p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.plot.html?"><code>Series.plot()</code></a> uses a specified plotting backend (<code>matplotlib</code> by default) to visualize your data. A histogram can be a helpful way to examine issue duration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="n">duration</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">days</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&#34;hist&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><p>This will plot a histogram that represents the frequency distribution of issues over days, which is one way you can tell how long most issues take to close. For example, mypy seems to handle the majority of issues and PRs within 10 days, with some outliers taking more than three months:</p>
 <p><p class="md-image">
   <img class="u-photo" src="plot.png" alt="Histogram for mypy issues over the last six months"  />
 </p></p>
@@ -127,8 +127,8 @@ max               102 days 20:56:30
 </p></p>
 <p>You can create different labels to categorize a discussion, and you can apply as many labels to a discussion as you like. In order to have your team draw your attention to threads that might benefit from your input or guidance, ask folks to use a label to point these out. This could be the <code>question</code> label, or any new label of your choosing.</p>
 <p>Clicking on a label in the sidebar will take you to a page that shows all the Issues or Pull Requests with that label. The URL will look something like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">https://github.com/&lt;organization name&gt;/&lt;repository name&gt;/labels/question
-</code></pre></div><p>You can also bookmark this page to easily check it on a regular schedule. This is a great, low-friction way for your team to indicate areas that could use your input.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">https://github.com/&lt;organization name&gt;/&lt;repository name&gt;/labels/question
+</span></span></code></pre></div><p>You can also bookmark this page to easily check it on a regular schedule. This is a great, low-friction way for your team to indicate areas that could use your input.</p>
 <h2 id="collaborating-on-files"><a href="#collaborating-on-files">Collaborating on files</a></h2><p>Similar to tracking changes in Google Docs or Word documents, you can edit documents in GitHub in a way that lets your team see the changes you&rsquo;ve made. This is a fantastic method for collaborating with your team where they work, and avoids the hassle of emailing attachments around.</p>
 <p>Text files in repositories have extensions such as <code>.md</code> for Markdown, or <code>.txt</code> for plain text. The majority of documentation on GitHub is in Markdown format. Clicking on any file in the repository file list will open it on the GitHub website. At the top right of the document, look for these buttons:</p>
 <p><p class="md-image">
@@ -145,80 +145,80 @@ max               102 days 20:56:30
 <p>The <code>raise</code> statement allows the programmer to force a specific exception to occur. (<a href="https://docs.python.org/3/tutorial/errors.html#raising-exceptions">8.4 Raising Exceptions</a>)</p>
 </blockquote>
 <p>Use <code>raise</code> when you know you want a specific behavior, such as:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&#34;Wanted strawberry, got grape.&#34;</span><span class="p">)</span>
-</code></pre></div><p>Raising an exception terminates the flow of your program, allowing the exception to bubble up the call stack. In the above example, this would let you explicitly handle <code>TypeError</code> later. If <code>TypeError</code> goes unhandled, code execution stops and you&rsquo;ll get an <em>unhandled exception</em> message.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&#34;Wanted strawberry, got grape.&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><p>Raising an exception terminates the flow of your program, allowing the exception to bubble up the call stack. In the above example, this would let you explicitly handle <code>TypeError</code> later. If <code>TypeError</code> goes unhandled, code execution stops and you&rsquo;ll get an <em>unhandled exception</em> message.</p>
 <p>Raise is useful in cases where you want to define a certain behavior to occur. For example, you may choose to disallow certain words in a text field:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">if</span> <span class="s2">&#34;raisins&#34;</span> <span class="ow">in</span> <span class="n">text_field</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&#34;That word is not allowed here&#34;</span><span class="p">)</span>
-</code></pre></div><p>Raise takes an instance of an exception, or a derivative of the <a href="https://docs.python.org/3/library/exceptions.html#Exception">Exception class</a>. Here are all of <a href="https://docs.python.org/3/library/exceptions.html#bltin-exceptions">Python&rsquo;s built-in exceptions</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">if</span> <span class="s2">&#34;raisins&#34;</span> <span class="ow">in</span> <span class="n">text_field</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&#34;That word is not allowed here&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><p>Raise takes an instance of an exception, or a derivative of the <a href="https://docs.python.org/3/library/exceptions.html#Exception">Exception class</a>. Here are all of <a href="https://docs.python.org/3/library/exceptions.html#bltin-exceptions">Python&rsquo;s built-in exceptions</a>.</p>
 <p>Raise can help you avoid writing functions that fail silently. For example, this code will not raise an exception if <code>JAM</code> doesn&rsquo;t exist:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
-
-
-<span class="k">def</span> <span class="nf">sandwich_or_bust</span><span class="p">(</span><span class="n">bread</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">jam</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;JAM&#34;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">bread</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">jam</span><span class="p">)</span> <span class="o">+</span> <span class="n">bread</span>
-
-
-<span class="n">s</span> <span class="o">=</span> <span class="n">sandwich_or_bust</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\U0001F35E</span><span class="s2">&#34;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="c1"># Prints &#34;🍞None🍞&#34; which is not very tasty.</span>
-</code></pre></div><p>To cause the <code>sandwich_or_bust()</code> function to actually bust, add a <code>raise</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
-
-
-<span class="k">def</span> <span class="nf">sandwich_or_bust</span><span class="p">(</span><span class="n">bread</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">jam</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;JAM&#34;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">jam</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&#34;There is no jam. Sad bread.&#34;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">bread</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">jam</span><span class="p">)</span> <span class="o">+</span> <span class="n">bread</span>
-
-
-<span class="n">s</span> <span class="o">=</span> <span class="n">sandwich_or_bust</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\U0001F35E</span><span class="s2">&#34;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="c1"># ValueError: There is no jam. Sad bread.</span>
-</code></pre></div><p>Any time your code interacts with an external variable, module, or service, there is a possibility of failure. You can use <code>raise</code> in an <code>if</code> statement to help ensure those failures aren&rsquo;t silent.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">sandwich_or_bust</span><span class="p">(</span><span class="n">bread</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">jam</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;JAM&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">bread</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">jam</span><span class="p">)</span> <span class="o">+</span> <span class="n">bread</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">s</span> <span class="o">=</span> <span class="n">sandwich_or_bust</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\U0001F35E</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Prints &#34;🍞None🍞&#34; which is not very tasty.</span>
+</span></span></code></pre></div><p>To cause the <code>sandwich_or_bust()</code> function to actually bust, add a <code>raise</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">sandwich_or_bust</span><span class="p">(</span><span class="n">bread</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">jam</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;JAM&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">jam</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&#34;There is no jam. Sad bread.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">bread</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">jam</span><span class="p">)</span> <span class="o">+</span> <span class="n">bread</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">s</span> <span class="o">=</span> <span class="n">sandwich_or_bust</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\U0001F35E</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># ValueError: There is no jam. Sad bread.</span>
+</span></span></code></pre></div><p>Any time your code interacts with an external variable, module, or service, there is a possibility of failure. You can use <code>raise</code> in an <code>if</code> statement to help ensure those failures aren&rsquo;t silent.</p>
 <h3 id="raise-in-try-and-except"><a href="#raise-in-try-and-except">Raise in <code>try</code> and <code>except</code></a></h3><p>To handle a possible failure by taking an action if there is one, use a <code>try</code> &hellip; <code>except</code> statement.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">try</span><span class="p">:</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">sandwich_or_bust</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\U0001F35E</span><span class="s2">&#34;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-    <span class="n">buy_more_jam</span><span class="p">()</span>
-    <span class="k">raise</span>
-</code></pre></div><p>This lets you <code>buy_more_jam()</code> before re-raising the exception. If you want to propagate a caught exception, use <code>raise</code> without arguments to avoid possible loss of the stack trace.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span> <span class="o">=</span> <span class="n">sandwich_or_bust</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\U0001F35E</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">buy_more_jam</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">raise</span>
+</span></span></code></pre></div><p>This lets you <code>buy_more_jam()</code> before re-raising the exception. If you want to propagate a caught exception, use <code>raise</code> without arguments to avoid possible loss of the stack trace.</p>
 <p>If you don&rsquo;t know that the exception will be a <code>ValueError</code>, you can also use a bare <code>except:</code> or catch any derivative of the <code>Exception</code> class with <code>except Exception:</code>. Whenever possible, it&rsquo;s better to raise and handle exceptions explicitly.</p>
 <p>Use <code>else</code> for code to execute if the <code>try</code> does not raise an exception. For example:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">try</span><span class="p">:</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">sandwich_or_bust</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\U0001F35E</span><span class="s2">&#34;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-    <span class="n">buy_more_jam</span><span class="p">()</span>
-    <span class="k">raise</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Congratulations on your sandwich.&#34;</span><span class="p">)</span>
-</code></pre></div><p>You could also place the print line within the <code>try</code> block, however, this is less explicit.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span> <span class="o">=</span> <span class="n">sandwich_or_bust</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\U0001F35E</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">buy_more_jam</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">raise</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Congratulations on your sandwich.&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><p>You could also place the print line within the <code>try</code> block, however, this is less explicit.</p>
 <h2 id="when-to-return"><a href="#when-to-return">When to return</a></h2><p>When you use <code>return</code> in Python, you&rsquo;re giving back a value. A function returns to the location it was called from.</p>
 <p>While it&rsquo;s more idiomatic to <code>raise</code> errors in Python, there may be occasions where you find <code>return</code> to be more applicable.</p>
 <p>For example, if your Python code is interacting with other components that do not handle exception classes, you may want to return a message instead. Here&rsquo;s an example using a <code>try</code> &hellip; <code>except</code> statement:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-
-
-<span class="k">def</span> <span class="nf">share_sandwich</span><span class="p">(</span><span class="n">sandwich</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">bad_math</span> <span class="o">=</span> <span class="n">sandwich</span> <span class="o">/</span> <span class="mi">0</span>
-        <span class="k">return</span> <span class="n">bad_math</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">e</span>
-
-
-<span class="n">s</span> <span class="o">=</span> <span class="n">share_sandwich</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="c1"># Prints &#34;division by zero&#34;</span>
-</code></pre></div><p>Note that when you return an <code>Exception</code> class object, you&rsquo;ll get a representation of its associated value, usually the first item in its list of arguments. In the example above, this is the string explanation of the exception. In some cases, it may be a tuple with other information about the exception.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">share_sandwich</span><span class="p">(</span><span class="n">sandwich</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">bad_math</span> <span class="o">=</span> <span class="n">sandwich</span> <span class="o">/</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">bad_math</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">e</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">s</span> <span class="o">=</span> <span class="n">share_sandwich</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Prints &#34;division by zero&#34;</span>
+</span></span></code></pre></div><p>Note that when you return an <code>Exception</code> class object, you&rsquo;ll get a representation of its associated value, usually the first item in its list of arguments. In the example above, this is the string explanation of the exception. In some cases, it may be a tuple with other information about the exception.</p>
 <p>You may also use <code>return</code> to give a specific error object, such as with <a href="https://docs.djangoproject.com/en/3.1/ref/request-response/#httpresponse-subclasses"><code>HttpResponseNotFound</code> in Django</a>. For example, you may want to return a <code>404</code> instead of a <code>403</code> for security reasons:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">if</span> <span class="nb">object</span><span class="o">.</span><span class="n">owner</span> <span class="o">!=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">HttpResponseNotFound</span>
-</code></pre></div><p>Using <code>return</code> can help you write appropriately noisy code when your function is expected to give back a certain value, and when interacting with outside elements.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">if</span> <span class="nb">object</span><span class="o">.</span><span class="n">owner</span> <span class="o">!=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">HttpResponseNotFound</span>
+</span></span></code></pre></div><p>Using <code>return</code> can help you write appropriately noisy code when your function is expected to give back a certain value, and when interacting with outside elements.</p>
 <h2 id="the-most-important-part"><a href="#the-most-important-part">The most important part</a></h2><p>Silent failures create some of the most frustrating bugs to find and fix. You can help create a pleasant development experience for yourself and your team by using <code>raise</code> and <code>return</code> to <strong>ensure that errors are handled in your Python code.</strong></p>
 <p>I write about good development practices and how to improve productivity as a software developer. You can get these tips right in your inbox by signing up below!</p>
 <div class="form-container centered" id="subscribe">
@@ -321,44 +321,44 @@ max               102 days 20:56:30
 <p>Besides being aptly named, Django will find these files using <a href="https://docs.python.org/3/library/unittest.html#unittest-test-discovery">built-in test discovery</a> based on the <code>unittest</code> module. All files in your application with names that begin with <code>test</code> will be collected into a test suite.</p>
 <p>This convenient test discovery allows you to place test files anywhere that makes sense for your application. As long as they&rsquo;re correctly named, Django&rsquo;s test utility can find and run them.</p>
 <h2 id="how-to-document-a-test"><a href="#how-to-document-a-test">How to document a test</a></h2><p>Use <a href="https://www.python.org/dev/peps/pep-0257/">docstrings</a> to explain what a test is intended to verify at a high level. For example:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">test_create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&#34;&#34;&#34;Creating a new user object should also create an associated profile object&#34;&#34;&#34;</span>
-    <span class="c1"># ...</span>
-</code></pre></div><p>These docstrings help you quickly understand what a test is supposed to be doing. Besides navigating the codebase, this helps to make it obvious when a test doesn&rsquo;t verify what the docstring says it should.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">test_create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;Creating a new user object should also create an associated profile object&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># ...</span>
+</span></span></code></pre></div><p>These docstrings help you quickly understand what a test is supposed to be doing. Besides navigating the codebase, this helps to make it obvious when a test doesn&rsquo;t verify what the docstring says it should.</p>
 <p>Docstrings are also shown when the tests are being run, which can be helpful for logging and debugging.</p>
 <h2 id="what-a-test-needs-to-work"><a href="#what-a-test-needs-to-work">What a test needs to work</a></h2><p>Django tests can be quickly set up using data created in the <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#django.test.TestCase.setUpTestData"><code>setUpTestData()</code> method</a>. You can use various approaches to create your test data, such as utilizing external files, or even hard-coding silly phrases or the names of your staff. Personally, I much prefer to use a fake-data-generation library, such as <a href="https://github.com/joke2k/faker/"><code>faker</code></a>.</p>
 <p>The proper set up of arbitrary testing data can help you ensure that you&rsquo;re testing your application functionality instead of accidentally testing test data. Because generators like <code>faker</code> add some degree of unexpectedness to your inputs, it can be more representative of real-world use.</p>
 <p>Here is an example set up for a test:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
-<span class="kn">from</span> <span class="nn">faker</span> <span class="kn">import</span> <span class="n">Faker</span>
-
-<span class="kn">from</span> <span class="nn">app.models</span> <span class="kn">import</span> <span class="n">MyModel</span><span class="p">,</span> <span class="n">AnotherModel</span>
-
-<span class="n">fake</span> <span class="o">=</span> <span class="n">Faker</span><span class="p">()</span>
-
-
-<span class="k">class</span> <span class="nc">MyModelTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">setUpTestData</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="s2">&#34;&#34;&#34;Quickly set up data for the whole TestCase&#34;&#34;&#34;</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">user_first</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">first_name</span><span class="p">()</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">user_last</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">last_name</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">test_create_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&#34;&#34;&#34;Creating a MyModel object should also create AnotherModel object&#34;&#34;&#34;</span>
-        <span class="c1"># In test methods, use the variables created above</span>
-        <span class="n">test_object</span> <span class="o">=</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-            <span class="n">first_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">,</span>
-            <span class="n">last_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_last</span><span class="p">,</span>
-            <span class="c1"># ...</span>
-        <span class="p">)</span>
-        <span class="n">another_model</span> <span class="o">=</span> <span class="n">AnotherModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">my_model</span><span class="o">=</span><span class="n">test_object</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">another_model</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">)</span>
-        <span class="c1"># ...</span>
-</code></pre></div><p>Tests pass or fail based on the outcome of the assertion methods. You can use <a href="https://docs.python.org/3/library/unittest.html#assert-methods">Python&rsquo;s <code>unittest</code> methods</a>, and <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#assertions">Django&rsquo;s assertion methods</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">faker</span> <span class="kn">import</span> <span class="n">Faker</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">app.models</span> <span class="kn">import</span> <span class="n">MyModel</span><span class="p">,</span> <span class="n">AnotherModel</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">fake</span> <span class="o">=</span> <span class="n">Faker</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyModelTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">setUpTestData</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;Quickly set up data for the whole TestCase&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">cls</span><span class="o">.</span><span class="n">user_first</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">first_name</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">cls</span><span class="o">.</span><span class="n">user_last</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">last_name</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">test_create_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;Creating a MyModel object should also create AnotherModel object&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># In test methods, use the variables created above</span>
+</span></span><span class="line"><span class="cl">        <span class="n">test_object</span> <span class="o">=</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">first_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">last_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_last</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="c1"># ...</span>
+</span></span><span class="line"><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">another_model</span> <span class="o">=</span> <span class="n">AnotherModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">my_model</span><span class="o">=</span><span class="n">test_object</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">another_model</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># ...</span>
+</span></span></code></pre></div><p>Tests pass or fail based on the outcome of the assertion methods. You can use <a href="https://docs.python.org/3/library/unittest.html#assert-methods">Python&rsquo;s <code>unittest</code> methods</a>, and <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#assertions">Django&rsquo;s assertion methods</a>.</p>
 <p>For further guidance on writing tests, see <a href="https://docs.djangoproject.com/en/3.1/topics/testing/">Testing in Django</a>.</p>
 <h2 id="best-possible-execution-for-running-your-tests"><a href="#best-possible-execution-for-running-your-tests">Best possible execution for running your tests</a></h2><p>Django&rsquo;s test suite is manually run with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">./manage.py <span class="nb">test</span>
-</code></pre></div><p>I rarely run my Django tests this way.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./manage.py <span class="nb">test</span>
+</span></span></code></pre></div><p>I rarely run my Django tests this way.</p>
 <p>The best, or most efficient, testing practice is one that occurs without you or your developers ever thinking, &ldquo;I need to run the tests first.&rdquo; The beauty of Django&rsquo;s near-effortless test suite set up is that it can be seamlessly run as a part of regular developer activities. This could be in a pre-commit hook, or in a continuous integration or deployment workflow.</p>
 <p>I&rsquo;ve previously written about how to use pre-commit hooks to <a href="/blog/technical-ergonomics-for-the-efficient-developer/">improve your developer ergonomics</a> and save your team some brainpower. Django&rsquo;s speedy tests can be run this way, and they become especially efficient if you can <a href="https://docs.djangoproject.com/en/3.1/ref/django-admin/#cmdoption-test-parallel">run tests in parallel</a>.</p>
 <p>Tests that run as part of a CI/CD workflow, for example, <a href="/blog/django-project-best-practices-to-keep-your-developers-happy/#continuous-testing-with-github-actions">on pull requests with GitHub Actions</a>, require no regular effort from your developers to remember to run tests at all. I&rsquo;m not sure how plainly I can put it &ndash; this one&rsquo;s literally a no-brainer.</p>
@@ -367,101 +367,101 @@ max               102 days 20:56:30
 ]]></content></entry><entry><title type="html">Django project best practices to keep your developers happy</title><link href="https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/"/><id>https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/</id><author><name>Victoria Drake</name></author><published>2020-09-22T04:55:19-04:00</published><updated>2020-09-22T04:55:19-04:00</updated><content type="html"><![CDATA[<p>Do you want your team to <em>enjoy</em> your development workflow? Do you think building software should be <em>fun and existentially fulfilling?</em> If so, <em>this is the post</em> for you!</p>
 <p>I&rsquo;ve been developing with Django for years, and I&rsquo;ve never been happier with my Django project set up than I am right now. Here&rsquo;s how I&rsquo;m making a day of developing with Django the most relaxing and enjoyable development experience possible for myself and my engineering team.</p>
 <h2 id="a-custom-cli-tool-for-your-django-project"><a href="#a-custom-cli-tool-for-your-django-project">A custom CLI tool for your Django project</a></h2><p>Instead of typing:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">python3 -m venv env
-<span class="nb">source</span> env/bin/activate
-pip install -r requirements.txt
-python3 manage.py makemigrations
-python3 manage.py migrate
-python3 manage.py collectstatic
-python3 manage.py runserver
-</code></pre></div><p>Wouldn&rsquo;t it be much nicer to type:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">make start
-</code></pre></div><p>&hellip;and have all that happen for you? I think so!</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">python3 -m venv env
+</span></span><span class="line"><span class="cl"><span class="nb">source</span> env/bin/activate
+</span></span><span class="line"><span class="cl">pip install -r requirements.txt
+</span></span><span class="line"><span class="cl">python3 manage.py makemigrations
+</span></span><span class="line"><span class="cl">python3 manage.py migrate
+</span></span><span class="line"><span class="cl">python3 manage.py collectstatic
+</span></span><span class="line"><span class="cl">python3 manage.py runserver
+</span></span></code></pre></div><p>Wouldn&rsquo;t it be much nicer to type:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">make start
+</span></span></code></pre></div><p>&hellip;and have all that happen for you? I think so!</p>
 <p>We can do that with a self-documenting Makefile! Here&rsquo;s one I frequently use when developing my Django applications, like <a href="https://applybyapi.com/">ApplyByAPI.com</a>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nv">VENV</span> <span class="o">:=</span> env
-<span class="nv">BIN</span> <span class="o">:=</span> <span class="k">$(</span>VENV<span class="k">)</span>/bin
-<span class="nv">PYTHON</span> <span class="o">:=</span> <span class="k">$(</span>BIN<span class="k">)</span>/python
-<span class="nv">SHELL</span> <span class="o">:=</span> /bin/bash
-
-<span class="err">include</span> <span class="err">.env</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span>
-<span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
-</span><span class="c"></span>    @egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">venv</span>
-<span class="nf">venv</span><span class="o">:</span> <span class="c">## Make a new virtual environment
-</span><span class="c"></span>    python3 -m venv <span class="k">$(</span>VENV<span class="k">)</span> <span class="o">&amp;&amp;</span> <span class="nb">source</span> <span class="k">$(</span>BIN<span class="k">)</span>/activate
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">install</span>
-<span class="nf">install</span><span class="o">:</span> <span class="n">venv</span> <span class="c">## Make venv and install requirements
-</span><span class="c"></span>    <span class="k">$(</span>BIN<span class="k">)</span>/pip install --upgrade -r requirements.txt
-
-<span class="nf">freeze</span><span class="o">:</span> <span class="c">## Pin current dependencies
-</span><span class="c"></span>    <span class="k">$(</span>BIN<span class="k">)</span>/pip freeze &gt; requirements.txt
-
-<span class="nf">migrate</span><span class="o">:</span> <span class="c">## Make and run migrations
-</span><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py makemigrations
-    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py migrate
-
-<span class="nf">db-up</span><span class="o">:</span> <span class="c">## Pull and start the Docker Postgres container in the background
-</span><span class="c"></span>    docker pull postgres
-    docker-compose up -d
-
-<span class="nf">db-shell</span><span class="o">:</span> <span class="c">## Access the Postgres Docker database interactively with psql. Pass in DBNAME=&lt;name&gt;.
-</span><span class="c"></span>    docker <span class="nb">exec</span> -it container_name psql -d <span class="k">$(</span>DBNAME<span class="k">)</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">test</span>
-<span class="nf">test</span><span class="o">:</span> <span class="c">## Run tests
-</span><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py <span class="nb">test</span> application --verbosity<span class="o">=</span><span class="m">0</span> --parallel --failfast
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">run</span>
-<span class="nf">run</span><span class="o">:</span> <span class="c">## Run the Django server
-</span><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py runserver
-
-<span class="nf">start</span><span class="o">:</span> <span class="n">install</span> <span class="n">migrate</span> <span class="n">run</span> <span class="c">## Install requirements, apply migrations, then start development server
-</span></code></pre></div><p>You&rsquo;ll notice the presence of the line <code>include .env</code> above. This ensures <code>make</code> has access to environment variables stored in a file called <code>.env</code>. This allows Make to utilize these variables in its commands, for example, the name of my virtual environment, or to pass in <code>$(DBNAME)</code> to <code>psql</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="line"><span class="cl"><span class="nv">VENV</span> <span class="o">:=</span> env
+</span></span><span class="line"><span class="cl"><span class="nv">BIN</span> <span class="o">:=</span> <span class="k">$(</span>VENV<span class="k">)</span>/bin
+</span></span><span class="line"><span class="cl"><span class="nv">PYTHON</span> <span class="o">:=</span> <span class="k">$(</span>BIN<span class="k">)</span>/python
+</span></span><span class="line"><span class="cl"><span class="nv">SHELL</span> <span class="o">:=</span> /bin/bash
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">include</span> <span class="err">.env</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span>
+</span></span><span class="line"><span class="cl"><span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    @egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">venv</span>
+</span></span><span class="line"><span class="cl"><span class="nf">venv</span><span class="o">:</span> <span class="c">## Make a new virtual environment
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    python3 -m venv <span class="k">$(</span>VENV<span class="k">)</span> <span class="o">&amp;&amp;</span> <span class="nb">source</span> <span class="k">$(</span>BIN<span class="k">)</span>/activate
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">install</span>
+</span></span><span class="line"><span class="cl"><span class="nf">install</span><span class="o">:</span> <span class="n">venv</span> <span class="c">## Make venv and install requirements
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>BIN<span class="k">)</span>/pip install --upgrade -r requirements.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">freeze</span><span class="o">:</span> <span class="c">## Pin current dependencies
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>BIN<span class="k">)</span>/pip freeze &gt; requirements.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">migrate</span><span class="o">:</span> <span class="c">## Make and run migrations
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py makemigrations
+</span></span><span class="line"><span class="cl">    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py migrate
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">db-up</span><span class="o">:</span> <span class="c">## Pull and start the Docker Postgres container in the background
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    docker pull postgres
+</span></span><span class="line"><span class="cl">    docker-compose up -d
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">db-shell</span><span class="o">:</span> <span class="c">## Access the Postgres Docker database interactively with psql. Pass in DBNAME=&lt;name&gt;.
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    docker <span class="nb">exec</span> -it container_name psql -d <span class="k">$(</span>DBNAME<span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">test</span>
+</span></span><span class="line"><span class="cl"><span class="nf">test</span><span class="o">:</span> <span class="c">## Run tests
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py <span class="nb">test</span> application --verbosity<span class="o">=</span><span class="m">0</span> --parallel --failfast
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">run</span>
+</span></span><span class="line"><span class="cl"><span class="nf">run</span><span class="o">:</span> <span class="c">## Run the Django server
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py runserver
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">start</span><span class="o">:</span> <span class="n">install</span> <span class="n">migrate</span> <span class="n">run</span> <span class="c">## Install requirements, apply migrations, then start development server
+</span></span></span></code></pre></div><p>You&rsquo;ll notice the presence of the line <code>include .env</code> above. This ensures <code>make</code> has access to environment variables stored in a file called <code>.env</code>. This allows Make to utilize these variables in its commands, for example, the name of my virtual environment, or to pass in <code>$(DBNAME)</code> to <code>psql</code>.</p>
 <p>What&rsquo;s with that weird &ldquo;<code>##</code>&rdquo; comment syntax? A Makefile like this gives you a handy suite of command-line aliases you can check in to your Django project. It&rsquo;s very useful so long as you&rsquo;re able to remember what all those aliases are.</p>
 <p>The <code>help</code> command above, which runs by default, prints a helpful list of available commands when you run <code>make</code> or <code>make help</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">help                 Show this help
-venv                 Make a new virtual environment
-install              Make venv and install requirements
-migrate              Make and run migrations
-db-up                Pull and start the Docker Postgres container in the background
-db-shell             Access the Postgres Docker database interactively with psql
-test                 Run tests
-run                  Run the Django server
-start                Install requirements, apply migrations, then start development server
-</code></pre></div><p>All the usual Django commands are covered, and we&rsquo;ve got a <code>test</code> command that runs our tests with the options we prefer. Brilliant.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">help                 Show this help
+</span></span><span class="line"><span class="cl">venv                 Make a new virtual environment
+</span></span><span class="line"><span class="cl">install              Make venv and install requirements
+</span></span><span class="line"><span class="cl">migrate              Make and run migrations
+</span></span><span class="line"><span class="cl">db-up                Pull and start the Docker Postgres container in the background
+</span></span><span class="line"><span class="cl">db-shell             Access the Postgres Docker database interactively with psql
+</span></span><span class="line"><span class="cl">test                 Run tests
+</span></span><span class="line"><span class="cl">run                  Run the Django server
+</span></span><span class="line"><span class="cl">start                Install requirements, apply migrations, then start development server
+</span></span></code></pre></div><p>All the usual Django commands are covered, and we&rsquo;ve got a <code>test</code> command that runs our tests with the options we prefer. Brilliant.</p>
 <p>You can read my full <a href="/blog/how-to-create-a-self-documenting-makefile/">post about self-documenting Makefiles here</a>, which also includes an example Makefile using <code>pipenv</code>.</p>
 <h2 id="save-your-brainpower-with-pre-commit-hooks"><a href="#save-your-brainpower-with-pre-commit-hooks">Save your brainpower with pre-commit hooks</a></h2><p>I previously wrote about some <a href="/blog/technical-ergonomics-for-the-efficient-developer/">technical ergonomics</a> that can make it a lot easier for teams to develop great software.</p>
 <p>One area that&rsquo;s a no-brainer is using pre-commit hooks to lint code prior to checking it in. This helps to ensure the quality of the code your developers check in, but most importantly, ensures that no one on your team is spending time trying to remember if it should be single or double quotes or where to put a line break.</p>
 <p>The confusingly-named <a href="https://pre-commit.com/">pre-commit framework</a> is an otherwise fantastic way to keep hooks (which are not included in cloned repositories) consistent across local environments.</p>
 <p>Here is my configuration file, <code>.pre-commit-config.yaml</code>, for my Django projects:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">fail_fast</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span><span class="w"></span><span class="nt">repos</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/pre-commit/pre-commit-hooks</span><span class="w">
-</span><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l">v3.1.0</span><span class="w">
-</span><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">detect-aws-credentials</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/psf/black</span><span class="w">
-</span><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="m">19.</span><span class="l">3b0</span><span class="w">
-</span><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">black</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/asottile/blacken-docs</span><span class="w">
-</span><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l">v1.7.0</span><span class="w">
-</span><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">blacken-docs</span><span class="w">
-</span><span class="w">        </span><span class="nt">additional_dependencies</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">black==19.3b0]</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">local</span><span class="w">
-</span><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint</span><span class="w">
-</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint</span><span class="w">
-</span><span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;Lint Markdown files&#34;</span><span class="w">
-</span><span class="w">        </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint &#39;**/*.md&#39; --fix --ignore node_modules --config &#34;./.markdownlint.json&#34;</span><span class="w">
-</span><span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l">node</span><span class="w">
-</span><span class="w">        </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">markdown]</span><span class="w">
-</span></code></pre></div><p>These hooks check for accidental secret commits, format Python files using <a href="https://github.com/psf/black">Black</a>, format Python snippets in Markdown files using <a href="https://github.com/asottile/blacken-docs"><code>blacken-docs</code></a>, and <a href="https://github.com/igorshubovych/markdownlint-cli">lint Markdown files</a> as well. To install them, just type <code>pre-commit install</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">fail_fast</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">repos</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/pre-commit/pre-commit-hooks</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l">v3.1.0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">detect-aws-credentials</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/psf/black</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="m">19.</span><span class="l">3b0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">black</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/asottile/blacken-docs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l">v1.7.0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">blacken-docs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">additional_dependencies</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">black==19.3b0]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">local</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;Lint Markdown files&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint &#39;**/*.md&#39; --fix --ignore node_modules --config &#34;./.markdownlint.json&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l">node</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">markdown]</span><span class="w">
+</span></span></span></code></pre></div><p>These hooks check for accidental secret commits, format Python files using <a href="https://github.com/psf/black">Black</a>, format Python snippets in Markdown files using <a href="https://github.com/asottile/blacken-docs"><code>blacken-docs</code></a>, and <a href="https://github.com/igorshubovych/markdownlint-cli">lint Markdown files</a> as well. To install them, just type <code>pre-commit install</code>.</p>
 <p>There are likely even more useful hooks available for your particular use case: see <a href="https://pre-commit.com/hooks.html">supported hooks</a> to explore.</p>
 <h2 id="useful-gitignores"><a href="#useful-gitignores">Useful gitignores</a></h2><p>An underappreciated way to improve your team&rsquo;s daily development experience is to make sure your project uses a well-rounded <code>.gitignore</code> file. It can help prevent files containing secrets from being committed, and can additionally save developers hours of tedium by ensuring you&rsquo;re never sifting through a <code>git diff</code> of generated files.</p>
 <p>To efficiently create a <a href="https://www.toptal.com/developers/gitignore/api/python,django">gitignore for Python and Django projects</a>, Toptal&rsquo;s <a href="https://gitignore.io">gitignore.io</a> can be a nice resource for generating a robust <code>.gitignore</code> file.</p>
@@ -471,26 +471,26 @@ start                Install requirements, apply migrations, then start developm
 <p>A hosted CI environment like GitHub Actions can also help when running integration tests that require using managed services resources. You can use <a href="https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets">encrypted secrets in a repository</a> to grant the Actions runner access to resources in a testing environment, without worrying about creating testing resources and access keys for each of your developers to use.</p>
 <p>I&rsquo;ve written on many occasions about setting up Actions workflows, including <a href="/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">using one to run your Makefile</a>, and <a href="/blog/publishing-github-event-data-with-github-actions-and-pages/">how to integrate GitHub event data</a>. GitHub even <a href="https://github.blog/2020-06-26-github-action-hero-victoria-drake/">interviewed me about Actions</a> once.</p>
 <p>For Django projects, here&rsquo;s a GitHub Actions workflow that runs tests with a consistent Python version whenever someone opens a pull request in the repository.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run Django tests</span><span class="w">
-</span><span class="w">
-</span><span class="w"></span><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="l">pull_request</span><span class="w">
-</span><span class="w">
-</span><span class="w"></span><span class="nt">jobs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span><span class="nt">test</span><span class="p">:</span><span class="w">
-</span><span class="w">
-</span><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l">ubuntu-latest</span><span class="w">
-</span><span class="w">
-</span><span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@v2</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Set up Python</span><span class="w">
-</span><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/setup-python@v2</span><span class="w">
-</span><span class="w">        </span><span class="nt">with</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.8&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Install dependencies</span><span class="w">
-</span><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make install</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run tests</span><span class="w">
-</span><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make test</span><span class="w">
-</span></code></pre></div><p>For the installation and test commands, I&rsquo;ve simply utilized the <a href="#a-custom-cli-tool-for-your-django-project">Makefile</a> that&rsquo;s been checked in to the repository. A benefit of using your Makefile commands in your CI test workflows is that you only need to keep them updated in one place &ndash; your Makefile! No more &ldquo;why is this working locally but not in CI??!?&rdquo; headaches.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run Django tests</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="l">pull_request</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">jobs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">test</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l">ubuntu-latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@v2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Set up Python</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/setup-python@v2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">with</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.8&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Install dependencies</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make install</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run tests</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make test</span><span class="w">
+</span></span></span></code></pre></div><p>For the installation and test commands, I&rsquo;ve simply utilized the <a href="#a-custom-cli-tool-for-your-django-project">Makefile</a> that&rsquo;s been checked in to the repository. A benefit of using your Makefile commands in your CI test workflows is that you only need to keep them updated in one place &ndash; your Makefile! No more &ldquo;why is this working locally but not in CI??!?&rdquo; headaches.</p>
 <p>If you want to step up your security game, you can add <a href="https://github.com/victoriadrake/django-security-check">Django Security Check</a> as an Action too.</p>
 <h2 id="set-up-your-django-project-for-success"><a href="#set-up-your-django-project-for-success">Set up your Django project for success</a></h2><p>Want to help keep your development team happy? Set them up for success with these best practices for Django development. Remember, an ounce of brainpower is worth a pound of software!</p>
 ]]></content></entry><entry><title type="html">How GitHub Codespaces increases productivity and lowers barriers</title><link href="https://victoria.dev/blog/how-github-codespaces-increases-productivity-and-lowers-barriers/"/><id>https://victoria.dev/blog/how-github-codespaces-increases-productivity-and-lowers-barriers/</id><author><name>Victoria Drake</name></author><published>2020-08-15T16:08:08-04:00</published><updated>2020-08-15T16:08:08-04:00</updated><content type="html"><![CDATA[<p>The most recent integration between Visual Studio Code and GitHub can help make development accessible and welcoming: Codespaces in GitHub!</p>
@@ -523,101 +523,98 @@ start                Install requirements, apply migrations, then start developm
 
 ]]></content></entry><entry><title type="html">How to create a self-documenting Makefile</title><link href="https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/"/><id>https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/</id><author><name>Victoria Drake</name></author><published>2020-08-05T08:55:19-04:00</published><updated>2020-08-05T08:55:19-04:00</updated><content type="html"><![CDATA[<p>My new favorite way to completely underuse a Makefile? Creating personalized, per-project repository workflow command aliases that you can check in.</p>
 <p>Can a Makefile improve your DevOps and keep developers happy? How awesome would it be if a new developer working on your project didn&rsquo;t start out by copying and pasting commands from your README? What if instead of:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">pip3 install pipenv
-pipenv shell --python 3.8
-pipenv install --dev
-npm install
-pre-commit install --install-hooks
-<span class="c1"># look up how to install Framework X...</span>
-<span class="c1"># copy and paste from README...</span>
-npm run serve
-</code></pre></div><p>&hellip; you could just type:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">make start
-</code></pre></div><p>&hellip;and then start working?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">pip3 install pipenv
+</span></span><span class="line"><span class="cl">pipenv shell --python 3.8
+</span></span><span class="line"><span class="cl">pipenv install --dev
+</span></span><span class="line"><span class="cl">npm install
+</span></span><span class="line"><span class="cl">pre-commit install --install-hooks
+</span></span><span class="line"><span class="cl"><span class="c1"># look up how to install Framework X...</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># copy and paste from README...</span>
+</span></span><span class="line"><span class="cl">npm run serve
+</span></span></code></pre></div><p>&hellip; you could just type:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">make start
+</span></span></code></pre></div><p>&hellip;and then start working?</p>
 <h2 id="making-a-difference"><a href="#making-a-difference">Making a difference</a></h2><p>I use <code>make</code> every day to take the tedium out of common development activities like updating programs, installing dependencies, and testing. To do all this with a Makefile (GNU make), we use <a href="https://www.gnu.org/software/make/manual/make.html#Rules">Makefile rules</a> and <a href="https://www.gnu.org/software/make/manual/make.html#Recipes">recipes</a>. Similar parallels exist for POSIX flavor make, like <a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html#tag_20_76_13_04">Target Rules</a>; here&rsquo;s a <a href="https://nullprogram.com/blog/2017/08/20/">great article</a> on POSIX-compatible Makefiles.</p>
 <p>Here&rsquo;s some examples of things we can <code>make</code> easier (sorry):</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">update</span><span class="o">:</span> <span class="c">## Do apt upgrade and autoremove
-</span><span class="c"></span>    sudo apt update <span class="o">&amp;&amp;</span> sudo apt upgrade -y
-    sudo apt autoremove -y
-
-<span class="nf">env</span><span class="o">:</span>
-    pip3 install pipenv
-    pipenv shell --python 3.8
-
-<span class="nf">install</span><span class="o">:</span> <span class="c">## Install or update dependencies
-</span><span class="c"></span>    pipenv install --dev
-    npm install
-    pre-commit install --install-hooks
-
-<span class="nf">serve</span><span class="o">:</span> <span class="c">## Run the local development server
-</span><span class="c"></span>    hugo serve --enableGitInfo --disableFastRender --environment development
-
-<span class="nf">initial</span><span class="o">:</span> <span class="n">update</span> <span class="n">env</span> <span class="n">install</span> <span class="n">serve</span> <span class="c">## Install tools and start development server
-</span></code></pre></div><p>Now we have some command-line aliases that you can check in! Great idea! If you&rsquo;re wondering what&rsquo;s up with that weird <code>##</code> comment syntax, it gets better.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="line"><span class="cl"><span class="nf">update</span><span class="o">:</span> <span class="c">## Do apt upgrade and autoremove
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    sudo apt update <span class="o">&amp;&amp;</span> sudo apt upgrade -y
+</span></span><span class="line"><span class="cl">    sudo apt autoremove -y
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">env</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    pip3 install pipenv
+</span></span><span class="line"><span class="cl">    pipenv shell --python 3.8
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">install</span><span class="o">:</span> <span class="c">## Install or update dependencies
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    pipenv install --dev
+</span></span><span class="line"><span class="cl">    npm install
+</span></span><span class="line"><span class="cl">    pre-commit install --install-hooks
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">serve</span><span class="o">:</span> <span class="c">## Run the local development server
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    hugo serve --enableGitInfo --disableFastRender --environment development
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">initial</span><span class="o">:</span> <span class="n">update</span> <span class="n">env</span> <span class="n">install</span> <span class="n">serve</span> <span class="c">## Install tools and start development server
+</span></span></span></code></pre></div><p>Now we have some command-line aliases that you can check in! Great idea! If you&rsquo;re wondering what&rsquo;s up with that weird <code>##</code> comment syntax, it gets better.</p>
 <h2 id="a-self-documenting-makefile"><a href="#a-self-documenting-makefile">A self-documenting Makefile</a></h2><p>Aliases are great, if you remember what they all are and what they do without constantly typing <code>cat Makefile</code>. Naturally, you need a <code>help</code> command:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span>
-<span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
-</span><span class="c"></span>    @egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> sort <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
-</code></pre></div><p>With a little command-line magic, this <code>egrep</code> command takes the output of <code>MAKEFILE_LIST</code>, sorts it, and uses <code>awk</code> to find strings that follow the <code>##</code> pattern. It then prints a helpful formatted version of the comments.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span>
+</span></span><span class="line"><span class="cl"><span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    @egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> sort <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</span></span></code></pre></div><p>With a little command-line magic, this <code>egrep</code> command takes the output of <code>MAKEFILE_LIST</code>, sorts it, and uses <code>awk</code> to find strings that follow the <code>##</code> pattern. It then prints a helpful formatted version of the comments.</p>
 <p>We&rsquo;ll put it at the top of the file so it&rsquo;s the default target. Now to see all our handy shortcuts and what they do, we just run <code>make</code>, or <code>make help</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">help                 Show this help
-initial              Install tools and start development server
-install              Install or update dependencies
-serve                Run the local development server
-update               Do apt upgrade and autoremove
-</code></pre></div><p>Now we have our very own personalized and project-specific CLI tool!</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">help                 Show this help
+</span></span><span class="line"><span class="cl">initial              Install tools and start development server
+</span></span><span class="line"><span class="cl">install              Install or update dependencies
+</span></span><span class="line"><span class="cl">serve                Run the local development server
+</span></span><span class="line"><span class="cl">update               Do apt upgrade and autoremove
+</span></span></code></pre></div><p>Now we have our very own personalized and project-specific CLI tool!</p>
 <p>The possibilities for improving your DevOps flow with a self-documenting Makefile are almost endless. You can use one to simplify any workflow and produce some very happy developers.</p>
 <p>Please enjoy the (live!) Makefile I use to manage and develop this Hugo site. I hope it inspires you!</p>
 <details>
 <summary>My Hugo site Makefile</summary>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile">
-<span class="nv">SHELL</span> <span class="o">:=</span> /bin/bash
-<span class="nf">.POSIX</span><span class="o">:</span>
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span> <span class="n">env</span> <span class="n">install</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">serve</span> <span class="n">build</span> <span class="n">start</span> <span class="n">initial</span>
-
-<span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
-</span><span class="c"></span>	@egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> sort <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
-
-<span class="nf">env</span><span class="o">:</span>
-	pip3 install pipenv
-
-<span class="nf">shell</span><span class="o">:</span> <span class="c">## Enter the virtual environment
-</span><span class="c"></span>	pipenv shell
-
-<span class="nf">install</span><span class="o">:</span> <span class="c">## Install or update dependencies
-</span><span class="c"></span>	pipenv install --dev
-	npm install
-	npm install -g markdownlint-cli
-	pre-commit install --install-hooks
-
-<span class="nv">HUGO_VERSION</span><span class="o">:=</span><span class="k">$(</span>shell curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest <span class="p">|</span> grep <span class="s1">&#39;tag_name&#39;</span> <span class="p">|</span> cut -d <span class="s1">&#39;&#34;&#39;</span> -f <span class="m">4</span> <span class="p">|</span> cut -c 2-<span class="k">)</span>
-
-<span class="nf">upgrade-hugo</span><span class="o">:</span> <span class="c">## Get the latest Hugo
-</span><span class="c"></span>	mkdir tmp/ <span class="o">&amp;&amp;</span> <span class="se">\
-</span><span class="se"></span>	<span class="nb">cd</span> tmp/ <span class="o">&amp;&amp;</span> <span class="se">\
-</span><span class="se"></span>	curl -sSL https://github.com/gohugoio/hugo/releases/download/v<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz <span class="p">|</span> tar -xvzf- <span class="o">&amp;&amp;</span> <span class="se">\
-</span><span class="se"></span>	sudo mv hugo /usr/local/bin/ <span class="o">&amp;&amp;</span> <span class="se">\
-</span><span class="se"></span>	<span class="nb">cd</span> .. <span class="o">&amp;&amp;</span> <span class="se">\
-</span><span class="se"></span>	rm -rf tmp/
-	hugo version
-
-<span class="nf">dev</span><span class="o">:</span> <span class="c">## Run the local development server
-</span><span class="c"></span>	hugo serve --enableGitInfo --disableFastRender --environment development
-
-<span class="nf">future</span><span class="o">:</span> <span class="c">## Run the local development server in the future
-</span><span class="c"></span>	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
-
-<span class="nf">build</span><span class="o">:</span> <span class="c">## Lock dependencies and build site
-</span><span class="c"></span>	pipenv lock
-	hugo --minify --cleanDestination
-
-<span class="nf">start</span><span class="o">:</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">serve</span> <span class="c">## Update Hugo and start development server
-</span><span class="c"></span>
-<span class="nf">initial</span><span class="o">:</span> <span class="n">env</span> <span class="n">install</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">serve</span> <span class="c">## Install tools and start development server
-</span><span class="c"></span>
-
-
-</code></pre></div></details>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">SHELL</span> <span class="o">:=</span> /bin/bash
+</span></span><span class="line"><span class="cl"><span class="nf">.POSIX</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span> <span class="n">env</span> <span class="n">install</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">serve</span> <span class="n">build</span> <span class="n">start</span> <span class="n">initial</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>	@egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> sort <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">env</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	pip3 install pipenv
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">shell</span><span class="o">:</span> <span class="c">## Enter the virtual environment
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>	pipenv shell
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">install</span><span class="o">:</span> <span class="c">## Install or update dependencies
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>	pipenv install --dev
+</span></span><span class="line"><span class="cl">	npm install
+</span></span><span class="line"><span class="cl">	npm install -g markdownlint-cli
+</span></span><span class="line"><span class="cl">	pre-commit install --install-hooks
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">HUGO_VERSION</span><span class="o">:=</span><span class="k">$(</span>shell curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest <span class="p">|</span> grep <span class="s1">&#39;tag_name&#39;</span> <span class="p">|</span> cut -d <span class="s1">&#39;&#34;&#39;</span> -f <span class="m">4</span> <span class="p">|</span> cut -c 2-<span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">upgrade-hugo</span><span class="o">:</span> <span class="c">## Get the latest Hugo
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>	mkdir tmp/ <span class="o">&amp;&amp;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	<span class="nb">cd</span> tmp/ <span class="o">&amp;&amp;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	curl -sSL https://github.com/gohugoio/hugo/releases/download/v<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>/hugo_extended_<span class="k">$(</span>HUGO_VERSION<span class="k">)</span>_Linux-64bit.tar.gz <span class="p">|</span> tar -xvzf- <span class="o">&amp;&amp;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	sudo mv hugo /usr/local/bin/ <span class="o">&amp;&amp;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	<span class="nb">cd</span> .. <span class="o">&amp;&amp;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	rm -rf tmp/
+</span></span><span class="line"><span class="cl">	hugo version
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">dev</span><span class="o">:</span> <span class="c">## Run the local development server
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>	hugo serve --enableGitInfo --disableFastRender --environment development
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">future</span><span class="o">:</span> <span class="c">## Run the local development server in the future
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">build</span><span class="o">:</span> <span class="c">## Lock dependencies and build site
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>	pipenv lock
+</span></span><span class="line"><span class="cl">	hugo --minify --cleanDestination
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">start</span><span class="o">:</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">serve</span> <span class="c">## Update Hugo and start development server
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>
+</span></span><span class="line"><span class="cl"><span class="nf">initial</span><span class="o">:</span> <span class="n">env</span> <span class="n">install</span> <span class="n">upgrade</span>-<span class="n">hugo</span> <span class="n">serve</span> <span class="c">## Install tools and start development server
+</span></span></span></code></pre></div></details>
 ]]></content></entry><entry><title type="html">How to choose and care for a secure open source project</title><link href="https://victoria.dev/blog/how-to-choose-and-care-for-a-secure-open-source-project/"/><id>https://victoria.dev/blog/how-to-choose-and-care-for-a-secure-open-source-project/</id><author><name>Victoria Drake</name></author><published>2020-05-25T05:53:09-04:00</published><updated>2020-05-25T05:53:09-04:00</updated><content type="html"><![CDATA[<p>There is a rather progressive sect of the software development world that believes that most people would be a lot happier and get a lot more work done if they just stopped building things that someone else has already built and is offering up for free use. They&rsquo;re called the open source community. They want you to take their stuff.</p>
 <p><p class="md-image">
   <img class="u-photo" src="wheels.png" alt="A comic I drew about using other people&amp;rsquo;s stuff, with the wheel as an example."  />
@@ -629,7 +626,7 @@ update               Do apt upgrade and autoremove
 <p>You can draw conclusions about a project&rsquo;s user base by looking at available statistics. Depending on your platform, these may include the number of downloads, reviews, issues or tickets, comments, contributions, forks, or &ldquo;stars,&rdquo; whatever those are.</p>
 <p>Evaluate social statistics on platforms like GitHub with a grain of salt. They can help you determine how popular a project may be, but only in the same way that restaurant review apps can help you figure out if you should eat at Foo&rsquo;s Grill &amp; Bar. Depending on where Foo&rsquo;s Grill &amp; Bar is, when it opened, and how likely people are to be near it when the invariable steak craving should call, having twenty-six reviews may be a good sign or a terrible one. While you would not expect a project that addresses a very obscure use case or technology to have hundreds of users, having a few active users is, in such a case, just as confidence-inspiring.</p>
 <p>External validation can also be useful. For example, packages that are included in a Linux operating system distribution (distro) must conform to stringent standards and undergo vetting. Choosing software that is included in a distro&rsquo;s default repositories can mean it&rsquo;s more likely to be secure.</p>
-<p>Perhaps one of the best indications to look for is whether a project&rsquo;s development team is using their own project. Look for issues, discussions, or blog posts that show that the project&rsquo;s creators and maintainers are using what they&rsquo;ve built themselves. Commonly referred to as <a href="https://en.wikipedia.org/wiki/Eating_your_own_dog_food">&ldquo;eating your own dog food,&quot;</a> or &ldquo;dogfooding,&rdquo; it&rsquo;s an indicator that the project is most likely to be well-maintained by its developers.</p>
+<p>Perhaps one of the best indications to look for is whether a project&rsquo;s development team is using their own project. Look for issues, discussions, or blog posts that show that the project&rsquo;s creators and maintainers are using what they&rsquo;ve built themselves. Commonly referred to as <a href="https://en.wikipedia.org/wiki/Eating_your_own_dog_food">&ldquo;eating your own dog food,&rdquo;</a> or &ldquo;dogfooding,&rdquo; it&rsquo;s an indicator that the project is most likely to be well-maintained by its developers.</p>
 <h3 id="whos-building-it"><a href="#whos-building-it">Who&rsquo;s building it</a></h3><p>The main enemy of good open source software is usually a lack of interest. The parties involved in an open source project can make the difference between a flash-in-the-pan library and a respected long-term utility. Multiple committed maintainers, even making contributions in their spare time, have a much higher success rate of sustaining a project and generating interest.</p>
 <p>Projects with healthy interest are usually supported by, and in turn cultivate, a community of contributors and users. New contributors may be actively welcomed, clear guides are available explaining how to help, and project maintainers are available and approachable when people have inevitable questions. Some communities even have chat rooms or forums where people can interact outside of contributions. Active communities help sustain project interest, relevance, and its ensuing quality.</p>
 <p>In a less organic fashion, a project can also be sustained through organizations that sponsor it. Governments and companies with financial interest are open source patrons too, and a project that enjoys public sector use or financial backing has added incentive to remain relevant and useful.</p>
@@ -658,7 +655,7 @@ update               Do apt upgrade and autoremove
 <p>Input can be validated by constraining it to known values, such as by using <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/Constraint_validation#Semantic_input_types">semantic input types</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/Constraint_validation#Validation-related_attributes">validation-related attributes</a> in forms. Frameworks like <a href="https://www.djangoproject.com/">Django</a> also help by providing <a href="https://docs.djangoproject.com/en/3.0/ref/models/fields/#field-types">field types</a> for this purpose. Sanitizing data can be done by removing or replacing contextually-dangerous characters, such as by using a whitelist or escaping the input data.</p>
 <p>While it may not be intuitive, even data that a user submits to their own area on a site should be validated. One of the fastest viruses to proliferate was the <a href="https://en.wikipedia.org/wiki/Samy_(computer_worm)">Samy worm</a> on MySpace (yes, I&rsquo;m old), thanks to code that Samy Kamkar was able to inject into his own profile page. Don&rsquo;t directly return any input to your site without thorough validation or santization.</p>
 <p>For some further guidance on battling injection attacks, see the <a href="https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Injection_Prevention_Cheat_Sheet.md">OWASP Injection Prevention Cheat Sheet</a>.</p>
-<h2 id="beware-hidden-fields"><a href="#beware-hidden-fields">Beware hidden fields</a></h2><p>Adding <code>type=&quot;hidden&quot;</code> is an enticingly convenient way to hide sensitive data in pages and forms, but unfortunately not an effective one. With tools like <a href="https://www.zaproxy.org/">ZapProxy</a> and even inspection tools in plain ol' web browsers, users can easily click to reveal tasty bits of invisible information. Hiding checkboxes can be a neat hack for creating CSS-only switches, but hidden fields do little to contribute to security.</p>
+<h2 id="beware-hidden-fields"><a href="#beware-hidden-fields">Beware hidden fields</a></h2><p>Adding <code>type=&quot;hidden&quot;</code> is an enticingly convenient way to hide sensitive data in pages and forms, but unfortunately not an effective one. With tools like <a href="https://www.zaproxy.org/">ZapProxy</a> and even inspection tools in plain ol&rsquo; web browsers, users can easily click to reveal tasty bits of invisible information. Hiding checkboxes can be a neat hack for creating CSS-only switches, but hidden fields do little to contribute to security.</p>
 <h2 id="carefully-consider-autofill-fields"><a href="#carefully-consider-autofill-fields">Carefully consider autofill fields</a></h2><p>When a user chooses to give you their <a href="https://en.wikipedia.org/wiki/Personal_data">Personally Identifiable Information</a> (PII), it should be a conscious choice. Autofill form fields can be convenient - for both users and attackers. <a href="https://freedom-to-tinker.com/2017/12/27/no-boundaries-for-user-identities-web-trackers-exploit-browser-login-managers/">Exploits using hidden fields can harvest PII</a> previously captured by an autocomplete field.</p>
 <p>Many users aren&rsquo;t even aware what information their browser&rsquo;s autofill has stored up. Use these fields sparingly, and disable autofilled forms for particularly sensitive data.</p>
 <p>It&rsquo;s important to also weigh your risk profile against its trade-offs. If your project must be <a href="https://www.w3.org/WAI/standards-guidelines/wcag/">WCAG</a> compliant, disabling autocomplete can break your input for different modalities. For more, see <a href="https://www.w3.org/WAI/WCAG21/Understanding/identify-input-purpose.html">1.3.5: Identify Input Purpose in WCAG 2.1</a>.</p>
@@ -694,35 +691,35 @@ What effects does the patch have?</p>
 </blockquote>
 <p>This can be a lot to remember to cover, but there&rsquo;s a slick way to have these prompts at hand right when you need it. You can set up a commit message template by using the <code>commit.template</code> <a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration">configuration value</a>.</p>
 <p>To set it, configure Git to use a template file (for example, <code>.gitmessage</code> in your home directory), then create the template file with Vim:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git config --global commit.template ~/.gitmessage
-vim ~/.gitmessage
-</code></pre></div><p>When we run <code>git commit</code> without the <code>-m</code> message flag, the editor will open with our helpful template ready to go. Here&rsquo;s my commit message template:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">## If applied, this commit will...
-## [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
-
-
-## Why is it necessary? (Bug fix, feature, improvements?)
--
-## How does the change address the issue?
--
-## What side effects does this change have?
--
-</code></pre></div><p>I&rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Fix #16 missing CSS variables
-- Fix for unstyled elements
-- Add background color, height for code blocks
-- Only affects highlight class
-</code></pre></div><h3 id="reference-related-discussion"><a href="#reference-related-discussion">Reference related discussion</a></h3><p>Issue trackers in <a href="https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue">GitHub</a> and <a href="https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html">Bitbucket</a> both recognize the keywords <code>close</code>, <code>fix</code>, and <code>resolve</code> followed immediately by the issue or pull request number. These keywords conveniently help us close the referenced issue or pull request, and this helps maintain a clear trail of changes. <a href="https://docs.gitlab.com/ee/user/project/issues/crosslinking_issues.html">GitLab</a>, and issue trackers like <a href="https://confluence.atlassian.com/jirasoftwarecloud/referencing-issues-in-your-development-work-777002789.html">Jira</a> offer similar functionalities.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git config --global commit.template ~/.gitmessage
+</span></span><span class="line"><span class="cl">vim ~/.gitmessage
+</span></span></code></pre></div><p>When we run <code>git commit</code> without the <code>-m</code> message flag, the editor will open with our helpful template ready to go. Here&rsquo;s my commit message template:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">## If applied, this commit will...
+</span></span><span class="line"><span class="cl">## [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">## Why is it necessary? (Bug fix, feature, improvements?)
+</span></span><span class="line"><span class="cl">-
+</span></span><span class="line"><span class="cl">## How does the change address the issue?
+</span></span><span class="line"><span class="cl">-
+</span></span><span class="line"><span class="cl">## What side effects does this change have?
+</span></span><span class="line"><span class="cl">-
+</span></span></code></pre></div><p>I&rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Fix #16 missing CSS variables
+</span></span><span class="line"><span class="cl">- Fix for unstyled elements
+</span></span><span class="line"><span class="cl">- Add background color, height for code blocks
+</span></span><span class="line"><span class="cl">- Only affects highlight class
+</span></span></code></pre></div><h3 id="reference-related-discussion"><a href="#reference-related-discussion">Reference related discussion</a></h3><p>Issue trackers in <a href="https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue">GitHub</a> and <a href="https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html">Bitbucket</a> both recognize the keywords <code>close</code>, <code>fix</code>, and <code>resolve</code> followed immediately by the issue or pull request number. These keywords conveniently help us close the referenced issue or pull request, and this helps maintain a clear trail of changes. <a href="https://docs.gitlab.com/ee/user/project/issues/crosslinking_issues.html">GitLab</a>, and issue trackers like <a href="https://confluence.atlassian.com/jirasoftwarecloud/referencing-issues-in-your-development-work-777002789.html">Jira</a> offer similar functionalities.</p>
 <h3 id="use-helpful-vim-settings-for-git-commit-messages"><a href="#use-helpful-vim-settings-for-git-commit-messages">Use helpful Vim settings for git commit messages</a></h3><p>By adding a few lines to our Vim configuration, we can make writing great git commit messages easy. We can add these lines to <code>~/.vimrc</code> to turn on syntax highlighting in general, and spell check and text wrapping for commit messages in particular:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vimrc" data-lang="vimrc"><span class="c">&#34; Filetype detection, plugins, and indent rules</span><span class="err">
-</span><span class="err"></span><span class="nx">filetype</span> <span class="nx">plugin</span> <span class="nx">indent</span> <span class="nx">on</span><span class="err">
-</span><span class="err"></span><span class="c">
-</span><span class="c">&#34; Syntax highlighting</span><span class="err">
-</span><span class="err"></span><span class="nx">syntax</span> <span class="nx">on</span><span class="err">
-</span><span class="err"></span><span class="c">
-</span><span class="c">&#34; Spell check and line wrap just for git commit messages</span><span class="err">
-</span><span class="err"></span><span class="nx">autocmd</span> <span class="nx">Filetype</span> <span class="nx">gitcommit</span> <span class="nx">setlocal</span> <span class="nx">spell</span> <span class="nx">textwidth</span><span class="p">=</span><span class="m">72</span><span class="err">
-</span></code></pre></div><p>If you&rsquo;re curious, you can find my full <code>~/.vimrc</code> in my <a href="https://github.com/victoriadrake/dotfiles">dotfiles</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vimrc" data-lang="vimrc"><span class="line"><span class="cl"><span class="c">&#34; Filetype detection, plugins, and indent rules</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nx">filetype</span> <span class="nx">plugin</span> <span class="nx">indent</span> <span class="nx">on</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c">
+</span></span></span><span class="line"><span class="cl"><span class="c">&#34; Syntax highlighting</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nx">syntax</span> <span class="nx">on</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c">
+</span></span></span><span class="line"><span class="cl"><span class="c">&#34; Spell check and line wrap just for git commit messages</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nx">autocmd</span> <span class="nx">Filetype</span> <span class="nx">gitcommit</span> <span class="nx">setlocal</span> <span class="nx">spell</span> <span class="nx">textwidth</span><span class="p">=</span><span class="m">72</span><span class="err">
+</span></span></span></code></pre></div><p>If you&rsquo;re curious, you can find my full <code>~/.vimrc</code> in my <a href="https://github.com/victoriadrake/dotfiles">dotfiles</a>.</p>
 <p>Other editors have settings that can help us out as well. I came across <a href="https://dev.to/shreyasminocha/how-i-do-my-git-commits-34d">these for Sublime Text 3</a> and <a href="https://github.com/Microsoft/vscode-docs/blob/master/docs/getstarted/tips-and-tricks.md#language-specific-settings">language specific settings for VS Code</a>.</p>
 <h2 id="one-change-per-commit-how-to-squash-git-commits"><a href="#one-change-per-commit-how-to-squash-git-commits">One change per commit: how to squash Git commits</a></h2><figure><img src="git-commit-squash.png"
          alt="A doodle of squash"/><figcaption>
@@ -734,8 +731,8 @@ vim ~/.gitmessage
 <p>Here&rsquo;s the main point. If you&rsquo;ve pushed messy commits to a public repository, I say go right ahead and leave them be, instead of complicating things further. (We all learn from our embarrassments, especially the public ones - I&rsquo;m looking at you, past-Vicky.) If your messy commits currently only exist on your local version, great! We can tidy them up into one clean, well-described commit that we&rsquo;ll be proud to push, and no one will be the wiser.</p>
 <p>There are a couple different ways to squash commits, and choosing the appropriate one depends on what we need to achieve.</p>
 <p>The following examples are illustrated using <code>git log --graph</code>, with some options for brevity. We can set a handy alias to see this log format in our terminal with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git config --global alias.plog <span class="s2">&#34;log --graph --pretty=format:&#39;%h -%d %s %n&#39; --abbrev-commit --date=relative --branches&#34;</span>
-</code></pre></div><p>Then we just do <code>git plog</code> to see the pretty log.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git config --global alias.plog <span class="s2">&#34;log --graph --pretty=format:&#39;%h -%d %s %n&#39; --abbrev-commit --date=relative --branches&#34;</span>
+</span></span></code></pre></div><p>Then we just do <code>git plog</code> to see the pretty log.</p>
 <h3 id="method-1-one-commit-to-rule-the-master-branch"><a href="#method-1-one-commit-to-rule-the-master-branch">Method #1: one commit to rule the master branch</a></h3><p>This is appropriate when:</p>
 <ul>
 <li>We&rsquo;re committing directly to master</li>
@@ -743,83 +740,83 @@ vim ~/.gitmessage
 <li>We don&rsquo;t want to preserve history of branches or changes we haven&rsquo;t yet pushed</li>
 </ul>
 <p>This method takes a Git tree that looks like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">*   3e8fd79 - (HEAD -&gt; master) Fix a thing
-|
-*   4f0d387 - Tweak something
-|
-*   0a6b8b3 - Merge branch &#39;new-article&#39;
-|\
-| * 33b5509 - (new-article) Update article again again
-| |
-| * 1782e63 - Update article again
-| |
-| * 3c5b6a8 - Update article
-| |
-* | f790737 - (master) Tweak unrelated article
-|/
-|
-* 65af7e7 Add social media link
-|
-* 0e3fa32 (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>And makes it look like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 7f9a127 - (HEAD -&gt; master) Add new article
-|
-* 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>Here&rsquo;s how to do it - hold on to your hoverboards, it&rsquo;s super complicated:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git reset --soft origin/master
-git commit
-</code></pre></div><p>Yup that&rsquo;s all. We can delete the unwanted branch with <code>git branch -D new-article</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">*   3e8fd79 - (HEAD -&gt; master) Fix a thing
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">*   4f0d387 - Tweak something
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">*   0a6b8b3 - Merge branch &#39;new-article&#39;
+</span></span><span class="line"><span class="cl">|\
+</span></span><span class="line"><span class="cl">| * 33b5509 - (new-article) Update article again again
+</span></span><span class="line"><span class="cl">| |
+</span></span><span class="line"><span class="cl">| * 1782e63 - Update article again
+</span></span><span class="line"><span class="cl">| |
+</span></span><span class="line"><span class="cl">| * 3c5b6a8 - Update article
+</span></span><span class="line"><span class="cl">| |
+</span></span><span class="line"><span class="cl">* | f790737 - (master) Tweak unrelated article
+</span></span><span class="line"><span class="cl">|/
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 65af7e7 Add social media link
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 0e3fa32 (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>And makes it look like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">* 7f9a127 - (HEAD -&gt; master) Add new article
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>Here&rsquo;s how to do it - hold on to your hoverboards, it&rsquo;s super complicated:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git reset --soft origin/master
+</span></span><span class="line"><span class="cl">git commit
+</span></span></code></pre></div><p>Yup that&rsquo;s all. We can delete the unwanted branch with <code>git branch -D new-article</code>.</p>
 <h3 id="method-2-not-_that_-much"><a href="#method-2-not-_that_-much">Method #2: not <em>that</em> much</a></h3><p>This is appropriate when:</p>
 <ul>
 <li>We want to squash the last <em>x</em> commits but not <em>all</em> commits since <code>origin/master</code></li>
 <li>We want to open a pull request to merge a branch</li>
 </ul>
 <p>This method takes a Git tree that looks like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 13a070f - (HEAD -&gt; new-article) Finish new article
-|
-* 78e728a - Edit article draft
-|
-* d62603c - Add example
-|
-* 1aeb20e - Update draft
-|
-* 5a8442a - Add new article draft
-|
-| * 65af7e7 - (master) Add social media link
-|/
-|
-* 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>And makes it look like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 90da69a - (HEAD -&gt; new-article) Add new article
-|
-| * 65af7e7 - (master) Add social media link
-|/
-|
-* 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>To squash the last five commits on branch <code>new-article</code> into one, we use:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git reset --soft HEAD~5
-git commit -m <span class="s2">&#34;New message for the combined commit&#34;</span>
-</code></pre></div><p>Where <code>--soft</code> leaves our files untouched and staged, and <code>5</code> can be thought of as &ldquo;the number of previous commits I want to combine.&rdquo;</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">* 13a070f - (HEAD -&gt; new-article) Finish new article
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 78e728a - Edit article draft
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* d62603c - Add example
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 1aeb20e - Update draft
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 5a8442a - Add new article draft
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">| * 65af7e7 - (master) Add social media link
+</span></span><span class="line"><span class="cl">|/
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>And makes it look like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">* 90da69a - (HEAD -&gt; new-article) Add new article
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">| * 65af7e7 - (master) Add social media link
+</span></span><span class="line"><span class="cl">|/
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>To squash the last five commits on branch <code>new-article</code> into one, we use:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git reset --soft HEAD~5
+</span></span><span class="line"><span class="cl">git commit -m <span class="s2">&#34;New message for the combined commit&#34;</span>
+</span></span></code></pre></div><p>Where <code>--soft</code> leaves our files untouched and staged, and <code>5</code> can be thought of as &ldquo;the number of previous commits I want to combine.&rdquo;</p>
 <p>We can then do <code>git merge master</code> and create our pull request.</p>
 <h3 id="method-3-getting-picky"><a href="#method-3-getting-picky">Method #3: getting picky</a></h3><p>Say we had a really confusing afternoon and our Git tree looks like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* dc89918 - (HEAD -&gt; master) Add link
-|
-* 9b6780f - Update image asset
-|
-* 6379956 - Fix CSS bug
-|
-*   16ee1f3 - Merge master into branch
-|\
-| |
-| * ccec365 - Update list page
-| |
-* | 033dee7 - Fix typo
-| |
-* | 90da69a - Add new article
-|/
-|
-* 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>We want to retain some of this history, but clean up the commits. We also want to change the messages for some of the commits. To achieve this, we&rsquo;ll use <code>git rebase</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">* dc89918 - (HEAD -&gt; master) Add link
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 9b6780f - Update image asset
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 6379956 - Fix CSS bug
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">*   16ee1f3 - Merge master into branch
+</span></span><span class="line"><span class="cl">|\
+</span></span><span class="line"><span class="cl">| |
+</span></span><span class="line"><span class="cl">| * ccec365 - Update list page
+</span></span><span class="line"><span class="cl">| |
+</span></span><span class="line"><span class="cl">* | 033dee7 - Fix typo
+</span></span><span class="line"><span class="cl">| |
+</span></span><span class="line"><span class="cl">* | 90da69a - Add new article
+</span></span><span class="line"><span class="cl">|/
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>We want to retain some of this history, but clean up the commits. We also want to change the messages for some of the commits. To achieve this, we&rsquo;ll use <code>git rebase</code>.</p>
 <p>This is appropriate when:</p>
 <ul>
 <li>We want to squash only some commits</li>
@@ -827,127 +824,127 @@ git commit -m <span class="s2">&#34;New message for the combined commit&#34;</sp
 <li>We want to delete or reorder specific commits</li>
 </ul>
 <p>Git <code>rebase</code> is a powerful tool, and handy once we&rsquo;ve got the hang of it. To change all the commits since <code>origin/master</code>, we do:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git rebase -i origin/master
-</code></pre></div><p>Or, we can do:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git rebase -i 0e3fa32
-</code></pre></div><p>Where the commit hash is the last commit we want to retain as-is.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git rebase -i origin/master
+</span></span></code></pre></div><p>Or, we can do:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git rebase -i 0e3fa32
+</span></span></code></pre></div><p>Where the commit hash is the last commit we want to retain as-is.</p>
 <p>The <code>-i</code> option lets us run the interactive rebase tool, which launches our editor with, essentially, a script for us to modify. We&rsquo;ll see a list of our commits in reverse order to the git log, with the oldest at the top:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">pick 90da69a Add new article
-pick 033dee7 Fix typo
-pick ccec365 Update list page
-pick 6379956 Fix CSS bug
-pick 9b6780f Update image asset
-pick dc89918 Add link
-
-# Rebase 0e3fa32..dc89918 onto 0e3fa32 (6 commands)
-#
-# Commands:
-# p, pick = use commit
-# r, reword = use commit, but edit the commit message
-# e, edit = use commit, but stop for amending
-# s, squash = use commit, but meld into previous commit
-# f, fixup = like &#34;squash&#34;, but discard this commit&#39;s log message
-# x, exec = run command (the rest of the line) using shell
-# d, drop = remove commit
-#
-# These lines can be re-ordered; they are executed from top to bottom.
-#
-# If you remove a line here THAT COMMIT WILL BE LOST.
-#
-# However, if you remove everything, the rebase will be aborted.
-#
-# Note that empty commits are commented out
-#
-~
-</code></pre></div><p>The comments give us a handy guide as to what we&rsquo;re able to do. For now, let&rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">pick 90da69a Add new article
-squash 033dee7 Fix typo
-pick ccec365 Update list page
-squash 6379956 Fix CSS bug
-squash 9b6780f Update image asset
-squash dc89918 Add link
-</code></pre></div><p>Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"># This is a combination of 2 commits.
-# This is the 1st commit message:
-
-Add new article
-
-# This is the commit message #2:
-
-Fix typo
-
-# Please enter the commit message for your changes. Lines starting
-# with &#39;#&#39; will be ignored, and an empty message aborts the commit.
-#
-# interactive rebase in progress; onto 0e3fa32
-# Last commands done (2 commands done):
-#    pick 90da69a Add new article
-#    squash 033dee7 Fix typo
-# Next commands to do (4 remaining commands):
-#    pick ccec365 Update list page
-#    squash 6379956 Fix CSS bug
-# You are currently rebasing branch &#39;master&#39; on &#39;0e3fa32&#39;.
-#
-# Changes to be committed:
-#       modified:   ...
-#
-~
-</code></pre></div><p>Here&rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&hellip;</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">[detached HEAD 3cbad01] Add new article
- 1 file changed, 129 insertions(+), 19 deletions(-)
-Auto-merging content/dir/file.md
-CONFLICT (content): Merge conflict in content/dir/file.md
-error: could not apply ccec365... Update list page
-
-Resolve all conflicts manually, mark them as resolved with
-&#34;git add/rm &lt;conflicted_files&gt;&#34;, then run &#34;git rebase --continue&#34;.
-You can instead skip this commit: run &#34;git rebase --skip&#34;.
-To abort and get back to the state before &#34;git rebase&#34;, run &#34;git rebase --abort&#34;.
-
-Could not apply ccec365... Update list page
-</code></pre></div><p>Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with <code>git rebase --continue</code>. Our interactive rebase picks up where it left off.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">pick 90da69a Add new article
+</span></span><span class="line"><span class="cl">pick 033dee7 Fix typo
+</span></span><span class="line"><span class="cl">pick ccec365 Update list page
+</span></span><span class="line"><span class="cl">pick 6379956 Fix CSS bug
+</span></span><span class="line"><span class="cl">pick 9b6780f Update image asset
+</span></span><span class="line"><span class="cl">pick dc89918 Add link
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Rebase 0e3fa32..dc89918 onto 0e3fa32 (6 commands)
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># Commands:
+</span></span><span class="line"><span class="cl"># p, pick = use commit
+</span></span><span class="line"><span class="cl"># r, reword = use commit, but edit the commit message
+</span></span><span class="line"><span class="cl"># e, edit = use commit, but stop for amending
+</span></span><span class="line"><span class="cl"># s, squash = use commit, but meld into previous commit
+</span></span><span class="line"><span class="cl"># f, fixup = like &#34;squash&#34;, but discard this commit&#39;s log message
+</span></span><span class="line"><span class="cl"># x, exec = run command (the rest of the line) using shell
+</span></span><span class="line"><span class="cl"># d, drop = remove commit
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># These lines can be re-ordered; they are executed from top to bottom.
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># If you remove a line here THAT COMMIT WILL BE LOST.
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># However, if you remove everything, the rebase will be aborted.
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># Note that empty commits are commented out
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl">~
+</span></span></code></pre></div><p>The comments give us a handy guide as to what we&rsquo;re able to do. For now, let&rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">pick 90da69a Add new article
+</span></span><span class="line"><span class="cl">squash 033dee7 Fix typo
+</span></span><span class="line"><span class="cl">pick ccec365 Update list page
+</span></span><span class="line"><span class="cl">squash 6379956 Fix CSS bug
+</span></span><span class="line"><span class="cl">squash 9b6780f Update image asset
+</span></span><span class="line"><span class="cl">squash dc89918 Add link
+</span></span></code></pre></div><p>Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># This is a combination of 2 commits.
+</span></span><span class="line"><span class="cl"># This is the 1st commit message:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Add new article
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># This is the commit message #2:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Fix typo
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Please enter the commit message for your changes. Lines starting
+</span></span><span class="line"><span class="cl"># with &#39;#&#39; will be ignored, and an empty message aborts the commit.
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># interactive rebase in progress; onto 0e3fa32
+</span></span><span class="line"><span class="cl"># Last commands done (2 commands done):
+</span></span><span class="line"><span class="cl">#    pick 90da69a Add new article
+</span></span><span class="line"><span class="cl">#    squash 033dee7 Fix typo
+</span></span><span class="line"><span class="cl"># Next commands to do (4 remaining commands):
+</span></span><span class="line"><span class="cl">#    pick ccec365 Update list page
+</span></span><span class="line"><span class="cl">#    squash 6379956 Fix CSS bug
+</span></span><span class="line"><span class="cl"># You are currently rebasing branch &#39;master&#39; on &#39;0e3fa32&#39;.
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># Changes to be committed:
+</span></span><span class="line"><span class="cl">#       modified:   ...
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl">~
+</span></span></code></pre></div><p>Here&rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&hellip;</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">[detached HEAD 3cbad01] Add new article
+</span></span><span class="line"><span class="cl"> 1 file changed, 129 insertions(+), 19 deletions(-)
+</span></span><span class="line"><span class="cl">Auto-merging content/dir/file.md
+</span></span><span class="line"><span class="cl">CONFLICT (content): Merge conflict in content/dir/file.md
+</span></span><span class="line"><span class="cl">error: could not apply ccec365... Update list page
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Resolve all conflicts manually, mark them as resolved with
+</span></span><span class="line"><span class="cl">&#34;git add/rm &lt;conflicted_files&gt;&#34;, then run &#34;git rebase --continue&#34;.
+</span></span><span class="line"><span class="cl">You can instead skip this commit: run &#34;git rebase --skip&#34;.
+</span></span><span class="line"><span class="cl">To abort and get back to the state before &#34;git rebase&#34;, run &#34;git rebase --abort&#34;.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Could not apply ccec365... Update list page
+</span></span></code></pre></div><p>Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with <code>git rebase --continue</code>. Our interactive rebase picks up where it left off.</p>
 <p>Once all the squashing is done, our Git tree looks like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 3564b8c - (HEAD -&gt; master) Update list page
-|
-* 3cbad01 - Add new article
-|
-* 0e3fa32 - (origin/master, origin/HEAD) Update theme
-</code></pre></div><p>Phew, much better.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">* 3564b8c - (HEAD -&gt; master) Update list page
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 3cbad01 - Add new article
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>Phew, much better.</p>
 <h2 id="git-stash"><a href="#git-stash">Git stash</a></h2><p>If we&rsquo;re in the middle of some work and it&rsquo;s not a good time to commit, but we need to switch branches, <a href="https://git-scm.com/book/en/v1/Git-Tools-Stashing">stashing</a> can be a good option. Stashing lets us save our unfinished work without needing to create a half-assed commit. It&rsquo;s like that pile of paper on your desk representing all the stuff you&rsquo;ve been in the middle of doing since two weeks ago. Yup, that one.</p>
 <p>It&rsquo;s as easy as typing <code>git stash</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">Saved working directory and index state WIP on master: 3564b8c Update list page
-</code></pre></div><p>The dirty work we&rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&rsquo;s in our stash stack, we do <code>git stash list</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">stash@{0}: WIP on master: 3564b8c Update list page
-stash@{1}: WIP on master: 90da69a Add new article
-stash@{2}: WIP on cleanup: 0e3fa32 Update theme
-</code></pre></div><p>To restore our work in progress, we use <code>git stash apply</code>. Git will try and apply our most recent stashed work. To apply an older stash, we use <code>git stash apply stash@{1}</code> where <code>1</code> is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Saved working directory and index state WIP on master: 3564b8c Update list page
+</span></span></code></pre></div><p>The dirty work we&rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&rsquo;s in our stash stack, we do <code>git stash list</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">stash@{0}: WIP on master: 3564b8c Update list page
+</span></span><span class="line"><span class="cl">stash@{1}: WIP on master: 90da69a Add new article
+</span></span><span class="line"><span class="cl">stash@{2}: WIP on cleanup: 0e3fa32 Update theme
+</span></span></code></pre></div><p>To restore our work in progress, we use <code>git stash apply</code>. Git will try and apply our most recent stashed work. To apply an older stash, we use <code>git stash apply stash@{1}</code> where <code>1</code> is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.</p>
 <p>Applying a stash doesn&rsquo;t remove it from our list. To remove a stash from our stack, we do <code>git stash drop stash@{0}</code> where <code>0</code> is the one we want to remove.</p>
 <p>We can also use <code>git stash pop</code> to apply the most recent stash and then immediately remove it from the stack.</p>
 <h2 id="tag-release-versions-using-annotated-git-tags"><a href="#tag-release-versions-using-annotated-git-tags">Tag release versions using annotated Git tags</a></h2><p>In the spirit of having a beautiful, clean Git history, there&rsquo;s one more thing we can do to help make our commit log inspire infinite joy in its viewers. If you&rsquo;ve never heard of <code>git tag</code>, your master branch history might look like this&hellip;</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 0377782 - Update theme
-|
-* ecf8128 - Add about page (#25)
-|
-* 33e432f - Fix #23 navigation bug
-|
-* 08b853b - Create blog section
-|
-* 63d18b4 - Add theme (#12)
-|
-* 233e23f - Add main content (#6)
-</code></pre></div><p>Wouldn&rsquo;t it be nice if it looked like this instead?</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">* 0377782 - (tag: v2.1.0) Update theme
-|
-* ecf8128 - Add about page (#25)
-|
-* 33e432f - Fix #23 navigation bug
-|
-* 08b853b - (tag: v2.0.0) Create blog section
-|
-* 63d18b4 - Add theme (#12)
-|
-* 233e23f - (tag: v1.1.0) Add main content (#6)
-</code></pre></div><p>We can tag Git commits with anything, but tags are especially helpful for semantic versioning of releases. Sites like <a href="https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release">GitHub</a> and <a href="https://docs.gitlab.com/ee/user/project/releases/">GitLab</a> have pages for repositories that list tags, letting viewers of our project browse the release versions. This can be helpful for public projects to differentiate major releases, updates with bug fixes, or beta versions.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">* 0377782 - Update theme
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* ecf8128 - Add about page (#25)
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 33e432f - Fix #23 navigation bug
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 08b853b - Create blog section
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 63d18b4 - Add theme (#12)
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 233e23f - Add main content (#6)
+</span></span></code></pre></div><p>Wouldn&rsquo;t it be nice if it looked like this instead?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">* 0377782 - (tag: v2.1.0) Update theme
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* ecf8128 - Add about page (#25)
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 33e432f - Fix #23 navigation bug
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 08b853b - (tag: v2.0.0) Create blog section
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 63d18b4 - Add theme (#12)
+</span></span><span class="line"><span class="cl">|
+</span></span><span class="line"><span class="cl">* 233e23f - (tag: v1.1.0) Add main content (#6)
+</span></span></code></pre></div><p>We can tag Git commits with anything, but tags are especially helpful for semantic versioning of releases. Sites like <a href="https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release">GitHub</a> and <a href="https://docs.gitlab.com/ee/user/project/releases/">GitLab</a> have pages for repositories that list tags, letting viewers of our project browse the release versions. This can be helpful for public projects to differentiate major releases, updates with bug fixes, or beta versions.</p>
 <p>There are two types of Git tags: lightweight and annotated. For adding a version tag to commits, we use annotated Git tags.</p>
 <p>The <a href="https://git-scm.com/docs/git-tag">Git tag documentation</a> explains it this way:</p>
 <blockquote>
@@ -962,12 +959,12 @@ stash@{2}: WIP on cleanup: 0e3fa32 Update theme
 <li>Avoid conflicting tag names</li>
 </ul>
 <p>To create an annotated Git tag and attach it to our current (last) commit, we do:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git tag -a v1.2.0 -m <span class="s2">&#34;Clever release title&#34;</span>
-</code></pre></div><p>This tags the commit on our local repository. To push all annotated tags to the remote, we do:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git push --follow-tags
-</code></pre></div><p>We can also set our Git configuration to push our annotated tags by default:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git config --global push.followTags <span class="nb">true</span>
-</code></pre></div><p>If we then want to skip pushing tags this time, we pass <code>--no-follow-tags</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git tag -a v1.2.0 -m <span class="s2">&#34;Clever release title&#34;</span>
+</span></span></code></pre></div><p>This tags the commit on our local repository. To push all annotated tags to the remote, we do:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git push --follow-tags
+</span></span></code></pre></div><p>We can also set our Git configuration to push our annotated tags by default:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git config --global push.followTags <span class="nb">true</span>
+</span></span></code></pre></div><p>If we then want to skip pushing tags this time, we pass <code>--no-follow-tags</code>.</p>
 <h2 id="practice-responsible-commits"><a href="#practice-responsible-commits">Practice responsible commits</a></h2><p>A little time invested in getting familiar with these tools and practices can make your commits even more useful and well-crafted. With a little practice, these processes will become second nature. You can make it even easier by creating a personal commit checklist on paper to keep handy while you work - or if that isn&rsquo;t fun enough, <a href="/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">make it an interactive pre-commit hook.</a></p>
 <p>Creating clean, useful, and responsible Git commits says a lot about you. Especially in remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.</p>
 <p>If you enjoyed this post, there&rsquo;s a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. <a href="https://victoria.dev">Subscribe on victoria.dev</a> to see new articles first, and check out the ones below!</p>

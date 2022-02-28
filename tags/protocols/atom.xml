@@ -19,43 +19,43 @@
 </ul>
 <p>This points <code>matrix.example.org</code> to your Lightsail instance.</p>
 <h2 id="set-up-your-matrix-homeserver"><a href="#set-up-your-matrix-homeserver">Set up your Matrix homeserver</a></h2><p>Change permissions on the private key you downloaded:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
-</code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
-</code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea to use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">chmod <span class="m">600</span> &lt;path/to/key&gt;
+</span></span></code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
+</span></span></code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea to use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
 <p><em>Dec 2021 update: As the <a href="https://mastodon.social/@victorhck/107491777976384434">good people of Mastodon point out</a>, you might like to ensure you&rsquo;re choosing the stable version for Debian. For instance, replace <code>buster</code> below with <a href="https://www.debian.org/releases/">what&rsquo;s &ldquo;stable&rdquo; at the moment</a>.</em></p>
 <p>Change your <a href="https://wiki.debian.org/SourcesList">sources list</a> in order to get the newest version of Go:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
-</code></pre></div><p>Delete everything except these two lines:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
-</span><span class="err"></span><span class="nx">deb</span><span class="p">-</span><span class="nx">src</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
-</span></code></pre></div><p>Then replace the distributions:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
-</span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo vim /etc/apt/sources.list
+</span></span></code></pre></div><p>Delete everything except these two lines:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nx">deb</span><span class="p">-</span><span class="nx">src</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
+</span></span></span></code></pre></div><p>Then replace the distributions:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
+</span></span></span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
 <p>Once the upgrade is finished, restart your instance with <code>sudo shutdown -r now</code>.</p>
 <p>Go make some coffee, then SSH back in. Get the packages you&rsquo;ll need with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt update
-sudo apt upgrade
-sudo apt install -y git golang nginx python3-certbot-nginx
-</code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo apt update
+</span></span><span class="line"><span class="cl">sudo apt upgrade
+</span></span><span class="line"><span class="cl">sudo apt install -y git golang nginx python3-certbot-nginx
+</span></span></code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
 <h2 id="get-dendrite"><a href="#get-dendrite">Get Dendrite</a></h2><p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
-<span class="nb">cd</span> dendrite
-./build.sh
-
-<span class="c1"># Generate a Matrix signing key for federation (required)</span>
-./bin/generate-keys --private-key matrix_key.pem
-
-<span class="c1"># Generate a self-signed certificate (optional, but a valid TLS certificate is normally</span>
-<span class="c1"># needed for Matrix federation/clients to work properly!)</span>
-./bin/generate-keys --tls-cert server.crt --tls-key server.key
-
-<span class="c1"># Copy and modify the config file - you&#39;ll need to set a server name and paths to the keys</span>
-<span class="c1"># at the very least, along with setting up the database connection strings.</span>
-cp dendrite-config.yaml dendrite.yaml
-</code></pre></div><h2 id="configure-dendrite"><a href="#configure-dendrite">Configure Dendrite</a></h2><p>Modify the configuration file you just copied:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
-</code></pre></div><p>At minimum, set:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git clone https://github.com/matrix-org/dendrite
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> dendrite
+</span></span><span class="line"><span class="cl">./build.sh
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Generate a Matrix signing key for federation (required)</span>
+</span></span><span class="line"><span class="cl">./bin/generate-keys --private-key matrix_key.pem
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Generate a self-signed certificate (optional, but a valid TLS certificate is normally</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># needed for Matrix federation/clients to work properly!)</span>
+</span></span><span class="line"><span class="cl">./bin/generate-keys --tls-cert server.crt --tls-key server.key
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Copy and modify the config file - you&#39;ll need to set a server name and paths to the keys</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># at the very least, along with setting up the database connection strings.</span>
+</span></span><span class="line"><span class="cl">cp dendrite-config.yaml dendrite.yaml
+</span></span></code></pre></div><h2 id="configure-dendrite"><a href="#configure-dendrite">Configure Dendrite</a></h2><p>Modify the configuration file you just copied:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo vim dendrite.yaml
+</span></span></code></pre></div><p>At minimum, set:</p>
 <ul>
 <li><code>server name</code> to your shiny new domain name, e.g. <code>matrix.example.org</code></li>
 <li><code>disable_federation</code> to true or false</li>
@@ -63,38 +63,38 @@ cp dendrite-config.yaml dendrite.yaml
 </ul>
 <p>You might like to read the <a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ</a>.</p>
 <h2 id="configure-nginx"><a href="#configure-nginx">Configure nginx</a></h2><p>Get the required packages if you didn&rsquo;t already install them above:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
-</code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
-ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
-sudo cp default &lt;sitename&gt;
-</code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo apt install nginx python3-certbot-nginx
+</span></span></code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">cd</span> /etc/nginx/sites-available
+</span></span><span class="line"><span class="cl">ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
+</span></span><span class="line"><span class="cl">sudo cp default &lt;sitename&gt;
+</span></span></code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
 <p>Your <code>location</code> block should look like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
-    <span class="kn">proxy_pass</span> <span class="s">https://localhost:8448</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="cl"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kn">proxy_pass</span> <span class="s">https://localhost:8448</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
 <h2 id="create-self-signed-certificates"><a href="#create-self-signed-certificates">Create self-signed certificates</a></h2><p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
-</code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo certbot --nginx -d &lt;your.site.address&gt;
+</span></span></code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
 <p>Test your configuration and restart nginx with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo nginx -t
-sudo systemctl restart nginx
-</code></pre></div><p>Then start up your Matrix server.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Build and run the server:</span>
-./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
-</code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo nginx -t
+</span></span><span class="line"><span class="cl">sudo systemctl restart nginx
+</span></span></code></pre></div><p>Then start up your Matrix server.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Build and run the server:</span>
+</span></span><span class="line"><span class="cl">./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+</span></span></code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
 <p>You can log on to your new homeserver with any <a href="https://matrix.org/clients/">Matrix client</a>, or Matrix-capable applications like <a href="https://www.pidgin.im/plugins/?publisher=all&amp;query=&amp;type=">Pidgin with the Matrix plugin</a>.</p>
 <h2 id="other-troubleshooting"><a href="#other-troubleshooting">Other troubleshooting</a></h2><h3 id="log-files"><a href="#log-files">Log files</a></h3><p>If you get an error such as:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
-  Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
-</code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
-sudo chown admin:admin /var/log/dendrite
-
-<span class="c1"># Build and run the server:</span>
-./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
-</code></pre></div><h3 id="unable-to-decrypt"><a href="#unable-to-decrypt">Unable to decrypt</a></h3><p>If you see: <code>Unable to decrypt: The sender's device has not sent us the keys for this message.</code> you may need to verify a user (sometimes yourself).</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
+</span></span><span class="line"><span class="cl">  Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
+</span></span></code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo mkdir /var/log/dendrite
+</span></span><span class="line"><span class="cl">sudo chown admin:admin /var/log/dendrite
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Build and run the server:</span>
+</span></span><span class="line"><span class="cl">./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+</span></span></code></pre></div><h3 id="unable-to-decrypt"><a href="#unable-to-decrypt">Unable to decrypt</a></h3><p>If you see: <code>Unable to decrypt: The sender's device has not sent us the keys for this message.</code> you may need to verify a user (sometimes yourself).</p>
 <ol>
 <li>In your client, open the user&rsquo;s profile. Click the lock icon if there is one, or otherwise look for a way to verify them.</li>
 <li>You may be asked to see if some emojis presented to both users match if you&rsquo;re using certain clients like Element.</li>
@@ -107,7 +107,7 @@ sudo chown admin:admin /var/log/dendrite
 <p>Here&rsquo;s why the Internet Protocol Suite, or TCP/IP, is an imaginary rainbow layer cake.</p>
 <h2 id="layers-are-imaginary"><a href="#layers-are-imaginary">Layers are imaginary</a></h2><p>If you consider the general nature of a rainbow layer sponge cake, it&rsquo;s mostly made up of soft, melt-in-your mouth vanilla-y goodness. This goodness is in itself comprised of something along the lines of eggs, butter, flour, and sweetener.</p>
 <p><p class="md-image">
-  <img class="u-photo" src="free-cake.png" alt="Cartoon of a slice of rainbow layer cake, reads &amp;ldquo;Yay! Free cake!&amp;quot;"  />
+  <img class="u-photo" src="free-cake.png" alt="Cartoon of a slice of rainbow layer cake, reads &amp;ldquo;Yay! Free cake!&amp;rdquo;"  />
 </p></p>
 <p>There isn&rsquo;t much to distinguish one layer of a rainbow sponge cake from another. Often, the only difference between layers is the food-coloring and a bit of frosting. When you think about it, it&rsquo;s all cake from top to bottom. The rainbow layers are only there because the baker thought they ought to be.</p>
 <p>Similar to cake ingredients, layers in the context of computer networking are mostly composed of protocols, algorithms, and configurations, with some data sprinkled in. It can be easier to talk about computer networking if its many functions are split up into groups, so certain people came up with descriptions of layers, which we call network models. TCP/IP is just one network model among others. In this sense, layers are concepts, not things.</p>

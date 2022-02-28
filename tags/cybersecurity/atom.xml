@@ -15,10 +15,10 @@
 </li>
 <li>
 <p>You can save a tidbit of effort by putting the following into the <strong>Launch script</strong> box:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Update installed packages</span>
-sudo apt-get update
-sudo apt-get upgrade -y
-</code></pre></div></li>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Update installed packages</span>
+</span></span><span class="line"><span class="cl">sudo apt-get update
+</span></span><span class="line"><span class="cl">sudo apt-get upgrade -y
+</span></span></code></pre></div></li>
 <li>
 <p>Create a new SSH key for this server and ensure you download the <code>.pem</code>.</p>
 </li>
@@ -55,43 +55,43 @@ sudo apt-get upgrade -y
 </li>
 </ol>
 <h2 id="install-openvpn-on-your-server"><a href="#install-openvpn-on-your-server">Install OpenVPN on your server</a></h2><p>After connecting to your server using SSH, install OpenVPN on your server.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Download OpenVPN</span>
-wget https://git.io/vpn -O openvpn-install.sh
-chmod <span class="m">755</span> openvpn-install.sh
-sudo ./openvpn-install.sh
-</code></pre></div><p>You&rsquo;ll see:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Welcome to this OpenVPN road warrior installer!
-
-This server is behind NAT. What is the public IPv4 address or hostname?
-Public IPv4 address / hostname [x.xx.xxx.xxx]:
-</code></pre></div><p>&hellip;where the default option is your static IP that you set up earlier. Hit return to accept this. Then:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Which protocol should OpenVPN use?
-    1) UDP (recommended)
-    2) TCP
-Protocol [1]: 1
-</code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">What port should OpenVPN listen to?
-Port [1194]: #####
-</code></pre></div><p>Enter the UDP port number you chose earlier. Then:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Select a DNS server for the clients:
-    1) Current system resolvers
-    2) Google
-    3) 1.1.1.1
-    4) OpenDNS
-    5) Quad9
-    6) AdGuard
-DNS server [1]: 1
-</code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Enter a name for the first client:
-Name [client]: pihole
-</code></pre></div><p>The Pi-hole will be the client. Name it as you like then <code>Press any key to continue...</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Download OpenVPN</span>
+</span></span><span class="line"><span class="cl">wget https://git.io/vpn -O openvpn-install.sh
+</span></span><span class="line"><span class="cl">chmod <span class="m">755</span> openvpn-install.sh
+</span></span><span class="line"><span class="cl">sudo ./openvpn-install.sh
+</span></span></code></pre></div><p>You&rsquo;ll see:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Welcome to this OpenVPN road warrior installer!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">This server is behind NAT. What is the public IPv4 address or hostname?
+</span></span><span class="line"><span class="cl">Public IPv4 address / hostname [x.xx.xxx.xxx]:
+</span></span></code></pre></div><p>&hellip;where the default option is your static IP that you set up earlier. Hit return to accept this. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Which protocol should OpenVPN use?
+</span></span><span class="line"><span class="cl">    1) UDP (recommended)
+</span></span><span class="line"><span class="cl">    2) TCP
+</span></span><span class="line"><span class="cl">Protocol [1]: 1
+</span></span></code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">What port should OpenVPN listen to?
+</span></span><span class="line"><span class="cl">Port [1194]: #####
+</span></span></code></pre></div><p>Enter the UDP port number you chose earlier. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Select a DNS server for the clients:
+</span></span><span class="line"><span class="cl">    1) Current system resolvers
+</span></span><span class="line"><span class="cl">    2) Google
+</span></span><span class="line"><span class="cl">    3) 1.1.1.1
+</span></span><span class="line"><span class="cl">    4) OpenDNS
+</span></span><span class="line"><span class="cl">    5) Quad9
+</span></span><span class="line"><span class="cl">    6) AdGuard
+</span></span><span class="line"><span class="cl">DNS server [1]: 1
+</span></span></code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Enter a name for the first client:
+</span></span><span class="line"><span class="cl">Name [client]: pihole
+</span></span></code></pre></div><p>The Pi-hole will be the client. Name it as you like then <code>Press any key to continue...</code></p>
 <p>OpenVPN will set itself up. Confirm that <code>tun0</code> has the interface address <code>10.8.0.1/24</code> with the following command:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ip addr show tun0
-</code></pre></div><p>This ensures that the Pi-hole will be set up properly. Now, about that:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">ip addr show tun0
+</span></span></code></pre></div><p>This ensures that the Pi-hole will be set up properly. Now, about that:</p>
 <h2 id="install-and-configure-pi-hole"><a href="#install-and-configure-pi-hole">Install and configure Pi-hole</a></h2><p>On your Lightsail instance, install Pi-hole.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Download and install Pi-hole</span>
-curl -sSL https://install.pi-hole.net <span class="p">|</span> bash
-</code></pre></div><p>This runs the Pi-hole automated installer. You&rsquo;ll see some prompts which you can answer using the enter key, arrow keys, tab, and space bar for selecting an option.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Download and install Pi-hole</span>
+</span></span><span class="line"><span class="cl">curl -sSL https://install.pi-hole.net <span class="p">|</span> bash
+</span></span></code></pre></div><p>This runs the Pi-hole automated installer. You&rsquo;ll see some prompts which you can answer using the enter key, arrow keys, tab, and space bar for selecting an option.</p>
 <p>The important things:</p>
 <ol>
 <li>When you see <strong>Choose An Interface</strong>, ensure you pick <code>tun0</code>. It isn&rsquo;t the default selection.</li>
@@ -105,35 +105,35 @@ curl -sSL https://install.pi-hole.net <span class="p">|</span> bash
 <p>If you mess up, you can redo the configuration with <code>pihole reconfigure</code>.</p>
 <p>Finally, you&rsquo;ll configure the VPN to use the Pi-hole.</p>
 <h2 id="configure-openvpn"><a href="#configure-openvpn">Configure OpenVPN</a></h2><p>Confirm the address of the <code>tun0</code> interface with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ip a <span class="p">|</span> grep -C <span class="m">1</span> <span class="s1">&#39;tun0&#39;</span>
-</code></pre></div><p>You should see: <code>inet 10.8.0.1/24</code> in there.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">ip a <span class="p">|</span> grep -C <span class="m">1</span> <span class="s1">&#39;tun0&#39;</span>
+</span></span></code></pre></div><p>You should see: <code>inet 10.8.0.1/24</code> in there.</p>
 <p>Edit the OpenVPN config file with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/openvpn/server/server.conf
-</code></pre></div><p>Change the line that starts with <code>push &quot;dhcp-option</code>&hellip; to use the Pi-hole&rsquo;s IP address that you confirmed above:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">push</span> <span class="s2">&#34;dhcp-option DNS 10.8.0.1&#34;</span><span class="err">
-</span></code></pre></div><p>If any other lines start with <code>push &quot;dhcp-option</code>&hellip;, comment those out.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo vim /etc/openvpn/server/server.conf
+</span></span></code></pre></div><p>Change the line that starts with <code>push &quot;dhcp-option</code>&hellip; to use the Pi-hole&rsquo;s IP address that you confirmed above:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="nx">push</span> <span class="s2">&#34;dhcp-option DNS 10.8.0.1&#34;</span><span class="err">
+</span></span></span></code></pre></div><p>If any other lines start with <code>push &quot;dhcp-option</code>&hellip;, comment those out.</p>
 <p>If you want to log OpenVPN traffic, add these lines to the end of the file:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">log</span> <span class="sr">/var/</span><span class="nx">log</span>/<span class="nx">openvpn</span>.<span class="nx">log</span><span class="err">
-</span><span class="err"></span><span class="nx">verb</span> <span class="m">3</span><span class="err">
-</span></code></pre></div><p>Save the config. If you forgot to open Vim with <code>sudo</code>, use the <code>tee</code> trick: <code>:w !sudo tee %</code>, then <code>O</code>, then <code>:q!</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="nx">log</span> <span class="sr">/var/</span><span class="nx">log</span>/<span class="nx">openvpn</span>.<span class="nx">log</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nx">verb</span> <span class="m">3</span><span class="err">
+</span></span></span></code></pre></div><p>Save the config. If you forgot to open Vim with <code>sudo</code>, use the <code>tee</code> trick: <code>:w !sudo tee %</code>, then <code>O</code>, then <code>:q!</code>.</p>
 <p>Restart OpenVPN with <code>sudo systemctl restart openvpn-server@server</code>.</p>
 <h3 id="configure-firewall"><a href="#configure-firewall">Configure firewall</a></h3><p>Run the following to control traffic to the server <a href="https://docs.pi-hole.net/guides/vpn/openvpn/firewall/">as described here</a>.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo iptables -I INPUT -i tun0 -j ACCEPT
-sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">53</span> -j ACCEPT
-sudo iptables -A INPUT -i tun0 -p udp --destination-port <span class="m">53</span> -j ACCEPT
-sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">80</span> -j ACCEPT
-sudo iptables -A INPUT -p tcp --destination-port <span class="m">22</span> -j ACCEPT
-sudo iptables -A INPUT -p tcp --destination-port <span class="m">1194</span> -j ACCEPT
-sudo iptables -A INPUT -p udp --destination-port <span class="m">1194</span> -j ACCEPT
-sudo iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -I INPUT -i lo -j ACCEPT
-sudo iptables -P INPUT DROP
-
-<span class="c1"># Optionally, also block HTTPS advertisements while you&#39;re here.</span>
-sudo iptables -A INPUT -p udp --dport <span class="m">80</span> -j REJECT --reject-with icmp-port-unreachable
-sudo iptables -A INPUT -p tcp --dport <span class="m">443</span> -j REJECT --reject-with tcp-reset
-sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --reject-with icmp-port-unreachable
-</code></pre></div><p>You can review the results with <code>sudo iptables -L --line-numbers</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo iptables -I INPUT -i tun0 -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">53</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -i tun0 -p udp --destination-port <span class="m">53</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">80</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p tcp --destination-port <span class="m">22</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p tcp --destination-port <span class="m">1194</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p udp --destination-port <span class="m">1194</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -I INPUT -i lo -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -P INPUT DROP
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Optionally, also block HTTPS advertisements while you&#39;re here.</span>
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p udp --dport <span class="m">80</span> -j REJECT --reject-with icmp-port-unreachable
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p tcp --dport <span class="m">443</span> -j REJECT --reject-with tcp-reset
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --reject-with icmp-port-unreachable
+</span></span></code></pre></div><p>You can review the results with <code>sudo iptables -L --line-numbers</code>.</p>
 <p><strong>These are only stored in memory</strong> before you save them, so test out your set up on your client now to see if it all works as expected.</p>
 <h3 id="test-your-client-connection"><a href="#test-your-client-connection">Test your client connection</a></h3><p>To test your configuration, try adding a client (the phone or computer that will connect to the VPN).</p>
 <ol>
@@ -145,8 +145,8 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 <p>Try browsing for a while. You can also view the Pi-hole dashboard by visiting <code>http://pi.hole/admin/</code> on this device.</p>
 <p>If everything seems all right, go on to saving the configuration on your instance.</p>
 <h3 id="save-iptables"><a href="#save-iptables">Save <code>iptables</code></a></h3><p>Save the <code>iptables</code> you created earlier using the <code>tee</code> command to achieve the second permission.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo iptables-save <span class="p">|</span> sudo tee /etc/pihole/rules.v4
-</code></pre></div><p>You&rsquo;re finished with configuration on your Lightsail instance. If you wish to disconnect now, you can just type <code>exit</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo iptables-save <span class="p">|</span> sudo tee /etc/pihole/rules.v4
+</span></span></code></pre></div><p>You&rsquo;re finished with configuration on your Lightsail instance. If you wish to disconnect now, you can just type <code>exit</code>.</p>
 <h2 id="future-tasks"><a href="#future-tasks">Future tasks</a></h2><p>You&rsquo;re done with the set up! You now have your very own personal VPN with a Pi-hole keeping you safe from nasty trackers. Here are some references for operations you might like to come back to in the future:</p>
 <ul>
 <li>Reconnect to your Lightsail instance with SSH:
@@ -422,9 +422,9 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 <p>Know someone who&rsquo;d benefit from some beefed up cybersecurity? Share the <a href="/blog/your-cybersecurity-starter-pack/">cybersecurity starter pack</a>!</p>
 ]]></content></entry><entry><title type="html">Your cybersecurity starter pack</title><link href="https://victoria.dev/blog/your-cybersecurity-starter-pack/"/><id>https://victoria.dev/blog/your-cybersecurity-starter-pack/</id><author><name>Victoria Drake</name></author><published>2020-10-04T04:30:12-04:00</published><updated>2020-10-04T04:30:12-04:00</updated><content type="html"><![CDATA[<p>Readers of my blog typically know more about technology and cybersecurity than most people. This article is for most people. If someone you know could benefit from a simple and straightforward introduction to cybersecurity tools, please share this article with them &ndash; it benefits everyone!</p>
 <p>If you&rsquo;ve ever said to yourself:</p>
-<p><em>&ldquo;There&rsquo;s no one targeting lil ol' me.&quot;</em><br>
-<em>&ldquo;I have nothing to hide, anyway.&quot;</em><br>
-<em>&ldquo;I&rsquo;m too busy to learn all this stuff. Why can&rsquo;t someone just give me a simple summary of best practices that I can skim in approximately seven minutes?&quot;</em></p>
+<p><em>&ldquo;There&rsquo;s no one targeting lil ol&rsquo; me.&rdquo;</em><br>
+<em>&ldquo;I have nothing to hide, anyway.&rdquo;</em><br>
+<em>&ldquo;I&rsquo;m too busy to learn all this stuff. Why can&rsquo;t someone just give me a simple summary of best practices that I can skim in approximately seven minutes?&rdquo;</em></p>
 <p>First of all, you might want to stop talking to yourself in public. Secondly, here is a simple summary of best practices that you can skim in approximately seven minutes.</p>
 <h2 id="introducing-your-three-step-starter-pack"><a href="#introducing-your-three-step-starter-pack">Introducing your three-step starter pack</a></h2><p>While there are many different degrees of security, privacy, and anonymity, these three basics are accessible to all:</p>
 <ol>
@@ -551,13 +551,13 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 <p>When I became a co-author and a core maintainer for the <a href="https://github.com/OWASP/wstg">Open Web Application Security Project (OWASP) Web Security Testing Guide (WSTG)</a>, I gained an even broader appreciation for how a prototype-based, repeatable approach can help build secure web applications. Organizations worldwide consider the WSTG the foremost open source resource for testing the security of web applications. We&rsquo;ve applied this thinking via the use of GitHub Actions in our repository &ndash; I&rsquo;ll tell you more about that later.</p>
 <p>Whether I&rsquo;m creating an open source tool or leading a development team, my childhood experience still informs how I think about programming today. I strive to create repeatable units of software like GitHub Actions &ndash; only now, I make them for large enterprises in the real world!</p>
 <h2 id="what-is-the-story-behind-your-built-github-action-why-did-you-build-this"><a href="#what-is-the-story-behind-your-built-github-action-why-did-you-build-this">What is the story behind your built GitHub Action? (Why did you build this?)</a></h2><p>Developers take on a lot of responsibility when it comes to building secure applications these days. I&rsquo;m a full-time senior software developer at a cybersecurity company. I&rsquo;ve found that I&rsquo;m maximally productive when I create systems and processes that help myself and my team make desired outcomes inevitable. So I spend my free time building tools that make it easy for other developers to build secure software as well. My Actions help to automate contained, repeatable units of work that can make a big difference in a developer&rsquo;s day.</p>
-<h2 id="do-you-have-future-plans-for-this-or-other-actions"><a href="#do-you-have-future-plans-for-this-or-other-actions">Do you have future plans for this or other Actions?</a></h2><p>Yes! I&rsquo;m always finding ways for tools like GitHub Actions to boost the velocity of technical teams, whether at work or in my open source projects. Remember the Open Web Application Security Project? In the work I&rsquo;ve lead with OWASP, I&rsquo;ve championed the effort to increase automation using GitHub Actions to maintain quality, securely deploy new versions to the web, and even build PDFs of the WSTG. We&rsquo;re constantly looking into new ways that GitHub Actions can make our lives easier and our readers' projects more secure.</p>
+<h2 id="do-you-have-future-plans-for-this-or-other-actions"><a href="#do-you-have-future-plans-for-this-or-other-actions">Do you have future plans for this or other Actions?</a></h2><p>Yes! I&rsquo;m always finding ways for tools like GitHub Actions to boost the velocity of technical teams, whether at work or in my open source projects. Remember the Open Web Application Security Project? In the work I&rsquo;ve lead with OWASP, I&rsquo;ve championed the effort to increase automation using GitHub Actions to maintain quality, securely deploy new versions to the web, and even build PDFs of the WSTG. We&rsquo;re constantly looking into new ways that GitHub Actions can make our lives easier and our readers&rsquo; projects more secure.</p>
 <h2 id="what-has-been-your-favorite-feature-of-github-actions"><a href="#what-has-been-your-favorite-feature-of-github-actions">What has been your favorite feature of GitHub Actions?</a></h2><p>I like that I can build an Action using familiar and portable technologies, like Docker. Actions are easy for collaborators to work on too, since in the case of a Dockerized Action, you can use any language your team is comfortable with. This is especially useful in large organizations with polyglot teams and environments. There aren&rsquo;t any complicated dependencies for running these portable tasks, and you don&rsquo;t need to learn any special frameworks to get started.</p>
 <p>One of my first blog posts about GitHub Actions even describes how I used an Action to run a Makefile! This is especially useful for large legacy applications that want to modernize their pipeline by using GitHub Actions.</p>
 <h2 id="what-are-the-biggest-challenges-youve-faced-while-building-your-github-action"><a href="#what-are-the-biggest-challenges-youve-faced-while-building-your-github-action">What are the biggest challenges you’ve faced while building your GitHub Action?</a></h2><p>The largest challenge of GitHub Actions isn&rsquo;t really in GitHub Actions, but in the transition of legacy software and company culture.</p>
 <p>Migrating legacy software is always challenging, particularly with large legacy applications. Moving to modern CI/CD processes requires changes at the software level, team level, and even a shift in thinking when it comes to individual developers. It can help to have a tool like GitHub Actions, which is at once seamlessly modern and familiar, when transitioning legacy code to a modern pipeline.</p>
 <h2 id="anything-else-you-would-like-to-share-about-your-experience-any-stories-or-lessons-learned-through-building-your-action"><a href="#anything-else-you-would-like-to-share-about-your-experience-any-stories-or-lessons-learned-through-building-your-action">Anything else you would like to share about your experience? Any stories or lessons learned through building your Action?</a></h2><p>I&rsquo;m happiest when I&rsquo;m solving a challenge that makes developing secure software less challenging in the future, both for myself and for the technology organization I&rsquo;m leading. With tools like GitHub Actions, a lot of mental overhead can be offloaded to automatic processes &ndash; like getting a whole other brain, for free! This can massively help organizations that are ready to scale up their development output.</p>
-<p>In the realm of cybersecurity, not only does creating portable and reusable software make developers' lives easier, it helps to make whole workflows repeatable, which in turn makes software development processes more secure. With smart processes in place, technical teams are happier. As an inevitable result, they&rsquo;ll build better software for customers, too.</p>
+<p>In the realm of cybersecurity, not only does creating portable and reusable software make developers&rsquo; lives easier, it helps to make whole workflows repeatable, which in turn makes software development processes more secure. With smart processes in place, technical teams are happier. As an inevitable result, they&rsquo;ll build better software for customers, too.</p>
 ]]></content></entry><entry><title type="html">How to choose and care for a secure open source project</title><link href="https://victoria.dev/blog/how-to-choose-and-care-for-a-secure-open-source-project/"/><id>https://victoria.dev/blog/how-to-choose-and-care-for-a-secure-open-source-project/</id><author><name>Victoria Drake</name></author><published>2020-05-25T05:53:09-04:00</published><updated>2020-05-25T05:53:09-04:00</updated><content type="html"><![CDATA[<p>There is a rather progressive sect of the software development world that believes that most people would be a lot happier and get a lot more work done if they just stopped building things that someone else has already built and is offering up for free use. They&rsquo;re called the open source community. They want you to take their stuff.</p>
 <p><p class="md-image">
   <img class="u-photo" src="wheels.png" alt="A comic I drew about using other people&amp;rsquo;s stuff, with the wheel as an example."  />
@@ -569,7 +569,7 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 <p>You can draw conclusions about a project&rsquo;s user base by looking at available statistics. Depending on your platform, these may include the number of downloads, reviews, issues or tickets, comments, contributions, forks, or &ldquo;stars,&rdquo; whatever those are.</p>
 <p>Evaluate social statistics on platforms like GitHub with a grain of salt. They can help you determine how popular a project may be, but only in the same way that restaurant review apps can help you figure out if you should eat at Foo&rsquo;s Grill &amp; Bar. Depending on where Foo&rsquo;s Grill &amp; Bar is, when it opened, and how likely people are to be near it when the invariable steak craving should call, having twenty-six reviews may be a good sign or a terrible one. While you would not expect a project that addresses a very obscure use case or technology to have hundreds of users, having a few active users is, in such a case, just as confidence-inspiring.</p>
 <p>External validation can also be useful. For example, packages that are included in a Linux operating system distribution (distro) must conform to stringent standards and undergo vetting. Choosing software that is included in a distro&rsquo;s default repositories can mean it&rsquo;s more likely to be secure.</p>
-<p>Perhaps one of the best indications to look for is whether a project&rsquo;s development team is using their own project. Look for issues, discussions, or blog posts that show that the project&rsquo;s creators and maintainers are using what they&rsquo;ve built themselves. Commonly referred to as <a href="https://en.wikipedia.org/wiki/Eating_your_own_dog_food">&ldquo;eating your own dog food,&quot;</a> or &ldquo;dogfooding,&rdquo; it&rsquo;s an indicator that the project is most likely to be well-maintained by its developers.</p>
+<p>Perhaps one of the best indications to look for is whether a project&rsquo;s development team is using their own project. Look for issues, discussions, or blog posts that show that the project&rsquo;s creators and maintainers are using what they&rsquo;ve built themselves. Commonly referred to as <a href="https://en.wikipedia.org/wiki/Eating_your_own_dog_food">&ldquo;eating your own dog food,&rdquo;</a> or &ldquo;dogfooding,&rdquo; it&rsquo;s an indicator that the project is most likely to be well-maintained by its developers.</p>
 <h3 id="whos-building-it"><a href="#whos-building-it">Who&rsquo;s building it</a></h3><p>The main enemy of good open source software is usually a lack of interest. The parties involved in an open source project can make the difference between a flash-in-the-pan library and a respected long-term utility. Multiple committed maintainers, even making contributions in their spare time, have a much higher success rate of sustaining a project and generating interest.</p>
 <p>Projects with healthy interest are usually supported by, and in turn cultivate, a community of contributors and users. New contributors may be actively welcomed, clear guides are available explaining how to help, and project maintainers are available and approachable when people have inevitable questions. Some communities even have chat rooms or forums where people can interact outside of contributions. Active communities help sustain project interest, relevance, and its ensuing quality.</p>
 <p>In a less organic fashion, a project can also be sustained through organizations that sponsor it. Governments and companies with financial interest are open source patrons too, and a project that enjoys public sector use or financial backing has added incentive to remain relevant and useful.</p>
@@ -758,11 +758,11 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 <p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
 <h2 id="bottleneck-network-latency"><a href="#bottleneck-network-latency">Bottleneck: network latency</a></h2><p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
 <p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">      150 milliseconds
- x 12,000 links
----------
-1,800,000 milliseconds (30 minutes)
-</code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">      150 milliseconds
+</span></span><span class="line"><span class="cl"> x 12,000 links
+</span></span><span class="line"><span class="cl">---------
+</span></span><span class="line"><span class="cl">1,800,000 milliseconds (30 minutes)
+</span></span></code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
 <h3 id="feedback-loops"><a href="#feedback-loops">Feedback loops</a></h3><p>I previously wrote about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p>
 <p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&rsquo;m waiting on a process that&rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke <code>master</code> (hopefully <code>staging</code>).</p>
 <p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&rsquo;ve got a slow and inefficient company.</p>
@@ -777,171 +777,171 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 <p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.</p>
 <p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p>
 <h2 id="tacos-and-threading"><a href="#tacos-and-threading">Tacos and threading</a></h2><p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮
-🌮   ╔══════════════╗
-🌮      Hi I&#39;m Bob                          🌳
-🌮   ╚══════════════╝ \
-🌮                     🐹 🌮
-🌮
-🌮
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮
-🌮
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵
-🌮
-🌮
-🌮
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮   ╔══════════════╗
+</span></span><span class="line"><span class="cl">🌮      Hi I&#39;m Bob                          🌳
+</span></span><span class="line"><span class="cl">🌮   ╚══════════════╝ \
+</span></span><span class="line"><span class="cl">🌮                     🐹 🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p>
 <p>We can try splitting the queue:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮
-🌮         🧑💵🧑💵🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹
-🌮
-🌮         🧑💵🧑💵🧑💵🧑💵🧑💵
-🌮
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮         🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮         🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p>
 <p>We could get two Bobs:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵
-🌮                                          🌳
-🌮
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p>
 <p>We can do even better than that:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵
-🌮                                          🌳
-🌮      🐹 🧑💵🧑💵🧑💵
-🌮                                          🌳
-🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
-</code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮      🐹 🧑💵🧑💵🧑💵
+</span></span><span class="line"><span class="cl">🌮                                          🌳
+</span></span><span class="line"><span class="cl">🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
 <p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p>
 <h2 id="setting-up-a-go-web-crawler"><a href="#setting-up-a-go-web-crawler">Setting up a Go web crawler</a></h2><p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/blog/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">startDomain</span>             <span class="kt">string</span>
-    <span class="nx">brokenLinks</span>             <span class="p">[]</span><span class="nx">Result</span>
-    <span class="nx">visitedLinks</span>            <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span>
-    <span class="nx">workerCount</span><span class="p">,</span> <span class="nx">maxWorkers</span> <span class="kt">int</span>
-    <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
-<span class="p">}</span>
-<span class="o">...</span>
-<span class="c1">// Page allows us to retain parent and sublinks
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Page</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">parent</span><span class="p">,</span> <span class="nx">loc</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span>
-<span class="p">}</span>
-
-<span class="c1">// Result adds error information for the report
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Result</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Page</span>
-    <span class="nx">reason</span> <span class="kt">string</span>
-    <span class="nx">code</span>   <span class="kt">int</span>
-<span class="p">}</span>
-</code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Extract links from HTML
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">parse</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span><span class="p">)</span> <span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="p">[]</span><span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">doc</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">html</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nf">NewReader</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
-    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Could not parse: &#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="nx">goodLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="nx">badLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-    <span class="kd">var</span> <span class="nx">f</span> <span class="kd">func</span><span class="p">(</span><span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span>
-    <span class="nx">f</span> <span class="p">=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">n</span> <span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Type</span> <span class="o">==</span> <span class="nx">html</span><span class="p">.</span><span class="nx">ElementNode</span> <span class="o">&amp;&amp;</span> <span class="nf">checkKey</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">n</span><span class="p">.</span><span class="nx">Data</span><span class="p">))</span> <span class="p">{</span>
-            <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Attr</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="nf">checkAttr</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Key</span><span class="p">))</span> <span class="p">{</span>
-                    <span class="nx">j</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">formatURL</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Val</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-                        <span class="nx">badLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">badLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
-
-                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                        <span class="nx">goodLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
-                    <span class="p">}</span>
-                    <span class="k">break</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="k">for</span> <span class="nx">c</span> <span class="o">:=</span> <span class="nx">n</span><span class="p">.</span><span class="nx">FirstChild</span><span class="p">;</span> <span class="nx">c</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">;</span> <span class="nx">c</span> <span class="p">=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">NextSibling</span> <span class="p">{</span>
-            <span class="nf">f</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="nf">f</span><span class="p">(</span><span class="nx">doc</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">badLinks</span>
-<span class="p">}</span>
-</code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href="https://www.theregister.com/2016/03/23/npm_left_pad_chaos/">the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Checker</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">startDomain</span>             <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">brokenLinks</span>             <span class="p">[]</span><span class="nx">Result</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">visitedLinks</span>            <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">workerCount</span><span class="p">,</span> <span class="nx">maxWorkers</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// Page allows us to retain parent and sublinks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Page</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">parent</span><span class="p">,</span> <span class="nx">loc</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Result adds error information for the report
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Result</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">Page</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">reason</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">code</span>   <span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// Extract links from HTML
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">parse</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">data</span> <span class="kt">string</span><span class="p">)</span> <span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="p">[]</span><span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">doc</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">html</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nf">NewReader</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Could not parse: &#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">goodLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">badLinks</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="nx">f</span> <span class="kd">func</span><span class="p">(</span><span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">f</span> <span class="p">=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">n</span> <span class="o">*</span><span class="nx">html</span><span class="p">.</span><span class="nx">Node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Type</span> <span class="o">==</span> <span class="nx">html</span><span class="p">.</span><span class="nx">ElementNode</span> <span class="o">&amp;&amp;</span> <span class="nf">checkKey</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">n</span><span class="p">.</span><span class="nx">Data</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">n</span><span class="p">.</span><span class="nx">Attr</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="nf">checkAttr</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Key</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="nx">j</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">formatURL</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Val</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="nx">badLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">badLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="nx">goodLinks</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">break</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="nx">c</span> <span class="o">:=</span> <span class="nx">n</span><span class="p">.</span><span class="nx">FirstChild</span><span class="p">;</span> <span class="nx">c</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">;</span> <span class="nx">c</span> <span class="p">=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">NextSibling</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">f</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">f</span><span class="p">(</span><span class="nx">doc</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">goodLinks</span><span class="p">,</span> <span class="nx">badLinks</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href="https://www.theregister.com/2016/03/23/npm_left_pad_chaos/">the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p>
 <p>Here are snippets of the <code>main</code> function, where we pass in our starting URL and create a queue (or <a href="https://tour.golang.org/concurrency/2">channels</a>, in Go) to be filled with links for our goroutines to process.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="o">...</span>
-    <span class="nx">startURL</span> <span class="o">:=</span> <span class="nx">flag</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="s">&#34;url&#34;</span><span class="p">,</span> <span class="s">&#34;http://example.com&#34;</span><span class="p">,</span> <span class="s">&#34;full URL of site&#34;</span><span class="p">)</span>
-    <span class="o">...</span>
-
-    <span class="nx">firstPage</span> <span class="o">:=</span> <span class="nx">Page</span><span class="p">{</span>
-        <span class="nx">parent</span><span class="p">:</span> <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
-        <span class="nx">loc</span><span class="p">:</span>    <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
-    <span class="p">}</span>
-
-    <span class="nx">toProcess</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">Page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="nx">toProcess</span> <span class="o">&lt;-</span> <span class="nx">firstPage</span>
-
-    <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
-</code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">toProcess</span> <span class="p">{</span>
-    <span class="nx">wg</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="nx">checker</span><span class="p">.</span><span class="nf">addWorker</span><span class="p">()</span>
-    <span class="err">🐹</span> <span class="k">go</span> <span class="nf">worker</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">checker</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">wg</span><span class="p">,</span> <span class="nx">toProcess</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">workerCount</span> <span class="p">&gt;</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">maxWorkers</span> <span class="p">{</span>
-        <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span> <span class="c1">// throttle down
-</span><span class="c1"></span>    <span class="p">}</span>
-<span class="p">}</span>
-<span class="nx">wg</span><span class="p">.</span><span class="nf">Wait</span><span class="p">()</span>
-</code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">startURL</span> <span class="o">:=</span> <span class="nx">flag</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="s">&#34;url&#34;</span><span class="p">,</span> <span class="s">&#34;http://example.com&#34;</span><span class="p">,</span> <span class="s">&#34;full URL of site&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">firstPage</span> <span class="o">:=</span> <span class="nx">Page</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">parent</span><span class="p">:</span> <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">loc</span><span class="p">:</span>    <span class="o">*</span><span class="nx">startURL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">toProcess</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">Page</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">toProcess</span> <span class="o">&lt;-</span> <span class="nx">firstPage</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+</span></span></code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">toProcess</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">wg</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">checker</span><span class="p">.</span><span class="nf">addWorker</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="err">🐹</span> <span class="k">go</span> <span class="nf">worker</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">checker</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">wg</span><span class="p">,</span> <span class="nx">toProcess</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">workerCount</span> <span class="p">&gt;</span> <span class="nx">checker</span><span class="p">.</span><span class="nx">maxWorkers</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span> <span class="c1">// throttle down
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">wg</span><span class="p">.</span><span class="nf">Wait</span><span class="p">()</span>
+</span></span></code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
 <h2 id="did-we-do-the-thing-fast"><a href="#did-we-do-the-thing-fast">Did we do the thing fast</a></h2><p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time python3 slow-link-check.py https://victoria.dev
-
-real 17m34.084s
-user 11m40.761s
-sys     0m5.436s
-</code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">time python3 slow-link-check.py https://victoria.dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real 17m34.084s
+</span></span><span class="line"><span class="cl">user 11m40.761s
+</span></span><span class="line"><span class="cl">sys     0m5.436s
+</span></span></code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
 <p>The multithreaded Python version did a bit better:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time python3 hydra.py https://victoria.dev
-
-real 1m13.358s
-user 0m13.161s
-sys     0m2.826s
-</code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">time python3 hydra.py https://victoria.dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real 1m13.358s
+</span></span><span class="line"><span class="cl">user 0m13.161s
+</span></span><span class="line"><span class="cl">sys     0m2.826s
+</span></span></code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
 <p>How did Go do?</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">time ./go-link-check --url=https://victoria.dev
-
-real 0m7.926s
-user 0m9.044s
-sys     0m0.932s
-</code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">time ./go-link-check --url=https://victoria.dev
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real 0m7.926s
+</span></span><span class="line"><span class="cl">user 0m9.044s
+</span></span><span class="line"><span class="cl">sys     0m0.932s
+</span></span></code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
 <h2 id="breaking-bottlenecks"><a href="#breaking-bottlenecks">Breaking bottlenecks</a></h2><p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
 <p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p>
 ]]></content></entry><entry><title type="html">Three healthy cybersecurity habits</title><link href="https://victoria.dev/blog/three-healthy-cybersecurity-habits/"/><id>https://victoria.dev/blog/three-healthy-cybersecurity-habits/</id><author><name>Victoria Drake</name></author><published>2019-12-26T08:27:31-04:00</published><updated>2019-12-26T08:27:31-04:00</updated><content type="html"><![CDATA[<p>In a similar fashion to everyone getting the flu now and again, the risk of catching a cyberattack is a common one. Both a sophisticated social engineering attack or grammatically-lacking email phishing scam can cause real damage. No one who communicates over the Internet is immune.</p>
@@ -963,7 +963,7 @@ sys     0m0.932s
 <p>Input can be validated by constraining it to known values, such as by using <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/Constraint_validation#Semantic_input_types">semantic input types</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/Constraint_validation#Validation-related_attributes">validation-related attributes</a> in forms. Frameworks like <a href="https://www.djangoproject.com/">Django</a> also help by providing <a href="https://docs.djangoproject.com/en/3.0/ref/models/fields/#field-types">field types</a> for this purpose. Sanitizing data can be done by removing or replacing contextually-dangerous characters, such as by using a whitelist or escaping the input data.</p>
 <p>While it may not be intuitive, even data that a user submits to their own area on a site should be validated. One of the fastest viruses to proliferate was the <a href="https://en.wikipedia.org/wiki/Samy_(computer_worm)">Samy worm</a> on MySpace (yes, I&rsquo;m old), thanks to code that Samy Kamkar was able to inject into his own profile page. Don&rsquo;t directly return any input to your site without thorough validation or santization.</p>
 <p>For some further guidance on battling injection attacks, see the <a href="https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Injection_Prevention_Cheat_Sheet.md">OWASP Injection Prevention Cheat Sheet</a>.</p>
-<h2 id="beware-hidden-fields"><a href="#beware-hidden-fields">Beware hidden fields</a></h2><p>Adding <code>type=&quot;hidden&quot;</code> is an enticingly convenient way to hide sensitive data in pages and forms, but unfortunately not an effective one. With tools like <a href="https://www.zaproxy.org/">ZapProxy</a> and even inspection tools in plain ol' web browsers, users can easily click to reveal tasty bits of invisible information. Hiding checkboxes can be a neat hack for creating CSS-only switches, but hidden fields do little to contribute to security.</p>
+<h2 id="beware-hidden-fields"><a href="#beware-hidden-fields">Beware hidden fields</a></h2><p>Adding <code>type=&quot;hidden&quot;</code> is an enticingly convenient way to hide sensitive data in pages and forms, but unfortunately not an effective one. With tools like <a href="https://www.zaproxy.org/">ZapProxy</a> and even inspection tools in plain ol&rsquo; web browsers, users can easily click to reveal tasty bits of invisible information. Hiding checkboxes can be a neat hack for creating CSS-only switches, but hidden fields do little to contribute to security.</p>
 <h2 id="carefully-consider-autofill-fields"><a href="#carefully-consider-autofill-fields">Carefully consider autofill fields</a></h2><p>When a user chooses to give you their <a href="https://en.wikipedia.org/wiki/Personal_data">Personally Identifiable Information</a> (PII), it should be a conscious choice. Autofill form fields can be convenient - for both users and attackers. <a href="https://freedom-to-tinker.com/2017/12/27/no-boundaries-for-user-identities-web-trackers-exploit-browser-login-managers/">Exploits using hidden fields can harvest PII</a> previously captured by an autocomplete field.</p>
 <p>Many users aren&rsquo;t even aware what information their browser&rsquo;s autofill has stored up. Use these fields sparingly, and disable autofilled forms for particularly sensitive data.</p>
 <p>It&rsquo;s important to also weigh your risk profile against its trade-offs. If your project must be <a href="https://www.w3.org/WAI/standards-guidelines/wcag/">WCAG</a> compliant, disabling autocomplete can break your input for different modalities. For more, see <a href="https://www.w3.org/WAI/WCAG21/Understanding/identify-input-purpose.html">1.3.5: Identify Input Purpose in WCAG 2.1</a>.</p>
@@ -975,42 +975,42 @@ sys     0m0.932s
 ]]></content></entry><entry><title type="html">The surprisingly difficult task of printing newlines in a terminal</title><link href="https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/"/><id>https://victoria.dev/blog/the-surprisingly-difficult-task-of-printing-newlines-in-a-terminal/</id><author><name>Victoria Drake</name></author><published>2019-12-04T09:17:35-05:00</published><updated>2019-12-04T09:17:35-05:00</updated><content type="html"><![CDATA[<p>Surprisingly, getting computers to give humans readable output is no easy feat. With the introduction of <a href="https://en.wikipedia.org/wiki/Standard_streams">standard streams</a> and specifically standard output, programs gained a way to talk to each other using plain text streams; humanizing and displaying stdout is another matter. Technology throughout the computing age has tried to solve this problem, from the use of <a href="https://en.wikipedia.org/wiki/Computer_terminal#Early_VDUs">ASCII characters in video computer displays</a> to modern shell commands like <code>echo</code> and <code>printf</code>.</p>
 <p>These advancements have not been seamless. The job of printing output to a terminal is fraught with quirks for programmers to navigate, as exemplified by the deceptively nontrivial task of expanding an <a href="https://en.wikipedia.org/wiki/Escape_sequence">escape sequence</a> to print newlines. The expansion of the placeholder <code>\n</code> can be accomplished in a multitude of ways, each with its own unique history and complications.</p>
 <h2 id="using-echo"><a href="#using-echo">Using <code>echo</code></a></h2><p>From its appearance in <a href="https://en.wikipedia.org/wiki/Multics">Multics</a> to its modern-day Unix-like system ubiquity, <code>echo</code> remains a familiar tool for getting your terminal to say &ldquo;Hello world!&rdquo; Unfortunately, inconsistent implementations across operating systems make its usage tricky. Where <code>echo</code> on some systems will automatically expand escape sequences, others require the <code>-e</code> option to do the same:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">echo</span> <span class="s2">&#34;the study of European nerves is \neurology&#34;</span>
-<span class="c1"># the study of European nerves is \neurology</span>
-
-<span class="nb">echo</span> -e <span class="s2">&#34;the study of European nerves is \neurology&#34;</span>
-<span class="c1"># the study of European nerves is</span>
-<span class="c1"># eurology</span>
-</code></pre></div><p>Because of these inconsistencies in implementations, <code>echo</code> is considered non-portable. Additionally, its usage in conjunction with user input is relatively easy to corrupt through <a href="https://en.wikipedia.org/wiki/Code_injection#Shell_injection">shell injection attack</a> using command substitutions.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;the study of European nerves is \neurology&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># the study of European nerves is \neurology</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> -e <span class="s2">&#34;the study of European nerves is \neurology&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># the study of European nerves is</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># eurology</span>
+</span></span></code></pre></div><p>Because of these inconsistencies in implementations, <code>echo</code> is considered non-portable. Additionally, its usage in conjunction with user input is relatively easy to corrupt through <a href="https://en.wikipedia.org/wiki/Code_injection#Shell_injection">shell injection attack</a> using command substitutions.</p>
 <p>In modern systems, it is retained only to provide compatibility with the many programs that still use it. The <a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/echo.html#tag_20_37_16">POSIX specification recommends</a> the use of <code>printf</code> in new programs.</p>
 <h2 id="using-printf"><a href="#using-printf">Using <code>printf</code></a></h2><p>Since 4th <a href="https://en.wikipedia.org/wiki/Research_Unix#Versions">Edition</a> Unix, the portable <a href="https://en.wikipedia.org/wiki/Printf_(Unix)"><code>printf</code> command</a> has essentially been the new and better <code>echo</code>. It allows you to use <a href="https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholder_specification">format specifiers</a> to humanize input. To interpret backslash escape sequences, use <code>%b</code>. The character sequence <code>\n</code> ensures the output ends with a newline:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s2">&#34;%b\n&#34;</span> <span class="s2">&#34;Many females in Oble are \noblewomen&#34;</span>
-<span class="c1"># Many females in Oble are</span>
-<span class="c1"># oblewomen</span>
-</code></pre></div><p>Though <code>printf</code> has further options that make it a far more powerful replacement of <code>echo</code>, this utility is not foolproof and can be vulnerable to an <a href="https://en.wikipedia.org/wiki/Uncontrolled_format_string">uncontrolled format string</a> attack. It&rsquo;s important for programmers to ensure they <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">carefully handle user input</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">printf</span> <span class="s2">&#34;%b\n&#34;</span> <span class="s2">&#34;Many females in Oble are \noblewomen&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Many females in Oble are</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># oblewomen</span>
+</span></span></code></pre></div><p>Though <code>printf</code> has further options that make it a far more powerful replacement of <code>echo</code>, this utility is not foolproof and can be vulnerable to an <a href="https://en.wikipedia.org/wiki/Uncontrolled_format_string">uncontrolled format string</a> attack. It&rsquo;s important for programmers to ensure they <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">carefully handle user input</a>.</p>
 <h2 id="putting-newlines-in-variables"><a href="#putting-newlines-in-variables">Putting newlines in variables</a></h2><p>In an effort to improve portability amongst compilers, the <a href="https://en.wikipedia.org/wiki/ANSI_C">ANSI C Standard</a> was established in 1983. With <a href="https://www.gnu.org/software/bash/manual/html_node/ANSI_002dC-Quoting.html#ANSI_002dC-Quoting">ANSI-C quoting</a> using <code>$'...'</code>, <a href="https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences">escape sequences</a> are replaced in output according to the standard.</p>
 <p>This allows us to store strings with newlines in variables that are printed with the newlines interpreted. You can do this by setting the variable, then calling it with <code>printf</code> using <code>$</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nv">puns</span><span class="o">=</span><span class="s1">$&#39;\number\narrow\nether\nice&#39;</span>
-
-<span class="nb">printf</span> <span class="s2">&#34;%b\n&#34;</span> <span class="s2">&#34;These words started with n but don&#39;t make </span><span class="nv">$puns</span><span class="s2">&#34;</span>
-
-<span class="c1"># These words started with n but don&#39;t make</span>
-<span class="c1"># umber</span>
-<span class="c1"># arrow</span>
-<span class="c1"># ether</span>
-<span class="c1"># ice</span>
-</code></pre></div><p>The expanded variable is single-quoted, which is passed literally to <code>printf</code>. As always, it is important to properly handle the input.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nv">puns</span><span class="o">=</span><span class="s1">$&#39;\number\narrow\nether\nice&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">printf</span> <span class="s2">&#34;%b\n&#34;</span> <span class="s2">&#34;These words started with n but don&#39;t make </span><span class="nv">$puns</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># These words started with n but don&#39;t make</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># umber</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># arrow</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># ether</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># ice</span>
+</span></span></code></pre></div><p>The expanded variable is single-quoted, which is passed literally to <code>printf</code>. As always, it is important to properly handle the input.</p>
 <h2 id="bonus-round-shell-parameter-expansion"><a href="#bonus-round-shell-parameter-expansion">Bonus round: shell parameter expansion</a></h2><p>In my article explaining <a href="/blog/bash-and-shell-expansions-lazy-list-making/">Bash and braces</a>, I covered the magic of <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion</a>. We can use one expansion, <code>${parameter@operator}</code>, to interpret escape sequences, too. We use <code>printf</code>&rsquo;s <code>%s</code> specifier to print as a string, and the <code>E</code> operator will properly expand the escape sequences in our variable:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">printf</span> <span class="s2">&#34;%s\n&#34;</span> <span class="si">${</span><span class="nv">puns</span><span class="p">@E</span><span class="si">}</span>
-
-<span class="c1"># umber</span>
-<span class="c1"># arrow</span>
-<span class="c1"># ether</span>
-<span class="c1"># ice</span>
-</code></pre></div><h2 id="the-ongoing-challenge-of-humanizing-output"><a href="#the-ongoing-challenge-of-humanizing-output">The ongoing challenge of humanizing output</a></h2><p><a href="https://en.wikipedia.org/wiki/String_interpolation">String interpolation</a> continues to be a chewy problem for programmers. Besides getting languages and shells to agree on what certain placeholders mean, properly using the correct escape sequences requires an eye for detail.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">printf</span> <span class="s2">&#34;%s\n&#34;</span> <span class="si">${</span><span class="nv">puns</span><span class="p">@E</span><span class="si">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># umber</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># arrow</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># ether</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># ice</span>
+</span></span></code></pre></div><h2 id="the-ongoing-challenge-of-humanizing-output"><a href="#the-ongoing-challenge-of-humanizing-output">The ongoing challenge of humanizing output</a></h2><p><a href="https://en.wikipedia.org/wiki/String_interpolation">String interpolation</a> continues to be a chewy problem for programmers. Besides getting languages and shells to agree on what certain placeholders mean, properly using the correct escape sequences requires an eye for detail.</p>
 <p>Poor string interpolation can lead to silly-looking output, as well as introduce security vulnerabilities, such as from <a href="https://en.wikipedia.org/wiki/Code_injection">injection attacks</a>. Until the next evolution of the terminal has us talking in emojis, we&rsquo;d best pay attention when printing output for humans.</p>
 ]]></content></entry><entry><title type="html">The care and feeding of an IoT device</title><link href="https://victoria.dev/blog/the-care-and-feeding-of-an-iot-device/"/><id>https://victoria.dev/blog/the-care-and-feeding-of-an-iot-device/</id><author><name>Victoria Drake</name></author><published>2019-11-27T08:59:35-05:00</published><updated>2019-11-27T08:59:35-05:00</updated><content type="html"><![CDATA[<p>Giving someone a puppy for Christmas might work really well in a movie, but in real life often comes hitched to a multitude of responsibilities that the giftee may not be fully prepared to take on. The same is true for Internet of Things (IoT) devices, including Amazon&rsquo;s Alexa-enabled devices, Google Home, and other Internet-connected appliances like cameras, lightbulbs, and toasters. Yes, they have those now.</p>
-<p>Like puppies, IoT devices are still young. Many contain <a href="https://threatpost.com/iot-devices-vulnerable-takeover/144167/">known vulnerabilities</a> that remote attackers can use to gain access to device owners' networks. These attacks are sometimes as laughably simple as using a default username and password that the <a href="https://gdpr.report/news/2019/06/12/research-reveals-the-most-vulnerable-iot-devices/">device owner cannot change</a>.</p>
+<p>Like puppies, IoT devices are still young. Many contain <a href="https://threatpost.com/iot-devices-vulnerable-takeover/144167/">known vulnerabilities</a> that remote attackers can use to gain access to device owners&rsquo; networks. These attacks are sometimes as laughably simple as using a default username and password that the <a href="https://gdpr.report/news/2019/06/12/research-reveals-the-most-vulnerable-iot-devices/">device owner cannot change</a>.</p>
 <p>Does all this mean you shouldn&rsquo;t give Grandma Mabel a new app-enabled coffee maker or Ring doorbell for Christmas? Probably, although not necessarily. Like puppies, properly-maintained IoT devices are capable of warming your heart without causing <em>too</em> much havoc; but they take a lot of work to care for. Here are a few responsibilities to keep in mind for the care and feeding of an IoT device.</p>
 <h2 id="immature-security"><a href="#immature-security">Immature security</a></h2><p>Many manufacturers of IoT devices have not made security a priority. There aren&rsquo;t yet any enforced <a href="https://blog.rapid7.com/2019/03/27/the-iot-cybersecurity-improvement-act-of-2019/">security requirements</a> for this industry, which leaves the protection of your device and the network it&rsquo;s connected to in the hands of the manufacturer.</p>
 <p>It&rsquo;s not just obscure no-name toasters, either; malicious third-party apps have snuck onto Amazon&rsquo;s and Google&rsquo;s more reputable devices and enabled attackers to <a href="https://www.cnet.com/news/alexa-and-google-voice-assistants-app-exploits-left-it-vulnerable-to-eavesdropping/">eavesdrop</a> on unsuspecting owners.</p>
@@ -1032,26 +1032,26 @@ sys     0m0.932s
 <p>You could achieve this with a straightforward system like plugging in an external hard drive and dragging files over once a day, but this method has a few hurdles. Manually transferring files may be slow or incomplete, and besides, you&rsquo;ll first have to remember to do it.</p>
 <p>In my constant pursuit of automating all the things, there&rsquo;s one tool I often return to for its simplicity and reliability: <code>cron</code>. Cron does one thing, and does it well: it runs commands on a schedule.</p>
 <p>I first used it a few months shy of three years ago (Have I really been blogging that long?!) to create <a href="/blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/">custom desktop notifications on Linux</a>. Using the crontab configuration file, which you can edit by running <code>crontab -e</code>, you can specify a schedule for running any commands you like. Here&rsquo;s what the scheduling syntax looks like, from the <a href="https://en.wikipedia.org/wiki/Cron">Wikipedia cron page</a>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># ┌───────────── minute (0 - 59)</span>
-<span class="c1"># │ ┌───────────── hour (0 - 23)</span>
-<span class="c1"># │ │ ┌───────────── day of the month (1 - 31)</span>
-<span class="c1"># │ │ │ ┌───────────── month (1 - 12)</span>
-<span class="c1"># │ │ │ │ ┌───────────── day of the week (0 - 6)</span>
-<span class="c1"># │ │ │ │ │</span>
-<span class="c1"># │ │ │ │ │</span>
-<span class="c1"># │ │ │ │ │</span>
-<span class="c1"># * * * * * command to execute</span>
-</code></pre></div><p>For example, a cron job that runs every day at 00:00 would look like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">0</span> * * *
-</code></pre></div><p>To run a job every twelve hours, the syntax is:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> */12 * * *
-</code></pre></div><p>This <a href="https://crontab.guru/">great tool</a> can help you wrap your head around the cron scheduling syntax.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># ┌───────────── minute (0 - 59)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># │ ┌───────────── hour (0 - 23)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># │ │ ┌───────────── day of the month (1 - 31)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># │ │ │ ┌───────────── month (1 - 12)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># │ │ │ │ ┌───────────── day of the week (0 - 6)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># │ │ │ │ │</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># │ │ │ │ │</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># │ │ │ │ │</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># * * * * * command to execute</span>
+</span></span></code></pre></div><p>For example, a cron job that runs every day at 00:00 would look like:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="m">0</span> <span class="m">0</span> * * *
+</span></span></code></pre></div><p>To run a job every twelve hours, the syntax is:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="m">0</span> */12 * * *
+</span></span></code></pre></div><p>This <a href="https://crontab.guru/">great tool</a> can help you wrap your head around the cron scheduling syntax.</p>
 <p>What&rsquo;s a scheduler have to do with backing up? By itself, not much. The simple beauty of cron is that it runs commands - any shell commands, and any scripts that you&rsquo;d normally run on the command line. As you may have gleaned from my other posts, I&rsquo;m of the strong opinion that you can do just about anything on the command line, including backing up your files. Options for storage in this area are plentiful, from near-to-free local and cloud options, as well as paid managed services too numerous to list. For CLI tooling, we have utilitarian classics like <code>rsync</code>, and CLI tools for specific cloud providers like AWS.</p>
 <h2 id="backing-up-with-rsync"><a href="#backing-up-with-rsync">Backing up with <code>rsync</code></a></h2><p><a href="https://en.wikipedia.org/wiki/Rsync">The <code>rsync</code> utility</a> is a classic choice, and can back up your files to an external hard drive or remote server while making intelligent determinations about which files to update. It uses file size and modification times to recognize file changes, and then only transfers changed files, saving time and bandwidth.</p>
 <p>The <a href="https://download.samba.org/pub/rsync/rsync.html"><code>rsync</code> syntax</a> can be a little nuanced; for example, a trailing forward slash will copy just the contents of the directory, instead of the directory itself. I found examples to be helpful in understanding the usage and syntax.</p>
 <p>Here&rsquo;s one for backing up a local directory to a local destination, such as an external hard drive:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">rsync -a /home/user/directory /media/user/destination
-</code></pre></div><p>The first argument is the source, and the second is the destination. Reversing these in the above example would copy files from the mounted drive to the local home directory.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">rsync -a /home/user/directory /media/user/destination
+</span></span></code></pre></div><p>The first argument is the source, and the second is the destination. Reversing these in the above example would copy files from the mounted drive to the local home directory.</p>
 <p>The <code>a</code> flag for archive mode is one of <code>rsync</code>&rsquo;s superpowers. Equivalent to flags <code>-rlptgoD</code>, it:</p>
 <ul>
 <li>Syncs files recursively through directories (<code>r</code>);</li>
@@ -1059,22 +1059,22 @@ sys     0m0.932s
 <li>Copies device and special files (<code>D</code>).</li>
 </ul>
 <p>Here&rsquo;s another example, this time for backing up the contents of a local directory to a directory on a remote server using SSH:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
-</code></pre></div><p>The <code>v</code> flag turns on verbose output, which is helpful if you like realtime feedback on which files are being transferred. During large transfers, however, it can tend to slow things down. The <code>z</code> flag can help with that, as it indicates that files should be compressed during transfer.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">rsync -avze ssh /home/user/directory/ user@remote.host.net:home/user/directory
+</span></span></code></pre></div><p>The <code>v</code> flag turns on verbose output, which is helpful if you like realtime feedback on which files are being transferred. During large transfers, however, it can tend to slow things down. The <code>z</code> flag can help with that, as it indicates that files should be compressed during transfer.</p>
 <p>The <code>e</code> flag, followed by <code>ssh</code>, tells <code>rsync</code> to use SSH according to the destination instructions provided in the final argument.</p>
 <h2 id="backing-up-with-aws-cli"><a href="#backing-up-with-aws-cli">Backing up with AWS CLI</a></h2><p>Amazon Web Services offers a command line interface tool for doing just about everything with your AWS set up, including a straightforward <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/sync.html"><code>s3 sync</code> command</a> for recursively copying new and updated files to your S3 storage buckets. As a storage method for back up data, S3 is a stable and inexpensive choice. You can even <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html">turn on versioning in your bucket</a>.</p>
 <p>The <a href="https://docs.aws.amazon.com/ja_jp/cli/latest/reference/s3/index.html#directory-and-s3-prefix-operations">syntax for interacting with directories</a> is fairly straightforward, and you can directly indicate your S3 bucket as an <code>S3Uri</code> argument in the form of <code>s3://mybucket/mykey</code>. To back up a local directory to your S3 bucket, the command is:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">aws s3 sync /home/user/directory s3://mybucket
-</code></pre></div><p>Similar to <code>rsync</code>, reversing the source and destination would download files from the S3 bucket.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">aws s3 sync /home/user/directory s3://mybucket
+</span></span></code></pre></div><p>Similar to <code>rsync</code>, reversing the source and destination would download files from the S3 bucket.</p>
 <p>The <code>sync</code> command is intuitive by default. It will guess the mime type of uploaded files, as well as include files discovered by following symlinks. A variety of options exist to control these and other defaults, even including flags to specify the server-side encryption to be used.</p>
 <h2 id="setting-up-your-cronjob-back-up"><a href="#setting-up-your-cronjob-back-up">Setting up your cronjob back up</a></h2><p>You can edit your machine&rsquo;s cron file by running:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">crontab -e
-</code></pre></div><p>Intuitive as it may be, it&rsquo;s worth mentioning that your back up commands will only run when your computer is turned on and the cron daemon is running. With this in mind, choose a schedule for your cronjob that aligns with times when your machine is powered on, and maybe not overloaded with other work.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">crontab -e
+</span></span></code></pre></div><p>Intuitive as it may be, it&rsquo;s worth mentioning that your back up commands will only run when your computer is turned on and the cron daemon is running. With this in mind, choose a schedule for your cronjob that aligns with times when your machine is powered on, and maybe not overloaded with other work.</p>
 <p>To back up to an S3 bucket every day at 8AM, for example, you&rsquo;d put a line in your crontab that looks like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="m">0</span> <span class="m">8</span> * * * aws s3 sync /home/user/directory s3://mybucket
-</code></pre></div><p>If you&rsquo;re curious whether your cron job is currently running, find the PID of cron with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">pstree -ap <span class="p">|</span> grep cron
-</code></pre></div><p>Then run <code>pstree -ap &lt;PID&gt;</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="m">0</span> <span class="m">8</span> * * * aws s3 sync /home/user/directory s3://mybucket
+</span></span></code></pre></div><p>If you&rsquo;re curious whether your cron job is currently running, find the PID of cron with:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">pstree -ap <span class="p">|</span> grep cron
+</span></span></code></pre></div><p>Then run <code>pstree -ap &lt;PID&gt;</code>.</p>
 <p>This rabbit hole goes deeper; a quick search can reveal different ways of organizing and scheduling cronjobs, or help you find different utilities to run cronjobs when your computer is asleep. To protect against the possibility of ransomware-affected files being transferred to your back up, incrementally separated archives are a good idea. In essence, however, this basic set up is all you really need to create a reliable, automatic back up system.</p>
 <h2 id="dont-feed-the-trolls"><a href="#dont-feed-the-trolls">Don&rsquo;t feed the trolls</a></h2><p>Humans are fallible; that&rsquo;s why cyberattacks work. The success of a ransomware attack depends on the victim having no choice but to pay up in order to return to business as usual. A highly accessible recent back up undermines attackers who depend on us being unprepared. By blowing away a system and restoring from yesterday&rsquo;s back up, we may lose a day of progress; ransomers, however, gain nothing at all.</p>
 <p>For further resources on ransomware defense for users and organizations, check out <a href="https://www.us-cert.gov/Ransomware">CISA&rsquo;s advice on ransomware</a>.</p>
@@ -1095,17 +1095,17 @@ sys     0m0.932s
   <img class="u-photo" src="separation.png" alt="Separation of building floors"  />
 </p></p>
 <p>When it comes to your files, the benefit is perhaps easiest to understand if you consider a simple file structure:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">application/
- ├───html/
- │   └───index.html
- ├───assets/
- │   ├───images/
- │   │   ├───rainbows.jpg
- │   │   └───unicorns.jpg
- │   └───style.css
- └───super-secret-configurations/
-     └───master-keys.txt
-</code></pre></div><p>In this simplified example, let&rsquo;s say that all your application&rsquo;s images are stored in the <code>application/assets/images/</code> directory. When one of your users creates a profile and uploads their picture to it, this picture is also stored in this folder. Makes sense, right? It&rsquo;s an image, and that&rsquo;s where the images go. What&rsquo;s the issue?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">application/
+</span></span><span class="line"><span class="cl"> ├───html/
+</span></span><span class="line"><span class="cl"> │   └───index.html
+</span></span><span class="line"><span class="cl"> ├───assets/
+</span></span><span class="line"><span class="cl"> │   ├───images/
+</span></span><span class="line"><span class="cl"> │   │   ├───rainbows.jpg
+</span></span><span class="line"><span class="cl"> │   │   └───unicorns.jpg
+</span></span><span class="line"><span class="cl"> │   └───style.css
+</span></span><span class="line"><span class="cl"> └───super-secret-configurations/
+</span></span><span class="line"><span class="cl">     └───master-keys.txt
+</span></span></code></pre></div><p>In this simplified example, let&rsquo;s say that all your application&rsquo;s images are stored in the <code>application/assets/images/</code> directory. When one of your users creates a profile and uploads their picture to it, this picture is also stored in this folder. Makes sense, right? It&rsquo;s an image, and that&rsquo;s where the images go. What&rsquo;s the issue?</p>
 <p>If you&rsquo;re familiar with navigating a file structure in a terminal, you may have seen this syntax before: <code>../../</code>. The two dots are a handy way of saying, &ldquo;go up one directory.&rdquo; If you execute the command <code>cd ../../</code> in the <code>images/</code> directory of the simple file structure above, you&rsquo;d go up into <code>assets/</code>, then up again to the root directory, <code>application/</code>. This is a problem because of a wee little vulnerability dubbed <a href="https://cwe.mitre.org/data/definitions/22.html">path traversal</a>.</p>
 <p>While the dot syntax saves you some typing, it also introduces the interesting advantage of not actually needing to know what the parent directory is called in order to go to it. Consider an attack payload script, delivered into the <code>images/</code> folder of your insecure application via an uploaded file, that went up one directory using <code>cd ../</code> and then sent everything it found to the attacker, on repeat. Eventually, it would reach the root application directory and access the <code>super-secret-configurations/</code> folder. Not good.</p>
 <p>While other measures should be in place to prevent path traversal and related user upload vulnerabilities, the simplest prevention by far is a separation of storage. Core application files and assets should not be combined with other data, and especially not with <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">user input</a>. It&rsquo;s best to keep user-uploaded files and activity logs (which may contain juicy data and can be vulnerable to injection attacks) separate from the main application.</p>
@@ -1176,8 +1176,8 @@ sys     0m0.932s
 </code></pre><p>This specifies that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The target can be a domain name or an IP address, the latter with or without a port.</p>
 <p>The full <a href="https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/">guide to using NGINX as a reverse proxy</a> is part of the NGINX documentation.</p>
 <h3 id="using-apache-httpd-as-a-reverse-proxy"><a href="#using-apache-httpd-as-a-reverse-proxy">Using Apache httpd as a reverse proxy</a></h3><p>Apache httpd similarly requires some straightforward configuration to act as a reverse proxy server. In the <a href="https://httpd.apache.org/docs/current/configuring.html">configuration file</a>, usually <code>httpd.conf</code>, set the following directives:</p>
-<pre tabindex="0"><code class="language-conf" data-lang="conf">ProxyPass &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
-ProxyPassReverse &quot;/requested/path/&quot;  &quot;http://www.example.com/target/path/&quot;
+<pre tabindex="0"><code class="language-conf" data-lang="conf">ProxyPass &#34;/requested/path/&#34;  &#34;http://www.example.com/target/path/&#34;
+ProxyPassReverse &#34;/requested/path/&#34;  &#34;http://www.example.com/target/path/&#34;
 </code></pre><p>The <code>ProxyPass</code> directive ensures that all requests for the path <code>/requested/path/</code> are forwarded to <code>http://www.example.com/target/path/</code>. The <code>ProxyPassReverse</code> directive ensures that the headers sent by the web server are modified to point to the reverse proxy server instead.</p>
 <p>The full <a href="https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html">reverse proxy guide for Apache HTTP server</a> is available in their documentation.</p>
 <h2 id="proxy-servers-_most-of_-the-way-down"><a href="#proxy-servers-_most-of_-the-way-down">Proxy servers <em>most of</em> the way down</a></h2><p>I concede that my title is a little facetious, as cybersecurity best practices aren&rsquo;t really some eternal infinite-regression mystery (though they may sometimes seem to be). Regardless, I hope this post has helped in your understanding of what proxy servers are, how they contribute to online anonymity for both clients and servers, and that they are an integral building block of cybersecurity practices.</p>
@@ -1299,21 +1299,21 @@ ing rookie mistakes. Usually, the weakest point in the security of your software
 <p>XSS can occur on the server or on the client side, and generally comes in three flavors: DOM (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction">Document Object Model</a>) based, stored, and reflected XSS. The differences amount to where the attack payload is injected into the application.</p>
 <h3 id="dom-based-xss"><a href="#dom-based-xss">DOM-based XSS</a></h3><p><a href="https://owasp.org/www-project-web-security-testing-guide/v41/4-Web_Application_Security_Testing/11-Client_Side_Testing/01-Testing_for_DOM-based_Cross_Site_Scripting">DOM-based XSS</a> occurs when a JavaScript payload affects the structure, behavior, or content of the web page the user has loaded in their browser. These are most commonly executed through modified URLs, such as in phishing.</p>
 <p>To see how easy it would be for injected JavaScript to manipulate a page, we can create a working example with an HTML web page. Try creating a file on your local system called <code>xss-test.html</code> (or whatever you like) with the following HTML and JavaScript code:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>My XSS Example<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
-    <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">h1</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;greeting&#34;</span><span class="p">&gt;</span>Hello there!<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
-                <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">URLSearchParams</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">search</span><span class="p">).</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">name</span> <span class="o">!==</span> <span class="s1">&#39;null&#39;</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;greeting&#39;</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s1">&#39;Hello &#39;</span> <span class="o">+</span> <span class="nx">name</span> <span class="o">+</span> <span class="s1">&#39;!&#39;</span><span class="p">;</span>
-                <span class="p">}</span>
-            <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
-        <span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div><p>This web page will display the title &ldquo;Hello there!&rdquo; unless it receives a <a href="https://en.wikipedia.org/wiki/Query_string">URL parameter from a query string</a> with a value for <code>name</code>. To see the script work, open the page in a browser with an appended URL parameter, like so:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>My XSS Example<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">&lt;</span><span class="nt">h1</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;greeting&#34;</span><span class="p">&gt;</span>Hello there!<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">                <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">URLSearchParams</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">search</span><span class="p">).</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="nx">name</span> <span class="o">!==</span> <span class="s1">&#39;null&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;greeting&#39;</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s1">&#39;Hello &#39;</span> <span class="o">+</span> <span class="nx">name</span> <span class="o">+</span> <span class="s1">&#39;!&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span></code></pre></div><p>This web page will display the title &ldquo;Hello there!&rdquo; unless it receives a <a href="https://en.wikipedia.org/wiki/Query_string">URL parameter from a query string</a> with a value for <code>name</code>. To see the script work, open the page in a browser with an appended URL parameter, like so:</p>
 <p><code>file:///path/to/file/xss-test.html?name=Victoria</code></p>
 <p>Fun, right? Our insecure (in the safety sense, not the emotional one) page takes the URL parameter value for <code>name</code> and displays it in the DOM. The page is expecting the value to be a nice friendly string, but what if we change it to something else? Since the page is owned by us and only exists on our local system, we can test it all we like. What happens if we change the <code>name</code> parameter to, say, <code>&lt;img+src+onerror=alert(&quot;pwned&quot;)&gt;</code>?</p>
 <p><p class="md-image">
@@ -1412,12 +1412,12 @@ ing rookie mistakes. Usually, the weakest point in the security of your software
 <p>Success! Now that you&rsquo;ll be able to access your VPN instance, let&rsquo;s get your VPN service up and running.</p>
 <h3 id="3-initialize-openvpn-on-the-ec2-server"><a href="#3-initialize-openvpn-on-the-ec2-server">3. Initialize OpenVPN on the EC2 server</a></h3><p>First, you&rsquo;ll need to connect to the EC2 instance via your terminal. You&rsquo;ll use the private key you created earlier.</p>
 <p>Open a new terminal window and navigate to the directory containing the private key <code>.pem</code> file. You&rsquo;ll need to set its permissions with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo chmod <span class="m">400</span> &lt;name&gt;.pem
-</code></pre></div><p>Be sure to substitute <code>&lt;name&gt;</code> with the name of your key.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo chmod <span class="m">400</span> &lt;name&gt;.pem
+</span></span></code></pre></div><p>Be sure to substitute <code>&lt;name&gt;</code> with the name of your key.</p>
 <p>This sets the file permissions to <code>-r--------</code> so that it can only be read by the user (you). It may help to protect the private key from read and write operations by other users, but more importantly, will prevent AWS from throwing an error when you try to connect to your instance.</p>
 <p>We can now do just that by running:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;name&gt;.pem openvpnas@&lt;elastic ip&gt;
-</code></pre></div><p>The user <code>openvpnas</code> is set up by the OpenVPN Access Server to allow you to connect to your instance. Replace <code>&lt;elastic ip&gt;</code> with the Elastic IP address you just associated.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">ssh -i &lt;name&gt;.pem openvpnas@&lt;elastic ip&gt;
+</span></span></code></pre></div><p>The user <code>openvpnas</code> is set up by the OpenVPN Access Server to allow you to connect to your instance. Replace <code>&lt;elastic ip&gt;</code> with the Elastic IP address you just associated.</p>
 <p>We may get a message saying that the authenticity of your host can&rsquo;t be established. As long as you&rsquo;ve typed the Elastic IP correctly, go ahead and answer <strong>yes</strong> to the prompt.</p>
 <p>Upon the initial connection to the OpenVPN instance, a set up wizard called <strong>Initial Configuration Tool</strong> should automatically run. (If, for some reason, it doesn&rsquo;t, or you panic-mashed a button, you can restart it with <code>sudo ovpn-init –ec2</code>.) You&rsquo;ll be asked to accept the agreement, then the wizard will help to walk you through some configuration settings for your VPN server.</p>
 <p>You may generally accept the default settings, however, there are a couple questions you may like to answer knowledgeably. They are:</p>
@@ -1426,13 +1426,13 @@ ing rookie mistakes. Usually, the weakest point in the security of your software
 <p>These answers depend on your privacy goals for your VPN.</p>
 <p>When asked for your <strong>OpenVPN-AS license key</strong>, you can leave it blank to use the VPN with up to two clients. If you&rsquo;ve purchased a key, enter it here.</p>
 <p>Once the configuration wizard finishes running, you should see the message &ldquo;Initial Configuration Complete!&rdquo; Before you move on, you should set a password for your server&rsquo;s administration account. To do this, run:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo passwd openvpn
-</code></pre></div><p>Then enter your chosen password twice. Now we&rsquo;re ready to get connected!</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo passwd openvpn
+</span></span></code></pre></div><p>Then enter your chosen password twice. Now we&rsquo;re ready to get connected!</p>
 <p>To close the SSH connection, type <code>exit</code>.</p>
 <h3 id="4-connect-the-client-to-the-vpn"><a href="#4-connect-the-client-to-the-vpn">4. Connect the client to the VPN</a></h3><p>To connect your client (in this case, your laptop) to the VPN and start reaping the benefits, you&rsquo;ll need to do two things; first, obtain your connection profile; second, install the <code>openvpn</code> daemon.</p>
 <h4 id="1-get-your-ovpn-connection-profile"><a href="#1-get-your-ovpn-connection-profile">1. Get your <code>.ovpn</code> connection profile</a></h4><p>You&rsquo;ll need to download a connection profile; this is like a personal configuration file with information, including keys, that the VPN server will need to allow your connection. You can do this by logging in with the password you just set at your Elastic IP address, port 943. This looks like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">https://&lt;elastic ip&gt;:943/
-</code></pre></div><p>The <code>https</code> part is important; without it, the instance won&rsquo;t send any data.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">https://&lt;elastic ip&gt;:943/
+</span></span></code></pre></div><p>The <code>https</code> part is important; without it, the instance won&rsquo;t send any data.</p>
 <p>When you go to this URL, you may see a page warning you that this site&rsquo;s certificate issuer is unknown or invalid. As long as you&rsquo;ve typed your Elastic IP correctly, it&rsquo;s safe to proceed. If you&rsquo;re using Firefox, click <strong>Advanced</strong>, and then <strong>Accept the Risk and Continue</strong>. In Chrome, click <strong>Advanced</strong>, then <strong>Proceed</strong> to the elastic IP.</p>
 <p><p class="md-image">
   <img class="u-photo" src="13-warning.jpg#screenshot" alt="Security warning page"  />
@@ -1443,53 +1443,53 @@ ing rookie mistakes. Usually, the weakest point in the security of your software
 </p></p>
 <p>When you click the link, a file named <code>client.ovpn</code> will download.</p>
 <h4 id="2-install-and-start-openvpn-on-your-ubuntu-1804-client"><a href="#2-install-and-start-openvpn-on-your-ubuntu-1804-client">2. Install and start <code>openvpn</code> on your Ubuntu 18.04 client</a></h4><p>The <code>openvpn</code> daemon will allow your client to connect to your VPN server. It can be installed through the default Ubuntu repositories. Run:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install openvpn
-</code></pre></div><p>In order for OpenVPN to automatically start when you boot up your computer, you&rsquo;ll need to rename and move the connection profile file. I suggest using a <a href="https://en.wikipedia.org/wiki/Symbolic_link">symlink</a> to accomplish this, as it leaves your original file more easily accessible for editing, and allows you to store it in any directory you choose. You can create a symlink by running this command in the directory where your file is located:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo ln -s client.ovpn /etc/openvpn/&lt;name&gt;.conf
-</code></pre></div><p>This creates a symbolic link for the connection profile in the appropriate folder for <code>systemd</code> to find it. The <code>&lt;name&gt;</code> can be anything. When the Linux kernel has booted, <code>systemd</code> is used to initialize the services and daemons that the user has set up to run; one of these will now be OpenVPN. Renaming the file with the extension <code>.conf</code> will let the <code>openvpn</code> daemon know to use it as your connection file.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo apt install openvpn
+</span></span></code></pre></div><p>In order for OpenVPN to automatically start when you boot up your computer, you&rsquo;ll need to rename and move the connection profile file. I suggest using a <a href="https://en.wikipedia.org/wiki/Symbolic_link">symlink</a> to accomplish this, as it leaves your original file more easily accessible for editing, and allows you to store it in any directory you choose. You can create a symlink by running this command in the directory where your file is located:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo ln -s client.ovpn /etc/openvpn/&lt;name&gt;.conf
+</span></span></code></pre></div><p>This creates a symbolic link for the connection profile in the appropriate folder for <code>systemd</code> to find it. The <code>&lt;name&gt;</code> can be anything. When the Linux kernel has booted, <code>systemd</code> is used to initialize the services and daemons that the user has set up to run; one of these will now be OpenVPN. Renaming the file with the extension <code>.conf</code> will let the <code>openvpn</code> daemon know to use it as your connection file.</p>
 <p>For now, you can manually start and connect to OpenVPN by running:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo openvpn --config client.ovpn
-</code></pre></div><p>You&rsquo;ll be asked for a username and password, which will be the same credentials you used before. Once the service finishes starting up, you&rsquo;ll see &ldquo;Initialization Sequence Complete.&rdquo; If you now visit <a href="https://www.dnsleaktest.com/">the DNS leak test website</a>, you should see the Elastic IP and the location of your EC2 server. Yay!</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo openvpn --config client.ovpn
+</span></span></code></pre></div><p>You&rsquo;ll be asked for a username and password, which will be the same credentials you used before. Once the service finishes starting up, you&rsquo;ll see &ldquo;Initialization Sequence Complete.&rdquo; If you now visit <a href="https://www.dnsleaktest.com/">the DNS leak test website</a>, you should see the Elastic IP and the location of your EC2 server. Yay!</p>
 <p>If you&rsquo;re on a later version of Ubuntu, you may check for DNS leaks by clicking on one of the test buttons. If all the ISPs shown are Amazon and none are your own service provider&rsquo;s, congratulations! No leaks! You can move on to <a href="#3-set-up-openvpn-as-networkmanager-system-connection">Step 3 in the second section</a> below, after which, you&rsquo;ll be finished.</p>
 <p>If you&rsquo;re using Ubuntu 18.04 LTS, however, we&rsquo;re not yet done.</p>
 <h2 id="what-a-dns-leak-looks-like"><a href="#what-a-dns-leak-looks-like">What a DNS leak looks like</a></h2><p>Sites like <a href="https://dnsleaktest.com/">the DNS leak test website</a> can help you check your configuration and see if the Internet knows more about your location than you&rsquo;d like. On the main page you&rsquo;ll see a big hello, your IP address, and your location, so far as can be determined.</p>
 <p>If you have a DNS leak, you can see what it looks like by clicking on one of the test buttons on the <a href="https://www.dnsleaktest.com/">the DNS leak test page</a>. When you do, you&rsquo;ll see not only your Amazon.com IP addresses, but also your own ISP and location.</p>
 <p>You can also see the leak by running <code>systemd-resolve --status</code> in your terminal. Your results will contain two lines under different interfaces that both have entries for DNS Servers. It&rsquo;ll look something like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">Link <span class="m">7</span> <span class="o">(</span>tun0<span class="o">)</span>
-      Current Scopes: DNS
-       LLMNR setting: yes
-MulticastDNS setting: no
-      DNSSEC setting: no
-    DNSSEC supported: no
-         DNS Servers: 172.31.0.2
-          DNS Domain: ~.
-
-Link <span class="m">3</span> <span class="o">(</span>wlp4s0<span class="o">)</span>
-      Current Scopes: none
-       LLMNR setting: yes
-MulticastDNS setting: no
-      DNSSEC setting: no
-    DNSSEC supported: no
-         DNS Servers: 192.168.0.1
-          DNS Domain: ~.
-</code></pre></div><p>The <a href="https://unix.stackexchange.com/questions/434916/how-to-fix-openvpn-dns-leak">DNS leak problem in Ubuntu 18.04</a> stems from Ubuntu&rsquo;s DNS resolver, <code>systemd-resolved</code>, failing to properly handle your OpenVPN configuration. In order to try and be a good, efficient DNS resolver, <code>systemd-resolved</code> will send DNS lookup requests in parallel to each interface that has a DNS server configuration, and then utilizes the fastest response. In your case, you only want to use your VPN&rsquo;s DNS servers. Sorry, <code>systemd-resolved</code>. You tried.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">Link <span class="m">7</span> <span class="o">(</span>tun0<span class="o">)</span>
+</span></span><span class="line"><span class="cl">      Current Scopes: DNS
+</span></span><span class="line"><span class="cl">       LLMNR setting: yes
+</span></span><span class="line"><span class="cl">MulticastDNS setting: no
+</span></span><span class="line"><span class="cl">      DNSSEC setting: no
+</span></span><span class="line"><span class="cl">    DNSSEC supported: no
+</span></span><span class="line"><span class="cl">         DNS Servers: 172.31.0.2
+</span></span><span class="line"><span class="cl">          DNS Domain: ~.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Link <span class="m">3</span> <span class="o">(</span>wlp4s0<span class="o">)</span>
+</span></span><span class="line"><span class="cl">      Current Scopes: none
+</span></span><span class="line"><span class="cl">       LLMNR setting: yes
+</span></span><span class="line"><span class="cl">MulticastDNS setting: no
+</span></span><span class="line"><span class="cl">      DNSSEC setting: no
+</span></span><span class="line"><span class="cl">    DNSSEC supported: no
+</span></span><span class="line"><span class="cl">         DNS Servers: 192.168.0.1
+</span></span><span class="line"><span class="cl">          DNS Domain: ~.
+</span></span></code></pre></div><p>The <a href="https://unix.stackexchange.com/questions/434916/how-to-fix-openvpn-dns-leak">DNS leak problem in Ubuntu 18.04</a> stems from Ubuntu&rsquo;s DNS resolver, <code>systemd-resolved</code>, failing to properly handle your OpenVPN configuration. In order to try and be a good, efficient DNS resolver, <code>systemd-resolved</code> will send DNS lookup requests in parallel to each interface that has a DNS server configuration, and then utilizes the fastest response. In your case, you only want to use your VPN&rsquo;s DNS servers. Sorry, <code>systemd-resolved</code>. You tried.</p>
 <h2 id="how-to-fix-openvpn-dns-leak-on-ubuntu-1804"><a href="#how-to-fix-openvpn-dns-leak-on-ubuntu-1804">How to fix OpenVPN DNS leak on Ubuntu 18.04</a></h2><p>Luckily, there is a fix that you can implement. You&rsquo;ll need to install a few helpers from the Ubuntu repositories, update your configuration file, then set up OpenVPN using NetworkManager. Let&rsquo;s do it!</p>
 <h3 id="1-install-some-helpers"><a href="#1-install-some-helpers">1. Install some helpers</a></h3><p>To properly integrate OpenVPN with <code>systemd-resolved</code>, you&rsquo;ll need a bit more help. In a terminal, run:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install -y openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
-</code></pre></div><p>This will install a helper script that integrates OpenVPN and <code>systemd-resolved</code>, a NetworkManager plugin for OpenVPN, and its GUI counterpart for GNOME desktop environment.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo apt install -y openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
+</span></span></code></pre></div><p>This will install a helper script that integrates OpenVPN and <code>systemd-resolved</code>, a NetworkManager plugin for OpenVPN, and its GUI counterpart for GNOME desktop environment.</p>
 <h3 id="2-add-dns-implementation-to-your-connection-profile"><a href="#2-add-dns-implementation-to-your-connection-profile">2. Add DNS implementation to your connection profile</a></h3><p>You&rsquo;ll need to edit the connection profile file you downloaded earlier. Since it&rsquo;s symbolically linked, you can accomplish this by changing the <code>.ovpn</code> file, wherever it&rsquo;s stored. Run <code>vim &lt;name&gt;.ovpn</code> to open it in Vim, then add the following lines at the bottom. Explanation in the comments:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Allow OpenVPN to call user-defined scripts</span>
-script-security <span class="m">2</span>
-<span class="c1"># Tell systemd-resolved to send all DNS queries over the VPN</span>
-dhcp-option DOMAIN-ROUTE .
-
-<span class="c1"># Use the update-systemd-resolved script when TUN/TAP device is opened,</span>
-<span class="c1"># and also run the script on restarts and before the TUN/TAP device is closed</span>
-up /etc/openvpn/update-systemd-resolved
-up-restart
-down /etc/openvpn/update-systemd-resolved
-down-pre
-</code></pre></div><p>For the full list of OpenVPN options, see <a href="https://openvpn.net/community-resources/reference-manual-for-openvpn-2-1/">OpenVPN Scripting and Environment Variables</a>. You may also like <a href="https://en.wikipedia.org/wiki/TUN/TAP">more information about TUN/TAP</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Allow OpenVPN to call user-defined scripts</span>
+</span></span><span class="line"><span class="cl">script-security <span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Tell systemd-resolved to send all DNS queries over the VPN</span>
+</span></span><span class="line"><span class="cl">dhcp-option DOMAIN-ROUTE .
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Use the update-systemd-resolved script when TUN/TAP device is opened,</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># and also run the script on restarts and before the TUN/TAP device is closed</span>
+</span></span><span class="line"><span class="cl">up /etc/openvpn/update-systemd-resolved
+</span></span><span class="line"><span class="cl">up-restart
+</span></span><span class="line"><span class="cl">down /etc/openvpn/update-systemd-resolved
+</span></span><span class="line"><span class="cl">down-pre
+</span></span></code></pre></div><p>For the full list of OpenVPN options, see <a href="https://openvpn.net/community-resources/reference-manual-for-openvpn-2-1/">OpenVPN Scripting and Environment Variables</a>. You may also like <a href="https://en.wikipedia.org/wiki/TUN/TAP">more information about TUN/TAP</a>.</p>
 <h3 id="3-set-up-openvpn-as-networkmanager-system-connection"><a href="#3-set-up-openvpn-as-networkmanager-system-connection">3. Set up OpenVPN as NetworkManager system connection</a></h3><p>Use the GUI to set up your VPN with NetworkManager. Open up Network Settings, which should look something like this:</p>
 <p><p class="md-image">
   <img class="u-photo" src="15-networksettings.png#screenshot" alt="Network Settings window on Ubuntu 18.04"  />
@@ -1504,17 +1504,17 @@ down-pre
 </p></p>
 <p>Add your username and password for the server (<code>openvpn</code> and the password you set in <a href="#3-initialize-openvpn-on-the-ec2-server">the first section&rsquo;s Step 3</a>), and your user key password (the same one again, if you&rsquo;ve followed this tutorial), then click the &ldquo;Add&rdquo; button.</p>
 <h3 id="4-edit-your-openvpn-networkmanager-configuration"><a href="#4-edit-your-openvpn-networkmanager-configuration">4. Edit your OpenVPN NetworkManager configuration</a></h3><p>Nearly there! Now that you&rsquo;ve added the VPN as a NetworkManager connection, you&rsquo;ll need to make a quick change to it. You can see a list of NetworkManager connections by running:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ls -la /etc/NetworkManager/system-connections/*
-</code></pre></div><p>The one for your VPN is probably called <code>openvpn</code>, so let&rsquo;s edit it by running:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/NetworkManager/system-connections/openvpn
-</code></pre></div><p>Under <code>[ipv4]</code>, you&rsquo;ll need to add the line <code>dns-priority=-42</code>. It should end up looking like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">ls -la /etc/NetworkManager/system-connections/*
+</span></span></code></pre></div><p>The one for your VPN is probably called <code>openvpn</code>, so let&rsquo;s edit it by running:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo vim /etc/NetworkManager/system-connections/openvpn
+</span></span></code></pre></div><p>Under <code>[ipv4]</code>, you&rsquo;ll need to add the line <code>dns-priority=-42</code>. It should end up looking like this:</p>
 <p><p class="md-image">
   <img class="u-photo" src="18-connsettings.jpg#screenshot" alt="Connection settings for ipv4"  />
 </p></p>
 <p>Setting a negative number is a workaround that prioritizes this DNS server. The actual number is arbitrary (<code>-1</code> should also work) but I like 42. ¯\_(ツ)_/¯</p>
 <h3 id="5-restart-connect-profit"><a href="#5-restart-connect-profit">5. Restart, connect, profit</a></h3><p>In a terminal, run:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo service network-manager restart
-</code></pre></div><p>Then in the Network Settings, click the magic button that turns on the VPN:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo service network-manager restart
+</span></span></code></pre></div><p>Then in the Network Settings, click the magic button that turns on the VPN:</p>
 <p><p class="md-image">
   <img class="u-photo" src="19-vpnon.jpg#screenshot" alt="Network Settings window"  />
 </p></p>

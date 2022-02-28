@@ -15,10 +15,10 @@
 </li>
 <li>
 <p>You can save a tidbit of effort by putting the following into the <strong>Launch script</strong> box:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Update installed packages</span>
-sudo apt-get update
-sudo apt-get upgrade -y
-</code></pre></div></li>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Update installed packages</span>
+</span></span><span class="line"><span class="cl">sudo apt-get update
+</span></span><span class="line"><span class="cl">sudo apt-get upgrade -y
+</span></span></code></pre></div></li>
 <li>
 <p>Create a new SSH key for this server and ensure you download the <code>.pem</code>.</p>
 </li>
@@ -55,43 +55,43 @@ sudo apt-get upgrade -y
 </li>
 </ol>
 <h2 id="install-openvpn-on-your-server"><a href="#install-openvpn-on-your-server">Install OpenVPN on your server</a></h2><p>After connecting to your server using SSH, install OpenVPN on your server.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Download OpenVPN</span>
-wget https://git.io/vpn -O openvpn-install.sh
-chmod <span class="m">755</span> openvpn-install.sh
-sudo ./openvpn-install.sh
-</code></pre></div><p>You&rsquo;ll see:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Welcome to this OpenVPN road warrior installer!
-
-This server is behind NAT. What is the public IPv4 address or hostname?
-Public IPv4 address / hostname [x.xx.xxx.xxx]:
-</code></pre></div><p>&hellip;where the default option is your static IP that you set up earlier. Hit return to accept this. Then:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Which protocol should OpenVPN use?
-    1) UDP (recommended)
-    2) TCP
-Protocol [1]: 1
-</code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">What port should OpenVPN listen to?
-Port [1194]: #####
-</code></pre></div><p>Enter the UDP port number you chose earlier. Then:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Select a DNS server for the clients:
-    1) Current system resolvers
-    2) Google
-    3) 1.1.1.1
-    4) OpenDNS
-    5) Quad9
-    6) AdGuard
-DNS server [1]: 1
-</code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt">Enter a name for the first client:
-Name [client]: pihole
-</code></pre></div><p>The Pi-hole will be the client. Name it as you like then <code>Press any key to continue...</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Download OpenVPN</span>
+</span></span><span class="line"><span class="cl">wget https://git.io/vpn -O openvpn-install.sh
+</span></span><span class="line"><span class="cl">chmod <span class="m">755</span> openvpn-install.sh
+</span></span><span class="line"><span class="cl">sudo ./openvpn-install.sh
+</span></span></code></pre></div><p>You&rsquo;ll see:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Welcome to this OpenVPN road warrior installer!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">This server is behind NAT. What is the public IPv4 address or hostname?
+</span></span><span class="line"><span class="cl">Public IPv4 address / hostname [x.xx.xxx.xxx]:
+</span></span></code></pre></div><p>&hellip;where the default option is your static IP that you set up earlier. Hit return to accept this. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Which protocol should OpenVPN use?
+</span></span><span class="line"><span class="cl">    1) UDP (recommended)
+</span></span><span class="line"><span class="cl">    2) TCP
+</span></span><span class="line"><span class="cl">Protocol [1]: 1
+</span></span></code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">What port should OpenVPN listen to?
+</span></span><span class="line"><span class="cl">Port [1194]: #####
+</span></span></code></pre></div><p>Enter the UDP port number you chose earlier. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Select a DNS server for the clients:
+</span></span><span class="line"><span class="cl">    1) Current system resolvers
+</span></span><span class="line"><span class="cl">    2) Google
+</span></span><span class="line"><span class="cl">    3) 1.1.1.1
+</span></span><span class="line"><span class="cl">    4) OpenDNS
+</span></span><span class="line"><span class="cl">    5) Quad9
+</span></span><span class="line"><span class="cl">    6) AdGuard
+</span></span><span class="line"><span class="cl">DNS server [1]: 1
+</span></span></code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">Enter a name for the first client:
+</span></span><span class="line"><span class="cl">Name [client]: pihole
+</span></span></code></pre></div><p>The Pi-hole will be the client. Name it as you like then <code>Press any key to continue...</code></p>
 <p>OpenVPN will set itself up. Confirm that <code>tun0</code> has the interface address <code>10.8.0.1/24</code> with the following command:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ip addr show tun0
-</code></pre></div><p>This ensures that the Pi-hole will be set up properly. Now, about that:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">ip addr show tun0
+</span></span></code></pre></div><p>This ensures that the Pi-hole will be set up properly. Now, about that:</p>
 <h2 id="install-and-configure-pi-hole"><a href="#install-and-configure-pi-hole">Install and configure Pi-hole</a></h2><p>On your Lightsail instance, install Pi-hole.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Download and install Pi-hole</span>
-curl -sSL https://install.pi-hole.net <span class="p">|</span> bash
-</code></pre></div><p>This runs the Pi-hole automated installer. You&rsquo;ll see some prompts which you can answer using the enter key, arrow keys, tab, and space bar for selecting an option.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Download and install Pi-hole</span>
+</span></span><span class="line"><span class="cl">curl -sSL https://install.pi-hole.net <span class="p">|</span> bash
+</span></span></code></pre></div><p>This runs the Pi-hole automated installer. You&rsquo;ll see some prompts which you can answer using the enter key, arrow keys, tab, and space bar for selecting an option.</p>
 <p>The important things:</p>
 <ol>
 <li>When you see <strong>Choose An Interface</strong>, ensure you pick <code>tun0</code>. It isn&rsquo;t the default selection.</li>
@@ -105,35 +105,35 @@ curl -sSL https://install.pi-hole.net <span class="p">|</span> bash
 <p>If you mess up, you can redo the configuration with <code>pihole reconfigure</code>.</p>
 <p>Finally, you&rsquo;ll configure the VPN to use the Pi-hole.</p>
 <h2 id="configure-openvpn"><a href="#configure-openvpn">Configure OpenVPN</a></h2><p>Confirm the address of the <code>tun0</code> interface with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ip a <span class="p">|</span> grep -C <span class="m">1</span> <span class="s1">&#39;tun0&#39;</span>
-</code></pre></div><p>You should see: <code>inet 10.8.0.1/24</code> in there.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">ip a <span class="p">|</span> grep -C <span class="m">1</span> <span class="s1">&#39;tun0&#39;</span>
+</span></span></code></pre></div><p>You should see: <code>inet 10.8.0.1/24</code> in there.</p>
 <p>Edit the OpenVPN config file with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/openvpn/server/server.conf
-</code></pre></div><p>Change the line that starts with <code>push &quot;dhcp-option</code>&hellip; to use the Pi-hole&rsquo;s IP address that you confirmed above:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">push</span> <span class="s2">&#34;dhcp-option DNS 10.8.0.1&#34;</span><span class="err">
-</span></code></pre></div><p>If any other lines start with <code>push &quot;dhcp-option</code>&hellip;, comment those out.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo vim /etc/openvpn/server/server.conf
+</span></span></code></pre></div><p>Change the line that starts with <code>push &quot;dhcp-option</code>&hellip; to use the Pi-hole&rsquo;s IP address that you confirmed above:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="nx">push</span> <span class="s2">&#34;dhcp-option DNS 10.8.0.1&#34;</span><span class="err">
+</span></span></span></code></pre></div><p>If any other lines start with <code>push &quot;dhcp-option</code>&hellip;, comment those out.</p>
 <p>If you want to log OpenVPN traffic, add these lines to the end of the file:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">log</span> <span class="sr">/var/</span><span class="nx">log</span>/<span class="nx">openvpn</span>.<span class="nx">log</span><span class="err">
-</span><span class="err"></span><span class="nx">verb</span> <span class="m">3</span><span class="err">
-</span></code></pre></div><p>Save the config. If you forgot to open Vim with <code>sudo</code>, use the <code>tee</code> trick: <code>:w !sudo tee %</code>, then <code>O</code>, then <code>:q!</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="nx">log</span> <span class="sr">/var/</span><span class="nx">log</span>/<span class="nx">openvpn</span>.<span class="nx">log</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nx">verb</span> <span class="m">3</span><span class="err">
+</span></span></span></code></pre></div><p>Save the config. If you forgot to open Vim with <code>sudo</code>, use the <code>tee</code> trick: <code>:w !sudo tee %</code>, then <code>O</code>, then <code>:q!</code>.</p>
 <p>Restart OpenVPN with <code>sudo systemctl restart openvpn-server@server</code>.</p>
 <h3 id="configure-firewall"><a href="#configure-firewall">Configure firewall</a></h3><p>Run the following to control traffic to the server <a href="https://docs.pi-hole.net/guides/vpn/openvpn/firewall/">as described here</a>.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo iptables -I INPUT -i tun0 -j ACCEPT
-sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">53</span> -j ACCEPT
-sudo iptables -A INPUT -i tun0 -p udp --destination-port <span class="m">53</span> -j ACCEPT
-sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">80</span> -j ACCEPT
-sudo iptables -A INPUT -p tcp --destination-port <span class="m">22</span> -j ACCEPT
-sudo iptables -A INPUT -p tcp --destination-port <span class="m">1194</span> -j ACCEPT
-sudo iptables -A INPUT -p udp --destination-port <span class="m">1194</span> -j ACCEPT
-sudo iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -I INPUT -i lo -j ACCEPT
-sudo iptables -P INPUT DROP
-
-<span class="c1"># Optionally, also block HTTPS advertisements while you&#39;re here.</span>
-sudo iptables -A INPUT -p udp --dport <span class="m">80</span> -j REJECT --reject-with icmp-port-unreachable
-sudo iptables -A INPUT -p tcp --dport <span class="m">443</span> -j REJECT --reject-with tcp-reset
-sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --reject-with icmp-port-unreachable
-</code></pre></div><p>You can review the results with <code>sudo iptables -L --line-numbers</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo iptables -I INPUT -i tun0 -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">53</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -i tun0 -p udp --destination-port <span class="m">53</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span class="m">80</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p tcp --destination-port <span class="m">22</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p tcp --destination-port <span class="m">1194</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p udp --destination-port <span class="m">1194</span> -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -I INPUT -i lo -j ACCEPT
+</span></span><span class="line"><span class="cl">sudo iptables -P INPUT DROP
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Optionally, also block HTTPS advertisements while you&#39;re here.</span>
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p udp --dport <span class="m">80</span> -j REJECT --reject-with icmp-port-unreachable
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p tcp --dport <span class="m">443</span> -j REJECT --reject-with tcp-reset
+</span></span><span class="line"><span class="cl">sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --reject-with icmp-port-unreachable
+</span></span></code></pre></div><p>You can review the results with <code>sudo iptables -L --line-numbers</code>.</p>
 <p><strong>These are only stored in memory</strong> before you save them, so test out your set up on your client now to see if it all works as expected.</p>
 <h3 id="test-your-client-connection"><a href="#test-your-client-connection">Test your client connection</a></h3><p>To test your configuration, try adding a client (the phone or computer that will connect to the VPN).</p>
 <ol>
@@ -145,8 +145,8 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 <p>Try browsing for a while. You can also view the Pi-hole dashboard by visiting <code>http://pi.hole/admin/</code> on this device.</p>
 <p>If everything seems all right, go on to saving the configuration on your instance.</p>
 <h3 id="save-iptables"><a href="#save-iptables">Save <code>iptables</code></a></h3><p>Save the <code>iptables</code> you created earlier using the <code>tee</code> command to achieve the second permission.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo iptables-save <span class="p">|</span> sudo tee /etc/pihole/rules.v4
-</code></pre></div><p>You&rsquo;re finished with configuration on your Lightsail instance. If you wish to disconnect now, you can just type <code>exit</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo iptables-save <span class="p">|</span> sudo tee /etc/pihole/rules.v4
+</span></span></code></pre></div><p>You&rsquo;re finished with configuration on your Lightsail instance. If you wish to disconnect now, you can just type <code>exit</code>.</p>
 <h2 id="future-tasks"><a href="#future-tasks">Future tasks</a></h2><p>You&rsquo;re done with the set up! You now have your very own personal VPN with a Pi-hole keeping you safe from nasty trackers. Here are some references for operations you might like to come back to in the future:</p>
 <ul>
 <li>Reconnect to your Lightsail instance with SSH:
@@ -314,43 +314,43 @@ sudo iptables -A INPUT -p udp --dport <span class="m">443</span> -j REJECT --rej
 </ul>
 <p>This points <code>matrix.example.org</code> to your Lightsail instance.</p>
 <h2 id="set-up-your-matrix-homeserver"><a href="#set-up-your-matrix-homeserver">Set up your Matrix homeserver</a></h2><p>Change permissions on the private key you downloaded:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">chmod <span class="m">600</span> &lt;path/to/key&gt;
-</code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
-</code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea to use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">chmod <span class="m">600</span> &lt;path/to/key&gt;
+</span></span></code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
+</span></span></code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea to use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
 <p><em>Dec 2021 update: As the <a href="https://mastodon.social/@victorhck/107491777976384434">good people of Mastodon point out</a>, you might like to ensure you&rsquo;re choosing the stable version for Debian. For instance, replace <code>buster</code> below with <a href="https://www.debian.org/releases/">what&rsquo;s &ldquo;stable&rdquo; at the moment</a>.</em></p>
 <p>Change your <a href="https://wiki.debian.org/SourcesList">sources list</a> in order to get the newest version of Go:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim /etc/apt/sources.list
-</code></pre></div><p>Delete everything except these two lines:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
-</span><span class="err"></span><span class="nx">deb</span><span class="p">-</span><span class="nx">src</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
-</span></code></pre></div><p>Then replace the distributions:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
-</span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo vim /etc/apt/sources.list
+</span></span></code></pre></div><p>Delete everything except these two lines:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="nx">deb</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nx">deb</span><span class="p">-</span><span class="nx">src</span> <span class="nx">http</span>:<span class="sr">//</span><span class="nx">cdn</span><span class="p">-</span><span class="nx">aws</span>.<span class="nx">deb</span>.<span class="nx">debian</span>.<span class="nx">org</span>/<span class="nx">debian</span> <span class="nx">buster</span> <span class="nx">main</span><span class="err">
+</span></span></span></code></pre></div><p>Then replace the distributions:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="p">:</span>%<span class="nx">s</span><span class="sr">/buster main/</span><span class="nx">testing</span> <span class="nx">main</span> <span class="nx">contrib</span> <span class="nx">non</span><span class="p">-</span><span class="nx">free</span>/<span class="nx">g</span><span class="err">
+</span></span></span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
 <p>Once the upgrade is finished, restart your instance with <code>sudo shutdown -r now</code>.</p>
 <p>Go make some coffee, then SSH back in. Get the packages you&rsquo;ll need with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt update
-sudo apt upgrade
-sudo apt install -y git golang nginx python3-certbot-nginx
-</code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo apt update
+</span></span><span class="line"><span class="cl">sudo apt upgrade
+</span></span><span class="line"><span class="cl">sudo apt install -y git golang nginx python3-certbot-nginx
+</span></span></code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
 <h2 id="get-dendrite"><a href="#get-dendrite">Get Dendrite</a></h2><p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">git clone https://github.com/matrix-org/dendrite
-<span class="nb">cd</span> dendrite
-./build.sh
-
-<span class="c1"># Generate a Matrix signing key for federation (required)</span>
-./bin/generate-keys --private-key matrix_key.pem
-
-<span class="c1"># Generate a self-signed certificate (optional, but a valid TLS certificate is normally</span>
-<span class="c1"># needed for Matrix federation/clients to work properly!)</span>
-./bin/generate-keys --tls-cert server.crt --tls-key server.key
-
-<span class="c1"># Copy and modify the config file - you&#39;ll need to set a server name and paths to the keys</span>
-<span class="c1"># at the very least, along with setting up the database connection strings.</span>
-cp dendrite-config.yaml dendrite.yaml
-</code></pre></div><h2 id="configure-dendrite"><a href="#configure-dendrite">Configure Dendrite</a></h2><p>Modify the configuration file you just copied:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo vim dendrite.yaml
-</code></pre></div><p>At minimum, set:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git clone https://github.com/matrix-org/dendrite
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> dendrite
+</span></span><span class="line"><span class="cl">./build.sh
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Generate a Matrix signing key for federation (required)</span>
+</span></span><span class="line"><span class="cl">./bin/generate-keys --private-key matrix_key.pem
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Generate a self-signed certificate (optional, but a valid TLS certificate is normally</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># needed for Matrix federation/clients to work properly!)</span>
+</span></span><span class="line"><span class="cl">./bin/generate-keys --tls-cert server.crt --tls-key server.key
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Copy and modify the config file - you&#39;ll need to set a server name and paths to the keys</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># at the very least, along with setting up the database connection strings.</span>
+</span></span><span class="line"><span class="cl">cp dendrite-config.yaml dendrite.yaml
+</span></span></code></pre></div><h2 id="configure-dendrite"><a href="#configure-dendrite">Configure Dendrite</a></h2><p>Modify the configuration file you just copied:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo vim dendrite.yaml
+</span></span></code></pre></div><p>At minimum, set:</p>
 <ul>
 <li><code>server name</code> to your shiny new domain name, e.g. <code>matrix.example.org</code></li>
 <li><code>disable_federation</code> to true or false</li>
@@ -358,38 +358,38 @@ cp dendrite-config.yaml dendrite.yaml
 </ul>
 <p>You might like to read the <a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ</a>.</p>
 <h2 id="configure-nginx"><a href="#configure-nginx">Configure nginx</a></h2><p>Get the required packages if you didn&rsquo;t already install them above:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo apt install nginx python3-certbot-nginx
-</code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> /etc/nginx/sites-available
-ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
-sudo cp default &lt;sitename&gt;
-</code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo apt install nginx python3-certbot-nginx
+</span></span></code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">cd</span> /etc/nginx/sites-available
+</span></span><span class="line"><span class="cl">ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
+</span></span><span class="line"><span class="cl">sudo cp default &lt;sitename&gt;
+</span></span></code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
 <p>Your <code>location</code> block should look like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
-    <span class="kn">proxy_pass</span> <span class="s">https://localhost:8448</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="cl"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kn">proxy_pass</span> <span class="s">https://localhost:8448</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
 <h2 id="create-self-signed-certificates"><a href="#create-self-signed-certificates">Create self-signed certificates</a></h2><p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo certbot --nginx -d &lt;your.site.address&gt;
-</code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo certbot --nginx -d &lt;your.site.address&gt;
+</span></span></code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
 <p>Test your configuration and restart nginx with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo nginx -t
-sudo systemctl restart nginx
-</code></pre></div><p>Then start up your Matrix server.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Build and run the server:</span>
-./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
-</code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo nginx -t
+</span></span><span class="line"><span class="cl">sudo systemctl restart nginx
+</span></span></code></pre></div><p>Then start up your Matrix server.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Build and run the server:</span>
+</span></span><span class="line"><span class="cl">./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+</span></span></code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
 <p>You can log on to your new homeserver with any <a href="https://matrix.org/clients/">Matrix client</a>, or Matrix-capable applications like <a href="https://www.pidgin.im/plugins/?publisher=all&amp;query=&amp;type=">Pidgin with the Matrix plugin</a>.</p>
 <h2 id="other-troubleshooting"><a href="#other-troubleshooting">Other troubleshooting</a></h2><h3 id="log-files"><a href="#log-files">Log files</a></h3><p>If you get an error such as:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
-  Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
-</code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">sudo mkdir /var/log/dendrite
-sudo chown admin:admin /var/log/dendrite
-
-<span class="c1"># Build and run the server:</span>
-./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
-</code></pre></div><h3 id="unable-to-decrypt"><a href="#unable-to-decrypt">Unable to decrypt</a></h3><p>If you see: <code>Unable to decrypt: The sender's device has not sent us the keys for this message.</code> you may need to verify a user (sometimes yourself).</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
+</span></span><span class="line"><span class="cl">  Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
+</span></span></code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo mkdir /var/log/dendrite
+</span></span><span class="line"><span class="cl">sudo chown admin:admin /var/log/dendrite
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Build and run the server:</span>
+</span></span><span class="line"><span class="cl">./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+</span></span></code></pre></div><h3 id="unable-to-decrypt"><a href="#unable-to-decrypt">Unable to decrypt</a></h3><p>If you see: <code>Unable to decrypt: The sender's device has not sent us the keys for this message.</code> you may need to verify a user (sometimes yourself).</p>
 <ol>
 <li>In your client, open the user&rsquo;s profile. Click the lock icon if there is one, or otherwise look for a way to verify them.</li>
 <li>You may be asked to see if some emojis presented to both users match if you&rsquo;re using certain clients like Element.</li>
@@ -459,7 +459,7 @@ sudo chown admin:admin /var/log/dendrite
 <h2 id="practice-healthy-cybersecurity-habits"><a href="#practice-healthy-cybersecurity-habits">Practice healthy cybersecurity habits</a></h2><p>Keeping your devices healthy and happy is a matter of practicing good habits. Like battling the flu, good habits can help protect yourself and those around you. Incorporate some conscientious cybersecurity practices in your new year resolutions - or start them right away.</p>
 <p>Have a safe and happy holiday!</p>
 ]]></content></entry><entry><title type="html">The care and feeding of an IoT device</title><link href="https://victoria.dev/blog/the-care-and-feeding-of-an-iot-device/"/><id>https://victoria.dev/blog/the-care-and-feeding-of-an-iot-device/</id><author><name>Victoria Drake</name></author><published>2019-11-27T08:59:35-05:00</published><updated>2019-11-27T08:59:35-05:00</updated><content type="html"><![CDATA[<p>Giving someone a puppy for Christmas might work really well in a movie, but in real life often comes hitched to a multitude of responsibilities that the giftee may not be fully prepared to take on. The same is true for Internet of Things (IoT) devices, including Amazon&rsquo;s Alexa-enabled devices, Google Home, and other Internet-connected appliances like cameras, lightbulbs, and toasters. Yes, they have those now.</p>
-<p>Like puppies, IoT devices are still young. Many contain <a href="https://threatpost.com/iot-devices-vulnerable-takeover/144167/">known vulnerabilities</a> that remote attackers can use to gain access to device owners' networks. These attacks are sometimes as laughably simple as using a default username and password that the <a href="https://gdpr.report/news/2019/06/12/research-reveals-the-most-vulnerable-iot-devices/">device owner cannot change</a>.</p>
+<p>Like puppies, IoT devices are still young. Many contain <a href="https://threatpost.com/iot-devices-vulnerable-takeover/144167/">known vulnerabilities</a> that remote attackers can use to gain access to device owners&rsquo; networks. These attacks are sometimes as laughably simple as using a default username and password that the <a href="https://gdpr.report/news/2019/06/12/research-reveals-the-most-vulnerable-iot-devices/">device owner cannot change</a>.</p>
 <p>Does all this mean you shouldn&rsquo;t give Grandma Mabel a new app-enabled coffee maker or Ring doorbell for Christmas? Probably, although not necessarily. Like puppies, properly-maintained IoT devices are capable of warming your heart without causing <em>too</em> much havoc; but they take a lot of work to care for. Here are a few responsibilities to keep in mind for the care and feeding of an IoT device.</p>
 <h2 id="immature-security"><a href="#immature-security">Immature security</a></h2><p>Many manufacturers of IoT devices have not made security a priority. There aren&rsquo;t yet any enforced <a href="https://blog.rapid7.com/2019/03/27/the-iot-cybersecurity-improvement-act-of-2019/">security requirements</a> for this industry, which leaves the protection of your device and the network it&rsquo;s connected to in the hands of the manufacturer.</p>
 <p>It&rsquo;s not just obscure no-name toasters, either; malicious third-party apps have snuck onto Amazon&rsquo;s and Google&rsquo;s more reputable devices and enabled attackers to <a href="https://www.cnet.com/news/alexa-and-google-voice-assistants-app-exploits-left-it-vulnerable-to-eavesdropping/">eavesdrop</a> on unsuspecting owners.</p>

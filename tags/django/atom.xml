@@ -20,44 +20,44 @@
 <p>Besides being aptly named, Django will find these files using <a href="https://docs.python.org/3/library/unittest.html#unittest-test-discovery">built-in test discovery</a> based on the <code>unittest</code> module. All files in your application with names that begin with <code>test</code> will be collected into a test suite.</p>
 <p>This convenient test discovery allows you to place test files anywhere that makes sense for your application. As long as they&rsquo;re correctly named, Django&rsquo;s test utility can find and run them.</p>
 <h2 id="how-to-document-a-test"><a href="#how-to-document-a-test">How to document a test</a></h2><p>Use <a href="https://www.python.org/dev/peps/pep-0257/">docstrings</a> to explain what a test is intended to verify at a high level. For example:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">test_create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&#34;&#34;&#34;Creating a new user object should also create an associated profile object&#34;&#34;&#34;</span>
-    <span class="c1"># ...</span>
-</code></pre></div><p>These docstrings help you quickly understand what a test is supposed to be doing. Besides navigating the codebase, this helps to make it obvious when a test doesn&rsquo;t verify what the docstring says it should.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">test_create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;Creating a new user object should also create an associated profile object&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># ...</span>
+</span></span></code></pre></div><p>These docstrings help you quickly understand what a test is supposed to be doing. Besides navigating the codebase, this helps to make it obvious when a test doesn&rsquo;t verify what the docstring says it should.</p>
 <p>Docstrings are also shown when the tests are being run, which can be helpful for logging and debugging.</p>
 <h2 id="what-a-test-needs-to-work"><a href="#what-a-test-needs-to-work">What a test needs to work</a></h2><p>Django tests can be quickly set up using data created in the <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#django.test.TestCase.setUpTestData"><code>setUpTestData()</code> method</a>. You can use various approaches to create your test data, such as utilizing external files, or even hard-coding silly phrases or the names of your staff. Personally, I much prefer to use a fake-data-generation library, such as <a href="https://github.com/joke2k/faker/"><code>faker</code></a>.</p>
 <p>The proper set up of arbitrary testing data can help you ensure that you&rsquo;re testing your application functionality instead of accidentally testing test data. Because generators like <code>faker</code> add some degree of unexpectedness to your inputs, it can be more representative of real-world use.</p>
 <p>Here is an example set up for a test:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
-<span class="kn">from</span> <span class="nn">faker</span> <span class="kn">import</span> <span class="n">Faker</span>
-
-<span class="kn">from</span> <span class="nn">app.models</span> <span class="kn">import</span> <span class="n">MyModel</span><span class="p">,</span> <span class="n">AnotherModel</span>
-
-<span class="n">fake</span> <span class="o">=</span> <span class="n">Faker</span><span class="p">()</span>
-
-
-<span class="k">class</span> <span class="nc">MyModelTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">setUpTestData</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="s2">&#34;&#34;&#34;Quickly set up data for the whole TestCase&#34;&#34;&#34;</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">user_first</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">first_name</span><span class="p">()</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">user_last</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">last_name</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">test_create_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&#34;&#34;&#34;Creating a MyModel object should also create AnotherModel object&#34;&#34;&#34;</span>
-        <span class="c1"># In test methods, use the variables created above</span>
-        <span class="n">test_object</span> <span class="o">=</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-            <span class="n">first_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">,</span>
-            <span class="n">last_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_last</span><span class="p">,</span>
-            <span class="c1"># ...</span>
-        <span class="p">)</span>
-        <span class="n">another_model</span> <span class="o">=</span> <span class="n">AnotherModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">my_model</span><span class="o">=</span><span class="n">test_object</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">another_model</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">)</span>
-        <span class="c1"># ...</span>
-</code></pre></div><p>Tests pass or fail based on the outcome of the assertion methods. You can use <a href="https://docs.python.org/3/library/unittest.html#assert-methods">Python&rsquo;s <code>unittest</code> methods</a>, and <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#assertions">Django&rsquo;s assertion methods</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">faker</span> <span class="kn">import</span> <span class="n">Faker</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">app.models</span> <span class="kn">import</span> <span class="n">MyModel</span><span class="p">,</span> <span class="n">AnotherModel</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">fake</span> <span class="o">=</span> <span class="n">Faker</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyModelTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">setUpTestData</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;Quickly set up data for the whole TestCase&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">cls</span><span class="o">.</span><span class="n">user_first</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">first_name</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">cls</span><span class="o">.</span><span class="n">user_last</span> <span class="o">=</span> <span class="n">fake</span><span class="o">.</span><span class="n">last_name</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">test_create_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;Creating a MyModel object should also create AnotherModel object&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># In test methods, use the variables created above</span>
+</span></span><span class="line"><span class="cl">        <span class="n">test_object</span> <span class="o">=</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">first_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">last_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_last</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="c1"># ...</span>
+</span></span><span class="line"><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">another_model</span> <span class="o">=</span> <span class="n">AnotherModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">my_model</span><span class="o">=</span><span class="n">test_object</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">another_model</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_first</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># ...</span>
+</span></span></code></pre></div><p>Tests pass or fail based on the outcome of the assertion methods. You can use <a href="https://docs.python.org/3/library/unittest.html#assert-methods">Python&rsquo;s <code>unittest</code> methods</a>, and <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#assertions">Django&rsquo;s assertion methods</a>.</p>
 <p>For further guidance on writing tests, see <a href="https://docs.djangoproject.com/en/3.1/topics/testing/">Testing in Django</a>.</p>
 <h2 id="best-possible-execution-for-running-your-tests"><a href="#best-possible-execution-for-running-your-tests">Best possible execution for running your tests</a></h2><p>Django&rsquo;s test suite is manually run with:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">./manage.py <span class="nb">test</span>
-</code></pre></div><p>I rarely run my Django tests this way.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">./manage.py <span class="nb">test</span>
+</span></span></code></pre></div><p>I rarely run my Django tests this way.</p>
 <p>The best, or most efficient, testing practice is one that occurs without you or your developers ever thinking, &ldquo;I need to run the tests first.&rdquo; The beauty of Django&rsquo;s near-effortless test suite set up is that it can be seamlessly run as a part of regular developer activities. This could be in a pre-commit hook, or in a continuous integration or deployment workflow.</p>
 <p>I&rsquo;ve previously written about how to use pre-commit hooks to <a href="/blog/technical-ergonomics-for-the-efficient-developer/">improve your developer ergonomics</a> and save your team some brainpower. Django&rsquo;s speedy tests can be run this way, and they become especially efficient if you can <a href="https://docs.djangoproject.com/en/3.1/ref/django-admin/#cmdoption-test-parallel">run tests in parallel</a>.</p>
 <p>Tests that run as part of a CI/CD workflow, for example, <a href="/blog/django-project-best-practices-to-keep-your-developers-happy/#continuous-testing-with-github-actions">on pull requests with GitHub Actions</a>, require no regular effort from your developers to remember to run tests at all. I&rsquo;m not sure how plainly I can put it &ndash; this one&rsquo;s literally a no-brainer.</p>
@@ -66,101 +66,101 @@
 ]]></content></entry><entry><title type="html">Django project best practices to keep your developers happy</title><link href="https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/"/><id>https://victoria.dev/blog/django-project-best-practices-to-keep-your-developers-happy/</id><author><name>Victoria Drake</name></author><published>2020-09-22T04:55:19-04:00</published><updated>2020-09-22T04:55:19-04:00</updated><content type="html"><![CDATA[<p>Do you want your team to <em>enjoy</em> your development workflow? Do you think building software should be <em>fun and existentially fulfilling?</em> If so, <em>this is the post</em> for you!</p>
 <p>I&rsquo;ve been developing with Django for years, and I&rsquo;ve never been happier with my Django project set up than I am right now. Here&rsquo;s how I&rsquo;m making a day of developing with Django the most relaxing and enjoyable development experience possible for myself and my engineering team.</p>
 <h2 id="a-custom-cli-tool-for-your-django-project"><a href="#a-custom-cli-tool-for-your-django-project">A custom CLI tool for your Django project</a></h2><p>Instead of typing:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">python3 -m venv env
-<span class="nb">source</span> env/bin/activate
-pip install -r requirements.txt
-python3 manage.py makemigrations
-python3 manage.py migrate
-python3 manage.py collectstatic
-python3 manage.py runserver
-</code></pre></div><p>Wouldn&rsquo;t it be much nicer to type:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">make start
-</code></pre></div><p>&hellip;and have all that happen for you? I think so!</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">python3 -m venv env
+</span></span><span class="line"><span class="cl"><span class="nb">source</span> env/bin/activate
+</span></span><span class="line"><span class="cl">pip install -r requirements.txt
+</span></span><span class="line"><span class="cl">python3 manage.py makemigrations
+</span></span><span class="line"><span class="cl">python3 manage.py migrate
+</span></span><span class="line"><span class="cl">python3 manage.py collectstatic
+</span></span><span class="line"><span class="cl">python3 manage.py runserver
+</span></span></code></pre></div><p>Wouldn&rsquo;t it be much nicer to type:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">make start
+</span></span></code></pre></div><p>&hellip;and have all that happen for you? I think so!</p>
 <p>We can do that with a self-documenting Makefile! Here&rsquo;s one I frequently use when developing my Django applications, like <a href="https://applybyapi.com/">ApplyByAPI.com</a>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nv">VENV</span> <span class="o">:=</span> env
-<span class="nv">BIN</span> <span class="o">:=</span> <span class="k">$(</span>VENV<span class="k">)</span>/bin
-<span class="nv">PYTHON</span> <span class="o">:=</span> <span class="k">$(</span>BIN<span class="k">)</span>/python
-<span class="nv">SHELL</span> <span class="o">:=</span> /bin/bash
-
-<span class="err">include</span> <span class="err">.env</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span>
-<span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
-</span><span class="c"></span>    @egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">venv</span>
-<span class="nf">venv</span><span class="o">:</span> <span class="c">## Make a new virtual environment
-</span><span class="c"></span>    python3 -m venv <span class="k">$(</span>VENV<span class="k">)</span> <span class="o">&amp;&amp;</span> <span class="nb">source</span> <span class="k">$(</span>BIN<span class="k">)</span>/activate
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">install</span>
-<span class="nf">install</span><span class="o">:</span> <span class="n">venv</span> <span class="c">## Make venv and install requirements
-</span><span class="c"></span>    <span class="k">$(</span>BIN<span class="k">)</span>/pip install --upgrade -r requirements.txt
-
-<span class="nf">freeze</span><span class="o">:</span> <span class="c">## Pin current dependencies
-</span><span class="c"></span>    <span class="k">$(</span>BIN<span class="k">)</span>/pip freeze &gt; requirements.txt
-
-<span class="nf">migrate</span><span class="o">:</span> <span class="c">## Make and run migrations
-</span><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py makemigrations
-    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py migrate
-
-<span class="nf">db-up</span><span class="o">:</span> <span class="c">## Pull and start the Docker Postgres container in the background
-</span><span class="c"></span>    docker pull postgres
-    docker-compose up -d
-
-<span class="nf">db-shell</span><span class="o">:</span> <span class="c">## Access the Postgres Docker database interactively with psql. Pass in DBNAME=&lt;name&gt;.
-</span><span class="c"></span>    docker <span class="nb">exec</span> -it container_name psql -d <span class="k">$(</span>DBNAME<span class="k">)</span>
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">test</span>
-<span class="nf">test</span><span class="o">:</span> <span class="c">## Run tests
-</span><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py <span class="nb">test</span> application --verbosity<span class="o">=</span><span class="m">0</span> --parallel --failfast
-
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">run</span>
-<span class="nf">run</span><span class="o">:</span> <span class="c">## Run the Django server
-</span><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py runserver
-
-<span class="nf">start</span><span class="o">:</span> <span class="n">install</span> <span class="n">migrate</span> <span class="n">run</span> <span class="c">## Install requirements, apply migrations, then start development server
-</span></code></pre></div><p>You&rsquo;ll notice the presence of the line <code>include .env</code> above. This ensures <code>make</code> has access to environment variables stored in a file called <code>.env</code>. This allows Make to utilize these variables in its commands, for example, the name of my virtual environment, or to pass in <code>$(DBNAME)</code> to <code>psql</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="line"><span class="cl"><span class="nv">VENV</span> <span class="o">:=</span> env
+</span></span><span class="line"><span class="cl"><span class="nv">BIN</span> <span class="o">:=</span> <span class="k">$(</span>VENV<span class="k">)</span>/bin
+</span></span><span class="line"><span class="cl"><span class="nv">PYTHON</span> <span class="o">:=</span> <span class="k">$(</span>BIN<span class="k">)</span>/python
+</span></span><span class="line"><span class="cl"><span class="nv">SHELL</span> <span class="o">:=</span> /bin/bash
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">include</span> <span class="err">.env</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">help</span>
+</span></span><span class="line"><span class="cl"><span class="nf">help</span><span class="o">:</span> <span class="c">## Show this help
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    @egrep -h <span class="s1">&#39;\s##\s&#39;</span> <span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span> <span class="p">|</span> awk <span class="s1">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">venv</span>
+</span></span><span class="line"><span class="cl"><span class="nf">venv</span><span class="o">:</span> <span class="c">## Make a new virtual environment
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    python3 -m venv <span class="k">$(</span>VENV<span class="k">)</span> <span class="o">&amp;&amp;</span> <span class="nb">source</span> <span class="k">$(</span>BIN<span class="k">)</span>/activate
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">install</span>
+</span></span><span class="line"><span class="cl"><span class="nf">install</span><span class="o">:</span> <span class="n">venv</span> <span class="c">## Make venv and install requirements
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>BIN<span class="k">)</span>/pip install --upgrade -r requirements.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">freeze</span><span class="o">:</span> <span class="c">## Pin current dependencies
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>BIN<span class="k">)</span>/pip freeze &gt; requirements.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">migrate</span><span class="o">:</span> <span class="c">## Make and run migrations
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py makemigrations
+</span></span><span class="line"><span class="cl">    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py migrate
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">db-up</span><span class="o">:</span> <span class="c">## Pull and start the Docker Postgres container in the background
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    docker pull postgres
+</span></span><span class="line"><span class="cl">    docker-compose up -d
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">db-shell</span><span class="o">:</span> <span class="c">## Access the Postgres Docker database interactively with psql. Pass in DBNAME=&lt;name&gt;.
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    docker <span class="nb">exec</span> -it container_name psql -d <span class="k">$(</span>DBNAME<span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">test</span>
+</span></span><span class="line"><span class="cl"><span class="nf">test</span><span class="o">:</span> <span class="c">## Run tests
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py <span class="nb">test</span> application --verbosity<span class="o">=</span><span class="m">0</span> --parallel --failfast
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">run</span>
+</span></span><span class="line"><span class="cl"><span class="nf">run</span><span class="o">:</span> <span class="c">## Run the Django server
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="k">$(</span>PYTHON<span class="k">)</span> manage.py runserver
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">start</span><span class="o">:</span> <span class="n">install</span> <span class="n">migrate</span> <span class="n">run</span> <span class="c">## Install requirements, apply migrations, then start development server
+</span></span></span></code></pre></div><p>You&rsquo;ll notice the presence of the line <code>include .env</code> above. This ensures <code>make</code> has access to environment variables stored in a file called <code>.env</code>. This allows Make to utilize these variables in its commands, for example, the name of my virtual environment, or to pass in <code>$(DBNAME)</code> to <code>psql</code>.</p>
 <p>What&rsquo;s with that weird &ldquo;<code>##</code>&rdquo; comment syntax? A Makefile like this gives you a handy suite of command-line aliases you can check in to your Django project. It&rsquo;s very useful so long as you&rsquo;re able to remember what all those aliases are.</p>
 <p>The <code>help</code> command above, which runs by default, prints a helpful list of available commands when you run <code>make</code> or <code>make help</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">help                 Show this help
-venv                 Make a new virtual environment
-install              Make venv and install requirements
-migrate              Make and run migrations
-db-up                Pull and start the Docker Postgres container in the background
-db-shell             Access the Postgres Docker database interactively with psql
-test                 Run tests
-run                  Run the Django server
-start                Install requirements, apply migrations, then start development server
-</code></pre></div><p>All the usual Django commands are covered, and we&rsquo;ve got a <code>test</code> command that runs our tests with the options we prefer. Brilliant.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">help                 Show this help
+</span></span><span class="line"><span class="cl">venv                 Make a new virtual environment
+</span></span><span class="line"><span class="cl">install              Make venv and install requirements
+</span></span><span class="line"><span class="cl">migrate              Make and run migrations
+</span></span><span class="line"><span class="cl">db-up                Pull and start the Docker Postgres container in the background
+</span></span><span class="line"><span class="cl">db-shell             Access the Postgres Docker database interactively with psql
+</span></span><span class="line"><span class="cl">test                 Run tests
+</span></span><span class="line"><span class="cl">run                  Run the Django server
+</span></span><span class="line"><span class="cl">start                Install requirements, apply migrations, then start development server
+</span></span></code></pre></div><p>All the usual Django commands are covered, and we&rsquo;ve got a <code>test</code> command that runs our tests with the options we prefer. Brilliant.</p>
 <p>You can read my full <a href="/blog/how-to-create-a-self-documenting-makefile/">post about self-documenting Makefiles here</a>, which also includes an example Makefile using <code>pipenv</code>.</p>
 <h2 id="save-your-brainpower-with-pre-commit-hooks"><a href="#save-your-brainpower-with-pre-commit-hooks">Save your brainpower with pre-commit hooks</a></h2><p>I previously wrote about some <a href="/blog/technical-ergonomics-for-the-efficient-developer/">technical ergonomics</a> that can make it a lot easier for teams to develop great software.</p>
 <p>One area that&rsquo;s a no-brainer is using pre-commit hooks to lint code prior to checking it in. This helps to ensure the quality of the code your developers check in, but most importantly, ensures that no one on your team is spending time trying to remember if it should be single or double quotes or where to put a line break.</p>
 <p>The confusingly-named <a href="https://pre-commit.com/">pre-commit framework</a> is an otherwise fantastic way to keep hooks (which are not included in cloned repositories) consistent across local environments.</p>
 <p>Here is my configuration file, <code>.pre-commit-config.yaml</code>, for my Django projects:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">fail_fast</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span><span class="w"></span><span class="nt">repos</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/pre-commit/pre-commit-hooks</span><span class="w">
-</span><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l">v3.1.0</span><span class="w">
-</span><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">detect-aws-credentials</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/psf/black</span><span class="w">
-</span><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="m">19.</span><span class="l">3b0</span><span class="w">
-</span><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">black</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/asottile/blacken-docs</span><span class="w">
-</span><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l">v1.7.0</span><span class="w">
-</span><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">blacken-docs</span><span class="w">
-</span><span class="w">        </span><span class="nt">additional_dependencies</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">black==19.3b0]</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">local</span><span class="w">
-</span><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint</span><span class="w">
-</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint</span><span class="w">
-</span><span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;Lint Markdown files&#34;</span><span class="w">
-</span><span class="w">        </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint &#39;**/*.md&#39; --fix --ignore node_modules --config &#34;./.markdownlint.json&#34;</span><span class="w">
-</span><span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l">node</span><span class="w">
-</span><span class="w">        </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">markdown]</span><span class="w">
-</span></code></pre></div><p>These hooks check for accidental secret commits, format Python files using <a href="https://github.com/psf/black">Black</a>, format Python snippets in Markdown files using <a href="https://github.com/asottile/blacken-docs"><code>blacken-docs</code></a>, and <a href="https://github.com/igorshubovych/markdownlint-cli">lint Markdown files</a> as well. To install them, just type <code>pre-commit install</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">fail_fast</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">repos</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/pre-commit/pre-commit-hooks</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l">v3.1.0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">detect-aws-credentials</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/psf/black</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="m">19.</span><span class="l">3b0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">black</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">https://github.com/asottile/blacken-docs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l">v1.7.0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">blacken-docs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">additional_dependencies</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">black==19.3b0]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">local</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;Lint Markdown files&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l">markdownlint &#39;**/*.md&#39; --fix --ignore node_modules --config &#34;./.markdownlint.json&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l">node</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">markdown]</span><span class="w">
+</span></span></span></code></pre></div><p>These hooks check for accidental secret commits, format Python files using <a href="https://github.com/psf/black">Black</a>, format Python snippets in Markdown files using <a href="https://github.com/asottile/blacken-docs"><code>blacken-docs</code></a>, and <a href="https://github.com/igorshubovych/markdownlint-cli">lint Markdown files</a> as well. To install them, just type <code>pre-commit install</code>.</p>
 <p>There are likely even more useful hooks available for your particular use case: see <a href="https://pre-commit.com/hooks.html">supported hooks</a> to explore.</p>
 <h2 id="useful-gitignores"><a href="#useful-gitignores">Useful gitignores</a></h2><p>An underappreciated way to improve your team&rsquo;s daily development experience is to make sure your project uses a well-rounded <code>.gitignore</code> file. It can help prevent files containing secrets from being committed, and can additionally save developers hours of tedium by ensuring you&rsquo;re never sifting through a <code>git diff</code> of generated files.</p>
 <p>To efficiently create a <a href="https://www.toptal.com/developers/gitignore/api/python,django">gitignore for Python and Django projects</a>, Toptal&rsquo;s <a href="https://gitignore.io">gitignore.io</a> can be a nice resource for generating a robust <code>.gitignore</code> file.</p>
@@ -170,26 +170,26 @@ start                Install requirements, apply migrations, then start developm
 <p>A hosted CI environment like GitHub Actions can also help when running integration tests that require using managed services resources. You can use <a href="https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets">encrypted secrets in a repository</a> to grant the Actions runner access to resources in a testing environment, without worrying about creating testing resources and access keys for each of your developers to use.</p>
 <p>I&rsquo;ve written on many occasions about setting up Actions workflows, including <a href="/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">using one to run your Makefile</a>, and <a href="/blog/publishing-github-event-data-with-github-actions-and-pages/">how to integrate GitHub event data</a>. GitHub even <a href="https://github.blog/2020-06-26-github-action-hero-victoria-drake/">interviewed me about Actions</a> once.</p>
 <p>For Django projects, here&rsquo;s a GitHub Actions workflow that runs tests with a consistent Python version whenever someone opens a pull request in the repository.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run Django tests</span><span class="w">
-</span><span class="w">
-</span><span class="w"></span><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="l">pull_request</span><span class="w">
-</span><span class="w">
-</span><span class="w"></span><span class="nt">jobs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span><span class="nt">test</span><span class="p">:</span><span class="w">
-</span><span class="w">
-</span><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l">ubuntu-latest</span><span class="w">
-</span><span class="w">
-</span><span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@v2</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Set up Python</span><span class="w">
-</span><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/setup-python@v2</span><span class="w">
-</span><span class="w">        </span><span class="nt">with</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.8&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Install dependencies</span><span class="w">
-</span><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make install</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run tests</span><span class="w">
-</span><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make test</span><span class="w">
-</span></code></pre></div><p>For the installation and test commands, I&rsquo;ve simply utilized the <a href="#a-custom-cli-tool-for-your-django-project">Makefile</a> that&rsquo;s been checked in to the repository. A benefit of using your Makefile commands in your CI test workflows is that you only need to keep them updated in one place &ndash; your Makefile! No more &ldquo;why is this working locally but not in CI??!?&rdquo; headaches.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run Django tests</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="l">pull_request</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">jobs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">test</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l">ubuntu-latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@v2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Set up Python</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/setup-python@v2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">with</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.8&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Install dependencies</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make install</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Run tests</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">make test</span><span class="w">
+</span></span></span></code></pre></div><p>For the installation and test commands, I&rsquo;ve simply utilized the <a href="#a-custom-cli-tool-for-your-django-project">Makefile</a> that&rsquo;s been checked in to the repository. A benefit of using your Makefile commands in your CI test workflows is that you only need to keep them updated in one place &ndash; your Makefile! No more &ldquo;why is this working locally but not in CI??!?&rdquo; headaches.</p>
 <p>If you want to step up your security game, you can add <a href="https://github.com/victoriadrake/django-security-check">Django Security Check</a> as an Action too.</p>
 <h2 id="set-up-your-django-project-for-success"><a href="#set-up-your-django-project-for-success">Set up your Django project for success</a></h2><p>Want to help keep your development team happy? Set them up for success with these best practices for Django development. Remember, an ounce of brainpower is worth a pound of software!</p>
 ]]></content></entry><entry><title type="html">Manipulating data with Django migrations</title><link href="https://victoria.dev/blog/manipulating-data-with-django-migrations/"/><id>https://victoria.dev/blog/manipulating-data-with-django-migrations/</id><author><name>Victoria Drake</name></author><published>2020-09-14T02:12:57-04:00</published><updated>2020-09-14T02:12:57-04:00</updated><content type="html"><![CDATA[<p>Growing, successful applications are a lovely problem to have. As a product develops, it tends to accumulate complication the way your weekend cake project accumulates layers of frosting. Thankfully, Django, my favorite batteries-included framework, handles complexity pretty well.</p>
@@ -197,14 +197,14 @@ start                Install requirements, apply migrations, then start developm
 <h2 id="whats-under-the-hood"><a href="#whats-under-the-hood">What&rsquo;s under the hood</a></h2><p>Django migrations are Python files that help you add and change things in your database tables to reflect changes in your Django models. To understand how Django migrations help you work with data, it may be helpful to understand the underlying structures we&rsquo;re working with.</p>
 <h3 id="whats-a-database-table"><a href="#whats-a-database-table">What&rsquo;s a database table</a></h3><p>If you&rsquo;ve laid eyes on a spreadsheet before, you&rsquo;re already most of the way to understanding a database table. In a relational database, for example, a PostgreSQL database, you can expect to see data organized into columns and rows. A relational database table may have a set number of columns and any number of rows.</p>
 <p>In Django, each model is its own table. For example, here&rsquo;s a Django model:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
-
-
-<span class="k">class</span> <span class="nc">Lunch</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">left_side</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">right_side</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</code></pre></div><p>Each field is a column, and each row is a Django object instance of that model. Here&rsquo;s a representation of a database table for the Django model &ldquo;Lunch&rdquo; above. In the database, its name would be <code>lunch_table</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Lunch</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">left_side</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">right_side</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span></code></pre></div><p>Each field is a column, and each row is a Django object instance of that model. Here&rsquo;s a representation of a database table for the Django model &ldquo;Lunch&rdquo; above. In the database, its name would be <code>lunch_table</code>.</p>
 <table>
 <thead>
 <tr>
@@ -225,26 +225,26 @@ start                Install requirements, apply migrations, then start developm
 </table>
 <p>The model <code>Lunch</code> has three fields: <code>left_side</code>, <code>center</code>, and <code>right-side</code>. One instance of a <code>Lunch</code> object would have &ldquo;Fork&rdquo; for the <code>left_side</code>, a &ldquo;Plate&rdquo; for the <code>center</code>, and &ldquo;Spoon&rdquo; for the <code>right_side</code>. Django <a href="https://docs.djangoproject.com/en/3.2/topics/db/models/#automatic-primary-key-fields">automatically adds an <code>id</code> field</a> if you don&rsquo;t specify a primary key.</p>
 <p>If you wanted to change the name of your Lunch model, you would do so in your <code>models.py</code> code. For example, change &ldquo;Lunch&rdquo; to &ldquo;Dinner,&rdquo; then <a href="https://docs.djangoproject.com/en/3.2/ref/django-admin/#makemigrations">run <code>python manage.py makemigrations</code></a>. You&rsquo;ll see:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">python manage.py makemigrations
-Did you rename the backend.Lunch model to Dinner? [y/N] y
-Migrations for &#39;backend&#39;:
-  backend/migrations/0003_auto_20200922_2331.py
-    - Rename model Lunch to Dinner
-</code></pre></div><p>Django automatically generates the appropriate migration files. The relevant line of the generated migrations file in this case would look like:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="n">migrations</span><span class="o">.</span><span class="n">RenameModel</span><span class="p">(</span><span class="n">old_name</span><span class="o">=</span><span class="s2">&#34;Lunch&#34;</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="s2">&#34;Dinner&#34;</span><span class="p">),</span>
-</code></pre></div><p>This operation would rename our &ldquo;Lunch&rdquo; model to &ldquo;Dinner&rdquo; while keeping everything else the same. But what if you also wanted to change the structure of the database table itself, its schema, as well as make sure that existing data ends up in the right place on your Dinner table?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">python manage.py makemigrations
+</span></span><span class="line"><span class="cl">Did you rename the backend.Lunch model to Dinner? [y/N] y
+</span></span><span class="line"><span class="cl">Migrations for &#39;backend&#39;:
+</span></span><span class="line"><span class="cl">  backend/migrations/0003_auto_20200922_2331.py
+</span></span><span class="line"><span class="cl">    - Rename model Lunch to Dinner
+</span></span></code></pre></div><p>Django automatically generates the appropriate migration files. The relevant line of the generated migrations file in this case would look like:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">migrations</span><span class="o">.</span><span class="n">RenameModel</span><span class="p">(</span><span class="n">old_name</span><span class="o">=</span><span class="s2">&#34;Lunch&#34;</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="s2">&#34;Dinner&#34;</span><span class="p">),</span>
+</span></span></code></pre></div><p>This operation would rename our &ldquo;Lunch&rdquo; model to &ldquo;Dinner&rdquo; while keeping everything else the same. But what if you also wanted to change the structure of the database table itself, its schema, as well as make sure that existing data ends up in the right place on your Dinner table?</p>
 <p>Let&rsquo;s explore how to turn our Lunch model into a Dinner model that looks like this:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
-
-
-<span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">top_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">top_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">bottom_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</code></pre></div><p>&hellip;with a database table that would look like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">top_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">top_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bottom_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span></code></pre></div><p>&hellip;with a database table that would look like this:</p>
 <table>
 <thead>
 <tr>
@@ -272,37 +272,37 @@ Migrations for &#39;backend&#39;:
 <h2 id="manipulating-data-with-django-migrations"><a href="#manipulating-data-with-django-migrations">Manipulating data with Django migrations</a></h2><p>Before you begin to manipulate your data, it&rsquo;s always a good idea to create a backup of your database that you can restore in case something goes wrong. There are various ways to do this depending on the database you&rsquo;re using. You can typically find instructions by searching for <code>&lt;your database name&gt;</code> and keywords like <code>backup</code>, <code>recovery</code>, or <code>snapshot</code>.</p>
 <p>In order to design your migration, it&rsquo;s helpful to become familiar with the available <a href="https://docs.djangoproject.com/en/3.2/ref/migration-operations/">migration operations</a>. Migrations are run step-by-step, and each operation is some flavor of adding, removing, or altering data. Like a strategic puzzle, it&rsquo;s important to make model changes one step at a time so that the generated migrations have the correct result.</p>
 <p>We&rsquo;ve already renamed our model successfully. Now, we&rsquo;ll rename the fields that hold the data we want to retain:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</code></pre></div><p>Django is sometimes smart enough to determine the old and new field names correctly. You&rsquo;ll be asked for confirmation:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">python manage.py makemigrations
-Did you rename dinner.center to dinner.bottom_center (a CharField)? [y/N] y
-Did you rename dinner.left_side to dinner.bottom_left (a CharField)? [y/N] y
-Did you rename dinner.right_side to dinner.top_center (a CharField)? [y/N] y
-Migrations for &#39;backend&#39;:
-  backend/migrations/0004_auto_20200914_2345.py
-    - Rename field center on dinner to bottom_center
-    - Rename field left_side on dinner to bottom_left
-    - Rename field right_side on dinner to top_center
-</code></pre></div><p>In some cases, you&rsquo;ll want to try renaming the field and running <code>makemigrations</code> one at a time.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span></code></pre></div><p>Django is sometimes smart enough to determine the old and new field names correctly. You&rsquo;ll be asked for confirmation:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">python manage.py makemigrations
+</span></span><span class="line"><span class="cl">Did you rename dinner.center to dinner.bottom_center (a CharField)? [y/N] y
+</span></span><span class="line"><span class="cl">Did you rename dinner.left_side to dinner.bottom_left (a CharField)? [y/N] y
+</span></span><span class="line"><span class="cl">Did you rename dinner.right_side to dinner.top_center (a CharField)? [y/N] y
+</span></span><span class="line"><span class="cl">Migrations for &#39;backend&#39;:
+</span></span><span class="line"><span class="cl">  backend/migrations/0004_auto_20200914_2345.py
+</span></span><span class="line"><span class="cl">    - Rename field center on dinner to bottom_center
+</span></span><span class="line"><span class="cl">    - Rename field left_side on dinner to bottom_left
+</span></span><span class="line"><span class="cl">    - Rename field right_side on dinner to top_center
+</span></span></code></pre></div><p>In some cases, you&rsquo;ll want to try renaming the field and running <code>makemigrations</code> one at a time.</p>
 <p>Now that the existing fields have been migrated to their new names, add the remaining fields to the model:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">top_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">top_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">bottom_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</code></pre></div><p>Running <code>makemigrations</code> again now gives us:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text">python manage.py makemigrations
-Migrations for &#39;backend&#39;:
-  backend/migrations/0005_auto_20200914_2351.py
-    - Add field bottom_right to dinner
-    - Add field top_left to dinner
-    - Add field top_right to dinner
-</code></pre></div><p>You&rsquo;re done! By generating Django migrations, you&rsquo;ve successfully set up your <code>dinner_table</code> and moved existing data to its new spot.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Dinner</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">top_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">top_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">top_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bottom_center</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bottom_right</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span></code></pre></div><p>Running <code>makemigrations</code> again now gives us:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">python manage.py makemigrations
+</span></span><span class="line"><span class="cl">Migrations for &#39;backend&#39;:
+</span></span><span class="line"><span class="cl">  backend/migrations/0005_auto_20200914_2351.py
+</span></span><span class="line"><span class="cl">    - Add field bottom_right to dinner
+</span></span><span class="line"><span class="cl">    - Add field top_left to dinner
+</span></span><span class="line"><span class="cl">    - Add field top_right to dinner
+</span></span></code></pre></div><p>You&rsquo;re done! By generating Django migrations, you&rsquo;ve successfully set up your <code>dinner_table</code> and moved existing data to its new spot.</p>
 <h2 id="additional-complexity"><a href="#additional-complexity">Additional complexity</a></h2><p>You&rsquo;ll notice that our Lunch and Dinner models are not very complex. Out of Django&rsquo;s many <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#field-types">model field options</a>, we&rsquo;re just using <code>CharField</code>. We also set <code>null=True</code> to let Django store empty values as <code>NULL</code> in the database.</p>
 <p>Django migrations can handle additional complexity, such as changing field types, and whether a blank or null value is permitted. I keep Django&rsquo;s <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#">model field reference</a> handy as I work with varying types of data and different use cases.</p>
 <h2 id="de-mystified-migrations"><a href="#de-mystified-migrations">De-mystified migrations</a></h2><p>I hope this article has helped you better understand Django migrations and how they work!</p>
@@ -319,31 +319,31 @@ Migrations for &#39;backend&#39;:
 <p>In the case of ApplyByAPI, there were only a sparse few places where that level of tailored functionality was really necessary. Everywhere else, function-based views began making my life harder. Writing what is essentially a custom view for run-of-the-mill operations like displaying data on a list page became tedious, repetitive, and error-prone.</p>
 <p>With function-based views, you&rsquo;ll need figure out which Django methods to implement in order to handle requests and pass data to views. Unit testing can take some work to write. In short, the granular control that function-based views offer also requires some granular tedium to properly implement.</p>
 <p>I ended up holding back ApplyByAPI while I refactored the majority of the views into class-based views. This was not a small amount of work and refactoring, but when it was done, I had a bunch of tiny views that made a huge difference. I mean, just look at this one:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">ApplicationsList</span><span class="p">(</span><span class="n">ListView</span><span class="p">):</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">Application</span>
-    <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&#34;applications.html&#34;</span>
-</code></pre></div><p>It&rsquo;s three lines. My developer ergonomics, and my life, got a lot easier.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">ApplicationsList</span><span class="p">(</span><span class="n">ListView</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">model</span> <span class="o">=</span> <span class="n">Application</span>
+</span></span><span class="line"><span class="cl">    <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&#34;applications.html&#34;</span>
+</span></span></code></pre></div><p>It&rsquo;s three lines. My developer ergonomics, and my life, got a lot easier.</p>
 <p>You may think of class-based views as templates that cover most of the functionality any app needs. There are views for displaying lists of things, for viewing a thing in detail, and <a href="https://docs.djangoproject.com/en/3.2/ref/class-based-views/generic-editing/">editing views</a> for performing CRUD (Create, Read, Update, Delete) operations. Because implementing one of these generic views takes only a few lines of code, my application logic became dramatically succinct. This gave me less repeated code, fewer places for something to go wrong, and a more manageable application in general.</p>
 <p>Class-based views are fast to implement and use. The built-in class-based generic views may require less work to test, since you don&rsquo;t need to write tests for the base view Django provides. (Django does its own tests for that; no need for your app to double-check.) To tweak a generic view to your needs, you can <a href="https://docs.djangoproject.com/en/3.2/topics/class-based-views/#subclassing-generic-views">subclass a generic view</a> and override attributes or methods. In my case, since I only needed to write tests for any customizations I added, my test files became dramatically shorter, as did the time and resources it took to run them.</p>
 <p>When you&rsquo;re weighing the choice between function-based or class-based views, consider the amount of customization the view needs, and the future work that will be necessary to test and maintain it. If the logic is common, you may be able to hit the ground running with a generic class-based view. If you need sufficient granularity that re-writing a base view&rsquo;s methods would make it overly complicated, consider a function-based view instead.</p>
 <h2 id="django-models"><a href="#django-models">Django models</a></h2><p><a href="https://docs.djangoproject.com/en/3.2/topics/db/models/">Models</a> organize your Django application&rsquo;s central concepts to help make them flexible, robust, and easy to work with. If used wisely, models are a powerful way to collate your data into a definitive source of truth.</p>
 <p>Like views, Django provides some built-in model types for the convenience of implementing basic authentication, including the <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/auth/">User</a> and <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/auth/">Permission</a> models. For everything else, you can create a model that reflects your concept by <a href="https://docs.djangoproject.com/en/3.2/topics/db/models/#model-inheritance">inheriting from a parent Model class</a>.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">StaffMember</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
-    <span class="n">company</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span><span class="n">Company</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">company</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&#34; - &#34;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">email</span>
-</code></pre></div><p>When you create a custom model in Django, you subclass <a href="https://github.com/django/django/blob/master/django/db/models/base.py">Django&rsquo;s Model class</a> and take advantage of all its power. Each model you create generally maps to a database table. Each attribute is a database field. This gives you the ability to create objects to work with that humans can better understand.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">StaffMember</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">company</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span><span class="n">Company</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">company</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&#34; - &#34;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">email</span>
+</span></span></code></pre></div><p>When you create a custom model in Django, you subclass <a href="https://github.com/django/django/blob/master/django/db/models/base.py">Django&rsquo;s Model class</a> and take advantage of all its power. Each model you create generally maps to a database table. Each attribute is a database field. This gives you the ability to create objects to work with that humans can better understand.</p>
 <p>You can make a model useful to you by defining its fields. Many <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#model-field-types">built-in field types</a> are conveniently provided. These help Django figure out the data type, the HTML <a href="https://docs.djangoproject.com/en/3.2/ref/forms/widgets/">widget</a> to use when rendering a form, and even <a href="https://docs.djangoproject.com/en/3.2/ref/forms/validation/">form validation</a> requirements. If you need to, you can <a href="https://docs.djangoproject.com/en/3.2/howto/custom-model-fields/">write custom model fields</a>.</p>
 <p>Database <a href="https://docs.djangoproject.com/en/3.2/topics/db/models/#relationships">relationships</a> can be defined using a <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#django.db.models.ForeignKey">ForeignKey</a> field (many-to-one), or a <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#django.db.models.ManyToManyField">ManyToManyField</a> (give you three guesses). If those don&rsquo;t suffice, there&rsquo;s also a <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#django.db.models.OneToOneField">OneToOneField</a>. Together, these allow you to define relations between your models with levels of complexity limited only by your imagination. (Depending on the imagination you have, this may or may not be an advantage.)</p>
 <h2 id="retrieving-objects-with-queries"><a href="#retrieving-objects-with-queries">Retrieving objects with queries</a></h2><p>Use your model&rsquo;s Manager (<code>objects</code> by default) to <a href="https://docs.djangoproject.com/en/3.2/topics/db/queries/#retrieving-objects">construct a QuerySet</a>. This is a representation of objects in your database that you can refine, using methods, to retrieve specific subsets. All available methods are in the <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#django.db.models.query.QuerySet">QuerySet API</a> and can be chained together for even more fun.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-    <span class="nb">type</span><span class="o">=</span><span class="s2">&#34;new&#34;</span>
-<span class="p">)</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span>
-    <span class="n">title__startswith</span><span class="o">=</span><span class="s2">&#34;Blockchain&#34;</span>
-<span class="p">)</span>
-</code></pre></div><p>Some methods return new QuerySets, such as <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#filter"><code>filter()</code></a>, or <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#exclude"><code>exclude()</code></a>. Chaining these can give you powerful queries without affecting performance, as QuerySets aren&rsquo;t fetched from the database <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#when-querysets-are-evaluated">until they are evaluated</a>. Methods that evaluate a QuerySet include <code>get()</code>, <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#count"><code>count()</code></a>, <code>len()</code>, <code>list()</code>, or <code>bool()</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">type</span><span class="o">=</span><span class="s2">&#34;new&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">title__startswith</span><span class="o">=</span><span class="s2">&#34;Blockchain&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span></code></pre></div><p>Some methods return new QuerySets, such as <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#filter"><code>filter()</code></a>, or <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#exclude"><code>exclude()</code></a>. Chaining these can give you powerful queries without affecting performance, as QuerySets aren&rsquo;t fetched from the database <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#when-querysets-are-evaluated">until they are evaluated</a>. Methods that evaluate a QuerySet include <code>get()</code>, <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#count"><code>count()</code></a>, <code>len()</code>, <code>list()</code>, or <code>bool()</code>.</p>
 <p>Iterating over a QuerySet also evaluates it, so avoid doing so where possible to improve query performance. For instance, if you just want to know if an object is present, you can use <code>exists()</code> to avoid iterating over database objects.</p>
 <p>Use <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#django.db.models.query.QuerySet.get"><code>get()</code></a> in cases where you want to retrieve a specific object. This method raises <a href="https://docs.djangoproject.com/en/3.2/ref/exceptions/#django.core.exceptions.MultipleObjectsReturned"><code>MultipleObjectsReturned</code></a> if something unexpected happens, as well as the <code>DoesNotExist</code> exception, if, take a guess.</p>
 <p>If you&rsquo;d like to get an object that may not exist in the context of a user&rsquo;s request, use the convenient <a href="https://docs.djangoproject.com/en/3.2/topics/http/shortcuts/#get-object-or-404"><code>get_object_or_404()</code></a> or <a href="https://docs.djangoproject.com/en/3.2/topics/http/shortcuts/#get-list-or-404"><code>get_list_or_404()</code></a> which raises <a href="https://docs.djangoproject.com/en/3.2/topics/http/views/#django.http.Http404"><code>Http404</code></a> instead of <a href="https://docs.djangoproject.com/en/3.2/ref/models/instances/#django.db.models.Model.DoesNotExist"><code>DoesNotExist</code></a>. These helpful <a href="https://docs.djangoproject.com/en/3.2/topics/http/shortcuts/">shortcuts</a> are suited to just this purpose. To create an object that doesn&rsquo;t exist, there&rsquo;s also the convenient <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#get-or-create"><code>get_or_create()</code></a>.</p>
