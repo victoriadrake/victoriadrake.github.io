@@ -25,7 +25,9 @@ jobs:
           cd .. && rm -rf tmp/
           hugo version
       - name: Build site
-        run: hugo --minify --cleanDestinationDir
+        run: |
+          git pull --recurse-submodules
+          hugo --minify --cleanDestinationDir
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
