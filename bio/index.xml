@@ -1,4 +1,159 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Victoria Drake's Blog</title><link>https://victoria.dev/bio/</link><description>Get the latest posts from Victoria Drake.</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><atom:link href="https://victoria.dev/bio/index.xml" rel="self" type="application/rss+xml"/><item><title>Optimizing text for ChatGPT: NLP and text pre-processing techniques</title><link>https://victoria.dev/blog/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/</link><pubDate>Tue, 19 Sep 2023 04:46:36 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/</guid><description>Mastering text preprocessing to send more input to ChatGPT.</description><content:encoded>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Victoria Drake's Blog</title><link>https://victoria.dev/bio/</link><description>Get the latest posts from Victoria Drake.</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>hello@victoria.dev (Victoria Drake)</managingEditor><webMaster>hello@victoria.dev (Victoria Drake)</webMaster><atom:link href="https://victoria.dev/bio/index.xml" rel="self" type="application/rss+xml"/><item><title>How to send long text input to ChatGPT using the OpenAI API</title><link>https://victoria.dev/blog/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/</link><pubDate>Tue, 26 Sep 2023 04:46:36 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/</guid><description>A straightforward guide to sending large input to ChatGPT using Python.</description><content:encoded><![CDATA[ <p>In a previous post, I showed how you can apply text preprocessing techniques to shorten your input length for ChatGPT. Today in the web interface (<a href="https://chat.openai.com/">chat.openai.com</a>), ChatGPT allows you to send a message with a maximum token length of 4,096.</p>
+<p>There are bound to be situations in which this isn&rsquo;t enough, such as when you want to read in a large amount of text from a file. Using the OpenAI API allows you to send many more tokens in a messages array, with the maximum number depending on your chosen model. This lets you provide large amounts of text to ChatGPT using chunking. Here&rsquo;s how.</p>
+<h2 id="chunking-your-input"><a href="#chunking-your-input">Chunking your input</a></h2><p>The <code>gpt-4</code> model currently has a maximum content length token limit of 8,192 tokens. (<a href="https://platform.openai.com/docs/models">Here are the docs containing current limits for all the models</a>.) Remember that you can first apply text preprocessing techniques to reduce your input size &ndash; in my <a href="/blog/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/">previous post</a> I achieved a 28% size reduction without losing meaning with just a little tokenization and pruning.</p>
+<p>When this isn&rsquo;t enough to fit your message within the maximum message token limit, you can take a general programmatic approach that sends your input in message chunks. The goal is to divide your text into sections that each fit within the model&rsquo;s token limit. The general idea is to:</p>
+<ol>
+<li><strong>Tokenize and split text into chunks</strong> based on the model&rsquo;s token limit. It&rsquo;s better to keep message chunks slightly below the token limit since the token limit is shared between your message and ChatGPT&rsquo;s response.</li>
+<li><strong>Maintain context</strong> between chunks, e.g. avoid splitting a sentence in the middle.</li>
+</ol>
+<p>Each chunk is sent as a separate message in the conversation thread.</p>
+<h2 id="handling-responses"><a href="#handling-responses">Handling responses</a></h2><p>You send your chunks to ChatGPT using the OpenAI library&rsquo;s <code>ChatCompletion</code>. ChatGPT returns individual responses for each message, so you may want to process these by:</p>
+<ol>
+<li><strong>Concatenating responses</strong> in the order you sent them to get a coherent answer.</li>
+<li><strong>Manage conversation flow</strong> by keeping track of which response refers to which chunk.</li>
+<li><strong>Formatting the response</strong> to suit your desired output, e.g. replacing <code>\n</code> with line breaks.</li>
+</ol>
+<h2 id="putting-it-all-together"><a href="#putting-it-all-together">Putting it all together</a></h2><p>Using the OpenAI API, you can send multiple messages to ChatGPT and ask it to wait for you to provide all of the data before answering your prompt. Being a language model, you can provide these instructions to ChatGPT in plain language. Here&rsquo;s a suggested script:</p>
+<blockquote>
+<p>Prompt: Summarize the following text for me</p>
+<p>To provide the context for the above prompt, I will send you text in parts. When I am finished, I will tell you &ldquo;ALL PARTS SENT&rdquo;. Do not answer until you have received all the parts.</p>
+</blockquote>
+<p>I created <a href="https://github.com/victoriadrake/chatgptmax">a Python module, <code>chatgptmax</code></a>, that puts all this together. It breaks up a large amount of text by a given maximum token length and sends it in chunks to ChatGPT.</p>
+<p>You can install it with <code>pip install chatgptmax</code>, but here&rsquo;s the juicy part:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">openai</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">tiktoken</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Set up your OpenAI API key</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Load your API key from an environment variable or secret management service</span>
+</span></span><span class="line"><span class="cl"><span class="n">openai</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;OPENAI_API_KEY&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">send</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">prompt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">text_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">chat_model</span><span class="o">=</span><span class="s2">&#34;gpt-3.5-turbo&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">model_token_limit</span><span class="o">=</span><span class="mi">8192</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    Send the prompt at the start of the conversation and then send chunks of text_data to ChatGPT via the OpenAI API.
+</span></span></span><span class="line"><span class="cl"><span class="s2">    If the text_data is too long, it splits it into chunks and sends each chunk separately.
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    Args:
+</span></span></span><span class="line"><span class="cl"><span class="s2">    - prompt (str, optional): The prompt to guide the model&#39;s response.
+</span></span></span><span class="line"><span class="cl"><span class="s2">    - text_data (str, optional): Additional text data to be included.
+</span></span></span><span class="line"><span class="cl"><span class="s2">    - max_tokens (int, optional): Maximum tokens for each API call. Default is 2500.
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    Returns:
+</span></span></span><span class="line"><span class="cl"><span class="s2">    - list or str: A list of model&#39;s responses for each chunk or an error message.
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Check if the necessary arguments are provided</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">prompt</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Prompt is missing. Please provide a prompt.&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">text_data</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Text data is missing. Please provide some text data.&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Initialize the tokenizer</span>
+</span></span><span class="line"><span class="cl">    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tiktoken</span><span class="o">.</span><span class="n">encoding_for_model</span><span class="p">(</span><span class="n">chat_model</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Encode the text_data into token integers</span>
+</span></span><span class="line"><span class="cl">    <span class="n">token_integers</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">text_data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Split the token integers into chunks based on max_tokens</span>
+</span></span><span class="line"><span class="cl">    <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">max_tokens</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">prompt</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="n">token_integers</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_integers</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Decode token chunks back to strings</span>
+</span></span><span class="line"><span class="cl">    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">responses</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="s2">&#34;To provide the context for the above prompt, I will send you text in parts. When I am finished, I will tell you &#39;ALL PARTS SENT&#39;. Do not answer until you have received all the parts.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">chunk</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Check if total tokens exceed the model&#39;s limit and remove oldest chunks if necessary</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&#34;content&#34;</span><span class="p">]))</span> <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="o">&gt;</span> <span class="n">model_token_limit</span>
+</span></span><span class="line"><span class="cl">        <span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">messages</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Remove the oldest chunk</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">response</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">ChatCompletion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">chat_model</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">chatgpt_response</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="p">[</span><span class="s2">&#34;content&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chatgpt_response</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Add the final &#34;ALL PARTS SENT&#34; message</span>
+</span></span><span class="line"><span class="cl">    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="s2">&#34;ALL PARTS SENT&#34;</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">    <span class="n">response</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">ChatCompletion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">chat_model</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">final_response</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="p">[</span><span class="s2">&#34;content&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">final_response</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">responses</span>
+</span></span></code></pre></div><p>Here&rsquo;s an example of how you can use this module with text data read from a file. (<code>chatgptmax</code> also provides a <a href="https://github.com/victoriadrake/chatgptmax/blob/4431af468435cd51d07779c6d721c8e0016d6bd6/chatgptmax.py#L68">convenience method</a> for getting text from a file.)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-py" data-lang="py"><span class="line"><span class="cl"><span class="c1"># First, import the necessary modules and the function</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">chatgptmax</span> <span class="kn">import</span> <span class="n">send</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Define a function to read the content of a file</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">read_file_content</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Use the function</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Specify the path to your file</span>
+</span></span><span class="line"><span class="cl">    <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&#34;path_to_your_file.txt&#34;</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Read the content of the file</span>
+</span></span><span class="line"><span class="cl">    <span class="n">file_content</span> <span class="o">=</span> <span class="n">read_file_content</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Define your prompt</span>
+</span></span><span class="line"><span class="cl">    <span class="n">prompt_text</span> <span class="o">=</span> <span class="s2">&#34;Summarize the following text for me:&#34;</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Send the file content to ChatGPT</span>
+</span></span><span class="line"><span class="cl">    <span class="n">responses</span> <span class="o">=</span> <span class="n">send</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt_text</span><span class="p">,</span> <span class="n">text_data</span><span class="o">=</span><span class="n">file_content</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Print the responses</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span></span></code></pre></div><h3 id="error-handling"><a href="#error-handling">Error handling</a></h3><p>While the module is designed to handle most standard use cases, there are potential pitfalls to be aware of:</p>
+<ul>
+<li><strong>Incomplete sentences</strong>: If a chunk ends in the middle of a sentence, it might alter the meaning or context. To mitigate this, consider ensuring that chunks end at full stops or natural breaks in the text. You could do this by separating the text-chunking task into a separate function that:
+<ol>
+<li>Splits the text into sentences.</li>
+<li>Iterates over the sentences and adds them to a chunk until the chunk reaches the maximum size.</li>
+<li>Starts a new chunk when the current chunk reaches the maximum size or when adding another sentence would exceed the maximum size.</li>
+</ol>
+</li>
+<li><strong>API connectivity issues</strong>: There&rsquo;s always a possibility of timeouts or connectivity problems during API calls. If this is a significant issue for your application, you can include retry logic in your code. If an API call fails, the script could wait for a few seconds and then try again, ensuring that all chunks are processed.</li>
+<li><strong>Rate limits</strong>: Be mindful of <a href="https://platform.openai.com/docs/guides/rate-limits/overview">OpenAI API&rsquo;s rate limits</a>. If you&rsquo;re sending many chunks in rapid succession, you might hit these limits. Introducing a slight delay between calls or spreading out requests can help avoid this.</li>
+</ul>
+<h3 id="optimization"><a href="#optimization">Optimization</a></h3><p>As with any process, there&rsquo;s always room for improvement. Here are a couple of ways you might optimize the module&rsquo;s chunking and sending process further:</p>
+<ul>
+<li><strong>Parallelizing API calls</strong>: If <a href="https://platform.openai.com/docs/guides/rate-limits/overview">OpenAI API&rsquo;s rate limits</a> and your infrastructure allow, you could send multiple chunks simultaneously. This parallel processing can speed up the overall time it takes to get responses for all chunks. Unless you have access to OpenAI&rsquo;s <code>32k</code> models or need to use small chunk sizes, however, parallelism gains are likely to be minimal.</li>
+<li><strong>Caching mechanisms</strong>: If you find yourself sending the same or similar chunks frequently, consider implementing a caching system. By storing ChatGPT&rsquo;s responses for specific chunks, you can retrieve them instantly from the cache the next time, saving both time and API calls.</li>
+</ul>
+<h2 id="now-what"><a href="#now-what">Now what</a></h2><p>If you found your way here via search, you probably already have a use case in mind. Here are some other (startup) ideas:</p>
+<ul>
+<li><strong>You&rsquo;re a researcher</strong> who wants to save time by getting short summaries of many lengthy articles.</li>
+<li><strong>You&rsquo;re a legal professional</strong> who wants to analyze long contracts by extracting key points or clauses.</li>
+<li><strong>You&rsquo;re a financial analyst</strong> who wants to pull a quick overview of trends from a long report.</li>
+<li><strong>You&rsquo;re a writer</strong> who wants feedback on a new article or chapter&hellip; without having to actually show it to anyone yet.</li>
+</ul>
+<p>Do you have a use case I didn&rsquo;t list? <a href="/contact">Let me know about it!</a> In the meantime, have fun sending lots of text to ChatGPT.</p>
+ ]]></content:encoded></item><item><title>Optimizing text for ChatGPT: NLP and text pre-processing techniques</title><link>https://victoria.dev/blog/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/</link><pubDate>Tue, 19 Sep 2023 04:46:36 -0500</pubDate><author>hello@victoria.dev (Victoria Drake)</author><guid>https://victoria.dev/blog/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/</guid><description>Mastering text preprocessing to send more input to ChatGPT.</description><content:encoded>
 &lt;img src="https://victoria.dev/blog/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/cover_hu758b20f649ca0506d2c835c6929e568e_1077283_640x0_resize_box_3.png" width="640" height="426"/><![CDATA[ <p>In order for chatbots and voice assistants to be helpful, they need to be able to take in and understand our instructions in plain language using Natural Language Processing (NLP). ChatGPT relies on a blend of advanced algorithms and text preprocessing methods to make sense of our words. But just throwing a wall of text at it can be inefficient &ndash; you might be dumping in a lot of noise with that signal and hitting the text input limit.</p>
 <p>Text preprocessing can help shorten and refine your input, ensuring that ChatGPT can grasp the essence without getting overwhelmed. In this article, we&rsquo;ll explore these techniques, understand their importance, and see how they make your interactions with tools like ChatGPT more reliable and productive.</p>
 <h2 id="text-preprocessing"><a href="#text-preprocessing">Text preprocessing</a></h2><p>Text preprocessing prepares raw text data for analysis by NLP models. Generally, it distills everyday text (like full sentences) to make it more manageable or concise and meaningful. Techniques include:</p>
