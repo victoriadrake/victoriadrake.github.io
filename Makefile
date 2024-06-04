@@ -34,7 +34,7 @@ dev: ## Run the local development server
 future: ## Run the local development server in the future
 	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
 
-build: update-submodules ## Lock dependencies and build site
+build: ## Lock dependencies and build site
 	hugo --minify --cleanDestinationDir
 
 start: upgrade-hugo serve ## Update Hugo and start development server
