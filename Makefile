@@ -35,7 +35,6 @@ future: ## Run the local development server in the future
 	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
 
 build: ## Lock dependencies and build site
-	git submodule update --init --recursive --remote
 	GIT_SSH_COMMAND="ssh -i $(DEPLOY_KEY)" git submodule update --init --recursive --remote
 	hugo --minify --cleanDestinationDir
 
