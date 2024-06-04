@@ -34,12 +34,6 @@ dev: ## Run the local development server
 future: ## Run the local development server in the future
 	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
 
-update-submodules:
-	echo "$$BUILD" > /tmp/temp_ssh_key && \
-	chmod 600 /tmp/temp_ssh_key && \
-	GIT_SSH_COMMAND="ssh -i /tmp/temp_ssh_key" git submodule update --init --recursive --remote && \
-	rm /tmp/temp_ssh_key
-
 build: update-submodules ## Lock dependencies and build site
 	hugo --minify --cleanDestinationDir
 
