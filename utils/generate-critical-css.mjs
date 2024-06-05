@@ -7,7 +7,7 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const publicDir = path.join(__dirname, 'public');
+const publicDir = path.join(__dirname, '..', 'public'); // Adjust the path
 
 function getHtmlFiles(dir, fileList = []) {
   const files = fs.readdirSync(dir);
