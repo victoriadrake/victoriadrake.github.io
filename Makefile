@@ -13,9 +13,8 @@ shell: ## Enter the virtual environment
 
 install: ## Install or update dependencies
 	pipenv install --dev
-	npm install
-	npm install -g markdownlint-cli
 	pre-commit install --install-hooks
+	npm install
 
 HUGO_VERSION:=$(shell curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep 'tag_name' | cut -d '"' -f 4 | cut -c 2-)
 
@@ -34,9 +33,7 @@ dev: ## Run the local development server
 future: ## Run the local development server in the future
 	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
 
-build: ## Lock dependencies and build site
+build: ## Build site
 	hugo --minify --cleanDestinationDir
-
-start: upgrade-hugo serve ## Update Hugo and start development server
 
 initial: env install upgrade-hugo serve ## Install tools and start development server
