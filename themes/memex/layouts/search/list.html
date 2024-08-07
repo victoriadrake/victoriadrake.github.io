@@ -1,0 +1,37 @@
+{{ define "main" }}
+<article>
+    <h1>{{ if .Params.heading }}{{ .Params.heading }}{{ else }}{{ .Title }}{{ end }}</h1>
+    <div class="markdown">
+        {{.Content}}
+        {{ partial "search-form.html" . }}
+    </div>
+</article>
+
+<div class="page-separator">
+    <hr />
+</div>
+
+<nav aria-label="article list" class="markdown">
+    <ul role="menubar" id="article-list">
+        <li>
+            Enter a keyword above to search this site's {{ len .Site.Pages }} pages.
+        </li>
+    </ul>
+</nav>
+
+<div id="all-tags" class="markdown hidden">
+    <h2>Or read about...</h2>
+    <p>
+        {{ range .Site.Taxonomies.tags.ByCount }}
+        <a class="tag button" href="{{ "tags/" | relURL }}{{ .Name | urlize }}/">{{ .Name }}</a> &nbsp;
+        {{ end }}
+    </p>
+</div>
+
+<hr />
+
+{{ end }}
+
+{{ define "footer" }}
+{{ partial "search-index.html" . }}
+{{end}}

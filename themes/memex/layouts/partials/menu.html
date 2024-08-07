@@ -1,0 +1,27 @@
+{{ if not .IsHome }}
+<nav aria-label="Victoria.dev main menu" id="menu">
+    <ul role="menubar">
+        {{ $currentPage := . }}
+        {{ range .Site.Menus.main }}
+        <li role="none" class="menu-item {{if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
+            {{if $currentPage.IsMenuCurrent "main" . }}<span {{ else }}<a{{ end }} role="menuitem" href="{{ .URL }}">
+                {{ .Pre }}&nbsp;{{ .Name | safeHTML }}{{ .Post }}{{if $currentPage.IsMenuCurrent "main" . }}</span {{ else }}</a {{ end }}>
+        </li>
+        {{ end }}
+        {{ range .AlternativeOutputFormats }}
+        <li role="none" class="menu-item"><a href="{{ .Permalink }}">{{ .Name | lower }}</a></li>
+        {{ end }}
+    </ul>
+</nav>
+<nav aria-label="Victoria.dev menu for mobile" id="menu-mobile">
+    <ul role="menubar">
+        {{ $currentPage := . }}
+        {{ range .Site.Menus.main }}
+        <li role="none" class="menu-item">
+            {{if $currentPage.IsMenuCurrent "main" . }}<span {{ else }}<a{{ end }} role="menuitem" href="{{ .URL }}">
+                {{ .Name | safeHTML }}{{if $currentPage.IsMenuCurrent "main" . }}</span {{ else }}</a {{ end }}>
+        </li>
+        {{ end }}
+    </ul>
+</nav>
+{{ end }}

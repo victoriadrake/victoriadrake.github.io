@@ -1,0 +1,43 @@
+<!-- representative h-card: https://microformats.org/wiki/h-card -->
+<div class="h-card col" rel="author">
+        {{ if .Site.Author.image }}
+        <figure class="profile">
+            <img class="u-photo" alt="{{ with .Site.Author.name }}{{ . }}{{ else }}Author's photo{{ end }}"
+                src="{{ with .Site.Author.image }}/{{ . }}{{ end }}">
+        </figure>
+        {{ end }}
+        <div id="card" class="markdown">
+            {{ with .Site.Author.name }}
+            <h1>Hello! I'm <span class="p-name">{{ . }}.</h1>{{ end }}
+            <address class="metadata hidden">
+                {{ $url := urls.Parse .Permalink }}
+                <a class="u-url u-uid" rel="me" href="{{ .Permalink }}">{{ $url.Host }}</a>
+                {{ with .Site.Author.nickname }} {{ $.Site.Params.separator | default "∙" }}
+                <span class="p-nickname">{{.}}</span>
+                {{ end }}
+                {{ with .Site.Author.email }} {{ $.Site.Params.separator | default "∙" }}
+                <a class="u-email" href="mailto:{{ . }}">{{ . }}</a>
+                {{ end }}
+                {{ with .Site.Params.githubuser }} {{ $.Site.Params.separator | default "∙" }}
+                <a rel="me" href="https://github.com/{{ . }}">github</a>{{ end }}
+                {{ with .Site.Params.mastodon }} {{ $.Site.Params.separator | default "∙" }}
+                <a rel="me" href="{{ . }}">mastodon</a>{{ end }}
+                {{ with .Site.Params.twitteruser }} {{ $.Site.Params.separator | default "∙" }}
+                <a rel="me" href="https://twitter.com/{{ . }}">twitter</a>{{ end }}
+            </address>
+            <p class="p-note">
+                {{ with .Content }}
+                {{ . }}
+                {{- end }}
+            </p>
+            <nav aria-label="Victoria.dev main menu" role="menubar">
+                <p class="row" role="none">
+                    {{ range .Site.Menus.home }}
+                        <a role="menuitem" href="{{ .URL }}">
+                            {{ .Name | safeHTML }}
+                        </a> {{ .Post }} 
+                    {{ end }}
+                </p>
+            </nav>
+        </div>
+</div>

@@ -1,0 +1,38 @@
+{{ define "main" }}
+<article>
+    <h1>{{ .Title }}</h1>
+    <div id="all-tags">
+        <p>
+            {{ range .Site.Taxonomies.tags.Alphabetical }}
+            <a class="tag button" href="{{ "tags/" | relURL }}{{ .Name | urlize }}/">{{ .Name }}</a> &nbsp;
+            {{ end }}
+        </p>
+    </div>
+    <div class="markdown">
+        {{ .Content }}
+        {{ partial "search-form" . }}
+    </div>
+</article>
+
+<hr />
+
+<nav aria-label="article list" class="markdown">
+    <ul role="menubar" id="article-list" class="h-feed">
+        <div class="h-card hidden"><a href="{{ .Permalink }}" class="p-name u-url hidden"
+                rel="me">{{ $.Site.Author.name }}</a></div>
+        {{ range (.Paginate (where .Site.Pages "Type" "blog")).Pages }}
+        {{ partial "article-li" . }}
+        {{ end }}
+    </ul>
+</nav>
+
+<hr />
+
+{{ partial "pagination" . }}
+
+{{ end }}
+
+{{ define "footer" }}
+{{ partial "bio" . }}
+{{ partial "search-index" . }}
+{{ end }}

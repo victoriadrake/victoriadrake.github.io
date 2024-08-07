@@ -1,0 +1,51 @@
+<!-- feed h-entry: https://microformats.org/wiki/h-entry -->
+<li class="feed__li h-entry">
+    <div class="feed__content">
+        <div class="flex metadata__row ">
+            <div class="flex left metadata">
+                <a rel="author" class="p-author h-card hidden" href="{{.Site.BaseURL}}">{{.Site.Author.name}}</a>
+            </div>
+            <div class="flex right metadata">
+                {{ if in .Params.Categories "reply" }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="feather feather-corner-down-right">
+                    <polyline points="15 10 20 15 15 20"></polyline>
+                    <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
+                </svg>
+                {{ end }}
+                <a class="icon u-url" href="{{.Permalink}}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-bookmark">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        {{ if in .Params.Categories "note" }}
+        <article class="markdown p-summary p-name e-content">
+        {{ else if in .Params.Categories "reply" }}
+        <article class="markdown p-summary e-content">
+            <h2 class="p-name reply-context"><a class="u-in-reply-to h-cite" href="{{.Params.Reply}}">{{.Title}}</a>
+            </h2>
+        {{ else }}  
+        <article class="markdown p-summary e-content">
+            <h2 class="p-name"><a href="{{.Params.Uri}}">{{.Title}}</a></h2>
+            {{ end }}
+            {{ $img := (.Resources.ByType "image").GetMatch "*" }}
+            {{ with $img }}
+            <img class="u-photo" src="{{ $.Page.Permalink }}{{ $img }}" alt="post image" />
+            {{ else }}
+            {{ .Content | truncate 300 | safeHTML }}
+            {{ end }}
+            {{ if .Truncated }}
+            <div id="open">
+                <a href="{{ .Permalink }}" class="metadata"><strong>[ open me ]</strong></a>
+            </div>
+            {{ end }}
+        </article>
+        {{ partial "metadata" . }}                      
+    </div>
+</li>

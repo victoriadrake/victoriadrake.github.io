@@ -1,0 +1,119 @@
+{{ define "title" }}
+{{ .Title }} | {{ .Site.Title }}
+{{ end }}
+
+{{ define "main" }}
+<!-- Show image starting with "cover", otherwise show first image in Resources -->
+{{ $img := (.Resources.ByType "image").GetMatch "cover**" }}
+{{ with $img }}
+<div id="cover-image">
+    <img class="u-photo" src="{{ $.Page.Permalink }}{{ $img }}" alt="cover image" />
+</div>
+<article class="h-entry">
+    <h1 class="p-name">
+{{ else }}
+
+<!-- Use large text header if no images -->
+<article class="h-entry">
+    <h1 class="p-name title-header">
+{{ end }}
+
+<!-- Logic picks up here -->
+        {{ .Title }}
+    </h1>
+
+    {{ with $.Params.description }}
+    <p class="subtitle">{{ . }}</p>
+    {{ end }}
+
+    <!-- Metadata for h-entry -->
+    {{ with .Params.tags }}
+    <span>
+        {{ range . }}
+        <a class="p-category tag button" href="{{ "tags/" | relURL }}{{ . | urlize }}/">
+            {{ . }}
+        </a>&nbsp;
+        {{ end }}
+    </span>
+    {{ end }}
+    <span rel="author" class="p-author h-card">
+        <img class="u-photo hidden" src="{{ with $.Site.Author.image }}/{{ . }}{{ else }}https://picsum.photos/120.webp{{ end }}" />
+        <span class="p-name hidden" rel="me">{{ with .Params.author }}{{ . }}{{ else }}{{ $.Site.Author.name }}{{ end }}</span>
+    </span>
+    <p class="metadata" id="date">
+        <time class="hidden dt-published">{{ .Date }}</time>
+        <a class="u-url" href="{{ .Permalink }}">{{ .Date.Format .Site.Params.dateFormat }}</a>
+        {{ if ne .Params.lastmod .Date }}{{ if gt .Params.lastmod .Date }}
+        <span class="dt-updated">&nbsp;<em>Updated: {{ dateFormat "Jan 2, 2006" .Params.lastmod }}</em></span>
+        {{ end }}{{ end }}
+        <span>&nbsp;{{ .ReadingTime }} min read</span>
+        
+        {{ if .Site.IsServer }}
+        <span  style="text-align:center;font-family:var(--code-font)">Dated: {{ dateFormat "Jan 2, 2006" .Params.date }} and modified:
+            {{ dateFormat "Jan 2, 2006" .Lastmod }}</span>
+        {{ end }}
+        </p>
+
+        <div class="page-separator">
+            <hr />
+        </div>
+
+    {{ if and (gt .WordCount 400 ) (.Params.showtoc) }}
+    <div class="toc-dropdown">
+        <input type="checkbox" id="toc-toggle" />
+        <label for="toc-toggle" id="toggle">
+            <p class="toc-title">
+                <span class="toc-dropdown-icon">
+                    ⬍
+                </span>
+                Table of Contents
+            </p>
+        </label>
+        {{ .TableOfContents }}
+    </div>
+    {{ end }}
+
+    <div class="markdown e-content">
+        {{ .Content }}
+    </div>
+
+    <!-- Bridgy -->
+    <a class="hidden" href="https://brid.gy/publish/mastodon"></a>
+    <data class="p-bridgy-omit-link" value="false"></data>
+</article>
+
+<div id="up-container">
+    <a href="#" id="up">v</a>
+</div>
+
+<hr />
+
+<!-- Webmentions -->
+<div id="webmentions"></div>
+
+<!-- Show related posts in blog posts -->
+{{ $related := .Site.RegularPages.Related . | first 3 }}{{ with $related }}
+<div class="related">
+    <code class="language-sql" data-lang="sql">SELECT TOP 3 * FROM Related;</code>
+    <ul role="menubar" id="article-list">
+        {{ range . }}
+        {{ partial "article-li" . }}
+        {{ end }}
+    </ul>
+    {{ end }}
+
+    <div class="page-separator">
+        <p class="back-link"><a href="{{ "/blog" | relURL }}">
+                << Back to blog</a>
+        </p>
+    </div>
+</div>
+{{ end }}
+
+{{ define "footer" }}
+{{ partial "bio" . }}
+{{end}}
+
+{{ define "customScripts" }}
+{{ partial "webmentions" . }}
+{{ end }}

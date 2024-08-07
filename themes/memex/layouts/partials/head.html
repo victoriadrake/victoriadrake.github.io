@@ -1,0 +1,65 @@
+{{ with .Site.Params.description }}
+<meta name="description" content="{{ . | absURL }}">{{ end }}
+{{ with .Site.Params.monetization }}
+<meta name="monetization" content="{{ . | absURL }}">{{ end }}
+{{ if .Site.Params.plausible }}{{ partial "plausible.html" . }}{{ end }}
+
+<!-- Place favicon files in ./static/ -->
+<link rel="shortcut icon" href="{{ "favicon.ico" | absURL }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ "apple-touch-icon.png" | absURL }}">
+<link rel="icon" type="image/png" href="{{ "favicon-32x32.png" | absURL }}" sizes="32x32" />
+<link rel="icon" type="image/png" href="{{ "favicon-16x16.png" | absURL }}" sizes="16x16" />
+<link rel="manifest" href="{{ "site.webmanifest" | absURL }}">
+
+<!-- IndieAuth -->
+<link rel="authorization_endpoint" href="https://indieauth.com/auth">
+<link rel="token_endpoint" href="https://tokens.indieauth.com/token">
+{{ with .Site.Params.githubuser }}
+<link rel="me" href="https://github.com/{{ . | absURL }}" />{{ end }}
+{{ with .Site.Params.twitteruser }}
+<link rel="me" href="https://twitter.com/{{ . | absURL }}" />{{ end }}
+{{ with .Site.Params.mastodon }}
+<link rel="me" href="{{ . | absURL }}" />{{ end }}
+
+<!-- CSS -->
+{{ if .Site.IsServer }}
+<link rel="stylesheet" href="{{ resources.Get "css/style.css" | relURL }}">
+{{ end }}
+{{ $css := resources.Get "css/style.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $css.Permalink | absURL }}" integrity="{{ $css.Data.Integrity }}" crossorigin="anonymous" media="screen">
+{{ if .Site.Params.customCSS }}
+{{ $custom := resources.Get .Site.Params.customCSS | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $custom | absURL }}" integrity="{{ $custom.Data.Integrity }}" crossorigin="anonymous" media="screen">
+{{ end }}
+
+<!-- Webmention -->
+{{ with .Site.Params.webmentionUrl }}
+<link rel="webmention" href="{{ . | absURL }}" />{{ end }}
+{{ with .Site.Params.pingbackUrl }}
+<link rel="pingback" href="{{ . | absURL }}" />{{ end }}
+
+<!-- Micro{p,s}ub -->
+{{ with .Site.Params.micropubUrl }}
+<link rel="micropub" href="{{ . | absURL }}">{{ end }}
+{{ with .Site.Params.microsubUrl }}
+<link rel="microsub" href="{{ . | absURL }}">{{ end }}
+
+<!-- Silos -->
+<meta property="og:url" content="{{ .Site.BaseURL }}" />
+<meta property="og:title" content="{{ .Page.Title }}" />
+<meta property="og:site_name" content="{{ .Site.Title }}" />
+<meta property="og:type" content="website" />
+{{ if .Page.Description }}
+<meta property="og:description" content='{{ .Params.description }}' />{{ end }}
+{{ with .Resources.GetMatch "cover.png" }}
+<meta property="og:image" content="{{ $.Page.Permalink }}{{ . }}" />
+{{ else }}
+{{ with .Site.Params.socialImage }}
+<meta property="og:image" content="{{ . | absURL }}" />{{ end }}{{ end }}
+
+<meta name="twitter:title" content="{{ .Page.Title }}" />
+{{ if .Page.Description }}
+<meta name="twitter:description" content="{{ .Params.description }}" />{{ end }}
+{{ with .Site.Params.socialImage }}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:image" content="{{ . | absURL }}" />{{ end }}

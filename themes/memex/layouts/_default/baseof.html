@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
+    {{ block "head" . }}
+    {{ partial "head" . }}
+    {{ end }}
+  </head>
+
+  <body>
+    <header role="banner">
+      {{ block "header" . }}
+      {{ partial "menu" . }}
+      {{ end }}
+    </header>
+    <main aria-role="main">
+      <div class="container">
+        {{ block "main" . }}
+        {{ end }}
+      </div>
+
+    </main>
+    <footer>
+      {{ block "footer" . }}
+      {{ partial "footer" . }}
+      {{ end }}
+    </footer>
+    <!-- Include page specific scripts -->
+    {{ block "customScripts" . }}
+    {{ end }}
+    {{ if .Site.IsServer }}<section style="text-align:center;font-family:var(--code-font)">{{ printf "%#v" .Section }}</section>{{ end }}
+  </body>
+
+</html>
