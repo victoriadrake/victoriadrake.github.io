@@ -13,12 +13,7 @@
   publish = "public"
 
   # Default build command.
-  command = """
-  echo "$DEPLOY_KEY" | tr -d '\\r' > /tmp/ssh_key &&
-  chmod 600 /tmp/ssh_key &&
-  GIT_SSH_COMMAND='ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no' git submodule update --init --recursive --remote
-  npm run build
-  """
+  command = "git submodule update --init --recursive && npm run build"
 
 
 [build.environment]
