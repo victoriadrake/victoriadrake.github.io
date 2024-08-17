@@ -3,8 +3,8 @@ const https = require('https');
 const path = require('path');
 const yaml = require('js-yaml');
 
-// TODO: use your own Collected Notes site name
-const API_URL = 'https://collectednotes.com/victoriadrake.json';
+// TODO if you copy this code: use your own Collected Notes site name
+const API_URL = 'https://collectednotes.com/victoria.dev.json';
 
 // Directory to save markdown files
 const CONTENT_DIR = path.join(__dirname, '../content/blog');
@@ -59,8 +59,6 @@ fs.mkdir(CONTENT_DIR, { recursive: true }, (err) => {
                 }
 
                 // At this point, `contentBody` contains the body without front matter
-                console.log(contentBody)
-                // At this point, `contentBody` contains the body without front matter
                 let contentLines = contentBody.split('\n');
 
                 // Remove leading empty lines only
@@ -75,9 +73,6 @@ fs.mkdir(CONTENT_DIR, { recursive: true }, (err) => {
 
                 // Rejoin the remaining lines into the final content body
                 contentBody = contentLines.join('\n');
-
-                console.log(contentLines)
-
 
                 // Merge with new front matter
                 frontMatter.title = post.title.replace(/"/g, '\\"');
