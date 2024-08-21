@@ -1,0 +1,56 @@
+{{ $posts := where .Site.RegularPages "Section" "blog" }}
+{{ $paginator := .Paginate ($posts) }}
+<div class="blog-cards" id="results">
+    {{ range .Paginator.Pages }}
+        <div class="card">
+            <a href="{{ .Permalink }}">
+                {{ $firstImageTag := findRE "(?i)<img[^>]*src=[\"']([^\"']+)[\"']" .Content }}
+                {{ if .Params.image }}
+                    {{ $imageURL := replaceRE "(?i).*src=[\"']([^\"']+)[\"'].*" "$1" .Params.image }}
+                    {{ if or (strings.HasPrefix $imageURL "http") (strings.HasPrefix $imageURL "/") }}
+                        <!-- If the image URL is absolute or root-relative, use it directly -->
+                        <img src="{{ $imageURL }}" alt="{{ .Title }}">
+                    {{ else }}
+                        <!-- If the image URL is relative, prepend the page's relative URL -->
+                        <img src="{{ .RelPermalink }}{{ $imageURL }}" alt="{{ .Title }}">
+                    {{ end }}
+                {{ else if gt (len $firstImageTag) 0 }}
+                    {{ $firstImageURL := replaceRE "(?i).*src=[\"']([^\"']+)[\"'].*" "$1" (index $firstImageTag 0) }}
+                    {{ if or (strings.HasPrefix $firstImageURL "http") (strings.HasPrefix $firstImageURL "/") }}
+                        <!-- If the image URL is absolute or root-relative, use it directly -->
+                        <img src="{{ $firstImageURL }}" alt="{{ .Title }}">
+                    {{ else }}
+                        <!-- If the image URL is relative, prepend the page's relative URL -->
+                        <img src="{{ .RelPermalink }}{{ $firstImageURL }}" alt="{{ .Title }}">
+                    {{ end }}
+                {{ else }}
+                    {{ partial "randImage" . }}
+                {{ end }}
+                <div class="text">
+                    <h2>{{ .Title }}</h2>
+                    <p class="small">{{ .Summary }}</p>
+                </div>
+            </a>
+        </div>
+    {{ end }}
+</div>
+<!-- Pagination links -->
+{{ if gt $paginator.TotalPages 1 }}
+    <div class="pagination">
+        {{ if $paginator.HasPrev }}
+            <a href="{{ $paginator.Prev.URL }}">before</a>
+        {{ else }}
+            <p></p>
+        {{ end }}
+        <div class="pages">
+            {{ range $paginator.Pagers }}
+                <a href="{{ .URL }}"{{ if eq . $paginator }} class="active"{{ end }}>{{ .PageNumber }}</a>
+            {{ end }}
+        </div>
+        {{ if $paginator.HasNext }}
+            <a href="{{ $paginator.Next.URL }}">more</a>
+        {{ else }}
+            <p></p>
+        {{ end }}
+    </div>
+{{ end }}

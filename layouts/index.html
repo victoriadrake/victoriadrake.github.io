@@ -1,32 +1,66 @@
 {{ define "main" }}
-<section id="index-card">
-    {{ partial "h-card" . }}
-</section>
-<section>
-    <nav aria-label="article list" class="markdown">
-        <ul role="menubar" id="article-list" class="h-feed">
-            {{ range first 1 (where .Site.Pages "Section" "blog" ) }}
-            {{ partial "article-li" . }}
-            {{ end }}
-            {{ range (where .Site.Pages "Params.featured" true ) }}
-            {{ partial "article-li" . }}
-            {{ end }}
-        </ul>
-    </nav>
-    <div class="centered cta">
-        <a href="/blog" class="button primary">and there's more</a>
-    </div>
-    <div class="markdown"><hr /></div>
-    {{ partial "subscribe" . }}
-</section>
-{{ end }}
+    <section class="hero profile container">
+        <!-- Profile Section -->
+        <div class="profile">
+            <img src="/images/profile.jpg" alt="Profile Photo" class="profile-photo">
+        </div>
+        <!-- Content Section -->
+        <div class="profile content container col">
+            {{ .Content }}
+        </div>
+    </section>
 
-{{ define "footer" }}
-<div id="centered-footer">
-    {{ with.Site.Params.footerText }}<p class="metadata">{{ . }}</p>{{ end }}
-    <p class="centered metadata">Last build: {{ now.UTC.Format .Site.Params.dateTime }} at
-        {{ range .Site.Pages }}{{ $.Scratch.Add "words" .WordCount }}{{ end }}{{ printf "%d" ($.Scratch.Get "words") }}
-        words.
-    </p>
-</div>
+    <!-- Latest Post -->
+    <main class="container col profile profile-posts">
+        <div class="m-0 container row justify">
+        <p class="mt-0">Latest Posts</p>
+        <a href="/blog">
+        All Posts
+        →
+        </a>
+        </div>
+        {{ range first 1 (where .Site.Pages "Section" "blog" ) }}
+            <div class="card latest-post">
+                <a href="{{ .Permalink }}">
+                    {{ $firstImageTag := findRE "(?i)<img[^>]*src=[\"']([^\"']+)[\"']" .Content }}
+                    {{ if .Params.image }}
+                        {{ $imageURL := replaceRE "(?i).*src=[\"']([^\"']+)[\"'].*" "$1" .Params.image }}
+                        {{ if or (strings.HasPrefix $imageURL "http") (strings.HasPrefix $imageURL "/") }}
+                            <!-- If the image URL is absolute or root-relative, use it directly -->
+                            <img src="{{ $imageURL }}" alt="{{ .Title }}">
+                        {{ else }}
+                            <!-- If the image URL is relative, prepend the page's relative URL -->
+                            <img src="{{ .RelPermalink }}{{ $imageURL }}" alt="{{ .Title }}">
+                        {{ end }}
+                    {{ else if gt (len $firstImageTag) 0 }}
+                        {{ $firstImageURL := replaceRE "(?i).*src=[\"']([^\"']+)[\"'].*" "$1" (index $firstImageTag 0) }}
+                        {{ if or (strings.HasPrefix $firstImageURL "http") (strings.HasPrefix $firstImageURL "/") }}
+                            <!-- If the image URL is absolute or root-relative, use it directly -->
+                            <img src="{{ $firstImageURL }}" alt="{{ .Title }}">
+                        {{ else }}
+                            <!-- If the image URL is relative, prepend the page's relative URL -->
+                            <img src="{{ .RelPermalink }}{{ $firstImageURL }}" alt="{{ .Title }}">
+                        {{ end }}
+                    {{ else }}
+                        {{ partial "randImage" . }}
+                    {{ end }}
+                </a>
+                <div class="text p-0">
+                    <h2>{{ .Title }}</h2>
+                    <p class="">{{ .Summary }}</p>
+                </div>
+            </div>
+        {{ end }}
+
+        <div class="featured-posts">
+            <ul class="list-post">
+                {{ $recentPosts := where .Site.Pages "Section" "blog" | first 6 }}
+                {{ range after 1 $recentPosts }}
+                    <li class="featured-post">
+                        {{ partial "article-li" . }}
+                    </li>
+                {{ end }}
+            </ul>
+        </div>
+    </main>
 {{ end }}
