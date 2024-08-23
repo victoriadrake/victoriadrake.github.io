@@ -7,7 +7,7 @@ const yaml = require('js-yaml');
 const API_URL = 'https://collectednotes.com/victoria.dev.json';
 
 // Directory to save markdown files
-const CONTENT_DIR = path.join(__dirname, '../content/blog');
+const CONTENT_DIR = path.join(__dirname, '../content/posts');
 
 // Ensure the directory exists
 fs.mkdir(CONTENT_DIR, { recursive: true }, (err) => {
