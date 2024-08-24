@@ -30,7 +30,7 @@ tags:
     - leadership
     - terminal
     - websites
-images: cover.png
-showtoc: false
+image: cover.png
+noToc: true
 draft: true
 ---
