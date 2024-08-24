@@ -36,6 +36,13 @@
                 <div class="text">
                     <h2>{{ .Title }}</h2>
                     <p class="small">{{ .Summary }}</p>
+                    <p class="metadata small">
+                        {{ range first 1 (.GetTerms "tags") }}
+                        <a class="p-category tag button" href="{{ .Permalink }}">{{ .Title | lower }}</a>
+                        {{ end }}
+                        &nbsp;{{ .ReadingTime }} min read
+                        <time class="hidden dt-published">{{ .Date }}</time>
+                    </p>
                 </div>
             </a>
         </div>
