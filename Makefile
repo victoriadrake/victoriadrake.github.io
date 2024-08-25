@@ -28,6 +28,7 @@ upgrade-hugo: ## Get the latest Hugo
 	hugo version
 
 dev: ## Run the local development server
+	git submodule update --init --recursive
 	hugo serve --enableGitInfo --disableFastRender --environment development
 
 future: ## Run the local development server in the future
