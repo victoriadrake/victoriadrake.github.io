@@ -1,5 +1,5 @@
 ---
-date: 2024-08-25T01:42:33.480Z
+date: 2024-08-25T01:45:37.921Z
 title: "Top 5 Tips for Effective Software Leadership"
 datePublished: Sat Aug 24 2024 19:16:52 GMT+0000 (Coordinated Universal Time)
 cuid: cm08iuv6g000508jxex8jar9o
@@ -9,7 +9,6 @@ tags:
     - leadership
 
 ---
-date: 2024-08-25T01:42:33.480Z
 
 **The more you advance towards leadership in your tech career,
     - the less technical your focus becomes.**
@@ -113,7 +112,6 @@ Look for and eliminate obstacles that slow your team down. This could involve ne
     
 
 ---
-date: 2024-08-25T01:42:33.480Z
 
 By implementing these strategies,
     - you can empower your team to succeed and foster a culture of growth and collaboration. As a technical leader,
