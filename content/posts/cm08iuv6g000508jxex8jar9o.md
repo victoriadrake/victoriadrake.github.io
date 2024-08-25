@@ -1,11 +1,12 @@
 ---
-date: 2024-08-25T01:51:24.797Z
+date: 2024-08-25T01:53:06.600Z
 title: "Top 5 Tips for Effective Software Leadership"
 datePublished: Sat Aug 24 2024 19:16:52 GMT+0000 (Coordinated Universal Time)
 cuid: cm08iuv6g000508jxex8jar9o
 slug: top-5-tips-for-effective-software-leadership
 cover: https://cdn.hashnode.com/res/hashnode/image/stock/unsplash/eUMEWE-7Ewg/upload/0a8e7d45d7aec8284c1c62428e160ca0.jpeg
 tags:
+    - coding,
     - leadership
 
 ---
@@ -80,7 +81,5 @@ Look for and eliminate obstacles that slow your team down. This could involve ne
     
 * **Empower Problem Solvers:** Encourage team members to flag any blockers they encounter. Create an environment where people feel comfortable raising issues without fear of blame, and prioritize fixing these roadblocks swiftly.
     
-
----
 
 By implementing these strategies, you can empower your team to succeed and foster a culture of growth and collaboration. As a technical leader, your role shifts from solving problems yourself to enabling others to do their best work.
