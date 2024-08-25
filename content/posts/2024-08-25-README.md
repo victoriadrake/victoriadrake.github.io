@@ -1,3 +1,3 @@
-# Victoria Drake's Hashnode archive
+# Victoria Drake's posts
 
-Back ups of the articles you'll find [on my blog.](https://victoria.dev/)
+All the articles you'll find [on my website.](https://victoria.dev/)
