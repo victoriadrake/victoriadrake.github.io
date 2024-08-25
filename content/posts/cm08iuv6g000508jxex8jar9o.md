@@ -1,12 +1,12 @@
 ---
-date: 2024-08-25T01:53:06.600Z
+date: 2024-08-25T01:55:56.205Z
 title: "Top 5 Tips for Effective Software Leadership"
 datePublished: Sat Aug 24 2024 19:16:52 GMT+0000 (Coordinated Universal Time)
 cuid: cm08iuv6g000508jxex8jar9o
 slug: top-5-tips-for-effective-software-leadership
 cover: https://cdn.hashnode.com/res/hashnode/image/stock/unsplash/eUMEWE-7Ewg/upload/0a8e7d45d7aec8284c1c62428e160ca0.jpeg
 tags:
-    - coding,
+    - coding
     - leadership
 
 ---
