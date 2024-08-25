@@ -5,6 +5,7 @@ aliases:
     - books
 made-on: 2020-11-26T09:50:09-06:00
 draft: false
+layout: page
 ---
 
 Books that have measurably contributed to my skill stack are shared here.
