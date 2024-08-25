@@ -1,6 +1,7 @@
 ---
 title: "Victoria Drake"
 outputs: HTML
+layout: page
 ---
 
 ## Engineering Director and Principal Software Engineer
@@ -106,5 +107,3 @@ Championed digital transformation at a niche manufacturing company, resulting in
 ## Contact
 
 [hello@victoria.dev](mailto:hello@victoria.dev)
-
----
