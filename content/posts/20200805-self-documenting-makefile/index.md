@@ -4,6 +4,7 @@ date: 2020-08-05T08:55:19-04:00
 
 aliases:
     - /blog/self-documenting-devops-make-it-better/
+    - /archive/how-to-create-a-self-documenting-makefile/
 description: Accelerate your workflow and DevOps with command-line aliases you can check in
 tags:
     - coding

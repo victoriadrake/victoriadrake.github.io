@@ -3,7 +3,7 @@ title: Make your own independent website
 date: 2021-01-16T08:41:27-05:00
 
 aliases:
-    - /blog/make-your-own-independent-website/
+    - /archive/make-your-own-independent-website/
 description: How to make 2021 the year of the independent web.
 tags:
     - websites
