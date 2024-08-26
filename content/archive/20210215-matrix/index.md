@@ -223,4 +223,4 @@ If you see: `Unable to decrypt: The sender's device has not sent us the keys for
 
 ## Set up your own Matrix server today
 
-I hope you found this introduction to setting up your own Matrix homeserver to be helpful! If you have anything to add, feel free to [reply via Webmention](/blog/make-your-own-independent-website/).
+I hope you found this introduction to setting up your own Matrix homeserver to be helpful!

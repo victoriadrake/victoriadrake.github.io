@@ -19,9 +19,9 @@ Here’s a pre-PTO checklist to make sure you’ve taken care of those responsib
 
 ## Does everyone know who's supposed to do what?
 
-A lot of information lives in your head alone, despite valiant efforts to [document all the things](/blog/how-to-write-good-documentation/). That’s the nature of the work. Instead of attempting to disseminate everything you’re thinking through, focus on the work your team will do while you’re away.
+A lot of information lives in your head alone, despite valiant efforts to [document all the things](/posts/how-to-write-good-documentation/). That’s the nature of the work. Instead of attempting to disseminate everything you’re thinking through, focus on the work your team will do while you’re away.
 
-Hopefully, you already have a [centralized list of priorities](/blog/priority/). Ensure it’s up to date, and that all the tasks that could conceivably be done during your time off have been assigned a caretaker.
+Hopefully, you already have a [centralized list of priorities](/posts/priority/). Ensure it’s up to date, and that all the tasks that could conceivably be done during your time off have been assigned a caretaker.
 
 ## Are there any decisions waiting on me?
 
@@ -31,7 +31,7 @@ Review notes, discussion boards, and ask your team directly if anyone is waiting
 
 Set up auto-responders for communications from the public, as well as from your team! While a response from your public email may say that you’re out of the office and when you expect to be back, an internal auto-responder is an opportunity to provide even more value.
 
-It could take the form of an email response for your internal inbox, but a post on your team’s message board or chat channel also works. Let people know where to look for information they might need, who to turn to if they need help while you’re away, and where to find your [centralized priority list](/blog/priority/) so they can decide what to work on next.
+It could take the form of an email response for your internal inbox, but a post on your team’s message board or chat channel also works. Let people know where to look for information they might need, who to turn to if they need help while you’re away, and where to find your [centralized priority list](/posts/priority/) so they can decide what to work on next.
 
 ## Tidy up loose ends
 

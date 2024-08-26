@@ -3,7 +3,7 @@ title: "What is TLS? Transport Layer Security encryption explained in plain engl
 date: 2020-09-05T04:48:39-06:00
 
 aliases:
-    - /blog/tls
+    - /archive/tls
 description: How TLS, digital certificates, and sessions help keep communications secure.
 series:
     - security-for-developers

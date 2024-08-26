@@ -20,11 +20,11 @@ I use the [pre-commit framework](https://pre-commit.com/) to run [markdownlint-c
 
 ### Self-Documenting Makefile
 
-A [self-documenting Makefile](https://victoria.dev/blog/how-to-create-a-self-documenting-makefile/) helps me work efficiently without having to remember a bunch of command-line flags.
+A [self-documenting Makefile](https://victoria.dev/posts/how-to-create-a-self-documenting-makefile/) helps me work efficiently without having to remember a bunch of command-line flags.
 
 ## IndieWeb
 
-Learn how to [Make your own independent website](https://victoria.dev/blog/make-your-own-independent-website/).
+Learn how to [Make your own independent website](https://victoria.dev/posts/make-your-own-independent-website/).
 
 - **Webmentions**: [Webmentions](https://www.w3.org/TR/2017/REC-webmention-20170112/) are enabled.
 - **Microformats2**: I've implemented [microformats2](https://microformats.org/wiki/Main_Page) markup, making my site compatible with social readers and other IndieWeb sites!

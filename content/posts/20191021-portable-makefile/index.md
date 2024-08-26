@@ -3,6 +3,7 @@ title: A portable Makefile for continuous delivery with Hugo and GitHub Pages
 date: 2019-10-21T09:09:06-04:00
 
 aliases:
+    - /archive/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/
 description: My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
 tags:
     - ci/cd

@@ -5,6 +5,7 @@ date: 2018-05-30T14:08:28-04:00
 aliases:
     - /verbose/introduction-time-complexity
     - /verbose/a-coffee-break-introduction-to-time-complexity-of-algorithms
+    - /archive/a-coffee-break-introduction-to-time-complexity-of-algorithms/
 description: A groundwork understanding of algorithm time complexity and Big O notation in about fifteen minutes with Go code examples and silly food cartoons.
 tags:
     - algorithms

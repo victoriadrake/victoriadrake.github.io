@@ -3,6 +3,7 @@ title: A lightweight, tool-agnostic CI/CD flow with GitHub Actions
 date: 2019-10-28T08:28:52-04:00
 
 aliases:
+    - /archive/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/
 description: How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.
 tags:
     - ci/cd
@@ -22,7 +23,7 @@ The introduction of [GitHub Actions](https://github.com/features/actions) has th
 
 Prior to this article, I accomplished my CD flow with several lashed-together apps. I used AWS Lambda to trigger site builds on a schedule. I had Netlify build on push triggers, as well as run image optimization, and then push my site to the public Pages repository. I used Travis CI in the public repository to test the HTML. All this worked in conjunction with GitHub Pages, which actually hosts the site.
 
-I'm now using the GitHub Actions beta to accomplish all the same tasks, with one [portable Makefile](/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/) of build instructions, and without any other CI/CD apps.
+I'm now using the GitHub Actions beta to accomplish all the same tasks, with one [portable Makefile](/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/) of build instructions, and without any other CI/CD apps.
 
 ## Appreciating the shell
 
@@ -32,7 +33,7 @@ Especially for a contained use case like building my static site with a generato
 
 While a shell script is certainly the most portable option, I use the still-very-portable [Make](https://en.wikipedia.org/wiki/Make_(software)) to write my process instructions. This provides me with some advantages over simple shell scripting, like the use of variables and [macros](https://en.wikipedia.org/wiki/Make_(software)#Macros), and the modularity of [rules](https://en.wikipedia.org/wiki/Makefile#Rules).
 
-I got into the [nitty-gritty of my Makefile in my last post](/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/). Let's look at how to get GitHub Actions to run it.
+I got into the [nitty-gritty of my Makefile in my last post](/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/). Let's look at how to get GitHub Actions to run it.
 
 ## Using a Makefile with GitHub Actions
 
@@ -75,7 +76,7 @@ Once the `make-master.yml` file is in your repository, either of your triggers w
 
 ### One hacky thing
 
-Because the Makefile runs on every push to `master`, I sometimes would get errors when the site build had no changes. When Git, via [my Makefile](/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/), attempted to commit to the Pages repository, no changes were detected and the commit would fail annoyingly:
+Because the Makefile runs on every push to `master`, I sometimes would get errors when the site build had no changes. When Git, via [my Makefile](/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/), attempted to commit to the Pages repository, no changes were detected and the commit would fail annoyingly:
 
 ```txt
 nothing to commit, working tree clean

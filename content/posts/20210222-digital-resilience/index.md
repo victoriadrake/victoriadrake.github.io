@@ -3,6 +3,7 @@ title: "Digital resilience: redundancy for websites and communications"
 date: 2021-02-22T04:00:43-05:00
 
 aliases:
+    - /archive/digital-resilience-redundancy-for-websites-and-communications/
 description: How you can make your digital life more resilient when using services you don't own.
 tags:
     - privacy
@@ -72,7 +73,7 @@ You don't need to start using Thunderbird for all your email tasks. Just make su
 
 ## Websites
 
-I strongly believe you should have [your own independent website](/blog/make-your-own-independent-website/) for reasons that go beyond redundancy. To truly make your site resilient, it's important to have your own domain.
+I strongly believe you should have [your own independent website](/posts/make-your-own-independent-website/) for reasons that go beyond redundancy. To truly make your site resilient, it's important to have your own domain.
 
 If you know that my website is at the address `victoria.dev`, for example, it doesn't matter whether I'm hosting it on GitHub Pages, AWS, Wordpress, or from a server in my basement. If my hosting provider becomes unavailable, my website won't go down with it. Getting back up and running would be as simple as updating my DNS configuration to point to a new host.
 

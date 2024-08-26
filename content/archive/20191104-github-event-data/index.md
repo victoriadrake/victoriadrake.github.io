@@ -24,7 +24,7 @@ And, if you're like me, you can turn [GitHub issue comments](https://github.com/
 
 No matter the usage, the principle concepts are the same. We can use Actions to access, preserve, and display GitHub event data - with just one workflow file. To illustrate the process, I'll take you through the [workflow code](https://github.com/victoriadrake/github-guestbook/blob/master/.github/workflows/publish-comments.yml) that makes my guestbook shine on.
 
-For an introductory look at GitHub Actions including how workflows are triggered, see [A lightweight, tool-agnostic CI/CD flow with GitHub Actions](/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/).
+For an introductory look at GitHub Actions including how workflows are triggered, see [A lightweight, tool-agnostic CI/CD flow with GitHub Actions](/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/).
 
 ## Accessing GitHub event data
 
@@ -147,11 +147,11 @@ Since the workflow environment is shiny and newborn, we need to configure Git. I
 
 If you're using GitHub Pages with the default `secrets.GITHUB_TOKEN` variable and without a site generator, pushing changes to the repository in the workflow will only update the repository files. The GitHub Pages build will fail with an error, "Your site is having problems building: Page build failed."
 
-To enable Actions to trigger a Pages site build, you'll need to create a Personal Access Token. This token can be [stored as a secret in the repository](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) settings and passed into the workflow in place of the default `secrets.GITHUB_TOKEN` variable. I wrote more about [Actions environment and variables in this post](/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/#environment-and-variables).
+To enable Actions to trigger a Pages site build, you'll need to create a Personal Access Token. This token can be [stored as a secret in the repository](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) settings and passed into the workflow in place of the default `secrets.GITHUB_TOKEN` variable. I wrote more about [Actions environment and variables in this post](/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/#environment-and-variables).
 
 With the use of a Personal Access Token, a push initiated by the Actions workflow will also update the Pages site. You can see it for yourself by [leaving a comment](https://github.com/victoriadrake/github-guestbook/issues/1) in my guestbook! The comment creation event triggers the workflow, which then takes around 30 seconds to run and update the guestbook page.
 
-Where a site build is necessary for changes to be published, such as when using Hugo, an Action can do this too. However, in order to avoid creating unintended loops, one Action workflow will not trigger another ([see what will](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow)). Instead, it's extremely convenient to handle the process of [building the site with a Makefile](/blog/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/), which any workflow can then run. Simply add running the Makefile as the final step in your workflow job, with the repository token where necessary:
+Where a site build is necessary for changes to be published, such as when using Hugo, an Action can do this too. However, in order to avoid creating unintended loops, one Action workflow will not trigger another ([see what will](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow)). Instead, it's extremely convenient to handle the process of [building the site with a Makefile](/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/), which any workflow can then run. Simply add running the Makefile as the final step in your workflow job, with the repository token where necessary:
 
 ```yml
 - name: Run Makefile

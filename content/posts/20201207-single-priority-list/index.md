@@ -3,8 +3,8 @@ title: Make your team more productive by literally doing one thing
 date: 2020-12-07T15:01:25-06:00
 
 aliases:
-    - /blog/priority/
-    - /blog/how-a-single-priority-makes-your-tech-team-more-productive/
+    - /archive/priority/
+    - /archive/how-a-single-priority-makes-your-tech-team-more-productive/
 description: Stop giving your development team too many things to do first.
 tags:
     - leadership

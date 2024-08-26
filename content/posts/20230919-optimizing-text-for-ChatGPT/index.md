@@ -3,6 +3,8 @@ title: 'Optimizing text for ChatGPT: NLP and text pre-processing techniques'
 date: 2023-09-19T04:46:36-05:00
 description: Mastering text preprocessing to send more input to ChatGPT.
 categories: ["article"] 
+aliases:
+    - /archive/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/
 tags:
     - nlp
     - chatgpt

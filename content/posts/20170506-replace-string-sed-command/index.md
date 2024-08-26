@@ -4,7 +4,8 @@ date: 2017-05-06T20:04:53+08:00
 lastmod: 2020-11-22T20:04:53+08:00
 aliases:
     - /blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/
-    - /blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/
+    - /posts/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/
+    - /archive/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/
     - /verbose/replace-string-sed-command
     - /verbose/when-stackoverflow-sed-saves-30mins
     - /verbose/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command

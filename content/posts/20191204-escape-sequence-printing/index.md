@@ -69,7 +69,7 @@ The expanded variable is single-quoted, which is passed literally to `printf`. A
 
 ## Bonus round: shell parameter expansion
 
-In my article explaining [Bash and braces](/blog/bash-and-shell-expansions-lazy-list-making/), I covered the magic of [shell parameter expansion](https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html). We can use one expansion, `${parameter@operator}`, to interpret escape sequences, too. We use `printf`'s `%s` specifier to print as a string, and the `E` operator will properly expand the escape sequences in our variable:
+In my article explaining [Bash and braces](/posts/bash-and-shell-expansions-lazy-list-making/), I covered the magic of [shell parameter expansion](https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html). We can use one expansion, `${parameter@operator}`, to interpret escape sequences, too. We use `printf`'s `%s` specifier to print as a string, and the `E` operator will properly expand the escape sequences in our variable:
 
 ```sh
 printf "%s\n" ${puns@E}

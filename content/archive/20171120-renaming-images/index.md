@@ -41,7 +41,7 @@ IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
 
 The last item on the aforementioned list is "TODO: come up with a shorter title for this list."
 
-I previously wrote about the power of command line tools like [sed](/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/). This post expands on how to string all this magical functionality into one big, long, rainbow-coloured, viscous stream of awesome.
+I previously wrote about the power of command line tools like [sed](/posts/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/). This post expands on how to string all this magical functionality into one big, long, rainbow-coloured, viscous stream of awesome.
 
 ## Rename files
 

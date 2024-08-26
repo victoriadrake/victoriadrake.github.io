@@ -124,13 +124,13 @@ Congratulations! Your changes are now present in your remote repository on GitHu
 
 ### Pull changes from repository on your computer
 
-To bring your updated files full circle to your computer, you pull them from the GitHub repository. I prefer to use the terminal for this as it's quick and easy, but GitHub also offers a [graphical client](https://docs.github.com/en/desktop/installing-and-configuring-github-desktop/overview/getting-started-with-github-desktop) if terminal commands seem a little alien for now.
+To bring your updated files full circle to your computer, you pull them from the GitHub repository. I prefer to use the terminal for this as it's quick and easy, but GitHub also offers a [graphical client](https://docs.github.com/en/desktop/overview/getting-started-with-github-desktop?platform=windows) if terminal commands seem a little alien for now.
 
 If you started with the GitHub repository, you can clone it to a folder on your computer by following [these instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
 
 ### Staying in sync
 
-When you update your work on your computer, you'll use Git to push your changes to the remote repository. To do this, you can use GitHub's [graphical client](https://docs.github.com/en/desktop/installing-and-configuring-github-desktop/overview/getting-started-with-github-desktop), or follow [these instructions](https://docs.github.com/en/get-started/importing-your-projects-to-github/importing-source-code-to-github/adding-an-existing-project-to-github-using-the-command-line).
+When you update your work on your computer, you'll use Git to push your changes to the remote repository. To do this, you can use GitHub's [graphical client](https://docs.github.com/en/desktop/overview/getting-started-with-github-desktop?platform=windows), or follow [these instructions](https://docs.github.com/en/get-started/importing-your-projects-to-github/importing-source-code-to-github/adding-an-existing-project-to-github-using-the-command-line).
 
 On your iOS device, Working Copy makes pulling and pushing as simple as a single tap. On the Repository Status and Configuration page, tap on the remote name under **Remotes**.
 

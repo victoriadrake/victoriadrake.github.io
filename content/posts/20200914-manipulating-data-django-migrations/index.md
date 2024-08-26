@@ -1,8 +1,8 @@
 ---
 title: Manipulating data with Django migrations
 date: 2020-09-14T02:12:57-04:00
-
 aliases:
+    - /archive/manipulating-data-with-django-migrations/
 description: How to update Django models and manipulate existing data using migrations.
 series:
 tags:
@@ -18,7 +18,7 @@ categories: ["article"]
 
 Growing, successful applications are a lovely problem to have. As a product develops, it tends to accumulate complication the way your weekend cake project accumulates layers of frosting. Thankfully, Django, my favorite batteries-included framework, handles complexity pretty well.
 
-Django [models help humans work with data in a way that makes sense to our brains](/blog/writing-efficient-django/#django-models), and the framework offers plenty of classes you can inherit to help you rapidly develop a robust application from scratch. As for developing on existing Django applications, there's a feature for that, too. In this article, we'll cover how to use Django migrations to update your existing models and database.
+Django [models help humans work with data in a way that makes sense to our brains](/posts/writing-efficient-django/#django-models), and the framework offers plenty of classes you can inherit to help you rapidly develop a robust application from scratch. As for developing on existing Django applications, there's a feature for that, too. In this article, we'll cover how to use Django migrations to update your existing models and database.
 
 ## What's under the hood
 

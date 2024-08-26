@@ -115,7 +115,7 @@ function glab () {
 }
 ```
 
-With `glab username`, you can create a new `origin` URL for the current Git repository with our `username` on GitLab.com. Pushing to a new remote URL [automatically creates a new private GitLab repository](/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/#a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab), so this is a useful shortcut for creating backups!
+With `glab username`, you can create a new `origin` URL for the current Git repository with our `username` on GitLab.com. Pushing to a new remote URL [automatically creates a new private GitLab repository](/posts/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/#a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab), so this is a useful shortcut for creating backups!
 
 Bash functions are really only limited by the possibilities of scripting, of which there are, practically, few limits. If there's anything you do on a frequent basis that requires typing a few lines into a terminal, you can probably create a Bash function for it!
 

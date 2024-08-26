@@ -23,7 +23,7 @@ Companies who are primarily focused on getting products built want to see that y
 
 - Command line utilities that help with tedious tasks, like [renaming image files](/blog/batch-renaming-images-including-image-resolution-with-awk/)
 - [Themes](/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/) for static site generators like Hugo or Jekyll
-- Automation tools, such as for [GitHub Actions](/blog/go-automate-your-github-profile-readme/)
+- Automation tools, such as for [GitHub Actions](/posts/go-automate-your-github-profile-readme/)
 
 The best projects you could showcase are ones directly related to the specialty you want to apply for. Show that you have competency with the fundamentals. For instance, if you see yourself focusing on front end, demonstrate that you can build interactive web pages with no fancier tools than HTML, CSS, and vanilla JS. For back end focused developers, show that you know how to create a fundamental tool like an API for a service on a local server. Want to be well-rounded? Create an API with a web page UI.
 

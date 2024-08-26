@@ -18,7 +18,7 @@ wasfeatured:
     - where : url
 ---
 
-A little while ago I wrote about [a Lambda function I called ephemeral](/blog/why-im-automatically-deleting-my-old-tweets-using-aws-lambda/) for deleting my old tweets. While it's a great project for someone familiar with or wanting to learn to use Lambda, it isn't simple for a non-technical person to set up. There are services out there that will delete your tweets for you, but require your access credentials. There didn't seem to be anything that provided convenience without also requiring authentication.
+A little while ago I wrote about a Lambda function I called ephemeral for deleting my old tweets. While it's a great project for someone familiar with or wanting to learn to use Lambda, it isn't simple for a non-technical person to set up. There are services out there that will delete your tweets for you, but require your access credentials. There didn't seem to be anything that provided convenience without also requiring authentication.
 
 So, I went oldschool and created the ephemeral bookmarklet.
 

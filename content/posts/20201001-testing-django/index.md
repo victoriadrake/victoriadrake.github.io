@@ -1,8 +1,8 @@
 ---
 title: Increase developer confidence with a great Django test suite
 date: 2020-10-01T05:50:37-04:00
-
 aliases:
+    - /archive/increase-developer-confidence-with-a-great-django-test-suite/
 description: How to write tests for your Django applications that are painless and productive.
 series:
 tags:
@@ -117,9 +117,9 @@ I rarely run my Django tests this way.
 
 The best, or most efficient, testing practice is one that occurs without you or your developers ever thinking, "I need to run the tests first." The beauty of Django's near-effortless test suite set up is that it can be seamlessly run as a part of regular developer activities. This could be in a pre-commit hook, or in a continuous integration or deployment workflow.
 
-I've previously written about how to use pre-commit hooks to [improve your developer ergonomics](/blog/technical-ergonomics-for-the-efficient-developer/) and save your team some brainpower. Django's speedy tests can be run this way, and they become especially efficient if you can [run tests in parallel](https://docs.djangoproject.com/en/3.1/ref/django-admin/#cmdoption-test-parallel).
+I've previously written about how to use pre-commit hooks to [improve your developer ergonomics](/posts/technical-ergonomics-for-the-efficient-developer/) and save your team some brainpower. Django's speedy tests can be run this way, and they become especially efficient if you can [run tests in parallel](https://docs.djangoproject.com/en/3.1/ref/django-admin/#cmdoption-test-parallel).
 
-Tests that run as part of a CI/CD workflow, for example, [on pull requests with GitHub Actions](/blog/django-project-best-practices-to-keep-your-developers-happy/#continuous-testing-with-github-actions), require no regular effort from your developers to remember to run tests at all. I'm not sure how plainly I can put it -- this one's literally a no-brainer.
+Tests that run as part of a CI/CD workflow, for example, [on pull requests with GitHub Actions](/posts/django-project-best-practices-to-keep-your-developers-happy/#continuous-testing-with-github-actions), require no regular effort from your developers to remember to run tests at all. I'm not sure how plainly I can put it -- this one's literally a no-brainer.
 
 ## Testing your way to a great Django application
 

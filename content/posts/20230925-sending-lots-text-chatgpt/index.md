@@ -24,7 +24,7 @@ There are bound to be situations in which this isn't enough, such as when you wa
 
 ## Chunking your input
 
-The `gpt-4` model currently has a maximum content length token limit of 8,192 tokens. ([Here are the docs containing current limits for all the models](https://platform.openai.com/docs/models).) Remember that you can first apply text preprocessing techniques to reduce your input size -- in my [previous post](/blog/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/) I achieved a 28% size reduction without losing meaning with just a little tokenization and pruning.
+The `gpt-4` model currently has a maximum content length token limit of 8,192 tokens. ([Here are the docs containing current limits for all the models](https://platform.openai.com/docs/models).) Remember that you can first apply text preprocessing techniques to reduce your input size -- in my [previous post](/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/) I achieved a 28% size reduction without losing meaning with just a little tokenization and pruning.
 
 When this isn't enough to fit your message within the maximum message token limit, you can take a general programmatic approach that sends your input in message chunks. The goal is to divide your text into sections that each fit within the model's token limit. The general idea is to:
 

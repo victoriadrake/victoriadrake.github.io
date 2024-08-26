@@ -1,8 +1,8 @@
 ---
 title: Word bugs in software documentation and how to fix them
 date: 2019-12-18T09:01:23-04:00
-
 aliases:
+    - /archive/word-bugs-in-software-documentation-and-how-to-fix-them/
 description: A collection of mistakes that make documentation less awesome than it could be.
 tags:
     - docs

@@ -36,7 +36,7 @@ If you think hackers aren't likely to find your device in the vast expanse of th
 
 Just like locking your own front door, IoT owners are responsible for locking down access to their devices. This may mean searching through device settings to make sure default credentials are changed, or checking to make sure that a device used on your private home network doesn't by default have public Internet access.
 
-Where the options are available, HTTPS and [multifactor authentication](/blog/personal-cybersecurity-posture-for-when-youre-just-this-guy-you-know/#1-use-multifactor-authentication) should be enabled. The use of a [VPN](/blog/personal-cybersecurity-posture-for-when-youre-just-this-guy-you-know/#2-use-a-vpn) can also keep your devices from being found.
+Where the options are available, HTTPS and [multifactor authentication](/posts/personal-cybersecurity-posture-for-when-youre-just-this-guy-you-know/#1-use-multifactor-authentication) should be enabled. The use of a [VPN](/posts/personal-cybersecurity-posture-for-when-youre-just-this-guy-you-know/#2-use-a-vpn) can also keep your devices from being found.
 
 ## Keeping them patched
 

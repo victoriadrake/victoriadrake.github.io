@@ -47,6 +47,6 @@ You can quickly identify where the above strings are located using this command 
 
 This will recursively (`r`) search all files for strings matching the whole (`w`) pattern (`e`) provided and prefix results with the line numbers (`n`) so you can easily find them.
 
-Using `find` and `sed` can make these changes much faster. See [this article on search and replace](/blog/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/).
+Using `find` and `sed` can make these changes much faster. See [this article on search and replace](/posts/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/).
 
 Enjoy your new handle! (I hope it sticks.)

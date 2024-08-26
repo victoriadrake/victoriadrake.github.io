@@ -3,6 +3,7 @@ title: How to write good documentation
 date: 2020-12-14T04:53:10-05:00
 
 aliases:
+    - /archive/how-to-write-good-documentation/
 description: The secret to never forgetting how your project works, in three steps.
 tags:
     - docs
@@ -57,7 +58,7 @@ This step is best done after a long lunch break, or even the next day (but proba
 
 Take extra care to fill in or at least link to prerequisite knowledge, especially if you frequently use different languages or tools. Even an action as small as pasting in a link to the API documentation you used can save hours of future searching.
 
-Write down or link to READMEs, installation steps, and relevant support issues. For frequently performed command-line actions, you can use a [self-documenting Makefile](/blog/how-to-create-a-self-documenting-makefile/) to avoid having to `man` common tasks each time you come back to a project.
+Write down or link to READMEs, installation steps, and relevant support issues. For frequently performed command-line actions, you can use a [self-documenting Makefile](/posts/how-to-create-a-self-documenting-makefile/) to avoid having to `man` common tasks each time you come back to a project.
 
 It’s easy to forget supporting details after even just a short break from your project. Capture anything you found helpful this time around.
 

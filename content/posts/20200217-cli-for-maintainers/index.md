@@ -82,7 +82,7 @@ Given a file, `repos.txt` with a repository’s SSH link on each line (and your 
 xargs -n1 git clone < repos.txt
 ```
 
-If you want to pull and push many repositories, I previously wrote about [how to use a Bash one-liner to manage your repositories](/blog/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/).
+If you want to pull and push many repositories, I previously wrote about [how to use a Bash one-liner to manage your repositories](/posts/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/).
 
 ## List issues by number with `jot`
 

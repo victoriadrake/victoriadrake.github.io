@@ -17,7 +17,7 @@ You can deploy the Quint site template with one button (this button):
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/victoriadrake/quint-demo)
 
-The Quint template can use the Collected Notes app as a CMS and also saves your posts to the site repository, for [redundancy](https://victoria.dev/blog/digital-resilience-redundancy-for-websites-and-communications/). It fetches new posts each time you build, and if you're deploying via Netlify or GitHub Actions, you can use a webhook to deploy the site whenever you make a new post with Collected Notes.
+The Quint template can use the Collected Notes app as a CMS and also saves your posts to the site repository, for [redundancy](https://victoria.dev/posts/digital-resilience-redundancy-for-websites-and-communications/). It fetches new posts each time you build, and if you're deploying via Netlify or GitHub Actions, you can use a webhook to deploy the site whenever you make a new post with Collected Notes.
 
 To set up your own site:
 

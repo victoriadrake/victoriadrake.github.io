@@ -1,8 +1,8 @@
 ---
 title: Technical ergonomics for the efficient developer
 date: 2020-06-22T06:33:28-04:00
-
 aliases:
+    - /archive/technical-ergonomics-for-the-efficient-developer/
 description: If you knew these tools existed, you'd probably be using them by now.
 tags:
     - coding

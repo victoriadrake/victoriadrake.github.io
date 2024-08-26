@@ -4,6 +4,7 @@ date: 2020-09-22T04:55:19-04:00
 
 aliases:
     - /blog/my-django-project-best-practices-for-happy-developers/
+    - /archive/django-project-best-practices-to-keep-your-developers-happy/
 description: Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.
 series:
 tags:
@@ -111,11 +112,11 @@ start                Install requirements, apply migrations, then start developm
 
 All the usual Django commands are covered, and we've got a `test` command that runs our tests with the options we prefer. Brilliant.
 
-You can read my full [post about self-documenting Makefiles here](/blog/how-to-create-a-self-documenting-makefile/), which also includes an example Makefile using `pipenv`.
+You can read my full [post about self-documenting Makefiles here](/posts/how-to-create-a-self-documenting-makefile/), which also includes an example Makefile using `pipenv`.
 
 ## Save your brainpower with pre-commit hooks
 
-I previously wrote about some [technical ergonomics](/blog/technical-ergonomics-for-the-efficient-developer/) that can make it a lot easier for teams to develop great software.
+I previously wrote about some [technical ergonomics](/posts/technical-ergonomics-for-the-efficient-developer/) that can make it a lot easier for teams to develop great software.
 
 One area that's a no-brainer is using pre-commit hooks to lint code prior to checking it in. This helps to ensure the quality of the code your developers check in, but most importantly, ensures that no one on your team is spending time trying to remember if it should be single or double quotes or where to put a line break.
 
@@ -169,7 +170,7 @@ Tests that run in a consistent environment on every pull request can help elimin
 
 A hosted CI environment like GitHub Actions can also help when running integration tests that require using managed services resources. You can use [encrypted secrets in a repository](https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets) to grant the Actions runner access to resources in a testing environment, without worrying about creating testing resources and access keys for each of your developers to use.
 
-I've written on many occasions about setting up Actions workflows, including [using one to run your Makefile](/blog/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/), and [how to integrate GitHub event data](/blog/publishing-github-event-data-with-github-actions-and-pages/). GitHub even [interviewed me about Actions](https://github.blog/2020-06-26-github-action-hero-victoria-drake/) once.
+I've written on many occasions about setting up Actions workflows, including [using one to run your Makefile](/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/), and [how to integrate GitHub event data](/blog/publishing-github-event-data-with-github-actions-and-pages/). GitHub even [interviewed me about Actions](https://github.blog/2020-06-26-github-action-hero-victoria-drake/) once.
 
 For Django projects, here's a GitHub Actions workflow that runs tests with a consistent Python version whenever someone opens a pull request in the repository.
 

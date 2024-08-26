@@ -1,8 +1,8 @@
 ---
 title: Writing efficient Django
 date: 2020-07-09T04:02:47-05:00
-
 aliases:
+    - /archive/writing-efficient-django/
 description: How to use Django's views, models, and queries to build a better application.
 series:
 tags:
@@ -21,7 +21,7 @@ I like Django. It's a well-considered and intuitive framework with a name I can 
 - [Django models](#django-models)
 - [Retrieving objects with queries](#retrieving-objects-with-queries)
 
-Understanding these main features are the building blocks for maximizing development efficiency with Django. They'll build the foundation for you to [test efficiently](/blog/increase-developer-confidence-with-a-great-django-test-suite/) and [create an awesome development experience for your engineers](/blog/django-project-best-practices-to-keep-your-developers-happy/). Let's look at how these tools let you create a performant Django application that's pleasant to build and maintain.
+Understanding these main features are the building blocks for maximizing development efficiency with Django. They'll build the foundation for you to [test efficiently](/posts/increase-developer-confidence-with-a-great-django-test-suite/) and [create an awesome development experience for your engineers](/blog/django-project-best-practices-to-keep-your-developers-happy/). Let's look at how these tools let you create a performant Django application that's pleasant to build and maintain.
 
 ## Class-based versus function-based views
 
@@ -93,6 +93,6 @@ If you'd like to get an object that may not exist in the context of a user's req
 <!-- omit in toc -->
 ## Efficient essentials
 
-You've now got a handle on these three essential tools for building your efficient Django application -- congratulations! You can make Django work even better for you by learning about [manipulating data with migrations](/blog/manipulating-data-with-django-migrations/), [testing effectively](/blog/increase-developer-confidence-with-a-great-django-test-suite/), and [setting up your team's Django development for maximum happiness](/blog/django-project-best-practices-to-keep-your-developers-happy/).
+You've now got a handle on these three essential tools for building your efficient Django application -- congratulations! You can make Django work even better for you by learning about [manipulating data with migrations](/posts/manipulating-data-with-django-migrations/), [testing effectively](/posts/increase-developer-confidence-with-a-great-django-test-suite/), and [setting up your team's Django development for maximum happiness](/blog/django-project-best-practices-to-keep-your-developers-happy/).
 
 If you're going to build on GitHub, you may like to set up my [django-security-check GitHub Action](https://github.com/victoriadrake/django-security-check). In the meantime, you're well on your way to building a beautiful software project.
