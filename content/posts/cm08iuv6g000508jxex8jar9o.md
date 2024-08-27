@@ -1,5 +1,5 @@
 ---
-date: 2024-08-25T09:07:08.188Z
+date: 2024-08-27T13:55:47.820Z
 title: "Top 5 Tips for Effective Software Leadership"
 datePublished: Sat Aug 24 2024 19:16:52 GMT+0000 (Coordinated Universal Time)
 cuid: cm08iuv6g000508jxex8jar9o
