@@ -1,0 +1,39 @@
+{{ with .Site.Params.description }}
+<meta name="description" content="{{ . | absURL }}">{{ end }}
+{{ with .Site.Params.monetization }}
+<meta name="monetization" content="{{ . | absURL }}">{{ end }}
+{{ if .Site.Params.plausible }}{{ partial "plausible.html" . }}{{ end }}
+
+<!-- IndieAuth -->
+<link rel="authorization_endpoint" href="https://indieauth.com/auth">
+<link rel="token_endpoint" href="https://tokens.indieauth.com/token">
+{{ with .Site.Params.githubuser }}
+<link rel="me" href="https://github.com/{{ . | absURL }}" />{{ end }}
+{{ with .Site.Params.twitteruser }}
+<link rel="me" href="https://twitter.com/{{ . | absURL }}" />{{ end }}
+{{ with .Site.Params.mastodon }}
+<link rel="me" href="{{ . | absURL }}" />{{ end }}
+
+<!-- Social -->
+<meta property="og:url" content="{{ .Site.BaseURL }}" />
+<meta property="og:title" content="{{ .Page.Title }}" />
+<meta property="og:site_name" content="{{ .Site.Title }}" />
+<meta property="og:type" content="website" />
+
+{{ if .Page.Description }}
+<meta property="og:description" content="{{ .Params.description }}" />
+{{ end }}
+
+{{ if .Params.image }}
+<meta property="og:image" content="{{ .Params.image | absURL }}" />
+<meta name="twitter:image" content="{{ .Params.image | absURL }}" />
+{{ else }}
+<meta property="og:image" content="{{ .Site.Params.socialImage | absURL }}" />
+<meta name="twitter:image" content="{{ .Site.Params.socialImage | absURL }}" />
+{{ end }}
+
+<meta name="twitter:title" content="{{ .Page.Title }}" />
+{{ if .Page.Description }}
+<meta name="twitter:description" content="{{ .Params.description }}" />
+{{ end }}
+<meta name="twitter:card" content="summary" />

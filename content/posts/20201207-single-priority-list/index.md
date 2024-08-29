@@ -4,6 +4,7 @@ date: 2020-12-07T15:01:25-06:00
 
 aliases:
     - /archive/priority/
+    - /posts/priority/
     - /archive/how-a-single-priority-makes-your-tech-team-more-productive/
 description: Stop giving your development team too many things to do first.
 tags:

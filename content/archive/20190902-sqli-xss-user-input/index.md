@@ -69,7 +69,7 @@ The battle, however, is only half won...
 
 ## Cross Site Scripting (XSS) attacks
 
-If you're a malicious coder, JavaScript is pretty much your best friend. The right commands will do anything a legitimate user could do (and even some things they aren't supposed to be able to) on a web page, sometimes without any interaction on the part of an actual user. [Cross Site Scripting](https://en.wikipedia.org/wiki/Cross-site_scripting) attacks, or XSS, occur when JavaScript code is injected into a web page and changes that page's behavior. Its effects can range from prank nuisance occurrences to more severe authentication bypasses or credential stealing. [This incident report from Apache in 2010](https://blogs.apache.org/infra/entry/apache_org_04_09_2010) is a good example of how XSS can be chained in a larger attack to take over accounts and machines.
+If you're a malicious coder, JavaScript is pretty much your best friend. The right commands will do anything a legitimate user could do (and even some things they aren't supposed to be able to) on a web page, sometimes without any interaction on the part of an actual user. [Cross Site Scripting](https://en.wikipedia.org/wiki/Cross-site_scripting) attacks, or XSS, occur when JavaScript code is injected into a web page and changes that page's behavior. Its effects can range from prank nuisance occurrences to more severe authentication bypasses or credential stealing.
 
 {{< figure alt="An HTML dance party with a little JS cutting in" src="xss.png" caption="The annual DOM dance-off receives an unexpected guest);" >}}
 
