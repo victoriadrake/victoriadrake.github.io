@@ -101,12 +101,10 @@ If you can't use WPA2 or WPA3, do the best you can to take additional security m
 
 {{% figure src="cafewifi.png" alt="A cartoon of shouting out your bank details at a coffeeshop." %}}
 
-When possible, ensure you only connect to known networks that you or your organization control. Many cybersecurity attacks are executed when victims connect to an imitation public Wi-Fi access point, also called an evil twin attack, or Wi-Fi phishing. These fake hotspots are easily created using publicly accessible programs and tools. A VPN can help mitigate damage from these attacks as well, but it's always better not to take the risk. If you travel often, consider purchasing a portable hotspot that uses a cellular data plan, or using data SIM cards for all your devices.
+When possible, ensure you only connect to known networks that you or your organization control. Many cybersecurity attacks are executed when victims connect to an imitation public Wi-Fi access point, also called an evil twin attack, or Wi-Fi phishing. These fake hotspots are easily created using publicly accessible programs and tools. A reputable VPN can help mitigate damage from these attacks as well, but it's always better not to take the risk. If you travel often, consider purchasing a portable hotspot that uses a cellular data plan, or using data SIM cards for all your devices.
 
 ## Much more than just acronyms
 
 WEP, WPA, WPA2, and WPA3 mean a lot more than a bunch of similar letters -- in some cases, it's a difference of billions of years minus about 60 seconds.
 
 On more of a now-ish timescale, I hope I've taught you something new about the security of your Wi-Fi and how you can improve it!
-
-Know someone who'd benefit from some beefed up cybersecurity? Share the [cybersecurity starter pack](/blog/your-cybersecurity-starter-pack/)!

@@ -1,21 +1,21 @@
 <!-- representative h-card: https://microformats.org/wiki/h-card -->
 <div class="h-card col" rel="author">
-        {{ if .Site.Author.image }}
+        {{ if .Site.Params.Author.image }}
         <figure class="profile">
-            <img class="u-photo" alt="{{ with .Site.Author.name }}{{ . }}{{ else }}Author's photo{{ end }}"
-                src="{{ with .Site.Author.image }}/{{ . }}{{ end }}">
+            <img class="u-photo" alt="{{ with .Site.Params.Author.name }}{{ . }}{{ else }}Author's photo{{ end }}"
+                src="{{ with .Site.Params.Author.image }}/{{ . }}{{ end }}">
         </figure>
         {{ end }}
         <div id="card" class="markdown">
-            {{ with .Site.Author.name }}
+            {{ with .Site.Params.Author.name }}
             <h1 class="p-name">Hello! I'm <span>{{ . }}.</h1>{{ end }}
             <address class="metadata hidden">
                 {{ $url := urls.Parse .Permalink }}
                 <a class="u-url u-uid" rel="me" href="{{ .Permalink }}">{{ $url.Host }}</a>
-                {{ with .Site.Author.nickname }} {{ $.Site.Params.separator | default "∙" }}
+                {{ with .Site.Params.Author.nickname }} {{ $.Site.Params.separator | default "∙" }}
                 <span class="p-nickname">{{.}}</span>
                 {{ end }}
-                {{ with .Site.Author.email }} {{ $.Site.Params.separator | default "∙" }}
+                {{ with .Site.Params.Author.email }} {{ $.Site.Params.separator | default "∙" }}
                 <a class="u-email" href="mailto:{{ . }}">{{ . }}</a>
                 {{ end }}
                 {{ with .Site.Params.githubuser }} {{ $.Site.Params.separator | default "∙" }}
