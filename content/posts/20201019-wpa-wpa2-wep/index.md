@@ -3,6 +3,7 @@ title: "WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained"
 date: 2020-10-19T04:02:27-04:00
 
 aliases:
+    - /archive/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/
 description: Which one should you be using? Why Wi-Fi security matters.
 series:
     - security-for-developers
