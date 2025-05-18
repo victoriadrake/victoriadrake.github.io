@@ -11,7 +11,7 @@ tags:
     - terminal
     - linux
 image: dunstnotif.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

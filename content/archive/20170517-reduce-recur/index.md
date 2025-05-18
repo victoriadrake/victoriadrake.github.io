@@ -10,7 +10,7 @@ tags:
     - javascript
     - coding
 image: cover_recursion-pie.jpg
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

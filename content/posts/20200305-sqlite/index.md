@@ -8,7 +8,7 @@ tags:
     - data
     - computing
 image: cover.png
-noToc: true
+ 
 draft: false
 featured: true
 categories: ["article"]

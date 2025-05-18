@@ -11,7 +11,7 @@ tags:
     - ci/cd
     - leadership
 image: cover.png
-noToc: true
+ 
 draft: false
 ---
 

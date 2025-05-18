@@ -11,7 +11,7 @@ tags:
     - cybersecurity
     - leadership
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

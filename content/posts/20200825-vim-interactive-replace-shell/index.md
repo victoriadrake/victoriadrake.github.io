@@ -8,7 +8,7 @@ tags:
     - terminal
     - linux
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

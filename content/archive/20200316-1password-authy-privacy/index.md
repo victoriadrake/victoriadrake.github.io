@@ -10,7 +10,7 @@ tags:
     - data
     - life
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

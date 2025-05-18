@@ -11,7 +11,7 @@ tags:
     - data
     - life
     - websites
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

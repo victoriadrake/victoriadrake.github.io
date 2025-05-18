@@ -12,7 +12,7 @@ tags:
     - linux
     - git
     - data
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

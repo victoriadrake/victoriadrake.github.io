@@ -12,7 +12,7 @@ tags:
     - open-source
     - hardware
 image: cover.png
-noToc: true
+ 
 draft: false
 ---
 

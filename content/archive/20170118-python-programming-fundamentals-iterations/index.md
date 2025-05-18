@@ -12,8 +12,7 @@ description: The basics of writing iterations in Python using for loops, list co
 tags:
     - python
     - coding
-image: python-iterations.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

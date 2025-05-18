@@ -13,7 +13,7 @@ tags:
     - protocols
     - computing
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

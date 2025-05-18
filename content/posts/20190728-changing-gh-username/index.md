@@ -9,8 +9,8 @@ tags:
     - websites
     - linux
     - terminal
-image: barcat.png
-noToc: true
+image: cover.png
+ 
 draft: false
 categories: ["article"]
 

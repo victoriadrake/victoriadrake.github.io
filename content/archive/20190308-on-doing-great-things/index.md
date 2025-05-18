@@ -8,7 +8,7 @@ description: Some thoughts inspired by International Women's Day, Grace Hopper, 
 tags:
     - life
 image: grace-murray-hopper-park.jpeg
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

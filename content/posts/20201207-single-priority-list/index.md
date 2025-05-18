@@ -11,7 +11,7 @@ tags:
     - leadership
     - leadership
 image: prioritize.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

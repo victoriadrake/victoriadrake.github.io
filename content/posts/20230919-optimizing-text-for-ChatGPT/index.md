@@ -14,7 +14,7 @@ tags:
     - computing
     - data
     - python
-noToc: true
+ 
 draft: false
 ---
 

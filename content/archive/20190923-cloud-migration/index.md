@@ -11,7 +11,7 @@ tags:
     - data
     - websites
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

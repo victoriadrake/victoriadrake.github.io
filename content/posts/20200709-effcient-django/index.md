@@ -10,7 +10,7 @@ tags:
     - coding
     - python
 image: code.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

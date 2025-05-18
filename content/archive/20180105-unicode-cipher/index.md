@@ -10,7 +10,7 @@ tags:
     - algorithms
     - javascript
 image: cover_unicode-secret.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

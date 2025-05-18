@@ -9,7 +9,7 @@ description: Basic security best practices to share with your non-technical frie
 tags:
     - cybersecurity
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

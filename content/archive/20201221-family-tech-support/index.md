@@ -8,8 +8,6 @@ tags:
     - privacy
     - cybersecurity
     - life
-image: cover.png
-noToc: true
 draft: false
 categories: ["article"]
 ---

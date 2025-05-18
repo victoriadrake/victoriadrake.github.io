@@ -7,8 +7,8 @@ description: A new resource for software development leaders by Victoria Drake.
 series:
 tags:
     - leadership
-image: cover.PNG
-noToc: true
+image: cover.png
+ 
 draft: false
 ---
 

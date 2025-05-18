@@ -11,7 +11,7 @@ tags:
     - coding
     - terminal
 image: precommit-infomercial.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

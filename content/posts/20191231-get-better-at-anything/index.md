@@ -9,7 +9,7 @@ tags:
     - docs
     - coding
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

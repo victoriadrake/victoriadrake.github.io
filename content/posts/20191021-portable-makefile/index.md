@@ -11,7 +11,7 @@ tags:
     - terminal
     - websites
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

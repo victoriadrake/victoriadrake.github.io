@@ -8,7 +8,7 @@ tags:
     - leadership
     - leadership
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

@@ -13,7 +13,7 @@ description: The power to update multiple files with a single command in your te
 tags:
     - terminal
 image: cover_sed.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

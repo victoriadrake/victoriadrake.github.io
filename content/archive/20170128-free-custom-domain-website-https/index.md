@@ -10,7 +10,7 @@ description: A guide (for the minimally tech-savvy) to setting up a website with
 tags:
     - websites
 image: cover_free-https.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

@@ -7,7 +7,7 @@ description: Why decentralized photo sharing won't save us from Instagram - but 
 tags:
     - life
 image: ian-dooley-FgSyP02I0gw-unsplash.jpg
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

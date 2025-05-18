@@ -11,7 +11,7 @@ tags:
     - python
     - api
 image: plot.png
-noToc: true
+ 
 draft: false
 ---
 

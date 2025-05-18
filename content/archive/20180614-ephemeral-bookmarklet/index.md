@@ -10,7 +10,7 @@ description: Bookmarklets you can use in your browser to help clean up your soci
 tags:
     - javascript
 image: cover_bookmarklet-card.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

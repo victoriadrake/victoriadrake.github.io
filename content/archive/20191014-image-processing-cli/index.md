@@ -8,7 +8,7 @@ tags:
     - terminal
     - ci/cd
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

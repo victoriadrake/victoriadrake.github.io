@@ -7,8 +7,7 @@ description: The article I wish I had read when I started coding.
 tags:
     - coding
     - life
-image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

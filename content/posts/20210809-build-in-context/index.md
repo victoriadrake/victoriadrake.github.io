@@ -9,7 +9,7 @@ tags:
     - leadership
     - computing
 image: cover.jpg
-noToc: true
+ 
 draft: false
 ---
 

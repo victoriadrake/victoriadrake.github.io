@@ -11,8 +11,7 @@ tags:
     - aws
     - go
     - terminal
-image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

@@ -8,7 +8,7 @@ description: How to make 2021 the year of the independent web.
 tags:
     - websites
     - life
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

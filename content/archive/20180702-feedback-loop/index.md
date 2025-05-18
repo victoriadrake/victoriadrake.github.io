@@ -11,7 +11,7 @@ tags:
     - coding
     - life
 image: cover_feedback-pbjreview.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

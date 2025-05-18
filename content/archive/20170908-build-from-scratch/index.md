@@ -11,7 +11,7 @@ tags:
     - coding
     - javascript
 image: cover_solve-paella.jpg
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

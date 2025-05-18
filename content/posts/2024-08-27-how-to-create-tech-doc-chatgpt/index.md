@@ -4,6 +4,7 @@ title: "How to Create Technical Documentation Using ChatGPT"
 datePublished: Tue Aug 27 2024 13:55:32 GMT+0000 (Coordinated Universal Time)
 cuid: cm0chp6ka001309jwdjaxffnl
 slug: how-to-create-technical-documentation-using-chatgpt
+description: How to use ChatGPT to create effective and correct documentation for your project.
 canonical: https://victoria.dev/posts/how-to-create-technical-documentation-using-chatgpt
 image: https://cdn.hashnode.com/res/hashnode/image/upload/v1724610603073/dbed6199-8e9c-4858-b299-a8d84e280156.jpeg
 tags:
@@ -12,7 +13,7 @@ tags:
 
 ---
 
-No need to print out stacks of code when conversational AI can summarize it for you. (Photo is Margaret Hamilton, a computer scientist who played a crucial role in developing the software for the Apollo space program at NASA, standing next to a towering stack of printed code that she and her team wrote for the Apollo Guidance Computer.)
+{{< figure src="https://cdn.hashnode.com/res/hashnode/image/upload/v1724610603073/dbed6199-8e9c-4858-b299-a8d84e280156.jpeg" alt="Margaret Hamilton" caption="No need to print out stacks of code when conversational AI can summarize it for you. (Photo is Margaret Hamilton, a computer scientist who played a crucial role in developing the software for the Apollo space program at NASA, standing next to a towering stack of printed code that she and her team wrote for the Apollo Guidance Computer.)" >}}
 
 I've maintained for years that good code isn't that great without good documentation. It's a shame that this area is so often overlooked. Good docs don't have to be hard to write and often help you organize your thoughts -- which makes the code better as well.
 

@@ -11,7 +11,7 @@ tags:
     - coding
     - data
     - javascript
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

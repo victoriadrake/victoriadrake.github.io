@@ -8,7 +8,7 @@ description: Some thoughts and concrete suggestions on saving society through pr
 tags:
     - life
 image: fuji-fog.jpeg
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

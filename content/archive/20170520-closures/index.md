@@ -10,7 +10,7 @@ tags:
     - javascript
     - coding
 image: cover_closures-sandwich.jpg
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

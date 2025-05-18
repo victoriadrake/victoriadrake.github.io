@@ -8,19 +8,17 @@ For more details on how I built the site, see [About this site](https://victoria
 
 ### CMS
 
-Hashnode serves as the CMS for this blog, unless I publish Markdown files here directly.
+Hashnode serves as a CMS for this blog, unless I publish Markdown files here directly.
 
 The repository [victoriadrake/hashnode-blog](https://github.com/victoriadrake/hashnode-blog) is updated whenever I make a new post on Hashnode. The workflow in that repo pushes the new post to the `content` directory here.
 
-I previously tried using Collected Notes as my CMS, but it doesn't seem to be reliable.
-
 ### Continuous Deployment
 
-A GitHub Action manages continuous deployment by triggering a Netlify build. The site content and theme are [Git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+The site is deployed with each update using GitHub Pages.
 
 ### Link Checking
 
-I created another GitHub Action, [link-snitch](https://github.com/victoriadrake/link-snitch), to regularly check my site for broken links. It uses my [Hydra project](https://github.com/victoriadrake/hydra-link-checker), a standard-library-only Python program that crawls a site for broken links.
+I created a GitHub Action, [link-snitch](https://github.com/victoriadrake/link-snitch), to regularly check my site for broken links. It uses my [Hydra project](https://github.com/victoriadrake/hydra-link-checker), a standard-library-only Python program that crawls a site for broken links.
 
 ### Code Quality
 

@@ -8,7 +8,7 @@ tags:
     - life
     - coding
     - open-source
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

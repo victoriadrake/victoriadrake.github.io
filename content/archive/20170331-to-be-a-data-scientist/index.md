@@ -10,7 +10,7 @@ tags:
     - data
     - life
 image: cover_datasci-panelists.jpg
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

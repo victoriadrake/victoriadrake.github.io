@@ -7,7 +7,7 @@ description: Make every day feel like Christmas when you participate in open sou
 tags:
     - open-source
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

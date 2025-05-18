@@ -9,8 +9,8 @@ tags:
     - linux
     - terminal
     - git
-image: file.jpg
-noToc: true
+image: cover.png
+ 
 draft: false
 categories: ["article"]
 ---

@@ -11,7 +11,7 @@ tags:
     - linux
     - ci/cd
 image: renaming-rainbow.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 

@@ -7,7 +7,7 @@ description: A seasonal exploration of the difference between concurrent, parall
 tags:
     - computing
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

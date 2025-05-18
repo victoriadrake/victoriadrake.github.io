@@ -11,7 +11,7 @@ description: The go-to resources from my bookmarks folder for anyone who wants t
 tags:
     - coding
 image: cover.png
-noToc: true
+ 
 draft: true
 categories: ["article"]
 

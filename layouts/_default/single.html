@@ -124,4 +124,42 @@
                 });
         }
     </script>
+
+    <!-- Related Posts Section -->
+    {{ $currentPage := . }}
+    {{ $tags := .Params.tags }}
+    {{ $relatedPosts := slice }}
+    
+    {{ if $tags }}
+        {{ range $tag := $tags }}
+            {{ $tagRelated := where (where site.RegularPages "Type" "posts") "Params.tags" "intersect" (slice $tag) }}
+            {{ $relatedPosts = $relatedPosts | append $tagRelated }}
+        {{ end }}
+        
+        {{ $relatedPosts = $relatedPosts | uniq }}
+        {{ $relatedPosts = where $relatedPosts "Permalink" "ne" $currentPage.Permalink }}
+        
+        {{ if gt (len $relatedPosts) 0 }}
+        <section class="related-posts container">
+            <h2>Related Posts</h2>
+            <ul class="related-posts-list">
+                {{ range first 3 $relatedPosts }}
+                <li class="related-post-item">
+                    <a href="{{ .RelPermalink }}" class="related-post-link">
+                        <h3>{{ .Title }}</h3>
+                        <p class="small">{{ .Summary }}</p>
+                        <p class="metadata small">
+                            {{ range first 1 (.GetTerms "tags") }}
+                            <a class="p-category tag button" href="{{ .Permalink }}">{{ .Title | lower }}</a>
+                            {{ end }}
+                            &nbsp;{{ .ReadingTime }} min read
+                            <time class="hidden dt-published">{{ .Date }}</time>
+                        </p>
+                    </a>
+                </li>
+                {{ end }}
+            </ul>
+        </section>
+        {{ end }}
+    {{ end }}
 {{ end }}

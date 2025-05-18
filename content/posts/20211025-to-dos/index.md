@@ -9,7 +9,7 @@ tags:
     - docs
     - life
 image: a9ccelphZv.jpeg
-noToc: true
+ 
 draft: false
 ---
 

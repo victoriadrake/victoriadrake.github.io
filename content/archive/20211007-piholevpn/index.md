@@ -10,8 +10,7 @@ tags:
     - aws
     - cybersecurity
     - open-source
-image: cover.png
-noToc: true
+ 
 draft: false
 ---
 

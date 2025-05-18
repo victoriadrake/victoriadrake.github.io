@@ -11,7 +11,7 @@ tags:
     - coding
     - open-source
     - ci/cd
-noToc: true
+ 
 draft: false
 featured: false
 ---

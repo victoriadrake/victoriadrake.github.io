@@ -11,7 +11,7 @@ tags:
     - data
     - python
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

@@ -5,7 +5,7 @@ draft: false
 tags:
   - ai
   - career
-noToc: true
+ 
 ---
 In the viral essay _The Decade Ahead_, Leopold Aschenbrenner predicts that Artificial General Intelligence (AGI) will be a reality in only a few years. But what exactly is AGI, and how does it differ from the AI we have today?
 

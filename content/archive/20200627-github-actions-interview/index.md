@@ -13,7 +13,7 @@ tags:
     - terminal
     - api
 image: cover.PNG
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

@@ -12,7 +12,7 @@ tags:
     - terminal
     - aws
 image: cover.jpg
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

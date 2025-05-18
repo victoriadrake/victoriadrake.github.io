@@ -9,8 +9,7 @@ tags:
     - linux
     - terminal
     - hardware
-image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---

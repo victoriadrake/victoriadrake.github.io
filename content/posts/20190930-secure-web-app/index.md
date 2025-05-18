@@ -12,7 +12,7 @@ tags:
     - coding
     - data
 image: cover.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 featured: true

@@ -12,7 +12,7 @@ tags:
     - terminal
     - leadership
 image: cover_git-commit-art.png
-noToc: true
+ 
 draft: false
 categories: ["article"]
 ---
