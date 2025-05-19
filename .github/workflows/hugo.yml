@@ -42,7 +42,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: recursive
+      - name: Point theme submodule at latest
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --remote
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
