@@ -1,0 +1,32 @@
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link href="/images/fav/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+    <link href="/images/fav/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+    <link href="/images/fav/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+    <link href="/images/fav/site.webmanifest" rel="manifest"/>
+    <!-- Theme color for Safari on iOS - dynamically set based on color scheme -->
+    <meta name="theme-color" content="{{ .Site.Params.themeColor | default "#ffffff" }}" id="theme-color-meta"/>
+    <script>
+        // Function to update theme-color based on color scheme
+        function updateThemeColor() {
+            const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const themeColorMeta = document.getElementById('theme-color-meta');
+            // Use the same colors as defined in CSS
+            themeColorMeta.setAttribute('content', isDarkMode ? '#111111' : '#ffffff');
+        }
+        
+        // Set initial theme-color
+        updateThemeColor();
+        
+        // Update theme-color when color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeColor);
+    </script>
+    <title>{{ if ne .Title .Site.Title }}{{ .Title }} | {{ end }}{{ .Site.Title }}</title>
+    <link href="/css/styles.css" rel="stylesheet"/>
+    {{ range .Site.Params.css -}}
+        <link href="/{{ . }}" rel="stylesheet"/>
+    {{- end }}
+    <!-- Include extra head content -->
+    {{ partial "extra_head.html" . }}
+</head>
