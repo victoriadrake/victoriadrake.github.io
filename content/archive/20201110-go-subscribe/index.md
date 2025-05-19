@@ -12,7 +12,7 @@ tags:
     - data
     - cybersecurity
     - websites
-image: envelope.png
+image: cover.png
  
 draft: false
 categories: ["article"]

@@ -7,8 +7,6 @@ description: Announcing the release of a new version of the OWASP WSTG.
 tags:
     - cybersecurity
     - open-source
-image: cover.png
- 
 draft: false
 categories: ["article"]
 ---

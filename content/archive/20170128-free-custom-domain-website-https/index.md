@@ -9,8 +9,6 @@ aliases:
 description: A guide (for the minimally tech-savvy) to setting up a website with HTTPS using Hugo, Cloudflare and GitHub Pages.
 tags:
     - websites
-image: cover_free-https.png
- 
 draft: false
 categories: ["article"]
 

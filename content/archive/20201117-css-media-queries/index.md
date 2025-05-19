@@ -8,7 +8,7 @@ description: Building a responsive website with color themes? Start at the root.
 tags:
     - websites
     - coding
-image: cover.png
+image: title.png
  
 draft: false
 categories: ["article"]

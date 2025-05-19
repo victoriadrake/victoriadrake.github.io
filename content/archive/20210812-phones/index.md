@@ -11,7 +11,7 @@ tags:
     - linux
     - open-source
     - hardware
-image: cover.png
+image: cover.jpg
  
 draft: false
 ---
