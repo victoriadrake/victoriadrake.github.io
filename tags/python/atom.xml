@@ -1,0 +1,1214 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Python on victoria.dev</title><link href="https://victoria.dev/tags/python/feed.xml" rel="self"/><link href="https://victoria.dev/tags/python/"/><updated>2023-09-26T04:46:36-05:00</updated><id>https://victoria.dev/tags/python/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">How to send long text input to ChatGPT using the OpenAI API</title><link href="https://victoria.dev/posts/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/"/><id>https://victoria.dev/posts/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/</id><author><name>Victoria Drake</name></author><published>2023-09-26T04:46:36-05:00</published><updated>2023-09-26T04:46:36-05:00</updated><content type="html"><![CDATA[<p>In a previous post, I showed how you can apply text preprocessing techniques to shorten your input length for ChatGPT. Today in the web interface (<a href="https://chat.openai.com/">chat.openai.com</a>), ChatGPT allows you to send a message with a maximum token length of 4,096.</p>
+<p>There are bound to be situations in which this isn&rsquo;t enough, such as when you want to read in a large amount of text from a file. Using the OpenAI API allows you to send many more tokens in a messages array, with the maximum number depending on your chosen model. This lets you provide large amounts of text to ChatGPT using chunking. Here&rsquo;s how.</p>
+<h2 id="chunking-your-input">Chunking your input</h2>
+<p>The <code>gpt-4</code> model currently has a maximum content length token limit of 8,192 tokens. (<a href="https://platform.openai.com/docs/models">Here are the docs containing current limits for all the models</a>.) Remember that you can first apply text preprocessing techniques to reduce your input size &ndash; in my <a href="/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/">previous post</a> I achieved a 28% size reduction without losing meaning with just a little tokenization and pruning.</p>
+<p>When this isn&rsquo;t enough to fit your message within the maximum message token limit, you can take a general programmatic approach that sends your input in message chunks. The goal is to divide your text into sections that each fit within the model&rsquo;s token limit. The general idea is to:</p>
+<ol>
+<li><strong>Tokenize and split text into chunks</strong> based on the model&rsquo;s token limit. It&rsquo;s better to keep message chunks slightly below the token limit since the token limit is shared between your message and ChatGPT&rsquo;s response.</li>
+<li><strong>Maintain context</strong> between chunks, e.g. avoid splitting a sentence in the middle.</li>
+</ol>
+<p>Each chunk is sent as a separate message in the conversation thread.</p>
+<h2 id="handling-responses">Handling responses</h2>
+<p>You send your chunks to ChatGPT using the OpenAI library&rsquo;s <code>ChatCompletion</code>. ChatGPT returns individual responses for each message, so you may want to process these by:</p>
+<ol>
+<li><strong>Concatenating responses</strong> in the order you sent them to get a coherent answer.</li>
+<li><strong>Manage conversation flow</strong> by keeping track of which response refers to which chunk.</li>
+<li><strong>Formatting the response</strong> to suit your desired output, e.g. replacing <code>\n</code> with line breaks.</li>
+</ol>
+<h2 id="putting-it-all-together">Putting it all together</h2>
+<p>Using the OpenAI API, you can send multiple messages to ChatGPT and ask it to wait for you to provide all of the data before answering your prompt. Being a language model, you can provide these instructions to ChatGPT in plain language. Here&rsquo;s a suggested script:</p>
+<blockquote>
+<p>Prompt: Summarize the following text for me</p>
+<p>To provide the context for the above prompt, I will send you text in parts. When I am finished, I will tell you &ldquo;ALL PARTS SENT&rdquo;. Do not answer until you have received all the parts.</p></blockquote>
+<p>I created <a href="https://github.com/victoriadrake/chatgptmax">a Python module, <code>chatgptmax</code></a>, that puts all this together. It breaks up a large amount of text by a given maximum token length and sends it in chunks to ChatGPT.</p>
+<p>You can install it with <code>pip install chatgptmax</code>, but here&rsquo;s the juicy part:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> openai
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> tiktoken
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set up your OpenAI API key</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Load your API key from an environment variable or secret management service</span>
+</span></span><span style="display:flex;"><span>openai<span style="color:#f92672">.</span>api_key <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_KEY&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">send</span>(
+</span></span><span style="display:flex;"><span>    prompt<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>    text_data<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>    chat_model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-3.5-turbo&#34;</span>,
+</span></span><span style="display:flex;"><span>    model_token_limit<span style="color:#f92672">=</span><span style="color:#ae81ff">8192</span>,
+</span></span><span style="display:flex;"><span>    max_tokens<span style="color:#f92672">=</span><span style="color:#ae81ff">2500</span>,
+</span></span><span style="display:flex;"><span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Send the prompt at the start of the conversation and then send chunks of text_data to ChatGPT via the OpenAI API.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    If the text_data is too long, it splits it into chunks and sends each chunk separately.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Args:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - prompt (str, optional): The prompt to guide the model&#39;s response.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - text_data (str, optional): Additional text data to be included.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - max_tokens (int, optional): Maximum tokens for each API call. Default is 2500.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - list or str: A list of model&#39;s responses for each chunk or an error message.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Check if the necessary arguments are provided</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> prompt:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Error: Prompt is missing. Please provide a prompt.&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> text_data:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Error: Text data is missing. Please provide some text data.&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Initialize the tokenizer</span>
+</span></span><span style="display:flex;"><span>    tokenizer <span style="color:#f92672">=</span> tiktoken<span style="color:#f92672">.</span>encoding_for_model(chat_model)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Encode the text_data into token integers</span>
+</span></span><span style="display:flex;"><span>    token_integers <span style="color:#f92672">=</span> tokenizer<span style="color:#f92672">.</span>encode(text_data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Split the token integers into chunks based on max_tokens</span>
+</span></span><span style="display:flex;"><span>    chunk_size <span style="color:#f92672">=</span> max_tokens <span style="color:#f92672">-</span> len(tokenizer<span style="color:#f92672">.</span>encode(prompt))
+</span></span><span style="display:flex;"><span>    chunks <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        token_integers[i : i <span style="color:#f92672">+</span> chunk_size]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">0</span>, len(token_integers), chunk_size)
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Decode token chunks back to strings</span>
+</span></span><span style="display:flex;"><span>    chunks <span style="color:#f92672">=</span> [tokenizer<span style="color:#f92672">.</span>decode(chunk) <span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> chunks]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    responses <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    messages <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: prompt},
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;To provide the context for the above prompt, I will send you text in parts. When I am finished, I will tell you &#39;ALL PARTS SENT&#39;. Do not answer until you have received all the parts.&#34;</span>,
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> chunks:
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chunk})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Check if total tokens exceed the model&#39;s limit and remove oldest chunks if necessary</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (
+</span></span><span style="display:flex;"><span>            sum(len(tokenizer<span style="color:#f92672">.</span>encode(msg[<span style="color:#e6db74">&#34;content&#34;</span>])) <span style="color:#66d9ef">for</span> msg <span style="color:#f92672">in</span> messages)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&gt;</span> model_token_limit
+</span></span><span style="display:flex;"><span>        ):
+</span></span><span style="display:flex;"><span>            messages<span style="color:#f92672">.</span>pop(<span style="color:#ae81ff">1</span>)  <span style="color:#75715e"># Remove the oldest chunk</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> openai<span style="color:#f92672">.</span>ChatCompletion<span style="color:#f92672">.</span>create(model<span style="color:#f92672">=</span>chat_model, messages<span style="color:#f92672">=</span>messages)
+</span></span><span style="display:flex;"><span>        chatgpt_response <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message[<span style="color:#e6db74">&#34;content&#34;</span>]<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>        responses<span style="color:#f92672">.</span>append(chatgpt_response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add the final &#34;ALL PARTS SENT&#34; message</span>
+</span></span><span style="display:flex;"><span>    messages<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;ALL PARTS SENT&#34;</span>})
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> openai<span style="color:#f92672">.</span>ChatCompletion<span style="color:#f92672">.</span>create(model<span style="color:#f92672">=</span>chat_model, messages<span style="color:#f92672">=</span>messages)
+</span></span><span style="display:flex;"><span>    final_response <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message[<span style="color:#e6db74">&#34;content&#34;</span>]<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>    responses<span style="color:#f92672">.</span>append(final_response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> responses
+</span></span></code></pre></div><p>Here&rsquo;s an example of how you can use this module with text data read from a file. (<code>chatgptmax</code> also provides a <a href="https://github.com/victoriadrake/chatgptmax/blob/4431af468435cd51d07779c6d721c8e0016d6bd6/chatgptmax.py#L68">convenience method</a> for getting text from a file.)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#75715e"># First, import the necessary modules and the function</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> chatgptmax <span style="color:#f92672">import</span> send
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define a function to read the content of a file</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">read_file_content</span>(file_path):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> open(file_path, <span style="color:#e6db74">&#39;r&#39;</span>, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>) <span style="color:#66d9ef">as</span> file:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> file<span style="color:#f92672">.</span>read()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Use the function</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Specify the path to your file</span>
+</span></span><span style="display:flex;"><span>    file_path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;path_to_your_file.txt&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Read the content of the file</span>
+</span></span><span style="display:flex;"><span>    file_content <span style="color:#f92672">=</span> read_file_content(file_path)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Define your prompt</span>
+</span></span><span style="display:flex;"><span>    prompt_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Summarize the following text for me:&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Send the file content to ChatGPT</span>
+</span></span><span style="display:flex;"><span>    responses <span style="color:#f92672">=</span> send(prompt<span style="color:#f92672">=</span>prompt_text, text_data<span style="color:#f92672">=</span>file_content)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Print the responses</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> response <span style="color:#f92672">in</span> responses:
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><h3 id="error-handling">Error handling</h3>
+<p>While the module is designed to handle most standard use cases, there are potential pitfalls to be aware of:</p>
+<ul>
+<li><strong>Incomplete sentences</strong>: If a chunk ends in the middle of a sentence, it might alter the meaning or context. To mitigate this, consider ensuring that chunks end at full stops or natural breaks in the text. You could do this by separating the text-chunking task into a separate function that:
+<ol>
+<li>Splits the text into sentences.</li>
+<li>Iterates over the sentences and adds them to a chunk until the chunk reaches the maximum size.</li>
+<li>Starts a new chunk when the current chunk reaches the maximum size or when adding another sentence would exceed the maximum size.</li>
+</ol>
+</li>
+<li><strong>API connectivity issues</strong>: There&rsquo;s always a possibility of timeouts or connectivity problems during API calls. If this is a significant issue for your application, you can include retry logic in your code. If an API call fails, the script could wait for a few seconds and then try again, ensuring that all chunks are processed.</li>
+<li><strong>Rate limits</strong>: Be mindful of <a href="https://platform.openai.com/docs/guides/rate-limits/overview">OpenAI API&rsquo;s rate limits</a>. If you&rsquo;re sending many chunks in rapid succession, you might hit these limits. Introducing a slight delay between calls or spreading out requests can help avoid this.</li>
+</ul>
+<h3 id="optimization">Optimization</h3>
+<p>As with any process, there&rsquo;s always room for improvement. Here are a couple of ways you might optimize the module&rsquo;s chunking and sending process further:</p>
+<ul>
+<li><strong>Parallelizing API calls</strong>: If <a href="https://platform.openai.com/docs/guides/rate-limits/overview">OpenAI API&rsquo;s rate limits</a> and your infrastructure allow, you could send multiple chunks simultaneously. This parallel processing can speed up the overall time it takes to get responses for all chunks. Unless you have access to OpenAI&rsquo;s <code>32k</code> models or need to use small chunk sizes, however, parallelism gains are likely to be minimal.</li>
+<li><strong>Caching mechanisms</strong>: If you find yourself sending the same or similar chunks frequently, consider implementing a caching system. By storing ChatGPT&rsquo;s responses for specific chunks, you can retrieve them instantly from the cache the next time, saving both time and API calls.</li>
+</ul>
+<h2 id="now-what">Now what</h2>
+<p>If you found your way here via search, you probably already have a use case in mind. Here are some other (startup) ideas:</p>
+<ul>
+<li><strong>You&rsquo;re a researcher</strong> who wants to save time by getting short summaries of many lengthy articles.</li>
+<li><strong>You&rsquo;re a legal professional</strong> who wants to analyze long contracts by extracting key points or clauses.</li>
+<li><strong>You&rsquo;re a financial analyst</strong> who wants to pull a quick overview of trends from a long report.</li>
+<li><strong>You&rsquo;re a writer</strong> who wants feedback on a new article or chapter&hellip; without having to actually show it to anyone yet.</li>
+</ul>
+<p>Do you have a use case I didn&rsquo;t list? <a href="/contact">Let me know about it!</a> In the meantime, have fun sending lots of text to ChatGPT.</p>
+]]></content></entry><entry><title type="html">Optimizing text for ChatGPT: NLP and text pre-processing techniques</title><link href="https://victoria.dev/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/"/><id>https://victoria.dev/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/</id><author><name>Victoria Drake</name></author><published>2023-09-19T04:46:36-05:00</published><updated>2023-09-19T04:46:36-05:00</updated><content type="html"><![CDATA[<p>In order for chatbots and voice assistants to be helpful, they need to be able to take in and understand our instructions in plain language using Natural Language Processing (NLP). ChatGPT relies on a blend of advanced algorithms and text preprocessing methods to make sense of our words. But just throwing a wall of text at it can be inefficient &ndash; you might be dumping in a lot of noise with that signal and hitting the text input limit.</p>
+<p>Text preprocessing can help shorten and refine your input, ensuring that ChatGPT can grasp the essence without getting overwhelmed. In this article, we&rsquo;ll explore these techniques, understand their importance, and see how they make your interactions with tools like ChatGPT more reliable and productive.</p>
+<h2 id="text-preprocessing">Text preprocessing</h2>
+<p>Text preprocessing prepares raw text data for analysis by NLP models. Generally, it distills everyday text (like full sentences) to make it more manageable or concise and meaningful. Techniques include:</p>
+<ul>
+<li><strong>Tokenization:</strong> splitting up text by sentences or paragraphs. For example, you could break down a lengthy legal document into individual clauses or sentences.</li>
+<li><strong>Extractive summarization:</strong> selecting key sentences from the text and discarding the rest. Instead of reading an entire 10-page document, extractive summarization could pinpoint the most crucial sentences and give you a concise overview without delving into the details.</li>
+<li><strong>Abstractive summarization:</strong> generating a concise representation of the text content, for example, turning a 10-page document into a brief paragraph that captures the document&rsquo;s essence in new wording.</li>
+<li><strong>Pruning:</strong> removing redundant or less relevant parts. For example, in a verbose email thread, pruning can help remove all the greetings, sign-offs, and other repetitive elements, leaving only the core content for analysis.</li>
+</ul>
+<p>While all these techniques can help reduce the size of raw text data, some of these techniques are easier to apply to general use cases than others. Let&rsquo;s examine how text preprocessing can help us send a large amount of text to ChatGPT.</p>
+<h2 id="tokenization-and-chatgpt-input-limits">Tokenization and ChatGPT input limits</h2>
+<p>In the realm of Natural Language Processing (NLP), a token is the basic unit of text that a system reads. At its simplest, you can think of a token as a word, but depending on the language and the specific tokenization method used, a token can represent a word, part of a word, or even multiple words.</p>
+<p>While in English we often equate tokens with words, in NLP, the concept is broader. A token can be as short as a single character or as long as a word. For example, with word tokenization, the sentence &ldquo;Unicode characters such as emojis are not indivisible. ✂️&rdquo; can be broken down into tokens like this: [&ldquo;Unicode&rdquo;, &ldquo;characters&rdquo;, &ldquo;such&rdquo;, &ldquo;as&rdquo;, &ldquo;emojis&rdquo;, &ldquo;are&rdquo;, &ldquo;not&rdquo;, &ldquo;indivisible&rdquo;, &ldquo;.&rdquo;, &ldquo;✂️&rdquo;]</p>
+<p>In another form called Byte-Pair Encoding (BPE), the same sentence is tokenized as: [&ldquo;Un&rdquo;, &ldquo;ic&rdquo;, &ldquo;ode&rdquo;, &quot; characters&quot;, &quot; such&quot;, &quot; as&quot;, &quot; em, &ldquo;oj&rdquo;, &ldquo;is&rdquo;, &quot; are&quot;, &quot; not&quot;, &quot; ind&quot;, &ldquo;iv&rdquo;, &ldquo;isible&rdquo;, &ldquo;.&rdquo;, &quot; �&quot;, &ldquo;�️&rdquo;]. The emoji itself is split into tokens containing its underlying bytes.</p>
+<p>Depending on the ChatGPT model chosen, your text input size is restricted by tokens. <a href="https://platform.openai.com/docs/models">Here are the docs containing current limits</a>. BPE is used by ChatGPT to determine token count, and we&rsquo;ll discuss it more thoroughly later. First, we can programmatically apply some preprocessing techniques to reduce our text input size and use fewer tokens.</p>
+<h2 id="a-general-programmatic-approach">A general programmatic approach</h2>
+<p>For a general approach that can be applied programmatically, pruning is a suitable preprocessing technique. One form is <strong>stop word removal,</strong> or removing common words that might not add significant meaning in certain contexts. For example, consider the sentence:</p>
+<p>&ldquo;I always enjoy having pizza with my friends on weekends.&rdquo;</p>
+<p>Stop words are often words that don&rsquo;t carry significant meaning on their own in a given context. In this sentence, words like &ldquo;I&rdquo;, &ldquo;always&rdquo;, &ldquo;enjoy&rdquo;, &ldquo;having&rdquo;, &ldquo;with&rdquo;, &ldquo;my&rdquo;, &ldquo;on&rdquo; are considered stop words.</p>
+<p>After removing the stop words, the sentence becomes:</p>
+<p>&ldquo;pizza friends weekends.&rdquo;</p>
+<p>Now, the sentence is distilled to its key components, highlighting the main subject (pizza) and the associated context (friends and weekends). If you find yourself wishing you could convince people to do this in real life (<em>cough</em>meetings<em>cough</em>)&hellip; you aren&rsquo;t alone.</p>
+<p>Stop word removal is straightforward to apply programmatically: given a list of stop words, examine some text input to see if it contains any of the stop words on your list. If it does, remove them, then return the altered text.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_stopwords</span>(text: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    stopwords <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;an&#34;</span>, <span style="color:#e6db74">&#34;and&#34;</span>, <span style="color:#e6db74">&#34;at&#34;</span>, <span style="color:#e6db74">&#34;but&#34;</span>, <span style="color:#e6db74">&#34;how&#34;</span>, <span style="color:#e6db74">&#34;in&#34;</span>, <span style="color:#e6db74">&#34;is&#34;</span>, <span style="color:#e6db74">&#34;on&#34;</span>, <span style="color:#e6db74">&#34;or&#34;</span>, <span style="color:#e6db74">&#34;the&#34;</span>, <span style="color:#e6db74">&#34;to&#34;</span>, <span style="color:#e6db74">&#34;what&#34;</span>, <span style="color:#e6db74">&#34;will&#34;</span>]
+</span></span><span style="display:flex;"><span>    tokens <span style="color:#f92672">=</span> text<span style="color:#f92672">.</span>split()
+</span></span><span style="display:flex;"><span>    clean_tokens <span style="color:#f92672">=</span> [t <span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> tokens <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> t <span style="color:#f92672">in</span> stopwords]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34; &#34;</span><span style="color:#f92672">.</span>join(clean_tokens)
+</span></span></code></pre></div><p>To see how effective stop word removal can be, I took the entire text of my <a href="https://techleaderdocs.com">Tech Leader Docs newsletter</a> (17,230 words consisting of 104,892 characters) and processed it using the above function. How effective was it? The resulting text contained 89,337 characters, which is about a 15% reduction in size.</p>
+<p>Other pruning techniques can also be applied programmatically. Removing punctuation, numbers, HTML tags, URLs and email addresses, or non-alphabetical characters are all valid pruning techniques that can be straightforward to apply. Here is a function that does just that:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">import</span> re
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_text</span>(text):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove URLs</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;http\S+&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove email addresses</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;\S+@\S+&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove everything that&#39;s not a letter (a-z, A-Z)</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;[^a-zA-Z\s]&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove whitespace, tabs, and new lines</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span><span style="color:#f92672">.</span>join(text<span style="color:#f92672">.</span>split())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> text
+</span></span></code></pre></div><p>What measure of length reduction might we be able to get from this additional processing? Applying these techniques to the remaining characters of Tech Leader Docs results in just 75,217 characters; an overall reduction of about 28% from the original text.</p>
+<p>More opinionated pruning, such as removing short words or specific words or phrases, can be tailored to a specific use case. These don&rsquo;t lend themselves well to general functions, however.</p>
+<p>Now that you have some text processing techniques in your toolkit, let&rsquo;s look at how a reduction in characters translates to fewer tokens used when it comes to ChatGPT. To understand this, we&rsquo;ll examine Byte-Pair Encoding.</p>
+<h2 id="byte-pair-encoding-bpe">Byte-Pair Encoding (BPE)</h2>
+<p>Byte-Pair Encoding (BPE) is a subword tokenization method. It was originally introduced for data compression but has since been adapted for tokenization in NLP tasks. It allows representing common words as tokens and splits more rare words into subword units. This enables a balance between character-level and word-level tokenization.</p>
+<p>Let&rsquo;s make that more concrete. Imagine you have a big box of LEGO bricks, and each brick represents a single letter or character. You&rsquo;re tasked with building words using these LEGO bricks. At first, you might start by connecting individual bricks to form words. But over time, you notice that certain combinations of bricks (or characters) keep appearing together frequently, like &ldquo;th&rdquo; in &ldquo;the&rdquo; or &ldquo;ing&rdquo; in &ldquo;running.&rdquo;</p>
+<p>BPE is like a smart LEGO-building buddy who suggests, &ldquo;Hey, since &rsquo;th&rsquo; and &lsquo;ing&rsquo; keep appearing together a lot, why don&rsquo;t we glue them together and treat them as a single piece?&rdquo; This way, the next time you want to build a word with &ldquo;the&rdquo; or &ldquo;running,&rdquo; you can use these glued-together pieces, making the process faster and more efficient.</p>
+<p>Colloquially, the BPE algorithm looks like this:</p>
+<ol>
+<li>Start with single characters.</li>
+<li>Observe which pairs of characters frequently appear together.</li>
+<li>Merge those frequent pairs together to treat them as one unit.</li>
+<li>Repeat this process until you have a mix of single characters and frequently occurring character combinations.</li>
+</ol>
+<p>BPE is a particularly powerful tokenization method, especially when dealing with diverse and extensive vocabularies. Here&rsquo;s why:</p>
+<ul>
+<li>Handling rare words: Traditional tokenization methods might stumble upon rare or out-of-vocabulary words. BPE, with its ability to break words down into frequent subword units, can represent these words without needing to have seen them before.</li>
+<li>Efficiency: By representing frequent word parts as single tokens, BPE can compress text more effectively. This is especially useful for models like ChatGPT, where token limits apply.</li>
+<li>Adaptability: BPE is language-agnostic. It doesn&rsquo;t rely on predefined dictionaries or vocabularies. Instead, it learns from the data, making it adaptable to various languages and contexts.</li>
+</ul>
+<p>In essence, BPE strikes a balance, offering the granularity of character-level tokenization and the context-awareness of word-level tokenization. This hybrid approach ensures that NLP models like ChatGPT can understand a wide range of texts while maintaining computational efficiency.</p>
+<h2 id="sending-lots-of-text-to-chatgpt">Sending lots of text to ChatGPT</h2>
+<p>At time of writing, a message to ChatGPT via its web interface has a maximum token length of 4,096 tokens. If we assume the prior mentioned percent reduction as an average, this means you could reduce text of up to 5,712 tokens down to the appropriate size with just text preprocessing.</p>
+<p>What about when this isn&rsquo;t enough? Beyond text preprocessing, larger input can be sent in chunks using the OpenAI API. In my next post, I&rsquo;ll show you how to build a Python module that does exactly that.</p>
+]]></content></entry><entry><title type="html">Measuring productivity with GitHub issues</title><link href="https://victoria.dev/posts/measuring-productivity-with-github-issues/"/><id>https://victoria.dev/posts/measuring-productivity-with-github-issues/</id><author><name>Victoria Drake</name></author><published>2021-08-30T05:35:02+00:00</published><updated>2021-08-30T05:35:02+00:00</updated><content type="html"><![CDATA[<p>How long does it take for a bug to get squashed, or for a pull request to be merged? What kind of issues take the longest to close?</p>
+<p>Most organizations want to improve productivity and output, but few technical teams seem to take a data-driven approach to discovering productivity bottlenecks. If you&rsquo;re looking to improve development velocity, a couple key metrics could help your team get unblocked. Here&rsquo;s how you can apply a smidge of data science to visualize how your repository is doing, and where improvements can be made.</p>
+<h2 id="getting-quality-data">Getting quality data</h2>
+<p>The first and most difficult part, as any data scientist would likely tell you, is ensuring the quality of your data. It&rsquo;s especially important to consider consistency: are dates throughout the dataset presented in a consistent format? Have tags or labels been applied under consistent rules? Does the dataset contain repeated values, empty values, or unmatched types?</p>
+<p>If your repository has previously changed up processes or standards, consider the timeframe of the data you collect. If labeling issues is done arbitrarily, those may not be a useful feature. While cleaning data is outside the scope of this article, I can, at least, help you painlessly collect it.</p>
+<p>I wrote a straightforward <a href="https://github.com/victoriadrake/got-issues/">Python utility</a> that uses the GitHub API to pull data for any repository. You can use this on the command line and output the data to a file. It uses the <a href="https://docs.github.com/en/rest/reference/issues#list-repository-issues">list repository issues endpoint (docs)</a>, which, perhaps confusingly, includes both issues and pull requests (PRs) for the repository. I get my data like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>$ python fetch.py -h
+</span></span><span style="display:flex;"><span>usage: fetch.py <span style="color:#f92672">[</span>-h<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>--token TOKEN<span style="color:#f92672">]</span> repository months
+</span></span><span style="display:flex;"><span>$ python fetch.py OWASP/wstg <span style="color:#ae81ff">24</span> &gt; data.json
+</span></span></code></pre></div><p>Using the GitHub API means less worry about standardization, for example, all the dates are expressed as ISO 8601. Now that you have some data to process, it&rsquo;s time to play with Pandas.</p>
+<h2 id="plotting-with-pandas">Plotting with Pandas</h2>
+<p>You can use a <a href="https://jupyter.org/">Jupyter Notebook</a> to do some simple calculations and data visualization.</p>
+<p>First, create the Notebook file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>touch stats.ipynb
+</span></span></code></pre></div><p>Open the file in your favorite IDE, or in your browser by running <code>jupyter notebook</code>.</p>
+<p>In the first code cell, import Pandas and load your data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_json(<span style="color:#e6db74">&#34;data.json&#34;</span>)
+</span></span><span style="display:flex;"><span>data
+</span></span></code></pre></div><p>You can then run that cell to see a preview of the data you collected.</p>
+<p>Pandas is a <a href="https://pandas.pydata.org/pandas-docs/stable/index.html">well-documented</a> data analysis library. With a little imagination and a few keyword searches, you can begin to measure all kinds of repository metrics. For this walk-through, here&rsquo;s how you can calculate and create a graph that shows the number of days an issue or PR remains open in your repository.</p>
+<p>Create a new code cell and, for each item in your <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html">Series</a>, subtract the date it was closed from the date it was created:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>duration <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>Series(data<span style="color:#f92672">.</span>closed_at <span style="color:#f92672">-</span> data<span style="color:#f92672">.</span>created_at)
+</span></span><span style="display:flex;"><span>duration<span style="color:#f92672">.</span>describe()
+</span></span></code></pre></div><p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.describe.html"><code>Series.describe()</code></a> will give you some summary statistics that look something like these (from <a href="https://github.com/python/mypy">mypy on GitHub</a>):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>count                           514
+</span></span><span style="display:flex;"><span>mean      5 days 08:04:17.239299610
+</span></span><span style="display:flex;"><span>std      14 days 12:04:22.979308668
+</span></span><span style="display:flex;"><span>min                 0 days 00:00:09
+</span></span><span style="display:flex;"><span>25%          0 days 00:47:46.250000
+</span></span><span style="display:flex;"><span>50%                 0 days 06:18:47
+</span></span><span style="display:flex;"><span>75%          2 days 20:22:49.250000
+</span></span><span style="display:flex;"><span>max               102 days 20:56:30
+</span></span></code></pre></div><p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.plot.html?"><code>Series.plot()</code></a> uses a specified plotting backend (<code>matplotlib</code> by default) to visualize your data. A histogram can be a helpful way to examine issue duration:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>duration<span style="color:#f92672">.</span>apply(<span style="color:#66d9ef">lambda</span> x: x<span style="color:#f92672">.</span>days)<span style="color:#f92672">.</span>plot(kind<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;hist&#34;</span>)
+</span></span></code></pre></div><p>This will plot a histogram that represents the frequency distribution of issues over days, which is one way you can tell how long most issues take to close. For example, mypy seems to handle the majority of issues and PRs within 10 days, with some outliers taking more than three months:</p>
+<p><img src="plot.png" alt="Histogram for mypy issues over the last six months"></p>
+<p>It would be interesting to visualize other repository data, such as its most frequent contributors, or most often used labels. Does a relationship exist between the author or reviewers of an issue and how quickly it is resolved? Does the presence of particular labels predict anything about the duration of the issue?</p>
+<h2 id="you-aim-for-what-you-measure">You aim for what you measure</h2>
+<p>Now that you have some data-driven superpowers, remember that it comes with great responsibility. Deciding what to measure is just as, if not more, important than measuring it.</p>
+<p>Consider how to translate the numbers you gather into productivity improvements. For example, if your metric is closing issues and PRs faster, what actions can you take to encourage the right behavior in your teams? I&rsquo;d suggest encouraging issues to be clearly defined, and pull requests to be small and have a well-contained scope, making them easier to understand and review.</p>
+<p>To prepare to accurately take measurements for your repository, establish consistent standards for labels, tags, milestones, and other features you might want to examine. Remember that meaningful results are more easily gleaned from higher quality data.</p>
+<p>Finally, have fun exercising your data science skills. Who knows what you can discover and improve upon next!</p>
+]]></content></entry><entry><title type="html">Do I raise or return errors in Python?</title><link href="https://victoria.dev/posts/do-i-raise-or-return-errors-in-python/"/><id>https://victoria.dev/posts/do-i-raise-or-return-errors-in-python/</id><author><name>Victoria Drake</name></author><published>2021-02-09T05:34:48-05:00</published><updated>2021-02-09T05:34:48-05:00</updated><content type="html"><![CDATA[<p>I hear this question a lot: &ldquo;Do I raise or return this error in Python?&rdquo;</p>
+<p>The right answer will depend on the goals of your application logic. You want to <strong>ensure your Python code doesn&rsquo;t fail silently,</strong> saving you and your teammates from having to hunt down deeply entrenched errors.</p>
+<p>Here&rsquo;s the difference between <code>raise</code> and <code>return</code> when handling failures in Python.</p>
+<h2 id="when-to-raise">When to raise</h2>
+<blockquote>
+<p>The <code>raise</code> statement allows the programmer to force a specific exception to occur. (<a href="https://docs.python.org/3/tutorial/errors.html#raising-exceptions">8.4 Raising Exceptions</a>)</p></blockquote>
+<p>Use <code>raise</code> when you know you want a specific behavior, such as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">TypeError</span>(<span style="color:#e6db74">&#34;Wanted strawberry, got grape.&#34;</span>)
+</span></span></code></pre></div><p>Raising an exception terminates the flow of your program, allowing the exception to bubble up the call stack. In the above example, this would let you explicitly handle <code>TypeError</code> later. If <code>TypeError</code> goes unhandled, code execution stops and you&rsquo;ll get an <em>unhandled exception</em> message.</p>
+<p>Raise is useful in cases where you want to define a certain behavior to occur. For example, you may choose to disallow certain words in a text field:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;raisins&#34;</span> <span style="color:#f92672">in</span> text_field:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">ValueError</span>(<span style="color:#e6db74">&#34;That word is not allowed here&#34;</span>)
+</span></span></code></pre></div><p>Raise takes an instance of an exception, or a derivative of the <a href="https://docs.python.org/3/library/exceptions.html#Exception">Exception class</a>. Here are all of <a href="https://docs.python.org/3/library/exceptions.html#bltin-exceptions">Python&rsquo;s built-in exceptions</a>.</p>
+<p>Raise can help you avoid writing functions that fail silently. For example, this code will not raise an exception if <code>JAM</code> doesn&rsquo;t exist:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sandwich_or_bust</span>(bread: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    jam <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;JAM&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> bread <span style="color:#f92672">+</span> str(jam) <span style="color:#f92672">+</span> bread
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>s <span style="color:#f92672">=</span> sandwich_or_bust(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\U0001F35E</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(s)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Prints &#34;🍞None🍞&#34; which is not very tasty.</span>
+</span></span></code></pre></div><p>To cause the <code>sandwich_or_bust()</code> function to actually bust, add a <code>raise</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sandwich_or_bust</span>(bread: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    jam <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;JAM&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> jam:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">ValueError</span>(<span style="color:#e6db74">&#34;There is no jam. Sad bread.&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> bread <span style="color:#f92672">+</span> str(jam) <span style="color:#f92672">+</span> bread
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>s <span style="color:#f92672">=</span> sandwich_or_bust(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\U0001F35E</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(s)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ValueError: There is no jam. Sad bread.</span>
+</span></span></code></pre></div><p>Any time your code interacts with an external variable, module, or service, there is a possibility of failure. You can use <code>raise</code> in an <code>if</code> statement to help ensure those failures aren&rsquo;t silent.</p>
+<h3 id="raise-in-try-and-except">Raise in <code>try</code> and <code>except</code></h3>
+<p>To handle a possible failure by taking an action if there is one, use a <code>try</code> &hellip; <code>except</code> statement.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    s <span style="color:#f92672">=</span> sandwich_or_bust(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\U0001F35E</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    print(s)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">ValueError</span>:
+</span></span><span style="display:flex;"><span>    buy_more_jam()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">raise</span>
+</span></span></code></pre></div><p>This lets you <code>buy_more_jam()</code> before re-raising the exception. If you want to propagate a caught exception, use <code>raise</code> without arguments to avoid possible loss of the stack trace.</p>
+<p>If you don&rsquo;t know that the exception will be a <code>ValueError</code>, you can also use a bare <code>except:</code> or catch any derivative of the <code>Exception</code> class with <code>except Exception:</code>. Whenever possible, it&rsquo;s better to raise and handle exceptions explicitly.</p>
+<p>Use <code>else</code> for code to execute if the <code>try</code> does not raise an exception. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    s <span style="color:#f92672">=</span> sandwich_or_bust(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\U0001F35E</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    print(s)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">ValueError</span>:
+</span></span><span style="display:flex;"><span>    buy_more_jam()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">raise</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Congratulations on your sandwich.&#34;</span>)
+</span></span></code></pre></div><p>You could also place the print line within the <code>try</code> block, however, this is less explicit.</p>
+<h2 id="when-to-return">When to return</h2>
+<p>When you use <code>return</code> in Python, you&rsquo;re giving back a value. A function returns to the location it was called from.</p>
+<p>While it&rsquo;s more idiomatic to <code>raise</code> errors in Python, there may be occasions where you find <code>return</code> to be more applicable.</p>
+<p>For example, if your Python code is interacting with other components that do not handle exception classes, you may want to return a message instead. Here&rsquo;s an example using a <code>try</code> &hellip; <code>except</code> statement:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Union
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">share_sandwich</span>(sandwich: int) <span style="color:#f92672">-&gt;</span> Union[float, <span style="color:#a6e22e">Exception</span>]:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>        bad_math <span style="color:#f92672">=</span> sandwich <span style="color:#f92672">/</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> bad_math
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> e
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>s <span style="color:#f92672">=</span> share_sandwich(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>print(s)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Prints &#34;division by zero&#34;</span>
+</span></span></code></pre></div><p>Note that when you return an <code>Exception</code> class object, you&rsquo;ll get a representation of its associated value, usually the first item in its list of arguments. In the example above, this is the string explanation of the exception. In some cases, it may be a tuple with other information about the exception.</p>
+<p>You may also use <code>return</code> to give a specific error object, such as with <a href="https://docs.djangoproject.com/en/3.1/ref/request-response/#httpresponse-subclasses"><code>HttpResponseNotFound</code> in Django</a>. For example, you may want to return a <code>404</code> instead of a <code>403</code> for security reasons:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> object<span style="color:#f92672">.</span>owner <span style="color:#f92672">!=</span> request<span style="color:#f92672">.</span>user:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> HttpResponseNotFound
+</span></span></code></pre></div><p>Using <code>return</code> can help you write appropriately noisy code when your function is expected to give back a certain value, and when interacting with outside elements.</p>
+<h2 id="the-most-important-part">The most important part</h2>
+<p>Silent failures create some of the most frustrating bugs to find and fix. You can help create a pleasant development experience for yourself and your team by using <code>raise</code> and <code>return</code> to <strong>ensure that errors are handled in your Python code.</strong></p>
+<p>I write about good development practices and how to improve productivity as a software developer. You can get these tips right in your inbox by signing up below!</p>
+<div class="form-container centered" style="border:none; box-shadow: none; background-color:transparent !important;" id="subscribe">
+    <iframe src="https://victoriadrake.substack.com/embed" width="480" height="320" style="border:1px solid #EEE; background-color:transparent !important;" frameborder="0" scrolling="no"></iframe>
+</div>
+]]></content></entry><entry><title type="html">Increase developer confidence with a great Django test suite</title><link href="https://victoria.dev/posts/increase-developer-confidence-with-a-great-django-test-suite/"/><id>https://victoria.dev/posts/increase-developer-confidence-with-a-great-django-test-suite/</id><author><name>Victoria Drake</name></author><published>2020-10-01T05:50:37-04:00</published><updated>2020-10-01T05:50:37-04:00</updated><content type="html"><![CDATA[<p>Done correctly, tests are one of your application&rsquo;s most valuable assets.</p>
+<p>The Django framework in particular offers your team the opportunity to create an efficient testing practice. Based on the Python standard library <code>unittest</code>, proper tests in Django are fast to write, faster to run, and can offer you a seamless continuous integration solution for taking the pulse of your developing application.</p>
+<p>With comprehensive tests, developers have higher confidence when pushing changes. I&rsquo;ve seen firsthand in my own teams that good tests can boost development velocity as a direct result of a better developer experience.</p>
+<p>In this article, I&rsquo;ll share my own experiences in building useful tests for Django applications, from the basics to the best possible execution. If you&rsquo;re using Django or building with it in your organization, you might like to read the rest of my <a href="/tags/django/">Django series</a>.</p>
+<h2 id="what-to-test">What to test</h2>
+<p>Tests are extremely important. Far beyond simply letting you know if a function works, tests can form the basis of your team&rsquo;s understanding of how your application is <em>intended</em> to work.</p>
+<p>Here&rsquo;s the main goal: if you hit your head and forgot everything about how your application works tomorrow, you should be able to regain most of your understanding by reading and running the tests you write today.</p>
+<p>Here are some questions that may be helpful to ask as you decide what to test:</p>
+<ul>
+<li>What is our customer supposed to be able to do?</li>
+<li>What is our customer <em>not</em> supposed to be able to do?</li>
+<li>What should this method, view, or logical flow achieve?</li>
+<li>When, how, or where is this feature supposed to execute?</li>
+</ul>
+<p>Tests that make sense for your application can help build developer confidence. With these sensible safeguards in place, developers make improvements more readily, and feel confident introducing innovative solutions to product needs. The result is an application that comes together faster, and features that are shipped often and with confidence.</p>
+<p><img src="pbj-tests.png" alt="A cartoon for peanut butter and jelly sandwich tests"></p>
+<h2 id="where-to-put-tests">Where to put tests</h2>
+<p>If you only have a few tests, you may organize your test files similarly to <a href="https://docs.djangoproject.com/en/3.1/ref/django-admin/#startapp">Django&rsquo;s default app template</a> by putting them all in a file called <code>tests.py</code>. This straightforward approach is best for smaller applications.</p>
+<p>As your application grows, you may like to split your tests into different files, or test modules. One method is to use a directory to organize your files, such as <code>projectroot/app/tests/</code>. The name of each test file within that directory should begin with <code>test</code>, for example, <code>test_models.py</code>.</p>
+<p>Besides being aptly named, Django will find these files using <a href="https://docs.python.org/3/library/unittest.html#unittest-test-discovery">built-in test discovery</a> based on the <code>unittest</code> module. All files in your application with names that begin with <code>test</code> will be collected into a test suite.</p>
+<p>This convenient test discovery allows you to place test files anywhere that makes sense for your application. As long as they&rsquo;re correctly named, Django&rsquo;s test utility can find and run them.</p>
+<h2 id="how-to-document-a-test">How to document a test</h2>
+<p>Use <a href="https://www.python.org/dev/peps/pep-0257/">docstrings</a> to explain what a test is intended to verify at a high level. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_create_user</span>(self):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Creating a new user object should also create an associated profile object&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...</span>
+</span></span></code></pre></div><p>These docstrings help you quickly understand what a test is supposed to be doing. Besides navigating the codebase, this helps to make it obvious when a test doesn&rsquo;t verify what the docstring says it should.</p>
+<p>Docstrings are also shown when the tests are being run, which can be helpful for logging and debugging.</p>
+<h2 id="what-a-test-needs-to-work">What a test needs to work</h2>
+<p>Django tests can be quickly set up using data created in the <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#django.test.TestCase.setUpTestData"><code>setUpTestData()</code> method</a>. You can use various approaches to create your test data, such as utilizing external files, or even hard-coding silly phrases or the names of your staff. Personally, I much prefer to use a fake-data-generation library, such as <a href="https://github.com/joke2k/faker/"><code>faker</code></a>.</p>
+<p>The proper set up of arbitrary testing data can help you ensure that you&rsquo;re testing your application functionality instead of accidentally testing test data. Because generators like <code>faker</code> add some degree of unexpectedness to your inputs, it can be more representative of real-world use.</p>
+<p>Here is an example set up for a test:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.test <span style="color:#f92672">import</span> TestCase
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> faker <span style="color:#f92672">import</span> Faker
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> app.models <span style="color:#f92672">import</span> MyModel, AnotherModel
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fake <span style="color:#f92672">=</span> Faker()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyModelTest</span>(TestCase):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">setUpTestData</span>(cls):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Quickly set up data for the whole TestCase&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        cls<span style="color:#f92672">.</span>user_first <span style="color:#f92672">=</span> fake<span style="color:#f92672">.</span>first_name()
+</span></span><span style="display:flex;"><span>        cls<span style="color:#f92672">.</span>user_last <span style="color:#f92672">=</span> fake<span style="color:#f92672">.</span>last_name()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_create_models</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Creating a MyModel object should also create AnotherModel object&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># In test methods, use the variables created above</span>
+</span></span><span style="display:flex;"><span>        test_object <span style="color:#f92672">=</span> MyModel<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>            first_name<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>user_first,
+</span></span><span style="display:flex;"><span>            last_name<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>user_last,
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># ...</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        another_model <span style="color:#f92672">=</span> AnotherModel<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(my_model<span style="color:#f92672">=</span>test_object)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>assertEqual(another_model<span style="color:#f92672">.</span>first_name, self<span style="color:#f92672">.</span>user_first)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># ...</span>
+</span></span></code></pre></div><p>Tests pass or fail based on the outcome of the assertion methods. You can use <a href="https://docs.python.org/3/library/unittest.html#assert-methods">Python&rsquo;s <code>unittest</code> methods</a>, and <a href="https://docs.djangoproject.com/en/3.1/topics/testing/tools/#assertions">Django&rsquo;s assertion methods</a>.</p>
+<p>For further guidance on writing tests, see <a href="https://docs.djangoproject.com/en/3.1/topics/testing/">Testing in Django</a>.</p>
+<h2 id="best-possible-execution-for-running-your-tests">Best possible execution for running your tests</h2>
+<p>Django&rsquo;s test suite is manually run with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>./manage.py test
+</span></span></code></pre></div><p>I rarely run my Django tests this way.</p>
+<p>The best, or most efficient, testing practice is one that occurs without you or your developers ever thinking, &ldquo;I need to run the tests first.&rdquo; The beauty of Django&rsquo;s near-effortless test suite set up is that it can be seamlessly run as a part of regular developer activities. This could be in a pre-commit hook, or in a continuous integration or deployment workflow.</p>
+<p>I&rsquo;ve previously written about how to use pre-commit hooks to <a href="/posts/technical-ergonomics-for-the-efficient-developer/">improve your developer ergonomics</a> and save your team some brainpower. Django&rsquo;s speedy tests can be run this way, and they become especially efficient if you can <a href="https://docs.djangoproject.com/en/3.1/ref/django-admin/#cmdoption-test-parallel">run tests in parallel</a>.</p>
+<p>Tests that run as part of a CI/CD workflow, for example, <a href="/posts/django-project-best-practices-to-keep-your-developers-happy/#continuous-testing-with-github-actions">on pull requests with GitHub Actions</a>, require no regular effort from your developers to remember to run tests at all. I&rsquo;m not sure how plainly I can put it &ndash; this one&rsquo;s literally a no-brainer.</p>
+<h2 id="testing-your-way-to-a-great-django-application">Testing your way to a great Django application</h2>
+<p>Tests are extremely important, and underappreciated. They can catch logical errors in your application. They can help explain and validate how concepts and features of your product actually function. Best of all, tests can boost developer confidence and development velocity as a result.</p>
+<p>The best tests are ones that are relevant, help to explain and define your application, and are run continuously without a second thought. I hope I&rsquo;ve now shown you how testing in Django can help you to achieve these goals for your team!</p>
+]]></content></entry><entry><title type="html">Django project best practices to keep your developers happy</title><link href="https://victoria.dev/posts/django-project-best-practices-to-keep-your-developers-happy/"/><id>https://victoria.dev/posts/django-project-best-practices-to-keep-your-developers-happy/</id><author><name>Victoria Drake</name></author><published>2020-09-22T04:55:19-04:00</published><updated>2020-09-22T04:55:19-04:00</updated><content type="html"><![CDATA[<p>Do you want your team to <em>enjoy</em> your development workflow? Do you think building software should be <em>fun and existentially fulfilling?</em> If so, <em>this is the post</em> for you!</p>
+<p>I&rsquo;ve been developing with Django for years, and I&rsquo;ve never been happier with my Django project set up than I am right now. Here&rsquo;s how I&rsquo;m making a day of developing with Django the most relaxing and enjoyable development experience possible for myself and my engineering team.</p>
+<h2 id="a-custom-cli-tool-for-your-django-project">A custom CLI tool for your Django project</h2>
+<p>Instead of typing:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>python3 -m venv env
+</span></span><span style="display:flex;"><span>source env/bin/activate
+</span></span><span style="display:flex;"><span>pip install -r requirements.txt
+</span></span><span style="display:flex;"><span>python3 manage.py makemigrations
+</span></span><span style="display:flex;"><span>python3 manage.py migrate
+</span></span><span style="display:flex;"><span>python3 manage.py collectstatic
+</span></span><span style="display:flex;"><span>python3 manage.py runserver
+</span></span></code></pre></div><p>Wouldn&rsquo;t it be much nicer to type:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>make start
+</span></span></code></pre></div><p>&hellip;and have all that happen for you? I think so!</p>
+<p>We can do that with a self-documenting Makefile! Here&rsquo;s one I frequently use when developing my Django applications, like <a href="https://applybyapi.com/">ApplyByAPI.com</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Makefile" data-lang="Makefile"><span style="display:flex;"><span>VENV <span style="color:#f92672">:=</span> env
+</span></span><span style="display:flex;"><span>BIN <span style="color:#f92672">:=</span> <span style="color:#66d9ef">$(</span>VENV<span style="color:#66d9ef">)</span>/bin
+</span></span><span style="display:flex;"><span>PYTHON <span style="color:#f92672">:=</span> <span style="color:#66d9ef">$(</span>BIN<span style="color:#66d9ef">)</span>/python
+</span></span><span style="display:flex;"><span>SHELL <span style="color:#f92672">:=</span> /bin/bash
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">include</span> <span style="color:#960050;background-color:#1e0010">.env</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> help
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">help</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Show this help
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    @egrep -h <span style="color:#e6db74">&#39;\s##\s&#39;</span> <span style="color:#66d9ef">$(</span>MAKEFILE_LIST<span style="color:#66d9ef">)</span> | awk <span style="color:#e6db74">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> venv
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">venv</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Make a new virtual environment
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    python3 -m venv <span style="color:#66d9ef">$(</span>VENV<span style="color:#66d9ef">)</span> <span style="color:#f92672">&amp;&amp;</span> source <span style="color:#66d9ef">$(</span>BIN<span style="color:#66d9ef">)</span>/activate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> install
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">install</span><span style="color:#f92672">:</span> venv <span style="color:#75715e">## Make venv and install requirements
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">$(</span>BIN<span style="color:#66d9ef">)</span>/pip install --upgrade -r requirements.txt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">freeze</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Pin current dependencies
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">$(</span>BIN<span style="color:#66d9ef">)</span>/pip freeze &gt; requirements.txt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">migrate</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Make and run migrations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">$(</span>PYTHON<span style="color:#66d9ef">)</span> manage.py makemigrations
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">$(</span>PYTHON<span style="color:#66d9ef">)</span> manage.py migrate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">db-up</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Pull and start the Docker Postgres container in the background
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    docker pull postgres
+</span></span><span style="display:flex;"><span>    docker-compose up -d
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">db-shell</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Access the Postgres Docker database interactively with psql. Pass in DBNAME=&lt;name&gt;.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    docker exec -it container_name psql -d <span style="color:#66d9ef">$(</span>DBNAME<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> test
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">test</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Run tests
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">$(</span>PYTHON<span style="color:#66d9ef">)</span> manage.py test application --verbosity<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> --parallel --failfast
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> run
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">run</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Run the Django server
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">$(</span>PYTHON<span style="color:#66d9ef">)</span> manage.py runserver
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">start</span><span style="color:#f92672">:</span> install migrate run <span style="color:#75715e">## Install requirements, apply migrations, then start development server
+</span></span></span></code></pre></div><p>You&rsquo;ll notice the presence of the line <code>include .env</code> above. This ensures <code>make</code> has access to environment variables stored in a file called <code>.env</code>. This allows Make to utilize these variables in its commands, for example, the name of my virtual environment, or to pass in <code>$(DBNAME)</code> to <code>psql</code>.</p>
+<p>What&rsquo;s with that weird &ldquo;<code>##</code>&rdquo; comment syntax? A Makefile like this gives you a handy suite of command-line aliases you can check in to your Django project. It&rsquo;s very useful so long as you&rsquo;re able to remember what all those aliases are.</p>
+<p>The <code>help</code> command above, which runs by default, prints a helpful list of available commands when you run <code>make</code> or <code>make help</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>help                 Show this help
+</span></span><span style="display:flex;"><span>venv                 Make a new virtual environment
+</span></span><span style="display:flex;"><span>install              Make venv and install requirements
+</span></span><span style="display:flex;"><span>migrate              Make and run migrations
+</span></span><span style="display:flex;"><span>db-up                Pull and start the Docker Postgres container in the background
+</span></span><span style="display:flex;"><span>db-shell             Access the Postgres Docker database interactively with psql
+</span></span><span style="display:flex;"><span>test                 Run tests
+</span></span><span style="display:flex;"><span>run                  Run the Django server
+</span></span><span style="display:flex;"><span>start                Install requirements, apply migrations, then start development server
+</span></span></code></pre></div><p>All the usual Django commands are covered, and we&rsquo;ve got a <code>test</code> command that runs our tests with the options we prefer. Brilliant.</p>
+<p>You can read my full <a href="/posts/how-to-create-a-self-documenting-makefile/">post about self-documenting Makefiles here</a>, which also includes an example Makefile using <code>pipenv</code>.</p>
+<h2 id="save-your-brainpower-with-pre-commit-hooks">Save your brainpower with pre-commit hooks</h2>
+<p>I previously wrote about some <a href="/posts/technical-ergonomics-for-the-efficient-developer/">technical ergonomics</a> that can make it a lot easier for teams to develop great software.</p>
+<p>One area that&rsquo;s a no-brainer is using pre-commit hooks to lint code prior to checking it in. This helps to ensure the quality of the code your developers check in, but most importantly, ensures that no one on your team is spending time trying to remember if it should be single or double quotes or where to put a line break.</p>
+<p>The confusingly-named <a href="https://pre-commit.com/">pre-commit framework</a> is an otherwise fantastic way to keep hooks (which are not included in cloned repositories) consistent across local environments.</p>
+<p>Here is my configuration file, <code>.pre-commit-config.yaml</code>, for my Django projects:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">fail_fast</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">repos</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">https://github.com/pre-commit/pre-commit-hooks</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">rev</span>: <span style="color:#ae81ff">v3.1.0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">hooks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">id</span>: <span style="color:#ae81ff">detect-aws-credentials</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">https://github.com/psf/black</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">rev</span>: <span style="color:#ae81ff">19.</span><span style="color:#ae81ff">3b0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">hooks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">id</span>: <span style="color:#ae81ff">black</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">https://github.com/asottile/blacken-docs</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">rev</span>: <span style="color:#ae81ff">v1.7.0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">hooks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">id</span>: <span style="color:#ae81ff">blacken-docs</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">additional_dependencies</span>: [<span style="color:#ae81ff">black==19.3b0]</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">local</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">hooks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">id</span>: <span style="color:#ae81ff">markdownlint</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">markdownlint</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">description</span>: <span style="color:#e6db74">&#34;Lint Markdown files&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">entry</span>: <span style="color:#ae81ff">markdownlint &#39;**/*.md&#39; --fix --ignore node_modules --config &#34;./.markdownlint.json&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">language</span>: <span style="color:#ae81ff">node</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">types</span>: [<span style="color:#ae81ff">markdown]</span>
+</span></span></code></pre></div><p>These hooks check for accidental secret commits, format Python files using <a href="https://github.com/psf/black">Black</a>, format Python snippets in Markdown files using <a href="https://github.com/asottile/blacken-docs"><code>blacken-docs</code></a>, and <a href="https://github.com/igorshubovych/markdownlint-cli">lint Markdown files</a> as well. To install them, just type <code>pre-commit install</code>.</p>
+<p>There are likely even more useful hooks available for your particular use case: see <a href="https://pre-commit.com/hooks.html">supported hooks</a> to explore.</p>
+<h2 id="useful-gitignores">Useful gitignores</h2>
+<p>An underappreciated way to improve your team&rsquo;s daily development experience is to make sure your project uses a well-rounded <code>.gitignore</code> file. It can help prevent files containing secrets from being committed, and can additionally save developers hours of tedium by ensuring you&rsquo;re never sifting through a <code>git diff</code> of generated files.</p>
+<p>To efficiently create a <a href="https://www.toptal.com/developers/gitignore/api/python,django">gitignore for Python and Django projects</a>, Toptal&rsquo;s <a href="https://gitignore.io">gitignore.io</a> can be a nice resource for generating a robust <code>.gitignore</code> file.</p>
+<p>I still recommend examining the generated results yourself to ensure that ignored files suit your use case, and that nothing you want ignored is commented out.</p>
+<h2 id="continuous-testing-with-github-actions">Continuous testing with GitHub Actions</h2>
+<p>If your team works on GitHub, setting up a testing process with Actions is low-hanging fruit.</p>
+<p>Tests that run in a consistent environment on every pull request can help eliminate &ldquo;works on my machine&rdquo; conundrums, as well as ensure no one&rsquo;s sitting around waiting for a test to run locally.</p>
+<p>A hosted CI environment like GitHub Actions can also help when running integration tests that require using managed services resources. You can use <a href="https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets">encrypted secrets in a repository</a> to grant the Actions runner access to resources in a testing environment, without worrying about creating testing resources and access keys for each of your developers to use.</p>
+<p>I&rsquo;ve written on many occasions about setting up Actions workflows, including <a href="/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">using one to run your Makefile</a>, and <a href="/blog/publishing-github-event-data-with-github-actions-and-pages/">how to integrate GitHub event data</a>. GitHub even <a href="https://github.blog/2020-06-26-github-action-hero-victoria-drake/">interviewed me about Actions</a> once.</p>
+<p>For Django projects, here&rsquo;s a GitHub Actions workflow that runs tests with a consistent Python version whenever someone opens a pull request in the repository.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">name</span>: <span style="color:#ae81ff">Run Django tests</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">on</span>: <span style="color:#ae81ff">pull_request</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">jobs</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">test</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">runs-on</span>: <span style="color:#ae81ff">ubuntu-latest</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">steps</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@v2</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Set up Python</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/setup-python@v2</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">python-version</span>: <span style="color:#e6db74">&#39;3.8&#39;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Install dependencies</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">run</span>: <span style="color:#ae81ff">make install</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Run tests</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">run</span>: <span style="color:#ae81ff">make test</span>
+</span></span></code></pre></div><p>For the installation and test commands, I&rsquo;ve simply utilized the <a href="#a-custom-cli-tool-for-your-django-project">Makefile</a> that&rsquo;s been checked in to the repository. A benefit of using your Makefile commands in your CI test workflows is that you only need to keep them updated in one place &ndash; your Makefile! No more &ldquo;why is this working locally but not in CI??!?&rdquo; headaches.</p>
+<p>If you want to step up your security game, you can add <a href="https://github.com/victoriadrake/django-security-check">Django Security Check</a> as an Action too.</p>
+<h2 id="set-up-your-django-project-for-success">Set up your Django project for success</h2>
+<p>Want to help keep your development team happy? Set them up for success with these best practices for Django development. Remember, an ounce of brainpower is worth a pound of software!</p>
+]]></content></entry><entry><title type="html">Manipulating data with Django migrations</title><link href="https://victoria.dev/posts/manipulating-data-with-django-migrations/"/><id>https://victoria.dev/posts/manipulating-data-with-django-migrations/</id><author><name>Victoria Drake</name></author><published>2020-09-14T02:12:57-04:00</published><updated>2020-09-14T02:12:57-04:00</updated><content type="html"><![CDATA[<p>Growing, successful applications are a lovely problem to have. As a product develops, it tends to accumulate complication the way your weekend cake project accumulates layers of frosting. Thankfully, Django, my favorite batteries-included framework, handles complexity pretty well.</p>
+<p>Django <a href="/posts/writing-efficient-django/#django-models">models help humans work with data in a way that makes sense to our brains</a>, and the framework offers plenty of classes you can inherit to help you rapidly develop a robust application from scratch. As for developing on existing Django applications, there&rsquo;s a feature for that, too. In this article, we&rsquo;ll cover how to use Django migrations to update your existing models and database.</p>
+<h2 id="whats-under-the-hood">What&rsquo;s under the hood</h2>
+<p>Django migrations are Python files that help you add and change things in your database tables to reflect changes in your Django models. To understand how Django migrations help you work with data, it may be helpful to understand the underlying structures we&rsquo;re working with.</p>
+<h3 id="whats-a-database-table">What&rsquo;s a database table</h3>
+<p>If you&rsquo;ve laid eyes on a spreadsheet before, you&rsquo;re already most of the way to understanding a database table. In a relational database, for example, a PostgreSQL database, you can expect to see data organized into columns and rows. A relational database table may have a set number of columns and any number of rows.</p>
+<p>In Django, each model is its own table. For example, here&rsquo;s a Django model:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Lunch</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    left_side <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    center <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    right_side <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>Each field is a column, and each row is a Django object instance of that model. Here&rsquo;s a representation of a database table for the Django model &ldquo;Lunch&rdquo; above. In the database, its name would be <code>lunch_table</code>.</p>
+<table>
+  <thead>
+      <tr>
+          <th>id</th>
+          <th>left_side</th>
+          <th>center</th>
+          <th>right_side</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td>Fork</td>
+          <td>Plate</td>
+          <td>Spoon</td>
+      </tr>
+  </tbody>
+</table>
+<p>The model <code>Lunch</code> has three fields: <code>left_side</code>, <code>center</code>, and <code>right-side</code>. One instance of a <code>Lunch</code> object would have &ldquo;Fork&rdquo; for the <code>left_side</code>, a &ldquo;Plate&rdquo; for the <code>center</code>, and &ldquo;Spoon&rdquo; for the <code>right_side</code>. Django <a href="https://docs.djangoproject.com/en/3.2/topics/db/models/#automatic-primary-key-fields">automatically adds an <code>id</code> field</a> if you don&rsquo;t specify a primary key.</p>
+<p>If you wanted to change the name of your Lunch model, you would do so in your <code>models.py</code> code. For example, change &ldquo;Lunch&rdquo; to &ldquo;Dinner,&rdquo; then <a href="https://docs.djangoproject.com/en/3.2/ref/django-admin/#makemigrations">run <code>python manage.py makemigrations</code></a>. You&rsquo;ll see:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>python manage.py makemigrations
+</span></span><span style="display:flex;"><span>Did you rename the backend.Lunch model to Dinner? [y/N] y
+</span></span><span style="display:flex;"><span>Migrations for &#39;backend&#39;:
+</span></span><span style="display:flex;"><span>  backend/migrations/0003_auto_20200922_2331.py
+</span></span><span style="display:flex;"><span>    - Rename model Lunch to Dinner
+</span></span></code></pre></div><p>Django automatically generates the appropriate migration files. The relevant line of the generated migrations file in this case would look like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>migrations<span style="color:#f92672">.</span>RenameModel(old_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Lunch&#34;</span>, new_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Dinner&#34;</span>),
+</span></span></code></pre></div><p>This operation would rename our &ldquo;Lunch&rdquo; model to &ldquo;Dinner&rdquo; while keeping everything else the same. But what if you also wanted to change the structure of the database table itself, its schema, as well as make sure that existing data ends up in the right place on your Dinner table?</p>
+<p>Let&rsquo;s explore how to turn our Lunch model into a Dinner model that looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Dinner</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    top_left <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    top_center <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    top_right <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    bottom_left <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    bottom_center <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    bottom_right <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>&hellip;with a database table that would look like this:</p>
+<table>
+  <thead>
+      <tr>
+          <th>id</th>
+          <th>top_left</th>
+          <th>top_center</th>
+          <th>top_right</th>
+          <th>bottom_left</th>
+          <th>bottom_center</th>
+          <th>bottom_right</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td>Bread plate</td>
+          <td>Spoon</td>
+          <td>Glass</td>
+          <td>Fork</td>
+          <td>Plate</td>
+          <td>Knife</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="manipulating-data-with-django-migrations">Manipulating data with Django migrations</h2>
+<p>Before you begin to manipulate your data, it&rsquo;s always a good idea to create a backup of your database that you can restore in case something goes wrong. There are various ways to do this depending on the database you&rsquo;re using. You can typically find instructions by searching for <code>&lt;your database name&gt;</code> and keywords like <code>backup</code>, <code>recovery</code>, or <code>snapshot</code>.</p>
+<p>In order to design your migration, it&rsquo;s helpful to become familiar with the available <a href="https://docs.djangoproject.com/en/3.2/ref/migration-operations/">migration operations</a>. Migrations are run step-by-step, and each operation is some flavor of adding, removing, or altering data. Like a strategic puzzle, it&rsquo;s important to make model changes one step at a time so that the generated migrations have the correct result.</p>
+<p>We&rsquo;ve already renamed our model successfully. Now, we&rsquo;ll rename the fields that hold the data we want to retain:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Dinner</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    bottom_left <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    bottom_center <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    top_center <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>Django is sometimes smart enough to determine the old and new field names correctly. You&rsquo;ll be asked for confirmation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>python manage.py makemigrations
+</span></span><span style="display:flex;"><span>Did you rename dinner.center to dinner.bottom_center (a CharField)? [y/N] y
+</span></span><span style="display:flex;"><span>Did you rename dinner.left_side to dinner.bottom_left (a CharField)? [y/N] y
+</span></span><span style="display:flex;"><span>Did you rename dinner.right_side to dinner.top_center (a CharField)? [y/N] y
+</span></span><span style="display:flex;"><span>Migrations for &#39;backend&#39;:
+</span></span><span style="display:flex;"><span>  backend/migrations/0004_auto_20200914_2345.py
+</span></span><span style="display:flex;"><span>    - Rename field center on dinner to bottom_center
+</span></span><span style="display:flex;"><span>    - Rename field left_side on dinner to bottom_left
+</span></span><span style="display:flex;"><span>    - Rename field right_side on dinner to top_center
+</span></span></code></pre></div><p>In some cases, you&rsquo;ll want to try renaming the field and running <code>makemigrations</code> one at a time.</p>
+<p>Now that the existing fields have been migrated to their new names, add the remaining fields to the model:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Dinner</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    top_left <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    top_center <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    top_right <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    bottom_left <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    bottom_center <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    bottom_right <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>, null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>Running <code>makemigrations</code> again now gives us:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>python manage.py makemigrations
+</span></span><span style="display:flex;"><span>Migrations for &#39;backend&#39;:
+</span></span><span style="display:flex;"><span>  backend/migrations/0005_auto_20200914_2351.py
+</span></span><span style="display:flex;"><span>    - Add field bottom_right to dinner
+</span></span><span style="display:flex;"><span>    - Add field top_left to dinner
+</span></span><span style="display:flex;"><span>    - Add field top_right to dinner
+</span></span></code></pre></div><p>You&rsquo;re done! By generating Django migrations, you&rsquo;ve successfully set up your <code>dinner_table</code> and moved existing data to its new spot.</p>
+<h2 id="additional-complexity">Additional complexity</h2>
+<p>You&rsquo;ll notice that our Lunch and Dinner models are not very complex. Out of Django&rsquo;s many <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#field-types">model field options</a>, we&rsquo;re just using <code>CharField</code>. We also set <code>null=True</code> to let Django store empty values as <code>NULL</code> in the database.</p>
+<p>Django migrations can handle additional complexity, such as changing field types, and whether a blank or null value is permitted. I keep Django&rsquo;s <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#">model field reference</a> handy as I work with varying types of data and different use cases.</p>
+<h2 id="de-mystified-migrations">De-mystified migrations</h2>
+<p>I hope this article has helped you better understand Django migrations and how they work!</p>
+<p>Now that you can change models and manipulate existing data in your Django application, be sure to use your powers wisely! Backup your database, research and plan your migrations, and always run tests before working with customer data. By doing so, you have the potential to enable your application to grow &ndash; with manageable levels of complexity.</p>
+]]></content></entry><entry><title type="html">Writing efficient Django</title><link href="https://victoria.dev/posts/writing-efficient-django/"/><id>https://victoria.dev/posts/writing-efficient-django/</id><author><name>Victoria Drake</name></author><published>2020-07-09T04:02:47-05:00</published><updated>2020-07-09T04:02:47-05:00</updated><content type="html"><![CDATA[<p>I like Django. It&rsquo;s a well-considered and intuitive framework with a name I can pronounce out loud. You can use it to quickly spin up a weekend-sized project, and you can still use it to run <a href="https://applybyapi.com">full-blown production applications</a> at scale. I&rsquo;ve done both these things, and over the years I&rsquo;ve discovered how to use some of Django&rsquo;s features for maximum efficiency. These are:</p>
+<ul>
+<li><a href="#class-based-versus-function-based-views">Class-based versus function-based views</a></li>
+<li><a href="#django-models">Django models</a></li>
+<li><a href="#retrieving-objects-with-queries">Retrieving objects with queries</a></li>
+</ul>
+<p>Understanding these main features are the building blocks for maximizing development efficiency with Django. They&rsquo;ll build the foundation for you to <a href="/posts/increase-developer-confidence-with-a-great-django-test-suite/">test efficiently</a> and <a href="/blog/django-project-best-practices-to-keep-your-developers-happy/">create an awesome development experience for your engineers</a>. Let&rsquo;s look at how these tools let you create a performant Django application that&rsquo;s pleasant to build and maintain.</p>
+<h2 id="class-based-versus-function-based-views">Class-based versus function-based views</h2>
+<p>Remember that Django is all Python under the hood. When it comes to views, you&rsquo;ve got two choices: <a href="https://docs.djangoproject.com/en/3.2/topics/http/views/">view functions</a> (sometimes called &ldquo;function-based views&rdquo;), or <a href="https://docs.djangoproject.com/en/3.2/topics/class-based-views/">class-based views</a>.</p>
+<p>Years ago when I first built <a href="https://applybyapi.com">ApplyByAPI</a>, it was initially composed entirely of function-based views. These offer granular control, and are good for implementing complex logic; just as in a Python function, you have complete control (for better or worse) over what the view does. With great control comes great responsibility, and function-based views can be a little tedious to use. You&rsquo;re responsible for writing all the necessary methods for the view to work - this is what allows you to completely tailor your application.</p>
+<p>In the case of ApplyByAPI, there were only a sparse few places where that level of tailored functionality was really necessary. Everywhere else, function-based views began making my life harder. Writing what is essentially a custom view for run-of-the-mill operations like displaying data on a list page became tedious, repetitive, and error-prone.</p>
+<p>With function-based views, you&rsquo;ll need figure out which Django methods to implement in order to handle requests and pass data to views. Unit testing can take some work to write. In short, the granular control that function-based views offer also requires some granular tedium to properly implement.</p>
+<p>I ended up holding back ApplyByAPI while I refactored the majority of the views into class-based views. This was not a small amount of work and refactoring, but when it was done, I had a bunch of tiny views that made a huge difference. I mean, just look at this one:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ApplicationsList</span>(ListView):
+</span></span><span style="display:flex;"><span>    model <span style="color:#f92672">=</span> Application
+</span></span><span style="display:flex;"><span>    template_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;applications.html&#34;</span>
+</span></span></code></pre></div><p>It&rsquo;s three lines. My developer ergonomics, and my life, got a lot easier.</p>
+<p>You may think of class-based views as templates that cover most of the functionality any app needs. There are views for displaying lists of things, for viewing a thing in detail, and <a href="https://docs.djangoproject.com/en/3.2/ref/class-based-views/generic-editing/">editing views</a> for performing CRUD (Create, Read, Update, Delete) operations. Because implementing one of these generic views takes only a few lines of code, my application logic became dramatically succinct. This gave me less repeated code, fewer places for something to go wrong, and a more manageable application in general.</p>
+<p>Class-based views are fast to implement and use. The built-in class-based generic views may require less work to test, since you don&rsquo;t need to write tests for the base view Django provides. (Django does its own tests for that; no need for your app to double-check.) To tweak a generic view to your needs, you can <a href="https://docs.djangoproject.com/en/3.2/topics/class-based-views/#subclassing-generic-views">subclass a generic view</a> and override attributes or methods. In my case, since I only needed to write tests for any customizations I added, my test files became dramatically shorter, as did the time and resources it took to run them.</p>
+<p>When you&rsquo;re weighing the choice between function-based or class-based views, consider the amount of customization the view needs, and the future work that will be necessary to test and maintain it. If the logic is common, you may be able to hit the ground running with a generic class-based view. If you need sufficient granularity that re-writing a base view&rsquo;s methods would make it overly complicated, consider a function-based view instead.</p>
+<h2 id="django-models">Django models</h2>
+<p><a href="https://docs.djangoproject.com/en/3.2/topics/db/models/">Models</a> organize your Django application&rsquo;s central concepts to help make them flexible, robust, and easy to work with. If used wisely, models are a powerful way to collate your data into a definitive source of truth.</p>
+<p>Like views, Django provides some built-in model types for the convenience of implementing basic authentication, including the <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/auth/">User</a> and <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/auth/">Permission</a> models. For everything else, you can create a model that reflects your concept by <a href="https://docs.djangoproject.com/en/3.2/topics/db/models/#model-inheritance">inheriting from a parent Model class</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StaffMember</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    user <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>OneToOneField(User, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE)
+</span></span><span style="display:flex;"><span>    company <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>OneToOneField(Company, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>company<span style="color:#f92672">.</span>name <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; - &#34;</span> <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>email
+</span></span></code></pre></div><p>When you create a custom model in Django, you subclass <a href="https://github.com/django/django/blob/master/django/db/models/base.py">Django&rsquo;s Model class</a> and take advantage of all its power. Each model you create generally maps to a database table. Each attribute is a database field. This gives you the ability to create objects to work with that humans can better understand.</p>
+<p>You can make a model useful to you by defining its fields. Many <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#model-field-types">built-in field types</a> are conveniently provided. These help Django figure out the data type, the HTML <a href="https://docs.djangoproject.com/en/3.2/ref/forms/widgets/">widget</a> to use when rendering a form, and even <a href="https://docs.djangoproject.com/en/3.2/ref/forms/validation/">form validation</a> requirements. If you need to, you can <a href="https://docs.djangoproject.com/en/3.2/howto/custom-model-fields/">write custom model fields</a>.</p>
+<p>Database <a href="https://docs.djangoproject.com/en/3.2/topics/db/models/#relationships">relationships</a> can be defined using a <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#django.db.models.ForeignKey">ForeignKey</a> field (many-to-one), or a <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#django.db.models.ManyToManyField">ManyToManyField</a> (give you three guesses). If those don&rsquo;t suffice, there&rsquo;s also a <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#django.db.models.OneToOneField">OneToOneField</a>. Together, these allow you to define relations between your models with levels of complexity limited only by your imagination. (Depending on the imagination you have, this may or may not be an advantage.)</p>
+<h2 id="retrieving-objects-with-queries">Retrieving objects with queries</h2>
+<p>Use your model&rsquo;s Manager (<code>objects</code> by default) to <a href="https://docs.djangoproject.com/en/3.2/topics/db/queries/#retrieving-objects">construct a QuerySet</a>. This is a representation of objects in your database that you can refine, using methods, to retrieve specific subsets. All available methods are in the <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#django.db.models.query.QuerySet">QuerySet API</a> and can be chained together for even more fun.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(
+</span></span><span style="display:flex;"><span>    type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;new&#34;</span>
+</span></span><span style="display:flex;"><span>)<span style="color:#f92672">.</span>exclude(
+</span></span><span style="display:flex;"><span>    title__startswith<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Blockchain&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>Some methods return new QuerySets, such as <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#filter"><code>filter()</code></a>, or <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#exclude"><code>exclude()</code></a>. Chaining these can give you powerful queries without affecting performance, as QuerySets aren&rsquo;t fetched from the database <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#when-querysets-are-evaluated">until they are evaluated</a>. Methods that evaluate a QuerySet include <code>get()</code>, <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#count"><code>count()</code></a>, <code>len()</code>, <code>list()</code>, or <code>bool()</code>.</p>
+<p>Iterating over a QuerySet also evaluates it, so avoid doing so where possible to improve query performance. For instance, if you just want to know if an object is present, you can use <code>exists()</code> to avoid iterating over database objects.</p>
+<p>Use <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#django.db.models.query.QuerySet.get"><code>get()</code></a> in cases where you want to retrieve a specific object. This method raises <a href="https://docs.djangoproject.com/en/3.2/ref/exceptions/#django.core.exceptions.MultipleObjectsReturned"><code>MultipleObjectsReturned</code></a> if something unexpected happens, as well as the <code>DoesNotExist</code> exception, if, take a guess.</p>
+<p>If you&rsquo;d like to get an object that may not exist in the context of a user&rsquo;s request, use the convenient <a href="https://docs.djangoproject.com/en/3.2/topics/http/shortcuts/#get-object-or-404"><code>get_object_or_404()</code></a> or <a href="https://docs.djangoproject.com/en/3.2/topics/http/shortcuts/#get-list-or-404"><code>get_list_or_404()</code></a> which raises <a href="https://docs.djangoproject.com/en/3.2/topics/http/views/#django.http.Http404"><code>Http404</code></a> instead of <a href="https://docs.djangoproject.com/en/3.2/ref/models/instances/#django.db.models.Model.DoesNotExist"><code>DoesNotExist</code></a>. These helpful <a href="https://docs.djangoproject.com/en/3.2/topics/http/shortcuts/">shortcuts</a> are suited to just this purpose. To create an object that doesn&rsquo;t exist, there&rsquo;s also the convenient <a href="https://docs.djangoproject.com/en/3.2/ref/models/querysets/#get-or-create"><code>get_or_create()</code></a>.</p>
+<!-- omit in toc -->
+<h2 id="efficient-essentials">Efficient essentials</h2>
+<p>You&rsquo;ve now got a handle on these three essential tools for building your efficient Django application &ndash; congratulations! You can make Django work even better for you by learning about <a href="/posts/manipulating-data-with-django-migrations/">manipulating data with migrations</a>, <a href="/posts/increase-developer-confidence-with-a-great-django-test-suite/">testing effectively</a>, and <a href="/blog/django-project-best-practices-to-keep-your-developers-happy/">setting up your team&rsquo;s Django development for maximum happiness</a>.</p>
+<p>If you&rsquo;re going to build on GitHub, you may like to set up my <a href="https://github.com/victoriadrake/django-security-check">django-security-check GitHub Action</a>. In the meantime, you&rsquo;re well on your way to building a beautiful software project.</p>
+]]></content></entry><entry><title type="html">Multithreaded Python: slithering through an I/O bottleneck</title><link href="https://victoria.dev/posts/multithreaded-python-slithering-through-an-i/o-bottleneck/"/><id>https://victoria.dev/posts/multithreaded-python-slithering-through-an-i/o-bottleneck/</id><author><name>Victoria Drake</name></author><published>2020-02-28T09:31:02-05:00</published><updated>2020-02-28T09:31:02-05:00</updated><content type="html"><![CDATA[<p>I recently developed a project that I called <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>: a multithreaded link checker written in Python. Unlike many Python site crawlers I found while researching, Hydra uses only standard libraries, with no external dependencies like BeautifulSoup. It&rsquo;s intended to be run as part of a CI/CD process, so part of its success depended on being fast.</p>
+<p>Multiple threads in Python is a bit of a bitey subject (not sorry) in that the Python interpreter doesn&rsquo;t actually let multiple threads execute at the same time. Python&rsquo;s <a href="https://wiki.python.org/moin/GlobalInterpreterLock">Global Interpreter Lock</a>, or GIL, prevents multiple threads from executing Python bytecodes at once. Each thread that wants to execute must first wait for the GIL to be released by the currently executing thread. The GIL is pretty much the microphone in a low-budget conference panel, except where no one gets to shout.</p>
+<p>This has the advantage of preventing <a href="https://en.wikipedia.org/wiki/Race_condition">race conditions</a>. It does, however, lack the performance advantages afforded by running multiple tasks in parallel. (If you&rsquo;d like a refresher on concurrency, parallelism, and multithreading, see <a href="/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/">Concurrency, parallelism, and the many threads of Santa Claus</a>.) While I prefer Go for its convenient first-class primitives that support concurrency (see <a href="https://tour.golang.org/concurrency/1">Goroutines</a>), this project&rsquo;s recipients were more comfortable with Python. I took it as an opportunity to test and explore!</p>
+<p>Simultaneously performing multiple tasks in Python isn&rsquo;t impossible; it just takes a little extra work. For Hydra, the main advantage is in overcoming the input/output (I/O) bottleneck.</p>
+<p>In order to get web pages to check, Hydra needs to go out to the Internet and fetch them. When compared to tasks that are performed by the CPU alone, going out over the network is comparatively slower. How slow?</p>
+<p>Here are approximate timings for tasks performed on a typical PC:</p>
+<table>
+  <thead>
+      <tr>
+          <th></th>
+          <th>Task</th>
+          <th>Time</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>CPU</td>
+          <td>execute typical instruction</td>
+          <td>1/1,000,000,000 sec = 1 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L1 cache memory</td>
+          <td>0.5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>branch misprediction</td>
+          <td>5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L2 cache memory</td>
+          <td>7 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>Mutex lock/unlock</td>
+          <td>25 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>fetch from main memory</td>
+          <td>100 nanosec</td>
+      </tr>
+      <tr>
+          <td>Network</td>
+          <td>send 2K bytes over 1Gbps network</td>
+          <td>20,000 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>read 1MB sequentially from memory</td>
+          <td>250,000 nanosec</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>fetch from new disk location (seek)</td>
+          <td>8,000,000 nanosec   (8ms)</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>read 1MB sequentially from disk</td>
+          <td>20,000,000 nanosec  (20ms)</td>
+      </tr>
+      <tr>
+          <td>Network</td>
+          <td>send packet US to Europe and back</td>
+          <td>150,000,000 nanosec (150ms)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
+<p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
+<p>In Hydra, the task of parsing response data and assembling results into a report is relatively fast, since it all happens on the CPU. The slowest portion of the program&rsquo;s execution, by over six orders of magnitude, is network latency. Not only does Hydra need to fetch packets, but whole web pages! One way of improving Hydra&rsquo;s performance is to find a way for the page fetching tasks to execute without blocking the main thread.</p>
+<p>Python has a couple options for doing tasks in parallel: multiple processes, or multiple threads. These methods allow you to circumvent the GIL and speed up execution in a couple different ways.</p>
+<h2 id="multiple-processes">Multiple processes</h2>
+<p>To execute parallel tasks using multiple processes, you can use Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor"><code>ProcessPoolExecutor</code></a>. A concrete subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a> from the <a href="https://docs.python.org/3/library/concurrent.futures.html"><code>concurrent.futures</code> module</a>, <code>ProcessPoolExecutor</code> uses a pool of processes spawned with the <a href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing"><code>multiprocessing</code> module</a> to avoid the GIL.</p>
+<p>This option uses worker subprocesses that maximally default to the number of processors on the machine. The <code>multiprocessing</code> module allows you to maximally parallelize function execution across processes, which can really speed up compute-bound (or <a href="https://en.wikipedia.org/wiki/CPU-bound">CPU-bound</a>) tasks.</p>
+<p>Since the main bottleneck for Hydra is I/O and not the processing to be done by the CPU, I&rsquo;m better served by using multiple threads.</p>
+<h2 id="multiple-threads">Multiple threads</h2>
+<p>Fittingly named, Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor"><code>ThreadPoolExecutor</code></a> uses a pool of threads to execute asynchronous tasks. Also a subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a>, it uses a defined number of maximum worker threads (at least five by default, according to the formula <code>min(32, os.cpu_count() + 4)</code>) and reuses idle threads before starting new ones, making it pretty efficient.</p>
+<p>Here is a snippet of Hydra with comments showing how Hydra uses <code>ThreadPoolExecutor</code> to achieve parallel multithreaded bliss:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#75715e"># Create the Checker class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Checker</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Queue of links to be checked</span>
+</span></span><span style="display:flex;"><span>    TO_PROCESS <span style="color:#f92672">=</span> Queue()
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Maximum workers to run</span>
+</span></span><span style="display:flex;"><span>    THREADS <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Maximum seconds to wait for HTTP response</span>
+</span></span><span style="display:flex;"><span>    TIMEOUT <span style="color:#f92672">=</span> <span style="color:#ae81ff">60</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, url):
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Create the thread pool</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>pool <span style="color:#f92672">=</span> futures<span style="color:#f92672">.</span>ThreadPoolExecutor(max_workers<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>THREADS)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(self):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Run until the TO_PROCESS queue is empty</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            target_url <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>TO_PROCESS<span style="color:#f92672">.</span>get(block<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, timeout<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># If we haven&#39;t already checked this link</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> target_url[<span style="color:#e6db74">&#34;url&#34;</span>] <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>visited:
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Mark it as visited</span>
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>visited<span style="color:#f92672">.</span>add(target_url[<span style="color:#e6db74">&#34;url&#34;</span>])
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Submit the link to the pool</span>
+</span></span><span style="display:flex;"><span>                job <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>pool<span style="color:#f92672">.</span>submit(self<span style="color:#f92672">.</span>load_url, target_url, self<span style="color:#f92672">.</span>TIMEOUT)
+</span></span><span style="display:flex;"><span>                job<span style="color:#f92672">.</span>add_done_callback(self<span style="color:#f92672">.</span>handle_future)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> Empty:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>            print(e)
+</span></span></code></pre></div><p>You can view the full code in <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&rsquo;s GitHub repository</a>.</p>
+<h2 id="single-thread-to-multithread">Single thread to multithread</h2>
+<p>If you&rsquo;d like to see the full effect, I compared the run times for checking my website between a prototype single-thread program, and the <del>multiheaded</del>multithreaded Hydra.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time python3 slow-link-check.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    17m34.084s
+</span></span><span style="display:flex;"><span>user    11m40.761s
+</span></span><span style="display:flex;"><span>sys     0m5.436s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>time python3 hydra.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    0m15.729s
+</span></span><span style="display:flex;"><span>user    0m11.071s
+</span></span><span style="display:flex;"><span>sys     0m2.526s
+</span></span></code></pre></div><p>The single-thread program, which blocks on I/O, ran in about seventeen minutes. When I first ran the multithreaded version, it finished in 1m13.358s - after some profiling and tuning, it took a little under sixteen seconds. Again, the exact times don&rsquo;t mean all that much; they&rsquo;ll vary depending on factors such as the size of the site being crawled, your network speed, and your program&rsquo;s balance between the overhead of thread management and the benefits of parallelism.</p>
+<p>The more important thing, and the result I&rsquo;ll take any day, is a program that runs some orders of magnitude faster.</p>
+]]></content></entry><entry><title type="html">Breaking bottlenecks 🍾</title><link href="https://victoria.dev/posts/breaking-bottlenecks/"/><id>https://victoria.dev/posts/breaking-bottlenecks/</id><author><name>Victoria Drake</name></author><published>2020-02-25T12:50:29-05:00</published><updated>2020-02-25T12:50:29-05:00</updated><content type="html"><![CDATA[<p><em>I recently gave a lecture on the benefits of building non-blocking processes. This is a write-up of the full talk, minus any &ldquo;ums&rdquo; that may have occurred.</em></p>
+<p>I&rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.</p>
+<p>OWASP is a great group doing important work. I&rsquo;ve seen this firsthand as part of the core team that produces the Web Security Testing Guide. However, while OWASP inspires in its large volunteer base, it lacks in the area of central organization.</p>
+<p>This lack of organization was most recently apparent in the group&rsquo;s website, <a href="https://owasp.org">OWASP.org</a>. A big organization with an even bigger website to match, OWASP.org enjoys hundreds of thousands of visitors. Unfortunately, many of its pages - individually managed by disparate projects - are infrequently updated. Some are abandoned. The website as a whole lacks a centralized quality assurance process, and as a result, OWASP.org is peppered with broken links.</p>
+<h2 id="the-trouble-with-broken-links">The trouble with broken links</h2>
+<p>Customers don&rsquo;t like broken links; attackers really do. That&rsquo;s because broken links are a security vulnerability. Broken links can signal opportunities for attacks like <a href="https://edoverflow.com/2017/broken-link-hijacking/">broken link hijacking</a> and <a href="https://www.hackerone.com/blog/Guide-Subdomain-Takeovers">subdomain takeovers</a>. At their least effective, these attacks can be embarrassing; at their worst, severely damaging to businesses and organizations. One OWASP group, the Application Security Verification Standard (ASVS) project, writes about <a href="https://github.com/OWASP/ASVS/blob/d9e0ac99828ef3c1e9233bd8a1f691f2a6958aa3/4.0/en/0x18-V10-Malicious.md#v103-deployed-application-integrity-controls">integrity controls</a> that can help to mitigate the likelihood of these attacks. This knowledge, unfortunately, has not yet propagated throughout the rest of OWASP yet.</p>
+<p>This is the story of how I created a fast and efficient tool to help OWASP solve this problem.</p>
+<h2 id="the-job">The job</h2>
+<p>I took on the task of creating a program that could run as part of a CI/CD process to detect and report broken links. The program needed to:</p>
+<ul>
+<li>Find and enumerate all the broken links on OWASP.org in a report.</li>
+<li>Keep track of the parent pages the broken links were on so they could be fixed.</li>
+<li>Run efficiently as part of a CI/CD pipeline.</li>
+</ul>
+<p>Essentially; I need to build a web crawler.</p>
+<p>My original journey through this process was also in Python, as that was a comfortable language choice for everyone in the OWASP group. Personally, I prefer to use Go for higher performance as it offers more convenient concurrency primitives. Between the task and this talk, I wrote three programs: a prototype single-thread Python program, a multithreaded Python program, and a Go program using goroutines. We&rsquo;ll see a comparison of how each worked out near the end of the talk - first, let&rsquo;s explore how to build a web crawler.</p>
+<h2 id="prototyping-a-web-crawler">Prototyping a web crawler</h2>
+<p>Here&rsquo;s what our web crawler will need to do:</p>
+<ol>
+<li>Get the HTML data of the first page of the website (for example, <code>https://victoria.dev</code>)</li>
+<li>Check all of the links on the page
+<ol>
+<li>Keep track of the links we&rsquo;ve already visited so we don&rsquo;t end up checking them twice</li>
+<li>Record any broken links we find</li>
+</ol>
+</li>
+<li>Fetch more HTML data from any valid links on the page, as long as they&rsquo;re in the same domain (<code>https://victoria.dev</code> and not <code>https://github.com</code>, for instance)</li>
+<li>Repeat step #2 until all of the links on the site have been checked</li>
+</ol>
+<p>Here&rsquo;s what the execution flow will look like:</p>
+<figure class="screenshot"><img src="/posts/breaking-bottlenecks/execution_flow.png"
+    alt="A flow chart showing program execution">
+</figure>
+
+<p>As you can see, the nodes &ldquo;GET page&rdquo; -&gt; &ldquo;HTML&rdquo; -&gt; &ldquo;Parse links&rdquo; -&gt; &ldquo;Valid link&rdquo; -&gt; &ldquo;Check visited&rdquo; all form a loop. These are what enable our web crawler to continue crawling until all the links on the site have been accounted for in the &ldquo;Check visited&rdquo; node. When the crawler encounters links it&rsquo;s already checked, it will &ldquo;Stop.&rdquo; This loop will become more important in a moment.</p>
+<p>For now, the question on everyone&rsquo;s mind (I hope): how do we make it fast?</p>
+<h2 id="how-fast-can-you-do-the-thing">How fast can you do the thing</h2>
+<p>Here are some approximate timings for tasks performed on a typical PC:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Type</th>
+          <th>Task</th>
+          <th>Time</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>CPU</td>
+          <td>execute typical instruction</td>
+          <td>1/1,000,000,000 sec = 1 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L1 cache memory</td>
+          <td>0.5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>branch misprediction</td>
+          <td>5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L2 cache memory</td>
+          <td>7 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>Mutex lock/unlock</td>
+          <td>25 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>fetch from main memory</td>
+          <td>100 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>read 1MB sequentially from memory</td>
+          <td>250,000 nanosec</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>fetch from new disk location (seek)</td>
+          <td>8,000,000 nanosec   (8ms)</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>read 1MB sequentially from disk</td>
+          <td>20,000,000 nanosec  (20ms)</td>
+      </tr>
+      <tr>
+          <td>Network</td>
+          <td>send packet US to Europe and back</td>
+          <td>150,000,000 nanosec (150ms)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. They typically crop up now and then in articles titled along the lines of, &ldquo;Latency numbers every developer should know.&rdquo;</p>
+<p>Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
+<p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
+<h2 id="bottleneck-network-latency">Bottleneck: network latency</h2>
+<p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
+<p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>      150 milliseconds
+</span></span><span style="display:flex;"><span> x 12,000 links
+</span></span><span style="display:flex;"><span>---------
+</span></span><span style="display:flex;"><span>1,800,000 milliseconds (30 minutes)
+</span></span></code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
+<h3 id="feedback-loops">Feedback loops</h3>
+<p>I previously wrote about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p>
+<p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&rsquo;m waiting on a process that&rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke <code>master</code> (hopefully <code>staging</code>).</p>
+<p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&rsquo;ve got a slow and inefficient company.</p>
+<h3 id="the-cost-of-bottlenecks">The cost of bottlenecks</h3>
+<p>To add insult to injury, not only are you waiting on a bottlenecked process to run; you&rsquo;re also paying to wait. Take the serverless example - AWS Lambda, for instance. Here&rsquo;s a chart showing the cost of functions by compute time and CPU usage.</p>
+<figure><img src="/posts/breaking-bottlenecks/lambda-chart.png"
+    alt="Chart showing Total Lambda compute cost by function execution"><figcaption>
+      <p>Source: <a href="https://serverless.com/blog/understanding-and-controlling-aws-lambda-costs/">Understanding and Controlling AWS Lambda Costs</a></p>
+    </figcaption>
+</figure>
+
+<p>Again, the numbers change over the years, but the main concepts remain the same: the bigger the function and the longer its compute time, the bigger the cost. For applications taking advantage of serverless, these costs can add up dramatically.</p>
+<p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.</p>
+<p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p>
+<h2 id="tacos-and-threading">Tacos and threading</h2>
+<p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮   ╔══════════════╗
+</span></span><span style="display:flex;"><span>🌮      Hi I&#39;m Bob                          🌳
+</span></span><span style="display:flex;"><span>🌮   ╚══════════════╝ \
+</span></span><span style="display:flex;"><span>🌮                     🐹 🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p>
+<p>We can try splitting the queue:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮         🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮         🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p>
+<p>We could get two Bobs:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p>
+<p>We can do even better than that:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
+<p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p>
+<h2 id="setting-up-a-go-web-crawler">Setting up a Go web crawler</h2>
+<p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/posts/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Checker</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">startDomain</span>             <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">brokenLinks</span>             []<span style="color:#a6e22e">Result</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">visitedLinks</span>            <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">bool</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">workerCount</span>, <span style="color:#a6e22e">maxWorkers</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Page allows us to retain parent and sublinks</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Page</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">parent</span>, <span style="color:#a6e22e">loc</span>, <span style="color:#a6e22e">data</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Result adds error information for the report</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Result</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Page</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">reason</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">code</span>   <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// Extract links from HTML</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">parent</span>, <span style="color:#a6e22e">data</span> <span style="color:#66d9ef">string</span>) ([]<span style="color:#66d9ef">string</span>, []<span style="color:#66d9ef">string</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">doc</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">html</span>.<span style="color:#a6e22e">Parse</span>(<span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">NewReader</span>(<span style="color:#a6e22e">data</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Could not parse: &#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">goodLinks</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">badLinks</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">f</span> <span style="color:#66d9ef">func</span>(<span style="color:#f92672">*</span><span style="color:#a6e22e">html</span>.<span style="color:#a6e22e">Node</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span> = <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">n</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">html</span>.<span style="color:#a6e22e">Node</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">Type</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">html</span>.<span style="color:#a6e22e">ElementNode</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">checkKey</span>(string(<span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">Data</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">a</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">Attr</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">checkAttr</span>(string(<span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">Key</span>)) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">j</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">formatURL</span>(<span style="color:#a6e22e">parent</span>, <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">Val</span>)
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">badLinks</span> = append(<span style="color:#a6e22e">badLinks</span>, <span style="color:#a6e22e">j</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">goodLinks</span> = append(<span style="color:#a6e22e">goodLinks</span>, <span style="color:#a6e22e">j</span>)
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">FirstChild</span>; <span style="color:#a6e22e">c</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span>; <span style="color:#a6e22e">c</span> = <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">NextSibling</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">c</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">doc</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">goodLinks</span>, <span style="color:#a6e22e">badLinks</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href="https://www.theregister.com/2016/03/23/npm_left_pad_chaos/">the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p>
+<p>Here are snippets of the <code>main</code> function, where we pass in our starting URL and create a queue (or <a href="https://tour.golang.org/concurrency/2">channels</a>, in Go) to be filled with links for our goroutines to process.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">startURL</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">flag</span>.<span style="color:#a6e22e">String</span>(<span style="color:#e6db74">&#34;url&#34;</span>, <span style="color:#e6db74">&#34;http://example.com&#34;</span>, <span style="color:#e6db74">&#34;full URL of site&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">firstPage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">Page</span>{
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">parent</span>: <span style="color:#f92672">*</span><span style="color:#a6e22e">startURL</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">loc</span>:    <span style="color:#f92672">*</span><span style="color:#a6e22e">startURL</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">toProcess</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#a6e22e">Page</span>, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">toProcess</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">firstPage</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span></code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">toProcess</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">checker</span>.<span style="color:#a6e22e">addWorker</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">🐹</span> <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">worker</span>(<span style="color:#a6e22e">i</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">checker</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>, <span style="color:#a6e22e">toProcess</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">checker</span>.<span style="color:#a6e22e">workerCount</span> &gt; <span style="color:#a6e22e">checker</span>.<span style="color:#a6e22e">maxWorkers</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>) <span style="color:#75715e">// throttle down</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span></code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
+<h2 id="did-we-do-the-thing-fast">Did we do the thing fast</h2>
+<p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time python3 slow-link-check.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real 17m34.084s
+</span></span><span style="display:flex;"><span>user 11m40.761s
+</span></span><span style="display:flex;"><span>sys     0m5.436s
+</span></span></code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
+<p>The multithreaded Python version did a bit better:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time python3 hydra.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real 1m13.358s
+</span></span><span style="display:flex;"><span>user 0m13.161s
+</span></span><span style="display:flex;"><span>sys     0m2.826s
+</span></span></code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
+<p>How did Go do?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time ./go-link-check --url=https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real 0m7.926s
+</span></span><span style="display:flex;"><span>user 0m9.044s
+</span></span><span style="display:flex;"><span>sys     0m0.932s
+</span></span></code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
+<h2 id="breaking-bottlenecks">Breaking bottlenecks</h2>
+<p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
+<p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p>
+]]></content></entry><entry><title type="html">Iteration in Python: for, list, and map</title><link href="https://victoria.dev/archive/iteration-in-python-for-list-and-map/"/><id>https://victoria.dev/archive/iteration-in-python-for-list-and-map/</id><author><name>Victoria Drake</name></author><published>2017-01-18T21:58:28+07:00</published><updated>2020-11-22T21:58:28+07:00</updated><content type="html"><![CDATA[<p>Iteration in Python can be a little hard to understand. Subtle differences in terminology like <em>iteration</em>, <em>iterator</em>, <em>iterating</em>, and <em>iterable</em> aren&rsquo;t the most beginner-friendly.</p>
+<p>When tackling new concepts, I find concrete examples to be most useful. I&rsquo;ll share some in this post and discuss appropriate situations for each. (Pun intended.)</p>
+<h2 id="for-loop">For loop</h2>
+<p>First, in pseudocode:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> iterating_variable <span style="color:#f92672">in</span> iterable:
+</span></span><span style="display:flex;"><span>    statement(s)
+</span></span></code></pre></div><p>I find <code>for</code> loops to be the most readable way to iterate in Python. This is especially nice when you&rsquo;re writing code that someone else needs to read and understand, which is always.</p>
+<p>An <code>iterating_variable</code>, loosely speaking, is anything you could put in a group. For example: a letter in a string, an item from a list, or an integer in a range of integers.</p>
+<p>An <code>iterable</code> houses the things you iterate on. This can also take different forms: a string with multiple characters, a range of numbers, a list, and so on.</p>
+<p>A <code>statement</code> or multiple <code>statements</code> indicates <em>doing something</em> to the iterating variable.  This could be anything from mathematical expressions to simply printing a result.</p>
+<p>Here are a couple simple examples that print each <code>iterating_variable</code> of an <code>iterable</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> letter <span style="color:#f92672">in</span> <span style="color:#e6db74">&#34;Hello world&#34;</span>:
+</span></span><span style="display:flex;"><span>    print(letter)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+</span></span><span style="display:flex;"><span>    print(i)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>breakfast_menu <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;toast&#34;</span>, <span style="color:#e6db74">&#34;eggs&#34;</span>, <span style="color:#e6db74">&#34;waffles&#34;</span>, <span style="color:#e6db74">&#34;coffee&#34;</span>]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> choice <span style="color:#f92672">in</span> breakfast_menu:
+</span></span><span style="display:flex;"><span>    print(choice)
+</span></span></code></pre></div><p>You can even use a <code>for</code> loop in a more compact situation, such as this one-liner:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>breakfast_buffet <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34; &#34;</span><span style="color:#f92672">.</span>join(str(item) <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> breakfast_menu)
+</span></span></code></pre></div><p>The downside to <code>for</code> loops is that they can be a bit verbose, depending on how much you&rsquo;re trying to achieve. Still, for anyone hoping to make their Python code as easily understood as possible, <code>for</code> loops are the most straightforward choice.</p>
+<h2 id="list-comprehensions">List comprehensions</h2>
+<p>A pseudocode example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>new_list <span style="color:#f92672">=</span> [statement(s) <span style="color:#66d9ef">for</span> iterating_variable <span style="color:#f92672">in</span> iterable]
+</span></span></code></pre></div><p>List comprehensions are a concise and elegant way to create a new list by iterating on variables. Once you have a grasp of how they work, you can perform efficient iterations with very little code.</p>
+<p>List comprehensions will always return a list, which may or may not be appropriate for your situation.</p>
+<p>For example, you could use a list comprehension to quickly calculate and print tip percentage on a few bar tabs at once:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>tabs <span style="color:#f92672">=</span> <span style="color:#f92672">[</span>23.60, 42.10, 17.50<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>tabs_incl_tip <span style="color:#f92672">=</span> <span style="color:#f92672">[</span>round<span style="color:#f92672">(</span>tab*1.15, 2<span style="color:#f92672">)</span> <span style="color:#66d9ef">for</span> tab in tabs<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>print<span style="color:#f92672">(</span>tabs_incl_tip<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&gt;&gt;&gt; <span style="color:#f92672">[</span>27.14, 48.41, 20.12<span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>In one concise line, we&rsquo;ve taken each tab amount, added a 15% tip, rounded it to the nearest cent, and made a new list of the tabs plus the tip values.</p>
+<p>List comprehensions can be an elegant tool if output to a list is useful to you. Be advised that the more statements you add, the more complicated your list comprehension begins to look, especially once you get into nested list comprehensions. If your code isn&rsquo;t well annotated, it may become difficult for another reader to figure out.</p>
+<h2 id="map">Map</h2>
+<p>How to <code>map</code>, in pseudocode:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>map(statement, iterable)
+</span></span></code></pre></div><p>Map is pretty compact, for better or worse. It can be harder to read and understand, especially if your line of code has a lot of parentheses.</p>
+<p>In terms of efficiency for character count, <code>map</code> is hard to beat. It applies your <code>statement</code> to every instance of your <code>iterable</code> and returns an iterator.</p>
+<p>Here&rsquo;s an example casting each element of <code>input()</code> (the iterable) from string representation to integer representation. Since <code>map</code> returns an iterator, you also cast the result to a list representation.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>values <span style="color:#f92672">=</span> list(map(int, input()<span style="color:#f92672">.</span>split()))
+</span></span><span style="display:flex;"><span>weights <span style="color:#f92672">=</span> list(map(int, input()<span style="color:#f92672">.</span>split()))
+</span></span></code></pre></div><p>It&rsquo;s worth noting that you can also use <code>for</code> loops, list comprehension, and <code>map</code> all together:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>output <span style="color:#f92672">=</span> sum([x[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">*</span> x[<span style="color:#ae81ff">1</span>] <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> zip(values, weights)]) <span style="color:#f92672">/</span> sum(weights)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(round(output, <span style="color:#ae81ff">1</span>))
+</span></span></code></pre></div><h2 id="your-iteration-toolbox">Your iteration toolbox</h2>
+<p>Each of these methods of iteration in Python have a special place in the code I write every day. I hope these examples have helped you see how to use <code>for</code> loops, list comprehensions, and <code>map</code> in your own Python code!</p>
+<p>If you like this post, there&rsquo;s a lot more where that came from! I write about efficient programming for coders and for leading technical teams. Check out the posts below!</p>
+]]></content></entry></feed>

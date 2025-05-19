@@ -1,0 +1,232 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Nlp on victoria.dev</title><link href="https://victoria.dev/tags/nlp/feed.xml" rel="self"/><link href="https://victoria.dev/tags/nlp/"/><updated>2023-09-26T04:46:36-05:00</updated><id>https://victoria.dev/tags/nlp/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">How to send long text input to ChatGPT using the OpenAI API</title><link href="https://victoria.dev/posts/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/"/><id>https://victoria.dev/posts/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/</id><author><name>Victoria Drake</name></author><published>2023-09-26T04:46:36-05:00</published><updated>2023-09-26T04:46:36-05:00</updated><content type="html"><![CDATA[<p>In a previous post, I showed how you can apply text preprocessing techniques to shorten your input length for ChatGPT. Today in the web interface (<a href="https://chat.openai.com/">chat.openai.com</a>), ChatGPT allows you to send a message with a maximum token length of 4,096.</p>
+<p>There are bound to be situations in which this isn&rsquo;t enough, such as when you want to read in a large amount of text from a file. Using the OpenAI API allows you to send many more tokens in a messages array, with the maximum number depending on your chosen model. This lets you provide large amounts of text to ChatGPT using chunking. Here&rsquo;s how.</p>
+<h2 id="chunking-your-input">Chunking your input</h2>
+<p>The <code>gpt-4</code> model currently has a maximum content length token limit of 8,192 tokens. (<a href="https://platform.openai.com/docs/models">Here are the docs containing current limits for all the models</a>.) Remember that you can first apply text preprocessing techniques to reduce your input size &ndash; in my <a href="/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/">previous post</a> I achieved a 28% size reduction without losing meaning with just a little tokenization and pruning.</p>
+<p>When this isn&rsquo;t enough to fit your message within the maximum message token limit, you can take a general programmatic approach that sends your input in message chunks. The goal is to divide your text into sections that each fit within the model&rsquo;s token limit. The general idea is to:</p>
+<ol>
+<li><strong>Tokenize and split text into chunks</strong> based on the model&rsquo;s token limit. It&rsquo;s better to keep message chunks slightly below the token limit since the token limit is shared between your message and ChatGPT&rsquo;s response.</li>
+<li><strong>Maintain context</strong> between chunks, e.g. avoid splitting a sentence in the middle.</li>
+</ol>
+<p>Each chunk is sent as a separate message in the conversation thread.</p>
+<h2 id="handling-responses">Handling responses</h2>
+<p>You send your chunks to ChatGPT using the OpenAI library&rsquo;s <code>ChatCompletion</code>. ChatGPT returns individual responses for each message, so you may want to process these by:</p>
+<ol>
+<li><strong>Concatenating responses</strong> in the order you sent them to get a coherent answer.</li>
+<li><strong>Manage conversation flow</strong> by keeping track of which response refers to which chunk.</li>
+<li><strong>Formatting the response</strong> to suit your desired output, e.g. replacing <code>\n</code> with line breaks.</li>
+</ol>
+<h2 id="putting-it-all-together">Putting it all together</h2>
+<p>Using the OpenAI API, you can send multiple messages to ChatGPT and ask it to wait for you to provide all of the data before answering your prompt. Being a language model, you can provide these instructions to ChatGPT in plain language. Here&rsquo;s a suggested script:</p>
+<blockquote>
+<p>Prompt: Summarize the following text for me</p>
+<p>To provide the context for the above prompt, I will send you text in parts. When I am finished, I will tell you &ldquo;ALL PARTS SENT&rdquo;. Do not answer until you have received all the parts.</p></blockquote>
+<p>I created <a href="https://github.com/victoriadrake/chatgptmax">a Python module, <code>chatgptmax</code></a>, that puts all this together. It breaks up a large amount of text by a given maximum token length and sends it in chunks to ChatGPT.</p>
+<p>You can install it with <code>pip install chatgptmax</code>, but here&rsquo;s the juicy part:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> openai
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> tiktoken
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set up your OpenAI API key</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Load your API key from an environment variable or secret management service</span>
+</span></span><span style="display:flex;"><span>openai<span style="color:#f92672">.</span>api_key <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_KEY&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">send</span>(
+</span></span><span style="display:flex;"><span>    prompt<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>    text_data<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>    chat_model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-3.5-turbo&#34;</span>,
+</span></span><span style="display:flex;"><span>    model_token_limit<span style="color:#f92672">=</span><span style="color:#ae81ff">8192</span>,
+</span></span><span style="display:flex;"><span>    max_tokens<span style="color:#f92672">=</span><span style="color:#ae81ff">2500</span>,
+</span></span><span style="display:flex;"><span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Send the prompt at the start of the conversation and then send chunks of text_data to ChatGPT via the OpenAI API.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    If the text_data is too long, it splits it into chunks and sends each chunk separately.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Args:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - prompt (str, optional): The prompt to guide the model&#39;s response.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - text_data (str, optional): Additional text data to be included.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - max_tokens (int, optional): Maximum tokens for each API call. Default is 2500.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - list or str: A list of model&#39;s responses for each chunk or an error message.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Check if the necessary arguments are provided</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> prompt:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Error: Prompt is missing. Please provide a prompt.&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> text_data:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Error: Text data is missing. Please provide some text data.&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Initialize the tokenizer</span>
+</span></span><span style="display:flex;"><span>    tokenizer <span style="color:#f92672">=</span> tiktoken<span style="color:#f92672">.</span>encoding_for_model(chat_model)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Encode the text_data into token integers</span>
+</span></span><span style="display:flex;"><span>    token_integers <span style="color:#f92672">=</span> tokenizer<span style="color:#f92672">.</span>encode(text_data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Split the token integers into chunks based on max_tokens</span>
+</span></span><span style="display:flex;"><span>    chunk_size <span style="color:#f92672">=</span> max_tokens <span style="color:#f92672">-</span> len(tokenizer<span style="color:#f92672">.</span>encode(prompt))
+</span></span><span style="display:flex;"><span>    chunks <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        token_integers[i : i <span style="color:#f92672">+</span> chunk_size]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">0</span>, len(token_integers), chunk_size)
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Decode token chunks back to strings</span>
+</span></span><span style="display:flex;"><span>    chunks <span style="color:#f92672">=</span> [tokenizer<span style="color:#f92672">.</span>decode(chunk) <span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> chunks]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    responses <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    messages <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: prompt},
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;To provide the context for the above prompt, I will send you text in parts. When I am finished, I will tell you &#39;ALL PARTS SENT&#39;. Do not answer until you have received all the parts.&#34;</span>,
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> chunks:
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chunk})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Check if total tokens exceed the model&#39;s limit and remove oldest chunks if necessary</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (
+</span></span><span style="display:flex;"><span>            sum(len(tokenizer<span style="color:#f92672">.</span>encode(msg[<span style="color:#e6db74">&#34;content&#34;</span>])) <span style="color:#66d9ef">for</span> msg <span style="color:#f92672">in</span> messages)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&gt;</span> model_token_limit
+</span></span><span style="display:flex;"><span>        ):
+</span></span><span style="display:flex;"><span>            messages<span style="color:#f92672">.</span>pop(<span style="color:#ae81ff">1</span>)  <span style="color:#75715e"># Remove the oldest chunk</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> openai<span style="color:#f92672">.</span>ChatCompletion<span style="color:#f92672">.</span>create(model<span style="color:#f92672">=</span>chat_model, messages<span style="color:#f92672">=</span>messages)
+</span></span><span style="display:flex;"><span>        chatgpt_response <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message[<span style="color:#e6db74">&#34;content&#34;</span>]<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>        responses<span style="color:#f92672">.</span>append(chatgpt_response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add the final &#34;ALL PARTS SENT&#34; message</span>
+</span></span><span style="display:flex;"><span>    messages<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;ALL PARTS SENT&#34;</span>})
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> openai<span style="color:#f92672">.</span>ChatCompletion<span style="color:#f92672">.</span>create(model<span style="color:#f92672">=</span>chat_model, messages<span style="color:#f92672">=</span>messages)
+</span></span><span style="display:flex;"><span>    final_response <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message[<span style="color:#e6db74">&#34;content&#34;</span>]<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>    responses<span style="color:#f92672">.</span>append(final_response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> responses
+</span></span></code></pre></div><p>Here&rsquo;s an example of how you can use this module with text data read from a file. (<code>chatgptmax</code> also provides a <a href="https://github.com/victoriadrake/chatgptmax/blob/4431af468435cd51d07779c6d721c8e0016d6bd6/chatgptmax.py#L68">convenience method</a> for getting text from a file.)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#75715e"># First, import the necessary modules and the function</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> chatgptmax <span style="color:#f92672">import</span> send
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define a function to read the content of a file</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">read_file_content</span>(file_path):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> open(file_path, <span style="color:#e6db74">&#39;r&#39;</span>, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>) <span style="color:#66d9ef">as</span> file:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> file<span style="color:#f92672">.</span>read()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Use the function</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Specify the path to your file</span>
+</span></span><span style="display:flex;"><span>    file_path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;path_to_your_file.txt&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Read the content of the file</span>
+</span></span><span style="display:flex;"><span>    file_content <span style="color:#f92672">=</span> read_file_content(file_path)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Define your prompt</span>
+</span></span><span style="display:flex;"><span>    prompt_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Summarize the following text for me:&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Send the file content to ChatGPT</span>
+</span></span><span style="display:flex;"><span>    responses <span style="color:#f92672">=</span> send(prompt<span style="color:#f92672">=</span>prompt_text, text_data<span style="color:#f92672">=</span>file_content)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Print the responses</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> response <span style="color:#f92672">in</span> responses:
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><h3 id="error-handling">Error handling</h3>
+<p>While the module is designed to handle most standard use cases, there are potential pitfalls to be aware of:</p>
+<ul>
+<li><strong>Incomplete sentences</strong>: If a chunk ends in the middle of a sentence, it might alter the meaning or context. To mitigate this, consider ensuring that chunks end at full stops or natural breaks in the text. You could do this by separating the text-chunking task into a separate function that:
+<ol>
+<li>Splits the text into sentences.</li>
+<li>Iterates over the sentences and adds them to a chunk until the chunk reaches the maximum size.</li>
+<li>Starts a new chunk when the current chunk reaches the maximum size or when adding another sentence would exceed the maximum size.</li>
+</ol>
+</li>
+<li><strong>API connectivity issues</strong>: There&rsquo;s always a possibility of timeouts or connectivity problems during API calls. If this is a significant issue for your application, you can include retry logic in your code. If an API call fails, the script could wait for a few seconds and then try again, ensuring that all chunks are processed.</li>
+<li><strong>Rate limits</strong>: Be mindful of <a href="https://platform.openai.com/docs/guides/rate-limits/overview">OpenAI API&rsquo;s rate limits</a>. If you&rsquo;re sending many chunks in rapid succession, you might hit these limits. Introducing a slight delay between calls or spreading out requests can help avoid this.</li>
+</ul>
+<h3 id="optimization">Optimization</h3>
+<p>As with any process, there&rsquo;s always room for improvement. Here are a couple of ways you might optimize the module&rsquo;s chunking and sending process further:</p>
+<ul>
+<li><strong>Parallelizing API calls</strong>: If <a href="https://platform.openai.com/docs/guides/rate-limits/overview">OpenAI API&rsquo;s rate limits</a> and your infrastructure allow, you could send multiple chunks simultaneously. This parallel processing can speed up the overall time it takes to get responses for all chunks. Unless you have access to OpenAI&rsquo;s <code>32k</code> models or need to use small chunk sizes, however, parallelism gains are likely to be minimal.</li>
+<li><strong>Caching mechanisms</strong>: If you find yourself sending the same or similar chunks frequently, consider implementing a caching system. By storing ChatGPT&rsquo;s responses for specific chunks, you can retrieve them instantly from the cache the next time, saving both time and API calls.</li>
+</ul>
+<h2 id="now-what">Now what</h2>
+<p>If you found your way here via search, you probably already have a use case in mind. Here are some other (startup) ideas:</p>
+<ul>
+<li><strong>You&rsquo;re a researcher</strong> who wants to save time by getting short summaries of many lengthy articles.</li>
+<li><strong>You&rsquo;re a legal professional</strong> who wants to analyze long contracts by extracting key points or clauses.</li>
+<li><strong>You&rsquo;re a financial analyst</strong> who wants to pull a quick overview of trends from a long report.</li>
+<li><strong>You&rsquo;re a writer</strong> who wants feedback on a new article or chapter&hellip; without having to actually show it to anyone yet.</li>
+</ul>
+<p>Do you have a use case I didn&rsquo;t list? <a href="/contact">Let me know about it!</a> In the meantime, have fun sending lots of text to ChatGPT.</p>
+]]></content></entry><entry><title type="html">Optimizing text for ChatGPT: NLP and text pre-processing techniques</title><link href="https://victoria.dev/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/"/><id>https://victoria.dev/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/</id><author><name>Victoria Drake</name></author><published>2023-09-19T04:46:36-05:00</published><updated>2023-09-19T04:46:36-05:00</updated><content type="html"><![CDATA[<p>In order for chatbots and voice assistants to be helpful, they need to be able to take in and understand our instructions in plain language using Natural Language Processing (NLP). ChatGPT relies on a blend of advanced algorithms and text preprocessing methods to make sense of our words. But just throwing a wall of text at it can be inefficient &ndash; you might be dumping in a lot of noise with that signal and hitting the text input limit.</p>
+<p>Text preprocessing can help shorten and refine your input, ensuring that ChatGPT can grasp the essence without getting overwhelmed. In this article, we&rsquo;ll explore these techniques, understand their importance, and see how they make your interactions with tools like ChatGPT more reliable and productive.</p>
+<h2 id="text-preprocessing">Text preprocessing</h2>
+<p>Text preprocessing prepares raw text data for analysis by NLP models. Generally, it distills everyday text (like full sentences) to make it more manageable or concise and meaningful. Techniques include:</p>
+<ul>
+<li><strong>Tokenization:</strong> splitting up text by sentences or paragraphs. For example, you could break down a lengthy legal document into individual clauses or sentences.</li>
+<li><strong>Extractive summarization:</strong> selecting key sentences from the text and discarding the rest. Instead of reading an entire 10-page document, extractive summarization could pinpoint the most crucial sentences and give you a concise overview without delving into the details.</li>
+<li><strong>Abstractive summarization:</strong> generating a concise representation of the text content, for example, turning a 10-page document into a brief paragraph that captures the document&rsquo;s essence in new wording.</li>
+<li><strong>Pruning:</strong> removing redundant or less relevant parts. For example, in a verbose email thread, pruning can help remove all the greetings, sign-offs, and other repetitive elements, leaving only the core content for analysis.</li>
+</ul>
+<p>While all these techniques can help reduce the size of raw text data, some of these techniques are easier to apply to general use cases than others. Let&rsquo;s examine how text preprocessing can help us send a large amount of text to ChatGPT.</p>
+<h2 id="tokenization-and-chatgpt-input-limits">Tokenization and ChatGPT input limits</h2>
+<p>In the realm of Natural Language Processing (NLP), a token is the basic unit of text that a system reads. At its simplest, you can think of a token as a word, but depending on the language and the specific tokenization method used, a token can represent a word, part of a word, or even multiple words.</p>
+<p>While in English we often equate tokens with words, in NLP, the concept is broader. A token can be as short as a single character or as long as a word. For example, with word tokenization, the sentence &ldquo;Unicode characters such as emojis are not indivisible. ✂️&rdquo; can be broken down into tokens like this: [&ldquo;Unicode&rdquo;, &ldquo;characters&rdquo;, &ldquo;such&rdquo;, &ldquo;as&rdquo;, &ldquo;emojis&rdquo;, &ldquo;are&rdquo;, &ldquo;not&rdquo;, &ldquo;indivisible&rdquo;, &ldquo;.&rdquo;, &ldquo;✂️&rdquo;]</p>
+<p>In another form called Byte-Pair Encoding (BPE), the same sentence is tokenized as: [&ldquo;Un&rdquo;, &ldquo;ic&rdquo;, &ldquo;ode&rdquo;, &quot; characters&quot;, &quot; such&quot;, &quot; as&quot;, &quot; em, &ldquo;oj&rdquo;, &ldquo;is&rdquo;, &quot; are&quot;, &quot; not&quot;, &quot; ind&quot;, &ldquo;iv&rdquo;, &ldquo;isible&rdquo;, &ldquo;.&rdquo;, &quot; �&quot;, &ldquo;�️&rdquo;]. The emoji itself is split into tokens containing its underlying bytes.</p>
+<p>Depending on the ChatGPT model chosen, your text input size is restricted by tokens. <a href="https://platform.openai.com/docs/models">Here are the docs containing current limits</a>. BPE is used by ChatGPT to determine token count, and we&rsquo;ll discuss it more thoroughly later. First, we can programmatically apply some preprocessing techniques to reduce our text input size and use fewer tokens.</p>
+<h2 id="a-general-programmatic-approach">A general programmatic approach</h2>
+<p>For a general approach that can be applied programmatically, pruning is a suitable preprocessing technique. One form is <strong>stop word removal,</strong> or removing common words that might not add significant meaning in certain contexts. For example, consider the sentence:</p>
+<p>&ldquo;I always enjoy having pizza with my friends on weekends.&rdquo;</p>
+<p>Stop words are often words that don&rsquo;t carry significant meaning on their own in a given context. In this sentence, words like &ldquo;I&rdquo;, &ldquo;always&rdquo;, &ldquo;enjoy&rdquo;, &ldquo;having&rdquo;, &ldquo;with&rdquo;, &ldquo;my&rdquo;, &ldquo;on&rdquo; are considered stop words.</p>
+<p>After removing the stop words, the sentence becomes:</p>
+<p>&ldquo;pizza friends weekends.&rdquo;</p>
+<p>Now, the sentence is distilled to its key components, highlighting the main subject (pizza) and the associated context (friends and weekends). If you find yourself wishing you could convince people to do this in real life (<em>cough</em>meetings<em>cough</em>)&hellip; you aren&rsquo;t alone.</p>
+<p>Stop word removal is straightforward to apply programmatically: given a list of stop words, examine some text input to see if it contains any of the stop words on your list. If it does, remove them, then return the altered text.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_stopwords</span>(text: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    stopwords <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;an&#34;</span>, <span style="color:#e6db74">&#34;and&#34;</span>, <span style="color:#e6db74">&#34;at&#34;</span>, <span style="color:#e6db74">&#34;but&#34;</span>, <span style="color:#e6db74">&#34;how&#34;</span>, <span style="color:#e6db74">&#34;in&#34;</span>, <span style="color:#e6db74">&#34;is&#34;</span>, <span style="color:#e6db74">&#34;on&#34;</span>, <span style="color:#e6db74">&#34;or&#34;</span>, <span style="color:#e6db74">&#34;the&#34;</span>, <span style="color:#e6db74">&#34;to&#34;</span>, <span style="color:#e6db74">&#34;what&#34;</span>, <span style="color:#e6db74">&#34;will&#34;</span>]
+</span></span><span style="display:flex;"><span>    tokens <span style="color:#f92672">=</span> text<span style="color:#f92672">.</span>split()
+</span></span><span style="display:flex;"><span>    clean_tokens <span style="color:#f92672">=</span> [t <span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> tokens <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> t <span style="color:#f92672">in</span> stopwords]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34; &#34;</span><span style="color:#f92672">.</span>join(clean_tokens)
+</span></span></code></pre></div><p>To see how effective stop word removal can be, I took the entire text of my <a href="https://techleaderdocs.com">Tech Leader Docs newsletter</a> (17,230 words consisting of 104,892 characters) and processed it using the above function. How effective was it? The resulting text contained 89,337 characters, which is about a 15% reduction in size.</p>
+<p>Other pruning techniques can also be applied programmatically. Removing punctuation, numbers, HTML tags, URLs and email addresses, or non-alphabetical characters are all valid pruning techniques that can be straightforward to apply. Here is a function that does just that:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">import</span> re
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_text</span>(text):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove URLs</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;http\S+&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove email addresses</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;\S+@\S+&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove everything that&#39;s not a letter (a-z, A-Z)</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;[^a-zA-Z\s]&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove whitespace, tabs, and new lines</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span><span style="color:#f92672">.</span>join(text<span style="color:#f92672">.</span>split())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> text
+</span></span></code></pre></div><p>What measure of length reduction might we be able to get from this additional processing? Applying these techniques to the remaining characters of Tech Leader Docs results in just 75,217 characters; an overall reduction of about 28% from the original text.</p>
+<p>More opinionated pruning, such as removing short words or specific words or phrases, can be tailored to a specific use case. These don&rsquo;t lend themselves well to general functions, however.</p>
+<p>Now that you have some text processing techniques in your toolkit, let&rsquo;s look at how a reduction in characters translates to fewer tokens used when it comes to ChatGPT. To understand this, we&rsquo;ll examine Byte-Pair Encoding.</p>
+<h2 id="byte-pair-encoding-bpe">Byte-Pair Encoding (BPE)</h2>
+<p>Byte-Pair Encoding (BPE) is a subword tokenization method. It was originally introduced for data compression but has since been adapted for tokenization in NLP tasks. It allows representing common words as tokens and splits more rare words into subword units. This enables a balance between character-level and word-level tokenization.</p>
+<p>Let&rsquo;s make that more concrete. Imagine you have a big box of LEGO bricks, and each brick represents a single letter or character. You&rsquo;re tasked with building words using these LEGO bricks. At first, you might start by connecting individual bricks to form words. But over time, you notice that certain combinations of bricks (or characters) keep appearing together frequently, like &ldquo;th&rdquo; in &ldquo;the&rdquo; or &ldquo;ing&rdquo; in &ldquo;running.&rdquo;</p>
+<p>BPE is like a smart LEGO-building buddy who suggests, &ldquo;Hey, since &rsquo;th&rsquo; and &lsquo;ing&rsquo; keep appearing together a lot, why don&rsquo;t we glue them together and treat them as a single piece?&rdquo; This way, the next time you want to build a word with &ldquo;the&rdquo; or &ldquo;running,&rdquo; you can use these glued-together pieces, making the process faster and more efficient.</p>
+<p>Colloquially, the BPE algorithm looks like this:</p>
+<ol>
+<li>Start with single characters.</li>
+<li>Observe which pairs of characters frequently appear together.</li>
+<li>Merge those frequent pairs together to treat them as one unit.</li>
+<li>Repeat this process until you have a mix of single characters and frequently occurring character combinations.</li>
+</ol>
+<p>BPE is a particularly powerful tokenization method, especially when dealing with diverse and extensive vocabularies. Here&rsquo;s why:</p>
+<ul>
+<li>Handling rare words: Traditional tokenization methods might stumble upon rare or out-of-vocabulary words. BPE, with its ability to break words down into frequent subword units, can represent these words without needing to have seen them before.</li>
+<li>Efficiency: By representing frequent word parts as single tokens, BPE can compress text more effectively. This is especially useful for models like ChatGPT, where token limits apply.</li>
+<li>Adaptability: BPE is language-agnostic. It doesn&rsquo;t rely on predefined dictionaries or vocabularies. Instead, it learns from the data, making it adaptable to various languages and contexts.</li>
+</ul>
+<p>In essence, BPE strikes a balance, offering the granularity of character-level tokenization and the context-awareness of word-level tokenization. This hybrid approach ensures that NLP models like ChatGPT can understand a wide range of texts while maintaining computational efficiency.</p>
+<h2 id="sending-lots-of-text-to-chatgpt">Sending lots of text to ChatGPT</h2>
+<p>At time of writing, a message to ChatGPT via its web interface has a maximum token length of 4,096 tokens. If we assume the prior mentioned percent reduction as an average, this means you could reduce text of up to 5,712 tokens down to the appropriate size with just text preprocessing.</p>
+<p>What about when this isn&rsquo;t enough? Beyond text preprocessing, larger input can be sent in chunks using the OpenAI API. In my next post, I&rsquo;ll show you how to build a Python module that does exactly that.</p>
+]]></content></entry></feed>

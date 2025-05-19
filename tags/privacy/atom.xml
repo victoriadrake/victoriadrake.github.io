@@ -1,0 +1,597 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Privacy on victoria.dev</title><link href="https://victoria.dev/tags/privacy/feed.xml" rel="self"/><link href="https://victoria.dev/tags/privacy/"/><updated>2021-10-07T11:01:13+00:00</updated><id>https://victoria.dev/tags/privacy/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Set up a Pi-hole VPN on an AWS Lightsail instance</title><link href="https://victoria.dev/archive/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/"/><id>https://victoria.dev/archive/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/</id><author><name>Victoria Drake</name></author><published>2021-10-07T11:01:13+00:00</published><updated>2021-10-07T11:01:13+00:00</updated><content type="html"><![CDATA[<p>I&rsquo;ve written a fair bit in the past about the <a href="/tags/privacy">whys of online privacy</a>, and <a href="/tags/cybersecurity">a lot about staying safe online</a>. Chances are, if a search brought you here, you&rsquo;re well-past why. Let&rsquo;s go straight on to how.</p>
+<p>This guide will walk you through setting up <a href="https://pi-hole.net/">Pi-hole</a> on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance that acts as your VPN thanks to <a href="https://openvpn.net/">OpenVPN</a>. It&rsquo;s a more succinct version of the <a href="https://docs.pi-hole.net/guides/vpn/openvpn/overview/">official Pi-hole docs for OpenVPN</a>, made specifically for Lightsail with a few tips and tricks added in, because you deserve it.</p>
+<h2 id="create-and-connect-to-a-lightsail-instance">Create and connect to a Lightsail instance</h2>
+<ol>
+<li>
+<p>Log in or sign up to AWS and <a href="https://lightsail.aws.amazon.com/ls/webapp/home/instances">create a Lightsail Instance</a>.</p>
+</li>
+<li>
+<p>Under <strong>Select a platform</strong>, choose <strong>Linux/Unix</strong>.</p>
+</li>
+<li>
+<p>Under <strong>Select a blueprint</strong>, choose the <strong>OS Only</strong> button.</p>
+</li>
+<li>
+<p>Select the latest <a href="https://docs.pi-hole.net/main/prerequisites/#supported-operating-systems">officially supported Ubuntu server</a>.</p>
+</li>
+<li>
+<p>You can save a tidbit of effort by putting the following into the <strong>Launch script</strong> box:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Update installed packages</span>
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get upgrade -y
+</span></span></code></pre></div></li>
+<li>
+<p>Create a new SSH key for this server and ensure you download the <code>.pem</code>.</p>
+</li>
+<li>
+<p>Choose your plan. The $3.50 USD instance is sufficient.</p>
+</li>
+<li>
+<p>Give it a name then click <strong>Create instance</strong>.</p>
+</li>
+<li>
+<p>Stare eagerly at the page until the instance status is <strong>Running</strong>, then go to the <strong>Networking</strong> tab.</p>
+</li>
+<li>
+<p>Create a <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/understanding-static-ip-addresses-in-amazon-lightsail">Static IP</a> and attach it to your new instance. Remember that static IP addresses are free only while attached to an instance.</p>
+</li>
+<li>
+<p>Click on your instance name to return to its dashboard. Go back to the <strong>Networking</strong> tab. It&rsquo;ll look a bit different now.</p>
+</li>
+<li>
+<p>Under <strong>IPv6 networking</strong>, click the toggle to turn it off (unless you know what you are doing and you want IPv6 for some reason. Most of y&rsquo;all don&rsquo;t need it).</p>
+</li>
+<li>
+<p>Under <strong>IPv4 Firewall</strong>, delete the rule for <code>HTTP</code>.</p>
+</li>
+<li>
+<p>Click <strong>Add rule</strong>. In the <strong>Application</strong> dropdown, choose <strong>Custom</strong>.</p>
+<ul>
+<li>For <strong>Protocol</strong>, choose <strong>UDP</strong>.</li>
+<li>In the <strong>Port or range</strong> input, enter a UDP port for the OpenVPN server to run on. (It&rsquo;s typically <code>1194</code>, which you can choose to use, but you might like a different number for security purposes. Port range is <code>0-65535</code>.)</li>
+</ul>
+</li>
+<li>
+<p>Connect using SSH and your new key pair, either <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">in your terminal</a> or on the <strong>Connect</strong> tab with the <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/lightsail-how-to-connect-to-your-instance-virtual-private-server">browser-based client</a>.</p>
+</li>
+</ol>
+<h2 id="install-openvpn-on-your-server">Install OpenVPN on your server</h2>
+<p>After connecting to your server using SSH, install OpenVPN on your server.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Download OpenVPN</span>
+</span></span><span style="display:flex;"><span>wget https://git.io/vpn -O openvpn-install.sh
+</span></span><span style="display:flex;"><span>chmod <span style="color:#ae81ff">755</span> openvpn-install.sh
+</span></span><span style="display:flex;"><span>sudo ./openvpn-install.sh
+</span></span></code></pre></div><p>You&rsquo;ll see:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Welcome to this OpenVPN road warrior installer!
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>This server is behind NAT. What is the public IPv4 address or hostname?
+</span></span><span style="display:flex;"><span>Public IPv4 address / hostname [x.xx.xxx.xxx]:
+</span></span></code></pre></div><p>&hellip;where the default option is your static IP that you set up earlier. Hit return to accept this. Then:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Which protocol should OpenVPN use?
+</span></span><span style="display:flex;"><span>    1) UDP (recommended)
+</span></span><span style="display:flex;"><span>    2) TCP
+</span></span><span style="display:flex;"><span>Protocol [1]: 1
+</span></span></code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>What port should OpenVPN listen to?
+</span></span><span style="display:flex;"><span>Port [1194]: #####
+</span></span></code></pre></div><p>Enter the UDP port number you chose earlier. Then:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Select a DNS server for the clients:
+</span></span><span style="display:flex;"><span>    1) Current system resolvers
+</span></span><span style="display:flex;"><span>    2) Google
+</span></span><span style="display:flex;"><span>    3) 1.1.1.1
+</span></span><span style="display:flex;"><span>    4) OpenDNS
+</span></span><span style="display:flex;"><span>    5) Quad9
+</span></span><span style="display:flex;"><span>    6) AdGuard
+</span></span><span style="display:flex;"><span>DNS server [1]: 1
+</span></span></code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Enter a name for the first client:
+</span></span><span style="display:flex;"><span>Name [client]: pihole
+</span></span></code></pre></div><p>The Pi-hole will be the client. Name it as you like then <code>Press any key to continue...</code></p>
+<p>OpenVPN will set itself up. Confirm that <code>tun0</code> has the interface address <code>10.8.0.1/24</code> with the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ip addr show tun0
+</span></span></code></pre></div><p>This ensures that the Pi-hole will be set up properly. Now, about that:</p>
+<h2 id="install-and-configure-pi-hole">Install and configure Pi-hole</h2>
+<p>On your Lightsail instance, install Pi-hole.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Download and install Pi-hole</span>
+</span></span><span style="display:flex;"><span>curl -sSL https://install.pi-hole.net | bash
+</span></span></code></pre></div><p>This runs the Pi-hole automated installer. You&rsquo;ll see some prompts which you can answer using the enter key, arrow keys, tab, and space bar for selecting an option.</p>
+<p>The important things:</p>
+<ol>
+<li>When you see <strong>Choose An Interface</strong>, ensure you pick <code>tun0</code>. It isn&rsquo;t the default selection.</li>
+<li>You&rsquo;ll need to set the <strong>IPv4 address</strong> to the interface address you viewed previously using the <code>ip addr</code> command: <code>10.8.0.1/24</code>. This ensures the Pi-hole uses the VPN.</li>
+</ol>
+<blockquote>
+<p><em>At time of writing,</em> the second item above wasn&rsquo;t presented as an option in the automated installer. After the Pi-hole installer finishes, manually change the IP address by editing the configuration file:</p>
+<p><code>&gt; sudo vim /etc/pihole/setupVars.conf</code></p>
+<p>Change the <code>IPV4_ADDRESS</code> to <code>10.8.0.1/24</code> and save the file. Restart the Pi-hole with: <code>pihole restartdns</code>.</p></blockquote>
+<p>If you mess up, you can redo the configuration with <code>pihole reconfigure</code>.</p>
+<p>Finally, you&rsquo;ll configure the VPN to use the Pi-hole.</p>
+<h2 id="configure-openvpn">Configure OpenVPN</h2>
+<p>Confirm the address of the <code>tun0</code> interface with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ip a | grep -C <span style="color:#ae81ff">1</span> <span style="color:#e6db74">&#39;tun0&#39;</span>
+</span></span></code></pre></div><p>You should see: <code>inet 10.8.0.1/24</code> in there.</p>
+<p>Edit the OpenVPN config file with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo vim /etc/openvpn/server/server.conf
+</span></span></code></pre></div><p>Change the line that starts with <code>push &quot;dhcp-option</code>&hellip; to use the Pi-hole&rsquo;s IP address that you confirmed above:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">push</span> <span style="color:#e6db74">&#34;dhcp-option DNS 10.8.0.1&#34;</span>
+</span></span></code></pre></div><p>If any other lines start with <code>push &quot;dhcp-option</code>&hellip;, comment those out.</p>
+<p>If you want to log OpenVPN traffic, add these lines to the end of the file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">log</span> <span style="color:#e6db74">/var/</span><span style="color:#a6e22e">log</span>/<span style="color:#a6e22e">openvpn</span>.<span style="color:#a6e22e">log</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">verb</span> <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p>Save the config. If you forgot to open Vim with <code>sudo</code>, use the <code>tee</code> trick: <code>:w !sudo tee %</code>, then <code>O</code>, then <code>:q!</code>.</p>
+<p>Restart OpenVPN with <code>sudo systemctl restart openvpn-server@server</code>.</p>
+<h3 id="configure-firewall">Configure firewall</h3>
+<p>Run the following to control traffic to the server <a href="https://docs.pi-hole.net/guides/vpn/openvpn/firewall/">as described here</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo iptables -I INPUT -i tun0 -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span style="color:#ae81ff">53</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -i tun0 -p udp --destination-port <span style="color:#ae81ff">53</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span style="color:#ae81ff">80</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p tcp --destination-port <span style="color:#ae81ff">22</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p tcp --destination-port <span style="color:#ae81ff">1194</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p udp --destination-port <span style="color:#ae81ff">1194</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -I INPUT -i lo -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -P INPUT DROP
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Optionally, also block HTTPS advertisements while you&#39;re here.</span>
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p udp --dport <span style="color:#ae81ff">80</span> -j REJECT --reject-with icmp-port-unreachable
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p tcp --dport <span style="color:#ae81ff">443</span> -j REJECT --reject-with tcp-reset
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p udp --dport <span style="color:#ae81ff">443</span> -j REJECT --reject-with icmp-port-unreachable
+</span></span></code></pre></div><p>You can review the results with <code>sudo iptables -L --line-numbers</code>.</p>
+<p><strong>These are only stored in memory</strong> before you save them, so test out your set up on your client now to see if it all works as expected.</p>
+<h3 id="test-your-client-connection">Test your client connection</h3>
+<p>To test your configuration, try adding a client (the phone or computer that will connect to the VPN).</p>
+<ol>
+<li>Run the OpenVPN script again: <code>sudo ./openvpn-install.sh</code> and choose <strong>1) Add a new client</strong>. Give it a name; you may find it helps to name it by the device, e.g. &ldquo;phone&rdquo;. This creates a file that ends in <code>.ovpn</code>. You need to place this file on your client to use it.</li>
+<li>Install the appropriate <a href="https://duckduckgo.com/?q=OpenVPN+App">OpenVPN app</a> for your device.</li>
+<li>Transfer the <code>.ovpn</code> file you just obtained to the device if you haven&rsquo;t already. (See <a href="#future-tasks">future tasks</a> for a way to copy the file to your host machine.) Follow instructions in your app (try under <strong>FAQ</strong>) for importing the <code>.ovpn</code> file and activating the VPN.</li>
+<li>Ensure it seems to connect properly. If you <a href="https://duckduckgo.com/?t=ffab&amp;q=what's+my+ip">go to DuckDuckGo.com and search for &ldquo;What&rsquo;s my IP&rdquo;</a>, you should see the location of your Lightsail instance. For a more in-depth test, <a href="https://browserleaks.com/ip">check for DNS leaks at BrowserLeaks.com</a>.</li>
+</ol>
+<p>Try browsing for a while. You can also view the Pi-hole dashboard by visiting <code>http://pi.hole/admin/</code> on this device.</p>
+<p>If everything seems all right, go on to saving the configuration on your instance.</p>
+<h3 id="save-iptables">Save <code>iptables</code></h3>
+<p>Save the <code>iptables</code> you created earlier using the <code>tee</code> command to achieve the second permission.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo iptables-save | sudo tee /etc/pihole/rules.v4
+</span></span></code></pre></div><p>You&rsquo;re finished with configuration on your Lightsail instance. If you wish to disconnect now, you can just type <code>exit</code>.</p>
+<h2 id="future-tasks">Future tasks</h2>
+<p>You&rsquo;re done with the set up! You now have your very own personal VPN with a Pi-hole keeping you safe from nasty trackers. Here are some references for operations you might like to come back to in the future:</p>
+<ul>
+<li>Reconnect to your Lightsail instance with SSH:
+<ul>
+<li><code>ssh -i /path/to/private-key.pem ubuntu@public-ip-address</code></li>
+</ul>
+</li>
+<li>Set a password for the web interface dashboard:
+<ul>
+<li><code>pihole -a -p</code></li>
+</ul>
+</li>
+<li>Access the web interface dashboard:
+<ul>
+<li>Connect to the VPN, then visit <code>http://pi.hole/admin/</code></li>
+</ul>
+</li>
+<li>Update the Pi-hole:
+<ul>
+<li><code>pihole -up</code></li>
+</ul>
+</li>
+<li>Add a new client (<a href="https://docs.pi-hole.net/guides/vpn/openvpn/clients/">for iOS, Linux, or Windows</a>, or <a href="https://docs.pi-hole.net/guides/vpn/openvpn/android-client/">for Android</a>)</li>
+<li>Copy the <code>.ovpn</code> file for a client to your host machine (run on the host machine):
+<ul>
+<li><code>ssh -i /path/to/private-key.pem ubuntu@public-ip-address 'sudo cat /path/on/lightsail/client.ovpn' &gt; /path/on/host/client.ovpn</code></li>
+</ul>
+</li>
+<li>Beef up that block list! Here&rsquo;s my favorite resource for updating your Pi-hole <a href="https://docs.pi-hole.net/database/gravity/#adlist-table-adlist">adlist table</a>: <a href="https://firebog.net/">The Big Blocklist Collection</a></li>
+</ul>
+<p>Enjoy your new, more secure and peaceful Internet! If you found this guide helpful, please share it with someone else.</p>
+]]></content></entry><entry><title type="html">There are better options for a privacy-respecting phone</title><link href="https://victoria.dev/archive/there-are-better-options-for-a-privacy-respecting-phone/"/><id>https://victoria.dev/archive/there-are-better-options-for-a-privacy-respecting-phone/</id><author><name>Victoria Drake</name></author><published>2021-08-11T11:37:35+00:00</published><updated>2021-08-11T11:37:35+00:00</updated><content type="html"><![CDATA[<p>Whether you think the news of Apple scanning your private devices was a big deal, run-of-the-mill, or something we all should have seen coming, you might be wondering, &ldquo;What now?&rdquo; We know full well that Google is looking at the stuff on your phone too (and Gmail, and&hellip; well, everywhere else) so it’s not like there are other options after Apple&hellip; right?</p>
+<p>If a move towards privacy is what we’re after, we know a new off-the-shelf Google phone isn&rsquo;t a better answer &ndash; but there are more options.</p>
+<p>If you don&rsquo;t want the details, jump straight to <a href="#the-tldr">The TL;DR</a> at the end.</p>
+<h2 id="linux-phones-sort-of">Linux phones (sort of)</h2>
+<p>Unless you’re a rather tolerant tech-savvy tinkerer, a Linux phone isn’t one of these options&hellip; yet. I’ve personally been very excited about the bevy of emerging options in this space, from freedom-oriented hardware to fully open source, crowd-developed operating systems.</p>
+<p>The current state of these efforts is that this magical mashup just isn’t ready yet. Most Linux phone OS such as Ubuntu Touch, Mobian, Pure OS, etc, are in a &ldquo;mostly working&rdquo; state, with the missing features ranging from &ldquo;lack of reliable push notifications&rdquo; to &ldquo;intermittent Bluetooth connectivity&rdquo; to &ldquo;camera.&rdquo;</p>
+<p>If all you need is text messaging and a web browser, yes, you can probably go this route. For most users however, this isn’t going to make daily-driver status.</p>
+<p>If a Linux phone would suit you, I recommend getting your hands on a <a href="https://www.pine64.org/pinephone/">PinePhone</a> and running Arch Linux ARM (<a href="https://github.com/dreemurrs-embedded/Pine64-Arch/releases">releases on GitHub</a>) with <a href="https://www.plasma-mobile.org/get/">Plasma Mobile</a>.</p>
+<h2 id="de-googled-android">De-googled Android</h2>
+<p>For a daily-driver, &ldquo;de-googled&rdquo; Android is your best bet. Android itself (specifically, the Android Open Source Project source code) is based on a modified Linux kernel and is free and open source software. When we typically think of &ldquo;Android phones,&rdquo; we refer to Android devices with Google&rsquo;s proprietary software added to the mix, including Google Play Services. A &ldquo;de-googled&rdquo; Android phone is essentially the Android OS without Google&rsquo;s <del>spyware</del> services included by default.</p>
+<p>Keep in mind that this route still involves some DIY. You&rsquo;ll need to install an OS on a device yourself. Don&rsquo;t worry, there are step-by-step guides available &ndash; the most technical thing you&rsquo;ll likely have to do is copy and paste some commands into your terminal.</p>
+<p>Free and open source Android OS comes in multiple flavors, and the choice isn&rsquo;t arbitrary. Your selection of a &ldquo;de-googled&rdquo; phone is going to be determined by a couple factors: the hardware device you have or that you want to use, and the apps (software) you want to run on it.</p>
+<h3 id="hardware">Hardware</h3>
+<p>The phone you may already have (or the one you’re willing to purchase) will influence your choice of operating system (OS).</p>
+<h4 id="lineageos">LineageOS</h4>
+<p>At the time I’m writing this, if you have an older Pixel or another model of Android phone, your best bet for a hassle-free OS with A-class support will be Lineage. Here’s a link to the <a href="https://wiki.lineageos.org/devices/">LineageOS list of supported devices</a>. Clicking on your device here will get you to some installation instructions for your phone.</p>
+<h4 id="grapheneos">GrapheneOS</h4>
+<p>If you have a newer Pixel (generation 3 up to the newer 5) then GrapheneOS could be the way to go. <a href="https://grapheneos.org/faq#supported-devices">Here are the devices officially supported by GrapheneOS</a>. They also have <a href="https://grapheneos.org/install/">easy-to-follow installation instructions</a> and help via chat. It is possible to run GrapheneOS on other phones, but not without substantial DIY for which technical knowledge would help.</p>
+<p>Generally speaking, GrapheneOS is intended to be a security-hardened operating system targeted at individuals who won&rsquo;t be miffed if there are tradeoffs for mitigating vulnerabilities. If you don&rsquo;t have those requirements or intend to use Google Apps on your phone (see Software), then LineageOS will likely suit you better.</p>
+<h4 id="new-phone-who-dis">New phone, who dis?</h4>
+<p>If you&rsquo;re looking to purchase a new phone, you have some flexibility. My general recommendation is to pick up last-season&rsquo;s version of the model you want. Not only will this likely be cheaper (and often a great deal if you buy refurbished) but the open source community that develops these operating systems will have had more time to work with the device itself, which could help ensure better compatibility and a smoother set up.</p>
+<p>Consider buying a refurbished phone (sometimes called &ldquo;renewed&rdquo;) locally when you can. This can help fund the small businesses that offer them.</p>
+<h3 id="software">Software</h3>
+<p>What do you <em>need</em> to do on your phone? Privacy and convenience are typically at odds (a far larger topic I won’t dig into right now) so it can help to narrow down the functionality you need. If your needs look something like:</p>
+<ul>
+<li>Calls and texts</li>
+<li>Web browser</li>
+<li>Web-based email via browser</li>
+</ul>
+<p>Then you&rsquo;re good to go, right out of the box, with either LineageOS or GrapheneOS. They&rsquo;ll both include free and open source apps that let you do all these things.</p>
+<p>If you want a particular application that doesn&rsquo;t come pre-installed, here&rsquo;s where we get into some nuance. Your choices depend on the level of privacy you&rsquo;d like to maintain. Here are your avenues for installing apps, listed in order of preference.</p>
+<h4 id="1-official-apks">1. Official APKs</h4>
+<p>Some particularly privacy-focused applications offer an Android Package Kit (APK) that you can download directly in order to install the app. You should only download these when you&rsquo;ve navigated directly to a domain that the organization owns. Here are my favorites:</p>
+<ul>
+<li><a href="https://signal.org/android/apk/">Signal</a></li>
+<li><a href="https://protonapps.com/protonmail-android">ProtonMail</a></li>
+</ul>
+<p>You can download and install APKs whether you choose LineageOS or GrapheneOS.</p>
+<h4 id="2-use-f-droid">2. Use F-Droid</h4>
+<p>If you can&rsquo;t find an APK for something you want, search for it on F-Droid.</p>
+<p>The <a href="https://f-droid.org/">F-Droid</a> software repository allows you to download and install apps in much the same way that the Google Play store does, with a couple notable differences. All the apps here are free and open source, and no account or profile is required to download them. The F-Droid APK itself can be downloaded and installed from f-droid.org directly on either LineageOS or GrapheneOS.</p>
+<p>Just like any open source software, it&rsquo;s up to the user (you) to ensure that you&rsquo;re downloading and installing software you trust. If you want help or advice, F-Droid has a healthy community that you can interact with in lots of ways, including <a href="https://f-droid.org/en/about/">via IRC, Matrix, and the Fediverse</a>.</p>
+<p>You can find an app for pretty much anything here: from your general-store type functions such as to-do lists, music players, and maps; to specific niche security applications, and even a tea timer. Here are some well-known choices I can easily recommend:</p>
+<ul>
+<li><a href="https://f-droid.org/en/packages/com.standardnotes/">Standard Notes</a> (<a href="https://standardnotes.org/">https://standardnotes.org/</a>)</li>
+<li><a href="https://f-droid.org/en/packages/im.vector.app/">Element for Matrix</a> (<a href="https://element.io/">https://element.io/</a>)</li>
+<li><a href="https://f-droid.org/en/packages/de.tutao.tutanota/">Tutanota</a> (<a href="https://tutanota.com">https://tutanota.com</a>)</li>
+</ul>
+<h4 id="3-aurora-store">3. Aurora Store</h4>
+<p>If you need an app that isn&rsquo;t available on F-Droid, your next stop is the Aurora Store. This is an unofficial client for the Google Play Store that lets you download free applications anonymously, without signing into a Google account. Most applications found in the larger stores can be downloaded this way, without requiring Google&rsquo;s proprietary stuff on your phone.</p>
+<p>When loading Aurora Store for the first time, be sure to choose the &ldquo;Anonymous&rdquo; option instead of signing in.</p>
+<p>The Aurora Store itself can be <a href="https://f-droid.org/en/packages/com.aurora.store/">installed via F-Droid</a> or <a href="https://auroraoss.com/downloads/AuroraStore/">auroraoss.com</a>. It works on either LineageOS or GrapheneOS &ndash; however, apps that require less private permissions or access will probably work better on LineageOS.</p>
+<p>Keep in mind that your phone OS in no way supports these apps directly, or knows what&rsquo;s in them, or what sort of tracking and information exchange they may be up to. It&rsquo;s a slight privacy downgrade, but still better than a fully Google-ified OS.</p>
+<h4 id="4-if-you-need-google-apps">4. If you need Google Apps</h4>
+<p>If this will be your only phone and you simply must have Google Apps on it (think Google Play Store, Gmail, Calendar, Photos, etc) then go with LineageOS. You can choose to try emulating Google Play Services using <a href="https://lineage.microg.org/">LineageOS for microG</a>, or <a href="https://wiki.lineageos.org/gapps">install the Google Apps add-on</a> when you install LineageOS.</p>
+<h2 id="the-tldr">The TL;DR</h2>
+<p>Here&rsquo;s the &ldquo;Internet personality quiz&rdquo; version of everything above. You are&hellip;</p>
+<ol>
+<li><strong>Knowledgeable about Linux;</strong> mostly use a phone for text, calls, and web browser; and potentially want to help develop Linux phone software.
+<ul>
+<li>Try a Linux phone such as the PinePhone, but consider one of the other options as a back up for when you just need stuff to work.</li>
+</ul>
+</li>
+<li><strong>Security or privacy inclined,</strong> happy to use FOSS apps, or do most things via web browser anyway.
+<ul>
+<li>Get your hands on a Pixel 3{XL, a, a XL}, Pixel 4{XL, a, a 5G}, or Pixel 5, and use GrapheneOS. <a href="https://grapheneos.org/install/">Installation instructions here</a>.</li>
+<li>Optionally, download the <a href="https://f-droid.org/">F-Droid</a> or <a href="https://f-droid.org/en/packages/com.aurora.store/">Aurora Store</a> APKs for apps.</li>
+</ul>
+</li>
+<li><strong>Someone who needs Google Apps to work,</strong> or you want a phone that isn&rsquo;t a Pixel, or you&rsquo;re setting up a device for someone who&rsquo;s fine using Android but needs it to look familiar.
+<ul>
+<li>Use LineageOS with any of <a href="https://wiki.lineageos.org/devices/">its supported devices</a>. Click on the device name for installation instructions.</li>
+<li>If you must have Google Apps and need Google Play Services to work, <a href="https://wiki.lineageos.org/gapps">install the add-on</a> at the same time you install LineageOS.</li>
+<li>Optionally, download the <a href="https://f-droid.org/">F-Droid</a> or <a href="https://f-droid.org/en/packages/com.aurora.store/">Aurora Store</a> for installing apps.</li>
+</ul>
+</li>
+</ol>
+<p>Whichever route you choose, my advice is to treat this like a learning experiment. You&rsquo;re sort of building your own phone, after all, and gaining all the technological independence that comes with that knowledge. If possible, don&rsquo;t ditch your current phone until you try out one (two?) of these paths. The one you end up liking most could surprise you! It&rsquo;s great to have options.</p>
+]]></content></entry><entry><title type="html">Digital resilience: redundancy for websites and communications</title><link href="https://victoria.dev/posts/digital-resilience-redundancy-for-websites-and-communications/"/><id>https://victoria.dev/posts/digital-resilience-redundancy-for-websites-and-communications/</id><author><name>Victoria Drake</name></author><published>2021-02-22T04:00:43-05:00</published><updated>2021-02-22T04:00:43-05:00</updated><content type="html"><![CDATA[<p>When what seems like half the planet noped out of WhatsApp after its terms of service update, applications like <a href="https://signal.org/download/">Signal</a> (which I highly recommend) saw an unprecedented increase in user traffic. Signal had so many new users sign up that it overwhelmed their existing infrastructure and lead to a 24-hour-ish outage.</p>
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Signal is experiencing technical difficulties. We are working hard to restore service as quickly as possible.</p>&mdash; Signal (@signalapp) <a href="https://twitter.com/signalapp/status/1350118809860886528?ref_src=twsrc%5Etfw">January 15, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>The small team responded impressively quickly, especially given that a <a href="https://www.businessinsider.com/whatsapp-facebook-data-signal-download-telegram-encrypted-messaging-2021-1">4,200% spike</a> in new users was utterly implausible before it occurred.</p>
+<p>The downside of so many people moving onto this fantastic application is that it caused a brief outage. If you rely solely on a certain application for your communications, brief outages can be debilitating. Even when it seems implausible that your favorite chat, email, or website service could just &ndash; <em>poof</em> &ndash; vanish overnight, recent events have proved it isn&rsquo;t impossible.</p>
+<p>Have a backup plan. Have several. Here&rsquo;s how you can improve your digital resiliency for things like websites, messaging, and email.</p>
+<h2 id="messaging">Messaging</h2>
+<p>I recommend Signal because it is open source, end-to-end encrypted, cross-platform, and offers text, voice, video, and group chat. It&rsquo;s usually very reliable; however, strange things can happen.</p>
+<p>It&rsquo;s important to set up a backup plan ahead of any service outages with the people you communicate with the most. Have an agreement for a secondary method of messaging &ndash; ideally another end-to-end encrypted service. Avoid falling back on insecure communications like SMS and social media messaging. Here&rsquo;s a short list for you to explore:</p>
+<ul>
+<li><a href="https://signal.org/">Signal</a></li>
+<li><a href="https://wire.com/">Wire</a></li>
+<li><a href="https://getsession.org/">Session</a></li>
+</ul>
+<p>If you&rsquo;re particularly technically inclined, you can <a href="/blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/">set up your own self-hosted chat service with Matrix</a>.</p>
+<p>Having a go-to plan B can help bring peace of mind and ensure you&rsquo;re still able to communicate when strange things happen.</p>
+<h2 id="cloud-contacts">Cloud contacts</h2>
+<p>Do you know the phone numbers of your closest contacts? While memorizing them might not be practical, storing them solely online is an unnecessary risk. Most services allow you to export your contacts to vCard or CSV format.</p>
+<p>I recommend keeping your contacts locally on your device whenever you can. This ensures you still know how to contact people if your cloud provider is unavailable, or if you don&rsquo;t have Internet access.</p>
+<p>Full analog redundancy is also possible here. Remember that paper stuff? Write down the phone numbers of your most important contacts so you can access them if your devices run out of battery or otherwise can&rsquo;t turn on (drop your phone much?).</p>
+<h2 id="local-email-synchronization">Local email synchronization</h2>
+<p>If your email service exists solely online, there&rsquo;s a big email-shaped hole in your life. If you can&rsquo;t log in to your email for any reason &ndash; an outage on their end, a billing error, or your Internet is down &ndash; you&rsquo;ll have no way to access your messages for however long your exile lasts. If you think about all the things you do via email in a day, I think the appropriate reaction to not having local copies is 🤦.</p>
+<p>Download an open source email client like <a href="https://www.thunderbird.net/">Thunderbird</a>. Follow <a href="https://support.mozilla.org/en-US/products/thunderbird/download-install-and-migration">instructions to install Thunderbird</a> and set it up with your existing online email service. Your online service provider may have a help document that shows you how to set up Thunderbird.</p>
+<p>You can maximize your privacy by <a href="https://support.mozilla.org/kb/thunderbird-telemetry">turning off Thunderbird&rsquo;s telemetry</a>.</p>
+<p>To ensure that Thunderbird downloads your email messages and stores them locally on your machine:</p>
+<ol>
+<li>Click the &ldquo;hamburger&rdquo; overflow menu and go to <strong>Account Settings</strong></li>
+<li>Choose <strong>Synchronization &amp; Storage</strong> in the sidebar</li>
+<li>Ensure that under <strong>Message Synchronizing,</strong> the checkbox for <strong>Keep messages in all folders for this account on this computer</strong> is checked.</li>
+</ol>
+<p>You may need to visit each of your folders in order to trigger the initial download.</p>
+<p>Some other settings you may want to update:</p>
+<ol>
+<li>Choose <strong>Composition &amp; Addressing</strong> and uncheck the box next to <strong>Compose messages in HTML format</strong> to send plaintext emails instead.</li>
+<li>Under <strong>Return Receipts</strong> choose <strong>Global Preferences.</strong> Select the radio button for <strong>Never send a return receipt.</strong></li>
+</ol>
+<p>You don&rsquo;t need to start using Thunderbird for all your email tasks. Just make sure you open it up regularly so that your messages sync and download to your machine.</p>
+<h2 id="websites">Websites</h2>
+<p>I strongly believe you should have <a href="/posts/make-your-own-independent-website/">your own independent website</a> for reasons that go beyond redundancy. To truly make your site resilient, it&rsquo;s important to have your own domain.</p>
+<p>If you know that my website is at the address <code>victoria.dev</code>, for example, it doesn&rsquo;t matter whether I&rsquo;m hosting it on GitHub Pages, AWS, Wordpress, or from a server in my basement. If my hosting provider becomes unavailable, my website won&rsquo;t go down with it. Getting back up and running would be as simple as updating my DNS configuration to point to a new host.</p>
+<p>Price is hardly an excuse, either. You can buy a domain for <a href="https://www.jdoqocy.com/click-100268310-14326263" target="_blank" rel="noopener noreferrer">less than a cup of coffee</a>
+ with my Namecheap affiliate link (thanks!). Namecheap also handles <a href="https://www.namecheap.com/support/knowledgebase/article.aspx/767/10/how-to-change-dns-for-a-domain/">your DNS settings</a>, so it&rsquo;s a one-stop shop.</p>
+<p>With your own domain, you can build resiliency for your email address as well. Learn how to set up your custom domain with your email provider. If you need to switch providers in the future, your email address ports to the new service with you. Here are a few quick links for providers I&rsquo;d recommend:</p>
+<ul>
+<li><a href="https://proton.me/support/custom-domain">ProtonMail: How to use a custom domain with Proton Mail</a></li>
+<li><a href="https://tutanota.com/howto/#custom-domain">Tutanota: Adding of custom email domains</a></li>
+<li><a href="https://www.fastmail.help/hc/en-us/articles/360058753394-Custom-Domains-with-Fastmail">Fastmail: Custom Domains with Fastmail</a></li>
+</ul>
+<h2 id="build-your-digital-resiliency">Build your digital resiliency</h2>
+<p>I hope you&rsquo;ve found this article useful on your path to building digital resiliency. If you&rsquo;re interested in more privacy topics, you might like to learn about great <a href="/blog/outsourcing-security-with-1password-authy-and-privacy.com/">apps for outsourcing security</a>.</p>
+<p>If your threat model includes anonymity or censorship, building digital resiliency is just a first step. The rest is outside the scope of my blog, but here are a few great resources I&rsquo;ve come across:</p>
+<ul>
+<li><a href="https://www.torproject.org/">Tor Browser</a></li>
+<li><a href="https://inteltechniques.com/index.html">IntelTechniques</a></li>
+<li><a href="https://cantcancel.me/">Can&rsquo;t Cancel Me</a></li>
+<li><a href="https://tails.boum.org/">Tails portable OS</a></li>
+</ul>
+]]></content></entry><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/archive/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/archive/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-02-15T01:38:07-05:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
+<p>You can create your own self-hosted Matrix chat for as little as $3.50 USD per month on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance. Your homeserver can federate with other Matrix servers, giving you a reliable and fault-tolerant means of communication.</p>
+<p>Matrix is most widely installed via its <a href="https://element-hq.github.io/synapse/latest/index.html">Synapse</a> homeserver implementation written in Python 3. Dendrite, its second-generation homeserver implementation written in Go, is currently released in beta. Dendrite will provide more memory efficiency and reliability out-of-the-box, making it an excellent choice for running on a virtual instance.</p>
+<p>Here&rsquo;s how to set up your own homeserver on AWS Lightsail with Dendrite. You can also <a href="https://github.com/matrix-org/dendrite">contribute to Dendrite today</a>.</p>
+<h2 id="create-a-lightsail-instance">Create a Lightsail instance</h2>
+<p>Spin up a new Lightsail instance on AWS with Debian as your operating system. It&rsquo;s a good idea to create a new per-instance key for use with SSH. You can do this by with the SSH key pair manager on the instance creation page. Don&rsquo;t forget to download your private key and <code>.gitignore</code> your secrets.</p>
+<p>Click <strong>Create Instance.</strong> Wait for the status of your instance to change from <strong>Pending</strong> to <strong>Running</strong>, then click its name to see further information. You&rsquo;ll need the Public IP address.</p>
+<p>To enable people including yourself to connect to the instance, go to the Networking tab and add a firewall rule for HTTPS. This will open <code>443</code> so you can connect over IPv4. You can also do this for IPv6.</p>
+<h2 id="connect-dns">Connect DNS</h2>
+<p>Give your instance a catchier address by <a href="https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX" target="_top">buying a domain at Namecheap</a>
+ and setting up DNS records.</p>
+<ol>
+<li>On your domain management page in the <strong>Nameservers</strong> section, choose <strong>Namecheap BasicDNS</strong>.</li>
+<li>On the <strong>Advanced DNS</strong> tab, click <strong>Add New Record</strong>.</li>
+</ol>
+<p>Add an <code>A Record</code> to your Lightsail Public IP. You can use a subdomain if you want one, for example,</p>
+<ul>
+<li><strong>Type:</strong> <code>A Record</code></li>
+<li><strong>Host:</strong> <code>matrix</code></li>
+<li><strong>Value:</strong> <code>13.59.251.229</code></li>
+</ul>
+<p>This points <code>matrix.example.org</code> to your Lightsail instance.</p>
+<h2 id="set-up-your-matrix-homeserver">Set up your Matrix homeserver</h2>
+<p>Change permissions on the private key you downloaded:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>chmod <span style="color:#ae81ff">600</span> &lt;path/to/key&gt;
+</span></span></code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
+</span></span></code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea to use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
+<p><em>Dec 2021 update: As the good people of Mastodon point out, you might like to ensure you&rsquo;re choosing the stable version for Debian. For instance, replace <code>buster</code> below with <a href="https://www.debian.org/releases/">what&rsquo;s &ldquo;stable&rdquo; at the moment</a>.</em></p>
+<p>Change your <a href="https://wiki.debian.org/SourcesList">sources list</a> in order to get the newest version of Go:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo vim /etc/apt/sources.list
+</span></span></code></pre></div><p>Delete everything except these two lines:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">deb</span> <span style="color:#a6e22e">http</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">cdn</span>-<span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">deb</span>.<span style="color:#a6e22e">debian</span>.<span style="color:#a6e22e">org</span>/<span style="color:#a6e22e">debian</span> <span style="color:#a6e22e">buster</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">deb</span>-<span style="color:#a6e22e">src</span> <span style="color:#a6e22e">http</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">cdn</span>-<span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">deb</span>.<span style="color:#a6e22e">debian</span>.<span style="color:#a6e22e">org</span>/<span style="color:#a6e22e">debian</span> <span style="color:#a6e22e">buster</span> <span style="color:#a6e22e">main</span>
+</span></span></code></pre></div><p>Then replace the distributions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>:%<span style="color:#a6e22e">s</span><span style="color:#e6db74">/buster main/</span><span style="color:#a6e22e">testing</span> <span style="color:#a6e22e">main</span> <span style="color:#a6e22e">contrib</span> <span style="color:#a6e22e">non</span>-<span style="color:#a6e22e">free</span>/<span style="color:#a6e22e">g</span>
+</span></span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
+<p>Once the upgrade is finished, restart your instance with <code>sudo shutdown -r now</code>.</p>
+<p>Go make some coffee, then SSH back in. Get the packages you&rsquo;ll need with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>sudo apt upgrade
+</span></span><span style="display:flex;"><span>sudo apt install -y git golang nginx python3-certbot-nginx
+</span></span></code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
+<h2 id="get-dendrite">Get Dendrite</h2>
+<p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git clone https://github.com/matrix-org/dendrite
+</span></span><span style="display:flex;"><span>cd dendrite
+</span></span><span style="display:flex;"><span>./build.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate a Matrix signing key for federation (required)</span>
+</span></span><span style="display:flex;"><span>./bin/generate-keys --private-key matrix_key.pem
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate a self-signed certificate (optional, but a valid TLS certificate is normally</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># needed for Matrix federation/clients to work properly!)</span>
+</span></span><span style="display:flex;"><span>./bin/generate-keys --tls-cert server.crt --tls-key server.key
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Copy and modify the config file - you&#39;ll need to set a server name and paths to the keys</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># at the very least, along with setting up the database connection strings.</span>
+</span></span><span style="display:flex;"><span>cp dendrite-config.yaml dendrite.yaml
+</span></span></code></pre></div><h2 id="configure-dendrite">Configure Dendrite</h2>
+<p>Modify the configuration file you just copied:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo vim dendrite.yaml
+</span></span></code></pre></div><p>At minimum, set:</p>
+<ul>
+<li><code>server name</code> to your shiny new domain name, e.g. <code>matrix.example.org</code></li>
+<li><code>disable_federation</code> to true or false</li>
+<li><code>registration_disabled</code> to true or false</li>
+</ul>
+<p>You might like to read the <a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ</a>.</p>
+<h2 id="configure-nginx">Configure nginx</h2>
+<p>Get the required packages if you didn&rsquo;t already install them above:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo apt install nginx python3-certbot-nginx
+</span></span></code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>cd /etc/nginx/sites-available
+</span></span><span style="display:flex;"><span>ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
+</span></span><span style="display:flex;"><span>sudo cp default &lt;sitename&gt;
+</span></span></code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
+<p>Your <code>location</code> block should look like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-nginx" data-lang="nginx"><span style="display:flex;"><span><span style="color:#66d9ef">location</span> <span style="color:#e6db74">/</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">https://localhost:8448</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
+<h2 id="create-self-signed-certificates">Create self-signed certificates</h2>
+<p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo certbot --nginx -d &lt;your.site.address&gt;
+</span></span></code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
+<p>Test your configuration and restart nginx with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo nginx -t
+</span></span><span style="display:flex;"><span>sudo systemctl restart nginx
+</span></span></code></pre></div><p>Then start up your Matrix server.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Build and run the server:</span>
+</span></span><span style="display:flex;"><span>./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+</span></span></code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
+<p>You can log on to your new homeserver with any <a href="https://matrix.org/clients/">Matrix client</a>, or Matrix-capable applications like <a href="https://www.pidgin.im/plugins/?publisher=all&amp;query=&amp;type=">Pidgin with the Matrix plugin</a>.</p>
+<h2 id="other-troubleshooting">Other troubleshooting</h2>
+<h3 id="log-files">Log files</h3>
+<p>If you get an error such as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
+</span></span><span style="display:flex;"><span>  Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
+</span></span></code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo mkdir /var/log/dendrite
+</span></span><span style="display:flex;"><span>sudo chown admin:admin /var/log/dendrite
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Build and run the server:</span>
+</span></span><span style="display:flex;"><span>./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+</span></span></code></pre></div><h3 id="unable-to-decrypt">Unable to decrypt</h3>
+<p>If you see: <code>Unable to decrypt: The sender's device has not sent us the keys for this message.</code> you may need to verify a user (sometimes yourself).</p>
+<ol>
+<li>In your client, open the user&rsquo;s profile. Click the lock icon if there is one, or otherwise look for a way to verify them.</li>
+<li>You may be asked to see if some emojis presented to both users match if you&rsquo;re using certain clients like Element.</li>
+<li>You can then re-request encryption keys for any sent messages.</li>
+</ol>
+<h2 id="set-up-your-own-matrix-server-today">Set up your own Matrix server today</h2>
+<p>I hope you found this introduction to setting up your own Matrix homeserver to be helpful!</p>
+]]></content></entry><entry><title type="html">So you&amp;#39;re the family tech support</title><link href="https://victoria.dev/archive/so-youre-the-family-tech-support/"/><id>https://victoria.dev/archive/so-youre-the-family-tech-support/</id><author><name>Victoria Drake</name></author><published>2020-12-21T08:42:24-05:00</published><updated>2020-12-21T08:42:24-05:00</updated><content type="html"><![CDATA[<p>🎄🌟 Happy holidays! 🌟🎄</p>
+<p>For those of you seeing relatives this season, chances are that you’re the designated family tech support. If part of your time home for the holidays is spent on software updates and troubleshooting WiFi, here are a few other quick wins to help boost your family&rsquo;s online privacy and security.</p>
+<h2 id="1-set-up-a-vpn">1. Set up a VPN</h2>
+<p>Using a VPN is Online Safety 101. Choose a reputable provider with a strict no-logging policy, or if you&rsquo;re up for it, <a href="/blog/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/">roll your own</a>.</p>
+<h2 id="2-introduce-a-password-manager">2. Introduce a password manager</h2>
+<p>If your family member uses the same password everywhere (<code>&lt;petname&gt;</code>+<code>&lt;house number&gt;</code>, same as last year) because passwords are hard to remember, introduce them to their new best friend, <a href="https://1password.com/">1Password</a>. Help your family get set up with secure passwords they don&rsquo;t have to write down on Post-It notes &ndash; just one master pass(phrase) is all you need.</p>
+<p>When choosing a passphrase, avoid using information easily found on social media accounts, like pet names, favorite sports teams, favorite brands, or birthdays.</p>
+<h2 id="3-switch-to-duckduckgo">3. Switch to DuckDuckGo</h2>
+<p>Help fight the Internet search monopoly by getting your family to use a search engine that respects their privacy. Go to your browser <strong>Settings</strong> and set your <strong>Default Search Engine</strong> (that uses the URL bar) to <a href="https://duckduckgo.com/">DuckDuckGo</a>. Break the ice with an instant answer feature, like searching &ldquo;calendar&rdquo; so you can <a href="https://duckduckgo.com/?q=Countdown+To+25th+dec+2020&amp;t=canonical&amp;ia=answer">count down to Christmas</a>.</p>
+<p>(You might want to search for &ldquo;classic cocktails cheat sheet&rdquo; after all this.)</p>
+<h2 id="4-install-a-better-browser-and-blocker">4. Install a better browser and blocker</h2>
+<p>While I prefer a <a href="https://pi-hole.net/">Pi-hole</a>, setting one up can be complex. Instead, help set up a privacy-preserving browser like <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a> or a wide-spectrum blocking extension like <a href="https://ublockorigin.com/">uBlock Origin</a> <a href="https://github.com/gorhill/uBlock">(GitHub source)</a>.</p>
+<p>Your family will get faster page load times, less advertisements interrupting articles and videos, and fewer sneaky trackers leaking browsing habits to big tech, all with near-zero maintenance.</p>
+<h2 id="be-a-home-for-the-holidays-hero">Be a home-for-the-holidays hero!</h2>
+<p>Help improve your family&rsquo;s security posture this holiday season. A little beefed-up cybersecurity may be one of the best gifts you can give!</p>
+<p>I&rsquo;m keeping it short-and-sweet this week. My annual Christmas post drops on December 24, full of warm fuzzy goodness and a tech tip or two. Thank you for <a href="/">being a subscriber</a> &ndash; stay tuned!</p>
+]]></content></entry><entry><title type="html">Outsourcing security with 1Password, Authy, and Privacy.com</title><link href="https://victoria.dev/archive/outsourcing-security-with-1password-authy-and-privacy.com/"/><id>https://victoria.dev/archive/outsourcing-security-with-1password-authy-and-privacy.com/</id><author><name>Victoria Drake</name></author><published>2020-03-16T08:12:32-04:00</published><updated>2020-03-16T08:12:32-04:00</updated><content type="html"><![CDATA[<p>We&rsquo;ve already got enough to deal with without worrying about our cybersecurity. When humans are busy and under stress, we tend to get lax in less-obviously-pressing areas, like the integrity of our online accounts. These areas only become an obvious problem when it&rsquo;s too late for prevention.</p>
+<p>Cybersecurity can be fiddly and time-consuming. You might need to reset forgotten passwords, transfer multifactor authentication (MFA) codes to different devices, or deal with the fallout of compromised payment details in the event one of your accounts is still breached.</p>
+<p>Thankfully, most of the work necessary to keep up our cybersecurity measures can be outsourced.</p>
+<p>Here are three changes you can make to significantly reduce the chances of needing to fiddle with any of these things again.</p>
+<h2 id="1password">1Password</h2>
+<p><img src="1Password-iOS-FaceID-darkmode.jpg" alt="1Password on an iPhone"></p>
+<p>I&rsquo;ve historically avoided password managers because of an irrational knee-jerk reaction to putting all my eggs in one basket. You know what&rsquo;s great for irrational reactions? Education.</p>
+<p>To figure out if putting all my passwords into a password manager is more secure than not using one, I set out to see what some smart people wrote about it.</p>
+<p>First, we need to know a thing or two about passwords. Troy Hunt figured out almost a decade ago that <a href="https://www.troyhunt.com/only-secure-password-is-one-you-cant/">trying to remember strong passwords doesn&rsquo;t work</a>. In more recent times, Alex Weinert expanded on this in <a href="https://techcommunity.microsoft.com/t5/azure-active-directory-identity/your-pa-word-doesn-t-matter/ba-p/731984">Your Pa$$word doesn&rsquo;t matter</a>. TL;DR: our brains aren&rsquo;t better at passwords than computers, and please use MFA.</p>
+<p>So passwords don&rsquo;t matter, but complicated passwords are still better than memorable and guessable ones. Since I&rsquo;ve next to no hope of remembering a dozen variations of <code>p/q2-q4!</code> (I&rsquo;m not a <a href="https://inbox.vuxu.org/tuhs/CAG=a+rj8VcXjS-ftaj8P2_duLFSUpmNgB4-dYwnTsY_8g5WdEA@mail.gmail.com/">chess player</a>), this is a task I can outsource to <a href="https://1password.com/">1Password</a>. I&rsquo;ll still need to remember one, long, complicated master password - 1Password uses this to encrypt my data, so I really can&rsquo;t lose it - but I can handle just one.</p>
+<p>Using 1Password specifically has another, decidedly obvious, advantage. I chose 1Password because of their <a href="https://support.1password.com/watchtower/">Watchtower</a> feature. <a href="https://www.troyhunt.com/have-i-been-pwned-is-now-partnering-with-1password/">Thanks to Troy Hunt&rsquo;s Have I Been Pwned</a>, Watchtower will alert you if any of your passwords show up in a breach so you can change them. Passwords still don&rsquo;t completely work, but this is probably the best band-aid there is.</p>
+<p>One last bonus is that using a password manager is a heck of a lot more convenient. I don&rsquo;t need to take a few tries to type in a complicated password. I don&rsquo;t end up spending time resetting passwords I&rsquo;ve forgotten on sites I only rarely use.</p>
+<p>When tasked with remembering all their own passwords, people typically create simpler passwords that are easier to remember &ndash; and easier to hack. This occurs most frequently on sites that are considered unimportant. Using 1Password and generated passwords, those sites are now also first-class citizens in the land of strong passwords, instead of being half-abandoned and half-open attack vectors.</p>
+<p>So, yes, all my eggs are in one basket. A well-protected, complex, and monitored basket.</p>
+<h2 id="authy">Authy</h2>
+<p>Okay - so it&rsquo;s more like one-and-a-half baskets. 🤷🏻</p>
+<p><img src="Authy2019Logo.png" alt="Authy&rsquo;s logo"></p>
+<p><a href="https://authy.com/">Authy</a>, from the folks over at <a href="https://www.twilio.com">Twilio</a>, provides a 2FA solution that&rsquo;s more secure than SMS. <a href="https://authy.com/blog/authy-vs-google-authenticator/">Unlike Google Authenticator</a>, you can choose to back up your 2FA codes in case you lose or change your phone. (1Password offers 2FA functionality as well - but, you know, redundancies.)</p>
+<p>With Authy, your back up is encrypted with your password, similarly to how 1Password works. This makes it the second password you can&rsquo;t forget, if you don&rsquo;t want to lose access to your codes. If you reset your account, they all go away. I can deal with remembering two passwords; I&rsquo;ll take that trade.</p>
+<p>I&rsquo;ve tried other methods of MFA, including hardware keys, which can make accessing accounts on your phone more complicated than I care to put up with. I find the combination of 1Password and Authy to be the most practical combination of convenience and security that yet exists to my knowledge.</p>
+<h2 id="privacycom">Privacy.com</h2>
+<p><img src="privacy-ephemeral.png" alt="Screenshot of Privacy card"></p>
+<p>Finally, there&rsquo;s one last line of defense you can put in place in the unfortunate event that one of your accounts is still compromised. All the strong passwords and MFA in the world won&rsquo;t help if you open the doors yourself, and scams and phishing are a thing.</p>
+<p>Since it&rsquo;s rather impractical to use a different real credit card every place you shop, virtual cards are just a great idea. There&rsquo;s no good reason to spend an afternoon (or more) resetting your payment information on every account just to thwart a misbehaving merchant or patch up a data breach from that online shop for cute salt shakers you made a purchase at last year (just me?).</p>
+<p>As a bonus, a <a href="https://blog.privacy.com/create-virtual-cards-with-privacy-and-1password/">partnership between 1Password and Privacy.com</a> lets you easily create virtual credit cards using the 1Password extension.</p>
+<p>By setting up a separate virtual card for each merchant, in the event that one of those merchants is compromised, you can simply pause or delete that card. None of your other accounts or actual bank details are caught up in the process. Cards can have time-based limits or be one-off burner numbers, making them ideal for setting up subscriptions.</p>
+<p>This is the sort of basic functionality that I hope, one day, becomes more prevalent from banks and credit cards. In the meantime, I&rsquo;ll keep using <a href="https://privacy.com/join/Q6V3V">Privacy.com</a>. That&rsquo;s my referral link; if you&rsquo;d like to thank me by using it, we&rsquo;ll both get five bucks as a bonus.</p>
+<h2 id="outsource-better-security">Outsource better security</h2>
+<p>All together, implementing these changes will probably take up an afternoon, depending on how many accounts you have. It&rsquo;s worth it for the time you&rsquo;d otherwise spend resetting passwords, setting up new devices, or (knock on wood) recovering from compromised banking details. Best of all, you&rsquo;ll have continual protection just running in the background.</p>
+<ul>
+<li><a href="https://1password.com/">1Password</a></li>
+<li><a href="https://authy.com/">Authy</a></li>
+<li><a href="https://privacy.com/join/Q6V3V">Privacy.com</a></li>
+</ul>
+<p>We have the technology. Free up some brain cycles to focus on other things - or simply remove some unnecessary stress from your life by outsourcing the fiddly bits.</p>
+<p>Want to give the gift of cybersecurity to someone you know? Get them started with a <a href="/blog/your-cybersecurity-starter-pack/">cybersecurity starter pack</a>.</p>
+]]></content></entry><entry><title type="html">Three healthy cybersecurity habits</title><link href="https://victoria.dev/archive/three-healthy-cybersecurity-habits/"/><id>https://victoria.dev/archive/three-healthy-cybersecurity-habits/</id><author><name>Victoria Drake</name></author><published>2019-12-26T08:27:31-04:00</published><updated>2019-12-26T08:27:31-04:00</updated><content type="html"><![CDATA[<p>In a similar fashion to everyone getting the flu now and again, the risk of catching a cyberattack is a common one. Both a sophisticated social engineering attack or grammatically-lacking email phishing scam can cause real damage. No one who communicates over the Internet is immune.</p>
+<p>Like proper hand washing and getting a flu shot, good habits can lower your risk of inadvertently allowing cybergerms to spread. Since the new year is an inspiring time for beginning new habits, I offer a few suggestions for ways to help protect yourself and those around you.</p>
+<h2 id="1-get-a-follow-up">1. Get a follow-up</h2>
+<p>Recognizing a delivery method for cyberattack is getting more difficult. Messages with malicious links do not always come from strangers. They may appear to be routine communications, or seem to originate from someone you know or work with. Attacks use subtle but deeply-engrained cognitive biases to override your common sense. Your natural response ensures you click.</p>
+<p>Thankfully, there&rsquo;s a simple low-tech habit you can use to deter these attacks: before you act, follow-up.</p>
+<p>You may get an email from a friend that needs help, or from your boss who&rsquo;s about to get on a plane. It could be as enticing and mysterious as a direct message from an acquaintance who sends a link asking, &ldquo;Lol. Is this you?&rdquo; It takes presence of mind to override the panic these attacks prey on, but the deterrent itself is quick and straightforward. Send a text message, pick up the phone and call, or walk down the hall, and ask, &ldquo;Did you send me this?&rdquo;</p>
+<p>If the message is genuine, there&rsquo;s no harm in a few extra minutes to double check. If it&rsquo;s not, you&rsquo;ll immediately alert the originating party that they may be compromised, and you may have deterred a cyberattack!</p>
+<h2 id="2-use-and-encourage-others-to-use-end-to-end-encrypted-messaging">2. Use, and encourage others to use, end-to-end encrypted messaging</h2>
+<p>When individuals in a neighborhood get the flu shot, others in that neighborhood are safer for it. Encryption is similarly beneficial. Encourage your friends, coworkers, and Aunt Matilda to switch to an app like Signal. By doing so, you&rsquo;ll reduce everyone&rsquo;s exposure to more exploitable messaging systems.</p>
+<p>This doesn&rsquo;t mean that you must stop using other methods of communication entirely. Instead, think of it as a hierarchy. Use Signal for important messages that should be trusted, like requests for money or making travel arrangements. Use all other methods of messaging, like SMS or social sites, only for &ldquo;unimportant&rdquo; communications. Now, if requests or links that seem important come to you through your unimportant methods, you&rsquo;ll be all the more likely to second-guess them.</p>
+<h2 id="3-dont-put-that-dirty-usb-plug-into-your-">3. Don&rsquo;t put that dirty USB plug into your ***</h2>
+<p>You wouldn&rsquo;t brush your teeth with a toothbrush you found on the sidewalk. Why would you plug in a USB device if you don&rsquo;t know where it&rsquo;s been?! While we might ascribe <a href="https://en.wikipedia.org/wiki/2008_cyberattack_on_United_States">putting a random found USB drive in your computer</a> to a clever exploitation of natural human curiosity, we&rsquo;re no sooner likely to suspect using <a href="https://www.howtogeek.com/444267/how-safe-are-public-charging-stations/">a public phone-charging station</a> or <a href="https://www.theverge.com/2019/8/15/20807854/apple-mac-lightning-cable-hack-mike-grover-mg-omg-cables-defcon-cybersecurity">a USB cable</a> we bought ourselves. Even seemingly-innocuous USB <a href="https://www.cbsnews.com/news/why-your-usb-device-is-a-security-risk/">peripherals</a> or <a href="https://www.us-cert.gov/ncas/current-activity/2010/03/08/Energizer-DUO-USB-Battery-Charger-Software-Allows-Remote-System">rechargeable</a> devices can be a risk.</p>
+<p>Unlike email and some file-sharing services that scan and filter files before they reach your computer, plugging in via USB is as direct and <a href="https://www.wired.com/2014/07/usb-security/">unprotected</a> as connection gets. Once this connection is made, the user doesn&rsquo;t need to do anything else for a whole host of bad things to happen. Through USB connections, problems like malware and ransomware can easily infect your computer or phone.</p>
+<p>There&rsquo;s no need to swear off the convenience of USB connectivity, or to avoid these devices altogether. Instead of engaging in questionable USB behavior, don&rsquo;t cheap out on USB devices and cables. If it&rsquo;s going to get plugged into your computer, ensure you&rsquo;re being extra cautious. Buy it from the manufacturer (like the Apple Store) or from a reputable company or reseller with supply chain control. When juicing up USB-rechargeables, don&rsquo;t plug them into your computer. Use <a href="https://heronebag.com/blog/40-hours-drive-time-my-road-trip-charging-essentials/">a wall charger with a USB port</a> instead.</p>
+<h2 id="practice-healthy-cybersecurity-habits">Practice healthy cybersecurity habits</h2>
+<p>Keeping your devices healthy and happy is a matter of practicing good habits. Like battling the flu, good habits can help protect yourself and those around you. Incorporate some conscientious cybersecurity practices in your new year resolutions - or start them right away.</p>
+<p>Have a safe and happy holiday!</p>
+]]></content></entry><entry><title type="html">The care and feeding of an IoT device</title><link href="https://victoria.dev/archive/the-care-and-feeding-of-an-iot-device/"/><id>https://victoria.dev/archive/the-care-and-feeding-of-an-iot-device/</id><author><name>Victoria Drake</name></author><published>2019-11-27T08:59:35-05:00</published><updated>2019-11-27T08:59:35-05:00</updated><content type="html"><![CDATA[<p>Giving someone a puppy for Christmas might work really well in a movie, but in real life often comes hitched to a multitude of responsibilities that the giftee may not be fully prepared to take on. The same is true for Internet of Things (IoT) devices, including Amazon&rsquo;s Alexa-enabled devices, Google Home, and other Internet-connected appliances like cameras, lightbulbs, and toasters. Yes, they have those now.</p>
+<p>Like puppies, IoT devices are still young. Many contain <a href="https://threatpost.com/iot-devices-vulnerable-takeover/144167/">known vulnerabilities</a> that remote attackers can use to gain access to device owners&rsquo; networks. These attacks are sometimes as laughably simple as using a default username and password that the <a href="https://gdpr.report/news/2019/06/12/research-reveals-the-most-vulnerable-iot-devices/">device owner cannot change</a>.</p>
+<p>Does all this mean you shouldn&rsquo;t give Grandma Mabel a new app-enabled coffee maker or Ring doorbell for Christmas? Probably, although not necessarily. Like puppies, properly-maintained IoT devices are capable of warming your heart without causing <em>too</em> much havoc; but they take a lot of work to care for. Here are a few responsibilities to keep in mind for the care and feeding of an IoT device.</p>
+<h2 id="immature-security">Immature security</h2>
+<p>Many manufacturers of IoT devices have not made security a priority. There aren&rsquo;t yet any enforced <a href="https://blog.rapid7.com/2019/03/27/the-iot-cybersecurity-improvement-act-of-2019/">security requirements</a> for this industry, which leaves the protection of your device and the network it&rsquo;s connected to in the hands of the manufacturer.</p>
+<p>It&rsquo;s not just obscure no-name toasters, either; malicious third-party apps have snuck onto Amazon&rsquo;s and Google&rsquo;s more reputable devices and enabled attackers to <a href="https://www.cnet.com/news/alexa-and-google-voice-assistants-app-exploits-left-it-vulnerable-to-eavesdropping/">eavesdrop</a> on unsuspecting owners.</p>
+<p>Until security regulations are put in place and enforced, it&rsquo;s buyer beware for both devices and third-party applications. To the extent possible, potential owners must do ample research to weed out vulnerable devices and untrustworthy apps.</p>
+<h2 id="protecting-your-network">Protecting your network</h2>
+<p>If you think hackers aren&rsquo;t likely to find your device in the vast expanse of the Internet, you might be wrong. These days, obscurity doesn&rsquo;t provide security. It&rsquo;s no longer left up to a potential attacker&rsquo;s fallible human eyes to find your insecure front door camera in a cacophony of wireless traffic; <a href="https://money.cnn.com/2013/04/08/technology/security/shodan/index.html">IoT search engines</a> like <a href="https://www.shodan.io/">Shodan</a> will do that for them. Thankfully, these search engines are also used for good, enabling white hat hackers and penetration testers to find and fix insecure devices.</p>
+<p>Just like locking your own front door, IoT owners are responsible for locking down access to their devices. This may mean searching through device settings to make sure default credentials are changed, or checking to make sure that a device used on your private home network doesn&rsquo;t by default have public Internet access.</p>
+<p>Where the options are available, HTTPS and multifactor authentication should be enabled. The use of a VPN can also keep your devices from being found.</p>
+<h2 id="keeping-them-patched">Keeping them patched</h2>
+<p>Unlike puppies, many IoT devices are &ldquo;headless&rdquo; and have no inherent way of interfacing with a human. An app-controlled lightbulb, for example, may be all but useless without the software that makes it shine. As convenient as it may be to have your 1500K mood lighting come on automatically at dusk, it also means automatically ceding control of the device to its software developers.</p>
+<p>When vulnerabilities in your phone&rsquo;s operating system are discovered and patched, it&rsquo;s likely that automatic updates are pushed and installed overnight, possibly without you even knowing. Your IoT device, on the other hand, may have no such support. In those cases, it&rsquo;s completely up to the user to discover that an update is needed, find and download the patch, then correctly update their device. Even for owners with some technical expertise, this process takes significant effort. Many <a href="https://www.machinedesign.com/industrial-automation/software-updates-are-new-hurdle-iot-security">device owners aren&rsquo;t even aware</a> that their software is dangerously outdated.</p>
+<p>In practical terms, this means that users without the time, knowledge, or willingness to keep their devices updated should reconsider owning them. Alternatively, some research can help prospective owners choose devices that receive automatic push updates from their (hopefully responsible) manufacturers over WiFi.</p>
+<h2 id="being-responsible">Being responsible</h2>
+<p>Raising a healthy and happy IoT device is no small task, especially for potential owners with little time or willingness to put in the required effort. With the proper attention and maintenance, your Internet-connected appliance can bring joy and convenience to your life; but without, it introduces a potential security risk and a whole lot of trouble.</p>
+<p>Before getting or giving IoT, be sure the potential owner is up to the task of caring for it.</p>
+<p>You can learn more about basic cybersecurity for IoT (as a user or maker) by reading <a href="https://csrc.nist.gov/publications/detail/nistir/8259/draft">NIST&rsquo;s draft guidelines publication</a>.</p>
+]]></content></entry><entry><title type="html">Hackers are Googling your plain text passwords: preventing sensitive data exposure</title><link href="https://victoria.dev/archive/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/"/><id>https://victoria.dev/archive/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/</id><author><name>Victoria Drake</name></author><published>2019-09-09T09:10:11-04:00</published><updated>2019-09-09T09:10:11-04:00</updated><content type="html"><![CDATA[<p>Last week, I wrote about <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">the importance of properly handling user input</a> in our websites and applications. I alluded to an overarching security lesson that I hope to make explicit today: the security of our software, application, and customer data is built from the ground up, long before the product goes live.</p>
+<p>The <a href="https://owasp.org/www-project-top-ten/">OWASP Top 10</a> is a comprehensive guide to web application security risks. It is relied upon by technology professionals, corporations, and those interested in cybersecurity or information security. The most recent publication lists Sensitive Data Exposure as the third most critical web application security risk. Here&rsquo;s how the risk is described:</p>
+<blockquote>
+<p>Many web applications and APIs do not properly protect sensitive data, such as financial, healthcare, and PII. Attackers may steal or modify such weakly protected data to conduct credit card fraud, identity theft, or other crimes. Sensitive data may be compromised without extra protection, such as encryption at rest or in transit, and requires special precautions when exchanged with the browser.</p></blockquote>
+<p>&ldquo;Sensitive Data Exposure&rdquo; is a sort of catch-all category for leaked data resulting from many sources, ranging from weak cryptographic algorithms to unenforced encryption. The simplest source of this security risk, however, takes far fewer syllables to describe: people.</p>
+<p>The phrase &ldquo;an ounce of prevention is worth a pound of cure,&rdquo; applies to medicine as well as secure software development. In the world of the latter, this is referred to as &ldquo;pushing left,&rdquo; a rather unintuitive term for establishing security best practices earlier, rather than later, in the software development life cycle (SDLC). Establishing procedures &ldquo;to the left&rdquo; of the SDLC can help ensure that the people involved in creating a software product are properly taking care of sensitive data from day one.</p>
+<p>Unfortunately, a good amount of security testing often seems to occur much farther to the right side of the SDLC; too late for some security issues, such as sensitive data leakage, to be prevented.</p>
+<p>I&rsquo;m one of the authors contributing to the upcoming <a href="https://github.com/OWASP/OWASP-Testing-Guide-v5">OWASP Testing Guide</a> and recently expanded a section on search engine discovery reconnaissance, or what the kids these days call &ldquo;Google dorking.&rdquo; This is one method, and arguably the most accessible method, by which a security tester (or black hat hacker) could find exposed sensitive data on the Internet. Here&rsquo;s an excerpt from that section (currently a work in progress on GitHub, to be released in v5):</p>
+<blockquote>
+<h3 id="search-operators">Search Operators</h3>
+<p>A search operator is a special keyword that extends the capabilities of regular search queries, and can help obtain more specific results. They generally take the form of <code>operator:query</code>. Here are some commonly supported search operators:</p>
+<ul>
+<li><code>site:</code> will limit the search to the provided URL.</li>
+<li><code>inurl:</code> will only return results that include the keyword in the URL.</li>
+<li><code>intitle:</code> will only return results that have the keyword in the page title.</li>
+<li><code>intext:</code> or <code>inbody:</code> will only search for the keyword in the body of pages.</li>
+<li><code>filetype:</code> will match only a specific filetype, i.e. png, or php.</li>
+</ul>
+<p>For example, to find the web content of owasp.org as indexed by a typical search engine, the syntax required is:</p>
+<p><code>site:owasp.org</code></p>
+<p>&hellip;
+Searching with operators can be a very effective discovery reconnaissance technique when combined with the creativity of the tester. Operators can be chained to effectively discover specific kinds of sensitive files and information. This technique, called <a href="https://en.wikipedia.org/wiki/Google_hacking">Google hacking</a> or Google dorking, is also possible using other search engines, as long as the search operators are supported.</p>
+<p>A database of dorks, such as <a href="https://www.exploit-db.com/google-hacking-database">Google Hacking Database</a>, is a useful resource that can help uncover specific information.</p></blockquote>
+<p>Regularly reviewing search engine results can be a fruitful task for security testers. However, when a search for <code>site:myapp.com passwords</code> turns up no results, it may still be a little too early to break for lunch. Here are a couple other places a security tester might like to look for sensitive data exposed in the wild.</p>
+<h2 id="pastebin">Pastebin</h2>
+<p>The self-declared &ldquo;#1 paste tool since 2002,&rdquo; <a href="https://pastebin.com">Pastebin</a> allows users to temporarily store any kind of text. It&rsquo;s mostly used for sharing information with others, or retrieving your own &ldquo;paste&rdquo; on another machine, perhaps in another location. Pastebin makes it easy to share large amounts of complicated text, like error logs, source code, configuration files, tokens, api keys&hellip; what&rsquo;s that? Oh, yes, it&rsquo;s public by default.</p>
+<p>Here are some screenshots of a little dorking I did for a public bug bounty program.</p>
+<figure class="screenshot"><img src="/archive/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/pastebin_apikey.png"
+    alt="A screenshot of exposed api key in Google search"><figcaption>
+      <p>API keys in plain view.</p>
+    </figcaption>
+</figure>
+
+<figure class="screenshot"><img src="/archive/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/pastebin_pass.png"
+    alt="A screenshot of exposed username and password in Google search"><figcaption>
+      <p>Log-in details out in the open.</p>
+    </figcaption>
+</figure>
+
+<p>Thanks in part to the convenience of using Pastebin and similar websites, it would appear that some people fail to think twice before making sensitive data publicly available.</p>
+<h3 id="but-why">But why</h3>
+<p>Granted, non-technical employees with access to the application may not have an understanding of which items should or should not be freely shared. Someone unfamiliar with what encrypted data is or what it looks like may not realize the difference between an encrypted string and an unencrypted token made up of many random letters and numbers. Even technical staff can miss things, make mistakes, or act carelessly after a hard day at work. It may be easy to call this a training problem and move on; however, none of these rationalizations address the root cause of the issue.</p>
+<p>When people turn to outside solutions for an issue they face, it&rsquo;s usually because they haven&rsquo;t been provided with an equally-appealing internal solution, or are unaware that one exists. Employees using pastes to share or move sensitive data do so because they don&rsquo;t have an easier, more convenient, and secure internal solution to use instead.</p>
+<h3 id="mitigation">Mitigation</h3>
+<p>Everyone involved in the creation and maintenance of a web application should be briefed on a few basic things in regards to sensitive data protection:</p>
+<ol>
+<li>what constitutes sensitive data,</li>
+<li>the difference between plain text and encrypted data, and</li>
+<li>how to properly transmit and store sensitive data.</li>
+</ol>
+<p>When it comes to third-party services, ensure people are aware that some transmission may not be encrypted, or may be publicly searchable. If there is no system currently in place for safely sharing and storing sensitive data internally, this is a good place to start. The security of application data is in the hands of everyone on the team, from administrative staff to C-level executives. Ensure people have the tools they need to work securely.</p>
+<h2 id="public-repositories">Public repositories</h2>
+<p>Developers are notorious for leaving sensitive information hanging out where it doesn&rsquo;t belong (yes, I&rsquo;ve done it too!). Without a strong push-left approach in place for handling tokens, secrets, and keys, these little gems can end up in full public view on sites like GitHub, GitLab, and Bitbucket (to name a few). <a href="https://www.ndss-symposium.org/wp-content/uploads/2019/02/ndss2019_04B-3_Meli_paper.pdf">A 2019 study</a> found that thousands of new, unique secrets are leaked every day on GitHub alone.</p>
+<figure class="screenshot"><img src="/archive/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/github_tok.png"
+    alt="A screenshot of a Google search for tokens on GitHub">
+</figure>
+
+<p>GitHub has implemented measures like <a href="https://github.blog/2018-10-17-behind-the-scenes-of-github-token-scanning/">token scanning</a>, and GitLab 11.9 <a href="https://docs.gitlab.com/ee/user/application_security/secret_detection/">introduced secret detection</a>. While these tools aim to reduce the chances that a secret might accidentally be committed, to put it bluntly, it&rsquo;s really not their job. Secret scanning won&rsquo;t stop developers from committing the data in the first place.</p>
+<h3 id="but-why-1">But why</h3>
+<p>Without an obvious process in place for managing secrets, developers may tend too much towards their innate sense of just-get-it-done-ness. Sometimes this leads to the expedient but irresponsible practice of storing keys as unencrypted variables within the program, perhaps with the intention of it being temporary. Nonetheless, these variables inevitably fall from front of mind and end up in a commit.</p>
+<h3 id="mitigation-1">Mitigation</h3>
+<p>Having a strong push-left culture means ensuring that sensitive data is properly stored and can be securely retrieved long before anyone is ready to make a commit. Tools and strategies for doing so are readily available for those who seek them. Here are some examples of tools that can support a push-left approach:</p>
+<ul>
+<li>Use a management tool to store and control access to keys and secrets, such as <a href="https://aws.amazon.com/kms/">Amazon Key Management Service</a> or Microsoft&rsquo;s <a href="https://azure.microsoft.com/en-us/services/key-vault/">Azure Key Vault</a>.</li>
+<li>Make use of encrypted environment variables in CI tools, such as <a href="https://www.netlify.com/docs/continuous-deployment/#environment-variables">Netlify&rsquo;s environment variables</a> or <a href="https://docs.github.com/en/actions/security-guides/encrypted-secrets">virtual environments in GitHub Actions</a>.</li>
+<li>Craft a robust <code>.gitignore</code> file that everyone on the team can contribute to and use.</li>
+</ul>
+<p>We also need not rely entirely on the public repository to catch those mistakes that may still slip through. It&rsquo;s possible to set up Git pre-commit hooks that scan for committed secrets using <a href="https://en.wikipedia.org/wiki/Regular_expression">regular expressions</a>. There are some open-source programs available for this, such as <a href="https://github.com/thoughtworks/talisman">Talisman from ThoughtWorks</a> and <a href="https://github.com/awslabs/git-secrets">git-secrets from AWS Labs</a>.</p>
+<h2 id="pushing-left-to-prevent-sensitive-data-exposure">Pushing left to prevent sensitive data exposure</h2>
+<p>A little perspective can go a long way in demonstrating why it&rsquo;s important to begin managing sensitive data even before any sensitive data exists. By establishing security best practices on the left of the SDLC, we give our people the best chance to increase the odds that any future dorking on our software product looks more like this.</p>
+<p><img src="no_results.png#screenshot" alt="No results found in Google Search"></p>
+<p>Another great resource for checking up on the security of our data is Troy Hunt&rsquo;s <a href="https://haveibeenpwned.com/">Have I Been Pwned</a>, a service that compares your data (such as your email) to data that has been leaked in previous data breaches.</p>
+<p>To learn about more ways we can be proactive with our application security, the <a href="https://owasp.org/www-project-proactive-controls/">OWASP Proactive Controls</a> publication is a great resource. There&rsquo;s also more about creating a push-left approach to security in the upcoming <a href="https://github.com/OWASP/OWASP-Testing-Guide-v5">OWASP Testing Guide</a>. If these topics interest you, I encourage you to read, learn, and contribute so more people will make it harder for sensitive data to be found.</p>
+]]></content></entry></feed>

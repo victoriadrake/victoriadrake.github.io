@@ -1,0 +1,647 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Javascript on victoria.dev</title><link href="https://victoria.dev/tags/javascript/feed.xml" rel="self"/><link href="https://victoria.dev/tags/javascript/"/><updated>2021-01-26T09:25:17-05:00</updated><id>https://victoria.dev/tags/javascript/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Add search to Hugo static sites with Lunr</title><link href="https://victoria.dev/posts/add-search-to-hugo-static-sites-with-lunr/"/><id>https://victoria.dev/posts/add-search-to-hugo-static-sites-with-lunr/</id><author><name>Victoria Drake</name></author><published>2021-01-26T09:25:17-05:00</published><updated>2021-01-26T09:25:17-05:00</updated><content type="html"><![CDATA[<p>Yes, you <em>can</em> have an interactive search feature on your static site! No need for servers or paid subscriptions here. Thanks to the open source <a href="https://lunrjs.com/">Lunr</a> and the power of <a href="https://gohugo.io/">Hugo static site generator</a>, you can create a client-side search index with just a template and some JavaScript.</p>
+<p>A number of my readers have been kind enough to tell me that you find my blog useful, but there&rsquo;s something that you don&rsquo;t know. Up until I recently implemented a search feature on <a href="/">victoria.dev</a>, I had been my own unhappiest user.</p>
+<p>My blog exists for all to read, but it&rsquo;s also my own personal Internet brain. I frequently pull up a post I&rsquo;ve written when trying to re-discover some bit of knowledge that I may have had the foresight to record. Without a search, finding it again took a few clicks and more than a few guesses. Now, all my previous discoveries are conveniently at my fingertips, ready to be rolled into even more future work.</p>
+<p>If you&rsquo;d like to make your own personal Internet brain more useful, here&rsquo;s how you can implement your own search feature on your static Hugo site.</p>
+<h2 id="get-lunr">Get Lunr</h2>
+<p>While you can <a href="https://lunrjs.com/guides/getting_started.html">install lunr.js</a> via npm or include it from a CDN, I chose to vendorize it to minimize network impact. This means I host it from my own site files by placing the library in Hugo&rsquo;s <code>static</code> directory.</p>
+<p>You can save your visitors some bandwidth by minifying <code>lunr.js</code>, which I did just by <a href="https://github.com/olivernn/lunr.js">downloading lunr.js from source</a> and using the <a href="https://github.com/olback/es6-css-minify">JS &amp; CSS Minifier Visual Studio Code extension</a> on the file. That brought the size down roughly 60% from 97.5 KB to 39.35 KB.</p>
+<p>Save this as <code>static/js/lunr.min.js</code>.</p>
+<h2 id="create-a-search-form-partial">Create a search form partial</h2>
+<p>To easily place your search form wherever you like on your site, create the form as a partial template at <code>layouts/partials/search-form.html</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;search&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">action</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{{ with .GetPage &#34;/search&#34; }}{{.Permalink}}{{end}}&#39;</span> <span style="color:#a6e22e">method</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;get&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">label</span> <span style="color:#a6e22e">hidden</span> <span style="color:#a6e22e">for</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;search-input&#34;</span>&gt;Search site&lt;/<span style="color:#f92672">label</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;search-input&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;query&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">placeholder</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Type here to search&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;submit&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;search&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">form</span>&gt;
+</span></span></code></pre></div><p>Include your search form in other templates with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>{{ partial &#34;search-form.html&#34; . }}
+</span></span></code></pre></div><h2 id="create-a-search-page">Create a search page</h2>
+<p>For your search to be useful, you&rsquo;ll need a way to trigger one. You can create a (static!) <code>/search</code> page that responds to a GET request, runs your search, and displays results.</p>
+<p>Here&rsquo;s how to create a Hugo template file for a search page and get it to render.</p>
+<p>Create <code>layouts/search/list.html</code> with the following minimum markup, assuming you&rsquo;re <a href="https://gohugo.io/templates/base">inheriting from a base template</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>{{ define &#34;main&#34; }}
+</span></span><span style="display:flex;"><span>{{ partial &#34;search-form.html&#34; . }}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">ul</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;results&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>        Enter a keyword above to search this site.
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">ul</span>&gt;
+</span></span><span style="display:flex;"><span>{{ end }}
+</span></span></code></pre></div><p>In order to get Hugo to render the template, a matching content file must be available. Create <code>content/search/_index.md</code> to satisfy this requirement. The file just needs minimal <a href="https://gohugo.io/content-management/front-matter">front matter</a> to render:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-md" data-lang="md"><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span>title: Search me!
+</span></span><span style="display:flex;"><span>---
+</span></span></code></pre></div><p>You can run <code>hugo serve</code> and navigate to <code>/search</code> to see if everything builds as expected.</p>
+<p>A few libraries exist to help you build a search index and implement Lunr. You can find them <a href="https://gohugo.io/tools/search/">here on the Hugo site</a>. If you want to fully understand the process, however, you&rsquo;ll find it&rsquo;s not complicated do this without additional dependencies, thanks to the power of Hugo&rsquo;s static site processing.</p>
+<h2 id="build-your-search-index">Build your search index</h2>
+<p>Here&rsquo;s how to build an index for Lunr to search using Hugo&rsquo;s template rendering power. Use <code>range</code> to loop over the pages you want to make searchable, and capture your desired parameters in an array of documents. One way to do this is to create <code>layouts/partials/search-index.html</code> with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>window.<span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// You can specify your blog section only:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    {{ <span style="color:#a6e22e">range</span> <span style="color:#a6e22e">where</span> .<span style="color:#a6e22e">Site</span>.<span style="color:#a6e22e">Pages</span> <span style="color:#e6db74">&#34;Section&#34;</span> <span style="color:#e6db74">&#34;posts&#34;</span> }}
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// For all pages in your site, use &#34;range .Site.Pages&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// You can use any unique identifier here
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#e6db74">&#34;{{ .Permalink }}&#34;</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// You can customize your searchable fields using any .Page parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#e6db74">&#34;title&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;{{ .Title  }}&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;tags&#34;</span><span style="color:#f92672">:</span> [{{ <span style="color:#a6e22e">range</span> .<span style="color:#a6e22e">Params</span>.<span style="color:#a6e22e">Tags</span> }}<span style="color:#e6db74">&#34;{{ . }}&#34;</span>,{{ <span style="color:#a6e22e">end</span> }}],
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;content&#34;</span><span style="color:#f92672">:</span> {{ .<span style="color:#a6e22e">Content</span> <span style="color:#f92672">|</span> <span style="color:#a6e22e">plainify</span> }}, <span style="color:#75715e">// Strip out HTML tags
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#e6db74">&#34;url&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;{{ .Permalink }}&#34;</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    {{ <span style="color:#a6e22e">end</span> }}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- Include Lunr and code for your search function,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">which you&#39;ll write in the next section --&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/js/lunr.min.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/js/search.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+</span></span></code></pre></div><p>When Hugo renders your site, it will build your search index in much the same way as <a href="https://gohugo.io/templates/lists#what-is-a-list-page-template">a List page</a> is built, creating a document for each page with its parameters.</p>
+<p>The last piece of the puzzle is the code to handle the search process: taking the search query, getting Lunr to perform the search, and displaying the results.</p>
+<h2 id="perform-the-search-and-show-results">Perform the search and show results</h2>
+<p>Create <code>static/js/search.js</code> to hold the JavaScript that ties it all together. This file has three main tasks: get the search query, perform the search with Lunr, and display the results.</p>
+<h3 id="get-query-parameters-with-javascript">Get query parameters with JavaScript</h3>
+<p>This part&rsquo;s straightforward thanks to <a href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams">URLSearchParams</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">params</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URLSearchParams</span>(window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">search</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">query</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;q&#39;</span>)
+</span></span></code></pre></div><h3 id="search-for-the-query-with-lunr">Search for the query with Lunr</h3>
+<p>Define and configure an <a href="https://lunrjs.com/guides/getting_started.html#creating-an-index">index for Lunr</a>. This tells Lunr what you&rsquo;d like to search with, and you can optionally <code>boost</code> elements that are more important.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">idx</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lunr</span>(<span style="color:#66d9ef">function</span> () {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Search these fields
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">ref</span>(<span style="color:#e6db74">&#39;id&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">field</span>(<span style="color:#e6db74">&#39;title&#39;</span>, {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">boost</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">15</span>
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">field</span>(<span style="color:#e6db74">&#39;tags&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">field</span>(<span style="color:#e6db74">&#39;content&#39;</span>, {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">boost</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Add the documents from your search index to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// provide the data to idx
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">key</span> <span style="color:#66d9ef">in</span> window.<span style="color:#a6e22e">store</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">add</span>({
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">key</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">title</span><span style="color:#f92672">:</span> window.<span style="color:#a6e22e">store</span>[<span style="color:#a6e22e">key</span>].<span style="color:#a6e22e">title</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">tags</span><span style="color:#f92672">:</span> window.<span style="color:#a6e22e">store</span>[<span style="color:#a6e22e">key</span>].<span style="color:#a6e22e">category</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">content</span><span style="color:#f92672">:</span> window.<span style="color:#a6e22e">store</span>[<span style="color:#a6e22e">key</span>].<span style="color:#a6e22e">content</span>
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>You can then execute the search and store results with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">results</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">idx</span>.<span style="color:#a6e22e">search</span>(<span style="color:#a6e22e">query</span>)
+</span></span></code></pre></div><h3 id="display-results">Display results</h3>
+<p>You&rsquo;ll need a function that builds a list of results and displays them on your search page. Recall the <code>id</code> you gave your <code>ul</code> element in <code>layouts/search/list.html</code> and store it as a variable:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">searchResults</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;results&#39;</span>)
+</span></span></code></pre></div><p>If a search results in some results (🥁), you can iterate over them and build a <code>&lt;li&gt;</code> element for each one.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">results</span>.<span style="color:#a6e22e">length</span>) { <span style="color:#75715e">// Length greater than 0 is truthy
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">resultList</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">results</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Use the unique ref from the results list to get the full item
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#75715e">// so you can build its &lt;li&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">item</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">store</span>[<span style="color:#a6e22e">results</span>[<span style="color:#a6e22e">n</span>].<span style="color:#a6e22e">ref</span>]
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">resultList</span> <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#39;&lt;li&gt;&lt;p&gt;&lt;a href=&#34;&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">item</span>.<span style="color:#a6e22e">url</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;&#34;&gt;&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">item</span>.<span style="color:#a6e22e">title</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;&lt;/a&gt;&lt;/p&gt;&#39;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Add a short clip of the content
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#a6e22e">resultList</span> <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#39;&lt;p&gt;&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">item</span>.<span style="color:#a6e22e">content</span>.<span style="color:#a6e22e">substring</span>(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">150</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;...&lt;/p&gt;&lt;/li&gt;&#39;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">searchResults</span>.<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">resultList</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>For each of your results, this produces a list item similar to:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;.../blog/add-search-to-hugo-with-lunr/&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        Add search to Hugo static sites with Lunr
+</span></span><span style="display:flex;"><span>        &lt;/<span style="color:#f92672">a</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;Yes, you can have an interactive search feature on your static site!...&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">li</span>&gt;
+</span></span></code></pre></div><p>If there are no results, ham-handedly insert a message instead.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">searchResults</span>.<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;No results found.&#39;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="full-code-for-searchjs">Full code for search.js</h3>
+<p>Here&rsquo;s what <code>static/js/search.js</code> could look like in full.</p>
+<details>
+<summary>search.js full code</summary>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"></code></pre></div></details>
+<h2 id="make-it-go">Make it go</h2>
+<p>You now have Lunr, the search index, and the code that displays results. Since these are all included in <code>layouts/partials/search-index.html</code>, add this partial on all pages with a search form. In your page footer, place:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>{{ partial &#34;search-index.html&#34; . }}
+</span></span></code></pre></div><p>You can see what this looks like when it&rsquo;s all put together by trying it out <a href="/blog">on my blog</a>.</p>
+<h2 id="make-it-go-faster">Make it go faster</h2>
+<p>Since your site is static, it&rsquo;s possible to <a href="https://lunrjs.com/guides/index_prebuilding.html">pre-build your search index</a> as a JSON data file for Lunr to load. This is where those <a href="https://gohugo.io/tools/search/">aforementioned libraries</a> may be helpful, since a JSON-formatted search index would need to be built outside of running <code>hugo</code> to generate your site.</p>
+<p>You can maximize your search speed by minifying assets, and minimizing computationally expensive or blocking JavaScript in your code.</p>
+<h2 id="static-sites-get-search-too">Static sites get search, too!</h2>
+<p>I hope this helps you make your Internet brain more useful for yourself and others, too! Don&rsquo;t worry if you haven&rsquo;t got the time to implement a search feature today &ndash; you can find this tutorial again when you visit <a href="/blog">victoria.dev</a> and search for this post! 🥁</p>
+]]></content></entry><entry><title type="html">Adorable bookmarklets want to help delete your social media data</title><link href="https://victoria.dev/archive/adorable-bookmarklets-want-to-help-delete-your-social-media-data/"/><id>https://victoria.dev/archive/adorable-bookmarklets-want-to-help-delete-your-social-media-data/</id><author><name>Victoria Drake</name></author><published>2018-06-14T13:12:02-04:00</published><updated>2018-06-14T13:12:02-04:00</updated><content type="html"><![CDATA[<p>A little while ago I wrote about a Lambda function I called ephemeral for deleting my old tweets. While it&rsquo;s a great project for someone familiar with or wanting to learn to use Lambda, it isn&rsquo;t simple for a non-technical person to set up. There are services out there that will delete your tweets for you, but require your access credentials. There didn&rsquo;t seem to be anything that provided convenience without also requiring authentication.</p>
+<p>So, I went oldschool and created the ephemeral bookmarklet.</p>
+<p>If that didn&rsquo;t make you instantly nostalgic, a <a href="https://en.wikipedia.org/wiki/Bookmarklet">bookmarklet</a> is a little application that lives as a bookmark in your web browser. You &ldquo;install&rdquo; it by dragging the link to your bookmarks toolbar, or right-clicking on the link and choosing &ldquo;Bookmark this link&rdquo; (Firefox). You click it to execute the program on the current page.</p>
+<p>Here&rsquo;s what the ephemeral bookmarklet will do:</p>
+<video width="600px" controls="controls" poster="bookmarklet-card.png">
+    <source src="ephemeralbookmarklet.mp4" type="video/mp4" />
+</video>
+<p>The ephemeral bookmarklet is part of a new suite of tools for personal data management that I&rsquo;m co-creating with Adam Drake. You can <a href="https://adamdrake.github.io/pdmtools/">get all the bookmarklets on this page</a>, and they&rsquo;re also open source <a href="https://github.com/adamdrake/pdmtools">on GitHub</a>.</p>
+<p>There are currently bookmarklets for managing your data on LinkedIn and Twitter. We&rsquo;re looking for testers and contributors to help make this a comprehensive toolset for your social media data management. If you write code, I invite you to contribute and help this toolset grow.</p>
+<p>∩{｡◕‿◕｡}∩ &ndash; Bookmarklet says hi!</p>
+]]></content></entry><entry><title type="html">A Unicode substitution cipher algorithm</title><link href="https://victoria.dev/archive/a-unicode-substitution-cipher-algorithm/"/><id>https://victoria.dev/archive/a-unicode-substitution-cipher-algorithm/</id><author><name>Victoria Drake</name></author><published>2018-01-06T20:00:28-05:00</published><updated>2018-01-06T20:00:28-05:00</updated><content type="html"><![CDATA[<p>Full transparency: I occasionally waste time messing around on Twitter. <em>(Gasp! Shock!)</em> One of the ways I waste time messing around on Twitter is by writing my name in my profile with different Unicode character &ldquo;fonts,&rdquo; 𝖑𝖎𝖐𝖊 𝖙𝖍𝖎𝖘 𝖔𝖓𝖊. I previously did this by searching for different Unicode characters on Google, then one-by-one copying and pasting them into the &ldquo;Name&rdquo; field on my Twitter profile. Since this method of wasting time was a bit of a time waster, I decided (in true programmer fashion) to write a tool that would help me save some time while wasting it.</p>
+<p>I originally dubbed the tool &ldquo;uni-pretty,&rdquo; (based on LEGO&rsquo;s Unikitty from a movie &ndash; a pun that absolutely no one got) but have since renamed it <a href="https://fancyunicode.com">fancy unicode</a>. It builds from <a href="https://github.com/victoriadrake/fancy-unicode">this GitHub repo</a>. It lets you type any characters into a field and then converts them into Unicode characters that also represent letters, giving you fancy &ldquo;fonts&rdquo; that override a website&rsquo;s CSS, like in your Twitter profile. (Sorry, Internet.)</p>
+<p><img src="screenshot.png#screenshot" alt="fancy-unicode screenshot"></p>
+<p>The tool&rsquo;s first naive iteration existed for about twenty minutes while I copy-pasted Unicode characters into a data structure. This approach of storing the characters in the JavaScript file, called hard-coding, is fraught with issues. Besides having to store every character from every font style, it&rsquo;s painstaking to build, hard to update, and more code means it&rsquo;s susceptible to more possible errors.</p>
+<p>Fortunately, working with Unicode means that there&rsquo;s a way to avoid the whole mess of having to store all the font characters: Unicode numbers are sequential. More importantly, the special characters in Unicode that could be used as fonts (meaning that there&rsquo;s a matching character for most or all of the letters of the alphabet) are always in the following sequence: capital A-Z, lowercase a-z.</p>
+<p>For example, in the fancy Unicode above, the lowercase letter &ldquo;L&rdquo; character has the Unicode number <code>U+1D591</code> and HTML code <code>&amp;#120209;</code>. The next letter in the sequence, a lowercase letter &ldquo;M,&rdquo; has the Unicode number <code>U+1D592</code> and HTML code <code>&amp;#120210;</code>. Notice how the numbers in those codes increment by one.</p>
+<p>Why&rsquo;s this relevant? Since each special character can be referenced by a number, and we know that the order of the sequence is always the same (capital A-Z, lowercase a-z), we&rsquo;re able to produce any character simply by knowing the first number of its font sequence (the capital &ldquo;A&rdquo;). If this reminds you of anything, you can borrow my decoder pin.</p>
+<p>In cryptography, the Caesar cipher (or shift cipher) is a simple method of encryption that utilizes substitution of one character for another in order to encode a message. This is typically done using the alphabet and a shift &ldquo;key&rdquo; that tells you which letter to substitute for the original one. For example, if I were trying to encode the word &ldquo;cat&rdquo; with a right shift of 3, it would look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>c a t
+</span></span><span style="display:flex;"><span>f d w
+</span></span></code></pre></div><p>With this concept, encoding our plain text letters as a Unicode &ldquo;font&rdquo; is a simple process. All we need is an array to reference our plain text letters with, and the first index of our Unicode capital &ldquo;A&rdquo; representation. Since some Unicode numbers also include letters (which are sequential, but an unnecessary complication) and since the intent is to display the page in HTML, we&rsquo;ll use the HTML code number <code>&amp;#120172;</code>, with the extra bits removed for brevity.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">plain</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;A&#39;</span>, <span style="color:#e6db74">&#39;B&#39;</span>, <span style="color:#e6db74">&#39;C&#39;</span>, <span style="color:#e6db74">&#39;D&#39;</span>, <span style="color:#e6db74">&#39;E&#39;</span>, <span style="color:#e6db74">&#39;F&#39;</span>, <span style="color:#e6db74">&#39;G&#39;</span>, <span style="color:#e6db74">&#39;H&#39;</span>, <span style="color:#e6db74">&#39;I&#39;</span>, <span style="color:#e6db74">&#39;J&#39;</span>, <span style="color:#e6db74">&#39;K&#39;</span>, <span style="color:#e6db74">&#39;L&#39;</span>, <span style="color:#e6db74">&#39;M&#39;</span>, <span style="color:#e6db74">&#39;N&#39;</span>, <span style="color:#e6db74">&#39;O&#39;</span>, <span style="color:#e6db74">&#39;P&#39;</span>, <span style="color:#e6db74">&#39;Q&#39;</span>, <span style="color:#e6db74">&#39;R&#39;</span>, <span style="color:#e6db74">&#39;S&#39;</span>, <span style="color:#e6db74">&#39;T&#39;</span>, <span style="color:#e6db74">&#39;U&#39;</span>, <span style="color:#e6db74">&#39;V&#39;</span>, <span style="color:#e6db74">&#39;W&#39;</span>, <span style="color:#e6db74">&#39;X&#39;</span>, <span style="color:#e6db74">&#39;Y&#39;</span>, <span style="color:#e6db74">&#39;Z&#39;</span>, <span style="color:#e6db74">&#39;a&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>, <span style="color:#e6db74">&#39;c&#39;</span>, <span style="color:#e6db74">&#39;d&#39;</span>, <span style="color:#e6db74">&#39;e&#39;</span>, <span style="color:#e6db74">&#39;f&#39;</span>, <span style="color:#e6db74">&#39;g&#39;</span>, <span style="color:#e6db74">&#39;h&#39;</span>, <span style="color:#e6db74">&#39;i&#39;</span>, <span style="color:#e6db74">&#39;j&#39;</span>, <span style="color:#e6db74">&#39;k&#39;</span>, <span style="color:#e6db74">&#39;l&#39;</span>, <span style="color:#e6db74">&#39;m&#39;</span>, <span style="color:#e6db74">&#39;n&#39;</span>, <span style="color:#e6db74">&#39;o&#39;</span>, <span style="color:#e6db74">&#39;p&#39;</span>, <span style="color:#e6db74">&#39;q&#39;</span>, <span style="color:#e6db74">&#39;r&#39;</span>, <span style="color:#e6db74">&#39;s&#39;</span>, <span style="color:#e6db74">&#39;t&#39;</span>, <span style="color:#e6db74">&#39;u&#39;</span>, <span style="color:#e6db74">&#39;v&#39;</span>, <span style="color:#e6db74">&#39;w&#39;</span>, <span style="color:#e6db74">&#39;x&#39;</span>, <span style="color:#e6db74">&#39;y&#39;</span>, <span style="color:#e6db74">&#39;z&#39;</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">fancyA</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">120172</span>;
+</span></span></code></pre></div><p>Since we know that the letter sequence of the fancy Unicode is the same as our plain text array, any letter can be found by using its index in the plain text array as an offset from the fancy capital &ldquo;A&rdquo; number. For example, capital &ldquo;B&rdquo; in fancy Unicode is the capital &ldquo;A&rdquo; number, <code>120172</code> plus B&rsquo;s index, which is <code>1</code>: <code>120173</code>.</p>
+<p>Here&rsquo;s our conversion function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">convert</span>(<span style="color:#a6e22e">string</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Create a variable to store our converted letters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">converted</span> <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Break string into substrings (letters)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">arr</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">string</span>.<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39;&#39;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Search plain array for indexes of letters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">arr</span>.<span style="color:#a6e22e">forEach</span>(<span style="color:#a6e22e">element</span> =&gt; {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">plain</span>.<span style="color:#a6e22e">indexOf</span>(<span style="color:#a6e22e">element</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// If the letter isn&#39;t a letter (not found in the plain array)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">i</span> <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Return as a whitespace
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#a6e22e">converted</span>.<span style="color:#a6e22e">push</span>(<span style="color:#e6db74">&#39; &#39;</span>);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Get relevant character from fancy number + index
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">unicode</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fancyA</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Return as HTML code
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#a6e22e">converted</span>.<span style="color:#a6e22e">push</span>(<span style="color:#e6db74">&#39;&amp;#&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">unicode</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;;&#39;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Print the converted letters as a string
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">converted</span>.<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#39;&#39;</span>));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>A neat possibility for this method of encoding requires a departure from my original purpose, which was to create a human-readable representation of the original string. If the purpose was instead to produce a cipher, this could be done by using any Unicode index in place of <code>fancyA</code> as long as the character indexed isn&rsquo;t a representation of a capital &ldquo;A.&rdquo;</p>
+<p>Here&rsquo;s the same code set up with a simplified plain text array, and a non-letter-representation Unicode key:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">plain</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;a&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>, <span style="color:#e6db74">&#39;c&#39;</span>, <span style="color:#e6db74">&#39;d&#39;</span>, <span style="color:#e6db74">&#39;e&#39;</span>, <span style="color:#e6db74">&#39;f&#39;</span>, <span style="color:#e6db74">&#39;g&#39;</span>, <span style="color:#e6db74">&#39;h&#39;</span>, <span style="color:#e6db74">&#39;i&#39;</span>, <span style="color:#e6db74">&#39;j&#39;</span>, <span style="color:#e6db74">&#39;k&#39;</span>, <span style="color:#e6db74">&#39;l&#39;</span>, <span style="color:#e6db74">&#39;m&#39;</span>, <span style="color:#e6db74">&#39;n&#39;</span>, <span style="color:#e6db74">&#39;o&#39;</span>, <span style="color:#e6db74">&#39;p&#39;</span>, <span style="color:#e6db74">&#39;q&#39;</span>, <span style="color:#e6db74">&#39;r&#39;</span>, <span style="color:#e6db74">&#39;s&#39;</span>, <span style="color:#e6db74">&#39;t&#39;</span>, <span style="color:#e6db74">&#39;u&#39;</span>, <span style="color:#e6db74">&#39;v&#39;</span>, <span style="color:#e6db74">&#39;w&#39;</span>, <span style="color:#e6db74">&#39;x&#39;</span>, <span style="color:#e6db74">&#39;y&#39;</span>, <span style="color:#e6db74">&#39;z&#39;</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">key</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">9016</span>;
+</span></span></code></pre></div><p>You might be able to imagine that decoding a cipher produced by this method would be relatively straightforward, once you knew the encoding secret. You&rsquo;d simply need to subtract the key from the HTML code numbers of the encoded characters, then find the relevant plain text letters at the remaining indexes.</p>
+<p>Well, that&rsquo;s it for today. Be sure to drink your Ovaltine and we&rsquo;ll see you right here next Monday at 5:45!</p>
+<p>Oh, and&hellip; ⍔⍠⍟⍘⍣⍒⍥⍦⍝⍒⍥⍚⍠⍟⍤ ⍒⍟⍕ ⍨⍖⍝⍔⍠⍞⍖ ⍥⍠ ⍥⍙⍖ ⍔⍣⍪⍡⍥⍚⍔ ⍦⍟⍚⍔⍠⍕⍖ ⍤⍖⍔⍣⍖⍥ ⍤⍠⍔⍚⍖⍥⍪</p>
+<p>:)</p>
+]]></content></entry><entry><title type="html">How to code a satellite algorithm and cook paella from scratch</title><link href="https://victoria.dev/archive/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/"/><id>https://victoria.dev/archive/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/</id><author><name>Victoria Drake</name></author><published>2017-09-08T16:50:24-04:00</published><updated>2017-09-08T16:50:24-04:00</updated><content type="html"><![CDATA[<p>What if I told you that by the end of this article, you&rsquo;ll be able to calculate the orbital period of satellites around Earth using their average altitudes and&hellip; You tuned out already, didn&rsquo;t you?</p>
+<p>Okay, how about this: I&rsquo;m going to teach you how to make paella!</p>
+<p><em>And</em> you&rsquo;ll have written a function that does <em>the stuff I mentioned above</em>, just like I did for a freeCodeCamp challenge.</p>
+<p>I promise there&rsquo;s an overarching moral lesson that will benefit you every day for the rest of your life. Or at least, feed you for one night. Let&rsquo;s get started.</p>
+<h2 id="the-only-thing-i-know-about-paella-is-that-its-an-emoticon">The only thing I know about paella is that it&rsquo;s an emoticon</h2>
+<figure><img src="/archive/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/solve-unicode-paella.jpg"
+    alt="Unicode paella emoji."><figcaption>
+      <p>Unless you&rsquo;re reading this on a Samsung phone, in which case you&rsquo;re looking at a Korean hotpot.</p>
+    </figcaption>
+</figure>
+
+<p>One of my favorite things about living in the world today is that it&rsquo;s <em>totally fine</em> to know next-to-nothing about something. A hundred years ago you might have gone your whole life not knowing anything more about paella other than that it&rsquo;s an emoticon.* But today? You can simply <a href="https://en.wikipedia.org/wiki/Paella">look it up</a>.</p>
+<p>*That was a joke.</p>
+<p>As with all things in life, when we are unsure, we turn to the internet - in this case, the entry for <em>paella</em> on Wikipedia, which reads:</p>
+<blockquote>
+<p>Paella &hellip;is a Valencian rice dish. Paella has ancient roots, but its modern form originated in the mid-19th century near the Albufera lagoon on the east coast of Spain adjacent to the city of Valencia. Many non-Spaniards view paella as Spain&rsquo;s national dish, but most Spaniards consider it to be a regional Valencian dish. Valencians, in turn, regard paella as one of their identifying symbols.</p></blockquote>
+<p>At this point, you&rsquo;re probably full of questions. Do I need to talk to a Valencian? Should I take an online course on the history of Spain? What type of paella should I try to make? What is the common opinion of modern chefs when it comes to paella types?</p>
+<p>If you set out with the intention of answering all these questions, one thing is certain: you&rsquo;ll never end up actually making paella. You&rsquo;ll spend hours upon hours typing questions into search engines and years later wake up with a Masters in Valencian Cuisine.</p>
+<h2 id="the-most-important-question-method">The &ldquo;Most Important Question&rdquo; method</h2>
+<p>When I talk to myself out loud in public (doesn&rsquo;t everyone?) I refer to this as &ldquo;MIQ&rdquo; (rhymes with &ldquo;Nick&rdquo;). I also imagine MIQ to be a rather crunchy and quite adorable anthropomorphized tortilla chip. Couldn&rsquo;t tell you why.</p>
+<p><img src="solve-miq.png#center" alt="MIQ the chip."></p>
+<p>MIQ swings his crunchy triangular body around to point me in the right direction, and the right direction always takes the form of the most important question that you need to ask yourself at any stage of problem solving. The first most important question is always this:</p>
+<p><strong>What is the scope of the objective I want to achieve?</strong></p>
+<p>Well, you want to make paella.</p>
+<p>The next MIQ then becomes: how much do I actually need to know about paella in order to start making it?</p>
+<p>You&rsquo;ve heard this advice before: any big problem can be broken down into multiple, but more manageable, bite-size problems. In this little constellation of bite-size problems, there&rsquo;s only <em>one</em> that you need to solve in order to get <em>most of the way</em> to a complete solution.</p>
+<p>In the case of making paella, we need a recipe. That&rsquo;s a bite-size problem that a search engine can solve for us:</p>
+<blockquote>
+<p><strong>Simple Paella Recipe</strong></p>
+<ol>
+<li>In a medium bowl, mix together 2 tablespoons olive oil, paprika, oregano, and salt and pepper. Stir in chicken pieces to coat. Cover, and refrigerate.</li>
+<li>Heat 2 tablespoons olive oil in a large skillet or paella pan over medium heat. Stir in garlic, red pepper flakes, and rice. Cook, stirring, to coat rice with oil, about 3 minutes. Stir in saffron threads, bay leaf, parsley, chicken stock, and lemon zest. Bring to a boil, cover, and reduce heat to medium low. Simmer 20 minutes.</li>
+<li>Meanwhile, heat 2 tablespoons olive oil in a separate skillet over medium heat. Stir in marinated chicken and onion; cook 5 minutes. Stir in bell pepper and sausage; cook 5 minutes. Stir in shrimp; cook, turning the shrimp, until both sides are pink.</li>
+<li>Spread rice mixture onto a serving tray. Top with meat and seafood mixture. (<a href="https://www.allrecipes.com/recipe/84137/easy-paella/">allrecipes.com</a>)</li>
+</ol></blockquote>
+<p>And <em>voila</em>! Believe it or not, we&rsquo;re <em>most of the way</em> there already.</p>
+<p>Having a set of step-by-step instructions that are easy to understand is really most of the work done. All that&rsquo;s left is to go through the motions of gathering the ingredients and then making paella. From this point on, your MIQs may become fewer and far between, and they may slowly decrease in importance in relation to the overall problem. (Where do I buy paprika? How do I know when sausage is cooked? How do I set the timer on my phone for 20 minutes? How do I stop thinking about this delicious smell? Which Instagram filter best captures the ecstasy of this paella right now?)</p>
+<figure><img src="/archive/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/solve-insta-paella.jpg"
+    alt="The answer to that last one is Nashville"><figcaption>
+      <p>The answer to that last one is Nashville</p>
+    </figcaption>
+</figure>
+
+<h2 id="i-still-know-nothing-about-calculating-the-orbital-periods-of-satellites">I still know nothing about calculating the orbital periods of satellites</h2>
+<p>Okay. Let&rsquo;s examine the problem:</p>
+<blockquote>
+<p>Return a new array that transforms the element&rsquo;s average altitude into their orbital periods.</p>
+<p>The array will contain objects in the format {name: &rsquo;name&rsquo;, avgAlt: avgAlt}.</p>
+<p>You can read about orbital periods on wikipedia.</p>
+<p>The values should be rounded to the nearest whole number. The body being orbited is Earth.</p>
+<p>The radius of the earth is 6367.4447 kilometers, and the GM value of earth is 398600.4418 km3s-2.</p>
+<p><code>orbitalPeriod([{name : &quot;sputnik&quot;, avgAlt : 35873.5553}])</code> should return <code>[{name: &quot;sputnik&quot;, orbitalPeriod: 86400}].</code></p></blockquote>
+<p>Well, as it turns out, in order to calculate the orbital period of satellites, we also need a recipe. Amazing, the things you can find on the internet these days.</p>
+<p>Courtesy of <a href="http://www.dummies.com/education/science/physics/how-to-calculate-the-period-and-orbiting-radius-of-a-geosynchronous-satellite/">dummies.com</a> (yup! #noshame), here&rsquo;s our recipe:</p>
+<figure><img src="/archive/how-to-code-a-satellite-algorithm-and-cook-paella-from-scratch/solve-orbital-period.png"
+    alt="Orbital period formula"><figcaption>
+      <p>It&rsquo;s kind of cute, in a way.</p>
+    </figcaption>
+</figure>
+
+<p>That might look pretty complicated, but as we&rsquo;ve already seen, we just need to answer the next MIQ: how much do I actually need to know about this formula in order to start using it?</p>
+<p>In the case of this challenge, not too much. We&rsquo;re already given <code>earthRadius</code>, and <code>avgAlt</code> is part of our arguments object. Together, they form the radius, <em>r</em>. With a couple search queries and some mental time-travel to your elementary math class, we can describe this formula in a smattering of English:</p>
+<p><strong><em>T</em>, the orbital period, equals 2 multiplied by Pi, in turn multiplied by the square root of the radius, <em>r</em> cubed, divided by the gravitational mass, <em>GM</em>.</strong></p>
+<p>JavaScript has a <code>Math.PI</code> property, as well as <code>Math.sqrt()</code> function and <code>Math.pow()</code> function. Using those combined with simple calculation, we can represent this equation in a single line assigned to a variable:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">orbitalPeriod</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> Math.<span style="color:#a6e22e">PI</span> <span style="color:#f92672">*</span> (Math.<span style="color:#a6e22e">sqrt</span>(Math.<span style="color:#a6e22e">pow</span>((<span style="color:#a6e22e">earthRadius</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">avgAlt</span>), <span style="color:#ae81ff">3</span>) <span style="color:#f92672">/</span> <span style="color:#a6e22e">GM</span>));
+</span></span></code></pre></div><p>From the inside out:</p>
+<ol>
+<li>Add <code>earthRadius</code> and <code>avgAlt</code></li>
+<li>Cube the result of step 1</li>
+<li>Divide the result of step 2 by GM</li>
+<li>Take the square root of the result of step 3</li>
+<li>Multiply 2 times Pi times the result of step 4</li>
+<li>Assign the returned value to <code>orbitalPeriod</code></li>
+</ol>
+<p>Believe it or not, we&rsquo;re already most of the way there.</p>
+<p>The next MIQ for this challenge is to take the arguments object, extract the information we need, and return the result of our equation in the required format. There are a multitude of ways to do this, but I&rsquo;m happy with a straightforward <code>for</code> loop:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">orbitalPeriod</span>(<span style="color:#a6e22e">arr</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">resultArr</span> <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">teapot</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">teapot</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">arguments</span>[<span style="color:#ae81ff">0</span>].<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">teapot</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">GM</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">398600.4418</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">earthRadius</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">6367.4447</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">avgAlt</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">arguments</span>[<span style="color:#ae81ff">0</span>][<span style="color:#a6e22e">teapot</span>][<span style="color:#e6db74">&#39;avgAlt&#39;</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">arguments</span>[<span style="color:#ae81ff">0</span>][<span style="color:#a6e22e">teapot</span>][<span style="color:#e6db74">&#39;name&#39;</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">orbitalPeriod</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> Math.<span style="color:#a6e22e">PI</span> <span style="color:#f92672">*</span> (Math.<span style="color:#a6e22e">sqrt</span>(Math.<span style="color:#a6e22e">pow</span>((<span style="color:#a6e22e">earthRadius</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">avgAlt</span>), <span style="color:#ae81ff">3</span>) <span style="color:#f92672">/</span> <span style="color:#a6e22e">GM</span>));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">name</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">orbitalPeriod</span><span style="color:#f92672">:</span> Math.<span style="color:#a6e22e">round</span>(<span style="color:#a6e22e">orbitalPeriod</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">resultArr</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">result</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">resultArr</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>If you need a refresher on iterating through arrays, have a look at my <a href="/blog/iterating-over-objects-and-arrays-frequent-errors/">article on iterating, featuring breakfast arrays</a>! (5 minutes read)</p>
+<p>Don&rsquo;t look now, but you just gained the ability to calculate the orbital period of satellites. You could even do it <em>while</em> making paella, if you wanted to. Seriously. Put it on your resume.</p>
+<h2 id="tldr-the-overarching-moral-lesson">Tl;dr: the overarching moral lesson</h2>
+<p>Whether it&rsquo;s cooking, coding, or anything else, problems may at first seem confusing, insurmountable, or downright boring. If you&rsquo;re faced with such a challenge, just remember: they&rsquo;re a lot more digestible with a side of bite-sized MIQ chips.</p>
+<p><img src="solve-miq-bowl.png#center" alt="Bowl of MIQs."></p>
+]]></content></entry><entry><title type="html">Making sandwiches with closures in JavaScript</title><link href="https://victoria.dev/archive/making-sandwiches-with-closures-in-javascript/"/><id>https://victoria.dev/archive/making-sandwiches-with-closures-in-javascript/</id><author><name>Victoria Drake</name></author><published>2017-05-28T09:16:35+07:00</published><updated>2017-05-28T09:16:35+07:00</updated><content type="html"><![CDATA[<p>Say you&rsquo;re having a little coding get-together, and you need some sandwiches. You happen to know that everyone prefers a different type of sandwich, like chicken, ham, or peanut butter and mayo. You could make all these sandwiches yourself, but that would be tedious and boring.</p>
+<p>Luckily, you know of a nearby sandwich shop that delivers. They have the ability and ingredients to make any kind of sandwich in the world, and all you have to do is order through their app.</p>
+<p>The sandwich shop looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">makeMeASandwich</span>(<span style="color:#a6e22e">x</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">ingredients</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#39; &#39;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">barry</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ingredients</span>.<span style="color:#a6e22e">concat</span>(<span style="color:#e6db74">&#39; sandwich&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Notice that we have an outer function, <code>makeMeASandwich()</code> that takes an argument, <code>x</code>. This outer function has the local variable <code>ingredients</code>, which is just <code>x</code> mushed together.</p>
+<p>Barry? Who&rsquo;s Barry? He&rsquo;s the guy who works at the sandwich shop. You&rsquo;ll never talk with Barry directly, but he&rsquo;s the reason your sandwiches are made, and why they&rsquo;re so delicious. Barry takes <code>ingredients</code> and mushes them together with &quot; sandwich&quot;.</p>
+<p>The reason Barry is able to access the <code>ingredients</code> is because they&rsquo;re in his outer scope. If you were to take Barry out of the sandwich shop, he&rsquo;d no longer be able to access them. This is an example of <em>lexical scoping</em>: &ldquo;Nested functions have access to variables declared in their outer scope.&rdquo; (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#Lexical_scoping">MDN</a>)</p>
+<p>Barry, happily at work in the sandwich shop, is an example of a closure.</p>
+<blockquote>
+<p><strong>Closures</strong> are functions that refer to independent (free) variables (variables that are used locally, but defined in an enclosing scope). In other words, these functions &lsquo;remember&rsquo; the environment in which they were created. (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures">MDN</a>)</p></blockquote>
+<p>When you order, the app submits your sandwich request like so:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">pbm</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">makeMeASandwich</span>([<span style="color:#e6db74">&#39;peanut butter&#39;</span>, <span style="color:#e6db74">&#39;mayo&#39;</span>]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">pbm</span>();
+</span></span></code></pre></div><p>And in thirty-minutes-or-it&rsquo;s-free, you get: <code>peanut butter mayo sandwich</code>.</p>
+<p>The nice thing about the sandwich shop app is that it remembers the sandwiches you&rsquo;ve ordered before. Your peanut butter and mayo sandwich is now available to you as <code>pbm()</code> for you to order anytime. It&rsquo;s pretty convenient since, each time you order, there&rsquo;s no need to specify that the sandwich you want is the same one you got before with peanut butter and mayo and it&rsquo;s a sandwich. Using <code>pbm()</code> is much more concise.</p>
+<p>Let&rsquo;s order the sandwiches you need for the party:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">pmrp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">makeMeASandwich</span>([<span style="color:#e6db74">&#39;prosciutto&#39;</span>, <span style="color:#e6db74">&#39;mozzarella&#39;</span>, <span style="color:#e6db74">&#39;red pepper&#39;</span>]);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">pbt</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">makeMeASandwich</span>([<span style="color:#e6db74">&#39;peanut butter&#39;</span>, <span style="color:#e6db74">&#39;tuna&#39;</span>]);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">hm</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">makeMeASandwich</span>([<span style="color:#e6db74">&#39;ham&#39;</span>]);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">pbm</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">makeMeASandwich</span>([<span style="color:#e6db74">&#39;peanut butter&#39;</span>, <span style="color:#e6db74">&#39;mayo&#39;</span>]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">pmrp</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">pbt</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">hm</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">pbm</span>();
+</span></span></code></pre></div><p>Your order confirmation reads:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>prosciutto mozzarella red pepper sandwich
+</span></span><span style="display:flex;"><span>peanut butter tuna sandwich
+</span></span><span style="display:flex;"><span>ham sandwich
+</span></span><span style="display:flex;"><span>peanut butter mayo sandwich
+</span></span></code></pre></div><p>Plot twist! The guy who wanted a ham sandwich now wants a ham <em>and cheese</em> sandwich. Luckily, the sandwich shop just released a new version of their app that will let you add cheese to any sandwich.</p>
+<p>With this added feature, the sandwich shop now looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">makeMeASandwich</span>(<span style="color:#a6e22e">x</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">ingredients</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#39; &#39;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">slices</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">barry</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ingredients</span>.<span style="color:#a6e22e">concat</span>(<span style="color:#e6db74">&#39; sandwich&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">barryAddCheese</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">slices</span> <span style="color:#f92672">+=</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ingredients</span>.<span style="color:#a6e22e">concat</span>(<span style="color:#e6db74">&#39; sandwich with &#39;</span>, <span style="color:#a6e22e">slices</span>, <span style="color:#e6db74">&#39; slices of cheese&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">noCheese</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">barry</span>();
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">addCheese</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">barryAddCheese</span>();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>You amend the order to look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">pmrp</span>.<span style="color:#a6e22e">noCheese</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">pbt</span>.<span style="color:#a6e22e">noCheese</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">hm</span>.<span style="color:#a6e22e">addCheese</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">pbm</span>.<span style="color:#a6e22e">noCheese</span>();
+</span></span></code></pre></div><p>And your order confirmation reads:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>prosciutto mozzarella red pepper sandwich
+</span></span><span style="display:flex;"><span>peanut butter tuna sandwich
+</span></span><span style="display:flex;"><span>ham sandwich with <span style="color:#ae81ff">2</span> slices of cheese
+</span></span><span style="display:flex;"><span>peanut butter mayo sandwich
+</span></span></code></pre></div><p>You&rsquo;ll notice that when you order a sandwich with cheese, Barry puts 2 slices of cheese on it. In this way, the sandwich shop controls how much cheese you get. You can&rsquo;t get to Barry to tell him you want more than 2 slices at a time. That&rsquo;s because your only access to the sandwich shop is through the public functions <code>noCheese</code> or <code>addCheese</code>.</p>
+<p>Of course, there&rsquo;s a way to cheat the system&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">hm</span>.<span style="color:#a6e22e">addCheese</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">hm</span>.<span style="color:#a6e22e">addCheese</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">hm</span>.<span style="color:#a6e22e">addCheese</span>();
+</span></span></code></pre></div><p>By ordering the same ham sandwich with cheese three times, you get: <code>ham sandwich with 6 slices of cheese</code>.</p>
+<p>This happens because the sandwich shop app recognizes the variable <code>hm</code> as the same sandwich each time, and increases the number of cheese slices it tells Barry to add.</p>
+<p>The app could prevent you from adding lots of cheese to the same sandwich, either by adding a maximum or by appending unique order numbers to the variable names&hellip; but this is our fantasy sandwich shop, and we get to pile on as much cheese as we want.</p>
+<p><img src="closures-cheesestack.jpg#center" alt="All the cheese."></p>
+<p>By using closures, we can have JavaScript emulate private methods found in languages like Ruby and Java. Closures are a useful way to extend the functionality of JavaScript, and also order sandwiches.</p>
+]]></content></entry><entry><title type="html">Understanding Array.prototype.reduce() and recursion using apple pie</title><link href="https://victoria.dev/archive/understanding-array.prototype.reduce-and-recursion-using-apple-pie/"/><id>https://victoria.dev/archive/understanding-array.prototype.reduce-and-recursion-using-apple-pie/</id><author><name>Victoria Drake</name></author><published>2017-05-18T11:40:06+07:00</published><updated>2017-05-18T11:40:06+07:00</updated><content type="html"><![CDATA[<p>I was having trouble understanding <code>reduce()</code> and recursion in JavaScript, so I wrote this article to explain it to myself (hey, look, recursion!). I hope you find my examples both helpful and delicious.</p>
+<p>Given an array with nested arrays:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">arr</span> <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, [<span style="color:#ae81ff">2</span>], [<span style="color:#ae81ff">3</span>, [[<span style="color:#ae81ff">4</span>]]]]
+</span></span></code></pre></div><p>We want to produce this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">flat</span> <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>]
+</span></span></code></pre></div><h2 id="using-for-loops-and-if-statements">Using for loops and if statements</h2>
+<p>Naively, if we know the maximum number of nested arrays we&rsquo;ll encounter (there are 4 in this example), we can use <code>for</code> loops to iterate through each array item, then <code>if</code> statements to check if each item is in itself an array, and so on&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">flatten</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">flat</span> <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">i</span><span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">arr</span>.<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (Array.<span style="color:#a6e22e">isArray</span>(<span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>])) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">ii</span><span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">ii</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>].<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">ii</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (Array.<span style="color:#a6e22e">isArray</span>(<span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">ii</span>])) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">iii</span><span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">iii</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">ii</span>].<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">iii</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">iiii</span><span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">iiii</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">ii</span>][<span style="color:#a6e22e">iii</span>].<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">iiii</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (Array.<span style="color:#a6e22e">isArray</span>(<span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">ii</span>][<span style="color:#a6e22e">iii</span>])) {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">flat</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">ii</span>][<span style="color:#a6e22e">iii</span>][<span style="color:#a6e22e">iiii</span>]);
+</span></span><span style="display:flex;"><span>                } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">flat</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">ii</span>][<span style="color:#a6e22e">iii</span>]);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">flat</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">ii</span>]);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">flat</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">i</span>]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// [1, 2, 3, 4]
+</span></span></span></code></pre></div><p>&hellip;Which works, but of course looks ridiculous. Besides looking ridiculous, a) it only works if we know how many nested arrays we&rsquo;ll process, b) it&rsquo;s hard to read and harder to understand, and c) can you imagine having to debug this mess?! (Gee, I think there&rsquo;s an extra <code>i</code> somewhere.)</p>
+<h2 id="using-reduce">Using reduce</h2>
+<p>JavaScript has a couple methods we can use to make our code a little less ridiculous. One of these is <code>reduce()</code> and it looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">flat</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">arr</span>.<span style="color:#a6e22e">reduce</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">done</span>,<span style="color:#a6e22e">curr</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">done</span>.<span style="color:#a6e22e">concat</span>(<span style="color:#a6e22e">curr</span>);
+</span></span><span style="display:flex;"><span>}, []);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// [ 1, 2, 3, [ [ 4 ] ] ]
+</span></span></span></code></pre></div><p>It&rsquo;s a lot less code, but we haven&rsquo;t taken care of some of the nested arrays. Let&rsquo;s first walk through <code>reduce()</code> together and examine what it does to see how we&rsquo;ll correct this.</p>
+<blockquote>
+<p><strong>Array.prototype.reduce()</strong>
+The reduce() method applies a function against an accumulator and each element in the array (from left to right) to reduce it to a single value. (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce?v=example">MDN</a>)</p></blockquote>
+<p>It&rsquo;s not quite as complicated as it seems. Let&rsquo;s think of <code>reduce()</code> as an out-of-work developer (AI took all the dev jobs) with an empty basket. We&rsquo;ll call him Adam. Adam&rsquo;s main function (ba-dum ching) is now to take apples from a pile, shine them up, and put them one-by-one into the basket. This basket of shiny apples is destined to become delicious apple pies. It&rsquo;s a very important job.</p>
+<figure><img src="/archive/understanding-array.prototype.reduce-and-recursion-using-apple-pie/recursion-apple-formula.jpg"
+    alt="Pile of apples &#43; Adam: apple pie"><figcaption>
+      <p>Apples plus human effort equals pie. Not to be confused with apple-human-pie, which is less appetizing.</p>
+    </figcaption>
+</figure>
+
+<p>In our above example, the pile of apples is our array, <code>arr</code>. Our basket is <code>done</code>, the accumulator. The initial value of <code>done</code> is an empty array, which we see as <code>[]</code> at the end of our reduce function. The apple that our out-of-work dev is currently shining, you guessed it, is <code>curr</code>. Once Adam processes the current apple, he places it into the basket (<code>.concat()</code>). When there are no more apples in the pile, he returns the basket of polished apples to us, and then probably goes home to his cat, or something.</p>
+<h2 id="using-reduce-recursively-to-address-nested-arrays">Using reduce recursively to address nested arrays</h2>
+<p>So that&rsquo;s all well and good, and now we have a basket of polished apples. But we still have some nested arrays to deal with. Going back to our analogy, let&rsquo;s say that some of the apples in the pile are in boxes. Within each box there could be more apples, and/or more boxes containing smaller, cuter apples.</p>
+<figure><img src="/archive/understanding-array.prototype.reduce-and-recursion-using-apple-pie/recursion-nested-apples.jpg"
+    alt="Box within a box within a box with apples"><figcaption>
+      <p>Adorable, slightly skewed apples just want to be loved/eaten.</p>
+    </figcaption>
+</figure>
+
+<p>Here&rsquo;s what we want our apple-processing-function/Adam to do:</p>
+<ol>
+<li>If the pile of apples is a pile of apples, take an apple from the pile.</li>
+<li>If the apple is an apple, polish it, put it in the basket.</li>
+<li>If the apple is a box, open the box. If the box contains an apple, go to step 2.</li>
+<li>If the box contains another box, open this box, and go to step 3.</li>
+<li>When the pile is no more, give us the basket of shiny apples.</li>
+<li>If the pile of apples is not a pile of apples, give back whatever it is.</li>
+</ol>
+<p>A recursive reduce function that accomplishes this is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">flatten</span>(<span style="color:#a6e22e">arr</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (Array.<span style="color:#a6e22e">isArray</span>(<span style="color:#a6e22e">arr</span>)) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">arr</span>.<span style="color:#a6e22e">reduce</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">done</span>,<span style="color:#a6e22e">curr</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">done</span>.<span style="color:#a6e22e">concat</span>(<span style="color:#a6e22e">flatten</span>(<span style="color:#a6e22e">curr</span>));
+</span></span><span style="display:flex;"><span>    }, []);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">arr</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// [ 1, 2, 3, 4 ]
+</span></span></span></code></pre></div><p>Bear with me and I&rsquo;ll explain.</p>
+<blockquote>
+<p>An act of a function calling itself. Recursion is used to solve problems that contain smaller sub-problems. A recursive function can receive two inputs: a base case (ends recursion) or a recursive case (continues recursion). (<a href="https://developer.mozilla.org/en-US/docs/Glossary/Recursion">MDN</a>)</p></blockquote>
+<p>If you examine our code above, you&rsquo;ll see that <code>flatten()</code> appears twice. The first time it appears, it tells Adam what to do with the pile of apples. The second time, it tells him what to do with the thing he&rsquo;s currently holding, providing instructions in the case it&rsquo;s an apple, and in the case it&rsquo;s not an apple. The thing to note is that these instructions are a <em>repeat of the original instructions we started with</em> - and that&rsquo;s recursion.</p>
+<p>We&rsquo;ll break it down line-by-line for clarity:</p>
+<ol>
+<li><code>function flatten(arr) {</code> - we name our overall function and specify that it will take an argument, <code>arr</code>.</li>
+<li>`if (Array.isArray(arr)) {we examine the provided &ldquo;arrgument&rdquo; (I know, I&rsquo;m very funny) to determine if it is an array.</li>
+<li>`return arr.reduce(function(done,curr){if the previous line is true and the argument is an array, we want to reduce it. This is our recursive case. We&rsquo;ll apply the following function to each array item&hellip;</li>
+<li>`return done.concat(flatten(curr));nexpected plot twist appears! The function we want to apply is the very function we&rsquo;re in. Colloquially: take it from the top.</li>
+<li><code>}, []);ell our reduce function to start with an empty accumulator (</code>done`), and wrap it up.</li>
+<li>`} else {this resolves our if statement at line 2. If the provided argument isn&rsquo;t an array&hellip;</li>
+<li><code>return arr;rn whatever the</code>arr` is. (Hopefully a cute apple.) This is our base case that breaks us out of recursion.</li>
+<li>`}end the else statement.</li>
+<li><code>}</code> - end the overall function.</li>
+</ol>
+<p>And we&rsquo;re done! We&rsquo;ve gone from our 24 line, 4-layers-deep nested <code>for</code> loop solution to a much more concise, 9 line recursive reduce solution. Reduce and recursion can seem a little impenetrable at first, but they&rsquo;re valuable tools that will save you lots of future effort once you grasp them.</p>
+<p>And don&rsquo;t worry about Adam, our out-of-work developer. He got so much press after being featured in this article that he opened up his very own AI-managed apple pie factory. He&rsquo;s very happy.</p>
+<figure><img src="/archive/understanding-array.prototype.reduce-and-recursion-using-apple-pie/recursion-adams-apples.jpg"
+    alt="Adam&#39;s apple pie factory, Adam&#39;s Apples"><figcaption>
+      <p>+1 for you if you saw that one coming.</p>
+    </figcaption>
+</figure>
+
+]]></content></entry><entry><title type="html">Iterating over objects and arrays: frequent errors</title><link href="https://victoria.dev/archive/iterating-over-objects-and-arrays-frequent-errors/"/><id>https://victoria.dev/archive/iterating-over-objects-and-arrays-frequent-errors/</id><author><name>Victoria Drake</name></author><published>2017-05-16T10:46:46+07:00</published><updated>2017-05-16T10:46:46+07:00</updated><content type="html"><![CDATA[<p>Here&rsquo;s <del>some complaining</del> a quick overview of some code that has confounded me more than once. I&rsquo;m told even very experienced developers encounter these situations regularly, so if you find yourself on your third cup of coffee scratching your head over why your code is doing exactly what you told it to do (and not what you <em>want</em> it to do), maybe this post can help you.</p>
+<p>The example code is JavaScript, since that&rsquo;s what I&rsquo;ve been working in lately, but I believe the concepts to be pretty universal.</p>
+<h2 id="quick-reference-for-equivalent-statements">Quick reference for equivalent statements</h2>
+<table>
+  <thead>
+      <tr>
+          <th>This&hellip;</th>
+          <th>&hellip;is the same as this</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>i++;</code></td>
+          <td><code>i = i + 1;</code></td>
+      </tr>
+      <tr>
+          <td><code>i--;</code></td>
+          <td><code>i = i - 1;</code></td>
+      </tr>
+      <tr>
+          <td><code>apples += 5</code></td>
+          <td><code>apples = apples + 5;</code></td>
+      </tr>
+      <tr>
+          <td><code>apples -= 5</code></td>
+          <td><code>apples = apples - 5;</code></td>
+      </tr>
+      <tr>
+          <td><code>apples *= 5</code></td>
+          <td><code>apples = apples * 5;</code></td>
+      </tr>
+      <tr>
+          <td><code>apples /= 5</code></td>
+          <td><code>apples = apples / 5;</code></td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="quick-reference-for-logical-statements">Quick reference for logical statements</h2>
+<table>
+  <thead>
+      <tr>
+          <th>This&hellip;</th>
+          <th>&hellip;gives this</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>3 == '3'</code></td>
+          <td><code>true</code> (type converted)</td>
+      </tr>
+      <tr>
+          <td><code>3 === '3'</code></td>
+          <td><code>false</code> (type matters; integer is not a string)</td>
+      </tr>
+      <tr>
+          <td><code>3 != '3'</code></td>
+          <td><code>false</code> (type converted, 3: 3)</td>
+      </tr>
+      <tr>
+          <td><code>3 !== '3'</code></td>
+          <td><code>true</code> (type matters; integer is not a string)</td>
+      </tr>
+      <tr>
+          <td>||</td>
+          <td>logical &ldquo;or&rdquo;: either side evaluated</td>
+      </tr>
+      <tr>
+          <td><code>&amp;&amp;</code></td>
+          <td>logical &ldquo;and&rdquo;: both sides evaluated</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="objects">Objects</h2>
+<p>Given a breakfast object that looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">breakfast</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;eggs&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;waffles&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;fruit&#39;</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;blueberries&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;strawberries&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;coffee&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Or like this:</p>
+<p><img src="cover.png#center" alt="Breakfast object."></p>
+<h3 id="iterate-over-object-properties">Iterate over object properties</h3>
+<p>We can iterate through each breakfast item using a for loop as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#a6e22e">item</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">breakfast</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;item: &#39;</span>, <span style="color:#a6e22e">item</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This produces:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>item: eggs
+</span></span><span style="display:flex;"><span>item: waffles
+</span></span><span style="display:flex;"><span>item: fruit
+</span></span><span style="display:flex;"><span>item: coffee
+</span></span></code></pre></div><h3 id="get-object-property-value">Get object property value</h3>
+<p>We can access the value of the property or nested properties (in this example, the number of items) like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;How many waffles? &#39;</span>, <span style="color:#a6e22e">breakfast</span>[<span style="color:#e6db74">&#39;waffles&#39;</span>])
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;How many strawberries? &#39;</span>, <span style="color:#a6e22e">breakfast</span>[<span style="color:#e6db74">&#39;fruit&#39;</span>][<span style="color:#e6db74">&#39;strawberries&#39;</span>])
+</span></span></code></pre></div><p>Or equivalent syntax:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;How many waffles? &#39;</span>, <span style="color:#a6e22e">breakfast</span>.<span style="color:#a6e22e">waffles</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;How many strawberries? &#39;</span>, <span style="color:#a6e22e">breakfast</span>.<span style="color:#a6e22e">fruit</span>.<span style="color:#a6e22e">strawberries</span>)
+</span></span></code></pre></div><p>This produces:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>How many waffles?  <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>How many strawberries?  <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><h3 id="get-object-property-from-the-value">Get object property from the value</h3>
+<p>If instead I want to access the property via the value, for example, to find out which items are served in twos, I can do so by iterating like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#a6e22e">item</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">breakfast</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">breakfast</span>[<span style="color:#a6e22e">item</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Two of: &#39;</span>, <span style="color:#a6e22e">item</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Which gives us:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>Two of:  eggs
+</span></span><span style="display:flex;"><span>Two of:  waffles
+</span></span></code></pre></div><h3 id="alter-nested-property-values">Alter nested property values</h3>
+<p>Say I want to increase the number of fruits in breakfast, because sugar is bad for me and I like things that are bad for me. I can do that like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">fruits</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">breakfast</span>[<span style="color:#e6db74">&#39;fruit&#39;</span>];
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#a6e22e">f</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">fruits</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fruits</span>[<span style="color:#a6e22e">f</span>] <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">fruits</span>);
+</span></span></code></pre></div><p>Which gives us:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#f92672">{</span> blueberries: 6, strawberries: <span style="color:#ae81ff">2</span> <span style="color:#f92672">}</span>
+</span></span></code></pre></div><h2 id="arrays">Arrays</h2>
+<p>Given an array of waffles that looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wafflesIAte</span> <span style="color:#f92672">=</span> [ <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">11</span> ];
+</span></span></code></pre></div><p>Or like this:</p>
+<p><img src="iteration-waffles.png" alt="Waffle array."></p>
+<h3 id="iterate-through-array-items">Iterate through array items</h3>
+<p>We can iterate through each item in the array using a for loop:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">wafflesIAte</span>.<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;array index: &#39;</span>, <span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;item from array: &#39;</span>, <span style="color:#a6e22e">wafflesIAte</span>[<span style="color:#a6e22e">i</span>]);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This produces:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>array index:  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>item from array:  <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>array index:  <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>item from array:  <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>array index:  <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>item from array:  <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>array index:  <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>item from array:  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>array index:  <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>item from array:  <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>array index:  <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>item from array:  <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>array index:  <span style="color:#ae81ff">6</span>
+</span></span><span style="display:flex;"><span>item from array:  <span style="color:#ae81ff">11</span>
+</span></span></code></pre></div><p>Some things to remember:
+<code>i</code> in the above context is a placeholder; we could substitute anything we like (<code>x</code>, <code>n</code>, <code>underpants</code>, etc). It simply denotes each instance of the iteration.</p>
+<p><code>i &lt; wafflesIAte.length</code> tells our for loop to continue as long as <code>i</code> is less than the array&rsquo;s length (in this case, 7).</p>
+<p><code>i++</code> is equivalent to <code>i+1</code> and means we&rsquo;re incrementing through our array by one each time. We could also use <code>i+2</code> to proceed with every other item in the array, for example.</p>
+<h3 id="access-array-item-by-index">Access array item by index</h3>
+<p>We can specify an item in the array using the array index, written as <code>wafflesIAte[i]</code> where <code>i</code> is any index of the array. This gives the item at that location.</p>
+<p>Array index always starts with <code>0</code>, which is accessed with <code>wafflesIAte[0]</code>. Using <code>wafflesIAte[1]</code> gives us the second item in the array, which is &ldquo;3&rdquo;.</p>
+<h3 id="ways-to-get-mixed-up-over-arrays">Ways to get mixed up over arrays</h3>
+<p>Remember that <code>wafflesIAte.length</code> and the index of the last item in the array are different. The former is 7, the latter is <code>6</code>.</p>
+<p>When incrementing <code>i</code>, remember that <code>[i+1]</code> and <code>[i]+1</code> are different:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;[i+1] gives next array index: &#39;</span>, <span style="color:#a6e22e">wafflesIAte</span>[<span style="color:#ae81ff">0</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>]);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;[i]+1 gives index value + 1: &#39;</span>, <span style="color:#a6e22e">wafflesIAte</span>[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>);
+</span></span></code></pre></div><p>Produces:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#f92672">[</span>i+1<span style="color:#f92672">]</span> gives next array index:  <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>+1 gives index value + 1:  <span style="color:#ae81ff">2</span>
+</span></span></code></pre></div><h2 id="practice-makes-better">Practice makes&hellip; better</h2>
+<p>The more often you code and correct your errors, the better you&rsquo;ll remember it next time!</p>
+<p>That&rsquo;s all for now. If you have a correction, best practice, or another common error for me to add, please let me know!</p>
+]]></content></entry></feed>

@@ -1,0 +1,252 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Protocols on victoria.dev</title><link href="https://victoria.dev/tags/protocols/feed.xml" rel="self"/><link href="https://victoria.dev/tags/protocols/"/><updated>2021-02-15T01:38:07-05:00</updated><id>https://victoria.dev/tags/protocols/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Create a self-hosted chat service with your own Matrix server</title><link href="https://victoria.dev/archive/create-a-self-hosted-chat-service-with-your-own-matrix-server/"/><id>https://victoria.dev/archive/create-a-self-hosted-chat-service-with-your-own-matrix-server/</id><author><name>Victoria Drake</name></author><published>2021-02-15T01:38:07-05:00</published><updated>2021-02-15T01:38:07-05:00</updated><content type="html"><![CDATA[<p><a href="https://matrix.org/docs/guides/introduction">Matrix</a> is an open standard for decentralized real-time communication. The <a href="https://matrix.org/docs/spec/">specification</a> is production-ready and <a href="https://matrix.org/bridges/">bridges</a> to tons of silo products like Slack, Gitter, Telegram, Discord, and even Facebook Messenger. This lets you use Matrix to link together disjoint communities in one place, or create an alternative communication method that works with, but is independent of, communication silos.</p>
+<p>You can create your own self-hosted Matrix chat for as little as $3.50 USD per month on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance. Your homeserver can federate with other Matrix servers, giving you a reliable and fault-tolerant means of communication.</p>
+<p>Matrix is most widely installed via its <a href="https://element-hq.github.io/synapse/latest/index.html">Synapse</a> homeserver implementation written in Python 3. Dendrite, its second-generation homeserver implementation written in Go, is currently released in beta. Dendrite will provide more memory efficiency and reliability out-of-the-box, making it an excellent choice for running on a virtual instance.</p>
+<p>Here&rsquo;s how to set up your own homeserver on AWS Lightsail with Dendrite. You can also <a href="https://github.com/matrix-org/dendrite">contribute to Dendrite today</a>.</p>
+<h2 id="create-a-lightsail-instance">Create a Lightsail instance</h2>
+<p>Spin up a new Lightsail instance on AWS with Debian as your operating system. It&rsquo;s a good idea to create a new per-instance key for use with SSH. You can do this by with the SSH key pair manager on the instance creation page. Don&rsquo;t forget to download your private key and <code>.gitignore</code> your secrets.</p>
+<p>Click <strong>Create Instance.</strong> Wait for the status of your instance to change from <strong>Pending</strong> to <strong>Running</strong>, then click its name to see further information. You&rsquo;ll need the Public IP address.</p>
+<p>To enable people including yourself to connect to the instance, go to the Networking tab and add a firewall rule for HTTPS. This will open <code>443</code> so you can connect over IPv4. You can also do this for IPv6.</p>
+<h2 id="connect-dns">Connect DNS</h2>
+<p>Give your instance a catchier address by <a href="https://www.jdoqocy.com/ds70r09608OQPPRVXSQPOQSRVVVVX" target="_top">buying a domain at Namecheap</a>
+ and setting up DNS records.</p>
+<ol>
+<li>On your domain management page in the <strong>Nameservers</strong> section, choose <strong>Namecheap BasicDNS</strong>.</li>
+<li>On the <strong>Advanced DNS</strong> tab, click <strong>Add New Record</strong>.</li>
+</ol>
+<p>Add an <code>A Record</code> to your Lightsail Public IP. You can use a subdomain if you want one, for example,</p>
+<ul>
+<li><strong>Type:</strong> <code>A Record</code></li>
+<li><strong>Host:</strong> <code>matrix</code></li>
+<li><strong>Value:</strong> <code>13.59.251.229</code></li>
+</ul>
+<p>This points <code>matrix.example.org</code> to your Lightsail instance.</p>
+<h2 id="set-up-your-matrix-homeserver">Set up your Matrix homeserver</h2>
+<p>Change permissions on the private key you downloaded:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>chmod <span style="color:#ae81ff">600</span> &lt;path/to/key&gt;
+</span></span></code></pre></div><p>Then <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">SSH to your Public IP</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ssh -i &lt;path/to/key&gt; admin@&lt;public ip&gt;
+</span></span></code></pre></div><p>Welcome to your instance! You can make it more interesting by downloading some packages you&rsquo;ll need for Dendrite. It&rsquo;s a good idea to use <code>apt</code> for this, but first you&rsquo;ll want to make sure you&rsquo;re getting the latest stuff.</p>
+<p><em>Dec 2021 update: As the good people of Mastodon point out, you might like to ensure you&rsquo;re choosing the stable version for Debian. For instance, replace <code>buster</code> below with <a href="https://www.debian.org/releases/">what&rsquo;s &ldquo;stable&rdquo; at the moment</a>.</em></p>
+<p>Change your <a href="https://wiki.debian.org/SourcesList">sources list</a> in order to get the newest version of Go:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo vim /etc/apt/sources.list
+</span></span></code></pre></div><p>Delete everything except these two lines:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">deb</span> <span style="color:#a6e22e">http</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">cdn</span>-<span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">deb</span>.<span style="color:#a6e22e">debian</span>.<span style="color:#a6e22e">org</span>/<span style="color:#a6e22e">debian</span> <span style="color:#a6e22e">buster</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">deb</span>-<span style="color:#a6e22e">src</span> <span style="color:#a6e22e">http</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">cdn</span>-<span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">deb</span>.<span style="color:#a6e22e">debian</span>.<span style="color:#a6e22e">org</span>/<span style="color:#a6e22e">debian</span> <span style="color:#a6e22e">buster</span> <span style="color:#a6e22e">main</span>
+</span></span></code></pre></div><p>Then replace the distributions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>:%<span style="color:#a6e22e">s</span><span style="color:#e6db74">/buster main/</span><span style="color:#a6e22e">testing</span> <span style="color:#a6e22e">main</span> <span style="color:#a6e22e">contrib</span> <span style="color:#a6e22e">non</span>-<span style="color:#a6e22e">free</span>/<span style="color:#a6e22e">g</span>
+</span></span></code></pre></div><p>Run <code>sudo apt dist-upgrade</code>. If you&rsquo;re asked about modified configuration files, choose the option to &ldquo;keep the local version currently installed.&rdquo;</p>
+<p>Once the upgrade is finished, restart your instance with <code>sudo shutdown -r now</code>.</p>
+<p>Go make some coffee, then SSH back in. Get the packages you&rsquo;ll need with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>sudo apt upgrade
+</span></span><span style="display:flex;"><span>sudo apt install -y git golang nginx python3-certbot-nginx
+</span></span></code></pre></div><p>You&rsquo;re ready to get Dendrite.</p>
+<h2 id="get-dendrite">Get Dendrite</h2>
+<p>Clone <a href="https://github.com/matrix-org/dendrite">Dendrite</a> and follow the <a href="https://github.com/matrix-org/dendrite#get-started">README instructions to get started</a>. You&rsquo;ll need to choose whether you want your Matrix instance to be federating. For simplicity, here&rsquo;s how to set up a non-federating deployment to start:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git clone https://github.com/matrix-org/dendrite
+</span></span><span style="display:flex;"><span>cd dendrite
+</span></span><span style="display:flex;"><span>./build.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate a Matrix signing key for federation (required)</span>
+</span></span><span style="display:flex;"><span>./bin/generate-keys --private-key matrix_key.pem
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate a self-signed certificate (optional, but a valid TLS certificate is normally</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># needed for Matrix federation/clients to work properly!)</span>
+</span></span><span style="display:flex;"><span>./bin/generate-keys --tls-cert server.crt --tls-key server.key
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Copy and modify the config file - you&#39;ll need to set a server name and paths to the keys</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># at the very least, along with setting up the database connection strings.</span>
+</span></span><span style="display:flex;"><span>cp dendrite-config.yaml dendrite.yaml
+</span></span></code></pre></div><h2 id="configure-dendrite">Configure Dendrite</h2>
+<p>Modify the configuration file you just copied:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo vim dendrite.yaml
+</span></span></code></pre></div><p>At minimum, set:</p>
+<ul>
+<li><code>server name</code> to your shiny new domain name, e.g. <code>matrix.example.org</code></li>
+<li><code>disable_federation</code> to true or false</li>
+<li><code>registration_disabled</code> to true or false</li>
+</ul>
+<p>You might like to read the <a href="https://github.com/matrix-org/dendrite/blob/master/docs/FAQ.md">Dendrite FAQ</a>.</p>
+<h2 id="configure-nginx">Configure nginx</h2>
+<p>Get the required packages if you didn&rsquo;t already install them above:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo apt install nginx python3-certbot-nginx
+</span></span></code></pre></div><p>Create your site&rsquo;s configuration file under <code>sites-available</code> with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>cd /etc/nginx/sites-available
+</span></span><span style="display:flex;"><span>ln -s /etc/nginx/sites-available/&lt;sitename&gt; /etc/nginx/sites-enabled/&lt;sitename&gt;
+</span></span><span style="display:flex;"><span>sudo cp default &lt;sitename&gt;
+</span></span></code></pre></div><p>Edit your site configuration. Delete the <code>root</code> and <code>index</code> lines if you don&rsquo;t need them, and input your server name.</p>
+<p>Your <code>location</code> block should look like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-nginx" data-lang="nginx"><span style="display:flex;"><span><span style="color:#66d9ef">location</span> <span style="color:#e6db74">/</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">https://localhost:8448</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Remove the <code>default</code> with: <code>sudo rm /etc/nginx/sites-enabled/default</code>.</p>
+<h2 id="create-self-signed-certificates">Create self-signed certificates</h2>
+<p>You can use <a href="https://certbot.eff.org/">Certbot</a> to generate self-signed certificates with <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo certbot --nginx -d &lt;your.site.address&gt;
+</span></span></code></pre></div><p>If you don&rsquo;t want to give an email, add the <code>--register-unsafely-without-email</code> flag.</p>
+<p>Test your configuration and restart nginx with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo nginx -t
+</span></span><span style="display:flex;"><span>sudo systemctl restart nginx
+</span></span></code></pre></div><p>Then start up your Matrix server.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Build and run the server:</span>
+</span></span><span style="display:flex;"><span>./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+</span></span></code></pre></div><p>Your Matrix server is up and running at your web address! If you disabled registration in your configuration, you may need to create a user. You can do this by running the included <code>dendrite/bin/createuser</code>.</p>
+<p>You can log on to your new homeserver with any <a href="https://matrix.org/clients/">Matrix client</a>, or Matrix-capable applications like <a href="https://www.pidgin.im/plugins/?publisher=all&amp;query=&amp;type=">Pidgin with the Matrix plugin</a>.</p>
+<h2 id="other-troubleshooting">Other troubleshooting</h2>
+<h3 id="log-files">Log files</h3>
+<p>If you get an error such as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>... [github.com/matrix-org/dendrite/internal/log.go:155] setupFileHook
+</span></span><span style="display:flex;"><span>  Couldn&#39;t create directory /var/log/dendrite: &#34;mkdir /var/log/dendrite: permission denied&#34;
+</span></span></code></pre></div><p>You&rsquo;ll need to create a spot for your log files. Avoid the bad practice of running stuff with <code>sudo</code> whenever you can. Instead, create the necessary file with the right permissions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo mkdir /var/log/dendrite
+</span></span><span style="display:flex;"><span>sudo chown admin:admin /var/log/dendrite
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Build and run the server:</span>
+</span></span><span style="display:flex;"><span>./bin/dendrite-monolith-server --tls-cert server.crt --tls-key server.key --config dendrite.yaml
+</span></span></code></pre></div><h3 id="unable-to-decrypt">Unable to decrypt</h3>
+<p>If you see: <code>Unable to decrypt: The sender's device has not sent us the keys for this message.</code> you may need to verify a user (sometimes yourself).</p>
+<ol>
+<li>In your client, open the user&rsquo;s profile. Click the lock icon if there is one, or otherwise look for a way to verify them.</li>
+<li>You may be asked to see if some emojis presented to both users match if you&rsquo;re using certain clients like Element.</li>
+<li>You can then re-request encryption keys for any sent messages.</li>
+</ol>
+<h2 id="set-up-your-own-matrix-server-today">Set up your own Matrix server today</h2>
+<p>I hope you found this introduction to setting up your own Matrix homeserver to be helpful!</p>
+]]></content></entry><entry><title type="html">What is TCP/IP? Layers and protocols explained</title><link href="https://victoria.dev/archive/what-is-tcp/ip-layers-and-protocols-explained/"/><id>https://victoria.dev/archive/what-is-tcp/ip-layers-and-protocols-explained/</id><author><name>Victoria Drake</name></author><published>2020-11-29T04:01:22-04:00</published><updated>2020-11-29T04:01:22-04:00</updated><content type="html"><![CDATA[<p>A significant part of the process of creation is the ability to imagine things that do not yet exist. This skill was instrumental to the creation of the Internet. If no one had imagined the underlying technology that most now take for granted every day, there would be no cat memes.</p>
+<p>To make the Internet possible, two things that needed imagining are <em>layers</em> and <em>protocols.</em> Layers are conceptual divides that group similar functions together. The word &ldquo;protocol,&rdquo; means &ldquo;the way we&rsquo;ve agreed to do things around here,&rdquo; more or less. In short, both layers and protocols can be explained to a five-year-old as &ldquo;ideas that people agreed sounded good, and then they wrote them down so that other people could do things with the same ideas.&rdquo;</p>
+<p>The Internet Protocol Suite is described in terms of layers and protocols. Collectively, the suite refers to the communication protocols that enable our endless scrolling. It&rsquo;s often called by its foundational protocols: the Transmission Control Protocol (TCP) and the Internet Protocol (IP). Lumped together as TCP/IP, these protocols describe how data on the Internet is packaged, addressed, sent, and received.</p>
+<p>Here&rsquo;s why the Internet Protocol Suite, or TCP/IP, is an imaginary rainbow layer cake.</p>
+<h2 id="layers-are-imaginary">Layers are imaginary</h2>
+<p>If you consider the general nature of a rainbow layer sponge cake, it&rsquo;s mostly made up of soft, melt-in-your mouth vanilla-y goodness. This goodness is in itself comprised of something along the lines of eggs, butter, flour, and sweetener.</p>
+<p><img src="free-cake.png" alt="Cartoon of a slice of rainbow layer cake, reads &ldquo;Yay! Free cake!&rdquo;"></p>
+<p>There isn&rsquo;t much to distinguish one layer of a rainbow sponge cake from another. Often, the only difference between layers is the food-coloring and a bit of frosting. When you think about it, it&rsquo;s all cake from top to bottom. The rainbow layers are only there because the baker thought they ought to be.</p>
+<p>Similar to cake ingredients, layers in the context of computer networking are mostly composed of protocols, algorithms, and configurations, with some data sprinkled in. It can be easier to talk about computer networking if its many functions are split up into groups, so certain people came up with descriptions of layers, which we call network models. TCP/IP is just one network model among others. In this sense, layers are concepts, not things.</p>
+<p>Some of the people in question are part of the Internet Engineering Task Force (IETF). They created the <a href="https://tools.ietf.org/html/rfc1122">RFC-1122</a> publication, discussing the Internet&rsquo;s communications layers. Half of a whole, the standard:</p>
+<blockquote>
+<p>&hellip;covers the communications protocol layers: link layer, IP layer, and transport layer; its companion <a href="https://tools.ietf.org/html/rfc1123">RFC-1123</a> covers the application and support protocols.</p></blockquote>
+<p>The layers described by RFC-1122 and RFC-1123 each encapsulate protocols that satisfy the layer&rsquo;s functionality. Let&rsquo;s look at each of these communications layers and see how TCP and IP stack up in this model of the Internet layer cake.</p>
+<h2 id="link-layer-protocols">Link layer protocols</h2>
+<p><img src="link.png" alt="Link cake layer cartoon"></p>
+<p>The <a href="https://datatracker.ietf.org/doc/html/rfc1122#page-21">link layer</a> is the most basic, or lowest-level, classification of communication protocol. It deals with sending information between hosts on the same local network, and translating data from the higher layers to the physical layer. Protocols in the link layer describe how data interacts with the transmission medium, such as electronic signals sent over specific hardware. Unlike other layers, link layer protocols are dependent on the hardware being used.</p>
+<h2 id="internet-layer-protocols">Internet layer protocols</h2>
+<p>Protocols in the <a href="https://tools.ietf.org/html/rfc1122#page-27">Internet layer</a> describe how data is sent and received over the Internet. The process involves packaging data into packets, addressing and transmitting packets, and receiving incoming packets of data.</p>
+<p><img src="internet.png" alt="Internet cake layer cartoon"></p>
+<p>The most widely known protocol in this layer gives TCP/IP its last two letters. IP is a connectionless protocol, meaning that it provides no guarantee that packets are sent or received in the right order, along the same path, or even in their entirety. Reliability is handled by other protocols in the suite, such as in the transport layer.</p>
+<p>There are currently two versions of IP in use: IPv4, and IPv6. Both versions describe how devices on the Internet are assigned IP addresses, which are used when navigating to cat memes. IPv4 is more widely used, but has only <a href="https://tools.ietf.org/html/rfc791#section-2.3">32 bits for addressing</a>, allowing for about 4.3 billion (ca. 4.3×10<sup>9</sup>) possible addresses. These are running out, and IPv4 and will eventually suffer from address exhaustion as more and more people use more devices on the Internet.</p>
+<p>The successor version IPv6 aims to solve address exhaustion by <a href="https://tools.ietf.org/html/rfc8200#section-1">using 128 bits for addresses</a>. This provides, um, a <em>lot</em> more address possibilities (ca. 3.4×10<sup>38</sup>).</p>
+<h2 id="transport-layer-protocols">Transport layer protocols</h2>
+<p>In May 1974, Vint Cerf and Bob Kahn (collectively often called &ldquo;the fathers of the Internet&rdquo;) published a paper entitled <a href="https://web.archive.org/web/20160304150203/http://ece.ut.ac.ir/Classpages/F84/PrincipleofNetworkDesign/Papers/CK74.pdf">A Protocol for Packet Network Intercommunication</a>. This paper contained the first description of a Transmission Control Program, a concept encompassing what would eventually be known as the Transmission Control Protocol (TCP) and User Datagram Protocol (UDP). (I had the pleasure of meeting Vint and can personally confirm that yes, he does look exactly like The Architect in the Matrix movies.)</p>
+<p><img src="transport.png" alt="Transport cake layer cartoon"></p>
+<p>The <a href="https://tools.ietf.org/html/rfc1122#page-77">transport layer</a> presently encapsulates TCP and UDP. Like IP, UDP is connectionless and can be used to prioritize time over reliability. TCP, on the other hand, is a connection-oriented transport layer protocol that prioritizes reliability over latency, or time. TCP describes transferring data in the same order as it was sent, retransmitting lost packets, and controls affecting the rate of data transmission.</p>
+<h2 id="application-layer-protocols">Application layer protocols</h2>
+<p><img src="application.png" alt="Application cake layer cartoon"></p>
+<p>The application layer describes the protocols that software applications interact with most often. The specification includes descriptions of the remote login protocol <a href="https://tools.ietf.org/html/rfc1123#section-3">Telnet</a>, the <a href="https://tools.ietf.org/html/rfc1123#section-4">File Transfer Protocol (FTP)</a>, and the <a href="https://tools.ietf.org/html/rfc1123#section-5">Simple Mail Transfer Protocol (SMTP)</a>.</p>
+<p>Also included in the application layer are the Hypertext Transfer Protocol (HTTP) and its successor, Hypertext Transfer Protocol Secure (HTTPS). HTTPS is secured by Transport Layer Security, or TLS, which can be said to be the top-most layer of the networking model described by the Internet protocol suite. If you&rsquo;d like to further understand TLS and how this protocol secures your cat meme viewing, I invite you <a href="/blog/tls">read my article about TLS and cryptography</a>.</p>
+<h2 id="the-internet-cake-is-still-baking">The Internet cake is still baking</h2>
+<p>Like a still-rising sponge cake, descriptions of layers, better protocols, and new models are being developed every day. The Internet, or whatever it will become in the future, is still in the process of being imagined.</p>
+<p><img src="cake.png" alt="Cartoon of the full Internet layer cake, topped with Nyan Cat memes"></p>
+<p>If you enjoyed learning from this post, there&rsquo;s a lot more where this came from! I write about computing, cybersecurity, and building great technical teams. <a href="/">Subscribe</a> to see new articles first.</p>
+]]></content></entry><entry><title type="html">WPA Key, WPA2, WPA3, and WEP Key: Wi-Fi security explained</title><link href="https://victoria.dev/posts/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/"/><id>https://victoria.dev/posts/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/</id><author><name>Victoria Drake</name></author><published>2020-10-19T04:02:27-04:00</published><updated>2020-10-19T04:02:27-04:00</updated><content type="html"><![CDATA[<p>Setting up new Wi-Fi? Picking the type of password you need can seem like an arbitrary choice. After all, WEP, WPA, WPA2, and WPA3 all have mostly the same letters in them. A password is a password, so what&rsquo;s the difference?</p>
+<p>About 60 seconds to billions of years, as it turns out.</p>
+<p>All Wi-Fi encryption is not created equal. Let&rsquo;s explore what makes these four acronyms so different, and how you can best protect your home and organization Wi-Fi.</p>
+<h2 id="wired-equivalent-privacy-wep">Wired Equivalent Privacy (WEP)</h2>
+<p>In the beginning, there was WEP.</p>
+<figure><img src="/posts/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/wep.png"
+    alt="cartoon of WEP letters"><figcaption>
+      <p>Not to be confused with the name of a certain rap song.</p>
+    </figcaption>
+</figure>
+<p><a href="https://en.wikipedia.org/wiki/Wired_Equivalent_Privacy">Wired Equivalent Privacy</a> is a deprecated security algorithm from 1997 that was intended to provide equivalent security to a wired connection. &ldquo;Deprecated&rdquo; means, &ldquo;Let&rsquo;s not do that anymore.&rdquo;</p>
+<p>Even when it was first introduced, it was known not to be as strong as it could have been, for two reasons: one, its underlying encryption mechanism; and two, World War II.</p>
+<p>During World War II, the impact of code breaking (or cryptanalysis) was <a href="https://en.wikipedia.org/wiki/History_of_cryptography#World_War_II_cryptography">huge</a>. Governments reacted by attempting to keep their best secret-sauce recipes at home. Around the time of WEP, <a href="https://en.wikipedia.org/wiki/Export_of_cryptography_from_the_United_States">U.S. Government restrictions on the export of cryptographic technology</a> caused access point manufacturers to limit their devices to 64-bit encryption. Though this was later lifted to 128-bit, even this form of encryption offered a very limited possible <a href="https://en.wikipedia.org/wiki/Key_size">key size</a>.</p>
+<p>This proved problematic for WEP. The small key size resulted in being easier to <a href="https://en.wikipedia.org/wiki/Brute-force_attack">brute-force</a>, especially when that key doesn&rsquo;t often change.</p>
+<p>WEP&rsquo;s underlying encryption mechanism is the <a href="https://en.wikipedia.org/wiki/RC4">RC4 stream cipher</a>. This cipher gained popularity due to its speed and simplicity, but that came at a cost. It&rsquo;s not the most robust algorithm. WEP employs a single shared key among its users that must be manually entered on an access point device. (When&rsquo;s the last time you changed your Wi-Fi password? Right.) WEP didn&rsquo;t help matters either by simply concatenating the key with the initialization vector &ndash; which is to say, it sort of mashed its secret-sauce bits together and hoped for the best.</p>
+<blockquote>
+<p><a href="https://en.wikipedia.org/wiki/Initialization_vector">Initialization Vector (IV)</a>: fixed-size input to a <a href="https://en.wikipedia.org/wiki/Cryptographic_primitive">low-level cryptographic algorithm</a>, usually random.</p></blockquote>
+<p>Combined with the use of RC4, this left WEP particularly susceptible to <a href="https://en.wikipedia.org/wiki/Related-key_attack">related-key attack</a>. In the case of 128-bit WEP, your Wi-Fi password can be cracked by publicly-available tools in a matter of around <a href="https://eprint.iacr.org/2007/120">60 seconds</a> to <a href="https://www.networkcomputing.com/wireless-infrastructure/fbi-teaches-lesson-how-break-wi-fi-networks">three minutes</a>.</p>
+<p>While some devices came to offer 152-bit or 256-bit WEP variants, this failed to solve the fundamental problems of WEP&rsquo;s underlying encryption mechanism.</p>
+<p>So, yeah. Let&rsquo;s not do that anymore.</p>
+<h2 id="wi-fi-protected-access-wpa">Wi-Fi Protected Access (WPA)</h2>
+<p><img src="wpa.png" alt="WPA illustration"></p>
+<p>A new, interim standard sought to temporarily &ldquo;patch&rdquo; the problem of WEP&rsquo;s (lack of) security. The name <a href="https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access">Wi-Fi Protected Access (WPA)</a> certainly <em>sounds</em> more secure, so that&rsquo;s a good start; however, WPA first started out with another, more descriptive name.</p>
+<p>Ratified in a <a href="https://en.wikipedia.org/wiki/IEEE_802.11i-2004">2004 IEEE standard</a>, <a href="https://en.wikipedia.org/wiki/Temporal_Key_Integrity_Protocol#Beck-Tews_attack">Temporal Key Integrity Protocol (TKIP)</a> uses a dynamically-generated, per-packet key. Each packet sent has a unique temporal 128-bit key, (See? Descriptive!) that solves the susceptibility to related-key attacks brought on by WEP&rsquo;s shared key mashing.</p>
+<p>TKIP also implements other measures, such as a <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message authentication code (MAC)</a>. Sometimes known as a checksum, a MAC provides a cryptographic way to verify that messages haven&rsquo;t been changed. In TKIP, an invalid MAC can also trigger rekeying of the session key. If the access point receives an invalid MAC twice within a minute, the attempted intrusion can be countered by changing the key an attacker is trying to crack.</p>
+<p>Unfortunately, in order to preserve compatibility with the existing hardware that WPA was meant to &ldquo;patch,&rdquo; TKIP retained the use of the same underlying encryption mechanism as WEP &ndash; the RC4 stream cipher. While it certainly improved on the weaknesses of WEP, TKIP eventually proved vulnerable to new attacks that <a href="https://en.wikipedia.org/wiki/Temporal_Key_Integrity_Protocol#Security">extended previous attacks on WEP</a>. These attacks take a little longer to execute by comparison: for example, <a href="http://dl.aircrack-ng.org/breakingwepandwpa.pdf">twelve minutes</a> in the case of one, and <a href="https://www.rc4nomore.com/">52 hours</a> in another. This is more than sufficient, however, to deem TKIP no longer secure.</p>
+<p>WPA, or TKIP, has since been deprecated as well. So let&rsquo;s also not do that anymore.</p>
+<p>Which brings us to&hellip;</p>
+<h2 id="wi-fi-protected-access-ii-wpa2">Wi-Fi Protected Access II (WPA2)</h2>
+<p><img src="wpa2.png" alt="WPA2 illustration"></p>
+<p>Rather than spend the effort to come up with an entirely new name, the improved <a href="https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access#WPA2">Wi-Fi Protected Access II (WPA2)</a> standard instead focuses on using a new underlying cipher. Instead of the RC4 stream cipher, WPA2 employs a block cipher called <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">Advanced Encryption Standard (AES)</a> to form the basis of its encryption protocol. The protocol itself, abbreviated <a href="https://en.wikipedia.org/wiki/CCMP_(cryptography)">CCMP</a>, draws most of its security from the length of its rather long name (I&rsquo;m kidding): Counter Mode Cipher Block Chaining Message Authentication Code Protocol, which shortens to Counter Mode CBC-MAC Protocol, or CCM mode Protocol, or CCMP. 🤷</p>
+<p><a href="https://en.wikipedia.org/wiki/CCM_mode">CCM mode</a> is essentially a combination of a few good ideas. It provides data confidentiality through <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29">CTR mode, or counter mode</a>. To vastly oversimplify, this adds complexity to plaintext data by encrypting the successive values of a count sequence that does not repeat. CCM also integrates <a href="https://en.wikipedia.org/wiki/CBC-MAC">CBC-MAC</a>, a block cipher method for constructing a MAC.</p>
+<p>AES itself is on good footing. The AES specification was established in 2001 by the U.S. National Institute of Standards and Technology (NIST) after a five-year competitive selection process during which fifteen proposals for algorithm designs were evaluated. As a result of this process, a family of ciphers called Rijndael (Dutch) was selected, and a subset of these became AES. For the better part of two decades, AES has been used to protect every-day Internet traffic as well as <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#Security">certain levels of classified information in the U.S. Government</a>.</p>
+<p>While <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#Known_attacks">possible attacks on AES</a> have been described, none have yet been proven to be practical in real-world use. The fastest <a href="https://web.archive.org/web/20141230025103/http://research.microsoft.com/en-us/projects/cryptanalysis/aesbc.pdf">attack on AES</a> in public knowledge is a <a href="https://en.wikipedia.org/wiki/Key-recovery_attack">key-recovery attack</a> that improved on brute-forcing AES by a factor of about four. How long would it take? Some <a href="https://web.archive.org/web/20150108165723/https://blog.agilebits.com/2011/08/18/aes-encryption-isnt-cracked/">billions of years</a>.</p>
+<h2 id="wi-fi-protected-access-iii-wpa3">Wi-Fi Protected Access III (WPA3)</h2>
+<p><img src="wpa3.png" alt="WPA3 illustration"></p>
+<p>The next installment of the WPA trilogy has been required for new devices since July 1, 2020. Expected to further enhance the security of WPA2, the <a href="https://www.wi-fi.org/news-events/newsroom/wi-fi-alliance-introduces-wi-fi-certified-wpa3-security">WPA3 standard</a> seeks to improve password security by being more resilient to word list or <a href="https://en.wikipedia.org/wiki/Dictionary_attack">dictionary attacks</a>.</p>
+<p>Unlike its predecessors, WPA3 will also offer <a href="https://en.wikipedia.org/wiki/Forward_secrecy">forward secrecy</a>. This adds the considerable benefit of protecting previously exchanged information even if a long-term secret key is compromised. Forward secrecy is already provided by protocols like TLS by using asymmetric keys to establish shared keys. You can learn <a href="/blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/">more about TLS in this post</a>.</p>
+<p>As WPA2 has not been deprecated, both WPA2 and WPA3 remain your top choices for Wi-Fi security.</p>
+<h2 id="if-the-other-ones-suck-why-are-they-still-around">If the other ones suck, why are they still around?</h2>
+<p>You may be wondering why your access point even allows you to choose an option other than WPA2 or WPA3. The likely reason is that you&rsquo;re using legacy hardware, which is what tech people call your mom&rsquo;s router.</p>
+<p>Since the deprecation of WEP and WPA occurred (in old-people terms) rather recently, it&rsquo;s possible in large organizations as well as your parent&rsquo;s house to find older hardware that still uses these protocols. Even newer hardware may have a business need to support these older protocols.</p>
+<p>While I may be able to convince you to invest in a shiny new top-of-the-line Wi-Fi appliance, most organizations are a different story. Unfortunately, many just aren&rsquo;t yet cognizant of the important role cybersecurity plays in meeting customer needs and boosting that bottom line. Additionally, switching to newer protocols may require new internal hardware or firmware upgrades. Especially on complex systems in large organizations, upgrading devices can be financially or strategically difficult.</p>
+<h2 id="boost-your-wi-fi-security">Boost your Wi-Fi security</h2>
+<p>If it&rsquo;s an option, choose WPA2 or WPA3. Cybersecurity is a field that evolves by the day, and getting stuck in the past can have dire consequences.</p>
+<p>If you can&rsquo;t use WPA2 or WPA3, do the best you can to take additional security measures. The best bang for your buck is to use a Virtual Private Network (VPN). Using a VPN is a good idea no matter which type of Wi-Fi encryption you have. On open Wi-Fi (coffee shops) and using WEP, it&rsquo;s plain irresponsible to go without a VPN. Kind of like shouting out your bank details as you order your second cappuccino.</p>
+<figure><img src="/posts/wpa-key-wpa2-wpa3-and-wep-key-wi-fi-security-explained/cafewifi.png"
+    alt="A cartoon of shouting out your bank details at a coffeeshop.">
+</figure>
+<p>When possible, ensure you only connect to known networks that you or your organization control. Many cybersecurity attacks are executed when victims connect to an imitation public Wi-Fi access point, also called an evil twin attack, or Wi-Fi phishing. These fake hotspots are easily created using publicly accessible programs and tools. A reputable VPN can help mitigate damage from these attacks as well, but it&rsquo;s always better not to take the risk. If you travel often, consider purchasing a portable hotspot that uses a cellular data plan, or using data SIM cards for all your devices.</p>
+<h2 id="much-more-than-just-acronyms">Much more than just acronyms</h2>
+<p>WEP, WPA, WPA2, and WPA3 mean a lot more than a bunch of similar letters &ndash; in some cases, it&rsquo;s a difference of billions of years minus about 60 seconds.</p>
+<p>On more of a now-ish timescale, I hope I&rsquo;ve taught you something new about the security of your Wi-Fi and how you can improve it!</p>
+]]></content></entry><entry><title type="html">What is TLS? Transport Layer Security encryption explained in plain english</title><link href="https://victoria.dev/archive/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/"/><id>https://victoria.dev/archive/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/</id><author><name>Victoria Drake</name></author><published>2020-09-05T04:48:39-06:00</published><updated>2020-09-05T04:48:39-06:00</updated><content type="html"><![CDATA[<p>If you want to have a confidential conversation with someone you know, you might meet up in person and find a private place to talk. If you want to send data confidentially over the Internet, you might have a few more considerations to cover.</p>
+<p>TLS, or Transport Layer Security, refers to a protocol. &ldquo;Protocol&rdquo; is a word that means, &ldquo;the way we&rsquo;ve agreed to do things around here,&rdquo; more or less. The &ldquo;transport layer&rdquo; part of TLS simply refers to host-to-host communication, such as how a client and a server interact, in the <a href="https://en.wikipedia.org/wiki/Internet_protocol_suite">Internet protocol suite model</a>.</p>
+<p>The TLS protocol attempts to solve these fundamental problems:</p>
+<ul>
+<li>How do I know you are who you say you are?</li>
+<li>How do I know this message from you hasn&rsquo;t been tampered with?</li>
+<li>How can we communicate securely?</li>
+</ul>
+<p>Here&rsquo;s how TLS works, explained in plain English. As with many successful interactions, it begins with a handshake.</p>
+<h2 id="getting-to-know-you">Getting to know you</h2>
+<p>The basic process of a <a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_handshake">TLS handshake</a> involves a client, such as your web browser, and a server, such as one hosting a website, establishing some ground rules for communication. It begins with the client saying hello. Literally. It&rsquo;s called a <em>ClientHello</em> message.</p>
+<p>The <em>ClientHello</em> message tells the server which TLS protocol version and <em>cipher suites</em> it supports. While &ldquo;cipher suite&rdquo; sounds like a fancy hotel upgrade, it just refers to a set of algorithms that can be used to secure communications. The server, in a similarly named <em>ServerHello</em> message, chooses the protocol version and cipher suite to use from the choices offered. Other data may also be sent, for example, a <em>session ID</em> if the server supports resuming a previous handshake.</p>
+<p><img src="hello-hello.png" alt="A cartoon of a client and server saying hello"></p>
+<p>Depending on the cipher suite chosen, the client and server exchange further information in order to establish a shared secret. Often, this process moves the exchange from <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">asymmetric cryptography</a> to <a href="https://en.wikipedia.org/wiki/Symmetric-key_algorithm">symmetric cryptography</a> with varying levels of complexity. Let&rsquo;s explore these concepts at a general level and see why they matter to TLS.</p>
+<h2 id="asymmetric-beginnings">Asymmetric beginnings</h2>
+<p>This is asymmetry:</p>
+<figure><img src="/archive/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/asymmetry-eggs.jpeg"
+    alt="A small egg and a big egg"><figcaption>
+      <p>Small egg, big egg.</p>
+    </figcaption>
+</figure>
+
+<p>Asymmetric cryptography is one method by which you can perform <em>authentication</em>. When you authenticate yourself, you answer the fundamental question, &ldquo;How do I know you are who you say you are?&rdquo;</p>
+<p>In an asymmetric cryptographic system, you use a pair of keys in order to achieve authentication. These keys are asymmetric. One key is your public key, which, as you would guess, is public. The other is your private key, which &ndash; well, you know.</p>
+<p>Typically, during the TLS handshake, the server will provide its public key via its digital certificate, sometimes still called its <em>SSL certificate</em>, though TLS replaces the deprecated Secure Sockets Layer (SSL) protocol. Digital certificates are provided and verified by trusted third parties known as <a href="https://en.wikipedia.org/wiki/Certificate_authority">Certificate Authorities (CA)</a>, which are a whole other article in themselves.</p>
+<p>While anyone may encrypt a message using your public key, only your private key can then decrypt that message. The security of asymmetric cryptography relies only on your private key staying private, hence the asymmetry. It&rsquo;s also asymmetric in the sense that it&rsquo;s a one-way trip. Alice can send messages encrypted with your public key to you, but neither of your keys will help you send an encrypted message to Alice.</p>
+<h2 id="symmetric-secrets">Symmetric secrets</h2>
+<p>Asymmetric cryptography also requires more computational resources than symmetric cryptography. Thus when a TLS handshake begins with an asymmetric exchange, the client and server will use this initial communication to establish a shared secret, sometimes called a <em>session key</em>. This key is symmetric, meaning that both parties use the same shared secret and must maintain that secrecy for the encryption to be secure.</p>
+<figure><img src="/archive/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/asym-vs-sym.png"
+    alt="A cartoon of public-key cryptography vs. shared-key cryptography"><figcaption>
+      <p>Wise man say: share your public key, but keep your shared keys private.</p>
+    </figcaption>
+</figure>
+
+<p>By using the initial asymmetric communication to establish a session key, the client and server can rely on the session key being known only to them. For the rest of the session, they&rsquo;ll both use this same shared key to encrypt and decrypt messages, which speeds up communication.</p>
+<h2 id="secure-sessions">Secure sessions</h2>
+<p>A TLS handshake may use asymmetric cryptography or other cipher suites to establish the shared session key. Once the session key is established, the handshaking portion is complete and the session begins.</p>
+<p>The <em>session</em> is the duration of encrypted communication between the client and server. During this time, messages are encrypted and decrypted using the session key that only the client and server have. This ensures that communication is secure.</p>
+<p>The integrity of exchanged information is maintained by using a checksum. Messages exchanged using session keys have a <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message authentication code (MAC)</a> attached. This is not the same thing as your device&rsquo;s <a href="https://en.wikipedia.org/wiki/MAC_address">MAC address</a>. The MAC is generated and verified using the session key. Because of this, either party can detect if a message has been changed before being received. This solves the fundamental question, &ldquo;How do I know this message from you hasn&rsquo;t been tampered with?&rdquo;</p>
+<p>Sessions can end deliberately, due to network disconnection, or from the client staying idle for too long. Once a session ends, it must be re-established via a new handshake or through previously established secrets called <em>session IDs</em> that allow resuming a session.</p>
+<h2 id="tls-and-you">TLS and you</h2>
+<p>Let&rsquo;s recap:</p>
+<ul>
+<li>TLS is a cryptographic protocol for providing secure communication.</li>
+<li>The process of creating a secure connection begins with a handshake.</li>
+<li>The handshake establishes a shared session key that is then used to secure messages and provide message integrity.</li>
+<li>Sessions are temporary, and once ended, must be re-established or resumed.</li>
+</ul>
+<p>This is just a surface-level skim of the very complex cryptographic systems that help to keep your communications secure. For more depth on the topic, I recommend exploring cipher suites and the various <a href="https://en.wikipedia.org/wiki/Cipher_suite#Supported_algorithms">supported algorithms</a>.</p>
+<p>The TLS protocol serves a very important purpose in your everyday life. It helps to secure your emails to family, your online banking activities, and the connection by which you&rsquo;re reading this article. The <a href="https://en.wikipedia.org/wiki/HTTPS">HTTPS communication protocol</a> is encrypted using TLS. Every time you see that little lock icon in your URL bar, you&rsquo;re experiencing firsthand all the concepts you&rsquo;ve just read about in this article. Now you know the answer to the last question: &ldquo;How can we communicate securely?&rdquo;</p>
+]]></content></entry></feed>

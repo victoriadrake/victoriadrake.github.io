@@ -1,0 +1,845 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Git on victoria.dev</title><link href="https://victoria.dev/tags/git/feed.xml" rel="self"/><link href="https://victoria.dev/tags/git/"/><updated>2022-02-28T06:37:48-06:00</updated><id>https://victoria.dev/tags/git/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Git branching for small teams</title><link href="https://victoria.dev/posts/git-branching-for-small-teams/"/><id>https://victoria.dev/posts/git-branching-for-small-teams/</id><author><name>Victoria Drake</name></author><published>2022-02-28T06:37:48-06:00</published><updated>2022-02-28T06:37:48-06:00</updated><content type="html"><![CDATA[<p>Here&rsquo;s a practice I use personally and encourage within my open source projects and any small teams I run for work. I&rsquo;ve seen major elements of it presented under a few different names: <a href="https://trunkbaseddevelopment.com/short-lived-feature-branches/">Short-Lived Feature Branch</a> flow, <a href="https://docs.github.com/en/get-started/quickstart/github-flow">GitHub flow</a> (not to be confused with GitFlow), and <a href="https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow">Feature Branch Workflow</a> are some. Having implemented features I like from all of these with different teams over the years, I&rsquo;ll describe the resulting process that I&rsquo;ve found works best for small teams of about 5-12 people.</p>
+<h2 id="a-protected-main-branch">A protected main branch</h2>
+<p>To support continuous delivery, no human should have direct push permissions on your <code>master</code> branch. If you develop on GitHub, the latest tag of this branch gets deployed when you <a href="https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release">create a release</a> &ndash; which is hopefully very often, and very automated.</p>
+<h2 id="one-issue-one-branch-one-pr">One issue, one branch, one PR</h2>
+<p>You&rsquo;re already doing a great job of tracking future features and current bugs as issues (right?). To take a quick aside, an issue is a well-defined piece of work that can be merged to the main branch and deployed without breaking anything. It could be a new piece of functionality, a button component update, or a bug fix.</p>
+<figure><img src="/posts/git-branching-for-small-teams/cover.png"><figcaption>
+      <h4>Author&#39;s illustration of issue branches and releases from master.</h4>
+    </figcaption>
+</figure>
+
+<p>A short-lived branch-per-issue helps ensure that its resulting pull request doesn&rsquo;t get too large, making it unwieldy and hard to review carefully. The definition of &ldquo;short&rdquo; varies depending on the team or project&rsquo;s development velocity: for a small team producing a commercial app (like a startup), the time from issue branch creation to PR probably won&rsquo;t exceed a week. For open source projects like the <a href="https://github.com/OWASP/wstg">OWASP WSTG</a> that depends on volunteers working around busy schedules, branches may live for a few weeks to a few months, depending on the contributor. Generally, strive to iterate in as little time as possible.</p>
+<p>Here&rsquo;s what this looks like practically. For an issue named <strong>(#28) Add user settings page</strong>, check out a new branch from <code>master</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Get all the latest work locally</span>
+</span></span><span style="display:flex;"><span>git checkout master
+</span></span><span style="display:flex;"><span>git pull
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Start your new branch from master</span>
+</span></span><span style="display:flex;"><span>git checkout -b 28/add-settings-page
+</span></span></code></pre></div><p>Work on the issue, and periodically merge <code>master</code> to fix and avoid other conflicts:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Commit to your issue branch</span>
+</span></span><span style="display:flex;"><span>git commit ...
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get the latest work on master</span>
+</span></span><span style="display:flex;"><span>git checkout master
+</span></span><span style="display:flex;"><span>git pull
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Return to your issue branch and merge in master</span>
+</span></span><span style="display:flex;"><span>git checkout 28/add-settings-page
+</span></span><span style="display:flex;"><span>git merge master
+</span></span></code></pre></div><p>You may prefer to use rebasing instead of merging in <code>master</code>. This happens to be my personal preference as well, however, I&rsquo;ve found that people generally seem to have a harder time wrapping their heads around how rebasing works than they do with merging. Interactive rebasing can easily introduce confusing errors, and rewriting history can be confusing to begin with. Since I&rsquo;m all about reducing cognitive load in developers&rsquo; processes in general, I recommend using a merge strategy.</p>
+<p>When the issue work is ready to PR, open the request against <code>master</code>. Automated tests run. Teammates review the work (using <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request#adding-line-comments-to-a-pull-request">inline comments and suggestions</a> if you&rsquo;re on GitHub). Depending on the project, you may deploy a preview version as well.</p>
+<p>Once everything checks out, the PR is merged, the issue is closed, and the branch is deleted.</p>
+<h2 id="keep-it-clean">Keep it clean</h2>
+<p>Some common pitfalls I&rsquo;ve seen that can undermine this flow are:</p>
+<ol>
+<li><strong>Creating feature branches off of other feature/issue branches.</strong> This is a result of poor organization and prioritization. To avoid confusing conflicts and dependencies, always branch off the most up-to-date <code>master</code>.</li>
+<li><strong>Letting the issue branch live <em>just a little longer</em>.</strong> This results in scope creep and huge, confusing PRs that take a lot of time and mental effort to review. Keep branches tightly scoped to the one issue they&rsquo;re meant to close.</li>
+<li><strong>Not deleting merged branches.</strong> There&rsquo;s no reason to leave them about &ndash; all the work is in <code>master</code>. Not removing branches that are stale or have already been merged can cause confusion and make it more difficult than necessary to differentiate new ones.</li>
+</ol>
+<p>If this sounds like a process you&rsquo;d use, or if you have anything to add, <a href="https://webmention.io/victoria.dev/webmention">let me know via Webmention!</a></p>
+]]></content></entry><entry><title type="html">Publishing GitHub event data with GitHub Actions and Pages</title><link href="https://victoria.dev/archive/publishing-github-event-data-with-github-actions-and-pages/"/><id>https://victoria.dev/archive/publishing-github-event-data-with-github-actions-and-pages/</id><author><name>Victoria Drake</name></author><published>2019-11-04T09:13:23-04:00</published><updated>2019-11-04T09:13:23-04:00</updated><content type="html"><![CDATA[<p>Teams who work on GitHub rely on event data to collaborate. The data recorded as issues, pull requests, and comments, become vital to understanding the project.</p>
+<p>With the general availability of GitHub Actions, we have a chance to programmatically access and preserve GitHub event data in our repository. Making the data part of the repository itself is a way of preserving it outside of GitHub, and also gives us the ability to feature the data on a front-facing website, such as with GitHub Pages, through an automated process that&rsquo;s part of our CI/CD pipeline.</p>
+<p>And, if you&rsquo;re like me, you can turn <a href="https://github.com/victoriadrake/github-guestbook/issues/1">GitHub issue comments</a> into an <a href="https://github.com/victoriadrake/github-guestbook">awesome 90s guestbook page</a>.</p>
+<p>No matter the usage, the principle concepts are the same. We can use Actions to access, preserve, and display GitHub event data - with just one workflow file. To illustrate the process, I&rsquo;ll take you through the <a href="https://github.com/victoriadrake/github-guestbook/blob/master/.github/workflows/publish-comments.yml">workflow code</a> that makes my guestbook shine on.</p>
+<p>For an introductory look at GitHub Actions including how workflows are triggered, see <a href="/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>.</p>
+<h2 id="accessing-github-event-data">Accessing GitHub event data</h2>
+<p>An Action workflow runs in an environment with some default environment variables. A lot of convenient information is available here, including event data. The most complete way to access the event data is using the <code>$GITHUB_EVENT_PATH</code> variable, the path of the file with the complete JSON event payload.</p>
+<p>The expanded path looks like <code>/home/runner/work/_temp/_github_workflow/event.json</code> and its data corresponds to its webhook event. You  can find the documentation for webhook event data in GitHub REST API <a href="https://developer.github.com/webhooks/#events">Event Types and Payloads</a>. To make the JSON data available in the workflow environment, you can use a tool like <code>jq</code> to parse the event data and put it in an environment variable.</p>
+<p>Below, I grab the comment ID from an <a href="https://developer.github.com/v3/activity/events/types/#issuecommentevent">issue comment event</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ID<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>jq <span style="color:#e6db74">&#39;.comment.id&#39;</span> $GITHUB_EVENT_PATH<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><p>Most event data is also available via the <a href="https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"><code>github.event</code> context variable</a> without needing to parse JSON. The fields are accessed using dot notation, as in the example below where I grab the same comment ID:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ID<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.id <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>For my guestbook, I want to display entries with the user&rsquo;s handle, and the date and time. I can capture this event data like so:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>AUTHOR<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.user.login <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>DATE<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.created_at <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Shell variables are handy for accessing data, however, they&rsquo;re ephemeral. The workflow environment is created anew each run, and even shell variables set in one step do not persist to other steps. To persist the captured data, you have two options: use artifacts, or commit it to the repository.</p>
+<h2 id="preserving-event-data-using-artifacts">Preserving event data: using artifacts</h2>
+<p>Using artifacts, you can persist data between workflow jobs without committing it to your repository. This is handy when, for example, you wish to transform or incorporate the data before putting it somewhere more permanent.</p>
+<p>Two actions assist with using artifacts: <code>upload-artifact</code> and <code>download-artifact</code>. You can use these actions to make files available to other jobs in the same workflow. For a full example, see <a href="https://docs.github.com/en/actions/advanced-guides/storing-workflow-data-as-artifacts#passing-data-between-jobs-in-a-workflow">passing data between jobs in a workflow</a>.</p>
+<p>The <code>upload-artifact</code> action&rsquo;s <code>action.yml</code> contains an <a href="https://github.com/actions/upload-artifact/blob/master/action.yml">explanation</a> of the keywords. The uploaded files are saved in <code>.zip</code> format. Another job in the same workflow run can use the <code>download-artifact</code> action to utilize the data in another step.</p>
+<p>You can also manually download the archive on the workflow run page, under the repository&rsquo;s Actions tab.</p>
+<p>Persisting workflow data between jobs does not make any changes to the repository files, as the artifacts generated live only in the workflow environment. Personally, being comfortable working in a shell environment, I see a narrow use case for artifacts, though I&rsquo;d have been remiss not to mention them. Besides passing data between jobs, they could be useful for creating <code>.zip</code> format archives of, say, test output data. In the case of my guestbook example, I simply ran all the necessary steps in one job, negating any need for passing data between jobs.</p>
+<h2 id="preserving-event-data-pushing-workflow-files-to-the-repository">Preserving event data: pushing workflow files to the repository</h2>
+<p>To preserve data captured in the workflow in the repository itself, it is necessary to add and push this data to the Git repository. You can do this in the workflow by creating new files with the data, or by appending data to existing files, using shell commands.</p>
+<h3 id="creating-files-in-the-workflow">Creating files in the workflow</h3>
+<p>To work with the repository files in the workflow, use the <a href="https://github.com/actions/checkout"><code>checkout</code> action</a> to first get a copy to work with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@master</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">fetch-depth</span>: <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>To add comments to my guestbook, I turn the event data captured in shell variables into proper files, using substitutions in <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion</a> to sanitize user input and translate newlines to paragraphs. I wrote previously about <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">why user input should be treated carefully</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Turn comment into file</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    ID=${{ github.event.comment.id }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    AUTHOR=${{ github.event.comment.user.login }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    DATE=${{ github.event.comment.created_at }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    COMMENT=$(echo &#34;${{ github.event.comment.body }}&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    NO_TAGS=${COMMENT//[&lt;&gt;]/\`}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    FOLDER=comments
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    printf &#39;%b\n&#39; &#34;&lt;div class=\&#34;comment\&#34;&gt;&lt;p&gt;${AUTHOR} says:&lt;/p&gt;&lt;p&gt;${NO_TAGS//$&#39;\n&#39;/\&lt;\/p\&gt;\&lt;p\&gt;}&lt;/p&gt;&lt;p&gt;${DATE}&lt;/p&gt;&lt;/div&gt;\r\n&#34; &gt; ${FOLDER}/${ID}.html</span>
+</span></span></code></pre></div><p>By using <code>printf</code> and directing its output with <code>&gt;</code> to a new file, the event data is transformed into an HTML file, named with the comment ID number, that contains the captured event data. Formatted, it looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;comment&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;victoriadrake says:&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;This is a comment!&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;2019-11-04T00:28:36Z&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span></code></pre></div><p>When working with comments, one effect of naming files using the comment ID is that a new file with the same ID will overwrite the previous. This is handy for a guestbook, as it allows any edits to a comment to replace the original comment file.</p>
+<p>If you&rsquo;re using a static site generator like Hugo, you could build a Markdown format file, stick it in your <code>content/</code> folder, and the regular site build will take care of the rest. In the case of my simplistic guestbook, I have an extra step to consolidate the individual comment files into a page. Each time it runs, it overwrites the existing <code>index.html</code> with the <code>header.html</code> portion (<code>&gt;</code>), then finds and appends (<code>&gt;&gt;</code>) all the comment files&rsquo; contents in descending order, and lastly appends the <code>footer.html</code> portion to end the page.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Assemble page</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    cat header.html &gt; index.html
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    find comments/ -name &#34;*.html&#34; | sort -r | xargs -I % cat % &gt;&gt; index.html
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    cat footer.html &gt;&gt; index.html</span>
+</span></span></code></pre></div><h3 id="committing-changes-to-the-repository">Committing changes to the repository</h3>
+<p>Since the <code>checkout</code> action is not quite the same as cloning the repository, at time of writing, there are some <a href="https://github.community/t5/GitHub-Actions/Checkout-Action-does-not-create-local-master-and-has-no-options/td-p/31575">issues</a> still to work around. A couple extra steps are necessary to <code>pull</code>, <code>checkout</code>, and successfully <code>push</code> changes back to the <code>master</code> branch, but this is pretty trivially done in the shell.</p>
+<p>Below is the step that adds, commits, and pushes changes made by the workflow back to the repository&rsquo;s <code>master</code> branch.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Push changes to repo</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git config user.email &#34;${{ github.actor }}@users.noreply.github.com&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git config user.name &#34;${{ github.actor }}&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git pull ${REMOTE}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git checkout master
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git add .
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git status
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git commit -am &#34;Add new comment&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git push ${REMOTE} master</span>
+</span></span></code></pre></div><p>The remote, in fact, our repository, is specified using the <code>github.repository</code> context variable. For our workflow to be allowed to push to master, we give the remote URL using <a href="https://docs.github.com/en/actions/security-guides/automatic-token-authentication">the default <code>secrets.GITHUB_TOKEN</code> variable</a>.</p>
+<p>Since the workflow environment is shiny and newborn, we need to configure Git. In the above example, I&rsquo;ve used the <code>github.actor</code> context variable to input the username of the account initiating the workflow. The email is similarly configured using the <a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-email-preferences/setting-your-commit-email-address#setting-your-commit-email-address-on-github">default <code>noreply</code> GitHub email address</a>.</p>
+<h2 id="displaying-event-data">Displaying event data</h2>
+<p>If you&rsquo;re using GitHub Pages with the default <code>secrets.GITHUB_TOKEN</code> variable and without a site generator, pushing changes to the repository in the workflow will only update the repository files. The GitHub Pages build will fail with an error, &ldquo;Your site is having problems building: Page build failed.&rdquo;</p>
+<p>To enable Actions to trigger a Pages site build, you&rsquo;ll need to create a Personal Access Token. This token can be <a href="https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository">stored as a secret in the repository</a> settings and passed into the workflow in place of the default <code>secrets.GITHUB_TOKEN</code> variable. I wrote more about <a href="/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/#environment-and-variables">Actions environment and variables in this post</a>.</p>
+<p>With the use of a Personal Access Token, a push initiated by the Actions workflow will also update the Pages site. You can see it for yourself by <a href="https://github.com/victoriadrake/github-guestbook/issues/1">leaving a comment</a> in my guestbook! The comment creation event triggers the workflow, which then takes around 30 seconds to run and update the guestbook page.</p>
+<p>Where a site build is necessary for changes to be published, such as when using Hugo, an Action can do this too. However, in order to avoid creating unintended loops, one Action workflow will not trigger another (<a href="https://docs.github.com/en/actions/using-workflows/triggering-a-workflow">see what will</a>). Instead, it&rsquo;s extremely convenient to handle the process of <a href="/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">building the site with a Makefile</a>, which any workflow can then run. Simply add running the Makefile as the final step in your workflow job, with the repository token where necessary:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Run Makefile</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">TOKEN</span>: <span style="color:#ae81ff">${{ secrets.GITHUB_TOKEN }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: <span style="color:#ae81ff">make all</span>
+</span></span></code></pre></div><p>This ensures that the final step of your workflow builds and deploys the updated site.</p>
+<h2 id="no-more-event-data-horizon">No more event data horizon</h2>
+<p>GitHub Actions provides a neat way to capture and utilize event data so that it&rsquo;s not only available within GitHub. The possibilities are only as limited as your imagination! Here are a few ideas for things this lets us create:</p>
+<ol>
+<li>A public-facing issues board, where customers without GitHub accounts can view and give feedback on project issues.</li>
+<li>An automatically-updating RSS feed of new issues, comments, or PRs for any repository.</li>
+<li>A comments system for static sites, utilizing GitHub issue comments as an input method.</li>
+<li>An awesome 90s guestbook page.</li>
+</ol>
+<p>Did I mention I made a 90s guestbook page? My inner-Geocities-nerd is a little excited.</p>
+]]></content></entry><entry><title type="html">How to do twice as much with half the keystrokes using `.bashrc`</title><link href="https://victoria.dev/archive/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/"/><id>https://victoria.dev/archive/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/</id><author><name>Victoria Drake</name></author><published>2019-08-21T09:17:02-04:00</published><updated>2019-08-21T09:17:02-04:00</updated><content type="html"><![CDATA[<p>In my <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">recent post about setting up Ubuntu with Bash scripts</a>, I briefly alluded to the magic of <code>.bashrc</code>. This didn&rsquo;t really do it justice, so here&rsquo;s a quick post that offers a bit more detail about what the Bash configuration file can do.</p>
+<p>My current configuration hugely improves my workflow, and saves me well over 50% of the keystrokes I would have to employ without it! Let&rsquo;s look at some examples of aliases, functions, and prompt configurations that can improve our workflow by helping us be more efficient with fewer key presses.</p>
+<h2 id="bash-aliases">Bash aliases</h2>
+<p>A smartly written <code>.bashrc</code> can save a whole lot of keystrokes. You can take advantage of this in the literal sense by using <a href="https://www.gnu.org/software/bash/manual/html_node/Aliases.html">bash aliases</a>, or strings that expand to larger commands. For an indicative example, here is a Bash alias for copying files in the terminal:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Always copy contents of directories (r)ecursively and explain (v) what was done</span>
+</span></span><span style="display:flex;"><span>alias cp<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;cp -rv&#39;</span>
+</span></span></code></pre></div><p>The <code>alias</code> command defines the string you&rsquo;ll type, followed by what that string will expand to. You can override existing commands like <code>cp</code> above. On its own, the <code>cp</code> command will only copy files, not directories, and succeeds silently. With this alias, you need not remember to pass those two flags, nor <code>cd</code> or <code>ls</code> the location of our copied file to confirm that it&rsquo;s there! Now, just those two key presses (for <code>c</code> and <code>d</code>) will do all of that for us.</p>
+<p>Here are a few more <code>.bashrc</code> aliases for passing flags with common functions.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># List contents with colors for file types, (A)lmost all hidden files (without . and ..), in (C)olumns, with class indicators (F)</span>
+</span></span><span style="display:flex;"><span>alias ls<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;ls --color=auto -ACF&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># List contents with colors for file types, (a)ll hidden entries (including . and ..), use (l)ong listing format, with class indicators (F)</span>
+</span></span><span style="display:flex;"><span>alias ll<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;ls --color=auto -alF&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Explain (v) what was done when moving a file</span>
+</span></span><span style="display:flex;"><span>alias mv<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;mv -v&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create any non-existent (p)arent directories and explain (v) what was done</span>
+</span></span><span style="display:flex;"><span>alias mkdir<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;mkdir -pv&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Always try to (c)ontinue getting a partially-downloaded file</span>
+</span></span><span style="display:flex;"><span>alias wget<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;wget -c&#39;</span>
+</span></span></code></pre></div><p>Aliases come in handy when you want to avoid typing long commands, too. Here are a few I use when working with Python environments:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>alias pym<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;python3 manage.py&#39;</span>
+</span></span><span style="display:flex;"><span>alias mkenv<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;python3 -m venv env&#39;</span>
+</span></span><span style="display:flex;"><span>alias startenv<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;source env/bin/activate &amp;&amp; which python3&#39;</span>
+</span></span><span style="display:flex;"><span>alias stopenv<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;deactivate&#39;</span>
+</span></span></code></pre></div><p>For further inspiration on ways Bash aliases can save time, I highly recommend <a href="https://www.digitalocean.com/community/tutorials/an-introduction-to-useful-bash-aliases-and-functions">the examples in this article</a>.</p>
+<h2 id="bash-functions">Bash functions</h2>
+<p>One downside of the aliases above is that they&rsquo;re rather static - they&rsquo;ll always expand to exactly the text declared. For a Bash alias that takes arguments, you&rsquo;ll need to create a function. You can do this like so:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Show contents of the directory after changing to it</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> cd <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    builtin cd <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>    ls -ACF
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>I can&rsquo;t begin to tally how many times I&rsquo;ve typed <code>cd</code> and then <code>ls</code> immediately after to see the contents of the directory I&rsquo;m now in. With this function set up, it all happens with just those two letters! The function takes the first argument, <code>$1</code>, as the location to change directory to, then prints the contents of that directory in nicely formatted columns with file type indicators. The <code>builtin</code> part is necessary to get Bash to allow us to override this default command.</p>
+<p>Bash functions are very useful when it comes to downloading or upgrading software, too.</p>
+<h3 id="bash-function-for-downloading-extended-hugo">Bash function for downloading extended Hugo</h3>
+<p>Thanks to the static site generator Hugo&rsquo;s excellent ship frequency, I previously spent at least a few minutes every couple weeks <a href="https://github.com/gohugoio/hugo/releases">downloading the new extended version</a>. With a Bash function, I only need to pass in the version number, and the upgrade happens in a few seconds.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Hugo install or upgrade</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> gethugo <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span>/hugo_extended_<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span>_Linux-64bit.tar.gz
+</span></span><span style="display:flex;"><span>    tar xf tmp/hugo_extended_<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span>_Linux-64bit.tar.gz -C tmp/
+</span></span><span style="display:flex;"><span>    sudo mv -f tmp/hugo /usr/local/bin/
+</span></span><span style="display:flex;"><span>    rm -rf tmp/
+</span></span><span style="display:flex;"><span>    hugo version
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>The <code>$@</code> notation simply takes all the arguments given, replacing its spot in the function. To run the above function and download Hugo version 0.57.2, you use the command <code>gethugo 0.57.2</code>.</p>
+<h3 id="bash-function-for-downloading-a-specific-go-version">Bash function for downloading a specific Go version</h3>
+<p>I&rsquo;ve got one for <a href="https://golang.org/">Golang</a>, too:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> getgolang <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    sudo rm -rf /usr/local/go
+</span></span><span style="display:flex;"><span>    wget -q -P tmp/ https://dl.google.com/go/go<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span>.linux-amd64.tar.gz
+</span></span><span style="display:flex;"><span>    sudo tar -C /usr/local -xzf tmp/go<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span>.linux-amd64.tar.gz
+</span></span><span style="display:flex;"><span>    rm -rf tmp/
+</span></span><span style="display:flex;"><span>    go version
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="bash-function-for-adding-a-gitlab-remote">Bash function for adding a GitLab remote</h3>
+<p>Or how about a function that adds a remote origin URL for GitLab to the current repository?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> glab <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    git remote set-url origin --add git@gitlab.com:<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span>/<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>PWD##*/<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>.git
+</span></span><span style="display:flex;"><span>    git remote -v
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>With <code>glab username</code>, you can create a new <code>origin</code> URL for the current Git repository with our <code>username</code> on GitLab.com. Pushing to a new remote URL <a href="/posts/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/#a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab">automatically creates a new private GitLab repository</a>, so this is a useful shortcut for creating backups!</p>
+<p>Bash functions are really only limited by the possibilities of scripting, of which there are, practically, few limits. If there&rsquo;s anything you do on a frequent basis that requires typing a few lines into a terminal, you can probably create a Bash function for it!</p>
+<h2 id="bash-prompt">Bash prompt</h2>
+<p>Besides directory contents, it&rsquo;s also useful to see the full path of the directory we&rsquo;re in. The Bash prompt can show us this path, along with other useful information like our current Git branch. To make it more readable, you can define colours for each part of the prompt. Here&rsquo;s how you can set up our prompt in <code>.bashrc</code> to accomplish this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Colour codes are cumbersome, so let&#39;s name them</span>
+</span></span><span style="display:flex;"><span>txtcyn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\[\e[0;96m\]&#39;</span> <span style="color:#75715e"># Cyan</span>
+</span></span><span style="display:flex;"><span>txtpur<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\[\e[0;35m\]&#39;</span> <span style="color:#75715e"># Purple</span>
+</span></span><span style="display:flex;"><span>txtwht<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\[\e[0;37m\]&#39;</span> <span style="color:#75715e"># White</span>
+</span></span><span style="display:flex;"><span>txtrst<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\[\e[0m\]&#39;</span>    <span style="color:#75715e"># Text Reset</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Which (C)olour for what part of the prompt?</span>
+</span></span><span style="display:flex;"><span>pathC<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>txtcyn<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>gitC<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>txtpur<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>pointerC<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>txtwht<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>normalC<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>txtrst<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get the name of our branch and put parenthesis around it</span>
+</span></span><span style="display:flex;"><span>gitBranch<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    git branch 2&gt; /dev/null | sed -e <span style="color:#e6db74">&#39;/^[^*]/d&#39;</span> -e <span style="color:#e6db74">&#39;s/* \(.*\)/(\1)/&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Build the prompt</span>
+</span></span><span style="display:flex;"><span>export PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>pathC<span style="color:#e6db74">}</span><span style="color:#e6db74">\w </span><span style="color:#e6db74">${</span>gitC<span style="color:#e6db74">}</span><span style="color:#e6db74">\$(gitBranch) </span><span style="color:#e6db74">${</span>pointerC<span style="color:#e6db74">}</span><span style="color:#e6db74">\$</span><span style="color:#e6db74">${</span>normalC<span style="color:#e6db74">}</span><span style="color:#e6db74"> &#34;</span>
+</span></span></code></pre></div><p>Result:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>~/github/myrepo <span style="color:#f92672">(</span>master<span style="color:#f92672">)</span> $
+</span></span></code></pre></div><p>Naming the colours helps to easily identify where one colour starts and stops, and where the next one begins. The prompt that you see in our terminal is defined by the string following <code>export PS1</code>, with each component of the prompt set with an <a href="https://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/bash-prompt-escape-sequences.html">escape sequence</a>. Let&rsquo;s break that down:</p>
+<ul>
+<li><code>\w</code> displays the current working directory,</li>
+<li><code>\$(gitBranch)</code> calls the <code>gitBranch</code> function defined above, which displays the current Git branch,</li>
+<li><code>\$</code> will display a &ldquo;$&rdquo; if you are a normal user or in normal user mode, and a &ldquo;#&rdquo; if you are root.</li>
+</ul>
+<p>The <a href="https://www.gnu.org/software/bash/manual/html_node/Controlling-the-Prompt.html">full list of Bash escape sequences</a> can help us display many more bits of information, including even the time and date! Bash prompts are highly customizable and individual, so feel free to set it up any way you please.</p>
+<p>Here are a few options that put information front and centre and can help us to work more efficiently.</p>
+<h3 id="for-the-procrastination-averse">For the procrastination-averse</h3>
+<p>Username and current time with seconds, in 24-hour HH:MM:SS format:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>userC<span style="color:#e6db74">}</span><span style="color:#e6db74">\u </span><span style="color:#e6db74">${</span>normalC<span style="color:#e6db74">}</span><span style="color:#e6db74">at \t &gt;&#34;</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>user at 09:35:55 &gt;
+</span></span></code></pre></div><h3 id="for-those-who-always-like-to-know-where-they-stand">For those who always like to know where they stand</h3>
+<p>Full file path on a separate line, and username:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>pathC<span style="color:#e6db74">}</span><span style="color:#e6db74">\w</span><span style="color:#e6db74">${</span>normalC<span style="color:#e6db74">}</span><span style="color:#e6db74">\n\u:&#34;</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>~/github/myrepo
+</span></span><span style="display:flex;"><span>user:
+</span></span></code></pre></div><h3 id="for-the-minimalist">For the minimalist</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&gt;&#34;</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt;
+</span></span></code></pre></div><p>We can build many practical prompts with just the basic escape sequences; once you start to integrate functions with prompts, as in the Git branch example, things can get really complicated. Whether this amount of complication is an addition or a detriment to your productivity, only you can know for sure!</p>
+<p>Many fancy Bash prompts are possible with programs readily available with a quick search. I&rsquo;ve intentionally not provided samples here because, well, if you can tend to get as excited about this stuff as I can, it might be a couple hours before you get back to what you were doing before you started reading this post, and I just can&rsquo;t have that on my conscience. 🥺</p>
+<p>We&rsquo;ve hopefully struck a nice balance now between time invested and usefulness gained from our Bash configuration file! I hope you use your newly-recovered keystroke capacity for good.</p>
+]]></content></entry><entry><title type="html">How to write Bash one-liners for cloning and managing GitHub and GitLab repositories</title><link href="https://victoria.dev/posts/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/"/><id>https://victoria.dev/posts/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/</id><author><name>Victoria Drake</name></author><published>2019-08-06T10:55:19-04:00</published><updated>2019-08-06T10:55:19-04:00</updated><content type="html"><![CDATA[<p>Few things are more satisfying to me than one elegant line of Bash that automates hours of tedious work. As part of some recent explorations into <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">automatically re-creating my laptop with Bash scripts</a>, I wanted to find a way to easily clone my GitHub-hosted repositories to a new machine. After a bit of digging around, I wrote a one-liner that did just that. Then, in the spirit of not putting all our eggs in the same basket, I wrote another one-liner to automatically create and push to GitLab-hosted backups as well. Here they are.</p>
+<h2 id="a-bash-one-liner-to-clone-all-your-github-repositories">A Bash one-liner to clone all your GitHub repositories</h2>
+<p>Caveat: you&rsquo;ll need a list of the GitHub repositories you want to clone. The good thing about that is it gives you full agency to choose just the repositories you want on your machine, instead of going in whole-hog.</p>
+<p>You can easily clone GitHub repositories without entering your password each time by using HTTPS with your <a href="https://docs.github.com/en/get-started/getting-started-with-git/caching-your-github-credentials-in-git">15-minute cached credentials</a> or, my preferred method, by <a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh">connecting to GitHub with SSH</a>. For brevity I&rsquo;ll assume we&rsquo;re going with the latter, and our SSH keys are set up.</p>
+<p>Given a list of GitHub URLs in the file <code>gh-repos.txt</code>, like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>git@github.com:username/first-repository.git
+</span></span><span style="display:flex;"><span>git@github.com:username/second-repository.git
+</span></span><span style="display:flex;"><span>git@github.com:username/third-repository.git
+</span></span></code></pre></div><p>We run:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>xargs -n1 git clone &lt; gh-repos.txt
+</span></span></code></pre></div><p>This clones all the repositories on the list into the current folder. This same one-liner works for GitLab repositories as well, if you substitute the appropriate URLs.</p>
+<h3 id="whats-going-on-here">What&rsquo;s going on here</h3>
+<p>There are two halves to this one-liner: the input, counterintuitively on the right side, and the part that makes stuff happen, on the left. We could make the order of these parts more intuitive (maybe?) by writing the same command like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&lt;gh-repos.txt xargs -n1 git clone
+</span></span></code></pre></div><p>To run a command for each line of our input, <code>gh-repos.txt</code>, we use <code>xargs -n1</code>. The tool <code>xargs</code> reads items from input and executes any commands it finds (it will <code>echo</code> if it doesn&rsquo;t find any). By default, it assumes that items are separated by spaces; new lines also works and makes our list easier to read. The flag <code>-n1</code> tells <code>xargs</code> to use <code>1</code> argument, or in our case, one line, per command. We build our command with <code>git clone</code>, which <code>xargs</code> then executes for each line. Ta-da.</p>
+<h2 id="a-bash-one-liner-to-create-and-push-many-repositories-on-gitlab">A Bash one-liner to create and push many repositories on GitLab</h2>
+<p>GitLab, unlike GitHub, lets us do this nifty thing where we don&rsquo;t have to use the website to make a new repository first. We can <a href="https://docs.gitlab.com/ee/user/project/working_with_projects.html#create-a-new-project-with-git-push">create a new GitLab repository from our terminal</a>. The newly created repository defaults to being set as Private, so if we want to make it Public on GitLab, we&rsquo;ll have to do that manually later.</p>
+<p>The GitLab docs tell us to push to create a new project using <code>git push --set-upstream</code>, but I don&rsquo;t find this to be very convenient for using GitLab as a backup. As I work with my repositories in the future, I&rsquo;d like to run one command that pushes to both GitHub <em>and</em> GitLab without additional effort on my part.</p>
+<p>To make this Bash one-liner work, we&rsquo;ll also need a list of repository URLs for GitLab (ones that don&rsquo;t exist yet). We can easily do this by copying our GitHub repository list, opening it up with Vim, and doing a <a href="https://vim.fandom.com/wiki/Search_and_replace">search-and-replace</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cp gh-repos.txt gl-repos.txt
+</span></span><span style="display:flex;"><span>vim gl-repos.txt
+</span></span><span style="display:flex;"><span>:%s/<span style="color:#ae81ff">\&lt;</span>github<span style="color:#ae81ff">\&gt;</span>/gitlab/g
+</span></span><span style="display:flex;"><span>:wq
+</span></span></code></pre></div><p>This produces <code>gl-repos.txt</code>, which looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>git@gitlab.com:username/first-repository.git
+</span></span><span style="display:flex;"><span>git@gitlab.com:username/second-repository.git
+</span></span><span style="display:flex;"><span>git@gitlab.com:username/third-repository.git
+</span></span></code></pre></div><p>We can create these repositories on GitLab, add the URLs as remotes, and push our code to the new repositories by running:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>awk -F<span style="color:#e6db74">&#39;\/|(\.git)&#39;</span> <span style="color:#e6db74">&#39;{system(&#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;)}&#39;</span> gl-repos.txt
+</span></span></code></pre></div><p>Hang tight and I&rsquo;ll explain it; for now, take note that <code>~/FULL/PATH/</code> should be the full path to the directory containing our GitHub repositories.</p>
+<p>We do have to make note of a couple assumptions:</p>
+<ol>
+<li>The name of the directory on your local machine that contains the repository is the same as the name of the repository in the URL (this will be the case if it was cloned with the one-liner above);</li>
+<li>Each repository is currently checked out to the branch you want pushed, ie. <code>master</code>.</li>
+</ol>
+<p>The one-liner could be expanded to handle these assumptions, but it is the humble opinion of the author that at that point, we really ought to be writing a Bash script.</p>
+<h3 id="whats-going-on-here-1">What&rsquo;s going on here</h3>
+<p>Our Bash one-liner uses each line (or URL) in the <code>gl-repos.txt</code> file as input. With <code>awk</code>, it splits off the name of the directory containing the repository on our local machine, and uses these pieces of information to build our larger command. If we were to <code>print</code> the output of <code>awk</code>, we&rsquo;d see:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd ~/FULL/PATH/first-repository <span style="color:#f92672">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/first-repository.git <span style="color:#f92672">&amp;&amp;</span> git push
+</span></span><span style="display:flex;"><span>cd ~/FULL/PATH/second-repository <span style="color:#f92672">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/second-repository.git <span style="color:#f92672">&amp;&amp;</span> git push
+</span></span><span style="display:flex;"><span>cd ~/FULL/PATH/third-repository <span style="color:#f92672">&amp;&amp;</span> git remote set-url origin --add git@gitlab.com:username/third-repository.git <span style="color:#f92672">&amp;&amp;</span> git push
+</span></span></code></pre></div><p>Let&rsquo;s look at how we build this command.</p>
+<h4 id="splitting-strings-with-awk">Splitting strings with <code>awk</code></h4>
+<p>The tool <code>awk</code> can split input based on <a href="https://www.gnu.org/software/gawk/manual/html_node/Command-Line-Field-Separator.html">field separators</a>. The default separator is a whitespace character, but we can change this by passing the <code>-F</code> flag. Besides single characters, we can also use a <a href="https://www.gnu.org/software/gawk/manual/html_node/Regexp-Field-Splitting.html#Regexp-Field-Splitting">regular expression field separator</a>. Since our repository URLs have a set format, we can grab the repository names by asking for the substring between the slash character <code>/</code> and the end of the URL, <code>.git</code>.</p>
+<p>One way to accomplish this is with our regex <code>\/|(\.git)</code>:</p>
+<ul>
+<li><code>\/</code> is an escaped <code>/</code> character;</li>
+<li><code>|</code> means &ldquo;or&rdquo;, telling awk to match either expression;</li>
+<li><code>(\.git)</code> is the capture group at the end of our URL that matches &ldquo;.git&rdquo;, with an escaped <code>.</code> character. This is a bit of a cheat, as &ldquo;.git&rdquo; isn&rsquo;t strictly splitting anything (there&rsquo;s nothing on the other side) but it&rsquo;s an easy way for us to take this bit off.</li>
+</ul>
+<p>Once we&rsquo;ve told <code>awk</code> where to split, we can grab the right substring with the <a href="https://www.gnu.org/software/gawk/manual/html_node/Fields.html#index-_0024-_0028dollar-sign_0029_002c-_0024-field-operator">field operator</a>. We refer to our fields with a <code>$</code> character, then by the field&rsquo;s column number. In our example, we want the second field, <code>$2</code>. Here&rsquo;s what all the substrings look like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>1: git@gitlab.com:username
+</span></span><span style="display:flex;"><span>2: first-repository
+</span></span></code></pre></div><p>To use the whole string, or in our case, the whole URL, we use the field operator <code>$0</code>. To write the command, we just substitute the field operators for the repository name and URL. Running this with <code>print</code> as we&rsquo;re building it can help to make sure we&rsquo;ve got all the spaces right.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>awk -F<span style="color:#e6db74">&#39;\/|(\.git)&#39;</span> <span style="color:#e6db74">&#39;{print &#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;}&#39;</span> gl-repos.txt
+</span></span></code></pre></div><h4 id="running-the-command">Running the command</h4>
+<p>We build our command inside the parenthesis of <code>system()</code>. By using this as the output of <code>awk</code>, each command will run as soon as it is built and output. The <code>system()</code> function creates a <a href="https://en.wikipedia.org/wiki/Child_process">child process</a> that executes our command, then returns once the command is completed. In plain English, this lets us perform the Git commands on each repository, one-by-one, without breaking from our main process in which <code>awk</code> is doing things with our input file. Here&rsquo;s our final command again, all put together.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>awk -F<span style="color:#e6db74">&#39;\/|(\.git)&#39;</span> <span style="color:#e6db74">&#39;{system(&#34;cd ~/FULL/PATH/&#34; $2 &#34; &amp;&amp; git remote set-url origin --add &#34; $0 &#34; &amp;&amp; git push&#34;)}&#39;</span> gl-repos.txt
+</span></span></code></pre></div><h4 id="using-our-backups">Using our backups</h4>
+<p>By adding the GitLab URLs as remotes, we&rsquo;ve simplified the process of pushing to both externally hosted repositories. If we run <code>git remote -v</code> in one of our repository directories, we&rsquo;ll see:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>origin  git@github.com:username/first-repository.git <span style="color:#f92672">(</span>fetch<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>origin  git@github.com:username/first-repository.git <span style="color:#f92672">(</span>push<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>origin  git@gitlab.com:username/first-repository.git <span style="color:#f92672">(</span>push<span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>Now, simply running <code>git push</code> without arguments will push the current branch to both remote repositories.</p>
+<p>We should also note that <code>git pull</code> will generally only try to pull from the remote repository you originally cloned from (the URL marked <code>(fetch)</code> in our example above). Pulling from multiple Git repositories at the same time is possible, but complicated, and beyond the scope of this post. Here&rsquo;s an <a href="https://astrofloyd.wordpress.com/2015/05/05/git-pushing-to-and-pulling-from-multiple-remote-locations-remote-url-and-pushurl/">explanation of pushing and pulling to multiple remotes</a> to help get you started, if you&rsquo;re curious. The <a href="https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes">Git documentation on remotes</a> may also be helpful.</p>
+<h2 id="to-elaborate-on-the-succinctness-of-bash-one-liners">To elaborate on the succinctness of Bash one-liners</h2>
+<p>Bash one-liners, when understood, can be fun and handy shortcuts. At the very least, being aware of tools like <code>xargs</code> and <code>awk</code> can help to automate and alleviate a lot of tediousness in our work. However, there are some downsides.</p>
+<p>In terms of an easy-to-understand, maintainable, and approachable tool, Bash one-liners suck. They&rsquo;re usually more complicated to write than a Bash script using <code>if</code> or <code>while</code> loops, and certainly more complicated to read. It&rsquo;s likely that when we write them, we&rsquo;ll miss a single quote or closing parenthesis somewhere; and as I hope this post demonstrates, they can take quite a bit of explaining, too. So why use them?</p>
+<p>Imagine reading a recipe for baking a cake, step by step. You understand the methods and ingredients, and gather your supplies. Then, as you think about it, you begin to realize that if you just throw all the ingredients at the oven in precisely the right order, a cake will instantly materialize. You try it, and it works!</p>
+<p>That would be pretty satisfying, wouldn&rsquo;t it?</p>
+]]></content></entry><entry><title type="html">Two ways to deploy a public GitHub Pages site from a private Hugo repository</title><link href="https://victoria.dev/archive/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/"/><id>https://victoria.dev/archive/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/</id><author><name>Victoria Drake</name></author><published>2019-04-22T10:05:15-04:00</published><updated>2019-04-22T10:05:15-04:00</updated><content type="html"><![CDATA[<p>Tools like Travis CI and Netlify offer some pretty nifty features, like seamlessly deploying your GitHub Pages site when changes are pushed to its repository. Along with a static site generator like Hugo, keeping a blog up to date is pretty painless.</p>
+<p>I&rsquo;ve used Hugo to build my site for years, but until this past week I&rsquo;d never hooked up my Pages repository to any deployment service. Why? Because using a tool that built my site before deploying it seemed to require having the whole recipe in one place - and if you&rsquo;re using GitHub Pages with the free version of GitHub, <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site">that place is public</a>. That means that all my three-in-the-morning bright ideas and messy unfinished (and unfunny) drafts would be publicly available - and no amount of continuous convenience was going to convince me to do that.</p>
+<p>So I kept things separated, with Hugo&rsquo;s messy behind-the-scenes stuff in a local Git repository, and the generated <code>public/</code> folder pushing to my GitHub Pages remote repository. Each time I wanted to deploy my site, I&rsquo;d have to get on my laptop and <code>hugo</code> to build my site, then <code>cd public/ &amp;&amp; git add . &amp;&amp; git commit</code>&hellip; etc etc. And all was well, except for the nagging feeling that there was a better way to do this.</p>
+<p>I wrote another article a little while back about <a href="/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy</a> to make changes to my repositories on my iPad whenever I&rsquo;m out and about. It seemed off to me that I could do everything except deploy my site from my iPad, so I set out to change that.</p>
+<p>A couple three-in-the-morning bright ideas and a revoked access token later (oops), I now have not one but <em>two</em> ways to deploy to my public GitHub Pages repository from an entirely separated, private GitHub repository. In this post, I&rsquo;ll take you through achieving this with <a href="https://travis-ci.com/">Travis CI</a> or using <a href="http://netlify.com/">Netlify</a> and <a href="https://www.gnu.org/software/make/">Make</a>.</p>
+<p>There&rsquo;s nothing hackish about it - my public GitHub Pages repository still looks the same as it does when I pushed to it locally from my terminal. Only now, I&rsquo;m able to take advantage of a couple great deployment tools to have the site update whenever I push to my private repo, whether I&rsquo;m on my laptop or out and about with my iPad.</p>
+<figure><img src="/archive/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/im-on-a-bridge.jpg"
+    alt="Hashtag: you did not push from there"><figcaption>
+      <p>#YouDidNotPushFromThere</p>
+    </figcaption>
+</figure>
+
+<p>This article assumes you have working knowledge of Git and GitHub Pages. If not, you may like to spin off some browser tabs from my articles on <a href="/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy</a> and <a href="/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/">building a site with Hugo and GitHub Pages</a> first.</p>
+<p>Let&rsquo;s do it!</p>
+<h2 id="private-to-public-github-pages-deployment-with-travis-ci">Private-to-public GitHub Pages deployment with Travis CI</h2>
+<p>Travis CI has the built-in ability (♪) to <a href="https://docs.travis-ci.com/user/deployment/pages/">deploy to GitHub Pages</a> following a successful build. They do a decent job in the docs of explaining how to add this feature, especially if you&rsquo;ve used Travis CI before&hellip; which I haven&rsquo;t. Don&rsquo;t worry, I did the bulk of the figuring-things-out for you.</p>
+<ul>
+<li>Travis CI gets all its instructions from a configuration file in the root of your repository called <code>.travis.yml</code></li>
+<li>You need to provide a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">GitHub personal access token</a> as a secure encrypted variable, which you can generate using <code>travis</code> on the command line</li>
+<li>Once your script successfully finishes doing what you&rsquo;ve told it to do (not necessarily what you <em>want</em> it to do but that&rsquo;s a whole other blog post), Travis will deploy your build directory to a repository you can specify with the <code>repo</code> configuration variable.</li>
+</ul>
+<h3 id="setting-up-the-travis-configuration-file">Setting up the Travis configuration file</h3>
+<p>Create a new configuration file for Travis with the filename <code>.travis.yml</code> (note the leading &ldquo;.&rdquo;). These scripts are very customizable and I struggled to find a relevant example to use as a starting point - luckily, you don&rsquo;t have that problem!</p>
+<p>Here&rsquo;s my basic <code>.travis.yml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">git</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">depth</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">global</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">HUGO_VERSION=&#34;0.54.0&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">matrix</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">YOUR_ENCRYPTED_VARIABLE</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">install</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">wget -q https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">tar xf hugo_${HUGO_VERSION}_Linux-64bit.tar.gz</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">mv hugo ~/bin/</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">script</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">hugo --gc --minify</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">deploy</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">provider</span>: <span style="color:#ae81ff">pages</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">skip-cleanup</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">github-token</span>: <span style="color:#ae81ff">$GITHUB_TOKEN</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">keep-history</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">local-dir</span>: <span style="color:#ae81ff">public</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">gh-username/gh-username.github.io</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">target-branch</span>: <span style="color:#ae81ff">master</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">verbose</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">on</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">branch</span>: <span style="color:#ae81ff">master</span>
+</span></span></code></pre></div><p>This script downloads and installs Hugo, builds the site with the garbage collection and minify <a href="https://gohugo.io/commands/hugo/#synopsis">flags</a>, then deploys the <code>public/</code> directory to the specified <code>repo</code> - in this example, your public GitHub Pages repository. You can read about each of the <code>deploy</code> configuration options <a href="https://docs.travis-ci.com/user/deployment/pages/#further-configuration">here</a>.</p>
+<p>To <a href="https://docs.travis-ci.com/user/environment-variables#defining-encrypted-variables-in-travisyml">add the GitHub personal access token as an encrypted variable</a>, you don&rsquo;t need to manually edit your <code>.travis.yml</code>. The <code>travis</code> gem commands below will encrypt and add the variable for you when you run them in your repository directory.</p>
+<p>First, install <code>travis</code> with <code>sudo gem install travis</code>.</p>
+<p>Then <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">generate your GitHub personal access token</a>, copy it (it only shows up once!) and run the commands below in your repository root, substituting your token for the kisses:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>travis login --pro --github-token xxxxxxxxxxxxxxxxxxxxxxxxxxx
+</span></span><span style="display:flex;"><span>travis encrypt GITHUB_TOKEN<span style="color:#f92672">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxx --add env.matrix
+</span></span></code></pre></div><p>Your encrypted token magically appears in the file. Once you&rsquo;ve committed <code>.travis.yml</code> to your private Hugo repository, Travis CI will run the script and if the build succeeds, will deploy your site to your public GitHub Pages repo. Magic!</p>
+<p>Travis will always run a build each time you push to your private repository. If you don&rsquo;t want to trigger this behavior with a particular commit, <a href="https://docs.travis-ci.com/user/customizing-the-build/#skipping-a-build">add the <code>skip</code> command to your commit message</a>.</p>
+<p><em>Yo that&rsquo;s cool but I like Netlify.</em></p>
+<p>Okay fine.</p>
+<h2 id="deploying-to-a-separate-repository-with-netlify-and-make">Deploying to a separate repository with Netlify and Make</h2>
+<p>We can get Netlify to do our bidding by using a Makefile, which we&rsquo;ll run with Netlify&rsquo;s build command.</p>
+<p>Here&rsquo;s what our <code>Makefile</code> looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-makefile" data-lang="makefile"><span style="display:flex;"><span>SHELL<span style="color:#f92672">:=</span>/bin/bash
+</span></span><span style="display:flex;"><span>BASEDIR<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>CURDIR<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>OUTPUTDIR<span style="color:#f92672">=</span>public
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> all
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">all</span><span style="color:#f92672">:</span> clean get_repository build deploy
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> clean
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">clean</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Removing public directory&#34;</span>
+</span></span><span style="display:flex;"><span> rm -rf <span style="color:#66d9ef">$(</span>BASEDIR<span style="color:#66d9ef">)</span>/<span style="color:#66d9ef">$(</span>OUTPUTDIR<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> get_repository
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">get_repository</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Getting public repository&#34;</span>
+</span></span><span style="display:flex;"><span> git clone https://github.com/gh-username/gh-username.github.io.git public
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> build
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">build</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Generating site&#34;</span>
+</span></span><span style="display:flex;"><span> hugo --gc --minify
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> deploy
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">deploy</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Preparing commit&#34;</span>
+</span></span><span style="display:flex;"><span> @cd <span style="color:#66d9ef">$(</span>OUTPUTDIR<span style="color:#66d9ef">)</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git config user.email <span style="color:#e6db74">&#34;you@youremail.com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git config user.name <span style="color:#e6db74">&#34;Your Name&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git add . <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git status <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git commit -m <span style="color:#e6db74">&#34;Deploy via Makefile&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git push -f -q https://<span style="color:#66d9ef">$(</span>GITHUB_TOKEN<span style="color:#66d9ef">)</span>@github.com/gh-username/gh-username.github.io.git master
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Pushed to remote&#34;</span>
+</span></span></code></pre></div><p>To preserve the Git history of our separate GitHub Pages repository, we&rsquo;ll first clone it, build our new Hugo site to it, and then push it back to the Pages repository. This script first removes any existing <code>public/</code> folder that might contain files or a Git history. It then clones our Pages repository to <code>public/</code>, builds our Hugo site (essentially updating the files in <code>public/</code>), then takes care of committing the new site to the Pages repository.</p>
+<p>In the <code>deploy</code> section, you&rsquo;ll notice lines starting with <code>&amp;&amp;</code>. These are chained commands. Since Make <a href="https://www.gnu.org/software/make/manual/html_node/Execution.html#Execution">invokes a new sub-shell for each line</a>, it starts over with every new line from our root directory. To get our <code>cd</code> to stick and avoid running our Git commands in the project root directory, we&rsquo;re chaining the commands and using the backslash character to <a href="http://clarkgrubb.com/makefile-style-guide#breaking-long-lines">break long lines</a> for readability.</p>
+<p>By chaining our commands, we&rsquo;re able to <a href="https://stackoverflow.com/questions/6116548/how-to-tell-git-to-use-the-correct-identity-name-and-email-for-a-given-project">configure our Git identity</a>, add all our updated files, and create a commit for our Pages repository.</p>
+<p>Similarly to using Travis CI, we&rsquo;ll need to pass in a <a href="https://github.com/settings/tokens">GitHub personal access token</a> to push to our public GitHub Pages repository - only Netlify doesn&rsquo;t provide a straightforward way to encrypt the token in our Makefile.</p>
+<p>Instead, we&rsquo;ll use Netlify&rsquo;s <a href="https://www.netlify.com/docs/continuous-deployment/#build-environment-variables">Build Environment Variables</a>, which live safely in our site settings in the Netlify app. We can then call our token variable in the Makefile. We use it to push (quietly, to avoid printing the token in logs) to our Pages repository by <a href="https://stackoverflow.com/questions/44773415/how-to-push-a-commit-to-github-from-a-circleci-build-using-a-personal-access-tok">passing it in the remote URL</a>.</p>
+<p>To avoid printing the token in Netlify&rsquo;s logs, we suppress <a href="https://www.gnu.org/software/make/manual/html_node/Echoing.html#Echoing">recipe echoing</a> for that line with the leading <code>@</code> character.</p>
+<p>With your Makefile in the root of your private GitHub repository, you can set up Netlify to run it for you.</p>
+<h3 id="setting-up-netlify">Setting up Netlify</h3>
+<p>Getting set up with Netlify via the <a href="https://app.netlify.com/">web UI</a> is straightforward. Once you sign in with GitHub, choose the private GitHub repository where your Hugo site lives. The next page Netlify takes you to lets you enter deploy settings:</p>
+<p><img src="netlify-new-site.png" alt="Create a new site page"></p>
+<p>You can specify the build command that will run your Makefile (<code>make all</code> for this example). The branch to deploy and the publish directory don&rsquo;t matter too much in our specific case, since we&rsquo;re only concerned with pushing to a separate repository. You can enter the typical <code>master</code> deploy branch and <code>public</code> publish directory.</p>
+<p>Under &ldquo;Advanced build settings&rdquo; click &ldquo;New variable&rdquo; to add your GitHub personal access token as a Build Environment Variable. In our example, the variable name is <code>GITHUB_TOKEN</code>. Click &ldquo;Deploy site&rdquo; to make the magic happen.</p>
+<p>If you&rsquo;ve already previously set up your repository with Netlify, find the settings for Continuous Deployment under Settings &gt; Build &amp; deploy.</p>
+<p>Netlify will build your site each time you push to the private repository. If you don&rsquo;t want a particular commit to trigger a build, <a href="https://www.netlify.com/docs/continuous-deployment/#skipping-a-deploy">add <code>[skip ci]</code> in your Git commit message</a>.</p>
+<h3 id="same-same-but-different">Same same but different</h3>
+<p>One effect of using Netlify this way is that your site will be built in two places: one is the separate, public GitHub Pages repository that the Makefile pushes to, and the other is your Netlify site that deploys on their CDN from your linked private GitHub repository. The latter is useful if you&rsquo;re going to play with <a href="https://www.netlify.com/blog/2016/07/20/introducing-deploy-previews-in-netlify/">Deploy Previews</a> and other Netlify features, but those are outside the scope of this post.</p>
+<p>The main point is that your GitHub Pages site is now updated in your public repo. Yay!</p>
+<h2 id="go-forth-and-deploy-fearlessly">Go forth and deploy fearlessly</h2>
+<p>I hope the effect of this new information is that you feel more able to update your sites, wherever you happen to be. The possibilities are endless - at home on your couch with your laptop, out cafe-hopping with your iPad, or in the middle of a first date on your phone. Endless!</p>
+<figure><img src="/archive/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/date-deploy.png"
+    alt="Don&#39;t update your site from your phone on a date"><figcaption>
+      <p>Don&rsquo;t do stuff on your phone when you&rsquo;re on a date. Not if you want a second one, anyway.</p>
+    </figcaption>
+</figure>
+
+]]></content></entry><entry><title type="html">A remote sync solution for iOS and Linux: Git and Working Copy</title><link href="https://victoria.dev/archive/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/"/><id>https://victoria.dev/archive/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/</id><author><name>Victoria Drake</name></author><published>2019-03-15T11:55:28-04:00</published><updated>2020-12-02T11:55:28-04:00</updated><content type="html"><![CDATA[<p>I&rsquo;m always looking for pockets of time in which I can be productive. If you add up the minutes you spend in limbo while waiting in line, commuting, or waiting for food delivery (just me?), you may just find an extra hour or two in your day.</p>
+<p>To take full advantage of these bits of time, I needed a solution that let me pick up work on my Git repositories wherever I happen to be. That means a remote sync solution that bridges my iOS devices (iPad and iPhone) and my Linux machine.</p>
+<p>After a lot of trial and error, I&rsquo;ve found one that works really well. With synced Git repositories on iOS, I can seamlessly pick up work for any of my repositories on the go.</p>
+<h2 id="components">Components</h2>
+<ul>
+<li><a href="https://workingcopy.app">Working Copy app</a> ($15.99 one-time pro-unlock and well worth it)</li>
+<li><a href="https://ia.net/writer">iA Writer app</a> ($8.99 one-time purchase for iOS, also available on Mac, Windows, and Android)</li>
+<li>GitHub repositories</li>
+</ul>
+<h2 id="get-set-up">Get set up</h2>
+<p>Here are the steps to setting up that I&rsquo;ll walk you through in this article.</p>
+<ol>
+<li>Create your remote repository</li>
+<li>Clone repository to iPad with Working Copy</li>
+<li>Open and edit files with iA Writer</li>
+<li>Push changes back to remote</li>
+<li>Pull changes from repository on your computer</li>
+</ol>
+<p>This system is straightforward to set up whether you&rsquo;re a command line whiz or just getting into Git. Let&rsquo;s do it!</p>
+<h3 id="create-your-remote-repository">Create your remote repository</h3>
+<p>Create a public or private repository on GitHub.</p>
+<p>If you&rsquo;re creating a new repository, you can follow GitHub&rsquo;s instructions to push some files to it from your computer, or you can add files later from your iOS device.</p>
+<h3 id="clone-repository-to-ios-with-working-copy">Clone repository to iOS with Working Copy</h3>
+<p>Download <a href="https://workingcopy.app">Working Copy</a> from the App Store. It&rsquo;s a fantastic app. Developer <a href="https://twitter.com/palmin">Anders Borum</a> has a steady track record of frequent updates and incorporating the latest features for iOS apps, like <a href="https://workingcopy.app/manual/dragdrop">drag and drop</a> on iPad. I think he&rsquo;s fairly priced his product in light of the work he puts into maintaining and enhancing it.</p>
+<p>In Working Copy, find the gear icon in the top left corner and touch to open Settings.</p>
+<p>Tap on SSH Keys, and you&rsquo;ll see this screen:</p>
+<p>SSH keys, or Secure Shell keys, are access credentials used in the <a href="https://en.wikipedia.org/wiki/Secure_Shell">SSH protocol</a>. Your key is a password that your device will use to securely connect with your remote repository host - GitHub, in this example. Since anyone with your SSH keys can potentially pretend to be you and gain access to your files, it&rsquo;s important not to share them accidentally, like in a screenshot on a blog post.</p>
+<p>Tap on the second line that looks like <strong>WorkingCopy@iPad-xxxxxxxx</strong> to get this screen:</p>
+<p>Working Copy supports easy connection to GitHub. Tap <strong>Connect With GitHub</strong> to bring up some familiar sign-in screens that will authorize Working Copy to access your account(s).</p>
+<p>Once connected, tap the <strong>+</strong> symbol in the top right of the side bar to add a new repository. Choose <strong>Clone repository</strong> to bring up this screen:</p>
+<p>Here, you can either manually input the remote URL, or simply choose from the list of repositories that Working Copy fetches from your connected account. When you make your choice, the app clones the repository to your device and it will show up in the sidebar. You&rsquo;re connected!</p>
+<h3 id="open-and-edit-files-with-ia-writer">Open and edit files with iA Writer</h3>
+<p>One of the (many) reasons I adore <a href="https://ia.net/writer">iA Writer</a> is its ability to select your freshly cloned remote repository as a Library Location. To enable this, first open your Files app. On the Browse screen, tap the overflow menu (three dots) in the top right and choose <strong>Edit</strong>.</p>
+<p>Turn on Working Copy as a location option:</p>
+<p>Then in the iA Writer app:</p>
+<ol>
+<li>From the main Library list, in the top right of the sidebar, tap <strong>Edit</strong>.</li>
+<li>Tap <strong>Add Location&hellip;</strong>.</li>
+<li>A helpful popup appears. Tap <strong>OK</strong>.</li>
+<li>From the Working Copy location, tap <strong>Select</strong> in the top right, then choose the repository folder.</li>
+<li>Tap <strong>Open</strong>, then <strong>Done</strong>.</li>
+</ol>
+<p>Your remote repository now appears as a Location in the sidebar. Tap on it to work within this directory.</p>
+<p>While inside this location, new files you create (by tapping the pencil-and-paper icon in the top right corner) will be saved to this folder locally. As you work, iA Writer automatically saves your progress. Next, we&rsquo;ll look at pushing those files and changes back to your remote.</p>
+<h3 id="push-changes-back-to-remote">Push changes back to remote</h3>
+<p>Once you&rsquo;ve made changes to your files, open Working Copy again. You should see a yellow dot on your changed repository.</p>
+<p>Tap on your repository name, then on <strong>Repository Status and Configuration</strong> at the top of the sidebar. Your changed files will be indicated by yellow dots or green <strong>+</strong> symbols. These mean that you&rsquo;ve modified or added files, respectively.</p>
+<p>Working Copy is a sweet iOS Git client, and you can tap on your files to see additional information including a comparison of changes (&ldquo;diff&rdquo;) as well as status and Git history. You can even edit files right within the app, with <a href="https://workingcopyapp.com/manual/edit">syntax highlighting</a> for its many supported languages. For now, we&rsquo;ll look at how to push your changed work to your remote repository.</p>
+<p>On the <strong>Repository Status and Configuration</strong> page, you&rsquo;ll see right at the top that there are changes to be committed. If you&rsquo;re new to Git, this is like &ldquo;saving your changes&rdquo; to your Git history, something typically done with the terminal command <a href="https://git-scm.com/docs/git-commit"><code>git commit</code></a>. You can think of this as saving the files that we&rsquo;ll want to send to the GitHub repository. Tap <strong>Commit changes</strong>.</p>
+<p>Enter your commit message, and select the files you want to add. Toggle the <strong>Push</strong> switch to send everything to your remote repository when you commit the files. Then tap <strong>Commit</strong>.</p>
+<p>You&rsquo;ll see a progress bar as your files are uploaded, and then a confirmation message on the status screen.</p>
+<p>Congratulations! Your changes are now present in your remote repository on GitHub. You&rsquo;ve successfully synced your files remotely!</p>
+<h3 id="pull-changes-from-repository-on-your-computer">Pull changes from repository on your computer</h3>
+<p>To bring your updated files full circle to your computer, you pull them from the GitHub repository. I prefer to use the terminal for this as it&rsquo;s quick and easy, but GitHub also offers a <a href="https://docs.github.com/en/desktop/overview/getting-started-with-github-desktop?platform=windows">graphical client</a> if terminal commands seem a little alien for now.</p>
+<p>If you started with the GitHub repository, you can clone it to a folder on your computer by following <a href="https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository">these instructions</a>.</p>
+<h3 id="staying-in-sync">Staying in sync</h3>
+<p>When you update your work on your computer, you&rsquo;ll use Git to push your changes to the remote repository. To do this, you can use GitHub&rsquo;s <a href="https://docs.github.com/en/desktop/overview/getting-started-with-github-desktop?platform=windows">graphical client</a>, or follow <a href="https://docs.github.com/en/get-started/importing-your-projects-to-github/importing-source-code-to-github/adding-an-existing-project-to-github-using-the-command-line">these instructions</a>.</p>
+<p>On your iOS device, Working Copy makes pulling and pushing as simple as a single tap. On the Repository Status and Configuration page, tap on the remote name under <strong>Remotes</strong>.</p>
+<p>Then tap <strong>Synchronize</strong>. Working Copy will take care of the details of pushing your committed changes and/or pulling any new changes it finds from the remote repository.</p>
+<h2 id="work-anywhere">Work anywhere</h2>
+<p>For a Git-based developer and work-anywhere-aholic like me, this set up couldn&rsquo;t be more convenient. Working Copy really makes staying in sync with my remote repositories seamless, nevermind the ability to work with any of my GitHub repos on the go.</p>
+<p>I most recently used this set up to get some writing done while hanging out in the atrium of Washington DC&rsquo;s National Portrait Gallery, which is pleasantly photogenic.</p>
+<p>Happy working! If you enjoyed this post, there&rsquo;s a lot more where this came from! I write about computing, cybersecurity, and leading great technical teams. <a href="/">You can subscribe</a> to see new articles first.</p>
+]]></content></entry><entry><title type="html">Git commit practices your future self will thank you for</title><link href="https://victoria.dev/posts/git-commit-practices-your-future-self-will-thank-you-for/"/><id>https://victoria.dev/posts/git-commit-practices-your-future-self-will-thank-you-for/</id><author><name>Victoria Drake</name></author><published>2018-08-06T08:54:56-04:00</published><updated>2018-08-06T08:54:56-04:00</updated><content type="html"><![CDATA[<p>A history of clean commits can be evidence of a lot of things: attention to detail, good work ethic, and genuine investment in the project. What do your Git commits say about you?</p>
+<p>Here&rsquo;s how you can create and maintain a clean and orderly Git commit history using <a href="#write-great-git-commit-messages-with-a-template">message templates</a>, <a href="#one-change-per-commit-how-to-squash-git-commits">learning how to squash commits</a>, <a href="#git-stash">using git stash</a>, and <a href="#tag-release-versions-using-annotated-git-tags">creating annotated commit tags</a>.</p>
+<h2 id="what-it-means-to-commit-responsibly">What it means to commit responsibly</h2>
+<p>Whether our code will be seen by the entire open source community or just future versions of ourselves, either one will be grateful if we commit responsibly today. Being responsible can mean a lot of things to different people, so I enlisted some of <code>mastodon.technology</code> (instance shut down since) and <a href="https://dev.to/victoria/what-does-it-mean-to-commit-responsibly-22mi">dev.to</a> to help round out my list. From those (really great) threads, I distilled these main points:</p>
+<blockquote>
+<p><strong>Committing responsibly</strong></p>
+<ol>
+<li>Provide and/or use tests to avoid committing bugs or broken builds</li>
+<li>Write clean code that meets style specifications</li>
+<li>Use descriptive commit messages that reference related discussion</li>
+<li>Make only one change per commit and avoid including unrelated changes</li>
+</ol></blockquote>
+<p>Some of the above is achieved through maintaining a short feedback loop that helps you improve your code quality while staying accountable to yourself. <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">I wrote another article</a> that discusses this in detail, especially the part about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/#block-out-time-for-code-review">code review</a>. Other items on this list have to do specifically with making commits in Git. There are some features of Git that can benefit us in these areas, as can harnessing tools like Vim. I&rsquo;ll cover those topics here.</p>
+<p>If the majority of your Git commits so far have been created with something like <code>git commit -m &quot;Bug fixes&quot;</code> then this is the article for you!</p>
+<h2 id="write-great-git-commit-messages-with-a-template">Write great Git commit messages with a template</h2>
+<p>I think <a href="https://github.com/torvalds/subsurface-for-dirk/commit/b6590150d68df528efd40c889ba6eea476b39873">Linus</a> would be very happy if we didn&rsquo;t use <code>git commit -m &quot;Fix bug&quot;</code> in a public repository ever again. As very well put in <a href="https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html">this classic post</a> and <a href="https://chris.beams.io/posts/git-commit/">the seven rules of a great Git commit message</a>:</p>
+<blockquote>
+<p>A properly formed Git commit subject line should always be able to complete the following sentence:</p>
+<p>If applied, this commit will <em>your subject line here</em></p></blockquote>
+<p><a href="http://who-t.blogspot.com/2009/12/on-commit-messages.html">This other classic post</a> also discusses three questions that the body of the commit message should answer:</p>
+<blockquote>
+<p>Why is it necessary?
+How does it address the issue?
+What effects does the patch have?</p></blockquote>
+<p>This can be a lot to remember to cover, but there&rsquo;s a slick way to have these prompts at hand right when you need it. You can set up a commit message template by using the <code>commit.template</code> <a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration">configuration value</a>.</p>
+<p>To set it, configure Git to use a template file (for example, <code>.gitmessage</code> in your home directory), then create the template file with Vim:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git config --global commit.template ~/.gitmessage
+</span></span><span style="display:flex;"><span>vim ~/.gitmessage
+</span></span></code></pre></div><p>When we run <code>git commit</code> without the <code>-m</code> message flag, the editor will open with our helpful template ready to go. Here&rsquo;s my commit message template:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>## If applied, this commit will...
+</span></span><span style="display:flex;"><span>## [Add/Fix/Remove/Update/Refactor/Document] [issue #id] [summary]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>## Why is it necessary? (Bug fix, feature, improvements?)
+</span></span><span style="display:flex;"><span>-
+</span></span><span style="display:flex;"><span>## How does the change address the issue?
+</span></span><span style="display:flex;"><span>-
+</span></span><span style="display:flex;"><span>## What side effects does this change have?
+</span></span><span style="display:flex;"><span>-
+</span></span></code></pre></div><p>I&rsquo;m a fan of this format because commented lines are not included in the final message. I can simply fill in the blank lines with text and bullet points under the prompts, and it comes out looking something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Fix #16 missing CSS variables
+</span></span><span style="display:flex;"><span>- Fix for unstyled elements
+</span></span><span style="display:flex;"><span>- Add background color, height for code blocks
+</span></span><span style="display:flex;"><span>- Only affects highlight class
+</span></span></code></pre></div><h3 id="reference-related-discussion">Reference related discussion</h3>
+<p>Issue trackers in <a href="https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue">GitHub</a> and <a href="https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html">Bitbucket</a> both recognize the keywords <code>close</code>, <code>fix</code>, and <code>resolve</code> followed immediately by the issue or pull request number. These keywords conveniently help us close the referenced issue or pull request, and this helps maintain a clear trail of changes. <a href="https://docs.gitlab.com/ee/user/project/issues/crosslinking_issues.html">GitLab</a>, and issue trackers like <a href="https://confluence.atlassian.com/jirasoftwarecloud/referencing-issues-in-your-development-work-777002789.html">Jira</a> offer similar functionalities.</p>
+<h3 id="use-helpful-vim-settings-for-git-commit-messages">Use helpful Vim settings for git commit messages</h3>
+<p>By adding a few lines to our Vim configuration, we can make writing great git commit messages easy. We can add these lines to <code>~/.vimrc</code> to turn on syntax highlighting in general, and spell check and text wrapping for commit messages in particular:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vimrc" data-lang="vimrc"><span style="display:flex;"><span><span style="color:#75715e">&#34; Filetype detection, plugins, and indent rules</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">filetype</span> <span style="color:#a6e22e">plugin</span> <span style="color:#a6e22e">indent</span> <span style="color:#a6e22e">on</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">&#34; Syntax highlighting</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">syntax</span> <span style="color:#a6e22e">on</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">&#34; Spell check and line wrap just for git commit messages</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">autocmd</span> <span style="color:#a6e22e">Filetype</span> <span style="color:#a6e22e">gitcommit</span> <span style="color:#a6e22e">setlocal</span> <span style="color:#a6e22e">spell</span> <span style="color:#a6e22e">textwidth</span>=<span style="color:#ae81ff">72</span>
+</span></span></code></pre></div><p>If you&rsquo;re curious, you can find my full <code>~/.vimrc</code> in my <a href="https://github.com/victoriadrake/dotfiles">dotfiles</a>.</p>
+<p>Other editors have settings that can help us out as well. I came across <a href="https://dev.to/shreyasminocha/how-i-do-my-git-commits-34d">these for Sublime Text 3</a> and <a href="https://github.com/Microsoft/vscode-docs/blob/master/docs/getstarted/tips-and-tricks.md#language-specific-settings">language specific settings for VS Code</a>.</p>
+<h2 id="one-change-per-commit-how-to-squash-git-commits">One change per commit: how to squash Git commits</h2>
+<figure><img src="/posts/git-commit-practices-your-future-self-will-thank-you-for/git-commit-squash.png"
+    alt="A doodle of squash"><figcaption>
+      <p>Still life Git</p>
+    </figcaption>
+</figure>
+
+<p>Let&rsquo;s get one thing out of the way first: rewriting Git history just for the sake of having a pretty tree, especially with public repositories, is generally not advisable. It&rsquo;s kind of like going back in time, where changes you make to your version of the project cause it to look completely different from a version that someone else forked from a point in history that you&rsquo;ve now erased - I mean, haven&rsquo;t you seen <em>Back to the Future Part II</em>? (If you&rsquo;d rather maintain that only one <em>Back to the Future</em> movie was ever made, thus sparing your future self from having to watch the sequels, I get it.)</p>
+<p>Here&rsquo;s the main point. If you&rsquo;ve pushed messy commits to a public repository, I say go right ahead and leave them be, instead of complicating things further. (We all learn from our embarrassments, especially the public ones - I&rsquo;m looking at you, past-Vicky.) If your messy commits currently only exist on your local version, great! We can tidy them up into one clean, well-described commit that we&rsquo;ll be proud to push, and no one will be the wiser.</p>
+<p>There are a couple different ways to squash commits, and choosing the appropriate one depends on what we need to achieve.</p>
+<p>The following examples are illustrated using <code>git log --graph</code>, with some options for brevity. We can set a handy alias to see this log format in our terminal with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git config --global alias.plog <span style="color:#e6db74">&#34;log --graph --pretty=format:&#39;%h -%d %s %n&#39; --abbrev-commit --date=relative --branches&#34;</span>
+</span></span></code></pre></div><p>Then we just do <code>git plog</code> to see the pretty log.</p>
+<h3 id="method-1-one-commit-to-rule-the-master-branch">Method #1: one commit to rule the master branch</h3>
+<p>This is appropriate when:</p>
+<ul>
+<li>We&rsquo;re committing directly to master</li>
+<li>We don&rsquo;t intend to open a pull request to merge a feature</li>
+<li>We don&rsquo;t want to preserve history of branches or changes we haven&rsquo;t yet pushed</li>
+</ul>
+<p>This method takes a Git tree that looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>*   3e8fd79 - (HEAD -&gt; master) Fix a thing
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>*   4f0d387 - Tweak something
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>*   0a6b8b3 - Merge branch &#39;new-article&#39;
+</span></span><span style="display:flex;"><span>|\
+</span></span><span style="display:flex;"><span>| * 33b5509 - (new-article) Update article again again
+</span></span><span style="display:flex;"><span>| |
+</span></span><span style="display:flex;"><span>| * 1782e63 - Update article again
+</span></span><span style="display:flex;"><span>| |
+</span></span><span style="display:flex;"><span>| * 3c5b6a8 - Update article
+</span></span><span style="display:flex;"><span>| |
+</span></span><span style="display:flex;"><span>* | f790737 - (master) Tweak unrelated article
+</span></span><span style="display:flex;"><span>|/
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 65af7e7 Add social media link
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 0e3fa32 (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>And makes it look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>* 7f9a127 - (HEAD -&gt; master) Add new article
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>Here&rsquo;s how to do it - hold on to your hoverboards, it&rsquo;s super complicated:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git reset --soft origin/master
+</span></span><span style="display:flex;"><span>git commit
+</span></span></code></pre></div><p>Yup that&rsquo;s all. We can delete the unwanted branch with <code>git branch -D new-article</code>.</p>
+<h3 id="method-2-not-that-much">Method #2: not <em>that</em> much</h3>
+<p>This is appropriate when:</p>
+<ul>
+<li>We want to squash the last <em>x</em> commits but not <em>all</em> commits since <code>origin/master</code></li>
+<li>We want to open a pull request to merge a branch</li>
+</ul>
+<p>This method takes a Git tree that looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>* 13a070f - (HEAD -&gt; new-article) Finish new article
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 78e728a - Edit article draft
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* d62603c - Add example
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 1aeb20e - Update draft
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 5a8442a - Add new article draft
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>| * 65af7e7 - (master) Add social media link
+</span></span><span style="display:flex;"><span>|/
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>And makes it look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>* 90da69a - (HEAD -&gt; new-article) Add new article
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>| * 65af7e7 - (master) Add social media link
+</span></span><span style="display:flex;"><span>|/
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>To squash the last five commits on branch <code>new-article</code> into one, we use:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git reset --soft HEAD~5
+</span></span><span style="display:flex;"><span>git commit -m <span style="color:#e6db74">&#34;New message for the combined commit&#34;</span>
+</span></span></code></pre></div><p>Where <code>--soft</code> leaves our files untouched and staged, and <code>5</code> can be thought of as &ldquo;the number of previous commits I want to combine.&rdquo;</p>
+<p>We can then do <code>git merge master</code> and create our pull request.</p>
+<h3 id="method-3-getting-picky">Method #3: getting picky</h3>
+<p>Say we had a really confusing afternoon and our Git tree looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>* dc89918 - (HEAD -&gt; master) Add link
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 9b6780f - Update image asset
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 6379956 - Fix CSS bug
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>*   16ee1f3 - Merge master into branch
+</span></span><span style="display:flex;"><span>|\
+</span></span><span style="display:flex;"><span>| |
+</span></span><span style="display:flex;"><span>| * ccec365 - Update list page
+</span></span><span style="display:flex;"><span>| |
+</span></span><span style="display:flex;"><span>* | 033dee7 - Fix typo
+</span></span><span style="display:flex;"><span>| |
+</span></span><span style="display:flex;"><span>* | 90da69a - Add new article
+</span></span><span style="display:flex;"><span>|/
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>We want to retain some of this history, but clean up the commits. We also want to change the messages for some of the commits. To achieve this, we&rsquo;ll use <code>git rebase</code>.</p>
+<p>This is appropriate when:</p>
+<ul>
+<li>We want to squash only some commits</li>
+<li>We want to edit previous commit messages</li>
+<li>We want to delete or reorder specific commits</li>
+</ul>
+<p>Git <code>rebase</code> is a powerful tool, and handy once we&rsquo;ve got the hang of it. To change all the commits since <code>origin/master</code>, we do:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git rebase -i origin/master
+</span></span></code></pre></div><p>Or, we can do:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git rebase -i 0e3fa32
+</span></span></code></pre></div><p>Where the commit hash is the last commit we want to retain as-is.</p>
+<p>The <code>-i</code> option lets us run the interactive rebase tool, which launches our editor with, essentially, a script for us to modify. We&rsquo;ll see a list of our commits in reverse order to the git log, with the oldest at the top:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>pick 90da69a Add new article
+</span></span><span style="display:flex;"><span>pick 033dee7 Fix typo
+</span></span><span style="display:flex;"><span>pick ccec365 Update list page
+</span></span><span style="display:flex;"><span>pick 6379956 Fix CSS bug
+</span></span><span style="display:flex;"><span>pick 9b6780f Update image asset
+</span></span><span style="display:flex;"><span>pick dc89918 Add link
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Rebase 0e3fa32..dc89918 onto 0e3fa32 (6 commands)
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># Commands:
+</span></span><span style="display:flex;"><span># p, pick = use commit
+</span></span><span style="display:flex;"><span># r, reword = use commit, but edit the commit message
+</span></span><span style="display:flex;"><span># e, edit = use commit, but stop for amending
+</span></span><span style="display:flex;"><span># s, squash = use commit, but meld into previous commit
+</span></span><span style="display:flex;"><span># f, fixup = like &#34;squash&#34;, but discard this commit&#39;s log message
+</span></span><span style="display:flex;"><span># x, exec = run command (the rest of the line) using shell
+</span></span><span style="display:flex;"><span># d, drop = remove commit
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># These lines can be re-ordered; they are executed from top to bottom.
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># If you remove a line here THAT COMMIT WILL BE LOST.
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># However, if you remove everything, the rebase will be aborted.
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># Note that empty commits are commented out
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span>~
+</span></span></code></pre></div><p>The comments give us a handy guide as to what we&rsquo;re able to do. For now, let&rsquo;s squash the commits with small changes into the more significant commits. In our editor, we change the script to look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>pick 90da69a Add new article
+</span></span><span style="display:flex;"><span>squash 033dee7 Fix typo
+</span></span><span style="display:flex;"><span>pick ccec365 Update list page
+</span></span><span style="display:flex;"><span>squash 6379956 Fix CSS bug
+</span></span><span style="display:flex;"><span>squash 9b6780f Update image asset
+</span></span><span style="display:flex;"><span>squash dc89918 Add link
+</span></span></code></pre></div><p>Once we save the changes, the interactive tool continues to run. It will execute our instructions in sequence. In this case, we see the editor again with the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span># This is a combination of 2 commits.
+</span></span><span style="display:flex;"><span># This is the 1st commit message:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Add new article
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># This is the commit message #2:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Fix typo
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Please enter the commit message for your changes. Lines starting
+</span></span><span style="display:flex;"><span># with &#39;#&#39; will be ignored, and an empty message aborts the commit.
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># interactive rebase in progress; onto 0e3fa32
+</span></span><span style="display:flex;"><span># Last commands done (2 commands done):
+</span></span><span style="display:flex;"><span>#    pick 90da69a Add new article
+</span></span><span style="display:flex;"><span>#    squash 033dee7 Fix typo
+</span></span><span style="display:flex;"><span># Next commands to do (4 remaining commands):
+</span></span><span style="display:flex;"><span>#    pick ccec365 Update list page
+</span></span><span style="display:flex;"><span>#    squash 6379956 Fix CSS bug
+</span></span><span style="display:flex;"><span># You are currently rebasing branch &#39;master&#39; on &#39;0e3fa32&#39;.
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># Changes to be committed:
+</span></span><span style="display:flex;"><span>#       modified:   ...
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span>~
+</span></span></code></pre></div><p>Here&rsquo;s our chance to create a new commit message for this first squash, if we want to. Once we save it, the interactive tool will go on to the next instructions. Unless&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>[detached HEAD 3cbad01] Add new article
+</span></span><span style="display:flex;"><span> 1 file changed, 129 insertions(+), 19 deletions(-)
+</span></span><span style="display:flex;"><span>Auto-merging content/dir/file.md
+</span></span><span style="display:flex;"><span>CONFLICT (content): Merge conflict in content/dir/file.md
+</span></span><span style="display:flex;"><span>error: could not apply ccec365... Update list page
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Resolve all conflicts manually, mark them as resolved with
+</span></span><span style="display:flex;"><span>&#34;git add/rm &lt;conflicted_files&gt;&#34;, then run &#34;git rebase --continue&#34;.
+</span></span><span style="display:flex;"><span>You can instead skip this commit: run &#34;git rebase --skip&#34;.
+</span></span><span style="display:flex;"><span>To abort and get back to the state before &#34;git rebase&#34;, run &#34;git rebase --abort&#34;.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Could not apply ccec365... Update list page
+</span></span></code></pre></div><p>Again, the tool offers some very helpful instructions. Once we fix the merge conflict, we can resume the process with <code>git rebase --continue</code>. Our interactive rebase picks up where it left off.</p>
+<p>Once all the squashing is done, our Git tree looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>* 3564b8c - (HEAD -&gt; master) Update list page
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 3cbad01 - Add new article
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 0e3fa32 - (origin/master, origin/HEAD) Update theme
+</span></span></code></pre></div><p>Phew, much better.</p>
+<h2 id="git-stash">Git stash</h2>
+<p>If we&rsquo;re in the middle of some work and it&rsquo;s not a good time to commit, but we need to switch branches, <a href="https://git-scm.com/book/en/v2/Git-Tools-Stashing-and-Cleaning">stashing</a> can be a good option. Stashing lets us save our unfinished work without needing to create a half-assed commit. It&rsquo;s like that pile of paper on your desk representing all the stuff you&rsquo;ve been in the middle of doing since two weeks ago. Yup, that one.</p>
+<p>It&rsquo;s as easy as typing <code>git stash</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Saved working directory and index state WIP on master: 3564b8c Update list page
+</span></span></code></pre></div><p>The dirty work we&rsquo;re in the midst of is safely tucked away, and our working directory is clean - just as it was after our last commit. To see what&rsquo;s in our stash stack, we do <code>git stash list</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>stash@{0}: WIP on master: 3564b8c Update list page
+</span></span><span style="display:flex;"><span>stash@{1}: WIP on master: 90da69a Add new article
+</span></span><span style="display:flex;"><span>stash@{2}: WIP on cleanup: 0e3fa32 Update theme
+</span></span></code></pre></div><p>To restore our work in progress, we use <code>git stash apply</code>. Git will try and apply our most recent stashed work. To apply an older stash, we use <code>git stash apply stash@{1}</code> where <code>1</code> is the stash to apply. If changes since stashing our work prevent the stash from reapplying cleanly, Git will give us a merge conflict to resolve.</p>
+<p>Applying a stash doesn&rsquo;t remove it from our list. To remove a stash from our stack, we do <code>git stash drop stash@{0}</code> where <code>0</code> is the one we want to remove.</p>
+<p>We can also use <code>git stash pop</code> to apply the most recent stash and then immediately remove it from the stack.</p>
+<h2 id="tag-release-versions-using-annotated-git-tags">Tag release versions using annotated Git tags</h2>
+<p>In the spirit of having a beautiful, clean Git history, there&rsquo;s one more thing we can do to help make our commit log inspire infinite joy in its viewers. If you&rsquo;ve never heard of <code>git tag</code>, your master branch history might look like this&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>* 0377782 - Update theme
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* ecf8128 - Add about page (#25)
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 33e432f - Fix #23 navigation bug
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 08b853b - Create blog section
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 63d18b4 - Add theme (#12)
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 233e23f - Add main content (#6)
+</span></span></code></pre></div><p>Wouldn&rsquo;t it be nice if it looked like this instead?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>* 0377782 - (tag: v2.1.0) Update theme
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* ecf8128 - Add about page (#25)
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 33e432f - Fix #23 navigation bug
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 08b853b - (tag: v2.0.0) Create blog section
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 63d18b4 - Add theme (#12)
+</span></span><span style="display:flex;"><span>|
+</span></span><span style="display:flex;"><span>* 233e23f - (tag: v1.1.0) Add main content (#6)
+</span></span></code></pre></div><p>We can tag Git commits with anything, but tags are especially helpful for semantic versioning of releases. Sites like <a href="https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release">GitHub</a> and <a href="https://docs.gitlab.com/ee/user/project/releases/">GitLab</a> have pages for repositories that list tags, letting viewers of our project browse the release versions. This can be helpful for public projects to differentiate major releases, updates with bug fixes, or beta versions.</p>
+<p>There are two types of Git tags: lightweight and annotated. For adding a version tag to commits, we use annotated Git tags.</p>
+<p>The <a href="https://git-scm.com/docs/git-tag">Git tag documentation</a> explains it this way:</p>
+<blockquote>
+<p>Tag objects (created with -a, -s, or -u) are called &ldquo;annotated&rdquo; tags; they contain a creation date, the tagger name and e-mail, a tagging message, and an optional GnuPG signature. Whereas a &ldquo;lightweight&rdquo; tag is simply a name for an object (usually a commit object).</p>
+<p>Annotated tags are meant for release while lightweight tags are meant for private or temporary object labels. For this reason, some git commands for naming objects (like git describe) will ignore lightweight tags by default.</p></blockquote>
+<p>We can think of lightweight tags as bookmarks, and annotated tags as signed releases.</p>
+<p>For public repositories, annotated tags allow us to:</p>
+<ul>
+<li>See who tagged the commit, which may differ from the commit author</li>
+<li>See all the tags with <code>git describe</code></li>
+<li>Avoid conflicting tag names</li>
+</ul>
+<p>To create an annotated Git tag and attach it to our current (last) commit, we do:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git tag -a v1.2.0 -m <span style="color:#e6db74">&#34;Clever release title&#34;</span>
+</span></span></code></pre></div><p>This tags the commit on our local repository. To push all annotated tags to the remote, we do:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git push --follow-tags
+</span></span></code></pre></div><p>We can also set our Git configuration to push our annotated tags by default:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>git config --global push.followTags true
+</span></span></code></pre></div><p>If we then want to skip pushing tags this time, we pass <code>--no-follow-tags</code>.</p>
+<h2 id="practice-responsible-commits">Practice responsible commits</h2>
+<p>A little time invested in getting familiar with these tools and practices can make your commits even more useful and well-crafted. With a little practice, these processes will become second nature. You can make it even easier by creating a personal commit checklist on paper to keep handy while you work - or if that isn&rsquo;t fun enough, <a href="/blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/">make it an interactive pre-commit hook.</a></p>
+<p>Creating clean, useful, and responsible Git commits says a lot about you. Especially in remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.</p>
+<p>If you enjoyed this post, there&rsquo;s a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. <a href="https://victoria.dev">Subscribe on victoria.dev</a> to see new articles first, and check out the ones below!</p>
+]]></content></entry><entry><title type="html">An automatic interactive pre-commit checklist, in the style of infomercials</title><link href="https://victoria.dev/archive/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/"/><id>https://victoria.dev/archive/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/</id><author><name>Victoria Drake</name></author><published>2018-07-23T09:38:09-04:00</published><updated>2018-07-23T09:38:09-04:00</updated><content type="html"><![CDATA[<p>What&rsquo;s that, you say? You&rsquo;ve become tired of regular old boring <em>paper checklists?</em> Well, my friend, today is your lucky day! You, yes, <em>you,</em> can become the proud owner of a brand-spanking-new <em>automatic interactive pre-commit hook checklist!</em> You&rsquo;re gonna love this! Your life will be so much easier! Just wait until your friends see you.</p>
+<h2 id="whats-a-pre-commit-hook">What&rsquo;s a pre-commit hook</h2>
+<p>Did you know that nearly <em>1 out of 5 coders</em> are too embarrassed to ask this question? Don&rsquo;t worry, it&rsquo;s perfectly normal. In the next 60 seconds we&rsquo;ll tell you all you need to know to pre-commit with confidence.</p>
+<p>A <a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks">Git hook</a> is a feature of Git that triggers custom scripts at useful moments. They can be used for all kinds of reasons to help you automate your work, and best of all, you already have them! In every repository that you initialize with <code>git init</code>, you&rsquo;ll have a set of example scripts living in <code>.git/hooks</code>. They all end with <code>.sample</code> and activating them is as easy as renaming the file to remove the <code>.sample</code> part.</p>
+<p>Git hooks are not copied when a repository is cloned, so you can make them as personal as you like.</p>
+<p>The useful moment in particular that we&rsquo;ll talk about today is the <em>pre-commit</em>. This hook is run after you do <code>git commit</code>, and before you write a commit message. Exiting this hook with a non-zero status will abort the commit, which makes it extremely useful for last-minute quality checks. Or, a bit of fun. Why not both!</p>
+<h2 id="how-do-i-get-a-pre-commit-checklist">How do I get a pre-commit checklist</h2>
+<p>I only want the best for my family and my commits, and that&rsquo;s why I choose an interactive pre-commit checklist. Not only is it fun to use, it helps to keep my projects safe from unexpected off-spec mistakes!</p>
+<p>It&rsquo;s so easy! I just write a bash script that can read user input, and plop it into <code>.git/hooks</code> as a file named <code>pre-commit</code>. Then I do <code>chmod +x .git/hooks/pre-commit</code> to make it executable, and I&rsquo;m done!</p>
+<p>Oh look, here comes an example bash script now!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/sh
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;Would you like to play a game?&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Read user input, assign stdin to keyboard</span>
+</span></span><span style="display:flex;"><span>exec &lt; /dev/tty
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> read -p <span style="color:#e6db74">&#34;Have you double checked that only relevant files were added? (Y/n) &#34;</span> yn; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">case</span> $yn in
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">[</span>Yy<span style="color:#f92672">]</span> <span style="color:#f92672">)</span> break;;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">[</span>Nn<span style="color:#f92672">]</span> <span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Please ensure the right files were added!&#34;</span>; exit 1;;
+</span></span><span style="display:flex;"><span>        * <span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Please answer y (yes) or n (no):&#34;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">esac</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> read -p <span style="color:#e6db74">&#34;Has the documentation been updated? (Y/n) &#34;</span> yn; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">case</span> $yn in
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">[</span>Yy<span style="color:#f92672">]</span> <span style="color:#f92672">)</span> break;;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">[</span>Nn<span style="color:#f92672">]</span> <span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Please add or update the docs!&#34;</span>; exit 1;;
+</span></span><span style="display:flex;"><span>        * <span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Please answer y (yes) or n (no):&#34;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">esac</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> read -p <span style="color:#e6db74">&#34;Do you know which issue or PR numbers to reference? (Y/n) &#34;</span> yn; <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">case</span> $yn in
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">[</span>Yy<span style="color:#f92672">]</span> <span style="color:#f92672">)</span> break;;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">[</span>Nn<span style="color:#f92672">]</span> <span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Better go check those tracking numbers!&#34;</span>; exit 1;;
+</span></span><span style="display:flex;"><span>        * <span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Please answer y (yes) or n (no):&#34;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">esac</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>exec &lt;&amp;-
+</span></span></code></pre></div><h2 id="take-my-money">Take my money</h2>
+<p>Don&rsquo;t delay! Take advantage <em>right now</em> of this generous <em>one-time offer!</em> An interactive pre-commit hook checklist can be yours, today, for the low, low price of&hellip; free? Wait, who wrote this script?</p>
+]]></content></entry></feed>

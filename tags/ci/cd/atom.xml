@@ -1,0 +1,1138 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Ci/Cd on victoria.dev</title><link href="https://victoria.dev/tags/ci/cd/feed.xml" rel="self"/><link href="https://victoria.dev/tags/ci/cd/"/><updated>2022-02-28T06:37:48-06:00</updated><id>https://victoria.dev/tags/ci/cd/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Git branching for small teams</title><link href="https://victoria.dev/posts/git-branching-for-small-teams/"/><id>https://victoria.dev/posts/git-branching-for-small-teams/</id><author><name>Victoria Drake</name></author><published>2022-02-28T06:37:48-06:00</published><updated>2022-02-28T06:37:48-06:00</updated><content type="html"><![CDATA[<p>Here&rsquo;s a practice I use personally and encourage within my open source projects and any small teams I run for work. I&rsquo;ve seen major elements of it presented under a few different names: <a href="https://trunkbaseddevelopment.com/short-lived-feature-branches/">Short-Lived Feature Branch</a> flow, <a href="https://docs.github.com/en/get-started/quickstart/github-flow">GitHub flow</a> (not to be confused with GitFlow), and <a href="https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow">Feature Branch Workflow</a> are some. Having implemented features I like from all of these with different teams over the years, I&rsquo;ll describe the resulting process that I&rsquo;ve found works best for small teams of about 5-12 people.</p>
+<h2 id="a-protected-main-branch">A protected main branch</h2>
+<p>To support continuous delivery, no human should have direct push permissions on your <code>master</code> branch. If you develop on GitHub, the latest tag of this branch gets deployed when you <a href="https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release">create a release</a> &ndash; which is hopefully very often, and very automated.</p>
+<h2 id="one-issue-one-branch-one-pr">One issue, one branch, one PR</h2>
+<p>You&rsquo;re already doing a great job of tracking future features and current bugs as issues (right?). To take a quick aside, an issue is a well-defined piece of work that can be merged to the main branch and deployed without breaking anything. It could be a new piece of functionality, a button component update, or a bug fix.</p>
+<figure><img src="/posts/git-branching-for-small-teams/cover.png"><figcaption>
+      <h4>Author&#39;s illustration of issue branches and releases from master.</h4>
+    </figcaption>
+</figure>
+
+<p>A short-lived branch-per-issue helps ensure that its resulting pull request doesn&rsquo;t get too large, making it unwieldy and hard to review carefully. The definition of &ldquo;short&rdquo; varies depending on the team or project&rsquo;s development velocity: for a small team producing a commercial app (like a startup), the time from issue branch creation to PR probably won&rsquo;t exceed a week. For open source projects like the <a href="https://github.com/OWASP/wstg">OWASP WSTG</a> that depends on volunteers working around busy schedules, branches may live for a few weeks to a few months, depending on the contributor. Generally, strive to iterate in as little time as possible.</p>
+<p>Here&rsquo;s what this looks like practically. For an issue named <strong>(#28) Add user settings page</strong>, check out a new branch from <code>master</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Get all the latest work locally</span>
+</span></span><span style="display:flex;"><span>git checkout master
+</span></span><span style="display:flex;"><span>git pull
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Start your new branch from master</span>
+</span></span><span style="display:flex;"><span>git checkout -b 28/add-settings-page
+</span></span></code></pre></div><p>Work on the issue, and periodically merge <code>master</code> to fix and avoid other conflicts:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Commit to your issue branch</span>
+</span></span><span style="display:flex;"><span>git commit ...
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get the latest work on master</span>
+</span></span><span style="display:flex;"><span>git checkout master
+</span></span><span style="display:flex;"><span>git pull
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Return to your issue branch and merge in master</span>
+</span></span><span style="display:flex;"><span>git checkout 28/add-settings-page
+</span></span><span style="display:flex;"><span>git merge master
+</span></span></code></pre></div><p>You may prefer to use rebasing instead of merging in <code>master</code>. This happens to be my personal preference as well, however, I&rsquo;ve found that people generally seem to have a harder time wrapping their heads around how rebasing works than they do with merging. Interactive rebasing can easily introduce confusing errors, and rewriting history can be confusing to begin with. Since I&rsquo;m all about reducing cognitive load in developers&rsquo; processes in general, I recommend using a merge strategy.</p>
+<p>When the issue work is ready to PR, open the request against <code>master</code>. Automated tests run. Teammates review the work (using <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request#adding-line-comments-to-a-pull-request">inline comments and suggestions</a> if you&rsquo;re on GitHub). Depending on the project, you may deploy a preview version as well.</p>
+<p>Once everything checks out, the PR is merged, the issue is closed, and the branch is deleted.</p>
+<h2 id="keep-it-clean">Keep it clean</h2>
+<p>Some common pitfalls I&rsquo;ve seen that can undermine this flow are:</p>
+<ol>
+<li><strong>Creating feature branches off of other feature/issue branches.</strong> This is a result of poor organization and prioritization. To avoid confusing conflicts and dependencies, always branch off the most up-to-date <code>master</code>.</li>
+<li><strong>Letting the issue branch live <em>just a little longer</em>.</strong> This results in scope creep and huge, confusing PRs that take a lot of time and mental effort to review. Keep branches tightly scoped to the one issue they&rsquo;re meant to close.</li>
+<li><strong>Not deleting merged branches.</strong> There&rsquo;s no reason to leave them about &ndash; all the work is in <code>master</code>. Not removing branches that are stale or have already been merged can cause confusion and make it more difficult than necessary to differentiate new ones.</li>
+</ol>
+<p>If this sounds like a process you&rsquo;d use, or if you have anything to add, <a href="https://webmention.io/victoria.dev/webmention">let me know via Webmention!</a></p>
+]]></content></entry><entry><title type="html">Leading with a cybersecurity mindset</title><link href="https://victoria.dev/posts/leading-with-a-cybersecurity-mindset/"/><id>https://victoria.dev/posts/leading-with-a-cybersecurity-mindset/</id><author><name>Victoria Drake</name></author><published>2021-07-27T04:26:26-04:00</published><updated>2021-07-27T04:26:26-04:00</updated><content type="html"><![CDATA[<p>Times and technologies change, but a few good ideas are still the same. With consistent application, a handful of wise practices can help deter a slew of cybersecurity attacks. While implementation differs across applications, learning to lead development teams with a cybersecurity mindset boils down to a few fundamental concepts:</p>
+<ul>
+<li>Be a bad guy</li>
+<li>Fail secure</li>
+<li>Practice software minimalism</li>
+</ul>
+<p>A slight change in thinking can create a sea change in security. Let&rsquo;s examine how.</p>
+<h2 id="lets-be-bad-guys">Let&rsquo;s be bad guys</h2>
+<p>When it comes to cybersecurity, I take a pragmatic approach. There aren&rsquo;t enough sheaves of NIST recommendations in the world to help you if you aren&rsquo;t accustomed to thinking like the bad guy. To best lead your team to defend against hacking, first know how to hack yourself.</p>
+<p>A perusal of the resources linked at the end of this article can help you with a starting point, as will general consideration of your application through the lens of an outsider. Are there potentially vulnerable forms or endpoints you might examine first? Is there someone at your company you could call on the phone and surreptitiously get helpful information from? Defense is a difficult position to hold in any battle. If you aren&rsquo;t the first person to consider how your application might be attacked, you&rsquo;ve already lost.</p>
+<p>Develop your sense of how to be the bad guy. Every component of software, every interaction, every bit of data, can be useful to the bad guy. The more you hone your ability to consider how a thing can be used for ill, the better able you&rsquo;ll be to protect it.</p>
+<p>When looking at information, ask, &ldquo;How can I use this information to gain access to more important information?&rdquo; When considering a user story, ask, &ldquo;What happens if I do something unexpected?&rdquo;</p>
+<p>In all things, channel your inner four-year-old. Push all the buttons.</p>
+<p>Playing offense on your own application lets you fix vulnerabilities before they happen. That&rsquo;s a luxury you won&rsquo;t get from the real bad guys.</p>
+<h2 id="fail-secure">Fail secure</h2>
+<p>Every part of a system will fail with 100% certainty on a long enough timescale. Thinking a step ahead can help to ensure that when it does, the one failure doesn&rsquo;t leave your application wide open to others.</p>
+<p>To fail secure means that when a system or code fails to perform or does something unexpected, any follow-on effects are halted rather than permitted. This likely takes many forms in many areas of your application, so here are the more common ones I see.</p>
+<h3 id="permissions">Permissions</h3>
+<p>When gating access, deny by default. This most often takes the form of whitelisting, or colloquially, &ldquo;no one is allowed, except for the people on this list.&rdquo; In terms of code flow, everything should be denied first. Only allow any particular action after proper credentials are verified.</p>
+<h3 id="automation">Automation</h3>
+<p>For automated workflows such as deployments, ensure each step is dependent on the last. Don&rsquo;t make the (rather common) mistake of connecting actions to triggers that can kick off a workflow before all the necessary pieces are in place. With the smorgasbord of cloud and CI tools available, failure events may not be obvious or noisy.</p>
+<p>Be careful to avoid running flows on timed triggers unless they are completely self-contained. Workflows that unpredictably run faster or slower than expected can throw a whole series of events into disarray, leaving processes half-run and states insecure.</p>
+<h3 id="exception-handling">Exception handling</h3>
+<p>Errors are a frequent gold mine for attackers. Ensure your team&rsquo;s code returns &ldquo;pretty&rdquo; errors with content that you can control. &ldquo;Ugly&rdquo; errors, returned by default by databases, frameworks, etc, try to be helpful by providing lots of debugging information that can be extremely helpful to a hacker.</p>
+<h2 id="software-minimalism">Software minimalism</h2>
+<p>If your development team doesn&rsquo;t currently have one central source of information when it comes to keeping track of all your application components, here&rsquo;s a tip you really need. In software security, less is more (secure).</p>
+<p>The more modular an application is, the better its various components can be isolated, protected, or changed out. With a central source of truth for what all those components are (and preferably one that doesn&rsquo;t rely on manual updates), it&rsquo;s easier to ensure that your application is appropriately minimalist. Dependency managers, such as Pipenv, are a great example.</p>
+<p>Few industries besides technology seem to have produced as many acronyms. Philosophies like Don&rsquo;t Repeat Yourself (DRY), Keep It Simple Stupid (KISS), You Aren&rsquo;t Going to Need It (YAGNI), and countless other methodologies all build upon one very basic principle: minimalism. It&rsquo;s a principle that warrants incorporation in every aspect of an application.</p>
+<p>There&rsquo;s a reason it takes little skill to shoot the broad side of a barn: barns are rather large, and there&rsquo;s quite a lot of one to hit. Applications bloated by excessive third-party components, repeated code, and unnecessary assets make similarly large targets. The more there is to maintain and protect, the easier it is to hit.</p>
+<p>Like Marie Kondo&rsquo;s method for dispatching the inevitable creep of household clutter, you can reduce your application&rsquo;s attack surface by considering each component and asking whether it brings you joy. Do all of this component&rsquo;s functions benefit your application? Is there unnecessary redundancy here? Assess each component and decide how integral it is to the application. Every component is a risk; your job is to decide if it&rsquo;s a worthwhile risk.</p>
+<h2 id="bonus-your-personal-yodas">Bonus: your personal Yodas</h2>
+<p>With the basic principles of learning to think like the bad guy, failing securely, and practicing software minimalism, you&rsquo;re now ready to steep in the specifics. Keeping the fundamentals in mind can help you lead your team to focus your cybersecurity efforts where it matters most.</p>
+<p>No Jedi succeeds without a little help from friends. Whether you&rsquo;re a beginner in the battle against the dark side or a twice-returned-home Jedi Master, these resources provide continuing training and guidance.</p>
+<ul>
+<li><a href="https://owasp.org/www-project-web-security-testing-guide/">Open Web Application Security Project</a></li>
+<li><a href="https://www.nist.gov/cybersecurity">National Institute of Standards and Technology (NIST): Cybersecurity</a></li>
+<li><a href="https://owasp.org/www-project-proactive-controls/">OWASP Proactive Controls</a></li>
+<li><a href="https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/">OWASP Secure Coding Practices</a></li>
+<li><a href="https://owasp.org/www-project-web-security-testing-guide/">OWASP Web Security Testing Guide</a></li>
+<li><a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-30r1.pdf">NIST Special Publication 800-30: Guide for conducting risk assessments</a></li>
+<li><a href="https://www.nsa.gov/Press-Room/Cybersecurity-Advisories-Guidance/">NSA’S Cybersecurity Advisories &amp; Technical Guidance</a></li>
+</ul>
+<p>I hope you find these thought systems helpful! If you find your interest piqued as well, you can read more of what <a href="/tags/cybersecurity">I&rsquo;ve written about cybersecurity here</a>.</p>
+]]></content></entry><entry><title type="html">How to create a self-documenting Makefile</title><link href="https://victoria.dev/posts/how-to-create-a-self-documenting-makefile/"/><id>https://victoria.dev/posts/how-to-create-a-self-documenting-makefile/</id><author><name>Victoria Drake</name></author><published>2020-08-05T08:55:19-04:00</published><updated>2020-08-05T08:55:19-04:00</updated><content type="html"><![CDATA[<p>My new favorite way to completely underuse a Makefile? Creating personalized, per-project repository workflow command aliases that you can check in.</p>
+<p>Can a Makefile improve your DevOps and keep developers happy? How awesome would it be if a new developer working on your project didn&rsquo;t start out by copying and pasting commands from your README? What if instead of:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>pip3 install pipenv
+</span></span><span style="display:flex;"><span>pipenv shell --python 3.8
+</span></span><span style="display:flex;"><span>pipenv install --dev
+</span></span><span style="display:flex;"><span>npm install
+</span></span><span style="display:flex;"><span>pre-commit install --install-hooks
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># look up how to install Framework X...</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># copy and paste from README...</span>
+</span></span><span style="display:flex;"><span>npm run serve
+</span></span></code></pre></div><p>&hellip; you could just type:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>make start
+</span></span></code></pre></div><p>&hellip;and then start working?</p>
+<h2 id="making-a-difference">Making a difference</h2>
+<p>I use <code>make</code> every day to take the tedium out of common development activities like updating programs, installing dependencies, and testing. To do all this with a Makefile (GNU make), we use <a href="https://www.gnu.org/software/make/manual/make.html#Rules">Makefile rules</a> and <a href="https://www.gnu.org/software/make/manual/make.html#Recipes">recipes</a>. Similar parallels exist for POSIX flavor make, like <a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html#tag_20_76_13_04">Target Rules</a>; here&rsquo;s a <a href="https://nullprogram.com/blog/2017/08/20/">great article</a> on POSIX-compatible Makefiles.</p>
+<p>Here&rsquo;s some examples of things we can <code>make</code> easier (sorry):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Makefile" data-lang="Makefile"><span style="display:flex;"><span><span style="color:#a6e22e">update</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Do apt upgrade and autoremove
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    sudo apt update <span style="color:#f92672">&amp;&amp;</span> sudo apt upgrade -y
+</span></span><span style="display:flex;"><span>    sudo apt autoremove -y
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">env</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    pip3 install pipenv
+</span></span><span style="display:flex;"><span>    pipenv shell --python 3.8
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">install</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Install or update dependencies
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    pipenv install --dev
+</span></span><span style="display:flex;"><span>    npm install
+</span></span><span style="display:flex;"><span>    pre-commit install --install-hooks
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">serve</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Run the local development server
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    hugo serve --enableGitInfo --disableFastRender --environment development
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">initial</span><span style="color:#f92672">:</span> update env install serve <span style="color:#75715e">## Install tools and start development server
+</span></span></span></code></pre></div><p>Now we have some command-line aliases that you can check in! Great idea! If you&rsquo;re wondering what&rsquo;s up with that weird <code>##</code> comment syntax, it gets better.</p>
+<h2 id="a-self-documenting-makefile">A self-documenting Makefile</h2>
+<p>Aliases are great, if you remember what they all are and what they do without constantly typing <code>cat Makefile</code>. Naturally, you need a <code>help</code> command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Makefile" data-lang="Makefile"><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> help
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">help</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Show this help
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    @egrep -h <span style="color:#e6db74">&#39;\s##\s&#39;</span> <span style="color:#66d9ef">$(</span>MAKEFILE_LIST<span style="color:#66d9ef">)</span> | sort | awk <span style="color:#e6db74">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</span></span></code></pre></div><p>With a little command-line magic, this <code>egrep</code> command takes the output of <code>MAKEFILE_LIST</code>, sorts it, and uses <code>awk</code> to find strings that follow the <code>##</code> pattern. It then prints a helpful formatted version of the comments.</p>
+<p>We&rsquo;ll put it at the top of the file so it&rsquo;s the default target. Now to see all our handy shortcuts and what they do, we just run <code>make</code>, or <code>make help</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>help                 Show this help
+</span></span><span style="display:flex;"><span>initial              Install tools and start development server
+</span></span><span style="display:flex;"><span>install              Install or update dependencies
+</span></span><span style="display:flex;"><span>serve                Run the local development server
+</span></span><span style="display:flex;"><span>update               Do apt upgrade and autoremove
+</span></span></code></pre></div><p>Now we have our very own personalized and project-specific CLI tool!</p>
+<p>The possibilities for improving your DevOps flow with a self-documenting Makefile are almost endless. You can use one to simplify any workflow and produce some very happy developers.</p>
+<p>Please enjoy the (live!) Makefile I use to manage and develop this Hugo site. I hope it inspires you!</p>
+<details>
+<summary>My Hugo site Makefile</summary>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Makefile" data-lang="Makefile"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>SHELL <span style="color:#f92672">:=</span> /bin/bash
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.POSIX</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> help env install upgrade-hugo serve build start initial
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">help</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Show this help
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	@egrep -h <span style="color:#e6db74">&#39;\s##\s&#39;</span> <span style="color:#66d9ef">$(</span>MAKEFILE_LIST<span style="color:#66d9ef">)</span> | sort | awk <span style="color:#e6db74">&#39;BEGIN {FS = &#34;:.*?## &#34;}; {printf &#34;\033[36m%-20s\033[0m %s\n&#34;, $$1, $$2}&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">env</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>	pip3 install pipenv
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">shell</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Enter the virtual environment
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	pipenv shell
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">install</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Install or update dependencies
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	pipenv install --dev
+</span></span><span style="display:flex;"><span>	pre-commit install --install-hooks
+</span></span><span style="display:flex;"><span>	npm install
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>HUGO_VERSION<span style="color:#f92672">:=</span><span style="color:#66d9ef">$(</span>shell curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep <span style="color:#e6db74">&#39;tag_name&#39;</span> | cut -d <span style="color:#e6db74">&#39;&#34;&#39;</span> -f <span style="color:#ae81ff">4</span> | cut -c 2-<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">upgrade-hugo</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Get the latest Hugo
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	mkdir tmp/ <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	cd tmp/ <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	curl -sSL https://github.com/gohugoio/hugo/releases/download/v<span style="color:#66d9ef">$(</span>HUGO_VERSION<span style="color:#66d9ef">)</span>/hugo_extended_<span style="color:#66d9ef">$(</span>HUGO_VERSION<span style="color:#66d9ef">)</span>_Linux-64bit.tar.gz | tar -xvzf- <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	sudo mv hugo /usr/local/bin/ <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	cd .. <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	rm -rf tmp/
+</span></span><span style="display:flex;"><span>	hugo version
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">dev</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Run the local development server
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	git submodule update --init --recursive
+</span></span><span style="display:flex;"><span>	hugo serve --enableGitInfo --disableFastRender --environment development
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">future</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Run the local development server in the future
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">build</span><span style="color:#f92672">:</span> <span style="color:#75715e">## Build site
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	hugo --minify --cleanDestinationDir
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">initial</span><span style="color:#f92672">:</span> env install upgrade-hugo serve <span style="color:#75715e">## Install tools and start development server
+</span></span></span></code></pre></div></details>
+]]></content></entry><entry><title type="html">Go automate your GitHub profile README</title><link href="https://victoria.dev/posts/go-automate-your-github-profile-readme/"/><id>https://victoria.dev/posts/go-automate-your-github-profile-readme/</id><author><name>Victoria Drake</name></author><published>2020-07-25T10:51:15-04:00</published><updated>2020-07-25T10:51:15-04:00</updated><content type="html"><![CDATA[<p>GitHub&rsquo;s new profile page README feature is having the wonderful effect of bringing some personality to the Myspace pages of the developer Internet. Though Markdown lends itself best to standard static text content, that&rsquo;s not stopping creative folks from working to create a next-level README. You can include GIFs and images to add some motion and pizazz (they&rsquo;re covered in <a href="https://github.github.com/gfm/">GitHub Flavor Markdown</a>), but I&rsquo;m thinking of something a little more dynamic.</p>
+<p>At front-and-center on your GitHub profile, your README is a great opportunity to let folks know what you&rsquo;re about, what you find important, and to showcase some highlights of your work. You might like to show off your latest repositories, tweet, or blog post. Keeping it up to date doesn&rsquo;t have to be a pain either, thanks to continuous delivery tools like GitHub Actions.</p>
+<p>My current README refreshes itself daily with a link to my latest blog post. Here&rsquo;s how I&rsquo;m creating a self-updating <code>README.md</code> with Go and GitHub actions.</p>
+<h2 id="reading-and-writing-files-with-go">Reading and writing files with Go</h2>
+<p>I&rsquo;ve been writing a lot of Python lately, but for some things I really like using Go. You could say it&rsquo;s my go-to language for just-for-<code>func</code> projects. Sorry. Couldn&rsquo;t stop myself.</p>
+<p>To create my README.md, I&rsquo;m going to get some static content from an existing file, mash it together with some new dynamic content that we&rsquo;ll generate with Go, then bake the whole thing at 400 degrees until something awesome comes out.</p>
+<p>Here&rsquo;s how we read in a file called <code>static.md</code> and put it in <code>string</code> form:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// Unwrap Markdown content</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">content</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">ioutil</span>.<span style="color:#a6e22e">ReadFile</span>(<span style="color:#e6db74">&#34;static.md&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;cannot read file: %v&#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Make it a string</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">stringyContent</span> <span style="color:#f92672">:=</span> string(<span style="color:#a6e22e">content</span>)
+</span></span></code></pre></div><p>The possibilities for your dynamic content are only limited by your imagination! Here, I&rsquo;ll use the <a href="https://github.com/mmcdole/gofeed"><code>github.com/mmcdole/gofeed</code> package</a> to read the RSS feed from my blog and get the newest post.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">fp</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">gofeed</span>.<span style="color:#a6e22e">NewParser</span>()
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">feed</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">fp</span>.<span style="color:#a6e22e">ParseURL</span>(<span style="color:#e6db74">&#34;https://victoria.dev/index.xml&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;error getting feed: %v&#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Get the freshest item</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">rssItem</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">feed</span>.<span style="color:#a6e22e">Items</span>[<span style="color:#ae81ff">0</span>]
+</span></span></code></pre></div><p>To join these bits together and produce stringy goodness, we use <a href="https://golang.org/pkg/fmt/#Sprintf"><code>fmt.Sprintf()</code></a> to create a formatted string.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// Whisk together static and dynamic content until stiff peaks form</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">blog</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;Read my latest blog post: **[&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">rssItem</span>.<span style="color:#a6e22e">Title</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;](&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">rssItem</span>.<span style="color:#a6e22e">Link</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)**&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">data</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;%s\n%s\n&#34;</span>, <span style="color:#a6e22e">stringyContent</span>, <span style="color:#a6e22e">blog</span>)
+</span></span></code></pre></div><p>Then to create a new file from this mix, we use <a href="https://golang.org/pkg/os/#Create"><code>os.Create()</code></a>. There are <a href="https://www.joeshaw.org/dont-defer-close-on-writable-files/">more things to know about deferring <code>file.Close()</code></a>, but we don&rsquo;t need to get into those details here. We&rsquo;ll add <code>file.Sync()</code> to ensure our README gets written.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// Prepare file with a light coating of os</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Create</span>(<span style="color:#e6db74">&#34;README.md&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">Close</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Bake at n bytes per second until golden brown</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">data</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">Sync</span>()
+</span></span></code></pre></div><p>View the full code <a href="https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/update/main.go">here in my README repository</a>.</p>
+<p>Mmmm, doesn&rsquo;t that smell good? 🍪 Let&rsquo;s make this happen on the daily with a GitHub Action.</p>
+<h2 id="running-your-go-program-on-a-schedule-with-actions">Running your Go program on a schedule with Actions</h2>
+<p>You can create a GitHub Action workflow that <a href="https://docs.github.com/en/actions/reference/events-that-trigger-workflows">triggers</a> both on a push to your <code>master</code> branch as well as on a daily schedule. Here&rsquo;s a slice of the <code>.github/workflows/update.yaml</code> that defines this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">on</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">push</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">branches</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">master</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">schedule</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">cron</span>: <span style="color:#e6db74">&#39;0 11 * * *&#39;</span>
+</span></span></code></pre></div><p>To run the Go program that rebuilds our README, we first need a copy of our files. We use <code>actions/checkout</code> for that:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">steps</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">🍽️ Get working copy</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@master</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">fetch-depth</span>: <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>This step runs our Go program:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">🍳 Shake &amp; bake README</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    cd ${GITHUB_WORKSPACE}/update/
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    go run main.go</span>
+</span></span></code></pre></div><p>Finally, we push the updated files back to our repository. Learn more about the variables shown at <a href="https://docs.github.com/en/actions/configuring-and-managing-workflows/using-variables-and-secrets-in-a-workflow">Using variables and secrets in a workflow</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">🚀 Deploy</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git config user.name &#34;${GITHUB_ACTOR}&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git config user.email &#34;${GITHUB_ACTOR}@users.noreply.github.com&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git add .
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git commit -am &#34;Update dynamic content&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git push --all -f https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git</span>
+</span></span></code></pre></div><p>View the full code for this Action workflow <a href="https://github.com/victoriadrake/victoriadrake/blob/535da81efd291e40374307609a9fa66e08f4985c/.github/workflows/update.yaml">here in my README repository</a>.</p>
+<h2 id="go-forth-and-auto-update-your-readme">Go forth and auto-update your README</h2>
+<p>Congratulations and welcome to the cool kids&rsquo; club! You now know how to build an auto-updating GitHub profile README. You may now go forth and add all sorts of neat dynamic elements to your page &ndash; just go easy on the GIFs, okay?</p>
+]]></content></entry><entry><title type="html">Look mom, I&amp;#39;m a GitHub Action Hero</title><link href="https://victoria.dev/archive/look-mom-im-a-github-action-hero/"/><id>https://victoria.dev/archive/look-mom-im-a-github-action-hero/</id><author><name>Victoria Drake</name></author><published>2020-06-27T09:06:33-04:00</published><updated>2020-06-27T09:06:33-04:00</updated><content type="html"><![CDATA[<p>GitHub recently interviewed me for their blog editorial entitled <a href="https://github.blog/2020-06-26-github-action-hero-victoria-drake/">GitHub Action Hero: Victoria Drake</a>. Here&rsquo;s a behind-the-scenes peek at the original interview questions and my answers.</p>
+<h2 id="what-is-the-name-of-your-action-please-include-a-link-too">What is the name of your Action? Please include a link too.</h2>
+<p>Among the several Actions I&rsquo;ve built, I have two current favorites. One is <a href="https://github.com/victoriadrake/hugo-remote">hugo-remote</a>, which lets you continuously deploy a Hugo static site from a private source repository to a public GitHub Pages repository. This keeps the contents of the source repository private, such as your unreleased drafts, while still allowing you to have a public open source site using GitHub Pages.</p>
+<p>The second is <a href="https://github.com/victoriadrake/django-security-check">django-security-check</a>. It&rsquo;s an effortless way to continuously check that your production Django application is free from a variety of security misconfigurations. You can think of it as your little CI/CD helper for busy projects &ndash; a security linter!</p>
+<h2 id="tell-us-a-little-bit-more-about-yourselfhow-did-you-get-started-in-software-tools">Tell us a little bit more about yourself—how did you get started in software tools?</h2>
+<p>When I was a kid, I spent several summer vacations coding a huge medieval fantasy world MUD (Multi-User Dungeon, like a multiplayer role-playing game) written in LPC, with friends. It was entirely text-based, and built and played via Telnet. I fell in love with the terminal and learned a lot about object-oriented programming and prototype-based programming early on.</p>
+<p>I became a freelance developer and had the privilege of working on a wide variety of client projects. Realizing the difficulty that companies have with hiring experienced developers, I built <a href="https://ApplyByAPI.com">ApplyByAPI.com</a> to help. As you might imagine, it allows candidates to apply for jobs via API, instead of emailing a resume. It&rsquo;s based on the Django framework, so in the process, I learned even more about building reusable units of software.</p>
+<p>When I became a co-author and a core maintainer for the <a href="https://github.com/OWASP/wstg">Open Web Application Security Project (OWASP) Web Security Testing Guide (WSTG)</a>, I gained an even broader appreciation for how a prototype-based, repeatable approach can help build secure web applications. Organizations worldwide consider the WSTG the foremost open source resource for testing the security of web applications. We&rsquo;ve applied this thinking via the use of GitHub Actions in our repository &ndash; I&rsquo;ll tell you more about that later.</p>
+<p>Whether I&rsquo;m creating an open source tool or leading a development team, my childhood experience still informs how I think about programming today. I strive to create repeatable units of software like GitHub Actions &ndash; only now, I make them for large enterprises in the real world!</p>
+<h2 id="what-is-the-story-behind-your-built-github-action-why-did-you-build-this">What is the story behind your built GitHub Action? (Why did you build this?)</h2>
+<p>Developers take on a lot of responsibility when it comes to building secure applications these days. I&rsquo;m a full-time senior software developer at a cybersecurity company. I&rsquo;ve found that I&rsquo;m maximally productive when I create systems and processes that help myself and my team make desired outcomes inevitable. So I spend my free time building tools that make it easy for other developers to build secure software as well. My Actions help to automate contained, repeatable units of work that can make a big difference in a developer&rsquo;s day.</p>
+<h2 id="do-you-have-future-plans-for-this-or-other-actions">Do you have future plans for this or other Actions?</h2>
+<p>Yes! I&rsquo;m always finding ways for tools like GitHub Actions to boost the velocity of technical teams, whether at work or in my open source projects. Remember the Open Web Application Security Project? In the work I&rsquo;ve lead with OWASP, I&rsquo;ve championed the effort to increase automation using GitHub Actions to maintain quality, securely deploy new versions to the web, and even build PDFs of the WSTG. We&rsquo;re constantly looking into new ways that GitHub Actions can make our lives easier and our readers&rsquo; projects more secure.</p>
+<h2 id="what-has-been-your-favorite-feature-of-github-actions">What has been your favorite feature of GitHub Actions?</h2>
+<p>I like that I can build an Action using familiar and portable technologies, like Docker. Actions are easy for collaborators to work on too, since in the case of a Dockerized Action, you can use any language your team is comfortable with. This is especially useful in large organizations with polyglot teams and environments. There aren&rsquo;t any complicated dependencies for running these portable tasks, and you don&rsquo;t need to learn any special frameworks to get started.</p>
+<p>One of my first blog posts about GitHub Actions even describes how I used an Action to run a Makefile! This is especially useful for large legacy applications that want to modernize their pipeline by using GitHub Actions.</p>
+<h2 id="what-are-the-biggest-challenges-youve-faced-while-building-your-github-action">What are the biggest challenges you’ve faced while building your GitHub Action?</h2>
+<p>The largest challenge of GitHub Actions isn&rsquo;t really in GitHub Actions, but in the transition of legacy software and company culture.</p>
+<p>Migrating legacy software is always challenging, particularly with large legacy applications. Moving to modern CI/CD processes requires changes at the software level, team level, and even a shift in thinking when it comes to individual developers. It can help to have a tool like GitHub Actions, which is at once seamlessly modern and familiar, when transitioning legacy code to a modern pipeline.</p>
+<h2 id="anything-else-you-would-like-to-share-about-your-experience-any-stories-or-lessons-learned-through-building-your-action">Anything else you would like to share about your experience? Any stories or lessons learned through building your Action?</h2>
+<p>I&rsquo;m happiest when I&rsquo;m solving a challenge that makes developing secure software less challenging in the future, both for myself and for the technology organization I&rsquo;m leading. With tools like GitHub Actions, a lot of mental overhead can be offloaded to automatic processes &ndash; like getting a whole other brain, for free! This can massively help organizations that are ready to scale up their development output.</p>
+<p>In the realm of cybersecurity, not only does creating portable and reusable software make developers&rsquo; lives easier, it helps to make whole workflows repeatable, which in turn makes software development processes more secure. With smart processes in place, technical teams are happier. As an inevitable result, they&rsquo;ll build better software for customers, too.</p>
+]]></content></entry><entry><title type="html">Multithreaded Python: slithering through an I/O bottleneck</title><link href="https://victoria.dev/posts/multithreaded-python-slithering-through-an-i/o-bottleneck/"/><id>https://victoria.dev/posts/multithreaded-python-slithering-through-an-i/o-bottleneck/</id><author><name>Victoria Drake</name></author><published>2020-02-28T09:31:02-05:00</published><updated>2020-02-28T09:31:02-05:00</updated><content type="html"><![CDATA[<p>I recently developed a project that I called <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>: a multithreaded link checker written in Python. Unlike many Python site crawlers I found while researching, Hydra uses only standard libraries, with no external dependencies like BeautifulSoup. It&rsquo;s intended to be run as part of a CI/CD process, so part of its success depended on being fast.</p>
+<p>Multiple threads in Python is a bit of a bitey subject (not sorry) in that the Python interpreter doesn&rsquo;t actually let multiple threads execute at the same time. Python&rsquo;s <a href="https://wiki.python.org/moin/GlobalInterpreterLock">Global Interpreter Lock</a>, or GIL, prevents multiple threads from executing Python bytecodes at once. Each thread that wants to execute must first wait for the GIL to be released by the currently executing thread. The GIL is pretty much the microphone in a low-budget conference panel, except where no one gets to shout.</p>
+<p>This has the advantage of preventing <a href="https://en.wikipedia.org/wiki/Race_condition">race conditions</a>. It does, however, lack the performance advantages afforded by running multiple tasks in parallel. (If you&rsquo;d like a refresher on concurrency, parallelism, and multithreading, see <a href="/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/">Concurrency, parallelism, and the many threads of Santa Claus</a>.) While I prefer Go for its convenient first-class primitives that support concurrency (see <a href="https://tour.golang.org/concurrency/1">Goroutines</a>), this project&rsquo;s recipients were more comfortable with Python. I took it as an opportunity to test and explore!</p>
+<p>Simultaneously performing multiple tasks in Python isn&rsquo;t impossible; it just takes a little extra work. For Hydra, the main advantage is in overcoming the input/output (I/O) bottleneck.</p>
+<p>In order to get web pages to check, Hydra needs to go out to the Internet and fetch them. When compared to tasks that are performed by the CPU alone, going out over the network is comparatively slower. How slow?</p>
+<p>Here are approximate timings for tasks performed on a typical PC:</p>
+<table>
+  <thead>
+      <tr>
+          <th></th>
+          <th>Task</th>
+          <th>Time</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>CPU</td>
+          <td>execute typical instruction</td>
+          <td>1/1,000,000,000 sec = 1 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L1 cache memory</td>
+          <td>0.5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>branch misprediction</td>
+          <td>5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L2 cache memory</td>
+          <td>7 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>Mutex lock/unlock</td>
+          <td>25 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>fetch from main memory</td>
+          <td>100 nanosec</td>
+      </tr>
+      <tr>
+          <td>Network</td>
+          <td>send 2K bytes over 1Gbps network</td>
+          <td>20,000 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>read 1MB sequentially from memory</td>
+          <td>250,000 nanosec</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>fetch from new disk location (seek)</td>
+          <td>8,000,000 nanosec   (8ms)</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>read 1MB sequentially from disk</td>
+          <td>20,000,000 nanosec  (20ms)</td>
+      </tr>
+      <tr>
+          <td>Network</td>
+          <td>send packet US to Europe and back</td>
+          <td>150,000,000 nanosec (150ms)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
+<p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
+<p>In Hydra, the task of parsing response data and assembling results into a report is relatively fast, since it all happens on the CPU. The slowest portion of the program&rsquo;s execution, by over six orders of magnitude, is network latency. Not only does Hydra need to fetch packets, but whole web pages! One way of improving Hydra&rsquo;s performance is to find a way for the page fetching tasks to execute without blocking the main thread.</p>
+<p>Python has a couple options for doing tasks in parallel: multiple processes, or multiple threads. These methods allow you to circumvent the GIL and speed up execution in a couple different ways.</p>
+<h2 id="multiple-processes">Multiple processes</h2>
+<p>To execute parallel tasks using multiple processes, you can use Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor"><code>ProcessPoolExecutor</code></a>. A concrete subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a> from the <a href="https://docs.python.org/3/library/concurrent.futures.html"><code>concurrent.futures</code> module</a>, <code>ProcessPoolExecutor</code> uses a pool of processes spawned with the <a href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing"><code>multiprocessing</code> module</a> to avoid the GIL.</p>
+<p>This option uses worker subprocesses that maximally default to the number of processors on the machine. The <code>multiprocessing</code> module allows you to maximally parallelize function execution across processes, which can really speed up compute-bound (or <a href="https://en.wikipedia.org/wiki/CPU-bound">CPU-bound</a>) tasks.</p>
+<p>Since the main bottleneck for Hydra is I/O and not the processing to be done by the CPU, I&rsquo;m better served by using multiple threads.</p>
+<h2 id="multiple-threads">Multiple threads</h2>
+<p>Fittingly named, Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor"><code>ThreadPoolExecutor</code></a> uses a pool of threads to execute asynchronous tasks. Also a subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a>, it uses a defined number of maximum worker threads (at least five by default, according to the formula <code>min(32, os.cpu_count() + 4)</code>) and reuses idle threads before starting new ones, making it pretty efficient.</p>
+<p>Here is a snippet of Hydra with comments showing how Hydra uses <code>ThreadPoolExecutor</code> to achieve parallel multithreaded bliss:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#75715e"># Create the Checker class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Checker</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Queue of links to be checked</span>
+</span></span><span style="display:flex;"><span>    TO_PROCESS <span style="color:#f92672">=</span> Queue()
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Maximum workers to run</span>
+</span></span><span style="display:flex;"><span>    THREADS <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Maximum seconds to wait for HTTP response</span>
+</span></span><span style="display:flex;"><span>    TIMEOUT <span style="color:#f92672">=</span> <span style="color:#ae81ff">60</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, url):
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Create the thread pool</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>pool <span style="color:#f92672">=</span> futures<span style="color:#f92672">.</span>ThreadPoolExecutor(max_workers<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>THREADS)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(self):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Run until the TO_PROCESS queue is empty</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            target_url <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>TO_PROCESS<span style="color:#f92672">.</span>get(block<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, timeout<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># If we haven&#39;t already checked this link</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> target_url[<span style="color:#e6db74">&#34;url&#34;</span>] <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>visited:
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Mark it as visited</span>
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>visited<span style="color:#f92672">.</span>add(target_url[<span style="color:#e6db74">&#34;url&#34;</span>])
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Submit the link to the pool</span>
+</span></span><span style="display:flex;"><span>                job <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>pool<span style="color:#f92672">.</span>submit(self<span style="color:#f92672">.</span>load_url, target_url, self<span style="color:#f92672">.</span>TIMEOUT)
+</span></span><span style="display:flex;"><span>                job<span style="color:#f92672">.</span>add_done_callback(self<span style="color:#f92672">.</span>handle_future)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> Empty:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>            print(e)
+</span></span></code></pre></div><p>You can view the full code in <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&rsquo;s GitHub repository</a>.</p>
+<h2 id="single-thread-to-multithread">Single thread to multithread</h2>
+<p>If you&rsquo;d like to see the full effect, I compared the run times for checking my website between a prototype single-thread program, and the <del>multiheaded</del>multithreaded Hydra.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time python3 slow-link-check.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    17m34.084s
+</span></span><span style="display:flex;"><span>user    11m40.761s
+</span></span><span style="display:flex;"><span>sys     0m5.436s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>time python3 hydra.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    0m15.729s
+</span></span><span style="display:flex;"><span>user    0m11.071s
+</span></span><span style="display:flex;"><span>sys     0m2.526s
+</span></span></code></pre></div><p>The single-thread program, which blocks on I/O, ran in about seventeen minutes. When I first ran the multithreaded version, it finished in 1m13.358s - after some profiling and tuning, it took a little under sixteen seconds. Again, the exact times don&rsquo;t mean all that much; they&rsquo;ll vary depending on factors such as the size of the site being crawled, your network speed, and your program&rsquo;s balance between the overhead of thread management and the benefits of parallelism.</p>
+<p>The more important thing, and the result I&rsquo;ll take any day, is a program that runs some orders of magnitude faster.</p>
+]]></content></entry><entry><title type="html">Breaking bottlenecks 🍾</title><link href="https://victoria.dev/posts/breaking-bottlenecks/"/><id>https://victoria.dev/posts/breaking-bottlenecks/</id><author><name>Victoria Drake</name></author><published>2020-02-25T12:50:29-05:00</published><updated>2020-02-25T12:50:29-05:00</updated><content type="html"><![CDATA[<p><em>I recently gave a lecture on the benefits of building non-blocking processes. This is a write-up of the full talk, minus any &ldquo;ums&rdquo; that may have occurred.</em></p>
+<p>I&rsquo;ve been helping out a group called the Open Web Application Security Project (OWASP). They&rsquo;re a non-profit foundation that produces some of the foremost application testing guides and cybersecurity resources. OWASP&rsquo;s publications, checklists, and reference materials are a help to security professionals, penetration testers, and developers all over the world. Most of the individual teams that create these materials are run almost entirely by volunteers.</p>
+<p>OWASP is a great group doing important work. I&rsquo;ve seen this firsthand as part of the core team that produces the Web Security Testing Guide. However, while OWASP inspires in its large volunteer base, it lacks in the area of central organization.</p>
+<p>This lack of organization was most recently apparent in the group&rsquo;s website, <a href="https://owasp.org">OWASP.org</a>. A big organization with an even bigger website to match, OWASP.org enjoys hundreds of thousands of visitors. Unfortunately, many of its pages - individually managed by disparate projects - are infrequently updated. Some are abandoned. The website as a whole lacks a centralized quality assurance process, and as a result, OWASP.org is peppered with broken links.</p>
+<h2 id="the-trouble-with-broken-links">The trouble with broken links</h2>
+<p>Customers don&rsquo;t like broken links; attackers really do. That&rsquo;s because broken links are a security vulnerability. Broken links can signal opportunities for attacks like <a href="https://edoverflow.com/2017/broken-link-hijacking/">broken link hijacking</a> and <a href="https://www.hackerone.com/blog/Guide-Subdomain-Takeovers">subdomain takeovers</a>. At their least effective, these attacks can be embarrassing; at their worst, severely damaging to businesses and organizations. One OWASP group, the Application Security Verification Standard (ASVS) project, writes about <a href="https://github.com/OWASP/ASVS/blob/d9e0ac99828ef3c1e9233bd8a1f691f2a6958aa3/4.0/en/0x18-V10-Malicious.md#v103-deployed-application-integrity-controls">integrity controls</a> that can help to mitigate the likelihood of these attacks. This knowledge, unfortunately, has not yet propagated throughout the rest of OWASP yet.</p>
+<p>This is the story of how I created a fast and efficient tool to help OWASP solve this problem.</p>
+<h2 id="the-job">The job</h2>
+<p>I took on the task of creating a program that could run as part of a CI/CD process to detect and report broken links. The program needed to:</p>
+<ul>
+<li>Find and enumerate all the broken links on OWASP.org in a report.</li>
+<li>Keep track of the parent pages the broken links were on so they could be fixed.</li>
+<li>Run efficiently as part of a CI/CD pipeline.</li>
+</ul>
+<p>Essentially; I need to build a web crawler.</p>
+<p>My original journey through this process was also in Python, as that was a comfortable language choice for everyone in the OWASP group. Personally, I prefer to use Go for higher performance as it offers more convenient concurrency primitives. Between the task and this talk, I wrote three programs: a prototype single-thread Python program, a multithreaded Python program, and a Go program using goroutines. We&rsquo;ll see a comparison of how each worked out near the end of the talk - first, let&rsquo;s explore how to build a web crawler.</p>
+<h2 id="prototyping-a-web-crawler">Prototyping a web crawler</h2>
+<p>Here&rsquo;s what our web crawler will need to do:</p>
+<ol>
+<li>Get the HTML data of the first page of the website (for example, <code>https://victoria.dev</code>)</li>
+<li>Check all of the links on the page
+<ol>
+<li>Keep track of the links we&rsquo;ve already visited so we don&rsquo;t end up checking them twice</li>
+<li>Record any broken links we find</li>
+</ol>
+</li>
+<li>Fetch more HTML data from any valid links on the page, as long as they&rsquo;re in the same domain (<code>https://victoria.dev</code> and not <code>https://github.com</code>, for instance)</li>
+<li>Repeat step #2 until all of the links on the site have been checked</li>
+</ol>
+<p>Here&rsquo;s what the execution flow will look like:</p>
+<figure class="screenshot"><img src="/posts/breaking-bottlenecks/execution_flow.png"
+    alt="A flow chart showing program execution">
+</figure>
+
+<p>As you can see, the nodes &ldquo;GET page&rdquo; -&gt; &ldquo;HTML&rdquo; -&gt; &ldquo;Parse links&rdquo; -&gt; &ldquo;Valid link&rdquo; -&gt; &ldquo;Check visited&rdquo; all form a loop. These are what enable our web crawler to continue crawling until all the links on the site have been accounted for in the &ldquo;Check visited&rdquo; node. When the crawler encounters links it&rsquo;s already checked, it will &ldquo;Stop.&rdquo; This loop will become more important in a moment.</p>
+<p>For now, the question on everyone&rsquo;s mind (I hope): how do we make it fast?</p>
+<h2 id="how-fast-can-you-do-the-thing">How fast can you do the thing</h2>
+<p>Here are some approximate timings for tasks performed on a typical PC:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Type</th>
+          <th>Task</th>
+          <th>Time</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>CPU</td>
+          <td>execute typical instruction</td>
+          <td>1/1,000,000,000 sec = 1 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L1 cache memory</td>
+          <td>0.5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>branch misprediction</td>
+          <td>5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L2 cache memory</td>
+          <td>7 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>Mutex lock/unlock</td>
+          <td>25 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>fetch from main memory</td>
+          <td>100 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>read 1MB sequentially from memory</td>
+          <td>250,000 nanosec</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>fetch from new disk location (seek)</td>
+          <td>8,000,000 nanosec   (8ms)</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>read 1MB sequentially from disk</td>
+          <td>20,000,000 nanosec  (20ms)</td>
+      </tr>
+      <tr>
+          <td>Network</td>
+          <td>send packet US to Europe and back</td>
+          <td>150,000,000 nanosec (150ms)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. They typically crop up now and then in articles titled along the lines of, &ldquo;Latency numbers every developer should know.&rdquo;</p>
+<p>Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
+<p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
+<h2 id="bottleneck-network-latency">Bottleneck: network latency</h2>
+<p>The numbers above mean that the difference in time it takes to send something over the Internet compared to fetching data from main memory is over six orders of magnitude. Remember the loop in our execution chart? The &ldquo;GET page&rdquo; node, in which our crawler fetches page data over the network, is going to be <em>a million times slower</em> than the next slowest thing in the loop!</p>
+<p>We don&rsquo;t need to run our prototype to see what that means in practical terms; we can estimate it. Let&rsquo;s take OWASP.org, which has upwards of 12,000 links, as an example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>      150 milliseconds
+</span></span><span style="display:flex;"><span> x 12,000 links
+</span></span><span style="display:flex;"><span>---------
+</span></span><span style="display:flex;"><span>1,800,000 milliseconds (30 minutes)
+</span></span></code></pre></div><p>A whole half hour, just for the network tasks. It may even be much slower than that, since web pages are frequently much larger than a packet. This means that in our single-thread prototype web crawler, our biggest bottleneck is network latency. Why is this problematic?</p>
+<h3 id="feedback-loops">Feedback loops</h3>
+<p>I previously wrote about <a href="/blog/how-to-set-up-a-short-feedback-loop-as-a-solo-coder/">feedback loops</a>. In essence, in order to improve at doing anything, you first need to be able to get feedback from your last attempt. That way, you have the necessary information to make adjustments and get closer to your goal on your next iteration.</p>
+<p>As a software developer, bottlenecks can contribute to long and inefficient feedback loops. If I&rsquo;m waiting on a process that&rsquo;s part of a CI/CD pipeline, in our bottlenecked web crawler example, I&rsquo;d be sitting around for a minimum of a half hour before learning whether or not changes in my last push were successful, or whether they broke <code>master</code> (hopefully <code>staging</code>).</p>
+<p>Multiply a slow and inefficient feedback loop by many runs per day, over many days, and you&rsquo;ve got a slow and inefficient developer. Multiply that by many developers in an organization bottlenecked on the same process, and you&rsquo;ve got a slow and inefficient company.</p>
+<h3 id="the-cost-of-bottlenecks">The cost of bottlenecks</h3>
+<p>To add insult to injury, not only are you waiting on a bottlenecked process to run; you&rsquo;re also paying to wait. Take the serverless example - AWS Lambda, for instance. Here&rsquo;s a chart showing the cost of functions by compute time and CPU usage.</p>
+<figure><img src="/posts/breaking-bottlenecks/lambda-chart.png"
+    alt="Chart showing Total Lambda compute cost by function execution"><figcaption>
+      <p>Source: <a href="https://serverless.com/blog/understanding-and-controlling-aws-lambda-costs/">Understanding and Controlling AWS Lambda Costs</a></p>
+    </figcaption>
+</figure>
+
+<p>Again, the numbers change over the years, but the main concepts remain the same: the bigger the function and the longer its compute time, the bigger the cost. For applications taking advantage of serverless, these costs can add up dramatically.</p>
+<p>Bottlenecks are a recipe for failure, for both productivity and the bottom line.</p>
+<p>The good news is that bottlenecks are mostly unnecessary. If we know how to identify them, we can strategize our way out of them. To understand how, let&rsquo;s get some tacos.</p>
+<h2 id="tacos-and-threading">Tacos and threading</h2>
+<p>Everyone, meet Bob. He&rsquo;s a gopher who works at the taco stand down the street as the cashier. Say &ldquo;Hi,&rdquo; Bob.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮   ╔══════════════╗
+</span></span><span style="display:flex;"><span>🌮      Hi I&#39;m Bob                          🌳
+</span></span><span style="display:flex;"><span>🌮   ╚══════════════╝ \
+</span></span><span style="display:flex;"><span>🌮                     🐹 🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>Bob works very hard at being a cashier, but he&rsquo;s still just one gopher. The customers who frequent Bob&rsquo;s taco stand can eat tacos really quickly; but in order to get the tacos to eat them, they&rsquo;ve got to order them through Bob. Here&rsquo;s what our bottlenecked, single-thread taco stand currently looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>As you can see, all the customers are queued up, right out the door. Poor Bob handles one customer&rsquo;s transaction at a time, starting and finishing with that customer completely before moving on to the next. Bob can only do so much, so our taco stand is rather inefficient at the moment. How can we make Bob faster?</p>
+<p>We can try splitting the queue:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮         🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮         🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>Now Bob can do some multitasking. For example, he can start a transaction with a customer in one queue; then, while that customer counts their bills, Bob can pop over to the second queue and get started there. This arrangement, known as a <a href="https://en.wikipedia.org/wiki/Concurrency_(computer_science)">concurrency model</a>, helps Bob go a little bit faster by jumping back and forth between lines. However, it&rsquo;s still just one Bob, which limits our improvement possibilities. If we were to make four queues, they&rsquo;d all be shorter; but Bob would be very thinly stretched between them. Can we do better?</p>
+<p>We could get two Bobs:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>With twice the Bobs, each can handle a queue of his own. This is our most efficient solution for our taco stand so far, since two Bobs can handle much more than one Bob can, even if each customer is still attended to one at a time.</p>
+<p>We can do even better than that:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮      🐹 🧑💵🧑💵🧑💵
+</span></span><span style="display:flex;"><span>🌮                                          🌳
+</span></span><span style="display:flex;"><span>🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮🌮
+</span></span></code></pre></div><p>With quadruple the Bobs, we have some very short queues, and a much more efficient taco stand. In computing, the concept of having multiple workers do tasks in parallel is called <a href="https://en.wikipedia.org/wiki/Multithreading_(computer_architecture)">multithreading</a>.</p>
+<p>In Go, we can apply this concept using goroutines. Here are some illustrative snippets from my Go solution.</p>
+<h2 id="setting-up-a-go-web-crawler">Setting up a Go web crawler</h2>
+<p>In order to share data between our <a href="https://tour.golang.org/concurrency/1">goroutines</a>, we&rsquo;ll need to create some data structures. Our <code>Checker</code> structure will be shared, so it will have a <code>Mutex</code> (<a href="https://en.wikipedia.org/wiki/Mutual_exclusion">mutual exclusion</a>) to allow our goroutines to lock and unlock it. The <code>Checker</code> structure will also hold a list of <code>brokenLinks</code> results, and <code>visitedLinks</code>. The latter will be a map of strings to booleans, which we&rsquo;ll use to directly and efficiently check for visited links. By using a map instead of iterating over a list, our <code>visitedLinks</code> lookup will have a constant complexity of O(1) as opposed to a linear complexity of O(n), thus avoiding the creation of another bottleneck. For more on time complexity, see my <a href="/posts/a-coffee-break-introduction-to-time-complexity-of-algorithms/">coffee-break introduction to time complexity of algorithms</a> article.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Checker</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">startDomain</span>             <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">brokenLinks</span>             []<span style="color:#a6e22e">Result</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">visitedLinks</span>            <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">bool</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">workerCount</span>, <span style="color:#a6e22e">maxWorkers</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Page allows us to retain parent and sublinks</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Page</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">parent</span>, <span style="color:#a6e22e">loc</span>, <span style="color:#a6e22e">data</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Result adds error information for the report</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Result</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Page</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">reason</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">code</span>   <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>To extract links from HTML data, here&rsquo;s a parser I wrote on top of <a href="https://pkg.go.dev/golang.org/x/net/html?tab=doc">package <code>html</code></a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// Extract links from HTML</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">parent</span>, <span style="color:#a6e22e">data</span> <span style="color:#66d9ef">string</span>) ([]<span style="color:#66d9ef">string</span>, []<span style="color:#66d9ef">string</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">doc</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">html</span>.<span style="color:#a6e22e">Parse</span>(<span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">NewReader</span>(<span style="color:#a6e22e">data</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Could not parse: &#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">goodLinks</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">badLinks</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">f</span> <span style="color:#66d9ef">func</span>(<span style="color:#f92672">*</span><span style="color:#a6e22e">html</span>.<span style="color:#a6e22e">Node</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span> = <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">n</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">html</span>.<span style="color:#a6e22e">Node</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">Type</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">html</span>.<span style="color:#a6e22e">ElementNode</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">checkKey</span>(string(<span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">Data</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">a</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">Attr</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">checkAttr</span>(string(<span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">Key</span>)) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">j</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">formatURL</span>(<span style="color:#a6e22e">parent</span>, <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">Val</span>)
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">badLinks</span> = append(<span style="color:#a6e22e">badLinks</span>, <span style="color:#a6e22e">j</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">goodLinks</span> = append(<span style="color:#a6e22e">goodLinks</span>, <span style="color:#a6e22e">j</span>)
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">FirstChild</span>; <span style="color:#a6e22e">c</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span>; <span style="color:#a6e22e">c</span> = <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">NextSibling</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">c</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">doc</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">goodLinks</span>, <span style="color:#a6e22e">badLinks</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>If you&rsquo;re wondering why I didn&rsquo;t use a more full-featured package for this project, I highly recommend <a href="https://www.theregister.com/2016/03/23/npm_left_pad_chaos/">the story of <code>left-pad</code></a>. The short of it: more dependencies, more problems.</p>
+<p>Here are snippets of the <code>main</code> function, where we pass in our starting URL and create a queue (or <a href="https://tour.golang.org/concurrency/2">channels</a>, in Go) to be filled with links for our goroutines to process.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">startURL</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">flag</span>.<span style="color:#a6e22e">String</span>(<span style="color:#e6db74">&#34;url&#34;</span>, <span style="color:#e6db74">&#34;http://example.com&#34;</span>, <span style="color:#e6db74">&#34;full URL of site&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">firstPage</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">Page</span>{
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">parent</span>: <span style="color:#f92672">*</span><span style="color:#a6e22e">startURL</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">loc</span>:    <span style="color:#f92672">*</span><span style="color:#a6e22e">startURL</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">toProcess</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#a6e22e">Page</span>, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">toProcess</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">firstPage</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span></code></pre></div><p>The last significant piece of the puzzle is to create our workers, which we&rsquo;ll do here:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">toProcess</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">checker</span>.<span style="color:#a6e22e">addWorker</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">🐹</span> <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">worker</span>(<span style="color:#a6e22e">i</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">checker</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>, <span style="color:#a6e22e">toProcess</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">checker</span>.<span style="color:#a6e22e">workerCount</span> &gt; <span style="color:#a6e22e">checker</span>.<span style="color:#a6e22e">maxWorkers</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>) <span style="color:#75715e">// throttle down</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span></code></pre></div><p>A <a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a> does just what it says on the tin: it waits for our group of goroutines to finish. When they have, we&rsquo;ll know our Go web crawler has finished checking all the links on the site.</p>
+<h2 id="did-we-do-the-thing-fast">Did we do the thing fast</h2>
+<p>Here&rsquo;s a comparison of the three programs I wrote on this journey. First, the prototype single-thread Python version:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time python3 slow-link-check.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real 17m34.084s
+</span></span><span style="display:flex;"><span>user 11m40.761s
+</span></span><span style="display:flex;"><span>sys     0m5.436s
+</span></span></code></pre></div><p>This finished crawling my website in about seventeen-and-a-half minutes, which is rather long for a site at least an order of magnitude smaller than OWASP.org.</p>
+<p>The multithreaded Python version did a bit better:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time python3 hydra.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real 1m13.358s
+</span></span><span style="display:flex;"><span>user 0m13.161s
+</span></span><span style="display:flex;"><span>sys     0m2.826s
+</span></span></code></pre></div><p>My multithreaded Python program (which I dubbed <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>) finished in one minute and thirteen seconds.</p>
+<p>How did Go do?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time ./go-link-check --url=https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real 0m7.926s
+</span></span><span style="display:flex;"><span>user 0m9.044s
+</span></span><span style="display:flex;"><span>sys     0m0.932s
+</span></span></code></pre></div><p>At just under eight seconds, I found the Go version to be extremely palatable.</p>
+<h2 id="breaking-bottlenecks">Breaking bottlenecks</h2>
+<p>As fun as it is to simply enjoy the speedups, we can directly relate these results to everything we&rsquo;ve learned so far. Consider taking a process that used to soak up seventeen minutes and turning it into an eight-second-affair instead. Not only will that give developers a much shorter and more efficient feedback loop, it will give companies the ability to develop faster, and thus grow more quickly - while costing less. To drive the point home: a process that runs in seventeen-and-a-half minutes when it could take eight seconds will also cost over a hundred and thirty times as much to run!</p>
+<p>A better work day for developers, and a better bottom line for companies. There&rsquo;s a lot of benefit to be had in making functions, code, and processes as efficient as possible - by breaking bottlenecks.</p>
+]]></content></entry><entry><title type="html">Publishing GitHub event data with GitHub Actions and Pages</title><link href="https://victoria.dev/archive/publishing-github-event-data-with-github-actions-and-pages/"/><id>https://victoria.dev/archive/publishing-github-event-data-with-github-actions-and-pages/</id><author><name>Victoria Drake</name></author><published>2019-11-04T09:13:23-04:00</published><updated>2019-11-04T09:13:23-04:00</updated><content type="html"><![CDATA[<p>Teams who work on GitHub rely on event data to collaborate. The data recorded as issues, pull requests, and comments, become vital to understanding the project.</p>
+<p>With the general availability of GitHub Actions, we have a chance to programmatically access and preserve GitHub event data in our repository. Making the data part of the repository itself is a way of preserving it outside of GitHub, and also gives us the ability to feature the data on a front-facing website, such as with GitHub Pages, through an automated process that&rsquo;s part of our CI/CD pipeline.</p>
+<p>And, if you&rsquo;re like me, you can turn <a href="https://github.com/victoriadrake/github-guestbook/issues/1">GitHub issue comments</a> into an <a href="https://github.com/victoriadrake/github-guestbook">awesome 90s guestbook page</a>.</p>
+<p>No matter the usage, the principle concepts are the same. We can use Actions to access, preserve, and display GitHub event data - with just one workflow file. To illustrate the process, I&rsquo;ll take you through the <a href="https://github.com/victoriadrake/github-guestbook/blob/master/.github/workflows/publish-comments.yml">workflow code</a> that makes my guestbook shine on.</p>
+<p>For an introductory look at GitHub Actions including how workflows are triggered, see <a href="/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>.</p>
+<h2 id="accessing-github-event-data">Accessing GitHub event data</h2>
+<p>An Action workflow runs in an environment with some default environment variables. A lot of convenient information is available here, including event data. The most complete way to access the event data is using the <code>$GITHUB_EVENT_PATH</code> variable, the path of the file with the complete JSON event payload.</p>
+<p>The expanded path looks like <code>/home/runner/work/_temp/_github_workflow/event.json</code> and its data corresponds to its webhook event. You  can find the documentation for webhook event data in GitHub REST API <a href="https://developer.github.com/webhooks/#events">Event Types and Payloads</a>. To make the JSON data available in the workflow environment, you can use a tool like <code>jq</code> to parse the event data and put it in an environment variable.</p>
+<p>Below, I grab the comment ID from an <a href="https://developer.github.com/v3/activity/events/types/#issuecommentevent">issue comment event</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ID<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>jq <span style="color:#e6db74">&#39;.comment.id&#39;</span> $GITHUB_EVENT_PATH<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><p>Most event data is also available via the <a href="https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"><code>github.event</code> context variable</a> without needing to parse JSON. The fields are accessed using dot notation, as in the example below where I grab the same comment ID:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ID<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.id <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>For my guestbook, I want to display entries with the user&rsquo;s handle, and the date and time. I can capture this event data like so:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>AUTHOR<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.user.login <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>DATE<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.created_at <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Shell variables are handy for accessing data, however, they&rsquo;re ephemeral. The workflow environment is created anew each run, and even shell variables set in one step do not persist to other steps. To persist the captured data, you have two options: use artifacts, or commit it to the repository.</p>
+<h2 id="preserving-event-data-using-artifacts">Preserving event data: using artifacts</h2>
+<p>Using artifacts, you can persist data between workflow jobs without committing it to your repository. This is handy when, for example, you wish to transform or incorporate the data before putting it somewhere more permanent.</p>
+<p>Two actions assist with using artifacts: <code>upload-artifact</code> and <code>download-artifact</code>. You can use these actions to make files available to other jobs in the same workflow. For a full example, see <a href="https://docs.github.com/en/actions/advanced-guides/storing-workflow-data-as-artifacts#passing-data-between-jobs-in-a-workflow">passing data between jobs in a workflow</a>.</p>
+<p>The <code>upload-artifact</code> action&rsquo;s <code>action.yml</code> contains an <a href="https://github.com/actions/upload-artifact/blob/master/action.yml">explanation</a> of the keywords. The uploaded files are saved in <code>.zip</code> format. Another job in the same workflow run can use the <code>download-artifact</code> action to utilize the data in another step.</p>
+<p>You can also manually download the archive on the workflow run page, under the repository&rsquo;s Actions tab.</p>
+<p>Persisting workflow data between jobs does not make any changes to the repository files, as the artifacts generated live only in the workflow environment. Personally, being comfortable working in a shell environment, I see a narrow use case for artifacts, though I&rsquo;d have been remiss not to mention them. Besides passing data between jobs, they could be useful for creating <code>.zip</code> format archives of, say, test output data. In the case of my guestbook example, I simply ran all the necessary steps in one job, negating any need for passing data between jobs.</p>
+<h2 id="preserving-event-data-pushing-workflow-files-to-the-repository">Preserving event data: pushing workflow files to the repository</h2>
+<p>To preserve data captured in the workflow in the repository itself, it is necessary to add and push this data to the Git repository. You can do this in the workflow by creating new files with the data, or by appending data to existing files, using shell commands.</p>
+<h3 id="creating-files-in-the-workflow">Creating files in the workflow</h3>
+<p>To work with the repository files in the workflow, use the <a href="https://github.com/actions/checkout"><code>checkout</code> action</a> to first get a copy to work with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@master</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">fetch-depth</span>: <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>To add comments to my guestbook, I turn the event data captured in shell variables into proper files, using substitutions in <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion</a> to sanitize user input and translate newlines to paragraphs. I wrote previously about <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">why user input should be treated carefully</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Turn comment into file</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    ID=${{ github.event.comment.id }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    AUTHOR=${{ github.event.comment.user.login }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    DATE=${{ github.event.comment.created_at }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    COMMENT=$(echo &#34;${{ github.event.comment.body }}&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    NO_TAGS=${COMMENT//[&lt;&gt;]/\`}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    FOLDER=comments
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    printf &#39;%b\n&#39; &#34;&lt;div class=\&#34;comment\&#34;&gt;&lt;p&gt;${AUTHOR} says:&lt;/p&gt;&lt;p&gt;${NO_TAGS//$&#39;\n&#39;/\&lt;\/p\&gt;\&lt;p\&gt;}&lt;/p&gt;&lt;p&gt;${DATE}&lt;/p&gt;&lt;/div&gt;\r\n&#34; &gt; ${FOLDER}/${ID}.html</span>
+</span></span></code></pre></div><p>By using <code>printf</code> and directing its output with <code>&gt;</code> to a new file, the event data is transformed into an HTML file, named with the comment ID number, that contains the captured event data. Formatted, it looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;comment&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;victoriadrake says:&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;This is a comment!&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;2019-11-04T00:28:36Z&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span></code></pre></div><p>When working with comments, one effect of naming files using the comment ID is that a new file with the same ID will overwrite the previous. This is handy for a guestbook, as it allows any edits to a comment to replace the original comment file.</p>
+<p>If you&rsquo;re using a static site generator like Hugo, you could build a Markdown format file, stick it in your <code>content/</code> folder, and the regular site build will take care of the rest. In the case of my simplistic guestbook, I have an extra step to consolidate the individual comment files into a page. Each time it runs, it overwrites the existing <code>index.html</code> with the <code>header.html</code> portion (<code>&gt;</code>), then finds and appends (<code>&gt;&gt;</code>) all the comment files&rsquo; contents in descending order, and lastly appends the <code>footer.html</code> portion to end the page.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Assemble page</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    cat header.html &gt; index.html
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    find comments/ -name &#34;*.html&#34; | sort -r | xargs -I % cat % &gt;&gt; index.html
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    cat footer.html &gt;&gt; index.html</span>
+</span></span></code></pre></div><h3 id="committing-changes-to-the-repository">Committing changes to the repository</h3>
+<p>Since the <code>checkout</code> action is not quite the same as cloning the repository, at time of writing, there are some <a href="https://github.community/t5/GitHub-Actions/Checkout-Action-does-not-create-local-master-and-has-no-options/td-p/31575">issues</a> still to work around. A couple extra steps are necessary to <code>pull</code>, <code>checkout</code>, and successfully <code>push</code> changes back to the <code>master</code> branch, but this is pretty trivially done in the shell.</p>
+<p>Below is the step that adds, commits, and pushes changes made by the workflow back to the repository&rsquo;s <code>master</code> branch.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Push changes to repo</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git config user.email &#34;${{ github.actor }}@users.noreply.github.com&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git config user.name &#34;${{ github.actor }}&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git pull ${REMOTE}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git checkout master
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git add .
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git status
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git commit -am &#34;Add new comment&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git push ${REMOTE} master</span>
+</span></span></code></pre></div><p>The remote, in fact, our repository, is specified using the <code>github.repository</code> context variable. For our workflow to be allowed to push to master, we give the remote URL using <a href="https://docs.github.com/en/actions/security-guides/automatic-token-authentication">the default <code>secrets.GITHUB_TOKEN</code> variable</a>.</p>
+<p>Since the workflow environment is shiny and newborn, we need to configure Git. In the above example, I&rsquo;ve used the <code>github.actor</code> context variable to input the username of the account initiating the workflow. The email is similarly configured using the <a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-email-preferences/setting-your-commit-email-address#setting-your-commit-email-address-on-github">default <code>noreply</code> GitHub email address</a>.</p>
+<h2 id="displaying-event-data">Displaying event data</h2>
+<p>If you&rsquo;re using GitHub Pages with the default <code>secrets.GITHUB_TOKEN</code> variable and without a site generator, pushing changes to the repository in the workflow will only update the repository files. The GitHub Pages build will fail with an error, &ldquo;Your site is having problems building: Page build failed.&rdquo;</p>
+<p>To enable Actions to trigger a Pages site build, you&rsquo;ll need to create a Personal Access Token. This token can be <a href="https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository">stored as a secret in the repository</a> settings and passed into the workflow in place of the default <code>secrets.GITHUB_TOKEN</code> variable. I wrote more about <a href="/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/#environment-and-variables">Actions environment and variables in this post</a>.</p>
+<p>With the use of a Personal Access Token, a push initiated by the Actions workflow will also update the Pages site. You can see it for yourself by <a href="https://github.com/victoriadrake/github-guestbook/issues/1">leaving a comment</a> in my guestbook! The comment creation event triggers the workflow, which then takes around 30 seconds to run and update the guestbook page.</p>
+<p>Where a site build is necessary for changes to be published, such as when using Hugo, an Action can do this too. However, in order to avoid creating unintended loops, one Action workflow will not trigger another (<a href="https://docs.github.com/en/actions/using-workflows/triggering-a-workflow">see what will</a>). Instead, it&rsquo;s extremely convenient to handle the process of <a href="/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">building the site with a Makefile</a>, which any workflow can then run. Simply add running the Makefile as the final step in your workflow job, with the repository token where necessary:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Run Makefile</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">TOKEN</span>: <span style="color:#ae81ff">${{ secrets.GITHUB_TOKEN }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: <span style="color:#ae81ff">make all</span>
+</span></span></code></pre></div><p>This ensures that the final step of your workflow builds and deploys the updated site.</p>
+<h2 id="no-more-event-data-horizon">No more event data horizon</h2>
+<p>GitHub Actions provides a neat way to capture and utilize event data so that it&rsquo;s not only available within GitHub. The possibilities are only as limited as your imagination! Here are a few ideas for things this lets us create:</p>
+<ol>
+<li>A public-facing issues board, where customers without GitHub accounts can view and give feedback on project issues.</li>
+<li>An automatically-updating RSS feed of new issues, comments, or PRs for any repository.</li>
+<li>A comments system for static sites, utilizing GitHub issue comments as an input method.</li>
+<li>An awesome 90s guestbook page.</li>
+</ol>
+<p>Did I mention I made a 90s guestbook page? My inner-Geocities-nerd is a little excited.</p>
+]]></content></entry><entry><title type="html">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</title><link href="https://victoria.dev/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/"/><id>https://victoria.dev/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/</id><author><name>Victoria Drake</name></author><published>2019-10-28T08:28:52-04:00</published><updated>2019-10-28T08:28:52-04:00</updated><content type="html"><![CDATA[<p>Agnostic tooling is the clever notion that you should be able to run your code in various environments. With many continuous integration and continuous development (CI/CD) apps available, agnostic tooling gives developers a big advantage: portability.</p>
+<p>Of course, having your CI/CD work <em>everywhere</em> is a tall order. Popular <a href="https://github.com/marketplace/category/continuous-integration">CI apps for GitHub repositories</a> alone use a multitude of configuration languages spanning <a href="https://groovy-lang.org/syntax.html">Groovy</a>, <a href="https://yaml.org/">YAML</a>, <a href="https://github.com/toml-lang/toml">TOML</a>, <a href="https://json.org/">JSON</a>, and more&hellip; all with differing syntax, of course. Porting workflows from one tool to another is more than a one-cup-of-coffee process.</p>
+<p>The introduction of <a href="https://github.com/features/actions">GitHub Actions</a> has the potential to add yet another tool to the mix; or, for the right set up, greatly simplify a CI/CD workflow.</p>
+<p>Prior to this article, I accomplished my CD flow with several lashed-together apps. I used AWS Lambda to trigger site builds on a schedule. I had Netlify build on push triggers, as well as run image optimization, and then push my site to the public Pages repository. I used Travis CI in the public repository to test the HTML. All this worked in conjunction with GitHub Pages, which actually hosts the site.</p>
+<p>I&rsquo;m now using the GitHub Actions beta to accomplish all the same tasks, with one <a href="/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">portable Makefile</a> of build instructions, and without any other CI/CD apps.</p>
+<h2 id="appreciating-the-shell">Appreciating the shell</h2>
+<p>What do most CI/CD tools have in common? They run your workflow instructions in a shell environment! This is wonderful, because that means that most CI/CD tools can do anything that you can do in a terminal&hellip; and you can do pretty much <em>anything</em> in a terminal.</p>
+<p>Especially for a contained use case like building my static site with a generator like Hugo, running it all in a shell is a no-brainer. To tell the magic box what to do, we just need to write instructions.</p>
+<p>While a shell script is certainly the most portable option, I use the still-very-portable <a href="https://en.wikipedia.org/wiki/Make_(software)">Make</a> to write my process instructions. This provides me with some advantages over simple shell scripting, like the use of variables and <a href="https://en.wikipedia.org/wiki/Make_(software)#Macros">macros</a>, and the modularity of <a href="https://en.wikipedia.org/wiki/Makefile#Rules">rules</a>.</p>
+<p>I got into the <a href="/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">nitty-gritty of my Makefile in my last post</a>. Let&rsquo;s look at how to get GitHub Actions to run it.</p>
+<h2 id="using-a-makefile-with-github-actions">Using a Makefile with GitHub Actions</h2>
+<p>To our point on portability, my magic Makefile is stored right in the repository root. Since it&rsquo;s included with the code, I can run the Makefile locally on any system where I can clone the repository, provided I set the environment variables. Using GitHub Actions as my CI/CD tool is as straightforward as making Make go worky-worky.</p>
+<p>I found the <a href="https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions">GitHub Actions workflow syntax guide</a> to be pretty straightforward, though also lengthy on options. Here&rsquo;s the necessary set up for getting the Makefile to run.</p>
+<p>The workflow file at <code>.github/workflows/make-master.yml</code> contains the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">name</span>: <span style="color:#ae81ff">make-master</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">on</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">push</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">branches</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">master</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">schedule</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">cron</span>: <span style="color:#e6db74">&#39;20 13 * * *&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">jobs</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">build</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">runs-on</span>: <span style="color:#ae81ff">ubuntu-latest</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">steps</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@master</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">fetch-depth</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Run Makefile</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">TOKEN</span>: <span style="color:#ae81ff">${{ secrets.TOKEN }}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">run</span>: <span style="color:#ae81ff">make all</span>
+</span></span></code></pre></div><p>I&rsquo;ll explain the components that make this work.</p>
+<h2 id="triggering-the-workflow">Triggering the workflow</h2>
+<p>Actions support multiple <a href="https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows">triggers for a workflow</a>. Using the <code>on</code> syntax, I&rsquo;ve defined two triggers for mine: a <a href="https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushbranchestagsbranches-ignoretags-ignore">push event</a> to the <code>master</code> branch only, and a <a href="https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule">scheduled</a> <code>cron</code> job.</p>
+<p>Once the <code>make-master.yml</code> file is in your repository, either of your triggers will cause Actions to run your Makefile. To see how the last run went, you can also <a href="https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/adding-a-workflow-status-badge">add a fun badge</a> to the README.</p>
+<h3 id="one-hacky-thing">One hacky thing</h3>
+<p>Because the Makefile runs on every push to <code>master</code>, I sometimes would get errors when the site build had no changes. When Git, via <a href="/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">my Makefile</a>, attempted to commit to the Pages repository, no changes were detected and the commit would fail annoyingly:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>nothing to commit, working tree clean
+</span></span><span style="display:flex;"><span>On branch master
+</span></span><span style="display:flex;"><span>Your branch is up to date with &#39;origin/master&#39;.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>nothing to commit, working tree clean
+</span></span><span style="display:flex;"><span>Makefile:62: recipe for target &#39;deploy&#39; failed
+</span></span><span style="display:flex;"><span>make: *** [deploy] Error 1
+</span></span><span style="display:flex;"><span>##[error]Process completed with exit code 2.
+</span></span></code></pre></div><p>I came across some solutions that proposed using <code>diff</code> to check if a commit should be made, but this may not work for <a href="https://github.com/benmatselby/hugo-deploy-gh-pages/issues/4">reasons</a>. As a workaround, I simply added the <a href="https://gohugo.io/methods/time/utc/">current UTC time</a> to my index page so that every build would contain a change to be committed.</p>
+<h2 id="environment-and-variables">Environment and variables</h2>
+<p>You can define the <a href="https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources">virtual environment</a> for your workflow to run in using the <code>runs-on</code> syntax. The <del>obvious best choice</del> one I chose is Ubuntu. Using <code>ubuntu-latest</code> gets me the most updated version, whatever that happens to be when you&rsquo;re reading this.</p>
+<p>GitHub sets some <a href="https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables">default environment variables</a> for workflows. The <a href="https://github.com/actions/checkout"><code>actions/checkout</code> action</a> with <code>fetch-depth: 1</code> creates a copy of just the most recent commit your repository in the <code>GITHUB_WORKSPACE</code> variable. This allows the workflow to access the Makefile at <code>GITHUB_WORKSPACE/Makefile</code>. Without using the checkout action, the Makefile won&rsquo;t be found, and I get an error that looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>make: *** No rule to make target &#39;all&#39;.  Stop.
+</span></span><span style="display:flex;"><span>Running Makefile
+</span></span><span style="display:flex;"><span>##[error]Process completed with exit code 2.
+</span></span></code></pre></div><p>While there is a <a href="https://docs.github.com/en/actions/security-guides/automatic-token-authentication">default <code>GITHUB_TOKEN</code> secret</a>, this is not the one I used. The default is only locally scoped to the current repository. To be able to push to my separate GitHub Pages repository, I created a <a href="https://github.com/settings/tokens">personal access token</a> scoped to <code>public_repo</code> and pass it in as the <code>secrets.TOKEN</code> encrypted variable. For a step-by-step, see <a href="https://docs.github.com/en/actions/security-guides/encrypted-secrets">Creating and using encrypted secrets</a>.</p>
+<h2 id="portable-tooling">Portable tooling</h2>
+<p>The nice thing about using a simple Makefile to define the bulk of my CI/CD process is that it&rsquo;s completely portable. I can run a Makefile anywhere I have access to an environment, which is most CI/CD apps, virtual instances, and, of course, on my local machine.</p>
+<p>One of the reasons I like GitHub Actions is that getting my Makefile to run was pretty straightforward. I think the syntax is well done - easy to read, and intuitive when it comes to finding an option you&rsquo;re looking for. For someone already using GitHub Pages, Actions provides a pretty seamless CD experience; and if that should ever change, I can run my Makefile elsewhere. ¯\_(ツ)_/¯</p>
+]]></content></entry><entry><title type="html">A portable Makefile for continuous delivery with Hugo and GitHub Pages</title><link href="https://victoria.dev/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/"/><id>https://victoria.dev/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/</id><author><name>Victoria Drake</name></author><published>2019-10-21T09:09:06-04:00</published><updated>2019-10-21T09:09:06-04:00</updated><content type="html"><![CDATA[<p>Fun fact: I first launched this GitHub Pages site 1,018 days ago.</p>
+<p>Since then, we&rsquo;ve grown together. From early cringe-worthy commit messages, through eighty-six versions of <a href="https://gohugo.io/">Hugo</a>, and up until last week, a less-than-streamlined multi-app continuous integration and deployment (CI/CD) workflow.</p>
+<p>If you know me at all, you know I love to automate things. I&rsquo;ve been using a combination of AWS Lambda, Netlify, and Travis CI to automatically build and publish this site. My workflow for the task includes:</p>
+<ul>
+<li>Build with <a href="https://gohugo.io/">Hugo</a> on push to master, and on a schedule (Netlify and Lambda);</li>
+<li>Optimize and resize images (Netlify);</li>
+<li>Test with <a href="https://github.com/gjtorikian/html-proofer">HTMLProofer</a> (Travis CI); and</li>
+<li>Deploy to my <a href="/blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/">separate, public, GitHub Pages repository</a> (Netlify).</li>
+</ul>
+<p>Thanks to the introduction of GitHub Actions, I&rsquo;m able to do all the above with just one portable <a href="https://en.wikipedia.org/wiki/Makefile">Makefile</a>.</p>
+<p>Next week I&rsquo;ll cover my Actions set up; today, I&rsquo;ll take you through the nitty-gritty of my Makefile so you can write your own.</p>
+<h2 id="makefile-portability">Makefile portability</h2>
+<p><a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html">POSIX-standard-flavour Make</a> runs on every Unix-like system out there. <a href="https://en.wikipedia.org/wiki/Make_(software)#Derivatives">Make derivatives</a>, such as <a href="https://www.gnu.org/software/make/">GNU Make</a> and several flavours of BSD Make also run on Unix-like systems, though their particular use requires installing the respective program. To write a truly portable Makefile, mine follows the POSIX standard. (For a more thorough summation of POSIX-compatible Makefiles, I found this article helpful: <a href="https://nullprogram.com/blog/2017/08/20/">A Tutorial on Portable Makefiles</a>.) I run Ubuntu, so I&rsquo;ve tested the portability aspect using the BSD Make programs <code>bmake</code>, <code>pmake</code>, and <code>fmake</code>. Compatibility with non-Unix-like systems is a little more complicated, since shell commands differ. With derivatives such as Nmake, it&rsquo;s better to write a separate Makefile with appropriate Windows commands.</p>
+<p>While much of my particular use case could be achieved with shell scripting, I find Make offers some worthwhile advantages. I enjoy the ease of using variables and <a href="https://en.wikipedia.org/wiki/Make_(software)#Macros">macros</a>, and the modularity of <a href="https://en.wikipedia.org/wiki/Makefile#Rules">rules</a> when it comes to organizing my steps.</p>
+<p>The writing of rules mostly comes down to shell commands, which is the main reason Makefiles are as portable as they are. The best part is that you can do pretty much <em>anything</em> in a terminal, and certainly handle all the workflow steps listed above.</p>
+<h2 id="my-continuous-deployment-makefile">My continuous deployment Makefile</h2>
+<p>Here&rsquo;s the portable Makefile that handles my workflow. Yes, I put emojis in there. I&rsquo;m a monster.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Makefile" data-lang="Makefile"><span style="display:flex;"><span><span style="color:#a6e22e">.POSIX</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>DESTDIR<span style="color:#f92672">=</span>public
+</span></span><span style="display:flex;"><span>HUGO_VERSION<span style="color:#f92672">=</span>0.58.3
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>OPTIMIZE <span style="color:#f92672">=</span> find <span style="color:#66d9ef">$(</span>DESTDIR<span style="color:#66d9ef">)</span> -not -path <span style="color:#e6db74">&#34;*/static/*&#34;</span> <span style="color:#ae81ff">\(</span> -name <span style="color:#e6db74">&#39;*.png&#39;</span> -o -name <span style="color:#e6db74">&#39;*.jpg&#39;</span> -o -name <span style="color:#e6db74">&#39;*.jpeg&#39;</span> <span style="color:#ae81ff">\)</span> -print0 | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span><span style="color:#960050;background-color:#1e0010">xargs</span> <span style="color:#960050;background-color:#1e0010">-0</span> <span style="color:#960050;background-color:#1e0010">-P8</span> <span style="color:#960050;background-color:#1e0010">-n2</span> <span style="color:#960050;background-color:#1e0010">mogrify</span> <span style="color:#960050;background-color:#1e0010">-strip</span> <span style="color:#960050;background-color:#1e0010">-thumbnail</span> <span style="color:#e6db74">&#39;1000&gt;&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> all
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">all</span><span style="color:#f92672">:</span> get_repository clean get build test deploy
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> get_repository
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">get_repository</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;🛎 Getting Pages repository&#34;</span>
+</span></span><span style="display:flex;"><span> git clone https://github.com/victoriadrake/victoriadrake.github.io.git <span style="color:#66d9ef">$(</span>DESTDIR<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> clean
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">clean</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;🧹 Cleaning old build&#34;</span>
+</span></span><span style="display:flex;"><span> cd <span style="color:#66d9ef">$(</span>DESTDIR<span style="color:#66d9ef">)</span> <span style="color:#f92672">&amp;&amp;</span> rm -rf *
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> get
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">get</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;❓ Checking for hugo&#34;</span>
+</span></span><span style="display:flex;"><span> @if ! <span style="color:#f92672">[</span> -x <span style="color:#e6db74">&#34;</span>$$<span style="color:#e6db74">(command -v hugo)&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span><span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  echo <span style="color:#e6db74">&#34;🤵 Getting Hugo&#34;</span>;<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>     wget -q -P tmp/ https://github.com/gohugoio/hugo/releases/download/v<span style="color:#66d9ef">$(</span>HUGO_VERSION<span style="color:#66d9ef">)</span>/hugo_extended_<span style="color:#66d9ef">$(</span>HUGO_VERSION<span style="color:#66d9ef">)</span>_Linux-64bit.tar.gz;<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  tar xf tmp/hugo_extended_<span style="color:#66d9ef">$(</span>HUGO_VERSION<span style="color:#66d9ef">)</span>_Linux-64bit.tar.gz -C tmp/;<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  sudo mv -f tmp/hugo /usr/bin/;<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  rm -rf tmp/;<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  hugo version;<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> build
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">build</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;🍳 Generating site&#34;</span>
+</span></span><span style="display:flex;"><span> hugo --gc --minify -d <span style="color:#66d9ef">$(</span>DESTDIR<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;🧂 Optimizing images&#34;</span>
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">$(</span>OPTIMIZE<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> test
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">test</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;🍜 Testing HTML&#34;</span>
+</span></span><span style="display:flex;"><span> docker run -v <span style="color:#66d9ef">$(</span>GITHUB_WORKSPACE<span style="color:#66d9ef">)</span>/<span style="color:#66d9ef">$(</span>DESTDIR<span style="color:#66d9ef">)</span>/:/mnt 18fgsa/html-proofer mnt --disable-external
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> deploy
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">deploy</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;🎁 Preparing commit&#34;</span>
+</span></span><span style="display:flex;"><span> @cd <span style="color:#66d9ef">$(</span>DESTDIR<span style="color:#66d9ef">)</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git config user.email <span style="color:#e6db74">&#34;hello@victoria.dev&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git config user.name <span style="color:#e6db74">&#34;Victoria via GitHub Actions&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git add . <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git status <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git commit -m <span style="color:#e6db74">&#34;🤖 CD bot is helping&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git push -f -q https://<span style="color:#66d9ef">$(</span>TOKEN<span style="color:#66d9ef">)</span>@github.com/victoriadrake/victoriadrake.github.io.git master
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;🚀 Site is deployed!&#34;</span>
+</span></span></code></pre></div><p>Sequentially, this workflow:</p>
+<ol>
+<li>Clones the public Pages repository;</li>
+<li>Cleans (deletes) the previous build files;</li>
+<li>Downloads and installs the specified version of Hugo, if Hugo is not already present;</li>
+<li>Builds the site;</li>
+<li>Optimizes images;</li>
+<li>Tests the built site with HTMLProofer, and</li>
+<li>Prepares a new commit and pushes to the public Pages repository.</li>
+</ol>
+<p>If you&rsquo;re familiar with command line, most of this may look familiar. Here are a couple bits that might warrant a little explanation.</p>
+<h3 id="checking-if-a-program-is-already-installed">Checking if a program is already installed</h3>
+<p>I think this bit is pretty tidy:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> ! <span style="color:#f92672">[</span> -x <span style="color:#e6db74">&#34;</span>$$<span style="color:#e6db74">(command -v hugo)&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span><span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>...
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span></code></pre></div><p>I use a negated <code>if</code> conditional in conjunction with <code>command -v</code> to check if an executable (<code>-x</code>) called <code>hugo</code> exists. If one is not present, the script gets the specified version of Hugo and installs it. <a href="https://stackoverflow.com/a/677212">This Stack Overflow answer</a> has a nice summation of why <code>command -v</code> is a more portable choice than <code>which</code>.</p>
+<h3 id="image-optimization">Image optimization</h3>
+<p>My Makefile uses <code>mogrify</code> to batch resize and compress images in particular folders. It finds them automatically using the file extension, and only modifies images that are larger than the target size of 1000px in any dimension. I wrote more about the <a href="/blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/">batch-processing one-liner in this post</a>.</p>
+<p>There are a few different ways to achieve this same task, one of which, theoretically, is to take advantage of Make&rsquo;s <a href="https://en.wikipedia.org/wiki/Make_(software)#Suffix_rules">suffix rules</a> to run commands only on image files. I find the shell script to be more readable.</p>
+<h3 id="using-dockerized-htmlproofer">Using Dockerized HTMLProofer</h3>
+<p>HTMLProofer is installed with <code>gem</code>, and uses Ruby and <a href="https://nokogiri.org/tutorials/ensuring_well_formed_markup.html">Nokogiri</a>, which adds up to a lot of installation time for a CI workflow. Thankfully, <a href="https://github.com/18F">18F</a> has a <a href="https://github.com/18F/html-proofer-docker">Dockerized version</a> that is much faster to implement. Its usage requires starting the container with the built site directory <a href="https://docs.docker.com/storage/volumes/#start-a-container-with-a-volume">mounted as a data volume</a>, which is easily achieved by appending to the <code>docker run</code> command.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>docker run -v /absolute/path/to/site/:/mounted-site 18fgsa/html-proofer /mounted-site
+</span></span></code></pre></div><p>In my Makefile, I specify the absolute site path using the <a href="https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables">default environment variable</a> <code>GITHUB_WORKSPACE</code>. I&rsquo;ll dive into this and other GitHub Actions features in the next post.</p>
+<p>In the meantime, happy Making!</p>
+]]></content></entry><entry><title type="html">How to quickly batch resize, compress, and convert images with a Bash one-liner</title><link href="https://victoria.dev/archive/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/"/><id>https://victoria.dev/archive/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/</id><author><name>Victoria Drake</name></author><published>2019-10-14T08:27:49-04:00</published><updated>2019-10-14T08:27:49-04:00</updated><content type="html"><![CDATA[<p>Part of my Hugo site continuous deployment workflow is the processing of 210 images, at time of writing.</p>
+<p>Here&rsquo;s my one-liner:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>find public/ -not -path <span style="color:#e6db74">&#34;*/static/*&#34;</span> <span style="color:#ae81ff">\(</span> -name <span style="color:#e6db74">&#39;*.png&#39;</span> -o -name <span style="color:#e6db74">&#39;*.jpg&#39;</span> -o -name <span style="color:#e6db74">&#39;*.jpeg&#39;</span> <span style="color:#ae81ff">\)</span> -print0 | xargs -0 -P8 -n2 mogrify -strip -thumbnail <span style="color:#e6db74">&#39;1000&gt;&#39;</span> -format jpg
+</span></span></code></pre></div><p>I use <code>find</code> to target only certain image file formats in certain directories. With <a href="https://www.imagemagick.org/script/mogrify.php"><code>mogrify</code>, part of ImageMagick</a>, I resize only the images that are larger than a certain dimension, compress them, and strip the metadata. I tack on the <code>format</code> flag to create jpg copies of the images.</p>
+<p>Here&rsquo;s the one-liner again (broken up for better reading):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Look in the public/ directory</span>
+</span></span><span style="display:flex;"><span>find public/ <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span><span style="color:#75715e"># Ignore directories called &#34;static&#34; regardless of location</span>
+</span></span><span style="display:flex;"><span>-not -path <span style="color:#e6db74">&#34;*/static/*&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span><span style="color:#75715e"># Print the file paths of all files ending with any of these extensions</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\(</span> -name <span style="color:#e6db74">&#39;*.png&#39;</span> -o -name <span style="color:#e6db74">&#39;*.jpg&#39;</span> -o -name <span style="color:#e6db74">&#39;*.jpeg&#39;</span> <span style="color:#ae81ff">\)</span> -print0 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span><span style="color:#75715e"># Pipe the file paths to xargs and use 8 parallel workers to process 2 arguments</span>
+</span></span><span style="display:flex;"><span>| xargs -0 -P8 -n2 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span><span style="color:#75715e"># Tell mogrify to strip metadata, and...</span>
+</span></span><span style="display:flex;"><span>mogrify -strip <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span><span style="color:#75715e"># ...compress and resize any images larger than the target size (1000px in either dimension)</span>
+</span></span><span style="display:flex;"><span>-thumbnail <span style="color:#e6db74">&#39;1000&gt;&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span><span style="color:#75715e"># Convert the files to jpg format</span>
+</span></span><span style="display:flex;"><span>-format jpg
+</span></span></code></pre></div><p>That&rsquo;s it. That&rsquo;s the post.</p>
+]]></content></entry><entry><title type="html">Two ways to deploy a public GitHub Pages site from a private Hugo repository</title><link href="https://victoria.dev/archive/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/"/><id>https://victoria.dev/archive/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/</id><author><name>Victoria Drake</name></author><published>2019-04-22T10:05:15-04:00</published><updated>2019-04-22T10:05:15-04:00</updated><content type="html"><![CDATA[<p>Tools like Travis CI and Netlify offer some pretty nifty features, like seamlessly deploying your GitHub Pages site when changes are pushed to its repository. Along with a static site generator like Hugo, keeping a blog up to date is pretty painless.</p>
+<p>I&rsquo;ve used Hugo to build my site for years, but until this past week I&rsquo;d never hooked up my Pages repository to any deployment service. Why? Because using a tool that built my site before deploying it seemed to require having the whole recipe in one place - and if you&rsquo;re using GitHub Pages with the free version of GitHub, <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site">that place is public</a>. That means that all my three-in-the-morning bright ideas and messy unfinished (and unfunny) drafts would be publicly available - and no amount of continuous convenience was going to convince me to do that.</p>
+<p>So I kept things separated, with Hugo&rsquo;s messy behind-the-scenes stuff in a local Git repository, and the generated <code>public/</code> folder pushing to my GitHub Pages remote repository. Each time I wanted to deploy my site, I&rsquo;d have to get on my laptop and <code>hugo</code> to build my site, then <code>cd public/ &amp;&amp; git add . &amp;&amp; git commit</code>&hellip; etc etc. And all was well, except for the nagging feeling that there was a better way to do this.</p>
+<p>I wrote another article a little while back about <a href="/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy</a> to make changes to my repositories on my iPad whenever I&rsquo;m out and about. It seemed off to me that I could do everything except deploy my site from my iPad, so I set out to change that.</p>
+<p>A couple three-in-the-morning bright ideas and a revoked access token later (oops), I now have not one but <em>two</em> ways to deploy to my public GitHub Pages repository from an entirely separated, private GitHub repository. In this post, I&rsquo;ll take you through achieving this with <a href="https://travis-ci.com/">Travis CI</a> or using <a href="http://netlify.com/">Netlify</a> and <a href="https://www.gnu.org/software/make/">Make</a>.</p>
+<p>There&rsquo;s nothing hackish about it - my public GitHub Pages repository still looks the same as it does when I pushed to it locally from my terminal. Only now, I&rsquo;m able to take advantage of a couple great deployment tools to have the site update whenever I push to my private repo, whether I&rsquo;m on my laptop or out and about with my iPad.</p>
+<figure><img src="/archive/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/im-on-a-bridge.jpg"
+    alt="Hashtag: you did not push from there"><figcaption>
+      <p>#YouDidNotPushFromThere</p>
+    </figcaption>
+</figure>
+
+<p>This article assumes you have working knowledge of Git and GitHub Pages. If not, you may like to spin off some browser tabs from my articles on <a href="/blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/">using GitHub and Working Copy</a> and <a href="/blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/">building a site with Hugo and GitHub Pages</a> first.</p>
+<p>Let&rsquo;s do it!</p>
+<h2 id="private-to-public-github-pages-deployment-with-travis-ci">Private-to-public GitHub Pages deployment with Travis CI</h2>
+<p>Travis CI has the built-in ability (♪) to <a href="https://docs.travis-ci.com/user/deployment/pages/">deploy to GitHub Pages</a> following a successful build. They do a decent job in the docs of explaining how to add this feature, especially if you&rsquo;ve used Travis CI before&hellip; which I haven&rsquo;t. Don&rsquo;t worry, I did the bulk of the figuring-things-out for you.</p>
+<ul>
+<li>Travis CI gets all its instructions from a configuration file in the root of your repository called <code>.travis.yml</code></li>
+<li>You need to provide a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">GitHub personal access token</a> as a secure encrypted variable, which you can generate using <code>travis</code> on the command line</li>
+<li>Once your script successfully finishes doing what you&rsquo;ve told it to do (not necessarily what you <em>want</em> it to do but that&rsquo;s a whole other blog post), Travis will deploy your build directory to a repository you can specify with the <code>repo</code> configuration variable.</li>
+</ul>
+<h3 id="setting-up-the-travis-configuration-file">Setting up the Travis configuration file</h3>
+<p>Create a new configuration file for Travis with the filename <code>.travis.yml</code> (note the leading &ldquo;.&rdquo;). These scripts are very customizable and I struggled to find a relevant example to use as a starting point - luckily, you don&rsquo;t have that problem!</p>
+<p>Here&rsquo;s my basic <code>.travis.yml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">git</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">depth</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">global</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">HUGO_VERSION=&#34;0.54.0&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">matrix</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">YOUR_ENCRYPTED_VARIABLE</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">install</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">wget -q https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">tar xf hugo_${HUGO_VERSION}_Linux-64bit.tar.gz</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">mv hugo ~/bin/</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">script</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">hugo --gc --minify</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">deploy</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">provider</span>: <span style="color:#ae81ff">pages</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">skip-cleanup</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">github-token</span>: <span style="color:#ae81ff">$GITHUB_TOKEN</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">keep-history</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">local-dir</span>: <span style="color:#ae81ff">public</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">gh-username/gh-username.github.io</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">target-branch</span>: <span style="color:#ae81ff">master</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">verbose</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">on</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">branch</span>: <span style="color:#ae81ff">master</span>
+</span></span></code></pre></div><p>This script downloads and installs Hugo, builds the site with the garbage collection and minify <a href="https://gohugo.io/commands/hugo/#synopsis">flags</a>, then deploys the <code>public/</code> directory to the specified <code>repo</code> - in this example, your public GitHub Pages repository. You can read about each of the <code>deploy</code> configuration options <a href="https://docs.travis-ci.com/user/deployment/pages/#further-configuration">here</a>.</p>
+<p>To <a href="https://docs.travis-ci.com/user/environment-variables#defining-encrypted-variables-in-travisyml">add the GitHub personal access token as an encrypted variable</a>, you don&rsquo;t need to manually edit your <code>.travis.yml</code>. The <code>travis</code> gem commands below will encrypt and add the variable for you when you run them in your repository directory.</p>
+<p>First, install <code>travis</code> with <code>sudo gem install travis</code>.</p>
+<p>Then <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">generate your GitHub personal access token</a>, copy it (it only shows up once!) and run the commands below in your repository root, substituting your token for the kisses:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>travis login --pro --github-token xxxxxxxxxxxxxxxxxxxxxxxxxxx
+</span></span><span style="display:flex;"><span>travis encrypt GITHUB_TOKEN<span style="color:#f92672">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxx --add env.matrix
+</span></span></code></pre></div><p>Your encrypted token magically appears in the file. Once you&rsquo;ve committed <code>.travis.yml</code> to your private Hugo repository, Travis CI will run the script and if the build succeeds, will deploy your site to your public GitHub Pages repo. Magic!</p>
+<p>Travis will always run a build each time you push to your private repository. If you don&rsquo;t want to trigger this behavior with a particular commit, <a href="https://docs.travis-ci.com/user/customizing-the-build/#skipping-a-build">add the <code>skip</code> command to your commit message</a>.</p>
+<p><em>Yo that&rsquo;s cool but I like Netlify.</em></p>
+<p>Okay fine.</p>
+<h2 id="deploying-to-a-separate-repository-with-netlify-and-make">Deploying to a separate repository with Netlify and Make</h2>
+<p>We can get Netlify to do our bidding by using a Makefile, which we&rsquo;ll run with Netlify&rsquo;s build command.</p>
+<p>Here&rsquo;s what our <code>Makefile</code> looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-makefile" data-lang="makefile"><span style="display:flex;"><span>SHELL<span style="color:#f92672">:=</span>/bin/bash
+</span></span><span style="display:flex;"><span>BASEDIR<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>CURDIR<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>OUTPUTDIR<span style="color:#f92672">=</span>public
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> all
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">all</span><span style="color:#f92672">:</span> clean get_repository build deploy
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> clean
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">clean</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Removing public directory&#34;</span>
+</span></span><span style="display:flex;"><span> rm -rf <span style="color:#66d9ef">$(</span>BASEDIR<span style="color:#66d9ef">)</span>/<span style="color:#66d9ef">$(</span>OUTPUTDIR<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> get_repository
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">get_repository</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Getting public repository&#34;</span>
+</span></span><span style="display:flex;"><span> git clone https://github.com/gh-username/gh-username.github.io.git public
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> build
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">build</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Generating site&#34;</span>
+</span></span><span style="display:flex;"><span> hugo --gc --minify
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> deploy
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">deploy</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Preparing commit&#34;</span>
+</span></span><span style="display:flex;"><span> @cd <span style="color:#66d9ef">$(</span>OUTPUTDIR<span style="color:#66d9ef">)</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git config user.email <span style="color:#e6db74">&#34;you@youremail.com&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git config user.name <span style="color:#e6db74">&#34;Your Name&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git add . <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git status <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git commit -m <span style="color:#e6db74">&#34;Deploy via Makefile&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span> <span style="color:#f92672">&amp;&amp;</span> git push -f -q https://<span style="color:#66d9ef">$(</span>GITHUB_TOKEN<span style="color:#66d9ef">)</span>@github.com/gh-username/gh-username.github.io.git master
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> @echo <span style="color:#e6db74">&#34;Pushed to remote&#34;</span>
+</span></span></code></pre></div><p>To preserve the Git history of our separate GitHub Pages repository, we&rsquo;ll first clone it, build our new Hugo site to it, and then push it back to the Pages repository. This script first removes any existing <code>public/</code> folder that might contain files or a Git history. It then clones our Pages repository to <code>public/</code>, builds our Hugo site (essentially updating the files in <code>public/</code>), then takes care of committing the new site to the Pages repository.</p>
+<p>In the <code>deploy</code> section, you&rsquo;ll notice lines starting with <code>&amp;&amp;</code>. These are chained commands. Since Make <a href="https://www.gnu.org/software/make/manual/html_node/Execution.html#Execution">invokes a new sub-shell for each line</a>, it starts over with every new line from our root directory. To get our <code>cd</code> to stick and avoid running our Git commands in the project root directory, we&rsquo;re chaining the commands and using the backslash character to <a href="http://clarkgrubb.com/makefile-style-guide#breaking-long-lines">break long lines</a> for readability.</p>
+<p>By chaining our commands, we&rsquo;re able to <a href="https://stackoverflow.com/questions/6116548/how-to-tell-git-to-use-the-correct-identity-name-and-email-for-a-given-project">configure our Git identity</a>, add all our updated files, and create a commit for our Pages repository.</p>
+<p>Similarly to using Travis CI, we&rsquo;ll need to pass in a <a href="https://github.com/settings/tokens">GitHub personal access token</a> to push to our public GitHub Pages repository - only Netlify doesn&rsquo;t provide a straightforward way to encrypt the token in our Makefile.</p>
+<p>Instead, we&rsquo;ll use Netlify&rsquo;s <a href="https://www.netlify.com/docs/continuous-deployment/#build-environment-variables">Build Environment Variables</a>, which live safely in our site settings in the Netlify app. We can then call our token variable in the Makefile. We use it to push (quietly, to avoid printing the token in logs) to our Pages repository by <a href="https://stackoverflow.com/questions/44773415/how-to-push-a-commit-to-github-from-a-circleci-build-using-a-personal-access-tok">passing it in the remote URL</a>.</p>
+<p>To avoid printing the token in Netlify&rsquo;s logs, we suppress <a href="https://www.gnu.org/software/make/manual/html_node/Echoing.html#Echoing">recipe echoing</a> for that line with the leading <code>@</code> character.</p>
+<p>With your Makefile in the root of your private GitHub repository, you can set up Netlify to run it for you.</p>
+<h3 id="setting-up-netlify">Setting up Netlify</h3>
+<p>Getting set up with Netlify via the <a href="https://app.netlify.com/">web UI</a> is straightforward. Once you sign in with GitHub, choose the private GitHub repository where your Hugo site lives. The next page Netlify takes you to lets you enter deploy settings:</p>
+<p><img src="netlify-new-site.png" alt="Create a new site page"></p>
+<p>You can specify the build command that will run your Makefile (<code>make all</code> for this example). The branch to deploy and the publish directory don&rsquo;t matter too much in our specific case, since we&rsquo;re only concerned with pushing to a separate repository. You can enter the typical <code>master</code> deploy branch and <code>public</code> publish directory.</p>
+<p>Under &ldquo;Advanced build settings&rdquo; click &ldquo;New variable&rdquo; to add your GitHub personal access token as a Build Environment Variable. In our example, the variable name is <code>GITHUB_TOKEN</code>. Click &ldquo;Deploy site&rdquo; to make the magic happen.</p>
+<p>If you&rsquo;ve already previously set up your repository with Netlify, find the settings for Continuous Deployment under Settings &gt; Build &amp; deploy.</p>
+<p>Netlify will build your site each time you push to the private repository. If you don&rsquo;t want a particular commit to trigger a build, <a href="https://www.netlify.com/docs/continuous-deployment/#skipping-a-deploy">add <code>[skip ci]</code> in your Git commit message</a>.</p>
+<h3 id="same-same-but-different">Same same but different</h3>
+<p>One effect of using Netlify this way is that your site will be built in two places: one is the separate, public GitHub Pages repository that the Makefile pushes to, and the other is your Netlify site that deploys on their CDN from your linked private GitHub repository. The latter is useful if you&rsquo;re going to play with <a href="https://www.netlify.com/blog/2016/07/20/introducing-deploy-previews-in-netlify/">Deploy Previews</a> and other Netlify features, but those are outside the scope of this post.</p>
+<p>The main point is that your GitHub Pages site is now updated in your public repo. Yay!</p>
+<h2 id="go-forth-and-deploy-fearlessly">Go forth and deploy fearlessly</h2>
+<p>I hope the effect of this new information is that you feel more able to update your sites, wherever you happen to be. The possibilities are endless - at home on your couch with your laptop, out cafe-hopping with your iPad, or in the middle of a first date on your phone. Endless!</p>
+<figure><img src="/archive/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/date-deploy.png"
+    alt="Don&#39;t update your site from your phone on a date"><figcaption>
+      <p>Don&rsquo;t do stuff on your phone when you&rsquo;re on a date. Not if you want a second one, anyway.</p>
+    </figcaption>
+</figure>
+
+]]></content></entry><entry><title type="html">Batch renaming images, including image resolution, with awk</title><link href="https://victoria.dev/archive/batch-renaming-images-including-image-resolution-with-awk/"/><id>https://victoria.dev/archive/batch-renaming-images-including-image-resolution-with-awk/</id><author><name>Victoria Drake</name></author><published>2017-11-20T13:59:30-05:00</published><updated>2017-11-20T13:59:30-05:00</updated><content type="html"><![CDATA[<p>The most recent item on my list of &ldquo;Geeky things I did that made me feel pretty awesome&rdquo; is an hour&rsquo;s adventure that culminated in this code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ file IMG* | awk <span style="color:#e6db74">&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> | <span style="color:#66d9ef">while</span> read fn fr; <span style="color:#66d9ef">do</span> echo <span style="color:#66d9ef">$(</span>rename -v <span style="color:#e6db74">&#34;s/</span>$fn<span style="color:#e6db74">/img_</span>$fr<span style="color:#e6db74">/g&#34;</span> *<span style="color:#66d9ef">)</span>; <span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span>IMG_20170808_172653_425.jpg renamed as img_0_4032x3024.jpg
+</span></span><span style="display:flex;"><span>IMG_20170808_173020_267.jpg renamed as img_1_3024x3506.jpg
+</span></span><span style="display:flex;"><span>IMG_20170808_173130_616.jpg renamed as img_2_3024x3779.jpg
+</span></span><span style="display:flex;"><span>IMG_20170808_173221_425.jpg renamed as img_3_3024x3780.jpg
+</span></span><span style="display:flex;"><span>IMG_20170808_173417_059.jpg renamed as img_4_2956x2980.jpg
+</span></span><span style="display:flex;"><span>IMG_20170808_173450_971.jpg renamed as img_5_3024x3024.jpg
+</span></span><span style="display:flex;"><span>IMG_20170808_173536_034.jpg renamed as img_6_4032x3024.jpg
+</span></span><span style="display:flex;"><span>IMG_20170808_173602_732.jpg renamed as img_7_1617x1617.jpg
+</span></span><span style="display:flex;"><span>IMG_20170808_173645_339.jpg renamed as img_8_3024x3780.jpg
+</span></span><span style="display:flex;"><span>IMG_20170909_170146_585.jpg renamed as img_9_3036x3036.jpg
+</span></span><span style="display:flex;"><span>IMG_20170911_211522_543.jpg renamed as img_10_3036x3036.jpg
+</span></span><span style="display:flex;"><span>IMG_20170913_071608_288.jpg renamed as img_11_2760x2760.jpg
+</span></span><span style="display:flex;"><span>IMG_20170913_073205_522.jpg renamed as img_12_2738x2738.jpg
+</span></span><span style="display:flex;"><span>// ... etc etc
+</span></span></code></pre></div><p>The last item on the aforementioned list is &ldquo;TODO: come up with a shorter title for this list.&rdquo;</p>
+<p>I previously wrote about the power of command line tools like <a href="/posts/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/">sed</a>. This post expands on how to string all this magical functionality into one big, long, rainbow-coloured, viscous stream of awesome.</p>
+<h2 id="rename-files">Rename files</h2>
+<p>The tool that actually handles the renaming of our files is, appropriately enough, <code>rename</code>. The syntax is: <code>rename -n &quot;s/original_filename/new_filename/g&quot; *</code> where <code>-n</code> does a dry-run, and substituting <code>-v</code> would rename the files. The <code>s</code> indicates our substitution string, and <code>g</code> for &ldquo;global&rdquo; finds all occurrences of the string. The <code>*</code> matches zero or more occurrences of our search-and-replace parameters.</p>
+<p>We&rsquo;ll come back to this later.</p>
+<h2 id="get-file-information">Get file information</h2>
+<p>When I run <code>$ file IMG_20170808_172653_425.jpg</code> in the image directory, I get this output:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>IMG_20170808_172653_425.jpg: JPEG image data, baseline, precision 8, 4032x3024, frames <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p>Since we can get the image resolution (&ldquo;4032x3024&rdquo; above), we know that we&rsquo;ll be able to use it in our new filename.</p>
+<h2 id="isolate-the-information-we-want">Isolate the information we want</h2>
+<p>I love <code>awk</code> for its simplicity. It takes lines of text and makes individual bits of information available to us with built in variables that we can then refer to as column numbers denoted by <code>$1</code>, <code>$2</code>, etc. By default, <code>awk</code> splits up columns on whitespace. To take the example above:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>|              1               |   2  |   3   |   4   |     5     |     6     | 7  |      8     |   9    | 10 |
+</span></span><span style="display:flex;"><span>-------------------------------------------------------------------------------------------------------------
+</span></span><span style="display:flex;"><span>| IMG_20170808_172653_425.jpg: | JPEG | image | data, | baseline, | precision | 8, | 4032x3024, | frames | 3  |
+</span></span></code></pre></div><p>We can denote different values to use as a splitter with, for example, <code>-F','</code> if we wanted to use commas as the column divisions. For our current project, spaces are fine.</p>
+<p>There are a couple issues we need to solve before we can plug the information into our new filenames. Column <code>$1</code> has the original filename we want, but there&rsquo;s an extra &ldquo;:&rdquo; character on the end. We don&rsquo;t need the &ldquo;.jpg&rdquo; either. Column <code>$8</code> has an extra &ldquo;,&rdquo; that we don&rsquo;t want as well. To get just to information we need, we&rsquo;ll take a substring of the column with <code>substr()</code>:</p>
+<p><code>substr($1, 1, length($1)-5)</code> - This gives us the file name from the beginning of the string to the end of the string, minus 5 characters (&ldquo;length minus 5&rdquo;).
+<code>substr($8,1, length($8)-1)</code> - This gives us the image size, without the extra comma (&ldquo;length minus 1&rdquo;).</p>
+<h2 id="avoid-duplicate-file-names">Avoid duplicate file names</h2>
+<p>To ensure that two images with the same resolutions don&rsquo;t create identical, competing file names, we&rsquo;ll append a unique incrementing number to the filename.</p>
+<p><code>BEGIN{a=0}</code> - Using <code>BEGIN</code> tells <code>awk</code> to run the following code only once, at the (drumroll) beginning. Here, we&rsquo;re declaring the variable <code>a</code> to be <code>0</code>.
+<code>a++</code> - Later in our code, at the appropriate spot for our file name, we call <code>a</code> and increment it.</p>
+<p>When <code>awk</code> prints a string, it concatenates everything that isn&rsquo;t separated by a comma. <code>{print a b c}</code> would create &ldquo;abc&rdquo; and <code>{print a,b,c}</code> would create &ldquo;a b c&rdquo;, for example.</p>
+<p>We can add additional characters to our file name, such as an underscore, by inserting it in quotations: <code>&quot;_&quot;</code>.</p>
+<h2 id="string-it-all-together">String it all together</h2>
+<p>To feed the output of one command into another command, we use &ldquo;pipe,&rdquo; written as <code>|</code>.</p>
+<p>If we only used pipe in this instance, all our data from <code>file</code> and <code>awk</code> would get fed into <code>rename</code> all at once, making for one very, very long and probably non-compiling file name. To run the <code>rename</code> command line by line, we can use <code>while</code> and <code>read</code>. Similarly to <code>awk</code>, <code>read</code> takes input and splits it into variables we can assign and use. In our code, it takes the first bit of output from <code>awk</code> (the original file name) and assigns that the variable name <code>$fn</code>. It takes the second output (our incrementing number and the image resolution) and assigns that to <code>$fr</code>. The variable names are arbitrary; you can call them whatever you want.</p>
+<p>To run our <code>rename</code> commands as if we&rsquo;d manually entered them in the terminal one by one, we can use <code>echo $(some command)</code>. Finally, <code>done</code> ends our <code>while</code> loop.</p>
+<h2 id="bonus-round-rainbow-output">Bonus round: rainbow output</h2>
+<p>I wasn&rsquo;t kidding with that <a href="https://github.com/tehmaze/lolcat">&ldquo;rainbow-coloured&rdquo; bit&hellip;</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>p install lolcat
+</span></span></code></pre></div><p>Here&rsquo;s our full code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>le IMG* | awk <span style="color:#e6db74">&#39;BEGIN{a=0} {print substr($1, 1, length($1)-5),a++&#34;_&#34;substr($8,1, length($8)-1)}&#39;</span> | <span style="color:#66d9ef">while</span> read fn fs; <span style="color:#66d9ef">do</span> echo <span style="color:#66d9ef">$(</span>rename -v <span style="color:#e6db74">&#34;s/</span>$fn<span style="color:#e6db74">/img_</span>$fs<span style="color:#e6db74">/g&#34;</span> *<span style="color:#66d9ef">)</span>; <span style="color:#66d9ef">done</span> | lolcat
+</span></span></code></pre></div><p>Enjoy!</p>
+]]></content></entry></feed>

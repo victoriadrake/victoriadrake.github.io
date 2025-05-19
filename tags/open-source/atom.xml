@@ -1,0 +1,1122 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Open-Source on victoria.dev</title><link href="https://victoria.dev/tags/open-source/feed.xml" rel="self"/><link href="https://victoria.dev/tags/open-source/"/><updated>2021-10-07T11:01:13+00:00</updated><id>https://victoria.dev/tags/open-source/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">Set up a Pi-hole VPN on an AWS Lightsail instance</title><link href="https://victoria.dev/archive/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/"/><id>https://victoria.dev/archive/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/</id><author><name>Victoria Drake</name></author><published>2021-10-07T11:01:13+00:00</published><updated>2021-10-07T11:01:13+00:00</updated><content type="html"><![CDATA[<p>I&rsquo;ve written a fair bit in the past about the <a href="/tags/privacy">whys of online privacy</a>, and <a href="/tags/cybersecurity">a lot about staying safe online</a>. Chances are, if a search brought you here, you&rsquo;re well-past why. Let&rsquo;s go straight on to how.</p>
+<p>This guide will walk you through setting up <a href="https://pi-hole.net/">Pi-hole</a> on an <a href="https://aws.amazon.com/lightsail/">AWS Lightsail</a> instance that acts as your VPN thanks to <a href="https://openvpn.net/">OpenVPN</a>. It&rsquo;s a more succinct version of the <a href="https://docs.pi-hole.net/guides/vpn/openvpn/overview/">official Pi-hole docs for OpenVPN</a>, made specifically for Lightsail with a few tips and tricks added in, because you deserve it.</p>
+<h2 id="create-and-connect-to-a-lightsail-instance">Create and connect to a Lightsail instance</h2>
+<ol>
+<li>
+<p>Log in or sign up to AWS and <a href="https://lightsail.aws.amazon.com/ls/webapp/home/instances">create a Lightsail Instance</a>.</p>
+</li>
+<li>
+<p>Under <strong>Select a platform</strong>, choose <strong>Linux/Unix</strong>.</p>
+</li>
+<li>
+<p>Under <strong>Select a blueprint</strong>, choose the <strong>OS Only</strong> button.</p>
+</li>
+<li>
+<p>Select the latest <a href="https://docs.pi-hole.net/main/prerequisites/#supported-operating-systems">officially supported Ubuntu server</a>.</p>
+</li>
+<li>
+<p>You can save a tidbit of effort by putting the following into the <strong>Launch script</strong> box:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Update installed packages</span>
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get upgrade -y
+</span></span></code></pre></div></li>
+<li>
+<p>Create a new SSH key for this server and ensure you download the <code>.pem</code>.</p>
+</li>
+<li>
+<p>Choose your plan. The $3.50 USD instance is sufficient.</p>
+</li>
+<li>
+<p>Give it a name then click <strong>Create instance</strong>.</p>
+</li>
+<li>
+<p>Stare eagerly at the page until the instance status is <strong>Running</strong>, then go to the <strong>Networking</strong> tab.</p>
+</li>
+<li>
+<p>Create a <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/understanding-static-ip-addresses-in-amazon-lightsail">Static IP</a> and attach it to your new instance. Remember that static IP addresses are free only while attached to an instance.</p>
+</li>
+<li>
+<p>Click on your instance name to return to its dashboard. Go back to the <strong>Networking</strong> tab. It&rsquo;ll look a bit different now.</p>
+</li>
+<li>
+<p>Under <strong>IPv6 networking</strong>, click the toggle to turn it off (unless you know what you are doing and you want IPv6 for some reason. Most of y&rsquo;all don&rsquo;t need it).</p>
+</li>
+<li>
+<p>Under <strong>IPv4 Firewall</strong>, delete the rule for <code>HTTP</code>.</p>
+</li>
+<li>
+<p>Click <strong>Add rule</strong>. In the <strong>Application</strong> dropdown, choose <strong>Custom</strong>.</p>
+<ul>
+<li>For <strong>Protocol</strong>, choose <strong>UDP</strong>.</li>
+<li>In the <strong>Port or range</strong> input, enter a UDP port for the OpenVPN server to run on. (It&rsquo;s typically <code>1194</code>, which you can choose to use, but you might like a different number for security purposes. Port range is <code>0-65535</code>.)</li>
+</ul>
+</li>
+<li>
+<p>Connect using SSH and your new key pair, either <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-ssh-using-terminal">in your terminal</a> or on the <strong>Connect</strong> tab with the <a href="https://lightsail.aws.amazon.com/ls/docs/en_us/articles/lightsail-how-to-connect-to-your-instance-virtual-private-server">browser-based client</a>.</p>
+</li>
+</ol>
+<h2 id="install-openvpn-on-your-server">Install OpenVPN on your server</h2>
+<p>After connecting to your server using SSH, install OpenVPN on your server.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Download OpenVPN</span>
+</span></span><span style="display:flex;"><span>wget https://git.io/vpn -O openvpn-install.sh
+</span></span><span style="display:flex;"><span>chmod <span style="color:#ae81ff">755</span> openvpn-install.sh
+</span></span><span style="display:flex;"><span>sudo ./openvpn-install.sh
+</span></span></code></pre></div><p>You&rsquo;ll see:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Welcome to this OpenVPN road warrior installer!
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>This server is behind NAT. What is the public IPv4 address or hostname?
+</span></span><span style="display:flex;"><span>Public IPv4 address / hostname [x.xx.xxx.xxx]:
+</span></span></code></pre></div><p>&hellip;where the default option is your static IP that you set up earlier. Hit return to accept this. Then:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Which protocol should OpenVPN use?
+</span></span><span style="display:flex;"><span>    1) UDP (recommended)
+</span></span><span style="display:flex;"><span>    2) TCP
+</span></span><span style="display:flex;"><span>Protocol [1]: 1
+</span></span></code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>What port should OpenVPN listen to?
+</span></span><span style="display:flex;"><span>Port [1194]: #####
+</span></span></code></pre></div><p>Enter the UDP port number you chose earlier. Then:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Select a DNS server for the clients:
+</span></span><span style="display:flex;"><span>    1) Current system resolvers
+</span></span><span style="display:flex;"><span>    2) Google
+</span></span><span style="display:flex;"><span>    3) 1.1.1.1
+</span></span><span style="display:flex;"><span>    4) OpenDNS
+</span></span><span style="display:flex;"><span>    5) Quad9
+</span></span><span style="display:flex;"><span>    6) AdGuard
+</span></span><span style="display:flex;"><span>DNS server [1]: 1
+</span></span></code></pre></div><p>Choose <code>1</code> or hit return. Then:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Enter a name for the first client:
+</span></span><span style="display:flex;"><span>Name [client]: pihole
+</span></span></code></pre></div><p>The Pi-hole will be the client. Name it as you like then <code>Press any key to continue...</code></p>
+<p>OpenVPN will set itself up. Confirm that <code>tun0</code> has the interface address <code>10.8.0.1/24</code> with the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ip addr show tun0
+</span></span></code></pre></div><p>This ensures that the Pi-hole will be set up properly. Now, about that:</p>
+<h2 id="install-and-configure-pi-hole">Install and configure Pi-hole</h2>
+<p>On your Lightsail instance, install Pi-hole.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Download and install Pi-hole</span>
+</span></span><span style="display:flex;"><span>curl -sSL https://install.pi-hole.net | bash
+</span></span></code></pre></div><p>This runs the Pi-hole automated installer. You&rsquo;ll see some prompts which you can answer using the enter key, arrow keys, tab, and space bar for selecting an option.</p>
+<p>The important things:</p>
+<ol>
+<li>When you see <strong>Choose An Interface</strong>, ensure you pick <code>tun0</code>. It isn&rsquo;t the default selection.</li>
+<li>You&rsquo;ll need to set the <strong>IPv4 address</strong> to the interface address you viewed previously using the <code>ip addr</code> command: <code>10.8.0.1/24</code>. This ensures the Pi-hole uses the VPN.</li>
+</ol>
+<blockquote>
+<p><em>At time of writing,</em> the second item above wasn&rsquo;t presented as an option in the automated installer. After the Pi-hole installer finishes, manually change the IP address by editing the configuration file:</p>
+<p><code>&gt; sudo vim /etc/pihole/setupVars.conf</code></p>
+<p>Change the <code>IPV4_ADDRESS</code> to <code>10.8.0.1/24</code> and save the file. Restart the Pi-hole with: <code>pihole restartdns</code>.</p></blockquote>
+<p>If you mess up, you can redo the configuration with <code>pihole reconfigure</code>.</p>
+<p>Finally, you&rsquo;ll configure the VPN to use the Pi-hole.</p>
+<h2 id="configure-openvpn">Configure OpenVPN</h2>
+<p>Confirm the address of the <code>tun0</code> interface with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ip a | grep -C <span style="color:#ae81ff">1</span> <span style="color:#e6db74">&#39;tun0&#39;</span>
+</span></span></code></pre></div><p>You should see: <code>inet 10.8.0.1/24</code> in there.</p>
+<p>Edit the OpenVPN config file with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo vim /etc/openvpn/server/server.conf
+</span></span></code></pre></div><p>Change the line that starts with <code>push &quot;dhcp-option</code>&hellip; to use the Pi-hole&rsquo;s IP address that you confirmed above:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">push</span> <span style="color:#e6db74">&#34;dhcp-option DNS 10.8.0.1&#34;</span>
+</span></span></code></pre></div><p>If any other lines start with <code>push &quot;dhcp-option</code>&hellip;, comment those out.</p>
+<p>If you want to log OpenVPN traffic, add these lines to the end of the file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">log</span> <span style="color:#e6db74">/var/</span><span style="color:#a6e22e">log</span>/<span style="color:#a6e22e">openvpn</span>.<span style="color:#a6e22e">log</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">verb</span> <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p>Save the config. If you forgot to open Vim with <code>sudo</code>, use the <code>tee</code> trick: <code>:w !sudo tee %</code>, then <code>O</code>, then <code>:q!</code>.</p>
+<p>Restart OpenVPN with <code>sudo systemctl restart openvpn-server@server</code>.</p>
+<h3 id="configure-firewall">Configure firewall</h3>
+<p>Run the following to control traffic to the server <a href="https://docs.pi-hole.net/guides/vpn/openvpn/firewall/">as described here</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo iptables -I INPUT -i tun0 -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span style="color:#ae81ff">53</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -i tun0 -p udp --destination-port <span style="color:#ae81ff">53</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -i tun0 -p tcp --destination-port <span style="color:#ae81ff">80</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p tcp --destination-port <span style="color:#ae81ff">22</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p tcp --destination-port <span style="color:#ae81ff">1194</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p udp --destination-port <span style="color:#ae81ff">1194</span> -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -I INPUT -i lo -j ACCEPT
+</span></span><span style="display:flex;"><span>sudo iptables -P INPUT DROP
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Optionally, also block HTTPS advertisements while you&#39;re here.</span>
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p udp --dport <span style="color:#ae81ff">80</span> -j REJECT --reject-with icmp-port-unreachable
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p tcp --dport <span style="color:#ae81ff">443</span> -j REJECT --reject-with tcp-reset
+</span></span><span style="display:flex;"><span>sudo iptables -A INPUT -p udp --dport <span style="color:#ae81ff">443</span> -j REJECT --reject-with icmp-port-unreachable
+</span></span></code></pre></div><p>You can review the results with <code>sudo iptables -L --line-numbers</code>.</p>
+<p><strong>These are only stored in memory</strong> before you save them, so test out your set up on your client now to see if it all works as expected.</p>
+<h3 id="test-your-client-connection">Test your client connection</h3>
+<p>To test your configuration, try adding a client (the phone or computer that will connect to the VPN).</p>
+<ol>
+<li>Run the OpenVPN script again: <code>sudo ./openvpn-install.sh</code> and choose <strong>1) Add a new client</strong>. Give it a name; you may find it helps to name it by the device, e.g. &ldquo;phone&rdquo;. This creates a file that ends in <code>.ovpn</code>. You need to place this file on your client to use it.</li>
+<li>Install the appropriate <a href="https://duckduckgo.com/?q=OpenVPN+App">OpenVPN app</a> for your device.</li>
+<li>Transfer the <code>.ovpn</code> file you just obtained to the device if you haven&rsquo;t already. (See <a href="#future-tasks">future tasks</a> for a way to copy the file to your host machine.) Follow instructions in your app (try under <strong>FAQ</strong>) for importing the <code>.ovpn</code> file and activating the VPN.</li>
+<li>Ensure it seems to connect properly. If you <a href="https://duckduckgo.com/?t=ffab&amp;q=what's+my+ip">go to DuckDuckGo.com and search for &ldquo;What&rsquo;s my IP&rdquo;</a>, you should see the location of your Lightsail instance. For a more in-depth test, <a href="https://browserleaks.com/ip">check for DNS leaks at BrowserLeaks.com</a>.</li>
+</ol>
+<p>Try browsing for a while. You can also view the Pi-hole dashboard by visiting <code>http://pi.hole/admin/</code> on this device.</p>
+<p>If everything seems all right, go on to saving the configuration on your instance.</p>
+<h3 id="save-iptables">Save <code>iptables</code></h3>
+<p>Save the <code>iptables</code> you created earlier using the <code>tee</code> command to achieve the second permission.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo iptables-save | sudo tee /etc/pihole/rules.v4
+</span></span></code></pre></div><p>You&rsquo;re finished with configuration on your Lightsail instance. If you wish to disconnect now, you can just type <code>exit</code>.</p>
+<h2 id="future-tasks">Future tasks</h2>
+<p>You&rsquo;re done with the set up! You now have your very own personal VPN with a Pi-hole keeping you safe from nasty trackers. Here are some references for operations you might like to come back to in the future:</p>
+<ul>
+<li>Reconnect to your Lightsail instance with SSH:
+<ul>
+<li><code>ssh -i /path/to/private-key.pem ubuntu@public-ip-address</code></li>
+</ul>
+</li>
+<li>Set a password for the web interface dashboard:
+<ul>
+<li><code>pihole -a -p</code></li>
+</ul>
+</li>
+<li>Access the web interface dashboard:
+<ul>
+<li>Connect to the VPN, then visit <code>http://pi.hole/admin/</code></li>
+</ul>
+</li>
+<li>Update the Pi-hole:
+<ul>
+<li><code>pihole -up</code></li>
+</ul>
+</li>
+<li>Add a new client (<a href="https://docs.pi-hole.net/guides/vpn/openvpn/clients/">for iOS, Linux, or Windows</a>, or <a href="https://docs.pi-hole.net/guides/vpn/openvpn/android-client/">for Android</a>)</li>
+<li>Copy the <code>.ovpn</code> file for a client to your host machine (run on the host machine):
+<ul>
+<li><code>ssh -i /path/to/private-key.pem ubuntu@public-ip-address 'sudo cat /path/on/lightsail/client.ovpn' &gt; /path/on/host/client.ovpn</code></li>
+</ul>
+</li>
+<li>Beef up that block list! Here&rsquo;s my favorite resource for updating your Pi-hole <a href="https://docs.pi-hole.net/database/gravity/#adlist-table-adlist">adlist table</a>: <a href="https://firebog.net/">The Big Blocklist Collection</a></li>
+</ul>
+<p>Enjoy your new, more secure and peaceful Internet! If you found this guide helpful, please share it with someone else.</p>
+]]></content></entry><entry><title type="html">There are better options for a privacy-respecting phone</title><link href="https://victoria.dev/archive/there-are-better-options-for-a-privacy-respecting-phone/"/><id>https://victoria.dev/archive/there-are-better-options-for-a-privacy-respecting-phone/</id><author><name>Victoria Drake</name></author><published>2021-08-11T11:37:35+00:00</published><updated>2021-08-11T11:37:35+00:00</updated><content type="html"><![CDATA[<p>Whether you think the news of Apple scanning your private devices was a big deal, run-of-the-mill, or something we all should have seen coming, you might be wondering, &ldquo;What now?&rdquo; We know full well that Google is looking at the stuff on your phone too (and Gmail, and&hellip; well, everywhere else) so it’s not like there are other options after Apple&hellip; right?</p>
+<p>If a move towards privacy is what we’re after, we know a new off-the-shelf Google phone isn&rsquo;t a better answer &ndash; but there are more options.</p>
+<p>If you don&rsquo;t want the details, jump straight to <a href="#the-tldr">The TL;DR</a> at the end.</p>
+<h2 id="linux-phones-sort-of">Linux phones (sort of)</h2>
+<p>Unless you’re a rather tolerant tech-savvy tinkerer, a Linux phone isn’t one of these options&hellip; yet. I’ve personally been very excited about the bevy of emerging options in this space, from freedom-oriented hardware to fully open source, crowd-developed operating systems.</p>
+<p>The current state of these efforts is that this magical mashup just isn’t ready yet. Most Linux phone OS such as Ubuntu Touch, Mobian, Pure OS, etc, are in a &ldquo;mostly working&rdquo; state, with the missing features ranging from &ldquo;lack of reliable push notifications&rdquo; to &ldquo;intermittent Bluetooth connectivity&rdquo; to &ldquo;camera.&rdquo;</p>
+<p>If all you need is text messaging and a web browser, yes, you can probably go this route. For most users however, this isn’t going to make daily-driver status.</p>
+<p>If a Linux phone would suit you, I recommend getting your hands on a <a href="https://www.pine64.org/pinephone/">PinePhone</a> and running Arch Linux ARM (<a href="https://github.com/dreemurrs-embedded/Pine64-Arch/releases">releases on GitHub</a>) with <a href="https://www.plasma-mobile.org/get/">Plasma Mobile</a>.</p>
+<h2 id="de-googled-android">De-googled Android</h2>
+<p>For a daily-driver, &ldquo;de-googled&rdquo; Android is your best bet. Android itself (specifically, the Android Open Source Project source code) is based on a modified Linux kernel and is free and open source software. When we typically think of &ldquo;Android phones,&rdquo; we refer to Android devices with Google&rsquo;s proprietary software added to the mix, including Google Play Services. A &ldquo;de-googled&rdquo; Android phone is essentially the Android OS without Google&rsquo;s <del>spyware</del> services included by default.</p>
+<p>Keep in mind that this route still involves some DIY. You&rsquo;ll need to install an OS on a device yourself. Don&rsquo;t worry, there are step-by-step guides available &ndash; the most technical thing you&rsquo;ll likely have to do is copy and paste some commands into your terminal.</p>
+<p>Free and open source Android OS comes in multiple flavors, and the choice isn&rsquo;t arbitrary. Your selection of a &ldquo;de-googled&rdquo; phone is going to be determined by a couple factors: the hardware device you have or that you want to use, and the apps (software) you want to run on it.</p>
+<h3 id="hardware">Hardware</h3>
+<p>The phone you may already have (or the one you’re willing to purchase) will influence your choice of operating system (OS).</p>
+<h4 id="lineageos">LineageOS</h4>
+<p>At the time I’m writing this, if you have an older Pixel or another model of Android phone, your best bet for a hassle-free OS with A-class support will be Lineage. Here’s a link to the <a href="https://wiki.lineageos.org/devices/">LineageOS list of supported devices</a>. Clicking on your device here will get you to some installation instructions for your phone.</p>
+<h4 id="grapheneos">GrapheneOS</h4>
+<p>If you have a newer Pixel (generation 3 up to the newer 5) then GrapheneOS could be the way to go. <a href="https://grapheneos.org/faq#supported-devices">Here are the devices officially supported by GrapheneOS</a>. They also have <a href="https://grapheneos.org/install/">easy-to-follow installation instructions</a> and help via chat. It is possible to run GrapheneOS on other phones, but not without substantial DIY for which technical knowledge would help.</p>
+<p>Generally speaking, GrapheneOS is intended to be a security-hardened operating system targeted at individuals who won&rsquo;t be miffed if there are tradeoffs for mitigating vulnerabilities. If you don&rsquo;t have those requirements or intend to use Google Apps on your phone (see Software), then LineageOS will likely suit you better.</p>
+<h4 id="new-phone-who-dis">New phone, who dis?</h4>
+<p>If you&rsquo;re looking to purchase a new phone, you have some flexibility. My general recommendation is to pick up last-season&rsquo;s version of the model you want. Not only will this likely be cheaper (and often a great deal if you buy refurbished) but the open source community that develops these operating systems will have had more time to work with the device itself, which could help ensure better compatibility and a smoother set up.</p>
+<p>Consider buying a refurbished phone (sometimes called &ldquo;renewed&rdquo;) locally when you can. This can help fund the small businesses that offer them.</p>
+<h3 id="software">Software</h3>
+<p>What do you <em>need</em> to do on your phone? Privacy and convenience are typically at odds (a far larger topic I won’t dig into right now) so it can help to narrow down the functionality you need. If your needs look something like:</p>
+<ul>
+<li>Calls and texts</li>
+<li>Web browser</li>
+<li>Web-based email via browser</li>
+</ul>
+<p>Then you&rsquo;re good to go, right out of the box, with either LineageOS or GrapheneOS. They&rsquo;ll both include free and open source apps that let you do all these things.</p>
+<p>If you want a particular application that doesn&rsquo;t come pre-installed, here&rsquo;s where we get into some nuance. Your choices depend on the level of privacy you&rsquo;d like to maintain. Here are your avenues for installing apps, listed in order of preference.</p>
+<h4 id="1-official-apks">1. Official APKs</h4>
+<p>Some particularly privacy-focused applications offer an Android Package Kit (APK) that you can download directly in order to install the app. You should only download these when you&rsquo;ve navigated directly to a domain that the organization owns. Here are my favorites:</p>
+<ul>
+<li><a href="https://signal.org/android/apk/">Signal</a></li>
+<li><a href="https://protonapps.com/protonmail-android">ProtonMail</a></li>
+</ul>
+<p>You can download and install APKs whether you choose LineageOS or GrapheneOS.</p>
+<h4 id="2-use-f-droid">2. Use F-Droid</h4>
+<p>If you can&rsquo;t find an APK for something you want, search for it on F-Droid.</p>
+<p>The <a href="https://f-droid.org/">F-Droid</a> software repository allows you to download and install apps in much the same way that the Google Play store does, with a couple notable differences. All the apps here are free and open source, and no account or profile is required to download them. The F-Droid APK itself can be downloaded and installed from f-droid.org directly on either LineageOS or GrapheneOS.</p>
+<p>Just like any open source software, it&rsquo;s up to the user (you) to ensure that you&rsquo;re downloading and installing software you trust. If you want help or advice, F-Droid has a healthy community that you can interact with in lots of ways, including <a href="https://f-droid.org/en/about/">via IRC, Matrix, and the Fediverse</a>.</p>
+<p>You can find an app for pretty much anything here: from your general-store type functions such as to-do lists, music players, and maps; to specific niche security applications, and even a tea timer. Here are some well-known choices I can easily recommend:</p>
+<ul>
+<li><a href="https://f-droid.org/en/packages/com.standardnotes/">Standard Notes</a> (<a href="https://standardnotes.org/">https://standardnotes.org/</a>)</li>
+<li><a href="https://f-droid.org/en/packages/im.vector.app/">Element for Matrix</a> (<a href="https://element.io/">https://element.io/</a>)</li>
+<li><a href="https://f-droid.org/en/packages/de.tutao.tutanota/">Tutanota</a> (<a href="https://tutanota.com">https://tutanota.com</a>)</li>
+</ul>
+<h4 id="3-aurora-store">3. Aurora Store</h4>
+<p>If you need an app that isn&rsquo;t available on F-Droid, your next stop is the Aurora Store. This is an unofficial client for the Google Play Store that lets you download free applications anonymously, without signing into a Google account. Most applications found in the larger stores can be downloaded this way, without requiring Google&rsquo;s proprietary stuff on your phone.</p>
+<p>When loading Aurora Store for the first time, be sure to choose the &ldquo;Anonymous&rdquo; option instead of signing in.</p>
+<p>The Aurora Store itself can be <a href="https://f-droid.org/en/packages/com.aurora.store/">installed via F-Droid</a> or <a href="https://auroraoss.com/downloads/AuroraStore/">auroraoss.com</a>. It works on either LineageOS or GrapheneOS &ndash; however, apps that require less private permissions or access will probably work better on LineageOS.</p>
+<p>Keep in mind that your phone OS in no way supports these apps directly, or knows what&rsquo;s in them, or what sort of tracking and information exchange they may be up to. It&rsquo;s a slight privacy downgrade, but still better than a fully Google-ified OS.</p>
+<h4 id="4-if-you-need-google-apps">4. If you need Google Apps</h4>
+<p>If this will be your only phone and you simply must have Google Apps on it (think Google Play Store, Gmail, Calendar, Photos, etc) then go with LineageOS. You can choose to try emulating Google Play Services using <a href="https://lineage.microg.org/">LineageOS for microG</a>, or <a href="https://wiki.lineageos.org/gapps">install the Google Apps add-on</a> when you install LineageOS.</p>
+<h2 id="the-tldr">The TL;DR</h2>
+<p>Here&rsquo;s the &ldquo;Internet personality quiz&rdquo; version of everything above. You are&hellip;</p>
+<ol>
+<li><strong>Knowledgeable about Linux;</strong> mostly use a phone for text, calls, and web browser; and potentially want to help develop Linux phone software.
+<ul>
+<li>Try a Linux phone such as the PinePhone, but consider one of the other options as a back up for when you just need stuff to work.</li>
+</ul>
+</li>
+<li><strong>Security or privacy inclined,</strong> happy to use FOSS apps, or do most things via web browser anyway.
+<ul>
+<li>Get your hands on a Pixel 3{XL, a, a XL}, Pixel 4{XL, a, a 5G}, or Pixel 5, and use GrapheneOS. <a href="https://grapheneos.org/install/">Installation instructions here</a>.</li>
+<li>Optionally, download the <a href="https://f-droid.org/">F-Droid</a> or <a href="https://f-droid.org/en/packages/com.aurora.store/">Aurora Store</a> APKs for apps.</li>
+</ul>
+</li>
+<li><strong>Someone who needs Google Apps to work,</strong> or you want a phone that isn&rsquo;t a Pixel, or you&rsquo;re setting up a device for someone who&rsquo;s fine using Android but needs it to look familiar.
+<ul>
+<li>Use LineageOS with any of <a href="https://wiki.lineageos.org/devices/">its supported devices</a>. Click on the device name for installation instructions.</li>
+<li>If you must have Google Apps and need Google Play Services to work, <a href="https://wiki.lineageos.org/gapps">install the add-on</a> at the same time you install LineageOS.</li>
+<li>Optionally, download the <a href="https://f-droid.org/">F-Droid</a> or <a href="https://f-droid.org/en/packages/com.aurora.store/">Aurora Store</a> for installing apps.</li>
+</ul>
+</li>
+</ol>
+<p>Whichever route you choose, my advice is to treat this like a learning experiment. You&rsquo;re sort of building your own phone, after all, and gaining all the technological independence that comes with that knowledge. If possible, don&rsquo;t ditch your current phone until you try out one (two?) of these paths. The one you end up liking most could surprise you! It&rsquo;s great to have options.</p>
+]]></content></entry><entry><title type="html">Leading with a cybersecurity mindset</title><link href="https://victoria.dev/posts/leading-with-a-cybersecurity-mindset/"/><id>https://victoria.dev/posts/leading-with-a-cybersecurity-mindset/</id><author><name>Victoria Drake</name></author><published>2021-07-27T04:26:26-04:00</published><updated>2021-07-27T04:26:26-04:00</updated><content type="html"><![CDATA[<p>Times and technologies change, but a few good ideas are still the same. With consistent application, a handful of wise practices can help deter a slew of cybersecurity attacks. While implementation differs across applications, learning to lead development teams with a cybersecurity mindset boils down to a few fundamental concepts:</p>
+<ul>
+<li>Be a bad guy</li>
+<li>Fail secure</li>
+<li>Practice software minimalism</li>
+</ul>
+<p>A slight change in thinking can create a sea change in security. Let&rsquo;s examine how.</p>
+<h2 id="lets-be-bad-guys">Let&rsquo;s be bad guys</h2>
+<p>When it comes to cybersecurity, I take a pragmatic approach. There aren&rsquo;t enough sheaves of NIST recommendations in the world to help you if you aren&rsquo;t accustomed to thinking like the bad guy. To best lead your team to defend against hacking, first know how to hack yourself.</p>
+<p>A perusal of the resources linked at the end of this article can help you with a starting point, as will general consideration of your application through the lens of an outsider. Are there potentially vulnerable forms or endpoints you might examine first? Is there someone at your company you could call on the phone and surreptitiously get helpful information from? Defense is a difficult position to hold in any battle. If you aren&rsquo;t the first person to consider how your application might be attacked, you&rsquo;ve already lost.</p>
+<p>Develop your sense of how to be the bad guy. Every component of software, every interaction, every bit of data, can be useful to the bad guy. The more you hone your ability to consider how a thing can be used for ill, the better able you&rsquo;ll be to protect it.</p>
+<p>When looking at information, ask, &ldquo;How can I use this information to gain access to more important information?&rdquo; When considering a user story, ask, &ldquo;What happens if I do something unexpected?&rdquo;</p>
+<p>In all things, channel your inner four-year-old. Push all the buttons.</p>
+<p>Playing offense on your own application lets you fix vulnerabilities before they happen. That&rsquo;s a luxury you won&rsquo;t get from the real bad guys.</p>
+<h2 id="fail-secure">Fail secure</h2>
+<p>Every part of a system will fail with 100% certainty on a long enough timescale. Thinking a step ahead can help to ensure that when it does, the one failure doesn&rsquo;t leave your application wide open to others.</p>
+<p>To fail secure means that when a system or code fails to perform or does something unexpected, any follow-on effects are halted rather than permitted. This likely takes many forms in many areas of your application, so here are the more common ones I see.</p>
+<h3 id="permissions">Permissions</h3>
+<p>When gating access, deny by default. This most often takes the form of whitelisting, or colloquially, &ldquo;no one is allowed, except for the people on this list.&rdquo; In terms of code flow, everything should be denied first. Only allow any particular action after proper credentials are verified.</p>
+<h3 id="automation">Automation</h3>
+<p>For automated workflows such as deployments, ensure each step is dependent on the last. Don&rsquo;t make the (rather common) mistake of connecting actions to triggers that can kick off a workflow before all the necessary pieces are in place. With the smorgasbord of cloud and CI tools available, failure events may not be obvious or noisy.</p>
+<p>Be careful to avoid running flows on timed triggers unless they are completely self-contained. Workflows that unpredictably run faster or slower than expected can throw a whole series of events into disarray, leaving processes half-run and states insecure.</p>
+<h3 id="exception-handling">Exception handling</h3>
+<p>Errors are a frequent gold mine for attackers. Ensure your team&rsquo;s code returns &ldquo;pretty&rdquo; errors with content that you can control. &ldquo;Ugly&rdquo; errors, returned by default by databases, frameworks, etc, try to be helpful by providing lots of debugging information that can be extremely helpful to a hacker.</p>
+<h2 id="software-minimalism">Software minimalism</h2>
+<p>If your development team doesn&rsquo;t currently have one central source of information when it comes to keeping track of all your application components, here&rsquo;s a tip you really need. In software security, less is more (secure).</p>
+<p>The more modular an application is, the better its various components can be isolated, protected, or changed out. With a central source of truth for what all those components are (and preferably one that doesn&rsquo;t rely on manual updates), it&rsquo;s easier to ensure that your application is appropriately minimalist. Dependency managers, such as Pipenv, are a great example.</p>
+<p>Few industries besides technology seem to have produced as many acronyms. Philosophies like Don&rsquo;t Repeat Yourself (DRY), Keep It Simple Stupid (KISS), You Aren&rsquo;t Going to Need It (YAGNI), and countless other methodologies all build upon one very basic principle: minimalism. It&rsquo;s a principle that warrants incorporation in every aspect of an application.</p>
+<p>There&rsquo;s a reason it takes little skill to shoot the broad side of a barn: barns are rather large, and there&rsquo;s quite a lot of one to hit. Applications bloated by excessive third-party components, repeated code, and unnecessary assets make similarly large targets. The more there is to maintain and protect, the easier it is to hit.</p>
+<p>Like Marie Kondo&rsquo;s method for dispatching the inevitable creep of household clutter, you can reduce your application&rsquo;s attack surface by considering each component and asking whether it brings you joy. Do all of this component&rsquo;s functions benefit your application? Is there unnecessary redundancy here? Assess each component and decide how integral it is to the application. Every component is a risk; your job is to decide if it&rsquo;s a worthwhile risk.</p>
+<h2 id="bonus-your-personal-yodas">Bonus: your personal Yodas</h2>
+<p>With the basic principles of learning to think like the bad guy, failing securely, and practicing software minimalism, you&rsquo;re now ready to steep in the specifics. Keeping the fundamentals in mind can help you lead your team to focus your cybersecurity efforts where it matters most.</p>
+<p>No Jedi succeeds without a little help from friends. Whether you&rsquo;re a beginner in the battle against the dark side or a twice-returned-home Jedi Master, these resources provide continuing training and guidance.</p>
+<ul>
+<li><a href="https://owasp.org/www-project-web-security-testing-guide/">Open Web Application Security Project</a></li>
+<li><a href="https://www.nist.gov/cybersecurity">National Institute of Standards and Technology (NIST): Cybersecurity</a></li>
+<li><a href="https://owasp.org/www-project-proactive-controls/">OWASP Proactive Controls</a></li>
+<li><a href="https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/">OWASP Secure Coding Practices</a></li>
+<li><a href="https://owasp.org/www-project-web-security-testing-guide/">OWASP Web Security Testing Guide</a></li>
+<li><a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-30r1.pdf">NIST Special Publication 800-30: Guide for conducting risk assessments</a></li>
+<li><a href="https://www.nsa.gov/Press-Room/Cybersecurity-Advisories-Guidance/">NSA’S Cybersecurity Advisories &amp; Technical Guidance</a></li>
+</ul>
+<p>I hope you find these thought systems helpful! If you find your interest piqued as well, you can read more of what <a href="/tags/cybersecurity">I&rsquo;ve written about cybersecurity here</a>.</p>
+]]></content></entry><entry><title type="html">How to get hired as a software developer</title><link href="https://victoria.dev/posts/how-to-get-hired-as-a-software-developer/"/><id>https://victoria.dev/posts/how-to-get-hired-as-a-software-developer/</id><author><name>Victoria Drake</name></author><published>2021-01-12T05:50:53-05:00</published><updated>2021-01-12T05:50:53-05:00</updated><content type="html"><![CDATA[<p>I&rsquo;m asked this question a lot, so let me be the first to give you the good news: there&rsquo;s no one right answer. As general tech-literacy increases, the culture of the coding industry is steadily, thankfully, moving away from a checklist approach. Instead of degrees and pre-requisites when it comes to deciding whether you&rsquo;re qualified to be hired as a software developer, companies (including my own) are far more concerned with just one question. <strong>What can you do?</strong></p>
+<p>There are some general best practices that will make you a far more attractive hire than the majority of applicants, and I&rsquo;ll discuss those in this post. For the most part, however, demonstrating what you&rsquo;re capable of is the best way to increase your chances of getting to the interview and beyond. Here&rsquo;s how to get hired as a software developer.</p>
+<h2 id="first-build-projects">First, build projects</h2>
+<p>Companies who are primarily focused on getting products built want to see that you&rsquo;ve built products. They don&rsquo;t need to be flashy or for-profit, but they do need to work. I&rsquo;m far more likely to consider a candidate with a colorful bouquet of working code in their GitHub or GitLab or CodePen portfolio. Here are some basic ideas to get you started:</p>
+<ul>
+<li>Command line utilities that help with tedious tasks, like <a href="/blog/batch-renaming-images-including-image-resolution-with-awk/">renaming image files</a></li>
+<li><a href="/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/">Themes</a> for static site generators like Hugo or Jekyll</li>
+<li>Automation tools, such as for <a href="/posts/go-automate-your-github-profile-readme/">GitHub Actions</a></li>
+</ul>
+<p>The best projects you could showcase are ones directly related to the specialty you want to apply for. Show that you have competency with the fundamentals. For instance, if you see yourself focusing on front end, demonstrate that you can build interactive web pages with no fancier tools than HTML, CSS, and vanilla JS. For back end focused developers, show that you know how to create a fundamental tool like an API for a service on a local server. Want to be well-rounded? Create an API with a web page UI.</p>
+<p>Spend some time creating a good README. Use screenshots, highlight code snippets, include well-written instructions for local set up. Show that you care about and fully understand your own work.</p>
+<p>Explore specific frameworks and libraries if they interest you, but keep in mind that those won&rsquo;t be interesting to a company unless the company already wants to use that framework.</p>
+<p>You maximize your chances of getting hired by demonstrating that you already have the ability to learn on your own, build, and then present projects to the world. Out of everything else in this article, this is the one fundamental trait that a company won&rsquo;t want to have to teach you.</p>
+<h2 id="next-stand-out">Next, stand out</h2>
+<p>Familiarity with the following topics, along with demonstrating that understanding in your own code, will put you miles ahead of most applicants.</p>
+<h3 id="reusable-code">Reusable code</h3>
+<p>Companies that build products are concerned with getting the most bang for their buck. This is the same idea as wanting to save yourself time when you&rsquo;re creating something individually. If you put a week of effort into building something, it would be nice if you could keep easily using it for a long time afterwards. How can you maximize the return on your efforts?</p>
+<p>Be familiar with DRY code. Avoid creating highly customized pieces that only fit a particular use case, peppered with hard-coded variables and dependent on a particular input structure. Avoid writing code that is hard to update in the future. Recognize when you&rsquo;re writing a script or library that could apply in many different situations, and understand how to turn it into a reusable module.</p>
+<h3 id="types-and-mutability">Types and mutability</h3>
+<p>Besides building projects, debugging them can be a company&rsquo;s most expensive task. It takes a lot of time to hunt down and fix bugs, but you can help reduce that cost by understanding the subtler ways that a lot of bugs occur. Understanding types and mutability &ndash; whether and how an object can be changed &ndash; can help open the door to even greater technical proficiency.</p>
+<p>Get familiar with at least one type system. If there&rsquo;s a linter available for your language, use it. Understand how immutable and mutable objects work in the language you use. Be able to describe specific use cases for either one. Understand at a general level how mutability impacts system resources, the difference between referencing and copying, and what it means to be thread-safe.</p>
+<h3 id="follow-on-effects">Follow-on effects</h3>
+<p>Keep in mind that organizations are made up of people. When you work together with colleagues, your work has an effect on someone else&rsquo;s. Being aware of these effects and demonstrating conscientiousness in this area will help show potential employers that you&rsquo;d benefit the team as a whole.</p>
+<p>Consider the second and third-order effects of code you write. Avoid writing code that will unnecessarily slow down a larger system. Understand what blocking means and how to use concurrency or parallelism in your project. Include your thoughts on follow-on effects in your READMEs. Show that you always have the larger project, effort, costs, or organization in mind.</p>
+<h2 id="other-nice-to-haves">Other nice-to-haves</h2>
+<p>If you&rsquo;ve fully taken advantage of the points above, you&rsquo;re most of the way to getting hired already. Seal the deal with these easy wins.</p>
+<h3 id="be-a-friendly-open-source-participant">Be a friendly open source participant</h3>
+<p>There&rsquo;s no better way to show a potential employer you can work well on a team than by providing plenty of examples. Get involved with open source projects, contribute features and fixes, and interact with contributors and maintainers. Create a real-life simulation for your future colleagues that leaves no doubt about what you&rsquo;d be like to work with. The further back this history goes, the better, so start right away.</p>
+<h3 id="communicate-with-care">Communicate with care</h3>
+<p>If you&rsquo;re participating in open source or working remotely, most of your communication with your colleagues is going to take place online in text. Without facial expressions, tone or inflection, this form of communication leaves a lot to be desired. Some extra care on your part can help make sure your message always comes across as intended.</p>
+<p>Get into a habit of drafting most everything you write, especially for long-form communication. Putting yourself in the mindset of creating a draft first lets you take all the time you need to craft your message. You can make sure you&rsquo;re choosing appropriate words and coming across with the emotions you intend to convey. Feeling hurried? Remember the golden rule of online communication: you <em>never</em> need to reply right away. Take a breath, then take your time.</p>
+<h2 id="finally-use-your-imagination">Finally, use your imagination</h2>
+<p>Software developers are creative people by necessity. Before you can write code, build a project, or design a page, you first have to be able to imagine it! So put that skill to good use.</p>
+<p>In every application, every email, every chat message with your potential employer, imagine yourself in their position. What do they care about right now? What current goals does the company have? What information about yourself can you share that would make them feel comfortable hiring you?</p>
+<p>Take your best guess, and then ask if you got it right. &ldquo;I think the company is looking for someone to [insert guess here], is that accurate?&rdquo; Show that you have both the capability to anticipate future needs and the desire to identify and solve them.</p>
+<h2 id="get-yourself-hired">Get yourself hired</h2>
+<p>Admittedly, this post is my own wishlist. Good candidates for software development positions are hard to come by, and people who can rightly say they do everything above are rare. I don&rsquo;t think the discrepancy is due to a lack of ability; perhaps just a lack of information.</p>
+<p>I&rsquo;ve seen both sides of the virtual interview table, and this post is a result of me figuring things out the long and circuitous way. I hope this helps you to take a more direct route to getting yourself hired as a software developer.</p>
+]]></content></entry><entry><title type="html">Be brave and build in public</title><link href="https://victoria.dev/archive/be-brave-and-build-in-public/"/><id>https://victoria.dev/archive/be-brave-and-build-in-public/</id><author><name>Victoria Drake</name></author><published>2020-12-24T04:57:31-06:00</published><updated>2020-12-24T04:57:31-06:00</updated><content type="html"><![CDATA[<p>I used to think that when I wanted to make updates to a project, I ought to hold back and do a big re-launch with all the changes at once. I figured that seeing big changes would feel like Christmas!</p>
+<p>Unfortunately, Christmas only comes once a year. After years in the tech and cybersecurity world, my perspective has changed.</p>
+<p>I&rsquo;ve found that people, including myself, value receiving small, constant, incremental improvements far more than big changes once or a few times a year. It makes sense if you think about it. The former constantly delights in small, unexpected ways that make the user experience better. The latter is invisible, except for a few times a year.</p>
+<p>There are occasions when big changes make sense. Say you&rsquo;re re-launching functionality, or coinciding with an event that deserves all the fanfare of an unveiling.</p>
+<p>Other than that, and for most of us, holding back doesn&rsquo;t serve us at all. It may even come from something far more insidious: fear of judgement.</p>
+<h2 id="being-brave">Being brave</h2>
+<p>Thinking such as &ldquo;I&rsquo;ll show it to the world when it&rsquo;s ready,&rdquo; always leaves out the most important detail. What does &ldquo;ready&rdquo; mean?</p>
+<p><img src="mvp-vs-user.png" alt="Your MVP (a chandelier) vs. What Users Want (a lightbulb) comic"></p>
+<p>If you haven&rsquo;t written down your definition of &ldquo;ready,&rdquo; consider that you may be holding back for no good reason. What&rsquo;s the worst that could happen, anyway, if you make your work public when it&rsquo;s less than perfect?</p>
+<p>I decided to find out when I started to build in public. Instead of holding back work, I released a first version as soon as it functioned as intended. I leaned on <code>v0.0.*</code> tags as a way to say, &ldquo;This is available, but still in progress.&rdquo; Or, I&rsquo;d say so outright, in the README.</p>
+<p>In the world of open source, building in public can be scary stuff. It feels like making yourself vulnerable. It&rsquo;s opening up part of yourself, a creative part, for scrutiny and nitpicking &ndash; <em>by strangers</em>. Of course it&rsquo;s not comfortable.</p>
+<p>Once I overcame the discomfort, once I decided to be brave and appreciate even possibly negative feedback, something amazing happened.</p>
+<p>I suddenly had <em>help</em>.</p>
+<p>Yes, there was scrutiny and nitpicking &ndash; but I don&rsquo;t think any of it was ill-intentioned. I found that there existed whole communities of people who wanted to help me build a project that they thought was interesting. In some cases, I was utterly amazed when people submitted pull requests for issues I&rsquo;d opened <em>on my own projects</em> describing enhancements I&rsquo;d like to have.</p>
+<p>I&rsquo;ve been fortunate to have wonderful experiences with open source so far. Based on these experiences, I&rsquo;d like to share with you what I&rsquo;ve discovered to be the most effective ways to be brave and generous when it comes to open source.</p>
+<h2 id="tis-the-season-to-share-generously">&lsquo;Tis the season to share generously</h2>
+<p>When unprompted strangers submit helpful comments, issues, and pull requests on your projects, it feels like Christmas. You can give the gift of helpfulness in your contributions as well.</p>
+<p><img src="typo.png" alt="Illustration of a Santa contributor helping to fix a typo"></p>
+<p>Treat comments like a face-to-face conversation. Greet the person you&rsquo;re addressing. Use full sentences. Think about whether what you&rsquo;re writing will make someone&rsquo;s day better or worse, and be nice.</p>
+<p>When writing issues, include as much technical detail as possible. Screenshots, console logs, screenshots <em>of</em> console logs, your operating system, browser, screen resolution &ndash; all these can help maintainers quickly diagnose a root cause.</p>
+<p>Pull requests are the best presents ever. They make maintainers happy when well done, and it&rsquo;s a gift that gives back when your contribution gets merged! 🎉 Give your PR the best chance of getting accepted by looking for and following any project contribution guidelines.</p>
+<h2 id="recognize-the-human">Recognize the human</h2>
+<p>Our brains are slightly lacking in an evolutionary sense when it comes to interacting with other humans through tiny screens. It can be easy to forget that the actions you put out there will eventually reach one or more other people.</p>
+<p>You can help to maintain a great open source community by remembering the humans that make it exist. When commenting, take the time to do it well (see below) and recognize the time that someone else has put in. When closing a thread or merging a contribution, remember to say thank you to the people who pitched in to help. I try to use first names instead of screen names, whenever possible.</p>
+<p>You can build personal relationships, too. If you&rsquo;re a project maintainer, you may choose to give people a way to contact you directly to ask questions or hash out complicated plans. Establishing one-to-one communications with regular contributors is also a great way to build a community around your project.</p>
+<p>Recognizing the humans behind the open source community is a simple and meaningful way to give back.</p>
+<h2 id="dont-rush">Don&rsquo;t rush</h2>
+<p>The vast majority of open source participants are volunteers, which means they don&rsquo;t get paid for the time they spend building up projects. That sometimes means that other work takes priority. It&rsquo;s okay if this describes you, too.</p>
+<p>It&rsquo;s important to remember that in most cases, a well-done contribution later is preferred over a half-done contribution sooner. If you&rsquo;re too short on time now to write a thoughtful comment &ndash; don&rsquo;t! Either draft a quick note and set it aside for later, or comment something along the lines of:</p>
+<blockquote>
+<p>Hi there! Just wanted to let you know that I&rsquo;ve seen this and I plan to help! I&rsquo;ll respond in full as soon as I have the time to write a thoughtful comment.</p></blockquote>
+<p>Showing that you think a comment is worth the time to do well is something that open source contributors and repository maintainers both appreciate.</p>
+<h2 id="build-generously">Build generously</h2>
+<p>When open source participants act with conscientiousness, every day feels like Christmas. Regardless of your type of contribution, you can help build this generous global community year-round.</p>
+<p>The humans of open source, by self selection, mostly consist of good people who want to help. If you build openly, share feedback generously, and try to do good in general, I think you fit in here.</p>
+<p>I hope you have a very happy holiday season and give many gifts that keep on giving!</p>
+<p><img src="presents.png" alt="An illustration of santa sitting on a pile of presents"></p>
+]]></content></entry><entry><title type="html">OWASP Web Security Testing Guide v4.2 released</title><link href="https://victoria.dev/archive/owasp-web-security-testing-guide-v4.2-released/"/><id>https://victoria.dev/archive/owasp-web-security-testing-guide-v4.2-released/</id><author><name>Victoria Drake</name></author><published>2020-12-03T16:02:33-06:00</published><updated>2020-12-03T16:02:33-06:00</updated><content type="html"><![CDATA[<p>I&rsquo;m very happy and proud to share that the Open Web Application Security Project (OWASP) Web Security Testing Guide v4.2 is now available! This update is the result of a lot of hard work by the repository team and many dedicated contributors. With a team like this, I&rsquo;m honored to be a core maintainer and co-author.</p>
+<p>Here&rsquo;s a reprint of <a href="https://owasp.org/2020/12/03/wstg-v42-released.html">the announcement I wrote for owasp.org</a>. If you&rsquo;re interested in security testing for web applications and APIs, this is an update you&rsquo;ll definitely want to check out!</p>
+<p>You can become a contributor yourself by <a href="https://github.com/OWASP/wstg">joining us on GitHub</a>!</p>
+<hr>
+<h2 id="web-security-testing-guide-v42-released">Web Security Testing Guide v4.2 Released</h2>
+<p><em>Thursday, December 3, 2020</em></p>
+<p>The OWASP Web Security Testing Guide team is proud to announce version 4.2 of the Web Security Testing Guide (WSTG)! In keeping with a continuous delivery mindset, this new minor version adds content as well as improves the existing tests.</p>
+<p>In recent years, the Web Security Testing Guide has sought to remain your foremost open source resource for web application testing. Our previous release marked a move from a cumbersome wiki platform to the highly collaborative world of <a href="https://github.com/OWASP/wstg/">GitHub</a>. Since then, over 61 new contributors pushing over 600 commits have helped to make the WSTG better than ever.</p>
+<p>Version 4.2 of the Web Security Testing Guide introduces new testing scenarios, updates existing chapters, and offers an improved reading experience with a clearer writing style and chapter layout. Readers will enjoy easier navigation and consistent testing instructions.</p>
+<p>With new improvements to our development workflow, new contributors will find it easier than ever to help build future versions of the WSTG. A clear and concise <a href="https://github.com/OWASP/wstg/blob/master/CONTRIBUTING.md">contributor’s guide</a> and <a href="https://github.com/OWASP/wstg/blob/master/style_guide.md">style guide</a> can help you write new tests or ensure existing scenarios stay current. Core maintainers <a href="https://github.com/kingthorin">Rick Mitchell</a>, <a href="https://github.com/ThunderSon">Elie Saad</a>, <a href="https://github.com/rejahrehim">Rejah Rehim</a>, and <a href="https://github.com/victoriadrake">Victoria Drake</a> have implemented modern processes like continuous integration with GitHub Actions. New workflows help to build PDFs and make reviewing new additions and updates easier.</p>
+<p>We couldn’t be happier to share this new version with you, and we don’t plan to slow down anytime soon. The dedicated volunteers who’ve made this release possible are already hard at work on the next major version of the WSTG. Come <a href="https://github.com/OWASP/wstg">join us and become a contributor</a>!</p>
+<p>You can <a href="https://owasp.org/www-project-web-security-testing-guide/">read the Web Security Testing Guide v4.2 online or download a PDF</a> on our project page. We greatly appreciate all the authors, editors, reviewers, and readers who make this open source security endeavor worthwhile.</p>
+<p>Thank you for being a part of the WSTG!</p>
+]]></content></entry><entry><title type="html">How GitHub Codespaces increases productivity and lowers barriers</title><link href="https://victoria.dev/archive/how-github-codespaces-increases-productivity-and-lowers-barriers/"/><id>https://victoria.dev/archive/how-github-codespaces-increases-productivity-and-lowers-barriers/</id><author><name>Victoria Drake</name></author><published>2020-08-15T16:08:08-04:00</published><updated>2020-08-15T16:08:08-04:00</updated><content type="html"><![CDATA[<p>The most recent integration between Visual Studio Code and GitHub can help make development accessible and welcoming: Codespaces in GitHub!</p>
+<p>Now in beta, <a href="https://docs.github.com/en/github/developing-online-with-codespaces/about-codespaces">GitHub Codespaces</a> provide an online, in-the-browser IDE powered by Visual Studio Code. This lets you use this full-featured IDE, complete with extensions, terminal, Git commands, and all the settings you&rsquo;re accustomed to, on any machine. You can now bring your development workflow anywhere using a tablet or other browser-based device.</p>
+<p>Codespaces is great news for open source contributors, too. <a href="https://docs.github.com/en/github/developing-online-with-codespaces/configuring-codespaces-for-your-project">Adding a codespace configuration</a> to your project is a great way to invite new folks to easily start contributing.</p>
+<p>A new open source contributor or new hire at your organization can quickly fire up a codespace and get hacking on a <code>good first issue</code> with no local environment set up or installations necessary!</p>
+<p><img src="open-with-codespaces-button.png" alt="Starting a new codespace"></p>
+<p>We&rsquo;ve added codespace configuration settings over at the <a href="https://github.com/OWASP/wstg">OWASP Web Security Testing Guide (WSTG)</a>. Want to take it for a spin? See our <a href="https://github.com/OWASP/wstg/issues">open issues</a>.</p>
+<h2 id="configuring-codespaces">Configuring Codespaces</h2>
+<p>You can use Visual Studio Code&rsquo;s <code>.devcontainer</code> folder to configure a development container for your repository as well.</p>
+<p>Many <a href="https://github.com/microsoft/vscode-dev-containers/tree/master/containers">pre-built containers are available</a> &ndash; just copy the <code>.devcontainer</code> you need to your repository root. If your repository doesn&rsquo;t have one, a <a href="https://github.com/microsoft/vscode-dev-containers/tree/master/containers/codespaces-linux">default base Linux image</a> will be used.</p>
+<p>Here&rsquo;s a reason to remove <code>.vscode</code> from your <code>.gitignore</code> file. Any new codespaces created in your repository will now respect settings found at <code>.vscode/settings.json</code>. This means that your online IDE can have the same Workspace configuration as you have on your local machine. Isn&rsquo;t that useful!</p>
+<h2 id="making-codespaces-personal">Making Codespaces personal</h2>
+<p>For next-level <a href="https://docs.github.com/en/github/developing-online-with-codespaces/personalizing-codespaces-for-your-account">dotfiles personalization</a>, consider committing relevant files from your local <code>dotfiles</code> folder as a public GitHub repository at <code>yourusername/dotfiles</code>.</p>
+<p>When you create a new codespace, this brings in your configurations, such as shell aliases and preferences, by creating symlinks to dotfiles in your codespace <code>$HOME</code>. This personalizes all the codespaces you create in your account.</p>
+<p>Need some inspiration? Browse <a href="https://github.com/victoriadrake/dotfiles">my dotfiles repository on GitHub</a>.</p>
+<p><a href="https://docs.github.com/en/github/developing-online-with-codespaces/developing-in-a-codespace">Developing in a codespace</a> is a familiar experience for Visual Studio Code users, right down to running an application locally.</p>
+<p>Thanks to <a href="https://docs.github.com/en/github/developing-online-with-codespaces/developing-in-a-codespace">port forwarding</a>, when I run an application in a codespace terminal, clicking on the resulting <code>localhost</code> URL takes me to the appropriate port as output from my codespace.</p>
+<p>When I&rsquo;m working on this website in my codespace, for example, I run <code>hugo serve</code> then click the provided <code>localhost:1313</code> link to see a preview of my changes in another browser tab.</p>
+<p>Want to stay in sync between devices? There&rsquo;s an extension for that. You can <a href="https://docs.github.com/en/github/developing-online-with-codespaces/connecting-to-your-codespace-from-visual-studio-code">connect to your codespace from Visual Studio Code</a> on your local machine so you can always pick up right where you left off.</p>
+<h2 id="develop-anywhere">Develop anywhere</h2>
+<p>Codespaces is a super exciting addition to my GitHub workflow. It allows me to access my full development process pretty much anywhere, using devices like my iPad.</p>
+<p>It&rsquo;ll also make it easier for new open source contributors or new hires at your organization to hit the ground running with a set-up IDE. If you have access to the limited beta, I invite you to spin up a codespace and try <a href="https://github.com/OWASP/wstg/issues">contributing to the WSTG</a>, or to <a href="https://github.com/victoriadrake?tab=repositories">an issue on one of my open source projects</a>.</p>
+<p>I&rsquo;m looking forward to general availability and seeing what the open source community will dream up for GitHub Codespaces next!</p>
+<p>And yes &ndash; codespaces support <a href="https://github.com/victoriadrake/kabukicho-vscode">your favorite Visual Studio Code theme</a>. 😈</p>
+<figure class="screenshot"><img src="/archive/how-github-codespaces-increases-productivity-and-lowers-barriers/codespace.png"
+    alt="A screenshot of my codespace"><figcaption>
+      <p>Screenshot of a codespace with the Kabukichō theme for Visual Studio Code</p>
+    </figcaption>
+</figure>
+
+]]></content></entry><entry><title type="html">Look mom, I&amp;#39;m a GitHub Action Hero</title><link href="https://victoria.dev/archive/look-mom-im-a-github-action-hero/"/><id>https://victoria.dev/archive/look-mom-im-a-github-action-hero/</id><author><name>Victoria Drake</name></author><published>2020-06-27T09:06:33-04:00</published><updated>2020-06-27T09:06:33-04:00</updated><content type="html"><![CDATA[<p>GitHub recently interviewed me for their blog editorial entitled <a href="https://github.blog/2020-06-26-github-action-hero-victoria-drake/">GitHub Action Hero: Victoria Drake</a>. Here&rsquo;s a behind-the-scenes peek at the original interview questions and my answers.</p>
+<h2 id="what-is-the-name-of-your-action-please-include-a-link-too">What is the name of your Action? Please include a link too.</h2>
+<p>Among the several Actions I&rsquo;ve built, I have two current favorites. One is <a href="https://github.com/victoriadrake/hugo-remote">hugo-remote</a>, which lets you continuously deploy a Hugo static site from a private source repository to a public GitHub Pages repository. This keeps the contents of the source repository private, such as your unreleased drafts, while still allowing you to have a public open source site using GitHub Pages.</p>
+<p>The second is <a href="https://github.com/victoriadrake/django-security-check">django-security-check</a>. It&rsquo;s an effortless way to continuously check that your production Django application is free from a variety of security misconfigurations. You can think of it as your little CI/CD helper for busy projects &ndash; a security linter!</p>
+<h2 id="tell-us-a-little-bit-more-about-yourselfhow-did-you-get-started-in-software-tools">Tell us a little bit more about yourself—how did you get started in software tools?</h2>
+<p>When I was a kid, I spent several summer vacations coding a huge medieval fantasy world MUD (Multi-User Dungeon, like a multiplayer role-playing game) written in LPC, with friends. It was entirely text-based, and built and played via Telnet. I fell in love with the terminal and learned a lot about object-oriented programming and prototype-based programming early on.</p>
+<p>I became a freelance developer and had the privilege of working on a wide variety of client projects. Realizing the difficulty that companies have with hiring experienced developers, I built <a href="https://ApplyByAPI.com">ApplyByAPI.com</a> to help. As you might imagine, it allows candidates to apply for jobs via API, instead of emailing a resume. It&rsquo;s based on the Django framework, so in the process, I learned even more about building reusable units of software.</p>
+<p>When I became a co-author and a core maintainer for the <a href="https://github.com/OWASP/wstg">Open Web Application Security Project (OWASP) Web Security Testing Guide (WSTG)</a>, I gained an even broader appreciation for how a prototype-based, repeatable approach can help build secure web applications. Organizations worldwide consider the WSTG the foremost open source resource for testing the security of web applications. We&rsquo;ve applied this thinking via the use of GitHub Actions in our repository &ndash; I&rsquo;ll tell you more about that later.</p>
+<p>Whether I&rsquo;m creating an open source tool or leading a development team, my childhood experience still informs how I think about programming today. I strive to create repeatable units of software like GitHub Actions &ndash; only now, I make them for large enterprises in the real world!</p>
+<h2 id="what-is-the-story-behind-your-built-github-action-why-did-you-build-this">What is the story behind your built GitHub Action? (Why did you build this?)</h2>
+<p>Developers take on a lot of responsibility when it comes to building secure applications these days. I&rsquo;m a full-time senior software developer at a cybersecurity company. I&rsquo;ve found that I&rsquo;m maximally productive when I create systems and processes that help myself and my team make desired outcomes inevitable. So I spend my free time building tools that make it easy for other developers to build secure software as well. My Actions help to automate contained, repeatable units of work that can make a big difference in a developer&rsquo;s day.</p>
+<h2 id="do-you-have-future-plans-for-this-or-other-actions">Do you have future plans for this or other Actions?</h2>
+<p>Yes! I&rsquo;m always finding ways for tools like GitHub Actions to boost the velocity of technical teams, whether at work or in my open source projects. Remember the Open Web Application Security Project? In the work I&rsquo;ve lead with OWASP, I&rsquo;ve championed the effort to increase automation using GitHub Actions to maintain quality, securely deploy new versions to the web, and even build PDFs of the WSTG. We&rsquo;re constantly looking into new ways that GitHub Actions can make our lives easier and our readers&rsquo; projects more secure.</p>
+<h2 id="what-has-been-your-favorite-feature-of-github-actions">What has been your favorite feature of GitHub Actions?</h2>
+<p>I like that I can build an Action using familiar and portable technologies, like Docker. Actions are easy for collaborators to work on too, since in the case of a Dockerized Action, you can use any language your team is comfortable with. This is especially useful in large organizations with polyglot teams and environments. There aren&rsquo;t any complicated dependencies for running these portable tasks, and you don&rsquo;t need to learn any special frameworks to get started.</p>
+<p>One of my first blog posts about GitHub Actions even describes how I used an Action to run a Makefile! This is especially useful for large legacy applications that want to modernize their pipeline by using GitHub Actions.</p>
+<h2 id="what-are-the-biggest-challenges-youve-faced-while-building-your-github-action">What are the biggest challenges you’ve faced while building your GitHub Action?</h2>
+<p>The largest challenge of GitHub Actions isn&rsquo;t really in GitHub Actions, but in the transition of legacy software and company culture.</p>
+<p>Migrating legacy software is always challenging, particularly with large legacy applications. Moving to modern CI/CD processes requires changes at the software level, team level, and even a shift in thinking when it comes to individual developers. It can help to have a tool like GitHub Actions, which is at once seamlessly modern and familiar, when transitioning legacy code to a modern pipeline.</p>
+<h2 id="anything-else-you-would-like-to-share-about-your-experience-any-stories-or-lessons-learned-through-building-your-action">Anything else you would like to share about your experience? Any stories or lessons learned through building your Action?</h2>
+<p>I&rsquo;m happiest when I&rsquo;m solving a challenge that makes developing secure software less challenging in the future, both for myself and for the technology organization I&rsquo;m leading. With tools like GitHub Actions, a lot of mental overhead can be offloaded to automatic processes &ndash; like getting a whole other brain, for free! This can massively help organizations that are ready to scale up their development output.</p>
+<p>In the realm of cybersecurity, not only does creating portable and reusable software make developers&rsquo; lives easier, it helps to make whole workflows repeatable, which in turn makes software development processes more secure. With smart processes in place, technical teams are happier. As an inevitable result, they&rsquo;ll build better software for customers, too.</p>
+]]></content></entry><entry><title type="html">How to choose and care for a secure open source project</title><link href="https://victoria.dev/posts/how-to-choose-and-care-for-a-secure-open-source-project/"/><id>https://victoria.dev/posts/how-to-choose-and-care-for-a-secure-open-source-project/</id><author><name>Victoria Drake</name></author><published>2020-05-25T05:53:09-04:00</published><updated>2020-05-25T05:53:09-04:00</updated><content type="html"><![CDATA[<p>There is a rather progressive sect of the software development world that believes that most people would be a lot happier and get a lot more work done if they just stopped building things that someone else has already built and is offering up for free use. They&rsquo;re called the open source community. They want you to take their stuff.</p>
+<p><img src="wheels.png" alt="A comic I drew about using other people&rsquo;s stuff, with the wheel as an example."></p>
+<p>Besides existing without you having to lift a finger, open source tools and software have some distinct advantages. Especially in the case of well-established projects, it&rsquo;s highly likely that someone else has already worked out all the most annoying bugs for you. Thanks to the ease with which users can view and modify source code, it&rsquo;s also more likely that a program has been tinkered with, improved, and secured over time. When many developers contribute, they bring their own unique expertise and experiences. This can result in a product far more robust and capable than one a single developer can produce.</p>
+<p>Of course, being as varied as the people who build them, not all open source projects are created equal, nor maintained to be equally secure. There are many factors that affect a project&rsquo;s suitability for your use case. Here are a few general considerations that make a good starting point when choosing an open source project.</p>
+<h2 id="how-to-choose-an-open-source-project">How to choose an open source project</h2>
+<p>As its most basic requirements, a good software project is reliable, easy to understand, and has up-to-date components and security. There are several indicators that can help you make an educated guess about whether an open source project satisfies these criteria.</p>
+<h3 id="whos-using-it">Who&rsquo;s using it</h3>
+<p>Taken in context, the number of people already using an open source project may be indicative of how good it is. If a project has a hundred users, for instance, it stands to reason that someone has tried to use it at least a hundred times before you found it. Thus by the ancient customs of &ldquo;I don&rsquo;t know what&rsquo;s in that cave, you go first,&rdquo; it&rsquo;s more likely to be fine.</p>
+<p>You can draw conclusions about a project&rsquo;s user base by looking at available statistics. Depending on your platform, these may include the number of downloads, reviews, issues or tickets, comments, contributions, forks, or &ldquo;stars,&rdquo; whatever those are.</p>
+<p>Evaluate social statistics on platforms like GitHub with a grain of salt. They can help you determine how popular a project may be, but only in the same way that restaurant review apps can help you figure out if you should eat at Foo&rsquo;s Grill &amp; Bar. Depending on where Foo&rsquo;s Grill &amp; Bar is, when it opened, and how likely people are to be near it when the invariable steak craving should call, having twenty-six reviews may be a good sign or a terrible one. While you would not expect a project that addresses a very obscure use case or technology to have hundreds of users, having a few active users is, in such a case, just as confidence-inspiring.</p>
+<p>External validation can also be useful. For example, packages that are included in a Linux operating system distribution (distro) must conform to stringent standards and undergo vetting. Choosing software that is included in a distro&rsquo;s default repositories can mean it&rsquo;s more likely to be secure.</p>
+<p>Perhaps one of the best indications to look for is whether a project&rsquo;s development team is using their own project. Look for issues, discussions, or blog posts that show that the project&rsquo;s creators and maintainers are using what they&rsquo;ve built themselves. Commonly referred to as <a href="https://en.wikipedia.org/wiki/Eating_your_own_dog_food">&ldquo;eating your own dog food,&rdquo;</a> or &ldquo;dogfooding,&rdquo; it&rsquo;s an indicator that the project is most likely to be well-maintained by its developers.</p>
+<h3 id="whos-building-it">Who&rsquo;s building it</h3>
+<p>The main enemy of good open source software is usually a lack of interest. The parties involved in an open source project can make the difference between a flash-in-the-pan library and a respected long-term utility. Multiple committed maintainers, even making contributions in their spare time, have a much higher success rate of sustaining a project and generating interest.</p>
+<p>Projects with healthy interest are usually supported by, and in turn cultivate, a community of contributors and users. New contributors may be actively welcomed, clear guides are available explaining how to help, and project maintainers are available and approachable when people have inevitable questions. Some communities even have chat rooms or forums where people can interact outside of contributions. Active communities help sustain project interest, relevance, and its ensuing quality.</p>
+<p>In a less organic fashion, a project can also be sustained through organizations that sponsor it. Governments and companies with financial interest are open source patrons too, and a project that enjoys public sector use or financial backing has added incentive to remain relevant and useful.</p>
+<h3 id="how-alive-is-it">How alive is it</h3>
+<p>The recency and frequency of an open source project&rsquo;s activity is perhaps the best indicator of how much attention is likely paid to its security. Look at releases, commit history, changelogs, or documentation revisions to determine if a project is active. As projects vary in size and scope, here are some general things to look for.</p>
+<p>Maintaining security is an ongoing endeavor that requires regular monitoring and updates, especially for projects with third-party components. These may be libraries or any part of the project that relies on something outside itself, such as a payment gateway integration. An inactive project is more likely to have outdated code or use outdated versions of components. For a more concrete determination, you can research a project&rsquo;s third-party components and compare their most recent patches or updates with the project&rsquo;s last updates.</p>
+<p>Projects without third-party components may have no outside updates to apply. In these cases, you can use recent activity and release notes to determine how committed a project&rsquo;s maintainers may be. Generally, active projects should show updates within the last months, with a notable release within the last year. This can be a good indication of whether the project is using an up-to-date version of its language or framework.</p>
+<p>You can also judge how active a project may be by looking at the project maintainers themselves. Active maintainers quickly respond to feedback or new issues, even if it&rsquo;s just to say, &ldquo;We&rsquo;re on it.&rdquo; If the project has a community, its maintainers are a part of it. They may have a dedicated website or write regular blogs. They may offer ways to contact them directly and privately, especially to raise security concerns.</p>
+<h3 id="can-you-understand-it">Can you understand it</h3>
+<p>Having documentation is a baseline requirement for a project that&rsquo;s intended for anyone but its creator to use. Good open source projects have documentation that is easy to follow, honest, and thorough.</p>
+<p>Having <a href="/posts/word-bugs-in-software-documentation-and-how-to-fix-them/">well-written documentation</a> is one way a project can stand out and demonstrate the thoughtfulness and dedication of its maintainers. A &ldquo;Getting Started&rdquo; section may detail all the requirements and initial set up for running the project. An accurate list of topics in the documentation enables users to quickly find the information they need. A clear license statement leaves no doubt as to how the project can be used, and for what purposes. These are characteristic aspects of documentation that serves its users.</p>
+<p>A project that is following sound coding practices likely has code that is as readable as its documentation. Code that is easy to read lends itself to being understood. Generally, it has clearly defined and appropriately-named functions and variables, a logical flow, and apparent purpose. Readable code is easier to fix, secure, and build upon.</p>
+<h3 id="how-compatible-is-it">How compatible is it</h3>
+<p>A few factors will determine how compatible a project is with your goals. These are objective qualities, and can be determined by looking at a project&rsquo;s repository files. They include:</p>
+<ul>
+<li>Code language</li>
+<li>Specific technologies or frameworks</li>
+<li>License compatibility</li>
+</ul>
+<p>Compatibility doesn&rsquo;t necessarily mean a direct match. Different code languages can interact with each other, as can various technologies and frameworks. You should carefully read a project&rsquo;s license to understand if it permits usage for your goal, or if it is compatible with a license you would like to use.</p>
+<p>Ultimately, a project that satisfies all these criteria may still not quite suit your use case. Part of the beauty of open source software, however, is that you may still benefit from it by making alterations that better suit your usage. If those alterations make the project better for everyone, you can pay it back and pay it forward by contributing your work to the project.</p>
+<h2 id="proper-care-and-feeding-of-an-open-source-project">Proper care and feeding of an open source project</h2>
+<p>Once you adopt an open source project, a little attention is required to make sure it continues to be a boon to your goals. While its maintainers will look after the upstream project files, you alone are responsible for your own copy. Like all software, your open source project must be well-maintained in order to remain as secure and useful as possible.</p>
+<p>Have a system that provides you with notifications when updates for your software are made available. Update software promptly, treating each patch as if it were vital to security; it may well be. Keep in mind that open source project creators and maintainers are, in most cases, acting only out of the goodness of their own hearts. If you&rsquo;ve got a particularly awesome one, its developers may make updates and security patches available on a regular basis. It&rsquo;s up to you to keep tabs on updates and promptly apply them.</p>
+<p>As with most things in software, keeping your open source additions modular can come in handy. You might use <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">git submodules</a>, branches, or environments to isolate your additions. This can make it easier to apply updates or pinpoint the source of any bugs that arise.</p>
+<p>So although an open source project may cost no money, <em>caveat emptor,</em> which means, &ldquo;Jimmy, if we get you a puppy, it&rsquo;s your responsibility to take care of it.&rdquo;</p>
+]]></content></entry><entry><title type="html">Hugo vs Jekyll: an epic battle of static site generator themes</title><link href="https://victoria.dev/archive/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/"/><id>https://victoria.dev/archive/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/</id><author><name>Victoria Drake</name></author><published>2020-04-27T06:34:41-04:00</published><updated>2020-04-27T06:34:41-04:00</updated><content type="html"><![CDATA[<p>I recently took on the task of creating a documentation site theme for two projects. Both projects needed the same basic features, but one uses Jekyll while the other uses Hugo.</p>
+<p>In typical developer rationality, there was clearly only one option. I decided to create the same theme in both frameworks, and to give you, dear reader, a side-by-side comparison.</p>
+<p>This post isn&rsquo;t a comprehensive theme-building guide, but intended to familiarize you with the process of building a theme in either generator. Here&rsquo;s what we&rsquo;ll cover:</p>
+<ul>
+<li><a href="#how-theme-files-are-organized">How theme files are organized</a></li>
+<li><a href="#where-to-put-content">Where to put content</a></li>
+<li><a href="#how-templating-works">How templating works</a></li>
+<li><a href="#creating-a-top-level-menu-with-the-pages-object">Creating a top-level menu with the <code>pages</code> object</a></li>
+<li><a href="#creating-a-menu-with-nested-links-from-a-data-list">Creating a menu with nested links from a data list</a></li>
+<li><a href="#putting-the-template-together">Putting the template together</a></li>
+<li><a href="#create-a-stylesheet">Create a stylesheet</a>
+<ul>
+<li><a href="#sass-and-css-in-jekyll">Sass and CSS in Jekyll</a></li>
+<li><a href="#sass-and-hugo-pipes-in-hugo">Sass and Hugo Pipes in Hugo</a></li>
+</ul>
+</li>
+<li><a href="#configure-and-deploy-to-github-pages">Configure and deploy to GitHub Pages</a>
+<ul>
+<li><a href="#configure-jekyll">Configure Jekyll</a></li>
+<li><a href="#configure-hugo">Configure Hugo</a></li>
+<li><a href="#deploy-to-github-pages">Deploy to GitHub Pages</a></li>
+</ul>
+</li>
+<li><a href="#showtime">Showtime</a></li>
+<li><a href="#wait-who-won">Wait who won</a></li>
+</ul>
+<p>Here&rsquo;s a crappy wireframe of the theme I&rsquo;m going to create.</p>
+<p><img src="wireframe.jpg" alt="A sketch of the finished page"></p>
+<p>If you&rsquo;re planning to build-along, it may be helpful to serve the theme locally as you build it; both generators offer this functionality. For Jekyll, run <code>jekyll serve</code>, and for Hugo, <code>hugo serve</code>.</p>
+<p>There are two main elements: the main content area, and the all-important sidebar menu. To create them, you&rsquo;ll need template files that tell the site generator how to generate the HTML page. To organize theme template files in a sensible way, you first need to know what directory structure the site generator expects.</p>
+<h2 id="how-theme-files-are-organized">How theme files are organized</h2>
+<p>Jekyll supports gem-based themes, which users can install like any other Ruby gems. This method hides theme files in the gem, so for the purposes of this comparison, we aren&rsquo;t using gem-based themes.</p>
+<p>When you run <code>jekyll new-theme &lt;name&gt;</code>, Jekyll will scaffold a new theme for you. Here&rsquo;s what those files look like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>├── assets
+</span></span><span style="display:flex;"><span>├── Gemfile
+</span></span><span style="display:flex;"><span>├── _includes
+</span></span><span style="display:flex;"><span>├── _layouts
+</span></span><span style="display:flex;"><span>│   ├── default.html
+</span></span><span style="display:flex;"><span>│   ├── page.html
+</span></span><span style="display:flex;"><span>│   └── post.html
+</span></span><span style="display:flex;"><span>├── LICENSE.txt
+</span></span><span style="display:flex;"><span>├── README.md
+</span></span><span style="display:flex;"><span>├── _sass
+</span></span><span style="display:flex;"><span>└── &lt;name&gt;.gemspec
+</span></span></code></pre></div><p>The directory names are appropriately descriptive. The <code>_includes</code> directory is for small bits of code that you reuse in different places, in much the same way you&rsquo;d put butter on everything. (Just me?) The <code>_layouts</code> directory contains templates for different types of pages on your site. The <code>_sass</code> folder is for <a href="https://sass-lang.com/documentation/syntax">Sass</a> files used to build your site&rsquo;s stylesheet.</p>
+<p>You can scaffold a new Hugo theme by running <code>hugo new theme &lt;name&gt;</code>. It has these files:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>├── archetypes
+</span></span><span style="display:flex;"><span>│   └── default.md
+</span></span><span style="display:flex;"><span>├── layouts
+</span></span><span style="display:flex;"><span>│   ├── 404.html
+</span></span><span style="display:flex;"><span>│   ├── _default
+</span></span><span style="display:flex;"><span>│   │   ├── baseof.html
+</span></span><span style="display:flex;"><span>│   │   ├── list.html
+</span></span><span style="display:flex;"><span>│   │   └── single.html
+</span></span><span style="display:flex;"><span>│   ├── index.html
+</span></span><span style="display:flex;"><span>│   └── partials
+</span></span><span style="display:flex;"><span>│       ├── footer.html
+</span></span><span style="display:flex;"><span>│       ├── header.html
+</span></span><span style="display:flex;"><span>│       └── head.html
+</span></span><span style="display:flex;"><span>├── LICENSE
+</span></span><span style="display:flex;"><span>├── static
+</span></span><span style="display:flex;"><span>│   ├── css
+</span></span><span style="display:flex;"><span>│   └── js
+</span></span><span style="display:flex;"><span>└── theme.toml
+</span></span></code></pre></div><p>You can see some similarities. Hugo&rsquo;s page template files are tucked into <code>layouts/</code>. Note that the <code>_default</code> page type has files for a <code>list.html</code> and a <code>single.html</code>. Unlike Jekyll, Hugo uses these specific file names to distinguish between <a href="https://gohugo.io/templates/lists/">list pages</a> (like a page with links to all your blog posts on it) and <a href="https://gohugo.io/templates/single-page-templates/">single pages</a> (like one of your blog posts). The <code>layouts/partials/</code> directory contains the buttery reusable bits, and stylesheet files have a spot picked out in <code>static/css/</code>.</p>
+<p>These directory structures aren&rsquo;t set in stone, as both site generators allow some measure of customization. For example, Jekyll lets you define <a href="https://jekyllrb.com/docs/collections/">collections</a>, and Hugo makes use of <a href="https://gohugo.io/content-management/page-bundles/">page bundles</a>. These features let you organize your content multiple ways, but for now, lets look at where to put some simple pages.</p>
+<h2 id="where-to-put-content">Where to put content</h2>
+<p>To create a site menu that looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-md" data-lang="md"><span style="display:flex;"><span>Introduction
+</span></span><span style="display:flex;"><span>    Getting Started
+</span></span><span style="display:flex;"><span>    Configuration
+</span></span><span style="display:flex;"><span>    Deploying
+</span></span><span style="display:flex;"><span>Advanced Usage
+</span></span><span style="display:flex;"><span>    All Configuration Settings
+</span></span><span style="display:flex;"><span>    Customizing
+</span></span><span style="display:flex;"><span>    Help and Support
+</span></span></code></pre></div><p>You&rsquo;ll need two sections (&ldquo;Introduction&rdquo; and &ldquo;Advanced Usage&rdquo;) containing their respective subsections.</p>
+<p>Jekyll isn&rsquo;t strict with its content location. It expects pages in the root of your site, and will build whatever&rsquo;s there. Here&rsquo;s how you might organize these pages in your Jekyll site root:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>├── 404.html
+</span></span><span style="display:flex;"><span>├── assets
+</span></span><span style="display:flex;"><span>├── Gemfile
+</span></span><span style="display:flex;"><span>├── _includes
+</span></span><span style="display:flex;"><span>├── index.markdown
+</span></span><span style="display:flex;"><span>├── intro
+</span></span><span style="display:flex;"><span>│   ├── config.md
+</span></span><span style="display:flex;"><span>│   ├── deploy.md
+</span></span><span style="display:flex;"><span>│   ├── index.md
+</span></span><span style="display:flex;"><span>│   └── quickstart.md
+</span></span><span style="display:flex;"><span>├── _layouts
+</span></span><span style="display:flex;"><span>│   ├── default.html
+</span></span><span style="display:flex;"><span>│   ├── page.html
+</span></span><span style="display:flex;"><span>│   └── post.html
+</span></span><span style="display:flex;"><span>├── LICENSE.txt
+</span></span><span style="display:flex;"><span>├── README.md
+</span></span><span style="display:flex;"><span>├── _sass
+</span></span><span style="display:flex;"><span>├── &lt;name&gt;.gemspec
+</span></span><span style="display:flex;"><span>└── usage
+</span></span><span style="display:flex;"><span>    ├── customizing.md
+</span></span><span style="display:flex;"><span>    ├── index.md
+</span></span><span style="display:flex;"><span>    ├── settings.md
+</span></span><span style="display:flex;"><span>    └── support.md
+</span></span></code></pre></div><p>You can change the location of the site source in your <a href="https://jekyllrb.com/docs/configuration/default/">Jekyll configuration</a>.</p>
+<p>In Hugo, all rendered content is expected in the <code>content/</code> folder. This prevents Hugo from trying to render pages you don&rsquo;t want, such as <code>404.html</code>, as site content. Here&rsquo;s how you might organize your <code>content/</code> directory in Hugo:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>├── _index.md
+</span></span><span style="display:flex;"><span>├── intro
+</span></span><span style="display:flex;"><span>│   ├── config.md
+</span></span><span style="display:flex;"><span>│   ├── deploy.md
+</span></span><span style="display:flex;"><span>│   ├── _index.md
+</span></span><span style="display:flex;"><span>│   └── quickstart.md
+</span></span><span style="display:flex;"><span>└── usage
+</span></span><span style="display:flex;"><span>    ├── customizing.md
+</span></span><span style="display:flex;"><span>    ├── _index.md
+</span></span><span style="display:flex;"><span>    ├── settings.md
+</span></span><span style="display:flex;"><span>    └── support.md
+</span></span></code></pre></div><p>To Hugo, <code>_index.md</code> and <code>index.md</code> mean different things. It can be helpful to know what kind of <a href="https://gohugo.io/content-management/page-bundles/">Page Bundle</a> you want for each section: Leaf, which has no children, or Branch.</p>
+<p>Now that you have some idea of where to put things, let&rsquo;s look at how to build a page template.</p>
+<h2 id="how-templating-works">How templating works</h2>
+<p>Jekyll page templates are built with the <a href="https://jekyllrb.com/docs/liquid/">Liquid templating language</a>. It uses braces to output variable content to a page, such as the page&rsquo;s title: <code>{{ page.title }}</code>.</p>
+<p>Hugo&rsquo;s templates also use braces, but they&rsquo;re built with <a href="https://gohugo.io/templates/introduction/">Go Templates</a>. The syntax is similar, but different: <code>{{ .Title }}</code>.</p>
+<p>Both Liquid and Go Templates can handle logic. Liquid uses <em>tags</em> syntax to denote logic operations:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>{% if user %}
+</span></span><span style="display:flex;"><span>  Hello {{ user.name }}!
+</span></span><span style="display:flex;"><span>{% endif %}
+</span></span></code></pre></div><p>And Go Templates places its functions and arguments in its braces syntax:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>{{ <span style="color:#66d9ef">if</span> .<span style="color:#a6e22e">User</span> }}
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Hello</span> {{ .<span style="color:#a6e22e">User</span> }}!
+</span></span><span style="display:flex;"><span>{{ <span style="color:#a6e22e">end</span> }}
+</span></span></code></pre></div><p>Templating languages allow you to build one skeleton HTML page, then tell the site generator to put variable content in areas you define. Let&rsquo;s compare two possible <code>default</code> page templates for Jekyll and Hugo.</p>
+<p>Jekyll&rsquo;s scaffold <code>default</code> theme is bare, so we&rsquo;ll look at their starter theme <a href="https://github.com/jekyll/minima">Minima</a>. Here&rsquo;s <code>_layouts/default.html</code> in Jekyll (Liquid):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span> <span style="color:#a6e22e">lang</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ page.lang | default: site.lang | default: &#34;</span><span style="color:#a6e22e">en</span><span style="color:#960050;background-color:#1e0010">&#34;</span> <span style="color:#960050;background-color:#1e0010">}}&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  {%- include head.html -%}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {%- include header.html -%}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">main</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;page-content&#34;</span> <span style="color:#a6e22e">aria-label</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Content&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;wrapper&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        {{ content }}
+</span></span><span style="display:flex;"><span>      &lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">main</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {%- include footer.html -%}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><p>Here&rsquo;s Hugo&rsquo;s scaffold theme <code>layouts/_default/baseof.html</code> (Go Templates):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span>&gt;
+</span></span><span style="display:flex;"><span>    {{- partial &#34;head.html&#34; . -}}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>        {{- partial &#34;header.html&#34; . -}}
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;content&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        {{- block &#34;main&#34; . }}{{- end }}
+</span></span><span style="display:flex;"><span>        &lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>        {{- partial &#34;footer.html&#34; . -}}
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><p>Different syntax, same idea. Both templates pull in reusable bits for <code>head.html</code>, <code>header.html</code>, and <code>footer.html</code>. These show up on a lot of pages, so it makes sense not to have to repeat yourself. Both templates also have a spot for the main content, though the Jekyll template uses a variable (<code>{{ content }}</code>) while Hugo uses a block (<code>{{- block &quot;main&quot; . }}{{- end }}</code>). <a href="https://gohugo.io/templates/base/#readout">Blocks</a> are just another way Hugo lets you define reusable bits.</p>
+<p>Now that you know how templating works, you can build the sidebar menu for the theme.</p>
+<h2 id="creating-a-top-level-menu-with-the-pages-object">Creating a top-level menu with the <code>pages</code> object</h2>
+<p>You can programmatically create a top-level menu from your pages. It will look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-md" data-lang="md"><span style="display:flex;"><span>Introduction
+</span></span><span style="display:flex;"><span>Advanced Usage
+</span></span></code></pre></div><p>Let&rsquo;s start with Jekyll. You can display links to site pages in your Liquid template by iterating through the <code>site.pages</code> object that Jekyll provides and building a list:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">ul</span>&gt;
+</span></span><span style="display:flex;"><span>    {% for page in site.pages %}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">li</span>&gt;&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ page.url | absolute_url }}&#34;</span>&gt;{{ page.title }}&lt;/<span style="color:#f92672">a</span>&gt;&lt;/<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>    {% endfor %}
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">ul</span>&gt;
+</span></span></code></pre></div><p>This returns all of the site&rsquo;s pages, including all the ones that you might not want, like <code>404.html</code>. You can filter for the pages you actually want with a couple more tags, such as conditionally including pages if they have a <code>section: true</code> parameter set:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">ul</span>&gt;
+</span></span><span style="display:flex;"><span>    {% for page in site.pages %}
+</span></span><span style="display:flex;"><span>    {%- if page.section -%}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">li</span>&gt;&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ page.url | absolute_url }}&#34;</span>&gt;{{ page.title }}&lt;/<span style="color:#f92672">a</span>&gt;&lt;/<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>    {%- endif -%}
+</span></span><span style="display:flex;"><span>    {% endfor %}
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">ul</span>&gt;
+</span></span></code></pre></div><p>You can achieve the same effect with slightly less code in Hugo. Loop through Hugo&rsquo;s <code>.Pages</code> object using Go Template&rsquo;s <a href="https://golang.org/pkg/text/template/#hdr-Actions"><code>range</code> action</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">ul</span>&gt;
+</span></span><span style="display:flex;"><span>{{ range .Pages }}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{.Permalink}}&#34;</span>&gt;{{.Title}}&lt;/<span style="color:#f92672">a</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>{{ end }}
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">ul</span>&gt;
+</span></span></code></pre></div><p>This template uses the <code>.Pages</code> object to return all the top-level pages in <code>content/</code> of your Hugo site. Since Hugo uses a specific folder for the site content you want rendered, there&rsquo;s no additional filtering necessary to build a simple menu of site pages.</p>
+<h2 id="creating-a-menu-with-nested-links-from-a-data-list">Creating a menu with nested links from a data list</h2>
+<p>Both site generators can use a separately defined data list of links to render a menu in your template. This is more suitable for creating nested links, like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-md" data-lang="md"><span style="display:flex;"><span>Introduction
+</span></span><span style="display:flex;"><span>    Getting Started
+</span></span><span style="display:flex;"><span>    Configuration
+</span></span><span style="display:flex;"><span>    Deploying
+</span></span><span style="display:flex;"><span>Advanced Usage
+</span></span><span style="display:flex;"><span>    All Configuration Settings
+</span></span><span style="display:flex;"><span>    Customizing
+</span></span><span style="display:flex;"><span>    Help and Support
+</span></span></code></pre></div><p>Jekyll supports <a href="https://jekyllrb.com/docs/datafiles/">data files</a> in a few formats, including YAML. Here&rsquo;s the definition for the menu above in <code>_data/menu.yml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">section</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">page</span>: <span style="color:#ae81ff">Introduction</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/intro</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">subsection</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">page</span>: <span style="color:#ae81ff">Getting Started</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/intro/quickstart</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">page</span>: <span style="color:#ae81ff">Configuration</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/intro/config</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">page</span>: <span style="color:#ae81ff">Deploying</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/intro/deploy</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">page</span>: <span style="color:#ae81ff">Advanced Usage</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/usage</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">subsection</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">page</span>: <span style="color:#ae81ff">Customizing</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/usage/customizing</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">page</span>: <span style="color:#ae81ff">All Configuration Settings</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/usage/settings</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">page</span>: <span style="color:#ae81ff">Help and Support</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/usage/support</span>
+</span></span></code></pre></div><p>Here&rsquo;s how to render the data in the sidebar template:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>{% for a in site.data.menu.section %}
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ a.url }}&#34;</span>&gt;{{ a.page }}&lt;/<span style="color:#f92672">a</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">ul</span>&gt;
+</span></span><span style="display:flex;"><span>    {% for b in a.subsection %}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">li</span>&gt;&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ b.url }}&#34;</span>&gt;{{ b.page }}&lt;/<span style="color:#f92672">a</span>&gt;&lt;/<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>    {% endfor %}
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">ul</span>&gt;
+</span></span><span style="display:flex;"><span>{% endfor %}
+</span></span></code></pre></div><p>This method allows you to build a custom menu, two nesting levels deep. The nesting levels are limited by the <code>for</code> loops in the template. For a recursive version that handles further levels of nesting, see <a href="https://jekyllrb.com/tutorials/navigation/#scenario-9-nested-tree-navigation-with-recursion">Nested tree navigation with recursion</a>.</p>
+<p>Hugo does something similar with its <a href="https://gohugo.io/templates/menu-templates/#section-menu-for-lazy-bloggers">menu templates</a>. You can define menu links in your <a href="https://gohugo.io/getting-started/configuration/">Hugo site config</a>, and even add useful properties that Hugo understands, like weighting. Here&rsquo;s a definition of the menu above in <code>config.yaml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">sectionPagesMenu</span>: <span style="color:#ae81ff">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">menu</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">main</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">identifier</span>: <span style="color:#ae81ff">intro</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Introduction</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/intro/</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">weight</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Getting Started</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">parent</span>: <span style="color:#ae81ff">intro</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/intro/quickstart/</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">weight</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Configuration</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">parent</span>: <span style="color:#ae81ff">intro</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/intro/config/</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">weight</span>: <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Deploying</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">parent</span>: <span style="color:#ae81ff">intro</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/intro/deploy/</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">weight</span>: <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">identifier</span>: <span style="color:#ae81ff">usage</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Advanced Usage</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/usage/</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Customizing</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">parent</span>: <span style="color:#ae81ff">usage</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/usage/customizing/</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">weight</span>: <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">All Configuration Settings</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">parent</span>: <span style="color:#ae81ff">usage</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/usage/settings/</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">weight</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Help and Support</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">parent</span>: <span style="color:#ae81ff">usage</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">/usage/support/</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">weight</span>: <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p>Hugo uses the <code>identifier</code>, which must match the section name, along with the <code>parent</code> variable to handle nesting. Here&rsquo;s how to render the menu in the sidebar template:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">ul</span>&gt;
+</span></span><span style="display:flex;"><span>    {{ range .Site.Menus.main }}
+</span></span><span style="display:flex;"><span>    {{ if .HasChildren }}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ .URL }}&#34;</span>&gt;{{ .Name }}&lt;/<span style="color:#f92672">a</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">ul</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;sub-menu&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        {{ range .Children }}
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>            &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ .URL }}&#34;</span>&gt;{{ .Name }}&lt;/<span style="color:#f92672">a</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;/<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>        {{ end }}
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">ul</span>&gt;
+</span></span><span style="display:flex;"><span>    {{ else }}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ .URL }}&#34;</span>&gt;{{ .Name }}&lt;/<span style="color:#f92672">a</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">li</span>&gt;
+</span></span><span style="display:flex;"><span>    {{ end }}
+</span></span><span style="display:flex;"><span>    {{ end }}
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">ul</span>&gt;
+</span></span></code></pre></div><p>The <code>range</code> function iterates over the menu data, and Hugo&rsquo;s <code>.Children</code> variable handles nested pages for you.</p>
+<h2 id="putting-the-template-together">Putting the template together</h2>
+<p>With your menu in your reusable sidebar bit (<code>_includes/sidebar.html</code> for Jekyll and <code>partials/sidebar.html</code> for Hugo), you can add it to the <code>default.html</code> template.</p>
+<p>In Jekyll:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span> <span style="color:#a6e22e">lang</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ page.lang | default: site.lang | default: &#34;</span><span style="color:#a6e22e">en</span><span style="color:#960050;background-color:#1e0010">&#34;</span> <span style="color:#960050;background-color:#1e0010">}}&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{%- include head.html -%}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>    {%- include sidebar.html -%}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {%- include header.html -%}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;content&#34;</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;page-content&#34;</span> <span style="color:#a6e22e">aria-label</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Content&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        {{ content }}
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {%- include footer.html -%}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><p>In Hugo:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span>&gt;
+</span></span><span style="display:flex;"><span>{{- partial &#34;head.html&#34; . -}}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>    {{- partial &#34;sidebar.html&#34; . -}}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {{- partial &#34;header.html&#34; . -}}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;content&#34;</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;page-content&#34;</span> <span style="color:#a6e22e">aria-label</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Content&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        {{- block &#34;main&#34; . }}{{- end }}
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>    {{- partial &#34;footer.html&#34; . -}}
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><p>When the site is generated, each page will contain all the code from your <code>sidebar.html</code>.</p>
+<h2 id="create-a-stylesheet">Create a stylesheet</h2>
+<p>Both site generators accept Sass for creating CSS stylesheets. Jekyll <a href="https://jekyllrb.com/docs/assets/">has Sass processing built in</a>, and Hugo uses <a href="https://gohugo.io/hugo-pipes/transform-to-css/">Hugo Pipes</a>. Both options have some quirks.</p>
+<h3 id="sass-and-css-in-jekyll">Sass and CSS in Jekyll</h3>
+<p>To process a Sass file in Jekyll, create your style definitions in the <code>_sass</code> directory. For example, in a file at <code>_sass/style-definitions.scss</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scss" data-lang="scss"><span style="display:flex;"><span>$background-color<span style="color:#f92672">:</span> <span style="color:#ae81ff">#eef</span> <span style="color:#66d9ef">!default</span>;
+</span></span><span style="display:flex;"><span>$text-color<span style="color:#f92672">:</span> <span style="color:#ae81ff">#111</span> <span style="color:#66d9ef">!default</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">body</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">background-color</span><span style="color:#f92672">:</span> $background-color;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">color</span><span style="color:#f92672">:</span> $text-color;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Jekyll won&rsquo;t generate this file directly, as it only processes files with front matter. To create the end-result filepath for your site&rsquo;s stylesheet, use a placeholder with empty front matter where you want the <code>.css</code> file to appear. For example, <code>assets/css/style.scss</code>. In this file, simply import your styles:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scss" data-lang="scss"><span style="display:flex;"><span><span style="color:#f92672">---</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">---</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">@</span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;style-definitions&#34;</span>;
+</span></span></code></pre></div><p>This rather hackish configuration has an upside: you can use Liquid template tags and variables in your placeholder file. This is a nice way to allow users to set variables from the site <code>_config.yml</code>, for example.</p>
+<p>The resulting CSS stylesheet in your generated site has the path <code>/assets/css/style.css</code>. You can link to it in your site&rsquo;s <code>head.html</code> using:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ &#34;</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#a6e22e">assets</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#a6e22e">css</span><span style="color:#960050;background-color:#1e0010">/</span><span style="color:#a6e22e">style</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">css</span><span style="color:#960050;background-color:#1e0010">&#34;</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#a6e22e">relative_url</span> <span style="color:#960050;background-color:#1e0010">}}&#34;</span> <span style="color:#a6e22e">media</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;screen&#34;</span>&gt;
+</span></span></code></pre></div><h3 id="sass-and-hugo-pipes-in-hugo">Sass and Hugo Pipes in Hugo</h3>
+<p>Hugo uses <a href="https://gohugo.io/hugo-pipes/transform-to-css/">Hugo Pipes</a> to process Sass to CSS. You can achieve this by using Hugo&rsquo;s asset processing function, <code>resources.ToCSS</code>, which expects a source in the <code>assets/</code> directory. It takes the SCSS file as an argument. With your style definitions in a Sass file at <code>assets/sass/style.scss</code>, here&rsquo;s how to get, process, and link your Sass in your theme&rsquo;s <code>head.html</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>{{ $style := resources.Get &#34;/sass/style.scss&#34; | resources.ToCSS }}
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ $style.RelPermalink }}&#34;</span> <span style="color:#a6e22e">media</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;screen&#34;</span>&gt;
+</span></span></code></pre></div><p>Hugo asset processing <a href="https://gohugo.io/troubleshooting/faq/#i-get-tocss--this-feature-is-not-available-in-your-current-hugo-version">requires extended Hugo</a>, which you may not have by default. You can get extended Hugo from the <a href="https://github.com/gohugoio/hugo/releases">releases page</a>.</p>
+<h2 id="configure-and-deploy-to-github-pages">Configure and deploy to GitHub Pages</h2>
+<p>Before your site generator can build your site, it needs a configuration file to set some necessary parameters. Configuration files live in the site root directory. Among other settings, you can declare the name of the theme to use when building the site.</p>
+<h3 id="configure-jekyll">Configure Jekyll</h3>
+<p>Here&rsquo;s a minimal <code>_config.yml</code> for Jekyll:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">title</span>: <span style="color:#ae81ff">Your awesome title</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">description</span>: <span style="color:#ae81ff">&gt;-</span> <span style="color:#75715e"># this means to ignore newlines until &#34;baseurl:&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">Write an awesome description for your new site here. You can edit this</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">line in _config.yml. It will appear in your document head meta (for</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">Google search results) and in your feed.xml site description.</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">baseurl</span>: <span style="color:#e6db74">&#34;&#34;</span> <span style="color:#75715e"># the subpath of your site, e.g. /blog</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">url</span>: <span style="color:#e6db74">&#34;&#34;</span> <span style="color:#75715e"># the base hostname &amp; protocol for your site, e.g. http://example.com</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">theme</span>: <span style="color:#75715e"># for gem-based themes</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">remote_theme</span>: <span style="color:#75715e"># for themes hosted on GitHub, when used with GitHub Pages</span>
+</span></span></code></pre></div><p>With <code>remote_theme</code>, any <a href="https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/adding-a-theme-to-your-github-pages-site-using-jekyll#adding-a-theme">Jekyll theme hosted on GitHub can be used</a> with sites hosted on GitHub Pages.</p>
+<p>Jekyll has a <a href="https://jekyllrb.com/docs/configuration/default/">default configuration</a>, so any parameters added to your configuration file will override the defaults. Here are <a href="https://jekyllrb.com/docs/configuration/options/">additional configuration settings</a>.</p>
+<h3 id="configure-hugo">Configure Hugo</h3>
+<p>Here&rsquo;s a minimal example of Hugo&rsquo;s <code>config.yml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">baseURL</span>: <span style="color:#ae81ff">https://example.com/</span> <span style="color:#75715e"># The full domain your site will live at</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">languageCode</span>: <span style="color:#ae81ff">en-us</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">title</span>: <span style="color:#ae81ff">Hugo Docs Site</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">theme</span>: <span style="color:#75715e"># theme name</span>
+</span></span></code></pre></div><p>Hugo makes no assumptions, so if a necessary parameter is missing, you&rsquo;ll see a warning when building or serving your site. Here are <a href="https://gohugo.io/getting-started/configuration/#all-configuration-settings">all configuration settings for Hugo</a>.</p>
+<h3 id="deploy-to-github-pages">Deploy to GitHub Pages</h3>
+<p>Both generators build your site with a command.</p>
+<p>For Jekyll, use <code>jekyll build</code>. See <a href="https://jekyllrb.com/docs/configuration/options/#build-command-options">further build options here</a>.</p>
+<p>For Hugo, use <code>hugo</code>. You can run <code>hugo help</code> or see <a href="https://gohugo.io/getting-started/usage/#test-installation">further build options here</a>.</p>
+<p>You&rsquo;ll have to choose the source for your GitHub Pages site; once done, your site will update each time you push a new build. Of course, you can also automate your GitHub Pages build using GitHub Actions. Here&rsquo;s one for <a href="https://github.com/victoriadrake/hugo-latest-cd">building and deploying with Hugo</a>, and one for <a href="https://github.com/victoriadrake/jekyll-cd">building and deploying Jekyll</a>.</p>
+<h2 id="showtime">Showtime</h2>
+<p>All the substantial differences between these two generators are under the hood; all the same, let&rsquo;s take a look at the finished themes, in two color variations.</p>
+<p>Here&rsquo;s Hugo:</p>
+<p><img src="ogd_hugo.png" alt="OpenGitDocs theme for Hugo"></p>
+<p>Here&rsquo;s Jekyll:</p>
+<p><img src="ogd_jekyll.png" alt="OpenGitDocs theme for Jekyll"></p>
+<p>Spiffy!</p>
+<h2 id="wait-who-won">Wait who won</h2>
+<p>🤷</p>
+<p>Both Hugo and Jekyll have their quirks and conveniences.</p>
+<p>From this developer&rsquo;s perspective, Jekyll is a workable choice for simple sites without complicated organizational needs. If you&rsquo;re looking to render some one-page posts in an <a href="https://jekyllrb.com/docs/themes/">available theme</a> and host with GitHub Pages, Jekyll will get you up and running fairly quickly.</p>
+<p>Personally, I use Hugo. I like the organizational capabilities of its Page Bundles, and it&rsquo;s backed by a dedicated and conscientious team that really seems to strive to facilitate convenience for their users. This is evident in Hugo&rsquo;s many functions, and handy tricks like <a href="https://gohugo.io/content-management/image-processing/">Image Processing</a> and <a href="https://gohugo.io/content-management/shortcodes/">Shortcodes</a>. They seem to release new fixes and versions about as often as I make a new cup of coffee.</p>
+<p>If you still can&rsquo;t decide, don&rsquo;t worry. Many themes are available for both Hugo and Jekyll! Start with one, switch later if you want. That&rsquo;s the benefit of having options.</p>
+]]></content></entry><entry><title type="html">Multithreaded Python: slithering through an I/O bottleneck</title><link href="https://victoria.dev/posts/multithreaded-python-slithering-through-an-i/o-bottleneck/"/><id>https://victoria.dev/posts/multithreaded-python-slithering-through-an-i/o-bottleneck/</id><author><name>Victoria Drake</name></author><published>2020-02-28T09:31:02-05:00</published><updated>2020-02-28T09:31:02-05:00</updated><content type="html"><![CDATA[<p>I recently developed a project that I called <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra</a>: a multithreaded link checker written in Python. Unlike many Python site crawlers I found while researching, Hydra uses only standard libraries, with no external dependencies like BeautifulSoup. It&rsquo;s intended to be run as part of a CI/CD process, so part of its success depended on being fast.</p>
+<p>Multiple threads in Python is a bit of a bitey subject (not sorry) in that the Python interpreter doesn&rsquo;t actually let multiple threads execute at the same time. Python&rsquo;s <a href="https://wiki.python.org/moin/GlobalInterpreterLock">Global Interpreter Lock</a>, or GIL, prevents multiple threads from executing Python bytecodes at once. Each thread that wants to execute must first wait for the GIL to be released by the currently executing thread. The GIL is pretty much the microphone in a low-budget conference panel, except where no one gets to shout.</p>
+<p>This has the advantage of preventing <a href="https://en.wikipedia.org/wiki/Race_condition">race conditions</a>. It does, however, lack the performance advantages afforded by running multiple tasks in parallel. (If you&rsquo;d like a refresher on concurrency, parallelism, and multithreading, see <a href="/blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/">Concurrency, parallelism, and the many threads of Santa Claus</a>.) While I prefer Go for its convenient first-class primitives that support concurrency (see <a href="https://tour.golang.org/concurrency/1">Goroutines</a>), this project&rsquo;s recipients were more comfortable with Python. I took it as an opportunity to test and explore!</p>
+<p>Simultaneously performing multiple tasks in Python isn&rsquo;t impossible; it just takes a little extra work. For Hydra, the main advantage is in overcoming the input/output (I/O) bottleneck.</p>
+<p>In order to get web pages to check, Hydra needs to go out to the Internet and fetch them. When compared to tasks that are performed by the CPU alone, going out over the network is comparatively slower. How slow?</p>
+<p>Here are approximate timings for tasks performed on a typical PC:</p>
+<table>
+  <thead>
+      <tr>
+          <th></th>
+          <th>Task</th>
+          <th>Time</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>CPU</td>
+          <td>execute typical instruction</td>
+          <td>1/1,000,000,000 sec = 1 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L1 cache memory</td>
+          <td>0.5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>branch misprediction</td>
+          <td>5 nanosec</td>
+      </tr>
+      <tr>
+          <td>CPU</td>
+          <td>fetch from L2 cache memory</td>
+          <td>7 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>Mutex lock/unlock</td>
+          <td>25 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>fetch from main memory</td>
+          <td>100 nanosec</td>
+      </tr>
+      <tr>
+          <td>Network</td>
+          <td>send 2K bytes over 1Gbps network</td>
+          <td>20,000 nanosec</td>
+      </tr>
+      <tr>
+          <td>RAM</td>
+          <td>read 1MB sequentially from memory</td>
+          <td>250,000 nanosec</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>fetch from new disk location (seek)</td>
+          <td>8,000,000 nanosec   (8ms)</td>
+      </tr>
+      <tr>
+          <td>Disk</td>
+          <td>read 1MB sequentially from disk</td>
+          <td>20,000,000 nanosec  (20ms)</td>
+      </tr>
+      <tr>
+          <td>Network</td>
+          <td>send packet US to Europe and back</td>
+          <td>150,000,000 nanosec (150ms)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Peter Norvig first published these numbers some years ago in <a href="http://norvig.com/21-days.html#answers">Teach Yourself Programming in Ten Years</a>. Since computers and their components change year over year, the exact numbers shown above aren&rsquo;t the point. What these numbers help to illustrate is the difference, in orders of magnitude, between operations.</p>
+<p>Compare the difference between fetching from main memory and sending a simple packet over the Internet. While both these operations occur in less than the blink of an eye (literally) from a human perspective, you can see that sending a simple packet over the Internet is over a million times slower than fetching from RAM. It&rsquo;s a difference that, in a single-thread program, can quickly accumulate to form troublesome bottlenecks.</p>
+<p>In Hydra, the task of parsing response data and assembling results into a report is relatively fast, since it all happens on the CPU. The slowest portion of the program&rsquo;s execution, by over six orders of magnitude, is network latency. Not only does Hydra need to fetch packets, but whole web pages! One way of improving Hydra&rsquo;s performance is to find a way for the page fetching tasks to execute without blocking the main thread.</p>
+<p>Python has a couple options for doing tasks in parallel: multiple processes, or multiple threads. These methods allow you to circumvent the GIL and speed up execution in a couple different ways.</p>
+<h2 id="multiple-processes">Multiple processes</h2>
+<p>To execute parallel tasks using multiple processes, you can use Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor"><code>ProcessPoolExecutor</code></a>. A concrete subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a> from the <a href="https://docs.python.org/3/library/concurrent.futures.html"><code>concurrent.futures</code> module</a>, <code>ProcessPoolExecutor</code> uses a pool of processes spawned with the <a href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing"><code>multiprocessing</code> module</a> to avoid the GIL.</p>
+<p>This option uses worker subprocesses that maximally default to the number of processors on the machine. The <code>multiprocessing</code> module allows you to maximally parallelize function execution across processes, which can really speed up compute-bound (or <a href="https://en.wikipedia.org/wiki/CPU-bound">CPU-bound</a>) tasks.</p>
+<p>Since the main bottleneck for Hydra is I/O and not the processing to be done by the CPU, I&rsquo;m better served by using multiple threads.</p>
+<h2 id="multiple-threads">Multiple threads</h2>
+<p>Fittingly named, Python&rsquo;s <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor"><code>ThreadPoolExecutor</code></a> uses a pool of threads to execute asynchronous tasks. Also a subclass of <a href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor"><code>Executor</code></a>, it uses a defined number of maximum worker threads (at least five by default, according to the formula <code>min(32, os.cpu_count() + 4)</code>) and reuses idle threads before starting new ones, making it pretty efficient.</p>
+<p>Here is a snippet of Hydra with comments showing how Hydra uses <code>ThreadPoolExecutor</code> to achieve parallel multithreaded bliss:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#75715e"># Create the Checker class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Checker</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Queue of links to be checked</span>
+</span></span><span style="display:flex;"><span>    TO_PROCESS <span style="color:#f92672">=</span> Queue()
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Maximum workers to run</span>
+</span></span><span style="display:flex;"><span>    THREADS <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Maximum seconds to wait for HTTP response</span>
+</span></span><span style="display:flex;"><span>    TIMEOUT <span style="color:#f92672">=</span> <span style="color:#ae81ff">60</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, url):
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Create the thread pool</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>pool <span style="color:#f92672">=</span> futures<span style="color:#f92672">.</span>ThreadPoolExecutor(max_workers<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>THREADS)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(self):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Run until the TO_PROCESS queue is empty</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            target_url <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>TO_PROCESS<span style="color:#f92672">.</span>get(block<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, timeout<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># If we haven&#39;t already checked this link</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> target_url[<span style="color:#e6db74">&#34;url&#34;</span>] <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>visited:
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Mark it as visited</span>
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>visited<span style="color:#f92672">.</span>add(target_url[<span style="color:#e6db74">&#34;url&#34;</span>])
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Submit the link to the pool</span>
+</span></span><span style="display:flex;"><span>                job <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>pool<span style="color:#f92672">.</span>submit(self<span style="color:#f92672">.</span>load_url, target_url, self<span style="color:#f92672">.</span>TIMEOUT)
+</span></span><span style="display:flex;"><span>                job<span style="color:#f92672">.</span>add_done_callback(self<span style="color:#f92672">.</span>handle_future)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> Empty:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>            print(e)
+</span></span></code></pre></div><p>You can view the full code in <a href="https://github.com/victoriadrake/hydra-link-checker">Hydra&rsquo;s GitHub repository</a>.</p>
+<h2 id="single-thread-to-multithread">Single thread to multithread</h2>
+<p>If you&rsquo;d like to see the full effect, I compared the run times for checking my website between a prototype single-thread program, and the <del>multiheaded</del>multithreaded Hydra.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>time python3 slow-link-check.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    17m34.084s
+</span></span><span style="display:flex;"><span>user    11m40.761s
+</span></span><span style="display:flex;"><span>sys     0m5.436s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>time python3 hydra.py https://victoria.dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    0m15.729s
+</span></span><span style="display:flex;"><span>user    0m11.071s
+</span></span><span style="display:flex;"><span>sys     0m2.526s
+</span></span></code></pre></div><p>The single-thread program, which blocks on I/O, ran in about seventeen minutes. When I first ran the multithreaded version, it finished in 1m13.358s - after some profiling and tuning, it took a little under sixteen seconds. Again, the exact times don&rsquo;t mean all that much; they&rsquo;ll vary depending on factors such as the size of the site being crawled, your network speed, and your program&rsquo;s balance between the overhead of thread management and the benefits of parallelism.</p>
+<p>The more important thing, and the result I&rsquo;ll take any day, is a program that runs some orders of magnitude faster.</p>
+]]></content></entry><entry><title type="html">Command line tricks for managing your messy open source repository</title><link href="https://victoria.dev/posts/command-line-tricks-for-managing-your-messy-open-source-repository/"/><id>https://victoria.dev/posts/command-line-tricks-for-managing-your-messy-open-source-repository/</id><author><name>Victoria Drake</name></author><published>2020-02-17T08:05:06-05:00</published><updated>2020-02-17T08:05:06-05:00</updated><content type="html"><![CDATA[<p>Effective collaboration, especially in open source software development, starts with effective organization. To make sure that nothing gets missed, the general rule, &ldquo;one issue, one pull request&rdquo; is a nice rule of thumb.</p>
+<p>Instead of opening an issue with a large scope like, &ldquo;Fix all the broken links in the documentation,&rdquo; open source projects will have more luck attracting contributors with several smaller and more manageable issues. In the preceding example, you might scope broken links by section or by page. This allows more contributors to jump in and dedicate small windows of their time, rather than waiting for one person to take on a larger and more tedious contribution effort.</p>
+<p>Smaller scoped issues also help project maintainers see where work has been completed and where it hasn&rsquo;t. This reduces the chances that some part of the issue is missed, assumed to be completed, and later leads to bugs or security vulnerabilities.</p>
+<p>That&rsquo;s all well and good; but what if you&rsquo;ve already opened several massively-scoped issues, some PRs have already been submitted or merged, and you currently have no idea where the work started or stopped?</p>
+<p>It&rsquo;s going to take a little sorting out to get the state of your project back under control. Thankfully, there are a number of command line tools to help you scan, sort, and make sense of a messy repository. Here&rsquo;s a small selection of ones I use.</p>
+<p>Jump to:</p>
+<ul>
+<li><a href="#interactive-search-and-replace-with-vim">Interactive search-and-replace with <code>vim</code></a></li>
+<li><a href="#find-dead-links-in-markdown-files-with-a-node-module">Find dead links in Markdown files with a node module</a></li>
+<li><a href="#list-subdirectories-with-or-without-a-git-repository-with-find">List subdirectories with or without a git repository with <code>find</code></a></li>
+<li><a href="#pull-multiple-git-repositories-from-a-list-with-xargs">Pull multiple git repositories from a list with <code>xargs</code></a></li>
+<li><a href="#list-issues-by-number-with-jot">List issues by number with <code>jot</code></a></li>
+<li><a href="#cli-powered-open-source-organization">CLI-powered open source organization</a></li>
+</ul>
+<h2 id="interactive-search-and-replace-with-vim">Interactive search-and-replace with <code>vim</code></h2>
+<p>You can open a file in Vim, then interactively search and replace with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>:%<span style="color:#a6e22e">s</span><span style="color:#e6db74">/\&lt;word\&gt;/</span><span style="color:#a6e22e">newword</span>/<span style="color:#a6e22e">gc</span>
+</span></span></code></pre></div><p>The <code>%</code> indicates to look in all lines of the current file; <code>s</code> is for substitute; <code>\&lt;word\&gt;</code> matches the whole word; and the <code>g</code> for &ldquo;global&rdquo; is for every occurrence. The <code>c</code> at the end will let you view and confirm each change before it&rsquo;s made. You can run it automatically, and much faster, without <code>c</code>; however, you put yourself at risk of complicating things if you&rsquo;ve made a pattern-matching error.</p>
+<h2 id="find-dead-links-in-markdown-files-with-a-node-module">Find dead links in Markdown files with a node module</h2>
+<p>The <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> node module has a great <a href="https://github.com/tcort/markdown-link-check#command-line-tool">CLI buddy</a>.</p>
+<p>I use this so often I turned it into a <a href="/blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/#bash-functions">Bash alias function</a>. To do the same, add this to your <code>.bashrc</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># Markdown link check in a folder, recursive</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> mlc <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    find $1 -name <span style="color:#ae81ff">\*</span>.md -exec markdown-link-check -p <span style="color:#f92672">{}</span> <span style="color:#ae81ff">\;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Then run with <code>mlc &lt;filename&gt;</code>.</p>
+<h2 id="list-subdirectories-with-or-without-a-git-repository-with-find">List subdirectories with or without a git repository with <code>find</code></h2>
+<p>Print all subdirectories that are git repositories, or in other words, have a <code>.git</code> in them:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>find . -maxdepth <span style="color:#ae81ff">1</span> -type d -exec test -e <span style="color:#e6db74">&#39;{}/.git&#39;</span> <span style="color:#e6db74">&#39;;&#39;</span> -printf <span style="color:#e6db74">&#34;is git repo: %p\n&#34;</span>
+</span></span></code></pre></div><p>To print all subdirectories that are not git repositories, negate the test with <code>!</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>find . -maxdepth <span style="color:#ae81ff">1</span> -type d -exec test <span style="color:#e6db74">&#39;!&#39;</span> -e <span style="color:#e6db74">&#39;{}/.git&#39;</span> <span style="color:#e6db74">&#39;;&#39;</span> -printf <span style="color:#e6db74">&#34;not git repo: %p\n&#34;</span>
+</span></span></code></pre></div><h2 id="pull-multiple-git-repositories-from-a-list-with-xargs">Pull multiple git repositories from a list with <code>xargs</code></h2>
+<p>I initially used this as part of <a href="/blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/">automatically re-creating my laptop with Bash scripts</a>, but it&rsquo;s pretty handy when you&rsquo;re working with cloud instances or Dockerfiles.</p>
+<p>Given a file, <code>repos.txt</code> with a repository’s SSH link on each line (and your SSH keys set up), run:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>xargs -n1 git clone &lt; repos.txt
+</span></span></code></pre></div><p>If you want to pull and push many repositories, I previously wrote about <a href="/posts/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/">how to use a Bash one-liner to manage your repositories</a>.</p>
+<h2 id="list-issues-by-number-with-jot">List issues by number with <code>jot</code></h2>
+<p>I&rsquo;m a co-author and maintainer for the <a href="https://github.com/OWASP/wstg/">OWASP Web Security Testing Guide</a> repository where I recently took one large issue (yup, it was &ldquo;Fix all the broken links in the documentation&rdquo; - how&rsquo;d you guess?) and broke it up into several smaller, more manageable issues. A whole thirty-seven smaller, more manageable issues.</p>
+<p>I wanted to enumerate all the issues that the original one became, but the idea of typing out thirty-seven issue numbers (#275 through #312) seemed awfully tedious and time-consuming. So, in natural programmer fashion, I spent the same amount of time I would have used to type out all those numbers and crafted a way to automate it instead.</p>
+<p>The <code>jot</code> utility (<code>apt install athena-jot</code>) is a tiny tool that&rsquo;s a big help when you want to print out some numbers. Just tell it how many you want, and where to start and stop.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#75715e"># jot [ reps [ begin [ end ] ] ]</span>
+</span></span><span style="display:flex;"><span>jot <span style="color:#ae81ff">37</span> <span style="color:#ae81ff">275</span> <span style="color:#ae81ff">312</span>
+</span></span></code></pre></div><p>This prints each number, inclusively, from 275 to 312 on a new line. To make these into issue number notations that GitHub and many other platforms automatically recognize and turn into links, you can pipe the output to <code>awk</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>jot <span style="color:#ae81ff">37</span> <span style="color:#ae81ff">275</span> <span style="color:#ae81ff">312</span> | awk <span style="color:#e6db74">&#39;{printf &#34;#&#34;$0&#34;, &#34;}&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#275, #276, #277, #278, #279, #280, #281, #282, #283, #284, #285, #286, #287, #288, #289, #290, #291, #292, #293, #295, #296, #297, #298, #299, #300, #301, #302, #303, #304, #305, #306, #307, #308, #309, #310, #311, #312</span>
+</span></span></code></pre></div><p>You can also use <code>jot</code> to generate random or redundant data, mainly for development or testing purposes.</p>
+<h2 id="cli-powered-open-source-organization">CLI-powered open source organization</h2>
+<p>A well-organized open source repository is a well-maintained open source project. Save this post for handy reference, and use your newfound CLI superpowers for good! 🚀</p>
+]]></content></entry><entry><title type="html">Word bugs in software documentation and how to fix them</title><link href="https://victoria.dev/posts/word-bugs-in-software-documentation-and-how-to-fix-them/"/><id>https://victoria.dev/posts/word-bugs-in-software-documentation-and-how-to-fix-them/</id><author><name>Victoria Drake</name></author><published>2019-12-18T09:01:23-04:00</published><updated>2019-12-18T09:01:23-04:00</updated><content type="html"><![CDATA[<p>I&rsquo;ve been an editor longer than I&rsquo;ve been a developer, so this topic for me is a real root issue. 🥁 When I see a great project with poorly-written docs, it hits close to <code>/home</code>. Okay, okay, I&rsquo;m done.</p>
+<p>I help the <a href="https://github.com/OWASP">Open Web Application Security Project (OWASP)</a> with their <a href="https://github.com/OWASP/wstg">Web Security Testing Guide (WSTG)</a>. I was recently tasked with writing a <a href="https://github.com/OWASP/wstg/blob/master/style_guide.md">style guide</a> and article template that show how to write technical instruction for testing software applications.</p>
+<p>I thought parts of the guide would benefit more people than just OWASP&rsquo;s contributors, so I&rsquo;m sharing some here.</p>
+<p>Many of the projects I participate in are open source. This is a wonderful way for people to share solutions and to build on each others&rsquo; ideas. Unfortunately, it&rsquo;s also a great way for misused and non-existent words to catch on. Here&rsquo;s an excerpt of the guide with some mistakes I&rsquo;ve noticed and how you can fix them in your technical documents.</p>
+<hr>
+<h2 id="use-correct-words">Use Correct Words</h2>
+<p>The following are frequently misused words and how to correct them.</p>
+<h3 id="andor"><em>and/or</em></h3>
+<p>While sometimes used in legal documents, <em>and/or</em> leads to ambiguity and confusion in technical writing. Instead, use <em>or</em>, which in the English language includes <em>and</em>. For example:</p>
+<blockquote>
+<p>Bad: &ldquo;The code will output an error number and/or description.&rdquo;
+Good: &ldquo;The code will output an error number or description.&rdquo;</p></blockquote>
+<p>The latter sentence does not exclude the possibility of having both an error number and description.</p>
+<p>If you need to specify all possible outcomes, use a list:</p>
+<blockquote>
+<p>&ldquo;The code will output an error number, or a description, or both.&rdquo;</p></blockquote>
+<h3 id="frontend-backend"><em>frontend, backend</em></h3>
+<p>While it&rsquo;s true that the English language evolves over time, these are not yet words.</p>
+<p>When referring to nouns, use <em>front end</em> and <em>back end</em>. For example:</p>
+<blockquote>
+<p>Security is equally important on the front end as it is on the back end.</p></blockquote>
+<p>As a descriptive adverb, use the hyphenated <em>front-end</em> and <em>back-end</em>.</p>
+<blockquote>
+<p>Both front-end developers and back-end developers are responsible for application security.</p></blockquote>
+<h3 id="whitebox-blackbox-greybox"><em>whitebox</em>, <em>blackbox</em>, <em>greybox</em></h3>
+<p>These are not words.</p>
+<p>As nouns, use <em>white box</em>, <em>black box</em>, and <em>grey box</em>. These nouns rarely appear in connection with cybersecurity.</p>
+<blockquote>
+<p>My cat enjoys jumping into that grey box.</p></blockquote>
+<p>As adverbs, use the hyphenated <em>white-box</em>, <em>black-box</em>, and <em>grey-box</em>. Do not use capitalization unless the words are in a title.</p>
+<blockquote>
+<p>While white-box testing involves knowledge of source code, black-box testing does not. A grey-box test is somewhere in-between.</p></blockquote>
+<h3 id="ie-eg"><em>ie</em>, <em>eg</em></h3>
+<p>These are letters.</p>
+<p>The abbreviation <em>i.e.</em> refers to the Latin <em>id est</em>, which means &ldquo;in other words.&rdquo; The abbreviation <em>e.g.</em> is for <em>exempli gratia</em>, translating to &ldquo;for example.&rdquo; To use these in a sentence:</p>
+<blockquote>
+<p>Write using proper English, i.e. correct spelling and grammar. Use common words over uncommon ones, e.g. &ldquo;learn&rdquo; instead of &ldquo;glean.&rdquo;</p></blockquote>
+<h3 id="etc"><em>etc</em></h3>
+<p>These are also letters.</p>
+<p>The Latin phrase <em>et cetera</em> translates to &ldquo;and the rest.&rdquo; It is abbreviated <em>etc.</em> and typically placed at the end of a list that seems redundant to complete:</p>
+<blockquote>
+<p>WSTG authors like rainbow colors, such as red, yellow, green, etc.</p></blockquote>
+<p>In technical writing, the use of <em>etc.</em> is problematic. It assumes the reader knows what you&rsquo;re talking about, and they may not. Violet is one of the colors of the rainbow, but the example above does not explicitly tell you if violet is a color that WSTG authors like.</p>
+<p>It is better to be explicit and thorough than to make assumptions of the reader. Only use <em>etc.</em> to avoid completing a list that was given in full earlier in the document.</p>
+<h3 id="-ellipsis"><em>&hellip;</em> (ellipsis)</h3>
+<p>The ellipsis punctuation mark can indicate that words have been left out of a quote:</p>
+<blockquote>
+<p>Linus Torvalds once said, &ldquo;Once you realize that documentation should be laughed at&hellip; THEN, and only then, have you reached the level where you can safely read it and try to use it to actually implement a driver.&rdquo;</p></blockquote>
+<p>As long as the omission does not change the meaning of the quote, this is acceptable usage of ellipsis in the WSTG.</p>
+<p>All other uses of ellipsis, such as to indicate an unfinished thought, are not.</p>
+<h3 id="ex"><em>ex</em></h3>
+<p>While this is a word, it is likely not the word you are looking for. The word <em>ex</em> has particular meaning in the fields of finance and commerce, and may refer to a person if you are discussing your past relationships. None of these topics should appear in the WSTG.</p>
+<p>The abbreviation <em>ex.</em> may be used to mean &ldquo;example&rdquo; by lazy writers. Please don&rsquo;t be lazy, and write <em>example</em> instead.</p>
+<hr>
+<h2 id="go-forth-and-write-docs">Go forth and write docs</h2>
+<p>If these reminders are helpful, please share them freely and use them when writing your own READMEs and documentation! If there&rsquo;s some I&rsquo;ve missed, I&rsquo;d love to know.</p>
+<p>And if you&rsquo;re here for the comments&hellip;</p>
+<p><img src="crowder-change-my-mind.png#center" alt="Change my mind meme"></p>
+<p>There are none on my blog. You can still <a href="/contact">@ me</a>.</p>
+<p>If you&rsquo;d like to help contribute to the OWASP WSTG, please read <a href="https://github.com/OWASP/wstg/blob/master/CONTRIBUTING.md">the contribution guide</a>. See the <a href="https://github.com/OWASP/wstg/blob/master/style_guide.md">full style guide here</a>.</p>
+]]></content></entry></feed>

@@ -1,0 +1,474 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Api on victoria.dev</title><link href="https://victoria.dev/tags/api/feed.xml" rel="self"/><link href="https://victoria.dev/tags/api/"/><updated>2023-09-26T04:46:36-05:00</updated><id>https://victoria.dev/tags/api/</id><author><name>Victoria Drake</name><email>hello@victoria.dev</email></author><generator>Hugo -- gohugo.io</generator><entry><title type="html">How to send long text input to ChatGPT using the OpenAI API</title><link href="https://victoria.dev/posts/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/"/><id>https://victoria.dev/posts/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/</id><author><name>Victoria Drake</name></author><published>2023-09-26T04:46:36-05:00</published><updated>2023-09-26T04:46:36-05:00</updated><content type="html"><![CDATA[<p>In a previous post, I showed how you can apply text preprocessing techniques to shorten your input length for ChatGPT. Today in the web interface (<a href="https://chat.openai.com/">chat.openai.com</a>), ChatGPT allows you to send a message with a maximum token length of 4,096.</p>
+<p>There are bound to be situations in which this isn&rsquo;t enough, such as when you want to read in a large amount of text from a file. Using the OpenAI API allows you to send many more tokens in a messages array, with the maximum number depending on your chosen model. This lets you provide large amounts of text to ChatGPT using chunking. Here&rsquo;s how.</p>
+<h2 id="chunking-your-input">Chunking your input</h2>
+<p>The <code>gpt-4</code> model currently has a maximum content length token limit of 8,192 tokens. (<a href="https://platform.openai.com/docs/models">Here are the docs containing current limits for all the models</a>.) Remember that you can first apply text preprocessing techniques to reduce your input size &ndash; in my <a href="/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/">previous post</a> I achieved a 28% size reduction without losing meaning with just a little tokenization and pruning.</p>
+<p>When this isn&rsquo;t enough to fit your message within the maximum message token limit, you can take a general programmatic approach that sends your input in message chunks. The goal is to divide your text into sections that each fit within the model&rsquo;s token limit. The general idea is to:</p>
+<ol>
+<li><strong>Tokenize and split text into chunks</strong> based on the model&rsquo;s token limit. It&rsquo;s better to keep message chunks slightly below the token limit since the token limit is shared between your message and ChatGPT&rsquo;s response.</li>
+<li><strong>Maintain context</strong> between chunks, e.g. avoid splitting a sentence in the middle.</li>
+</ol>
+<p>Each chunk is sent as a separate message in the conversation thread.</p>
+<h2 id="handling-responses">Handling responses</h2>
+<p>You send your chunks to ChatGPT using the OpenAI library&rsquo;s <code>ChatCompletion</code>. ChatGPT returns individual responses for each message, so you may want to process these by:</p>
+<ol>
+<li><strong>Concatenating responses</strong> in the order you sent them to get a coherent answer.</li>
+<li><strong>Manage conversation flow</strong> by keeping track of which response refers to which chunk.</li>
+<li><strong>Formatting the response</strong> to suit your desired output, e.g. replacing <code>\n</code> with line breaks.</li>
+</ol>
+<h2 id="putting-it-all-together">Putting it all together</h2>
+<p>Using the OpenAI API, you can send multiple messages to ChatGPT and ask it to wait for you to provide all of the data before answering your prompt. Being a language model, you can provide these instructions to ChatGPT in plain language. Here&rsquo;s a suggested script:</p>
+<blockquote>
+<p>Prompt: Summarize the following text for me</p>
+<p>To provide the context for the above prompt, I will send you text in parts. When I am finished, I will tell you &ldquo;ALL PARTS SENT&rdquo;. Do not answer until you have received all the parts.</p></blockquote>
+<p>I created <a href="https://github.com/victoriadrake/chatgptmax">a Python module, <code>chatgptmax</code></a>, that puts all this together. It breaks up a large amount of text by a given maximum token length and sends it in chunks to ChatGPT.</p>
+<p>You can install it with <code>pip install chatgptmax</code>, but here&rsquo;s the juicy part:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> openai
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> tiktoken
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set up your OpenAI API key</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Load your API key from an environment variable or secret management service</span>
+</span></span><span style="display:flex;"><span>openai<span style="color:#f92672">.</span>api_key <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_KEY&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">send</span>(
+</span></span><span style="display:flex;"><span>    prompt<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>    text_data<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>,
+</span></span><span style="display:flex;"><span>    chat_model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-3.5-turbo&#34;</span>,
+</span></span><span style="display:flex;"><span>    model_token_limit<span style="color:#f92672">=</span><span style="color:#ae81ff">8192</span>,
+</span></span><span style="display:flex;"><span>    max_tokens<span style="color:#f92672">=</span><span style="color:#ae81ff">2500</span>,
+</span></span><span style="display:flex;"><span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Send the prompt at the start of the conversation and then send chunks of text_data to ChatGPT via the OpenAI API.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    If the text_data is too long, it splits it into chunks and sends each chunk separately.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Args:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - prompt (str, optional): The prompt to guide the model&#39;s response.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - text_data (str, optional): Additional text data to be included.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - max_tokens (int, optional): Maximum tokens for each API call. Default is 2500.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - list or str: A list of model&#39;s responses for each chunk or an error message.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Check if the necessary arguments are provided</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> prompt:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Error: Prompt is missing. Please provide a prompt.&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> text_data:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Error: Text data is missing. Please provide some text data.&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Initialize the tokenizer</span>
+</span></span><span style="display:flex;"><span>    tokenizer <span style="color:#f92672">=</span> tiktoken<span style="color:#f92672">.</span>encoding_for_model(chat_model)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Encode the text_data into token integers</span>
+</span></span><span style="display:flex;"><span>    token_integers <span style="color:#f92672">=</span> tokenizer<span style="color:#f92672">.</span>encode(text_data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Split the token integers into chunks based on max_tokens</span>
+</span></span><span style="display:flex;"><span>    chunk_size <span style="color:#f92672">=</span> max_tokens <span style="color:#f92672">-</span> len(tokenizer<span style="color:#f92672">.</span>encode(prompt))
+</span></span><span style="display:flex;"><span>    chunks <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        token_integers[i : i <span style="color:#f92672">+</span> chunk_size]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">0</span>, len(token_integers), chunk_size)
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Decode token chunks back to strings</span>
+</span></span><span style="display:flex;"><span>    chunks <span style="color:#f92672">=</span> [tokenizer<span style="color:#f92672">.</span>decode(chunk) <span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> chunks]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    responses <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    messages <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: prompt},
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;To provide the context for the above prompt, I will send you text in parts. When I am finished, I will tell you &#39;ALL PARTS SENT&#39;. Do not answer until you have received all the parts.&#34;</span>,
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> chunks:
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chunk})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Check if total tokens exceed the model&#39;s limit and remove oldest chunks if necessary</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (
+</span></span><span style="display:flex;"><span>            sum(len(tokenizer<span style="color:#f92672">.</span>encode(msg[<span style="color:#e6db74">&#34;content&#34;</span>])) <span style="color:#66d9ef">for</span> msg <span style="color:#f92672">in</span> messages)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&gt;</span> model_token_limit
+</span></span><span style="display:flex;"><span>        ):
+</span></span><span style="display:flex;"><span>            messages<span style="color:#f92672">.</span>pop(<span style="color:#ae81ff">1</span>)  <span style="color:#75715e"># Remove the oldest chunk</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> openai<span style="color:#f92672">.</span>ChatCompletion<span style="color:#f92672">.</span>create(model<span style="color:#f92672">=</span>chat_model, messages<span style="color:#f92672">=</span>messages)
+</span></span><span style="display:flex;"><span>        chatgpt_response <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message[<span style="color:#e6db74">&#34;content&#34;</span>]<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>        responses<span style="color:#f92672">.</span>append(chatgpt_response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add the final &#34;ALL PARTS SENT&#34; message</span>
+</span></span><span style="display:flex;"><span>    messages<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;ALL PARTS SENT&#34;</span>})
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> openai<span style="color:#f92672">.</span>ChatCompletion<span style="color:#f92672">.</span>create(model<span style="color:#f92672">=</span>chat_model, messages<span style="color:#f92672">=</span>messages)
+</span></span><span style="display:flex;"><span>    final_response <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message[<span style="color:#e6db74">&#34;content&#34;</span>]<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>    responses<span style="color:#f92672">.</span>append(final_response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> responses
+</span></span></code></pre></div><p>Here&rsquo;s an example of how you can use this module with text data read from a file. (<code>chatgptmax</code> also provides a <a href="https://github.com/victoriadrake/chatgptmax/blob/4431af468435cd51d07779c6d721c8e0016d6bd6/chatgptmax.py#L68">convenience method</a> for getting text from a file.)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#75715e"># First, import the necessary modules and the function</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> chatgptmax <span style="color:#f92672">import</span> send
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define a function to read the content of a file</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">read_file_content</span>(file_path):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> open(file_path, <span style="color:#e6db74">&#39;r&#39;</span>, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>) <span style="color:#66d9ef">as</span> file:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> file<span style="color:#f92672">.</span>read()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Use the function</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Specify the path to your file</span>
+</span></span><span style="display:flex;"><span>    file_path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;path_to_your_file.txt&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Read the content of the file</span>
+</span></span><span style="display:flex;"><span>    file_content <span style="color:#f92672">=</span> read_file_content(file_path)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Define your prompt</span>
+</span></span><span style="display:flex;"><span>    prompt_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Summarize the following text for me:&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Send the file content to ChatGPT</span>
+</span></span><span style="display:flex;"><span>    responses <span style="color:#f92672">=</span> send(prompt<span style="color:#f92672">=</span>prompt_text, text_data<span style="color:#f92672">=</span>file_content)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Print the responses</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> response <span style="color:#f92672">in</span> responses:
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><h3 id="error-handling">Error handling</h3>
+<p>While the module is designed to handle most standard use cases, there are potential pitfalls to be aware of:</p>
+<ul>
+<li><strong>Incomplete sentences</strong>: If a chunk ends in the middle of a sentence, it might alter the meaning or context. To mitigate this, consider ensuring that chunks end at full stops or natural breaks in the text. You could do this by separating the text-chunking task into a separate function that:
+<ol>
+<li>Splits the text into sentences.</li>
+<li>Iterates over the sentences and adds them to a chunk until the chunk reaches the maximum size.</li>
+<li>Starts a new chunk when the current chunk reaches the maximum size or when adding another sentence would exceed the maximum size.</li>
+</ol>
+</li>
+<li><strong>API connectivity issues</strong>: There&rsquo;s always a possibility of timeouts or connectivity problems during API calls. If this is a significant issue for your application, you can include retry logic in your code. If an API call fails, the script could wait for a few seconds and then try again, ensuring that all chunks are processed.</li>
+<li><strong>Rate limits</strong>: Be mindful of <a href="https://platform.openai.com/docs/guides/rate-limits/overview">OpenAI API&rsquo;s rate limits</a>. If you&rsquo;re sending many chunks in rapid succession, you might hit these limits. Introducing a slight delay between calls or spreading out requests can help avoid this.</li>
+</ul>
+<h3 id="optimization">Optimization</h3>
+<p>As with any process, there&rsquo;s always room for improvement. Here are a couple of ways you might optimize the module&rsquo;s chunking and sending process further:</p>
+<ul>
+<li><strong>Parallelizing API calls</strong>: If <a href="https://platform.openai.com/docs/guides/rate-limits/overview">OpenAI API&rsquo;s rate limits</a> and your infrastructure allow, you could send multiple chunks simultaneously. This parallel processing can speed up the overall time it takes to get responses for all chunks. Unless you have access to OpenAI&rsquo;s <code>32k</code> models or need to use small chunk sizes, however, parallelism gains are likely to be minimal.</li>
+<li><strong>Caching mechanisms</strong>: If you find yourself sending the same or similar chunks frequently, consider implementing a caching system. By storing ChatGPT&rsquo;s responses for specific chunks, you can retrieve them instantly from the cache the next time, saving both time and API calls.</li>
+</ul>
+<h2 id="now-what">Now what</h2>
+<p>If you found your way here via search, you probably already have a use case in mind. Here are some other (startup) ideas:</p>
+<ul>
+<li><strong>You&rsquo;re a researcher</strong> who wants to save time by getting short summaries of many lengthy articles.</li>
+<li><strong>You&rsquo;re a legal professional</strong> who wants to analyze long contracts by extracting key points or clauses.</li>
+<li><strong>You&rsquo;re a financial analyst</strong> who wants to pull a quick overview of trends from a long report.</li>
+<li><strong>You&rsquo;re a writer</strong> who wants feedback on a new article or chapter&hellip; without having to actually show it to anyone yet.</li>
+</ul>
+<p>Do you have a use case I didn&rsquo;t list? <a href="/contact">Let me know about it!</a> In the meantime, have fun sending lots of text to ChatGPT.</p>
+]]></content></entry><entry><title type="html">Optimizing text for ChatGPT: NLP and text pre-processing techniques</title><link href="https://victoria.dev/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/"/><id>https://victoria.dev/posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/</id><author><name>Victoria Drake</name></author><published>2023-09-19T04:46:36-05:00</published><updated>2023-09-19T04:46:36-05:00</updated><content type="html"><![CDATA[<p>In order for chatbots and voice assistants to be helpful, they need to be able to take in and understand our instructions in plain language using Natural Language Processing (NLP). ChatGPT relies on a blend of advanced algorithms and text preprocessing methods to make sense of our words. But just throwing a wall of text at it can be inefficient &ndash; you might be dumping in a lot of noise with that signal and hitting the text input limit.</p>
+<p>Text preprocessing can help shorten and refine your input, ensuring that ChatGPT can grasp the essence without getting overwhelmed. In this article, we&rsquo;ll explore these techniques, understand their importance, and see how they make your interactions with tools like ChatGPT more reliable and productive.</p>
+<h2 id="text-preprocessing">Text preprocessing</h2>
+<p>Text preprocessing prepares raw text data for analysis by NLP models. Generally, it distills everyday text (like full sentences) to make it more manageable or concise and meaningful. Techniques include:</p>
+<ul>
+<li><strong>Tokenization:</strong> splitting up text by sentences or paragraphs. For example, you could break down a lengthy legal document into individual clauses or sentences.</li>
+<li><strong>Extractive summarization:</strong> selecting key sentences from the text and discarding the rest. Instead of reading an entire 10-page document, extractive summarization could pinpoint the most crucial sentences and give you a concise overview without delving into the details.</li>
+<li><strong>Abstractive summarization:</strong> generating a concise representation of the text content, for example, turning a 10-page document into a brief paragraph that captures the document&rsquo;s essence in new wording.</li>
+<li><strong>Pruning:</strong> removing redundant or less relevant parts. For example, in a verbose email thread, pruning can help remove all the greetings, sign-offs, and other repetitive elements, leaving only the core content for analysis.</li>
+</ul>
+<p>While all these techniques can help reduce the size of raw text data, some of these techniques are easier to apply to general use cases than others. Let&rsquo;s examine how text preprocessing can help us send a large amount of text to ChatGPT.</p>
+<h2 id="tokenization-and-chatgpt-input-limits">Tokenization and ChatGPT input limits</h2>
+<p>In the realm of Natural Language Processing (NLP), a token is the basic unit of text that a system reads. At its simplest, you can think of a token as a word, but depending on the language and the specific tokenization method used, a token can represent a word, part of a word, or even multiple words.</p>
+<p>While in English we often equate tokens with words, in NLP, the concept is broader. A token can be as short as a single character or as long as a word. For example, with word tokenization, the sentence &ldquo;Unicode characters such as emojis are not indivisible. ✂️&rdquo; can be broken down into tokens like this: [&ldquo;Unicode&rdquo;, &ldquo;characters&rdquo;, &ldquo;such&rdquo;, &ldquo;as&rdquo;, &ldquo;emojis&rdquo;, &ldquo;are&rdquo;, &ldquo;not&rdquo;, &ldquo;indivisible&rdquo;, &ldquo;.&rdquo;, &ldquo;✂️&rdquo;]</p>
+<p>In another form called Byte-Pair Encoding (BPE), the same sentence is tokenized as: [&ldquo;Un&rdquo;, &ldquo;ic&rdquo;, &ldquo;ode&rdquo;, &quot; characters&quot;, &quot; such&quot;, &quot; as&quot;, &quot; em, &ldquo;oj&rdquo;, &ldquo;is&rdquo;, &quot; are&quot;, &quot; not&quot;, &quot; ind&quot;, &ldquo;iv&rdquo;, &ldquo;isible&rdquo;, &ldquo;.&rdquo;, &quot; �&quot;, &ldquo;�️&rdquo;]. The emoji itself is split into tokens containing its underlying bytes.</p>
+<p>Depending on the ChatGPT model chosen, your text input size is restricted by tokens. <a href="https://platform.openai.com/docs/models">Here are the docs containing current limits</a>. BPE is used by ChatGPT to determine token count, and we&rsquo;ll discuss it more thoroughly later. First, we can programmatically apply some preprocessing techniques to reduce our text input size and use fewer tokens.</p>
+<h2 id="a-general-programmatic-approach">A general programmatic approach</h2>
+<p>For a general approach that can be applied programmatically, pruning is a suitable preprocessing technique. One form is <strong>stop word removal,</strong> or removing common words that might not add significant meaning in certain contexts. For example, consider the sentence:</p>
+<p>&ldquo;I always enjoy having pizza with my friends on weekends.&rdquo;</p>
+<p>Stop words are often words that don&rsquo;t carry significant meaning on their own in a given context. In this sentence, words like &ldquo;I&rdquo;, &ldquo;always&rdquo;, &ldquo;enjoy&rdquo;, &ldquo;having&rdquo;, &ldquo;with&rdquo;, &ldquo;my&rdquo;, &ldquo;on&rdquo; are considered stop words.</p>
+<p>After removing the stop words, the sentence becomes:</p>
+<p>&ldquo;pizza friends weekends.&rdquo;</p>
+<p>Now, the sentence is distilled to its key components, highlighting the main subject (pizza) and the associated context (friends and weekends). If you find yourself wishing you could convince people to do this in real life (<em>cough</em>meetings<em>cough</em>)&hellip; you aren&rsquo;t alone.</p>
+<p>Stop word removal is straightforward to apply programmatically: given a list of stop words, examine some text input to see if it contains any of the stop words on your list. If it does, remove them, then return the altered text.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_stopwords</span>(text: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    stopwords <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;an&#34;</span>, <span style="color:#e6db74">&#34;and&#34;</span>, <span style="color:#e6db74">&#34;at&#34;</span>, <span style="color:#e6db74">&#34;but&#34;</span>, <span style="color:#e6db74">&#34;how&#34;</span>, <span style="color:#e6db74">&#34;in&#34;</span>, <span style="color:#e6db74">&#34;is&#34;</span>, <span style="color:#e6db74">&#34;on&#34;</span>, <span style="color:#e6db74">&#34;or&#34;</span>, <span style="color:#e6db74">&#34;the&#34;</span>, <span style="color:#e6db74">&#34;to&#34;</span>, <span style="color:#e6db74">&#34;what&#34;</span>, <span style="color:#e6db74">&#34;will&#34;</span>]
+</span></span><span style="display:flex;"><span>    tokens <span style="color:#f92672">=</span> text<span style="color:#f92672">.</span>split()
+</span></span><span style="display:flex;"><span>    clean_tokens <span style="color:#f92672">=</span> [t <span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> tokens <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> t <span style="color:#f92672">in</span> stopwords]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34; &#34;</span><span style="color:#f92672">.</span>join(clean_tokens)
+</span></span></code></pre></div><p>To see how effective stop word removal can be, I took the entire text of my <a href="https://techleaderdocs.com">Tech Leader Docs newsletter</a> (17,230 words consisting of 104,892 characters) and processed it using the above function. How effective was it? The resulting text contained 89,337 characters, which is about a 15% reduction in size.</p>
+<p>Other pruning techniques can also be applied programmatically. Removing punctuation, numbers, HTML tags, URLs and email addresses, or non-alphabetical characters are all valid pruning techniques that can be straightforward to apply. Here is a function that does just that:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">import</span> re
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_text</span>(text):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove URLs</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;http\S+&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove email addresses</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;\S+@\S+&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove everything that&#39;s not a letter (a-z, A-Z)</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;[^a-zA-Z\s]&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, text)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Remove whitespace, tabs, and new lines</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span><span style="color:#f92672">.</span>join(text<span style="color:#f92672">.</span>split())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> text
+</span></span></code></pre></div><p>What measure of length reduction might we be able to get from this additional processing? Applying these techniques to the remaining characters of Tech Leader Docs results in just 75,217 characters; an overall reduction of about 28% from the original text.</p>
+<p>More opinionated pruning, such as removing short words or specific words or phrases, can be tailored to a specific use case. These don&rsquo;t lend themselves well to general functions, however.</p>
+<p>Now that you have some text processing techniques in your toolkit, let&rsquo;s look at how a reduction in characters translates to fewer tokens used when it comes to ChatGPT. To understand this, we&rsquo;ll examine Byte-Pair Encoding.</p>
+<h2 id="byte-pair-encoding-bpe">Byte-Pair Encoding (BPE)</h2>
+<p>Byte-Pair Encoding (BPE) is a subword tokenization method. It was originally introduced for data compression but has since been adapted for tokenization in NLP tasks. It allows representing common words as tokens and splits more rare words into subword units. This enables a balance between character-level and word-level tokenization.</p>
+<p>Let&rsquo;s make that more concrete. Imagine you have a big box of LEGO bricks, and each brick represents a single letter or character. You&rsquo;re tasked with building words using these LEGO bricks. At first, you might start by connecting individual bricks to form words. But over time, you notice that certain combinations of bricks (or characters) keep appearing together frequently, like &ldquo;th&rdquo; in &ldquo;the&rdquo; or &ldquo;ing&rdquo; in &ldquo;running.&rdquo;</p>
+<p>BPE is like a smart LEGO-building buddy who suggests, &ldquo;Hey, since &rsquo;th&rsquo; and &lsquo;ing&rsquo; keep appearing together a lot, why don&rsquo;t we glue them together and treat them as a single piece?&rdquo; This way, the next time you want to build a word with &ldquo;the&rdquo; or &ldquo;running,&rdquo; you can use these glued-together pieces, making the process faster and more efficient.</p>
+<p>Colloquially, the BPE algorithm looks like this:</p>
+<ol>
+<li>Start with single characters.</li>
+<li>Observe which pairs of characters frequently appear together.</li>
+<li>Merge those frequent pairs together to treat them as one unit.</li>
+<li>Repeat this process until you have a mix of single characters and frequently occurring character combinations.</li>
+</ol>
+<p>BPE is a particularly powerful tokenization method, especially when dealing with diverse and extensive vocabularies. Here&rsquo;s why:</p>
+<ul>
+<li>Handling rare words: Traditional tokenization methods might stumble upon rare or out-of-vocabulary words. BPE, with its ability to break words down into frequent subword units, can represent these words without needing to have seen them before.</li>
+<li>Efficiency: By representing frequent word parts as single tokens, BPE can compress text more effectively. This is especially useful for models like ChatGPT, where token limits apply.</li>
+<li>Adaptability: BPE is language-agnostic. It doesn&rsquo;t rely on predefined dictionaries or vocabularies. Instead, it learns from the data, making it adaptable to various languages and contexts.</li>
+</ul>
+<p>In essence, BPE strikes a balance, offering the granularity of character-level tokenization and the context-awareness of word-level tokenization. This hybrid approach ensures that NLP models like ChatGPT can understand a wide range of texts while maintaining computational efficiency.</p>
+<h2 id="sending-lots-of-text-to-chatgpt">Sending lots of text to ChatGPT</h2>
+<p>At time of writing, a message to ChatGPT via its web interface has a maximum token length of 4,096 tokens. If we assume the prior mentioned percent reduction as an average, this means you could reduce text of up to 5,712 tokens down to the appropriate size with just text preprocessing.</p>
+<p>What about when this isn&rsquo;t enough? Beyond text preprocessing, larger input can be sent in chunks using the OpenAI API. In my next post, I&rsquo;ll show you how to build a Python module that does exactly that.</p>
+]]></content></entry><entry><title type="html">Measuring productivity with GitHub issues</title><link href="https://victoria.dev/posts/measuring-productivity-with-github-issues/"/><id>https://victoria.dev/posts/measuring-productivity-with-github-issues/</id><author><name>Victoria Drake</name></author><published>2021-08-30T05:35:02+00:00</published><updated>2021-08-30T05:35:02+00:00</updated><content type="html"><![CDATA[<p>How long does it take for a bug to get squashed, or for a pull request to be merged? What kind of issues take the longest to close?</p>
+<p>Most organizations want to improve productivity and output, but few technical teams seem to take a data-driven approach to discovering productivity bottlenecks. If you&rsquo;re looking to improve development velocity, a couple key metrics could help your team get unblocked. Here&rsquo;s how you can apply a smidge of data science to visualize how your repository is doing, and where improvements can be made.</p>
+<h2 id="getting-quality-data">Getting quality data</h2>
+<p>The first and most difficult part, as any data scientist would likely tell you, is ensuring the quality of your data. It&rsquo;s especially important to consider consistency: are dates throughout the dataset presented in a consistent format? Have tags or labels been applied under consistent rules? Does the dataset contain repeated values, empty values, or unmatched types?</p>
+<p>If your repository has previously changed up processes or standards, consider the timeframe of the data you collect. If labeling issues is done arbitrarily, those may not be a useful feature. While cleaning data is outside the scope of this article, I can, at least, help you painlessly collect it.</p>
+<p>I wrote a straightforward <a href="https://github.com/victoriadrake/got-issues/">Python utility</a> that uses the GitHub API to pull data for any repository. You can use this on the command line and output the data to a file. It uses the <a href="https://docs.github.com/en/rest/reference/issues#list-repository-issues">list repository issues endpoint (docs)</a>, which, perhaps confusingly, includes both issues and pull requests (PRs) for the repository. I get my data like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>$ python fetch.py -h
+</span></span><span style="display:flex;"><span>usage: fetch.py <span style="color:#f92672">[</span>-h<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>--token TOKEN<span style="color:#f92672">]</span> repository months
+</span></span><span style="display:flex;"><span>$ python fetch.py OWASP/wstg <span style="color:#ae81ff">24</span> &gt; data.json
+</span></span></code></pre></div><p>Using the GitHub API means less worry about standardization, for example, all the dates are expressed as ISO 8601. Now that you have some data to process, it&rsquo;s time to play with Pandas.</p>
+<h2 id="plotting-with-pandas">Plotting with Pandas</h2>
+<p>You can use a <a href="https://jupyter.org/">Jupyter Notebook</a> to do some simple calculations and data visualization.</p>
+<p>First, create the Notebook file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>touch stats.ipynb
+</span></span></code></pre></div><p>Open the file in your favorite IDE, or in your browser by running <code>jupyter notebook</code>.</p>
+<p>In the first code cell, import Pandas and load your data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_json(<span style="color:#e6db74">&#34;data.json&#34;</span>)
+</span></span><span style="display:flex;"><span>data
+</span></span></code></pre></div><p>You can then run that cell to see a preview of the data you collected.</p>
+<p>Pandas is a <a href="https://pandas.pydata.org/pandas-docs/stable/index.html">well-documented</a> data analysis library. With a little imagination and a few keyword searches, you can begin to measure all kinds of repository metrics. For this walk-through, here&rsquo;s how you can calculate and create a graph that shows the number of days an issue or PR remains open in your repository.</p>
+<p>Create a new code cell and, for each item in your <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html">Series</a>, subtract the date it was closed from the date it was created:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>duration <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>Series(data<span style="color:#f92672">.</span>closed_at <span style="color:#f92672">-</span> data<span style="color:#f92672">.</span>created_at)
+</span></span><span style="display:flex;"><span>duration<span style="color:#f92672">.</span>describe()
+</span></span></code></pre></div><p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.describe.html"><code>Series.describe()</code></a> will give you some summary statistics that look something like these (from <a href="https://github.com/python/mypy">mypy on GitHub</a>):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>count                           514
+</span></span><span style="display:flex;"><span>mean      5 days 08:04:17.239299610
+</span></span><span style="display:flex;"><span>std      14 days 12:04:22.979308668
+</span></span><span style="display:flex;"><span>min                 0 days 00:00:09
+</span></span><span style="display:flex;"><span>25%          0 days 00:47:46.250000
+</span></span><span style="display:flex;"><span>50%                 0 days 06:18:47
+</span></span><span style="display:flex;"><span>75%          2 days 20:22:49.250000
+</span></span><span style="display:flex;"><span>max               102 days 20:56:30
+</span></span></code></pre></div><p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.plot.html?"><code>Series.plot()</code></a> uses a specified plotting backend (<code>matplotlib</code> by default) to visualize your data. A histogram can be a helpful way to examine issue duration:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>duration<span style="color:#f92672">.</span>apply(<span style="color:#66d9ef">lambda</span> x: x<span style="color:#f92672">.</span>days)<span style="color:#f92672">.</span>plot(kind<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;hist&#34;</span>)
+</span></span></code></pre></div><p>This will plot a histogram that represents the frequency distribution of issues over days, which is one way you can tell how long most issues take to close. For example, mypy seems to handle the majority of issues and PRs within 10 days, with some outliers taking more than three months:</p>
+<p><img src="plot.png" alt="Histogram for mypy issues over the last six months"></p>
+<p>It would be interesting to visualize other repository data, such as its most frequent contributors, or most often used labels. Does a relationship exist between the author or reviewers of an issue and how quickly it is resolved? Does the presence of particular labels predict anything about the duration of the issue?</p>
+<h2 id="you-aim-for-what-you-measure">You aim for what you measure</h2>
+<p>Now that you have some data-driven superpowers, remember that it comes with great responsibility. Deciding what to measure is just as, if not more, important than measuring it.</p>
+<p>Consider how to translate the numbers you gather into productivity improvements. For example, if your metric is closing issues and PRs faster, what actions can you take to encourage the right behavior in your teams? I&rsquo;d suggest encouraging issues to be clearly defined, and pull requests to be small and have a well-contained scope, making them easier to understand and review.</p>
+<p>To prepare to accurately take measurements for your repository, establish consistent standards for labels, tags, milestones, and other features you might want to examine. Remember that meaningful results are more easily gleaned from higher quality data.</p>
+<p>Finally, have fun exercising your data science skills. Who knows what you can discover and improve upon next!</p>
+]]></content></entry><entry><title type="html">Build your own serverless subscriber list with Go and AWS</title><link href="https://victoria.dev/archive/build-your-own-serverless-subscriber-list-with-go-and-aws/"/><id>https://victoria.dev/archive/build-your-own-serverless-subscriber-list-with-go-and-aws/</id><author><name>Victoria Drake</name></author><published>2020-11-10T04:52:50-05:00</published><updated>2020-11-10T04:52:50-05:00</updated><content type="html"><![CDATA[<p>You can now subscribe to my email list on <a href="/">victoria.dev</a>! Here&rsquo;s how I lovingly built a subscription sign up flow with email confirmation that doesn&rsquo;t suck. You can too.</p>
+<h2 id="introducing-simple-subscribe">Introducing Simple Subscribe</h2>
+<p>If you&rsquo;re interested in managing your own mailing list or newsletter, you can set up Simple Subscribe on your own AWS resources to collect email addresses. This open source API is written in Go, and runs on AWS Lambda. Visitors to your site can sign up to your list, which is stored in a DynamoDB table, ready to be queried or exported at your leisure.</p>
+<p>When someone signs up, they&rsquo;ll receive an email asking them to confirm their subscription. This is sometimes called &ldquo;double opt-in,&rdquo; although I prefer the term &ldquo;verified.&rdquo; Simple Subscribe works on serverless infrastructure and uses an AWS Lambda to handle subscription, confirmation, and unsubscribe requests.</p>
+<p>You can find the <a href="https://github.com/victoriadrake/simple-subscribe">Simple Subscribe project, with its fully open-source code, on GitHub</a>. I encourage you to pull up the code and follow along! In this post I&rsquo;ll share each build step, the thought process behind the API&rsquo;s single-responsibility functions, and security considerations for an AWS project like this one.</p>
+<h2 id="building-a-verified-subscription-flow">Building a verified subscription flow</h2>
+<p>A non-verified email sign up process is straightforward. Someone puts their email into a box on your website, then that email goes into your database. However, if I&rsquo;ve taught you anything about <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">not trusting user input</a>, the very idea of a non-verified sign up process should raise your hackles. Spam may be great when fried in a sandwich, but no fun when it&rsquo;s running up your AWS bill.</p>
+<p>While you can use a strategy like a CAPTCHA or puzzle for is-it-a-human verification, these can create enough friction to turn away your potential subscribers. Instead, a confirmation email can help to ensure both address correctness and user sentience.</p>
+<p>To build a subscription flow with email confirmation, create single-responsibility functions that satisfy each logical step. Those are:</p>
+<ol>
+<li>Accept an email address and record it.</li>
+<li>Generate a token associated with that email address and record it.</li>
+<li>Send a confirmation email to that email address with the token.</li>
+<li>Accept a verification request that has both the email address and token.</li>
+</ol>
+<p>To achieve each of these goals, Simple Subscribe uses the <a href="https://docs.aws.amazon.com/sdk-for-go/api/">official AWS SDK for Go</a> to interact with DynamoDB and SES.</p>
+<p>At each stage, consider what the data looks like and how you store it. This can help to handle conundrums like, &ldquo;What happens if someone tries to subscribe twice?&rdquo; or even <a href="/blog/if-you-want-to-build-a-treehouse-start-at-the-bottom/">threat-modeling</a> such as, &ldquo;What if someone subscribes with an email they don&rsquo;t own?&rdquo;</p>
+<p>Ready? Let&rsquo;s break down each step and see how the magic happens.</p>
+<h3 id="subscribing">Subscribing</h3>
+<p>The subscription process begins with a humble web form, like the one on my site&rsquo;s main page. A form input with attributes <code>type=&quot;email&quot; required</code> helps with validation, <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email#Validation">thanks to the browser</a>. When submitted, the form sends a GET request to the Simple Subscribe subscription endpoint.</p>
+<p>Simple Subscribe receives a GET request to this endpoint with a query string containing the intended subscriber&rsquo;s email. It then generates an <code>id</code> value and adds both <code>email</code> and <code>id</code> to your DynamoDB table.</p>
+<p>The table item now looks like:</p>
+<table>
+  <thead>
+      <tr>
+          <th>email</th>
+          <th>confirm</th>
+          <th>id</th>
+          <th>timestamp</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>subscriber@example.com</code></td>
+          <td><em>false</em></td>
+          <td><code>uuid-xxxxx</code></td>
+          <td>2020-11-01 00:27:39</td>
+      </tr>
+  </tbody>
+</table>
+<p>The <code>confirm</code> column, which holds a boolean, indicates that the item is a subscription request that has not yet been confirmed. To verify an email address in the database, you&rsquo;ll need to find the correct item and change <code>confirm</code> to <code>true</code>.</p>
+<p>As you work with your data, consider the goal of each manipulation and how you might compare an incoming request to existing data.</p>
+<p>For example, if someone made a subsequent subscription request for the same email address, how would you handle it? You might say, &ldquo;Create a new line item with a new <code>id</code>,&rdquo; however, this might not be best strategy when your serverless application database is paid for by request volume.</p>
+<p>Since <a href="https://aws.amazon.com/dynamodb/pricing/">DynamoDB Pricing</a> depends on how much data you read and write to your tables, it&rsquo;s advantageous to avoid piling on excess data.</p>
+<p>With that in mind, it would be prudent to handle subscription requests for the same email by performing an update instead of adding a new line. Simple Subscribe actually uses the same function to either add or update a database item. This is typically referred to as, &ldquo;update or insert.&rdquo;</p>
+<p>In a database like SQLite this is accomplished with the <a href="https://www.sqlite.org/lang_UPSERT.html">UPSERT syntax</a>. In the case of DynamoDB, you use an update operation. For the <a href="https://docs.aws.amazon.com/sdk-for-go/api/service/dynamodb/">Go SDK</a>, its syntax is <code>UpdateItem</code>.</p>
+<p>When a duplicate subscription request is received, the database item is matched on the <code>email</code> only. If an existing line item is found, its <code>id</code> and <code>timestamp</code> are overridden, which updates the existing database record and avoids flooding your table with duplicate requests.</p>
+<h3 id="verifying-email-addresses">Verifying email addresses</h3>
+<p>After submitting the form, the intended subscriber then receives an email from SES containing a link. This link is built using the <code>email</code> and <code>id</code> from the table, and takes the format:</p>
+<pre tabindex="0"><code class="language-url" data-lang="url">&lt;BASE_URL&gt;&lt;VERIFY_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
+</code></pre><p>In this set up, the <code>id</code> is a UUID that acts as a secret token. It provides an identifier that you can match that is sufficiently complex and hard to guess. This approach deters people from subscribing with email addresses they don&rsquo;t control.</p>
+<p>Visiting the link sends a request to your verification endpoint with the <code>email</code> and <code>id</code> in the query string. This time, it&rsquo;s important to compare both the incoming <code>email</code> and <code>id</code> values to the database record. This verifies that the recipient of the confirmation email is initiating the request.</p>
+<p>The verification endpoint ensures that these values match an item in your database, then performs another update operation to set <code>confirm</code> to <code>true</code>, and update the timestamp. The item now looks like:</p>
+<table>
+  <thead>
+      <tr>
+          <th>email</th>
+          <th>confirm</th>
+          <th>id</th>
+          <th>timestamp</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>subscriber@example.com</code></td>
+          <td><em>true</em></td>
+          <td><code>uuid-xxxxx</code></td>
+          <td>2020-11-01 00:37:39</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="querying-for-emails">Querying for emails</h3>
+<p>You can now query your table to build your email list. Depending on your email sending solution, you might do this manually, with another Lambda, or even from the command line.</p>
+<p>Since data for requested subscriptions (where <code>confirm</code> is <code>false</code>) is stored in the table alongside confirmed subscriptions, it&rsquo;s important to differentiate this data when querying for email addresses to send to. You&rsquo;ll want to ensure you only return emails where <code>confirm</code> is <code>true</code>.</p>
+<h2 id="providing-unsubscribe-links">Providing unsubscribe links</h2>
+<p>Similar to verifying an email address, Simple Subscribe uses <code>email</code> and <code>id</code> as arguments to the function that deletes an item from your DynamoDB table in order to unsubscribe an email address. To allow people to remove themselves from your list, you&rsquo;ll need to provide a URL in each email you send that includes their <code>email</code> and <code>id</code> as a query string to the unsubscribe endpoint. It would look something like:</p>
+<pre tabindex="0"><code class="language-url" data-lang="url">&lt;BASE_URL&gt;&lt;UNSUBSCRIBE_PATH&gt;/?email=subscriber@example.com&amp;id=uuid-xxxxx
+</code></pre><p>When the link is clicked, the query string is passed to the unsubscribe endpoint. If the provided <code>email</code> and <code>id</code> match a database item, that item will be deleted.</p>
+<p>Proving a method for your subscribers to automatically remove themselves from your list, without any human intervention necessary, is part of an ethical and respectful philosophy towards handling the data that&rsquo;s been entrusted to you.</p>
+<h2 id="caring-for-your-data">Caring for your data</h2>
+<p>Once you decide to accept other people&rsquo;s data, it becomes your responsibility to care for it. This is applicable to everything you build. For Simple Subscribe, it means maintaining the security of your database, and periodically pruning your table.</p>
+<p>In order to avoid retaining email addresses where <code>confirm</code> is <code>false</code> past a certain time frame, it would be a good idea to set up a cleaning function that runs on a regular schedule. This can be achieved manually, with an AWS Lambda function, or using the command line.</p>
+<p>To clean up, find database items where <code>confirm</code> is <code>false</code> and <code>timestamp</code> is older than a particular point in time. Depending on your use case and request volumes, the frequency at which you choose to clean up will vary.</p>
+<p>Also depending on your use case, you may wish to keep backups of your data. If you are particularly concerned about data integrity, you can explore <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backuprestore_HowItWorks.html">On-Demand Backup</a> or <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html">Point-in-Time Recovery</a> for DynamoDB.</p>
+<h2 id="build-your-independent-subscriber-base">Build your independent subscriber base</h2>
+<p>Building your own subscriber list can be an empowering endeavor! Whether you intend to start a newsletter, send out notifications for new content, or want to create a community around your work, there&rsquo;s nothing more personal or direct than an email from me to you.</p>
+<p>I encourage you to start building your subscriber base with Simple Subscribe today! Like most of my work, it&rsquo;s open source and free for your personal use. Dive into the code at <a href="https://github.com/victoriadrake/simple-subscribe">the GitHub repository</a> or learn more at <a href="https://simplesubscribe.org">SimpleSubscribe.org</a>.</p>
+]]></content></entry><entry><title type="html">Look mom, I&amp;#39;m a GitHub Action Hero</title><link href="https://victoria.dev/archive/look-mom-im-a-github-action-hero/"/><id>https://victoria.dev/archive/look-mom-im-a-github-action-hero/</id><author><name>Victoria Drake</name></author><published>2020-06-27T09:06:33-04:00</published><updated>2020-06-27T09:06:33-04:00</updated><content type="html"><![CDATA[<p>GitHub recently interviewed me for their blog editorial entitled <a href="https://github.blog/2020-06-26-github-action-hero-victoria-drake/">GitHub Action Hero: Victoria Drake</a>. Here&rsquo;s a behind-the-scenes peek at the original interview questions and my answers.</p>
+<h2 id="what-is-the-name-of-your-action-please-include-a-link-too">What is the name of your Action? Please include a link too.</h2>
+<p>Among the several Actions I&rsquo;ve built, I have two current favorites. One is <a href="https://github.com/victoriadrake/hugo-remote">hugo-remote</a>, which lets you continuously deploy a Hugo static site from a private source repository to a public GitHub Pages repository. This keeps the contents of the source repository private, such as your unreleased drafts, while still allowing you to have a public open source site using GitHub Pages.</p>
+<p>The second is <a href="https://github.com/victoriadrake/django-security-check">django-security-check</a>. It&rsquo;s an effortless way to continuously check that your production Django application is free from a variety of security misconfigurations. You can think of it as your little CI/CD helper for busy projects &ndash; a security linter!</p>
+<h2 id="tell-us-a-little-bit-more-about-yourselfhow-did-you-get-started-in-software-tools">Tell us a little bit more about yourself—how did you get started in software tools?</h2>
+<p>When I was a kid, I spent several summer vacations coding a huge medieval fantasy world MUD (Multi-User Dungeon, like a multiplayer role-playing game) written in LPC, with friends. It was entirely text-based, and built and played via Telnet. I fell in love with the terminal and learned a lot about object-oriented programming and prototype-based programming early on.</p>
+<p>I became a freelance developer and had the privilege of working on a wide variety of client projects. Realizing the difficulty that companies have with hiring experienced developers, I built <a href="https://ApplyByAPI.com">ApplyByAPI.com</a> to help. As you might imagine, it allows candidates to apply for jobs via API, instead of emailing a resume. It&rsquo;s based on the Django framework, so in the process, I learned even more about building reusable units of software.</p>
+<p>When I became a co-author and a core maintainer for the <a href="https://github.com/OWASP/wstg">Open Web Application Security Project (OWASP) Web Security Testing Guide (WSTG)</a>, I gained an even broader appreciation for how a prototype-based, repeatable approach can help build secure web applications. Organizations worldwide consider the WSTG the foremost open source resource for testing the security of web applications. We&rsquo;ve applied this thinking via the use of GitHub Actions in our repository &ndash; I&rsquo;ll tell you more about that later.</p>
+<p>Whether I&rsquo;m creating an open source tool or leading a development team, my childhood experience still informs how I think about programming today. I strive to create repeatable units of software like GitHub Actions &ndash; only now, I make them for large enterprises in the real world!</p>
+<h2 id="what-is-the-story-behind-your-built-github-action-why-did-you-build-this">What is the story behind your built GitHub Action? (Why did you build this?)</h2>
+<p>Developers take on a lot of responsibility when it comes to building secure applications these days. I&rsquo;m a full-time senior software developer at a cybersecurity company. I&rsquo;ve found that I&rsquo;m maximally productive when I create systems and processes that help myself and my team make desired outcomes inevitable. So I spend my free time building tools that make it easy for other developers to build secure software as well. My Actions help to automate contained, repeatable units of work that can make a big difference in a developer&rsquo;s day.</p>
+<h2 id="do-you-have-future-plans-for-this-or-other-actions">Do you have future plans for this or other Actions?</h2>
+<p>Yes! I&rsquo;m always finding ways for tools like GitHub Actions to boost the velocity of technical teams, whether at work or in my open source projects. Remember the Open Web Application Security Project? In the work I&rsquo;ve lead with OWASP, I&rsquo;ve championed the effort to increase automation using GitHub Actions to maintain quality, securely deploy new versions to the web, and even build PDFs of the WSTG. We&rsquo;re constantly looking into new ways that GitHub Actions can make our lives easier and our readers&rsquo; projects more secure.</p>
+<h2 id="what-has-been-your-favorite-feature-of-github-actions">What has been your favorite feature of GitHub Actions?</h2>
+<p>I like that I can build an Action using familiar and portable technologies, like Docker. Actions are easy for collaborators to work on too, since in the case of a Dockerized Action, you can use any language your team is comfortable with. This is especially useful in large organizations with polyglot teams and environments. There aren&rsquo;t any complicated dependencies for running these portable tasks, and you don&rsquo;t need to learn any special frameworks to get started.</p>
+<p>One of my first blog posts about GitHub Actions even describes how I used an Action to run a Makefile! This is especially useful for large legacy applications that want to modernize their pipeline by using GitHub Actions.</p>
+<h2 id="what-are-the-biggest-challenges-youve-faced-while-building-your-github-action">What are the biggest challenges you’ve faced while building your GitHub Action?</h2>
+<p>The largest challenge of GitHub Actions isn&rsquo;t really in GitHub Actions, but in the transition of legacy software and company culture.</p>
+<p>Migrating legacy software is always challenging, particularly with large legacy applications. Moving to modern CI/CD processes requires changes at the software level, team level, and even a shift in thinking when it comes to individual developers. It can help to have a tool like GitHub Actions, which is at once seamlessly modern and familiar, when transitioning legacy code to a modern pipeline.</p>
+<h2 id="anything-else-you-would-like-to-share-about-your-experience-any-stories-or-lessons-learned-through-building-your-action">Anything else you would like to share about your experience? Any stories or lessons learned through building your Action?</h2>
+<p>I&rsquo;m happiest when I&rsquo;m solving a challenge that makes developing secure software less challenging in the future, both for myself and for the technology organization I&rsquo;m leading. With tools like GitHub Actions, a lot of mental overhead can be offloaded to automatic processes &ndash; like getting a whole other brain, for free! This can massively help organizations that are ready to scale up their development output.</p>
+<p>In the realm of cybersecurity, not only does creating portable and reusable software make developers&rsquo; lives easier, it helps to make whole workflows repeatable, which in turn makes software development processes more secure. With smart processes in place, technical teams are happier. As an inevitable result, they&rsquo;ll build better software for customers, too.</p>
+]]></content></entry><entry><title type="html">Publishing GitHub event data with GitHub Actions and Pages</title><link href="https://victoria.dev/archive/publishing-github-event-data-with-github-actions-and-pages/"/><id>https://victoria.dev/archive/publishing-github-event-data-with-github-actions-and-pages/</id><author><name>Victoria Drake</name></author><published>2019-11-04T09:13:23-04:00</published><updated>2019-11-04T09:13:23-04:00</updated><content type="html"><![CDATA[<p>Teams who work on GitHub rely on event data to collaborate. The data recorded as issues, pull requests, and comments, become vital to understanding the project.</p>
+<p>With the general availability of GitHub Actions, we have a chance to programmatically access and preserve GitHub event data in our repository. Making the data part of the repository itself is a way of preserving it outside of GitHub, and also gives us the ability to feature the data on a front-facing website, such as with GitHub Pages, through an automated process that&rsquo;s part of our CI/CD pipeline.</p>
+<p>And, if you&rsquo;re like me, you can turn <a href="https://github.com/victoriadrake/github-guestbook/issues/1">GitHub issue comments</a> into an <a href="https://github.com/victoriadrake/github-guestbook">awesome 90s guestbook page</a>.</p>
+<p>No matter the usage, the principle concepts are the same. We can use Actions to access, preserve, and display GitHub event data - with just one workflow file. To illustrate the process, I&rsquo;ll take you through the <a href="https://github.com/victoriadrake/github-guestbook/blob/master/.github/workflows/publish-comments.yml">workflow code</a> that makes my guestbook shine on.</p>
+<p>For an introductory look at GitHub Actions including how workflows are triggered, see <a href="/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/">A lightweight, tool-agnostic CI/CD flow with GitHub Actions</a>.</p>
+<h2 id="accessing-github-event-data">Accessing GitHub event data</h2>
+<p>An Action workflow runs in an environment with some default environment variables. A lot of convenient information is available here, including event data. The most complete way to access the event data is using the <code>$GITHUB_EVENT_PATH</code> variable, the path of the file with the complete JSON event payload.</p>
+<p>The expanded path looks like <code>/home/runner/work/_temp/_github_workflow/event.json</code> and its data corresponds to its webhook event. You  can find the documentation for webhook event data in GitHub REST API <a href="https://developer.github.com/webhooks/#events">Event Types and Payloads</a>. To make the JSON data available in the workflow environment, you can use a tool like <code>jq</code> to parse the event data and put it in an environment variable.</p>
+<p>Below, I grab the comment ID from an <a href="https://developer.github.com/v3/activity/events/types/#issuecommentevent">issue comment event</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ID<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>jq <span style="color:#e6db74">&#39;.comment.id&#39;</span> $GITHUB_EVENT_PATH<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><p>Most event data is also available via the <a href="https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"><code>github.event</code> context variable</a> without needing to parse JSON. The fields are accessed using dot notation, as in the example below where I grab the same comment ID:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>ID<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.id <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>For my guestbook, I want to display entries with the user&rsquo;s handle, and the date and time. I can capture this event data like so:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>AUTHOR<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.user.login <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>DATE<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>{ github.event.comment.created_at <span style="color:#e6db74">}</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Shell variables are handy for accessing data, however, they&rsquo;re ephemeral. The workflow environment is created anew each run, and even shell variables set in one step do not persist to other steps. To persist the captured data, you have two options: use artifacts, or commit it to the repository.</p>
+<h2 id="preserving-event-data-using-artifacts">Preserving event data: using artifacts</h2>
+<p>Using artifacts, you can persist data between workflow jobs without committing it to your repository. This is handy when, for example, you wish to transform or incorporate the data before putting it somewhere more permanent.</p>
+<p>Two actions assist with using artifacts: <code>upload-artifact</code> and <code>download-artifact</code>. You can use these actions to make files available to other jobs in the same workflow. For a full example, see <a href="https://docs.github.com/en/actions/advanced-guides/storing-workflow-data-as-artifacts#passing-data-between-jobs-in-a-workflow">passing data between jobs in a workflow</a>.</p>
+<p>The <code>upload-artifact</code> action&rsquo;s <code>action.yml</code> contains an <a href="https://github.com/actions/upload-artifact/blob/master/action.yml">explanation</a> of the keywords. The uploaded files are saved in <code>.zip</code> format. Another job in the same workflow run can use the <code>download-artifact</code> action to utilize the data in another step.</p>
+<p>You can also manually download the archive on the workflow run page, under the repository&rsquo;s Actions tab.</p>
+<p>Persisting workflow data between jobs does not make any changes to the repository files, as the artifacts generated live only in the workflow environment. Personally, being comfortable working in a shell environment, I see a narrow use case for artifacts, though I&rsquo;d have been remiss not to mention them. Besides passing data between jobs, they could be useful for creating <code>.zip</code> format archives of, say, test output data. In the case of my guestbook example, I simply ran all the necessary steps in one job, negating any need for passing data between jobs.</p>
+<h2 id="preserving-event-data-pushing-workflow-files-to-the-repository">Preserving event data: pushing workflow files to the repository</h2>
+<p>To preserve data captured in the workflow in the repository itself, it is necessary to add and push this data to the Git repository. You can do this in the workflow by creating new files with the data, or by appending data to existing files, using shell commands.</p>
+<h3 id="creating-files-in-the-workflow">Creating files in the workflow</h3>
+<p>To work with the repository files in the workflow, use the <a href="https://github.com/actions/checkout"><code>checkout</code> action</a> to first get a copy to work with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@master</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">fetch-depth</span>: <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>To add comments to my guestbook, I turn the event data captured in shell variables into proper files, using substitutions in <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">shell parameter expansion</a> to sanitize user input and translate newlines to paragraphs. I wrote previously about <a href="/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/">why user input should be treated carefully</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Turn comment into file</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    ID=${{ github.event.comment.id }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    AUTHOR=${{ github.event.comment.user.login }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    DATE=${{ github.event.comment.created_at }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    COMMENT=$(echo &#34;${{ github.event.comment.body }}&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    NO_TAGS=${COMMENT//[&lt;&gt;]/\`}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    FOLDER=comments
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    printf &#39;%b\n&#39; &#34;&lt;div class=\&#34;comment\&#34;&gt;&lt;p&gt;${AUTHOR} says:&lt;/p&gt;&lt;p&gt;${NO_TAGS//$&#39;\n&#39;/\&lt;\/p\&gt;\&lt;p\&gt;}&lt;/p&gt;&lt;p&gt;${DATE}&lt;/p&gt;&lt;/div&gt;\r\n&#34; &gt; ${FOLDER}/${ID}.html</span>
+</span></span></code></pre></div><p>By using <code>printf</code> and directing its output with <code>&gt;</code> to a new file, the event data is transformed into an HTML file, named with the comment ID number, that contains the captured event data. Formatted, it looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;comment&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;victoriadrake says:&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;This is a comment!&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;2019-11-04T00:28:36Z&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span></code></pre></div><p>When working with comments, one effect of naming files using the comment ID is that a new file with the same ID will overwrite the previous. This is handy for a guestbook, as it allows any edits to a comment to replace the original comment file.</p>
+<p>If you&rsquo;re using a static site generator like Hugo, you could build a Markdown format file, stick it in your <code>content/</code> folder, and the regular site build will take care of the rest. In the case of my simplistic guestbook, I have an extra step to consolidate the individual comment files into a page. Each time it runs, it overwrites the existing <code>index.html</code> with the <code>header.html</code> portion (<code>&gt;</code>), then finds and appends (<code>&gt;&gt;</code>) all the comment files&rsquo; contents in descending order, and lastly appends the <code>footer.html</code> portion to end the page.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Assemble page</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    cat header.html &gt; index.html
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    find comments/ -name &#34;*.html&#34; | sort -r | xargs -I % cat % &gt;&gt; index.html
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    cat footer.html &gt;&gt; index.html</span>
+</span></span></code></pre></div><h3 id="committing-changes-to-the-repository">Committing changes to the repository</h3>
+<p>Since the <code>checkout</code> action is not quite the same as cloning the repository, at time of writing, there are some <a href="https://github.community/t5/GitHub-Actions/Checkout-Action-does-not-create-local-master-and-has-no-options/td-p/31575">issues</a> still to work around. A couple extra steps are necessary to <code>pull</code>, <code>checkout</code>, and successfully <code>push</code> changes back to the <code>master</code> branch, but this is pretty trivially done in the shell.</p>
+<p>Below is the step that adds, commits, and pushes changes made by the workflow back to the repository&rsquo;s <code>master</code> branch.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Push changes to repo</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git config user.email &#34;${{ github.actor }}@users.noreply.github.com&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git config user.name &#34;${{ github.actor }}&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git pull ${REMOTE}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git checkout master
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git add .
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git status
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git commit -am &#34;Add new comment&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    git push ${REMOTE} master</span>
+</span></span></code></pre></div><p>The remote, in fact, our repository, is specified using the <code>github.repository</code> context variable. For our workflow to be allowed to push to master, we give the remote URL using <a href="https://docs.github.com/en/actions/security-guides/automatic-token-authentication">the default <code>secrets.GITHUB_TOKEN</code> variable</a>.</p>
+<p>Since the workflow environment is shiny and newborn, we need to configure Git. In the above example, I&rsquo;ve used the <code>github.actor</code> context variable to input the username of the account initiating the workflow. The email is similarly configured using the <a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-email-preferences/setting-your-commit-email-address#setting-your-commit-email-address-on-github">default <code>noreply</code> GitHub email address</a>.</p>
+<h2 id="displaying-event-data">Displaying event data</h2>
+<p>If you&rsquo;re using GitHub Pages with the default <code>secrets.GITHUB_TOKEN</code> variable and without a site generator, pushing changes to the repository in the workflow will only update the repository files. The GitHub Pages build will fail with an error, &ldquo;Your site is having problems building: Page build failed.&rdquo;</p>
+<p>To enable Actions to trigger a Pages site build, you&rsquo;ll need to create a Personal Access Token. This token can be <a href="https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository">stored as a secret in the repository</a> settings and passed into the workflow in place of the default <code>secrets.GITHUB_TOKEN</code> variable. I wrote more about <a href="/posts/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/#environment-and-variables">Actions environment and variables in this post</a>.</p>
+<p>With the use of a Personal Access Token, a push initiated by the Actions workflow will also update the Pages site. You can see it for yourself by <a href="https://github.com/victoriadrake/github-guestbook/issues/1">leaving a comment</a> in my guestbook! The comment creation event triggers the workflow, which then takes around 30 seconds to run and update the guestbook page.</p>
+<p>Where a site build is necessary for changes to be published, such as when using Hugo, an Action can do this too. However, in order to avoid creating unintended loops, one Action workflow will not trigger another (<a href="https://docs.github.com/en/actions/using-workflows/triggering-a-workflow">see what will</a>). Instead, it&rsquo;s extremely convenient to handle the process of <a href="/posts/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/">building the site with a Makefile</a>, which any workflow can then run. Simply add running the Makefile as the final step in your workflow job, with the repository token where necessary:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Run Makefile</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">TOKEN</span>: <span style="color:#ae81ff">${{ secrets.GITHUB_TOKEN }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: <span style="color:#ae81ff">make all</span>
+</span></span></code></pre></div><p>This ensures that the final step of your workflow builds and deploys the updated site.</p>
+<h2 id="no-more-event-data-horizon">No more event data horizon</h2>
+<p>GitHub Actions provides a neat way to capture and utilize event data so that it&rsquo;s not only available within GitHub. The possibilities are only as limited as your imagination! Here are a few ideas for things this lets us create:</p>
+<ol>
+<li>A public-facing issues board, where customers without GitHub accounts can view and give feedback on project issues.</li>
+<li>An automatically-updating RSS feed of new issues, comments, or PRs for any repository.</li>
+<li>A comments system for static sites, utilizing GitHub issue comments as an input method.</li>
+<li>An awesome 90s guestbook page.</li>
+</ol>
+<p>Did I mention I made a 90s guestbook page? My inner-Geocities-nerd is a little excited.</p>
+]]></content></entry></feed>
