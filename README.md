@@ -2,7 +2,7 @@
 
 Oh, hello there! You're behind-the-scenes at [victoria.dev](https://victoria.dev).
 
-## How this works
+## How This Works
 
 For more details on how I built the site, see [About this site](https://victoria.dev/site/).
 
