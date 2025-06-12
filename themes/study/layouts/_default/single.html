@@ -1,0 +1,190 @@
+{{ define "main" }}
+<div class="post-container">
+    <article class="post h-entry">
+        <section class="post-header">
+            <h1 class="post-title p-name">{{ .Title }}</h1>
+            
+            {{ if .Params.description }}
+            <p class="post-subtitle p-summary">{{ .Params.description }}</p>
+            {{ end }}
+            
+            <div class="post-meta">
+                <time class="post-date dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+                    {{ .Date.Format "January 2, 2006" }}
+                </time>
+                
+                <span class="post-author p-author h-card">
+                    <img class="u-photo hidden" src="{{ .Site.Params.author.image }}" />
+                    <span class="p-name hidden">{{ with .Params.author }}{{ . }}{{ else }}{{ .Site.Params.author.name }}{{ end }}</span>
+                </span>
+            </div>
+        </section>
+        
+        <div class="post-content-wrapper">
+            {{ if .Site.Params.useToc }}
+                {{ $headingsCount := trim (partial "count-headings.html" .Content) " \n" }}
+                {{ $headingsCountInt := int $headingsCount }}
+                {{ $multiHeading := ge $headingsCountInt 1 }}
+                {{ if and (not .Params.noToc) $multiHeading }}
+                    <aside class="toc" id="tableOfContents">
+                        <h2>Table of Contents</h2>
+                        {{ .TableOfContents }}
+                    </aside>
+                {{ end }}
+            {{ end }}
+            
+            <div class="post-content e-content">
+                {{ .Content }}
+            </div>
+        </div>
+        
+        {{ with .Params.tags }}
+        <div class="post-tags">
+            {{ range . }}
+            <a class="p-category tag" href="{{ "tags/" | relURL }}{{ . | urlize }}/">{{ . }}</a>
+            {{ end }}
+        </div>
+        {{ end }}
+        
+        <div class="post-footer">
+            <div class="post-navigation">
+                {{ if .PrevInSection }}
+                <a href="{{ .PrevInSection.Permalink }}" class="prev-post">
+                    <span class="nav-arrow">←</span>
+                    <span class="nav-title">{{ .PrevInSection.Title }}</span>
+                </a>
+                {{ end }}
+                
+                {{ if .NextInSection }}
+                <a href="{{ .NextInSection.Permalink }}" class="next-post">
+                    <span class="nav-title">{{ .NextInSection.Title }}</span>
+                    <span class="nav-arrow">→</span>
+                </a>
+                {{ end }}
+            </div>
+        </div>
+    </article>
+
+    <!-- Related Posts Section -->
+    {{ $currentPage := . }}
+    {{ $tags := .Params.tags }}
+    {{ $relatedPosts := slice }}
+
+    {{ if $tags }}
+        {{ range $tag := $tags }}
+            {{ $tagRelated := where (where site.RegularPages "Type" "posts") "Params.tags" "intersect" (slice $tag) }}
+            {{ $relatedPosts = $relatedPosts | append $tagRelated }}
+        {{ end }}
+        
+        {{ $relatedPosts = $relatedPosts | uniq }}
+        {{ $relatedPosts = where $relatedPosts "Permalink" "ne" $currentPage.Permalink }}
+        
+        {{ if gt (len $relatedPosts) 0 }}
+        <section class="related-posts">
+            <h2>Related Posts</h2>
+            <ul class="related-posts-list">
+                {{ range first 3 $relatedPosts }}
+                <li class="related-post-item">
+                    <a href="{{ .RelPermalink }}" class="related-post-link">
+                        <h3 class="post-title">{{ .Title }}</h3>
+                        <p class="post-summary">{{ if .Params.description }}{{ .Params.description }}{{ else }}{{ .Summary }}{{ end }}</p>
+                        <div class="post-meta">
+                            {{ range first 1 (.GetTerms "tags") }}
+                            <a class="tag" href="{{ .Permalink }}">{{ .Title | lower }}</a>
+                            {{ end }}
+                            <span class="reading-time">{{ .ReadingTime }} min read</span>
+                        </div>
+                    </a>
+                </li>
+                {{ end }}
+            </ul>
+        </section>
+        {{ end }}
+    {{ end }}
+</div>
+
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the table of contents element
+    const toc = document.getElementById('tableOfContents');
+    
+    // If there's no table of contents, exit early
+    if (!toc) {
+      return;
+    }
+    
+    // Get all headings in the content
+    const headings = document.querySelectorAll('.post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6');
+    const tocLinks = toc.querySelectorAll('a');
+    
+    // Make TOC links smooth scroll to their targets
+    tocLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Get the target element
+        const targetId = this.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+          // Smooth scroll to the target
+          window.scrollTo({
+            top: targetElement.offsetTop - 100, // Offset for fixed header
+            behavior: 'smooth'
+          });
+          
+          // Update URL hash without jumping
+          history.pushState(null, null, '#' + targetId);
+          
+          // Update active state
+          tocLinks.forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+        }
+      });
+    });
+    
+    // Highlight the current section in the TOC as the user scrolls
+    function highlightTocSection() {
+      // If there are no headings, exit early
+      if (headings.length === 0) return;
+      
+      // Get current scroll position
+      const scrollPosition = window.scrollY;
+      
+      // Find the current heading
+      let currentHeadingIndex = 0;
+      
+      headings.forEach((heading, index) => {
+        // Subtract a small offset to highlight the section a bit before reaching it
+        if (heading.offsetTop - 120 <= scrollPosition) {
+          currentHeadingIndex = index;
+        }
+      });
+      
+      // Remove active class from all TOC links
+      tocLinks.forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Add active class to the current section's TOC link
+      const currentHeading = headings[currentHeadingIndex];
+      if (currentHeading) {
+        const id = currentHeading.id;
+        const correspondingLink = toc.querySelector(`a[href="#${id}"]`);
+        if (correspondingLink) {
+          correspondingLink.classList.add('active');
+        }
+      }
+    }
+    
+    // Call the highlight function on scroll
+    window.addEventListener('scroll', highlightTocSection);
+    
+    // Call it once on load
+    highlightTocSection();
+  });
+</script>
+{{ end }}

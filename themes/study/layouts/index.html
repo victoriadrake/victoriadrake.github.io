@@ -1,0 +1,45 @@
+{{ define "main" }}
+<div class="home-page">
+    
+    <section class="home-recent-posts">
+        
+        {{ $recentPosts := where .Site.RegularPages "Section" "posts" | first 5 }}
+        
+        {{ range $index, $post := $recentPosts }}
+
+            <!-- Regular posts -->
+            <article class="post-item h-entry">
+                <h3 class="post-title">
+                    <a href="{{ .Permalink }}" class="p-name u-url">{{ .Title }}</a>
+                </h3>
+                
+                {{ if .Params.description }}
+                <p class="post-summary p-summary">{{ .Params.description }}</p>
+                {{ else }}
+                <p class="post-summary p-summary">{{ .Summary }}</p>
+                {{ end }}
+
+                <div class="post-meta">
+                    <time class="post-date dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+                        {{ .Date.Format "January 2, 2006" }}
+                    </time>
+                    
+                    {{ with .Params.tags }}
+                    <div class="post-tags">
+                        {{ range first 1 . }}
+                        <a class="p-category tag" href="{{ "tags/" | relURL }}{{ . | urlize }}/">{{ . }}</a>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+                    
+                    <span class="reading-time">{{ .ReadingTime }} min read</span>
+                </div>
+            </article>
+        {{ end }}
+        
+        <div class="view-all">
+            <a href="/posts/" class="view-all-link">View all posts →</a>
+        </div>
+    </section>
+</div>
+{{ end }}

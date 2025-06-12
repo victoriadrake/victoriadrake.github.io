@@ -1,14 +1,16 @@
 ---
-title: "I'm Victoria Drake."
+title: "About"
 outputs: HTML
 layout: page
 ---
 
-Here's what I do.
+{{< img src="art-1.png" alt="Art of Victoria typing on a laptop" width="60%" class="centered-image" >}}
+
+Hello! I'm Victoria Drake. Here's what I do.
 
 ## Leadership
 
-I eagerly lead tech teams to deliver great software with a focus on security and maintainability. With my background as a principal software engineer, I'm able to find improvements in every area of building excellent software, from process to production.
+I love leading tech teams to deliver great software with a focus on security and maintainability. With my background as a principal software engineer, I'm able to find improvements in every area of building excellent software, from process to production.
 
 ## Software and Security
 

@@ -1,0 +1,70 @@
+{{ define "main" }}
+    <div class="taxonomy-list-page">
+        <header class="page-header">
+            <h1 class="page-title">{{ .Title }}</h1>
+            <p class="page-description">Posts tagged with "{{ .Title }}"</p>
+        </header>
+
+        {{ $paginator := .Paginate .Pages }}
+
+        <ul class="post-list">
+            {{ range $paginator.Pages }}
+                <li class="post-item h-entry">
+                    <h3 class="post-title">
+                        <a href="{{ .Permalink }}" class="p-name u-url">{{ .Title }}</a>
+                    </h3>
+                    <div class="post-summary p-summary">
+                        {{ if .Params.description }}
+                            {{ .Params.description }}
+                        {{ else }}
+                            {{ .Summary }}
+                        {{ end }}
+                    </div>
+                    <div class="post-meta">
+                        <time class="post-date dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+                            {{ .Date.Format "January 2, 2006" }}
+                        </time>
+
+                        {{ with .Params.tags }}
+                            <div class="post-tags">
+                                {{ range . }}
+                                    <a class="p-category tag" href="{{ "tags/" | relURL }}{{ . | urlize }}/">{{ . }}</a>
+                                {{ end }}
+                            </div>
+                        {{ end }}
+
+                        <span class="reading-time">{{ .ReadingTime }} min read</span>
+                    </div>
+
+                </li>
+            {{ end }}
+        </ul>
+
+        <!-- Pagination -->
+        {{ if gt $paginator.TotalPages 1 }}
+            <div class="pagination">
+                {{ if $paginator.HasPrev }}
+                    <a href="{{ $paginator.Prev.URL }}" class="prev prev-page">← Previous</a>
+                {{ else }}
+                    <span class="prev prev-page disabled">← Previous</span>
+                {{ end }}
+
+                <div class="pages">
+                    {{ range $paginator.Pagers }}
+                        <a href="{{ .URL }}" class="{{ if eq . $paginator }}active{{ end }}">{{ .PageNumber }}</a>
+                    {{ end }}
+                </div>
+
+                {{ if $paginator.HasNext }}
+                    <a href="{{ $paginator.Next.URL }}" class="next next-page">Next →</a>
+                {{ else }}
+                    <span class="next next-page disabled">Next →</span>
+                {{ end }}
+            </div>
+        {{ end }}
+
+        <div class="back-to-tags">
+            <a href="/tags/">← All Tags</a>
+        </div>
+    </div>
+{{ end }}

@@ -1,0 +1,18 @@
+{{ define "main" }}
+<div class="taxonomy-terms-page">
+    <header class="page-header">
+        <h1 class="page-title">{{ .Title }}</h1>
+        {{ if .Description }}
+        <p class="page-description">{{ .Description }}</p>
+        {{ end }}
+    </header>
+    
+    <div class="tags-container" id="all-tags">
+        {{- range $key, $value := .Data.Terms.Alphabetical -}}
+        <a class="tag" href="{{ "" | relLangURL }}{{ $.Data.Plural | urlize }}/{{ $value.Name | urlize }}/">
+            {{ $value.Name }} ({{ $value.Count }})
+        </a>
+        {{- end -}}
+    </div>
+</div>
+{{ end }}

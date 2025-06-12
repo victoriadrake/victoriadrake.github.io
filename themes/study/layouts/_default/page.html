@@ -1,0 +1,103 @@
+{{ define "main" }}
+<div class="page-container">
+    <article class="page">
+        <section class="page-header">
+            <h1 class="page-title">{{ .Title }}</h1>
+            
+            {{ if .Params.description }}
+            <p class="page-subtitle">{{ .Params.description }}</p>
+            {{ end }}
+        </section>
+        
+        <div class="page-content-wrapper">
+            <div class="page-content">
+                {{ .Content }}
+            </div>
+        </div>
+    </article>
+</div>
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the table of contents element
+    const toc = document.getElementById('tableOfContents');
+    
+    // If there's no table of contents, exit early
+    if (!toc) {
+      return;
+    }
+    
+    // Get all headings in the content
+    const headings = document.querySelectorAll('.page-content h2, .page-content h3, .page-content h4, .page-content h5, .page-content h6');
+    const tocLinks = toc.querySelectorAll('a');
+    
+    // Make TOC links smooth scroll to their targets
+    tocLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Get the target element
+        const targetId = this.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+          // Smooth scroll to the target
+          window.scrollTo({
+            top: targetElement.offsetTop - 100, // Offset for fixed header
+            behavior: 'smooth'
+          });
+          
+          // Update URL hash without jumping
+          history.pushState(null, null, '#' + targetId);
+          
+          // Update active state
+          tocLinks.forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+        }
+      });
+    });
+    
+    // Highlight the current section in the TOC as the user scrolls
+    function highlightTocSection() {
+      // If there are no headings, exit early
+      if (headings.length === 0) return;
+      
+      // Get current scroll position
+      const scrollPosition = window.scrollY;
+      
+      // Find the current heading
+      let currentHeadingIndex = 0;
+      
+      headings.forEach((heading, index) => {
+        // Subtract a small offset to highlight the section a bit before reaching it
+        if (heading.offsetTop - 120 <= scrollPosition) {
+          currentHeadingIndex = index;
+        }
+      });
+      
+      // Remove active class from all TOC links
+      tocLinks.forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Add active class to the current section's TOC link
+      const currentHeading = headings[currentHeadingIndex];
+      if (currentHeading) {
+        const id = currentHeading.id;
+        const correspondingLink = toc.querySelector(`a[href="#${id}"]`);
+        if (correspondingLink) {
+          correspondingLink.classList.add('active');
+        }
+      }
+    }
+    
+    // Call the highlight function on scroll
+    window.addEventListener('scroll', highlightTocSection);
+    
+    // Call it once on load
+    highlightTocSection();
+  });
+</script>
+{{ end }}
