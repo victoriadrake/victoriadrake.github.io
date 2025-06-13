@@ -4,7 +4,7 @@ outputs: HTML
 layout: page
 ---
 
-{{< img src="art-1.png" alt="Art of Victoria typing on a laptop" width="60%" class="centered-image" >}}
+{{< img src="art-1.png" alt="Art of Victoria typing on a laptop" width="50%" class="centered-image" >}}
 
 Hello! I'm Victoria Drake. Here's what I do.
 

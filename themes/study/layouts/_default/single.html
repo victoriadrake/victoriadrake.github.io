@@ -86,14 +86,7 @@
                 {{ range first 3 $relatedPosts }}
                 <li class="related-post-item">
                     <a href="{{ .RelPermalink }}" class="related-post-link">
-                        <h3 class="post-title">{{ .Title }}</h3>
-                        <p class="post-summary">{{ if .Params.description }}{{ .Params.description }}{{ else }}{{ .Summary }}{{ end }}</p>
-                        <div class="post-meta">
-                            {{ range first 1 (.GetTerms "tags") }}
-                            <a class="tag" href="{{ .Permalink }}">{{ .Title | lower }}</a>
-                            {{ end }}
-                            <span class="reading-time">{{ .ReadingTime }} min read</span>
-                        </div>
+                        {{ partial "post-item.html" (dict "post" . "wrapperElement" "div" "showAllTags" false "noTitleLink" true) }}
                     </a>
                 </li>
                 {{ end }}

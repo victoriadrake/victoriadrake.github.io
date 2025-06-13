@@ -1,0 +1,57 @@
+{{/* 
+    Post Item Partial
+    
+    Parameters:
+    - post: The post to display (required)
+    - showAllTags: Whether to show all tags or just the first one (default: false)
+    - wrapperElement: HTML element to wrap the post item (default: "li")
+    - noTitleLink: Whether to omit the link around the title (default: false)
+*/}}
+
+{{ $post := .post }}
+{{ $showAllTags := .showAllTags | default false }}
+{{ $wrapperElement := .wrapperElement | default "li" }}
+{{ $noTitleLink := .noTitleLink | default false }}
+
+{{ $openTag := printf "<%s class=\"post-item h-entry\">" $wrapperElement }}
+{{ $closeTag := printf "</%s>" $wrapperElement }}
+
+{{ $openTag | safeHTML }}
+    <h3 class="post-title">
+        {{ if $noTitleLink }}
+            <span class="p-name">{{ $post.Title }}</span>
+        {{ else }}
+            <a href="{{ $post.Permalink }}" class="p-name u-url">{{ $post.Title }}</a>
+        {{ end }}
+    </h3>
+    
+    <div class="post-meta">
+        {{ with $post.Params.tags }}
+            {{ if $showAllTags }}
+                {{ range . }}
+                    <a class="p-category tag" href="{{ "tags/" | relURL }}{{ . | urlize }}/">{{ . }}</a>
+                {{ end }}
+            {{ else }}
+                {{ range first 1 . }}
+                    <a class="p-category tag" href="{{ "tags/" | relURL }}{{ . | urlize }}/">{{ . }}</a>
+                {{ end }}
+            {{ end }}
+        {{ end }}
+        
+        <time class="post-date dt-published" datetime="{{ $post.Date.Format "2006-01-02T15:04:05Z07:00" }}">
+            {{ $post.Date.Format "January 2, 2006" }}
+        </time>
+        
+        <span class="meta-dot">•</span>
+        
+        <span class="reading-time">{{ $post.ReadingTime }} min read</span>
+    </div>
+    
+    <p class="post-summary p-summary">
+        {{ if $post.Params.description }}
+            {{ $post.Params.description }}
+        {{ else }}
+            {{ $post.Summary }}
+        {{ end }}
+    </p>
+{{ $closeTag | safeHTML }}
