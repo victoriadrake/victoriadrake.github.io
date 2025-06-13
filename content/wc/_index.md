@@ -1,5 +1,4 @@
 ---
-title: word count
-headless: true
-outputs: RSS
+title: "Word Count"
+outputs: ["RSS", "HTML"]
 ---
