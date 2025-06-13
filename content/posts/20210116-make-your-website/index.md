@@ -4,6 +4,7 @@ date: 2021-01-16T08:41:27-05:00
 
 aliases:
     - /archive/make-your-own-independent-website/
+    - /blog/make-your-own-independent-website/
 description: How to make 2021 the year of the independent web.
 tags:
     - websites
@@ -13,7 +14,7 @@ draft: false
 categories: ["article"]
 ---
 
-The web that raised me was a digital playground in the truest sense. It was made up of HTML experiments frankensteined together by people still figuring it all out.
+The web that raised me was a digital playground in the truest sense. It was made up of HTML experiments Frankensteined together by people still figuring it all out.
 
 The beauty of not completely knowing what you're doing is a lack of premature judgement. Without a standard to rise to, you're free to go sideways. Explore. Try things that don't work, without any expectation they _will_ work. An open world with a beginner's mindset.
 

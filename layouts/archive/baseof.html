@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode | default "en" }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Site.Params.description }}{{ . }}{{ end }}{{ end }}">
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/fav/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/fav/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/fav/favicon-16x16.png">
+    <link rel="manifest" href="/images/fav/site.webmanifest">
+    
+    <!-- Title -->
+    <title>{{ if ne .Title .Site.Title }}{{ .Title }} | {{ end }}{{ .Site.Title }} Archive</title>
+    
+    <!-- 90s Geocities-style CSS -->
+    <link rel="stylesheet" href="/css/archive.css">
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="{{ if ne .Title .Site.Title }}{{ .Title }} | {{ end }}{{ .Site.Title }} Archive">
+    <meta property="og:description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Site.Params.description }}{{ . }}{{ end }}{{ end }}">
+    <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+    <meta property="og:url" content="{{ .Permalink }}">
+    <meta property="og:image" content="{{ with .Params.image }}{{ . | absURL }}{{ else }}{{ .Site.Params.socialImage | absURL }}{{ end }}">
+    
+    <!-- RSS -->
+    {{ range .AlternativeOutputFormats -}}
+        {{ printf `<link rel="%s" type="%s" href="%s" title="%s">` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+    {{ end -}}
+    
+    <!-- Additional head content -->
+    {{ block "head" . }}{{ end }}
+    
+    <!-- 90s Geocities-style JavaScript -->
+    <script>
+        // Function to create a trail of stars following the cursor
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.querySelector('body');
+            
+            // Create star elements
+            for (let i = 0; i < 20; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.position = 'fixed';
+                star.style.width = '10px';
+                star.style.height = '10px';
+                star.style.backgroundColor = '#ffff00';
+                star.style.borderRadius = '50%';
+                star.style.pointerEvents = 'none';
+                star.style.opacity = '0';
+                star.style.zIndex = '9999';
+                body.appendChild(star);
+            }
+            
+            // Star trail effect
+            const stars = document.querySelectorAll('.star');
+            let mouseX = 0;
+            let mouseY = 0;
+            let starIndex = 0;
+            
+            document.addEventListener('mousemove', function(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            setInterval(function() {
+                const star = stars[starIndex];
+                star.style.left = mouseX + 'px';
+                star.style.top = mouseY + 'px';
+                star.style.opacity = '1';
+                
+                setTimeout(function() {
+                    star.style.opacity = '0';
+                }, 500);
+                
+                starIndex = (starIndex + 1) % stars.length;
+            }, 50);
+            
+            // Random "You've Got Mail" sound (10% chance on page load)
+            if (Math.random() < 0.1) {
+                const mailSound = new Audio('https://www.myinstants.com/media/sounds/youve-got-mail.mp3');
+                setTimeout(() => {
+                    mailSound.play();
+                }, 3000);
+            }
+            
+            // Update visitor counter
+            const counter = document.querySelector('.hit-counter');
+            if (counter) {
+                const randomVisitors = Math.floor(Math.random() * 9000) + 1000;
+                counter.textContent = randomVisitors.toString();
+            }
+        });
+    </script>
+</head>
+<body class="archive-body">
+    <header class="archive-header">
+        <h1 class="archive-logo">{{ .Site.Title }} Archive Zone</h1>
+        <div class="archive-nav">
+            <nav>
+                <ul>
+                    {{ range .Site.Menus.main }}
+                        <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+                    {{ end }}
+                    <li><a href="#guestbook">Sign Guestbook</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="under-construction"></div>
+    </header>
+    
+    <main class="archive-main">
+        {{ block "main" . }}{{ end }}
+        
+        <div class="divider"></div>
+        
+        <div class="hit-counter">12345</div>
+        
+        <a href="#guestbook" class="guestbook-link" id="guestbook">Sign My Guestbook!</a>
+    </main>
+    
+    <footer class="archive-footer">
+        <div class="webring">
+            <a href="#">
+                <div style="display: inline-block; width: 88px; height: 31px; background-color: #000000; color: #ffffff; font-size: 10px; text-align: center; line-height: 31px; border: 1px solid #ffffff;">WEBRING</div>
+            </a>
+            <a href="#">
+                <div style="display: inline-block; width: 88px; height: 31px; background-color: #ff00ff; color: #ffffff; font-size: 10px; text-align: center; line-height: 31px; border: 1px solid #ffffff;">ANIME</div>
+            </a>
+            <a href="#">
+                <div style="display: inline-block; width: 88px; height: 31px; background-color: #0000ff; color: #ffffff; font-size: 10px; text-align: center; line-height: 31px; border: 1px solid #ffffff;">HTML NOW</div>
+            </a>
+        </div>
+        
+        <p>© {{ now.Format "2006" }} {{ .Site.Params.author.name }} - Last updated: {{ now.Format "January 2, 2006" }}</p>
+        
+        <div class="best-viewed">
+            <p>Best viewed with:
+                <span style="display: inline-block; width: 88px; height: 31px; background-color: #0000ff; color: #ffffff; font-size: 10px; text-align: center; line-height: 31px; border: 1px solid #ffffff;">IE 5.5</span>
+                <span style="display: inline-block; width: 88px; height: 31px; background-color: #ff0000; color: #ffffff; font-size: 10px; text-align: center; line-height: 31px; border: 1px solid #ffffff;">NETSCAPE</span>
+                at 800x600 resolution
+            </p>
+        </div>
+    </footer>
+    
+    <!-- Additional scripts -->
+    {{ block "scripts" . }}{{ end }}
+</body>
+</html>

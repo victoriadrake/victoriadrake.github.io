@@ -3,6 +3,7 @@ title: SQLite in production with WAL
 date: 2020-03-05T10:14:43-05:00
 
 aliases:
+    - /blog/sqlite-in-production-with-wal/
 description: An underappreciated candidate for light and fast database transactions.
 tags:
     - data

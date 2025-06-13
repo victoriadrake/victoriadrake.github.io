@@ -2,7 +2,9 @@
 title: Set up a Pi-hole VPN on an AWS Lightsail instance
 date: 2021-10-07T11:01:13Z
 
-aliases: /blog/vpn
+aliases: 
+    - /blog/vpn
+    - /blog/set-up-a-pi-hole-vpn-on-an-aws-lightsail-instance/
 description: Build your own VPN with Pi-hole to block ads and trackers.
 series:
 tags:

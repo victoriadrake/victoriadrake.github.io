@@ -1,0 +1,92 @@
+{{ define "main" }}
+    <div class="archive-hero">
+        <h1>{{ .Title }}</h1>
+        <div class="divider" style="height: 10px;"></div>
+        <marquee scrollamount="5" behavior="alternate" direction="left" style="margin: 15px 0;">
+            <span style="color: #ff0000;">W</span>
+            <span style="color: #ff7f00;">e</span>
+            <span style="color: #ffff00;">l</span>
+            <span style="color: #00ff00;">c</span>
+            <span style="color: #0000ff;">o</span>
+            <span style="color: #4b0082;">m</span>
+            <span style="color: #9400d3;">e</span>
+            <span style="color: #ff0000;"> t</span>
+            <span style="color: #ff7f00;">o</span>
+            <span style="color: #ffff00;"> t</span>
+            <span style="color: #00ff00;">h</span>
+            <span style="color: #0000ff;">e</span>
+            <span style="color: #4b0082;"> A</span>
+            <span style="color: #9400d3;">r</span>
+            <span style="color: #ff0000;">c</span>
+            <span style="color: #ff7f00;">h</span>
+            <span style="color: #ffff00;">i</span>
+            <span style="color: #00ff00;">v</span>
+            <span style="color: #0000ff;">e</span>
+            <span style="color: #4b0082;">!</span>
+        </marquee>
+    </div>
+    
+    <div class="archive-search">
+        {{ partial "search.html" . }}
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="archive-content">
+        {{ .Content }}
+    </div>
+    
+    <div class="archive-posts">
+        <h2>📚 Archived Posts 📚</h2>
+        <blink style="color: #ff0000; display: block; margin: 10px 0;">These posts are from the old days!</blink>
+        
+        {{ $paginator := .Paginate (where .Pages "Type" "archive") }}
+        <ul class="archive-posts-list">
+            {{ range $paginator.Pages }}
+                <li class="archive-posts-item">
+                    <a href="{{ .RelPermalink }}" class="archive-posts-link">
+                        <div class="archive-posts-title">{{ .Title }}</div>
+                        <div class="archive-posts-meta">
+                            <span class="archive-posts-date">📅 {{ .Date.Format "January 2, 2006" }}</span>
+                            {{ with .Params.tags }}
+                                <span class="archive-posts-tags">
+                                    🏷️ 
+                                    {{ range first 1 . }}
+                                        {{ . }}
+                                    {{ end }}
+                                </span>
+                            {{ end }}
+                        </div>
+                        <div class="archive-posts-summary">
+                            {{ if .Params.description }}
+                                {{ .Params.description }}
+                            {{ else }}
+                                {{ .Summary }}
+                            {{ end }}
+                        </div>
+                    </a>
+                </li>
+            {{ end }}
+        </ul>
+        
+        {{ if gt $paginator.TotalPages 1 }}
+            <div class="archive-pagination">
+                {{ if $paginator.HasPrev }}
+                    <a href="{{ $paginator.Prev.URL }}" class="archive-pagination-prev">
+                        ⬅️ Previous Page
+                    </a>
+                {{ end }}
+                
+                <span class="archive-pagination-current">
+                    Page {{ $paginator.PageNumber }} of {{ $paginator.TotalPages }}
+                </span>
+                
+                {{ if $paginator.HasNext }}
+                    <a href="{{ $paginator.Next.URL }}" class="archive-pagination-next">
+                        Next Page ➡️
+                    </a>
+                {{ end }}
+            </div>
+        {{ end }}
+    </div>
+{{ end }}

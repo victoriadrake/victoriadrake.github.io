@@ -3,6 +3,7 @@ title: Create a self-hosted chat service with your own Matrix server
 date: 2021-02-15T01:38:07-05:00
 
 aliases:
+    - /blog/create-a-self-hosted-chat-service-with-your-own-matrix-server/
 description: A speed-run introduction to Matrix via Dendrite.
 tags:
     - privacy

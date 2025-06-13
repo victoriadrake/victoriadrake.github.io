@@ -5,6 +5,7 @@ lastmod: 2020-11-22T21:58:28+07:00
 
 aliases:
     - /blog/basics-of-iteration-in-python/
+    - /blog/iteration-in-python-for-list-and-map/
     - /blog/iterations-in-python-for-loop-list-comprehension-and-map/
     - /verbose/python-programming-fundamentals-iterations
     - /verbose/iterations-in-python-for-loop-list-comprehension-and-map

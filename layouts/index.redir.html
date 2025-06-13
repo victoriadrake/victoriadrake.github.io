@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode | default "en" }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ with .Site.Params.description }}{{ . }}{{ end }}">
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/fav/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/fav/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/fav/favicon-16x16.png">
+    <link rel="manifest" href="/images/fav/site.webmanifest">
+    
+    <!-- Theme color for Safari on iOS -->
+    <meta name="theme-color" content="{{ .Site.Params.themeColor | default "#f8f5f0" }}" id="theme-color-meta">
+    <script>
+        // Function to update theme-color based on color scheme
+        function updateThemeColor() {
+            const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const themeColorMeta = document.getElementById('theme-color-meta');
+            // Use the same colors as defined in CSS
+            themeColorMeta.setAttribute('content', isDarkMode ? '#1e1a15' : '#f8f5f0');
+        }
+        
+        // Set initial theme-color
+        updateThemeColor();
+        
+        // Update theme-color when color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeColor);
+    </script>
+    
+    <!-- Title -->
+    <title>404 - Page Not Found | {{ .Site.Title }}</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/tags.css">
+    {{ range .Site.Params.css -}}
+        <link rel="stylesheet" href="/{{ . }}">
+    {{- end }}
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="{{ .Site.Home.Permalink }}" class="logo">
+                <img src="{{ .Site.Params.logo }}" alt="{{ .Site.Title }} Logo" class="site-logo">
+            </a>
+            
+            <div class="site-nav">
+                <nav>
+                    <ul>
+                        {{ range .Site.Menus.main }}
+                            <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+                        {{ end }}
+                    </ul>
+                </nav>
+                
+                <!-- Search icon for mobile -->
+                <button class="search-toggle" aria-label="Toggle search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+                
+                <form action='/search/' class="search-form" method="get">
+                    <label for="search-input" class="visually-hidden">Search site</label>
+                    <input id="search-input" name="query" placeholder="Search..." type="text">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="page-container">
+            <header class="page-header">
+                <h1 class="page-title">404</h1>
+            </header>
+
+            <div class="page-content-wrapper">
+                <article class="page-content">
+                    {{ with .Site.GetPage "/404.md" }}
+                        {{ .Content }}
+                    {{ else }}
+                        <h2>Page Not Found</h2>
+                        <p>The page you're looking for doesn't exist or has been moved.</p>
+                    {{ end }}
+                </article>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-container">
+            <div class="footer-left">
+                <img src="{{ .Site.Params.author.image }}" alt="{{ .Site.Params.author.name }}" class="footer-photo">
+                <div class="footer-info">
+                    <p><strong>{{ .Site.Params.author.name }}</strong></p>
+                    <p>© {{ now.Format "2006" }} · All rights reserved</p>
+                </div>
+            </div>
+            
+            <div class="footer-social">
+                {{ range .Site.Params.social }}
+                    <a href="{{ .url }}" title="{{ .name }}" rel="me">
+                        <img src="{{ .icon }}" alt="{{ .name }}">
+                    </a>
+                {{ end }}
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Search index -->
+    <script src="/js/lunr.min.js"></script>
+    {{ partial "search-index.html" . }}
+    
+    <!-- Search toggle script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchToggle = document.querySelector('.search-toggle');
+            const searchForm = document.querySelector('.search-form');
+            
+            if (searchToggle && searchForm) {
+                // Remove any inline styles that might interfere
+                searchForm.removeAttribute('style');
+                
+                searchToggle.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    searchForm.classList.toggle('search-form-visible');
+                    
+                    if (searchForm.classList.contains('search-form-visible')) {
+                        setTimeout(() => {
+                            document.getElementById('search-input').focus();
+                        }, 300); // Wait for animation to complete
+                    }
+                });
+                
+                // Close search form when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!searchForm.contains(event.target) && !searchToggle.contains(event.target)) {
+                        searchForm.classList.remove('search-form-visible');
+                    }
+                });
+                
+                // Prevent search form from closing when clicking inside it
+                searchForm.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                });
+                
+                // Close search form when pressing Escape key
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape' && searchForm.classList.contains('search-form-visible')) {
+                        searchForm.classList.remove('search-form-visible');
+                        searchToggle.focus();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

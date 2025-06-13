@@ -1,0 +1,23 @@
+{{- $src1 := .Get "src1" -}}
+{{- $src2 := .Get "src2" -}}
+{{- $alt := .Get "alt" -}}
+{{- $width := .Get "width" | default "auto" -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $widthClass := "" -}}
+
+{{- if eq $width "25%" -}}
+    {{- $widthClass = "image-25" -}}
+{{- else if eq $width "33%" -}}
+    {{- $widthClass = "image-33" -}}
+{{- else if eq $width "50%" -}}
+    {{- $widthClass = "image-50" -}}
+{{- else if eq $width "60%" -}}
+    {{- $widthClass = "image-60" -}}
+{{- else if eq $width "75%" -}}
+    {{- $widthClass = "image-75" -}}
+{{- end -}}
+
+<div class="hover-image-container {{ $class }} {{ $widthClass }}">
+    <img src="{{ $src1 }}" alt="{{ $alt }}" class="hover-image primary-image" />
+    <img src="{{ $src2 }}" alt="{{ $alt }}" class="hover-image secondary-image" />
+</div>

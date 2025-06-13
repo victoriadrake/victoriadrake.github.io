@@ -3,6 +3,7 @@ title: A cron job that could save you from a ransomware attack
 date: 2019-11-13T08:27:31-04:00
 
 aliases:
+    - /blog/a-cron-job-that-could-save-you-from-a-ransomware-attack/
 description: How a simple scheduled job can help you quickly recover from ransomware.
 series:
     - security-for-developers

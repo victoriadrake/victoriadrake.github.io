@@ -48,7 +48,7 @@ Write right away. Create a habit of explaining everything you learn to yourself 
 
 Start by writing for yourself. Write about what interests you. Try something new, even if it seems rudimentary, and write in-depth about what you learn. ([One of my most popular posts](/blog/iteration-in-python-for-list-and-map/) is about iteration in Python. When I first wrote it, I considered myself a complete beginner.)
 
-If you want to go a step further, share your writing with the world. Learn in public, [like I do](https://victoria.dev). I often get questions like, "how do I choose a theme for my blog?" or "what platform should I use?" or "what popular language/framework/topic should I focus on?" My answer is: don't worry about it.
+If you want to go a step further, share your writing with the world!. Learn in public, like I do by writing on this site. I often get questions like, "how do I choose a theme for my blog?" or "what platform should I use?" or "what popular language/framework/topic should I focus on?" My answer is: don't worry about it.
 
 Don't fret too much about your blog theme or platform. Pick the easiest option for you to get started with for now. All of that will change and improve as you learn, practice, and find your focus. Just start writing, ideally, yesterday.
 
@@ -76,6 +76,6 @@ By allowing yourself to build some draft projects first, you allow yourself the 
 
 Don’t follow this advice blindly; rather, incorporate it into your own systems. Experiment, make it work better than when you found it, then pay it forward by writing down what you've learned for someone else to read!
 
-Here are my favorite books for reading or listening to if you want to cultivate a learning mindset. See [non-coding books for coders](/bookshelf/).
+Here are my favorite books for reading or listening to if you want to cultivate a learning mindset. See [non-coding books for coders](/bookshelf/#non-coding-books-for-coders).
 
 If this article benefits you in some way, I encourage you to write about it! The process of learning how to learn is never finished. You can be the next iteration.
