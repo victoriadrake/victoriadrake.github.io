@@ -88,18 +88,6 @@ Related:
 
 - [GitHub Action Hero: Victoria Drake](https://github.blog/2020-06-26-github-action-hero-victoria-drake/)
 
-## Head of Product
-
-_2012 — 2015_
-
-Championed digital transformation at a niche manufacturing company, resulting in a high-end e-commerce experience.
-
-- Advised on strategic product-market fit changes
-- Planned and executed long-term digital strategy
-- Migrated business processes to use modern e-commerce solutions
-- Overhauled legacy offline inventory management to a modern software solution
-- Managed recruiting activities to appoint and train team leads
-
 ## Education
 
 **Master of Science, Computer Science** - Georgia Institute of Technology

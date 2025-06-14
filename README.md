@@ -1,47 +1,37 @@
-# [Victoria.dev](https://victoria.dev)
+# What's All This?
 
-Oh, hello there! You're behind-the-scenes at [victoria.dev](https://victoria.dev).
+Welcome to the repository for [victoria.dev](https://victoria.dev), a personal website wholly created and owned by me, Victoria Drake. I've produced everything you see on the site—from research and writing to illustrations, design, code, and deployment.
 
-## How This Works
+Victoria.dev is built as a static site using [Hugo](https://gohugo.io/), a fast and flexible static site generator. The site is [open source](https://github.com/victoriadrake/victoriadrake.github.io), so feel free to explore how it works!
 
-For more details on how I built the site, see [About this site](https://victoria.dev/site/).
+### Technical Features
 
-### CMS
-
-Hashnode serves as a CMS for this blog, unless I publish Markdown files here directly.
-
-The repository [victoriadrake/hashnode-blog](https://github.com/victoriadrake/hashnode-blog) is updated whenever I make a new post on Hashnode. The workflow in that repo pushes the new post to the `content` directory here.
+- **Static Site Generation**: Built with [Hugo](https://gohugo.io/) for speed and flexibility.
+- **Search Functionality**: Implemented using `lunrjs`. [Learn how here](https://victoria.dev/posts/add-search-to-hugo-static-sites-with-lunr/).
+- **Illustrations**: I create all the illustrations and comics in my articles on my iPad.
+- **IndieWeb Integration**: I've implemented [microformats2](https://microformats.org/wiki/Main_Page) markup, making the site compatible with social readers and other IndieWeb sites.
 
 ### Continuous Deployment
 
-The site is deployed with each update using GitHub Pages.
+The site is automatically deployed with each update using GitHub Pages and GitHub Actions.
 
-### Link Checking
+### Development Tools
 
-I created a GitHub Action, [link-snitch](https://github.com/victoriadrake/link-snitch), to regularly check my site for broken links. It uses my [Hydra project](https://github.com/victoriadrake/hydra-link-checker), a standard-library-only Python program that crawls a site for broken links.
-
-### Code Quality
-
-I use the [pre-commit framework](https://pre-commit.com/) to run [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) to keep my content tidy.
-
-### Self-Documenting Makefile
-
-A [self-documenting Makefile](https://victoria.dev/posts/how-to-create-a-self-documenting-makefile/) helps me work efficiently without having to remember a bunch of command-line flags.
-
-## IndieWeb
-
-Learn how to [Make your own independent website](https://victoria.dev/posts/make-your-own-independent-website/).
-
-- **Webmentions**: [Webmentions](https://www.w3.org/TR/2017/REC-webmention-20170112/) are enabled.
-- **Microformats2**: I've implemented [microformats2](https://microformats.org/wiki/Main_Page) markup, making my site compatible with social readers and other IndieWeb sites!
+- **Link Checking**: I created [link-snitch](https://github.com/victoriadrake/link-snitch), a custom GitHub Action, to regular check for broken links across the site. It's powered by [Hydra](https://github.com/victoriadrake/hydra-link-checker), a multithreaded Python site-crawling link checker built with the standard library.
+- **Code Quality**: I use the [pre-commit framework](https://pre-commit.com/) with [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) to maintain content quality.
+- **Self-Documenting Makefile**: A [self-documenting Makefile](https://victoria.dev/posts/how-to-create-a-self-documenting-makefile/) helps streamline development workflows without having to remember command-line flags.
 
 ## Contributions
 
-If you find a mistake or bug, I'd love to know so I can fix it! Please open an issue.
+If you find a mistake or bug, please open an issue so it can be fixed!
 
-**Note**: I do not accept guest blog posts or requests for placing links in posts.
+**Note**: Guest blog posts or requests for placing links in posts are not accepted.
 
 ## License
 
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />
-This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
+
+---
+
+<sub>There may or may not be secret pages and easter eggs on the site.</sub>
