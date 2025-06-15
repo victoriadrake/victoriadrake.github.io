@@ -7,7 +7,7 @@ aliases:
 description: An overview of time-saving aliases, functions, and creating a useful Bash prompt.
 tags:
     - linux
-    - terminal
+    
     - git
 image: cover.png
  

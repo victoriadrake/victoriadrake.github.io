@@ -4,7 +4,7 @@ date: 2021-05-24
 categories: ["article"]
 tags: 
     - leadership
-    - leadership
+    - development
 description: How leaders can get to where the work happens and take part in business decisions on GitHub.
 draft: false
 ---

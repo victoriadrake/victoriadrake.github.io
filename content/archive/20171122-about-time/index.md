@@ -6,7 +6,7 @@ aliases:
     - /verbose/about-time
 description: Some thoughts and concrete suggestions on saving society through programming.
 tags:
-    - life
+    
 image: fuji-fog.jpeg
  
 draft: false
@@ -49,7 +49,7 @@ What if, as programmers, we actually did something about it?
 
 Consider that collectively - no, even individually - we who design and build the workings of modern technology have an *incredible* amount of power. The next indie app that goes viral on ProductHunt will consume hundreds of hours of time from its users. Where is all that untapped, pure potential going to? Some open-ended, inoffensive amusement? Another advertising platform thinly veiled as a game? Perhaps another drop of oil to smooth the machinery of The Great Engine of Commerce?
 
-I get it - programmers will build what they're paid to build. That's capitalism, that's feeding your family, survival - life. I'm not trying to suggest we all quit our jobs, go live in the woods, and volunteer as humanitarians. That would be nice, but it's impractical.
+I get it - programmers will build what they're paid to build. That's capitalism, that's feeding your family, survival--life. I'm not trying to suggest we all quit our jobs, go live in the woods, and volunteer as humanitarians. That would be nice, but it's impractical.
 
 But we all have side projects. Free time. What are you doing with yours?
 

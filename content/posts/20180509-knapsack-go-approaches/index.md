@@ -8,6 +8,7 @@ aliases:
 description: Using a greedy algorithm and dynamic programming to pack my full-time nomad travel bag.
 tags:
     - algorithms
+    - compsci
     - data
     - go
 image: cover_knapsack-doodle.png

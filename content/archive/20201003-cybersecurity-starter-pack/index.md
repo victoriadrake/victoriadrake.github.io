@@ -7,7 +7,7 @@ aliases:
     - /archive/personal-cybersecurity-posture-for-when-youre-just-this-guy-you-know/
 description: Basic security best practices to share with your non-technical friend.
 tags:
-    - cybersecurity
+    - security
 image: cover.png
  
 draft: false

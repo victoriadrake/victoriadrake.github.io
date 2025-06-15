@@ -7,11 +7,8 @@ aliases:
 description: How you can make your digital life more resilient when using services you don't own.
 tags:
     - privacy
-    - cybersecurity
+    - security
     - data
-    - life
-    - websites
- 
 draft: false
 categories: ["article"]
 ---

@@ -9,7 +9,7 @@ aliases:
 description: Stop giving your development team too many things to do first.
 tags:
     - leadership
-    - leadership
+    - development
 image: prioritize.png
  
 draft: false

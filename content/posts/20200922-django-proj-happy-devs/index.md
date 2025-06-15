@@ -8,11 +8,9 @@ aliases:
 description: Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.
 series:
 tags:
-    - django
-    - python
     - leadership
-    - coding
-    - docs
+    - development
+    - python
 image: cover.png
  
 draft: false

@@ -6,8 +6,8 @@ aliases:
 description: How taking advantage of parallelism in Python can make your software orders of magnitude faster.
 tags:
     - python
-    - computing
-    - ci/cd
+    - compsci
+    - development
     - data
     - open-source
 image: cover.png

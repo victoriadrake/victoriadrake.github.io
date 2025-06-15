@@ -5,9 +5,8 @@ date: 2019-12-31T08:27:31-04:00
 aliases:
 description: Thoughts on learning software development, technical blogging, and what the past ten years have taught me.
 tags:
-    - life
-    - docs
-    - coding
+    - career
+    - open-source
 image: cover.png
  
 draft: false

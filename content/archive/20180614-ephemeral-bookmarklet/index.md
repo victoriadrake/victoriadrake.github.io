@@ -8,7 +8,7 @@ aliases:
     - /verbose/adorable-bookmarklets-want-to-help-delete-your-social-media-data/
 description: Bookmarklets you can use in your browser to help clean up your social media data.
 tags:
-    - javascript
+    
 image: cover_bookmarklet-card.png
  
 draft: false

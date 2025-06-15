@@ -6,8 +6,7 @@ aliases:
 description: How to write tests for your Django applications that are painless and productive.
 series:
 tags:
-    - django
-    - coding
+    - development
     - leadership
     - python
 image: cover.png

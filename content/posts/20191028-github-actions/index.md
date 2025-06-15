@@ -6,9 +6,8 @@ aliases:
     - /archive/a-lightweight-tool-agnostic-ci/cd-flow-with-github-actions/
 description: How to take advantage of a simple GitHub Actions workflow without sacrificing agnostic tooling.
 tags:
-    - ci/cd
-    - terminal
-    - websites
+    - development
+    
 image: cover.png
  
 draft: false

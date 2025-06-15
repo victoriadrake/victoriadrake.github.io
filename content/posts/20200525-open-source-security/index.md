@@ -8,7 +8,7 @@ series:
     - security-for-developers
 tags:
     - open-source
-    - cybersecurity
+    - security
     - leadership
 image: cover.png
  

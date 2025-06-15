@@ -5,10 +5,7 @@ date: 2021-01-12T05:50:53-05:00
 aliases:
 description: What to know before applying for a software developer job.
 tags:
-    - life
-    - coding
-    - open-source
- 
+    - career
 draft: false
 categories: ["article"]
 ---

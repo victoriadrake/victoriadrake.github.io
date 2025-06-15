@@ -7,9 +7,7 @@ aliases:
     - /archive/how-to-create-a-self-documenting-makefile/
 description: Accelerate your workflow and DevOps with command-line aliases you can check in
 tags:
-    - coding
-    - ci/cd
-    - docs
+    - development
     - leadership
 image: cover.png
  

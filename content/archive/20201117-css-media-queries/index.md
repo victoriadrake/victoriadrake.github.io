@@ -6,8 +6,8 @@ aliases:
     - /blog/make-your-website-effortlessly-browse-able-with-clever-css/
 description: Building a responsive website with color themes? Start at the root.
 tags:
-    - websites
-    - coding
+    
+    
 image: title.png
  
 draft: false

@@ -8,7 +8,7 @@ aliases:
 description: How a fun but useless project turned into a Unicode substitution cipher algorithm.
 tags:
     - algorithms
-    - javascript
+    
 image: cover_unicode-secret.png
  
 draft: false

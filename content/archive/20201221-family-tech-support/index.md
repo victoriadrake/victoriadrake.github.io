@@ -6,8 +6,8 @@ aliases:
 description: Privacy and online security to-dos for the home-for-the-holidays tech support hero.
 tags:
     - privacy
-    - cybersecurity
-    - life
+    - security
+    
 draft: false
 categories: ["article"]
 ---

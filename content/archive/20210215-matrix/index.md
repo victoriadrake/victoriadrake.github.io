@@ -9,9 +9,9 @@ tags:
     - privacy
     - protocols
     - linux
-    - aws
+    - cloud
     - go
-    - terminal
+    
  
 draft: false
 categories: ["article"]

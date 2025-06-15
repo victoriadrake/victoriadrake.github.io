@@ -6,7 +6,7 @@ aliases:
     - /archive/how-to-write-good-documentation/
 description: The secret to never forgetting how your project works, in three steps.
 tags:
-    - docs
+    - development
     - leadership
 image: cover.png
  
@@ -33,7 +33,7 @@ As you work out ideas in code, ensure you don’t soon forget important details 
 
 Don't rely on inline comments that often fail to make sense once you've forgotten the context. Keep a document open alongside your code and write down things like commands, decisions, and sources you use. This can include:
 
-- Terminal commands you typed in
+ commands you typed in
 - Why you chose a particular method over another
 - Links you visited for help or *cough*copy-paste*cough* inspiration
 - The order in which you did things

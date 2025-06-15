@@ -7,11 +7,7 @@ aliases:
     - /archive/add-search-to-hugo-static-sites-with-lunr/
 description: Make your static site searchable with a client-side search index.
 tags:
-    - websites
-    - coding
-    - data
-    - javascript
- 
+    - open-source
 draft: false
 categories: ["article"]
 ---

@@ -9,7 +9,6 @@ tags:
     - data
     - leadership
     - python
-    - api
 image: plot.png
  
 draft: false

@@ -8,8 +8,7 @@ aliases:
 description: Learn how to easily create a clean and readable Git commit history with git squash, message templates, git stash, and tags.
 tags:
     - git
-    - coding
-    - terminal
+    - development
     - leadership
 image: cover_git-commit-art.png
  

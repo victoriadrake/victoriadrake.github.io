@@ -6,9 +6,9 @@ aliases:
     - /blog/healthy-habits-for-good-cybersecurity/
 description: Three helpful cybersecurity new year resolutions. Happy holidays!
 tags:
-    - cybersecurity
+    - security
     - privacy
-    - life
+    
 image: cover.png
  
 draft: false

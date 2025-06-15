@@ -5,7 +5,7 @@ date: 2020-02-16T19:23:20-05:00
 aliases:
 description: Why decentralized photo sharing won't save us from Instagram - but it might help.
 tags:
-    - life
+    
 image: ian-dooley-FgSyP02I0gw-unsplash.jpg
  
 draft: false

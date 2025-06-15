@@ -5,8 +5,8 @@ aliases:
     - /archive/word-bugs-in-software-documentation-and-how-to-fix-them/
 description: A collection of mistakes that make documentation less awesome than it could be.
 tags:
-    - docs
-    - open source
+    
+    - open-source
 image: cover.png
  
 draft: false

@@ -9,7 +9,7 @@ aliases:
     - /verbose/top-free-resources-for-developing-coding-superpowers/
 description: The go-to resources from my bookmarks folder for anyone who wants to learn to code.
 tags:
-    - coding
+    
 image: cover.png
  
 draft: true

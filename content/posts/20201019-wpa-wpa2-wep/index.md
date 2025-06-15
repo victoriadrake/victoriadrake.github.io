@@ -8,10 +8,8 @@ description: Which one should you be using? Why Wi-Fi security matters.
 series:
     - security-for-developers
 tags:
-    - computing
-    - algorithms
-    - protocols
-    - cybersecurity
+    - compsci
+    - security
 image: cover.png
 draft: false
 categories: ["article"]

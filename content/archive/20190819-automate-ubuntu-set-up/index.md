@@ -7,7 +7,7 @@ aliases:
 description: Configure settings, install programs, and customize your desktop environment with a single bash command.
 tags:
     - linux
-    - terminal
+    
     - hardware
  
 draft: false

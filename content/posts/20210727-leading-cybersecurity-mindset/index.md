@@ -7,10 +7,9 @@ description: Systems for considering software development from a security standp
 series:
     - security-for-developers
 tags:
-    - cybersecurity
-    - coding
+    - security
+    - leadership
     - open-source
-    - ci/cd
  
 draft: false
 featured: false

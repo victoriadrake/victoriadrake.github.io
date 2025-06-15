@@ -5,9 +5,7 @@ date: 2021-01-05T04:50:07-06:00
 aliases:
 description: The article I wish I had read when I started coding.
 tags:
-    - coding
-    - life
- 
+    - career
 draft: false
 categories: ["article"]
 ---

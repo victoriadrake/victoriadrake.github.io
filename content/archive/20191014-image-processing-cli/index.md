@@ -5,8 +5,8 @@ date: 2019-10-14T08:27:49-04:00
 aliases:
 description: A fast command line interface solution for batch image processing.
 tags:
-    - terminal
-    - ci/cd
+    
+    - development
 image: cover.png
  
 draft: false

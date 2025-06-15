@@ -5,8 +5,8 @@ aliases:
     - /archive/technical-ergonomics-for-the-efficient-developer/
 description: If you knew these tools existed, you'd probably be using them by now.
 tags:
-    - coding
-    - life
+    - development
+    
 image: cover.png
  
 draft: false

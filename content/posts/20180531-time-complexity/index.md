@@ -9,7 +9,7 @@ aliases:
 description: A groundwork understanding of algorithm time complexity and Big O notation in about fifteen minutes with Go code examples and silly food cartoons.
 tags:
     - algorithms
-    - computing
+    - compsci
     - go
 image: cover_wibbly.png
 showtoc: true

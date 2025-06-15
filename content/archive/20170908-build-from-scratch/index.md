@@ -8,8 +8,8 @@ aliases:
 description: A guide to expertly tackling seemingly complicated problems that you'd rather never tackle in the first place.
 tags:
     - algorithms
-    - coding
-    - javascript
+    
+    
 image: cover_solve-paella.jpg
  
 draft: false

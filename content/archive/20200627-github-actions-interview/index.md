@@ -5,12 +5,12 @@ date: 2020-06-27T09:06:33-04:00
 aliases:
 description: The GitHub blog interviews me for their GitHub Action Hero series.
 tags:
-    - ci/cd
+    - development
     - open-source
-    - cybersecurity
-    - life
-    - coding
-    - terminal
+    - security
+    
+    
+    
     - api
 image: cover.PNG
  

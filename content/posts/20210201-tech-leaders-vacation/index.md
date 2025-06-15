@@ -6,7 +6,6 @@ aliases:
 description: How to be a responsible leader even while you're away.
 tags:
     - leadership
-    - leadership
 image: cover.png
  
 draft: false

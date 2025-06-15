@@ -5,7 +5,7 @@ description: Keep your drafts out of the public eye by making use of continuous 
 aliases:
     - /verbose/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/
 tags:
-    - ci/cd
+    - development
     - git
 image: cover.png
 showtoc: true

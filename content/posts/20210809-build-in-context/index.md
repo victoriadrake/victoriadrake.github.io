@@ -7,7 +7,7 @@ description: The best laid plans are made better by staying close to context.
 series:
 tags:
     - leadership
-    - computing
+    - development
 image: cover.jpg
  
 draft: false

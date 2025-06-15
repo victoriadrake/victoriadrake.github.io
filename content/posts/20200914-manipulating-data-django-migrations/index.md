@@ -6,8 +6,7 @@ aliases:
 description: How to update Django models and manipulate existing data using migrations.
 series:
 tags:
-    - django
-    - coding
+    - development
     - data
     - python
 image: cover.png

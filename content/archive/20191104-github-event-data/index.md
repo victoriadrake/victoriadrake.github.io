@@ -6,10 +6,10 @@ aliases:
 description: A guide to overcoming the GitHub event data horizon with a little command-line magic.
 tags:
     - data
-    - ci/cd
+    - development
     - api
     - git
-    - websites
+    
 image: cover.png
  
 draft: false

@@ -12,7 +12,7 @@ aliases:
 description: The basics of writing iterations in Python using for loops, list comprehensions, and map.
 tags:
     - python
-    - coding
+    
  
 draft: false
 categories: ["article"]

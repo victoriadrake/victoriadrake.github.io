@@ -10,8 +10,8 @@ series:
     - security-for-developers
 series_weight: 4
 tags:
-    - cybersecurity
-    - coding
+    - security
+    
     - leadership
 image: cover.png
  

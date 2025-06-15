@@ -8,8 +8,8 @@ series:
     - security-for-developers
 series_weight: 1
 tags:
-    - cybersecurity
-    - coding
+    - security
+    - architecture
     - data
 image: cover.png
  

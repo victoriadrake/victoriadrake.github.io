@@ -7,7 +7,7 @@ aliases:
 description: An underappreciated candidate for light and fast database transactions.
 tags:
     - data
-    - computing
+    - compsci
 image: cover.png
  
 draft: false

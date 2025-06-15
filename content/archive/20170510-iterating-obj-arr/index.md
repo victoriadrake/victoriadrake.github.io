@@ -7,9 +7,9 @@ aliases:
     - /verbose/iterating-over-objects-and-arrays-frequent-errors
 description: A quick reference to why your code isn't working, or some errors I frequently make with iteration when the coffee wears off.
 tags:
-    - coding
-    - computing
-    - javascript
+    
+    - compsci
+    
 image: cover.png
 showtoc: true
 draft: false

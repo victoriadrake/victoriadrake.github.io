@@ -8,7 +8,7 @@ aliases:
     - /verbose/aws-lambda/
 description: How to save some time with automated link sharing on Twitter - for free!
 tags:
-    - aws
+    - cloud
     - go
 image: cover_lambda-doodle.png
 showtoc: true

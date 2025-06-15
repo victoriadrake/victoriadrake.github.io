@@ -5,12 +5,12 @@ date: 2020-02-25T12:50:29-05:00
 aliases:
 description: A talk on the benefits of non-blocking functions for programs, developers, and organizations.
 tags:
-    - computing
-    - ci/cd
-    - coding
-    - cybersecurity
+    - compsci
+    - development
+    - security
     - go
     - python
+    - leadership
 image: cover.png
  
 draft: false
@@ -110,7 +110,7 @@ Multiply a slow and inefficient feedback loop by many runs per day, over many da
 
 ### The cost of bottlenecks
 
-To add insult to injury, not only are you waiting on a bottlenecked process to run; you're also paying to wait. Take the serverless example - AWS Lambda, for instance. Here's a chart showing the cost of functions by compute time and CPU usage.
+To add insult to injury, not only are you waiting on a bottlenecked process to run; you're also paying to wait. Take the serverless example--AWS Lambda, for instance. Here's a chart showing the cost of functions by compute time and CPU usage.
 
 {{< figure src="lambda-chart.png" alt="Chart showing Total Lambda compute cost by function execution" caption="Source: [Understanding and Controlling AWS Lambda Costs](https://serverless.com/blog/understanding-and-controlling-aws-lambda-costs/)" >}}
 

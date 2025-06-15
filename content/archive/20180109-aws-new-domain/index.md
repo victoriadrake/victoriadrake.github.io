@@ -7,8 +7,8 @@ aliases:
     - /verbose/moving-to-a-new-domain-without-breaking-old-links-with-aws-disqus
 description: I moved my site's blog to its own domain without breaking old links or losing comments. Here's how.
 tags:
-    - aws
-    - websites
+    - cloud
+    
 image: cover_aws-moving.png
 showtoc: true
 draft: false

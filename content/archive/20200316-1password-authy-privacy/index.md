@@ -5,10 +5,10 @@ date: 2020-03-16T08:12:32-04:00
 aliases:
 description: Take some work off your plate while beefing up security with three changes you can make today.
 tags:
-    - cybersecurity
+    - security
     - privacy
     - data
-    - life
+    
 image: cover.png
  
 draft: false

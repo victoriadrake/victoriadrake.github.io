@@ -8,8 +8,8 @@ description: An overview of how proxy servers form the basis of online anonymity
 series:
     - security-for-developers
 tags:
-    - cybersecurity
-    - websites
+    - security
+    
 image: cover.png
  
 draft: false

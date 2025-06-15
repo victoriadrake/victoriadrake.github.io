@@ -6,10 +6,7 @@ aliases:
     - /archive/a-portable-makefile-for-continuous-delivery-with-hugo-and-github-pages/
 description: My Makefile for building this site, optimizing images, and running my CI/CD GitHub Actions flow.
 tags:
-    - ci/cd
-    - linux
-    - terminal
-    - websites
+    - development
 image: cover.png
  
 draft: false

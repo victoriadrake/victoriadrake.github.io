@@ -5,7 +5,7 @@ date: 2020-12-03T16:02:33-06:00
 aliases:
 description: Announcing the release of a new version of the OWASP WSTG.
 tags:
-    - cybersecurity
+    - security
     - open-source
 draft: false
 categories: ["article"]

@@ -7,8 +7,8 @@ aliases:
     - /verbose/making-sandwiches-with-closures-in-javascript
 description: An explanation of closures and how they can emulate private methods in JavaScript.
 tags:
-    - javascript
-    - coding
+    
+    
 image: cover_closures-sandwich.jpg
  
 draft: false

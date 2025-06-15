@@ -5,8 +5,8 @@ date: 2020-04-27T06:34:41-04:00
 aliases:
 description: A comparison of nuances of creating themes for the top two static site generators.
 tags:
-    - websites
-    - coding
+    
+    
     - go
     - open-source
 image: cover.png
