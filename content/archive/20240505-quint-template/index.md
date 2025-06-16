@@ -28,4 +28,4 @@ To set up your own site:
 
 Netlify will trigger a new build each time you push to your site repo, or, if you have a Collected Notes Premium subscription, you can set a [Netlify Build Hook](https://docs.netlify.com/configure-builds/build-hooks/) URL in your Collected Notes site settings to automatically redeploy the site when you make a post or update an existing post.
 
-I hope this template helps out busy people like you! I'm using this solution myself, of course, to write the [next chapter of my one-bag era](https://lightlylived.com/) -- with my phone in one hand and a coffee in the other.
+I hope you found this post helpful! If you have any suggestions or improvements to add, feel free to [contribute to the repository](https://github.com/victoriadrake/quint-demo).

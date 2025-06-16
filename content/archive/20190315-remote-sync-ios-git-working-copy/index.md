@@ -5,6 +5,7 @@ lastmod: 2020-12-02T11:55:28-04:00
 
 aliases:
     - /verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/
+    - /blog/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/
 description: How to set up a cross-platform solution for working with Git on iOS.
 tags:
     

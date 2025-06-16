@@ -6,6 +6,7 @@ slug: how-i-created-custom-desktop-notifications-using-terminal-and-cron
 aliases:
     - /verbose/create-desktop-notifications-cron
     - /verbose/how-i-created-custom-desktop-notifications-using-terminal-and-cron
+    - /blog/how-i-created-custom-desktop-notifications-using-terminal-and-cron/
 description: How you can use tools your Linux system already has to create custom desktop notifications.
 tags:
     

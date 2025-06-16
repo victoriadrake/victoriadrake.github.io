@@ -5,6 +5,7 @@ date: 2019-09-09T09:10:11-04:00
 aliases:
     - /verbose/hackers-can-find-your-plaintext-passwords-how-to-proactively-prevent-sensitive-data-exposure/
     - /verbose/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/
+    - /blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/
 description: Why sensitive data controls need to be established long before you think you need them, as demonstrated by Google dorking.
 series:
     - security-for-developers

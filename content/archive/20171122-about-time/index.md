@@ -4,6 +4,7 @@ date: 2017-11-22T14:05:14-05:00
 
 aliases:
     - /verbose/about-time
+    - /blog/about-time
 description: Some thoughts and concrete suggestions on saving society through programming.
 tags:
     

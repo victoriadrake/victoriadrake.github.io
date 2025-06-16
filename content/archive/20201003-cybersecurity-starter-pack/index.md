@@ -5,6 +5,7 @@ date: 2020-10-04T04:30:12-04:00
 aliases:
     - /blog/personal-cybersecurity-posture-for-when-youre-just-this-guy-you-know/
     - /archive/personal-cybersecurity-posture-for-when-youre-just-this-guy-you-know/
+    - /blog/your-cybersecurity-starter-pack/
 description: Basic security best practices to share with your non-technical friend.
 tags:
     - security

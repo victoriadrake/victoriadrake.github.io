@@ -6,6 +6,7 @@ aliases:
     - /verbose/how-to-clone-github-repositories-and-back-up-to-gitlab-with-bash-one-liners/
     - /verbose/bash-one-liners-to-clone-all-your-github-repositories-and-back-them-up-to-gitlab/
     - /verbose/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/
+    - /posts/how-to-write-bash-one-liners-for-cloning-and-managing-github-and-gitlab-repositories/
 description: Using xargs and awk in Bash to automate managing remote-hosted repositories.
 tags:
     

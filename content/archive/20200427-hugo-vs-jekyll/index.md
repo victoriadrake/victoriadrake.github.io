@@ -3,10 +3,9 @@ title: "Hugo vs Jekyll: an epic battle of static site generator themes"
 date: 2020-04-27T06:34:41-04:00
 
 aliases:
+    - /blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/
 description: A comparison of nuances of creating themes for the top two static site generators.
 tags:
-    
-    
     - go
     - open-source
 image: cover.png
@@ -92,7 +91,7 @@ You can scaffold a new Hugo theme by running `hugo new theme <name>`. It has the
 └── theme.toml
 ```
 
-You can see some similarities. Hugo's page template files are tucked into `layouts/`. Note that the `_default` page type has files for a `list.html` and a `single.html`. Unlike Jekyll, Hugo uses these specific file names to distinguish between [list pages](https://gohugo.io/templates/lists/) (like a page with links to all your blog posts on it) and [single pages](https://gohugo.io/templates/single-page-templates/) (like one of your blog posts). The `layouts/partials/` directory contains the buttery reusable bits, and stylesheet files have a spot picked out in `static/css/`.
+You can see some similarities. Hugo's page template files are tucked into `layouts/`. Note that the `_default` page type has files for a `list.html` and a `single.html`. Unlike Jekyll, Hugo uses these specific file names to distinguish between [list pages](https://gohugo.io/templates/lists/) (like a page with links to all your blog posts on it) and single pages (like one of your blog posts). The `layouts/partials/` directory contains the buttery reusable bits, and stylesheet files have a spot picked out in `static/css/`.
 
 These directory structures aren't set in stone, as both site generators allow some measure of customization. For example, Jekyll lets you define [collections](https://jekyllrb.com/docs/collections/), and Hugo makes use of [page bundles](https://gohugo.io/content-management/page-bundles/). These features let you organize your content multiple ways, but for now, lets look at where to put some simple pages.
 
@@ -232,7 +231,7 @@ Here's Hugo's scaffold theme `layouts/_default/baseof.html` (Go Templates):
 </html>
 ```
 
-Different syntax, same idea. Both templates pull in reusable bits for `head.html`, `header.html`, and `footer.html`. These show up on a lot of pages, so it makes sense not to have to repeat yourself. Both templates also have a spot for the main content, though the Jekyll template uses a variable (`{{ content }}`) while Hugo uses a block (`{{- block "main" . }}{{- end }}`). [Blocks](https://gohugo.io/templates/base/#readout) are just another way Hugo lets you define reusable bits.
+Different syntax, same idea. Both templates pull in reusable bits for `head.html`, `header.html`, and `footer.html`. These show up on a lot of pages, so it makes sense not to have to repeat yourself. Both templates also have a spot for the main content, though the Jekyll template uses a variable (`{{ content }}`) while Hugo uses a block (`{{- block "main" . }}{{- end }}`). Blocks are just another way Hugo lets you define reusable bits.
 
 Now that you know how templating works, you can build the sidebar menu for the theme.
 

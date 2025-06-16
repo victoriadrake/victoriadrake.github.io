@@ -3,6 +3,7 @@ title: Writing efficient Django
 date: 2020-07-09T04:02:47-05:00
 aliases:
     - /archive/writing-efficient-django/
+    - /posts/writing-efficient-django/
 description: How to use Django's views, models, and queries to build a better application.
 series:
 tags:

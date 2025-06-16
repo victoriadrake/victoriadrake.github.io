@@ -4,12 +4,9 @@ date: 2019-08-19T07:58:18-04:00
 
 aliases:
     - /verbose/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/
+    - /blog/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/
 description: Configure settings, install programs, and customize your desktop environment with a single bash command.
 tags:
-    
-    
-    
- 
 draft: false
 categories: ["article"]
 ---

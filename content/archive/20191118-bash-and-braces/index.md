@@ -3,6 +3,7 @@ title: "Bash and shell expansions: lazy list-making"
 date: 2019-11-18T07:07:24-05:00
 aliases:
     - /archive/bash-and-shell-expansions-lazy-list-making/
+    - /posts/bash-and-shell-expansions-lazy-list-making/
 description: A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.
 tags:
     

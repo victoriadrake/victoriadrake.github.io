@@ -83,4 +83,4 @@ No Jedi succeeds without a little help from friends. Whether you're a beginner i
 - [NIST Special Publication 800-30: Guide for conducting risk assessments](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-30r1.pdf)
 - [NSA’S Cybersecurity Advisories & Technical Guidance](https://www.nsa.gov/Press-Room/Cybersecurity-Advisories-Guidance/)
 
-I hope you find these thought systems helpful! If you find your interest piqued as well, you can read more of what [I've written about cybersecurity here](/tags/cybersecurity).
+I hope you find these thought systems helpful! If you find your interest piqued as well, you can read more of what [I've written about cybersecurity here](/tags/security).

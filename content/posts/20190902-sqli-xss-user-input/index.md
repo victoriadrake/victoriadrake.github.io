@@ -4,6 +4,7 @@ date: 2019-09-02T09:01:23-04:00
 
 aliases:
     - /verbose/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/
+    - /blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/
 description: "A primer on SQL injection and cross site scripting, and how to handle user input in software development."
 series:
     - security-for-developers
@@ -30,7 +31,6 @@ When it comes to learning how to find security vulnerabilities, it should come a
 * The [Open Web Application Security Project](https://owasp.org/) guides
 * The Hacker101 playlist from [HackerOne's YouTube channel](https://www.youtube.com/channel/UCsgzmECky2Q9lQMWzDwMhYw/)
 * [Web Hacking 101](https://leanpub.com/web-hacking-101) by Peter Yaworski
-* [Brute Logic's blog](https://brutelogic.com.br/blog/)
 * The [Computerphile](https://www.youtube.com/channel/UC9-y-6csu5WGm29I7JiwpnA) YouTube channel
 * Videos featuring Jason Haddix ([@jhaddix](https://github.com/jhaddix/)) and Tom Hudson ([@tomnomnom](https://github.com/tomnomnom/)) (two accomplished ethical hackers with different, but both effective, methodologies)
 
@@ -106,7 +106,7 @@ Fun, right? Our insecure (in the safety sense, not the emotional one) page takes
 
 ![A screenshot of the XSS page example](pwned.png#screenshot)
 
-This is just one example, largely based on one from [Brute's post](https://brutelogic.com.br/blog/dom-based-xss-the-3-sinks/), that demonstrates how an XSS attack could be executed. Funny pop-up alerts may be amusing, but JavaScript can do a lot of harm, including helping malicious attackers steal passwords and personal information.
+This is just one example that demonstrates how an XSS attack could be executed. Funny pop-up alerts may be amusing, but JavaScript can do a lot of harm, including helping malicious attackers steal passwords and personal information.
 
 ### Stored and reflected XSS
 

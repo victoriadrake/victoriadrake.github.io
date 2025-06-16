@@ -21,7 +21,7 @@ wasfeatured:
 
 Full transparency: I occasionally waste time messing around on Twitter. *(Gasp! Shock!)* One of the ways I waste time messing around on Twitter is by writing my name in my profile with different Unicode character "fonts," 𝖑𝖎𝖐𝖊 𝖙𝖍𝖎𝖘 𝖔𝖓𝖊. I previously did this by searching for different Unicode characters on Google, then one-by-one copying and pasting them into the "Name" field on my Twitter profile. Since this method of wasting time was a bit of a time waster, I decided (in true programmer fashion) to write a tool that would help me save some time while wasting it.
 
-I originally dubbed the tool "uni-pretty," (based on LEGO's Unikitty from a movie -- a pun that absolutely no one got) but have since renamed it [fancy unicode](https://fancyunicode.com). It builds from [this GitHub repo](https://github.com/victoriadrake/fancy-unicode). It lets you type any characters into a field and then converts them into Unicode characters that also represent letters, giving you fancy "fonts" that override a website's CSS, like in your Twitter profile. (Sorry, Internet.)
+I originally dubbed the tool "uni-pretty," (based on LEGO's Unikitty from a movie -- a pun that absolutely no one got) but have since renamed it [fancy unicode](http://victoria.dev/fancy-unicode/). It builds from [this GitHub repo](https://github.com/victoriadrake/fancy-unicode). It lets you type any characters into a field and then converts them into Unicode characters that also represent letters, giving you fancy "fonts" that override a website's CSS, like in your Twitter profile. (Sorry, Internet.)
 
 ![fancy-unicode screenshot](screenshot.png#screenshot)
 

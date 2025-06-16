@@ -3,9 +3,9 @@ title: How to quickly batch resize, compress, and convert images with a Bash one
 date: 2019-10-14T08:27:49-04:00
 
 aliases:
+    - /blog/how-to-quickly-batch-resize-compress-and-convert-images-with-a-bash-one-liner/
 description: A fast command line interface solution for batch image processing.
 tags:
-    
     - development
 image: cover.png
  

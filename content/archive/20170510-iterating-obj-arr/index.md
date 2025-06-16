@@ -5,6 +5,7 @@ date: 2017-05-16T10:46:46+07:00
 aliases:
     - /verbose/iterating-objects-arrays
     - /verbose/iterating-over-objects-and-arrays-frequent-errors
+    - /blog/iterating-over-objects-and-arrays-frequent-errors/
 description: A quick reference to why your code isn't working, or some errors I frequently make with iteration when the coffee wears off.
 tags:
     

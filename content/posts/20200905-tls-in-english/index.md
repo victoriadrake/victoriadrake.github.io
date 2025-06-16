@@ -4,6 +4,8 @@ date: 2020-09-05T04:48:39-06:00
 
 aliases:
     - /archive/tls
+    - /blog/tls
+    - /blog/what-is-tls-transport-layer-security-encryption-explained-in-plain-english/
 description: How TLS, digital certificates, and sessions help keep communications secure.
 series:
     - security-for-developers

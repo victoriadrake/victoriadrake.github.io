@@ -5,6 +5,7 @@ date: 2017-05-18T11:40:06+07:00
 aliases:
     - /verbose/reduce-recursion-with-pie
     - /verbose/understanding-array-prototype-reduce-and-recursion-using-apple-pie
+    - /blog/understanding-array.prototype.reduce-and-recursion-using-apple-pie/
 description: An explanation of JavaScript reduce() method and recursive functions using delicious, attention-retaining apples.
 tags:
     

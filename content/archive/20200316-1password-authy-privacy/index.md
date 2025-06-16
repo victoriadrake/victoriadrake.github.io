@@ -3,6 +3,7 @@ title: Outsourcing security with 1Password, Authy, and Privacy.com
 date: 2020-03-16T08:12:32-04:00
 
 aliases:
+    - /blog/outsourcing-security-with-1password-authy-and-privacy.com/
 description: Take some work off your plate while beefing up security with three changes you can make today.
 tags:
     - security
@@ -49,7 +50,7 @@ Okay - so it's more like one-and-a-half baskets. 🤷🏻
 
 ![Authy's logo](Authy2019Logo.png)
 
-[Authy](https://authy.com/), from the folks over at [Twilio](https://www.twilio.com), provides a 2FA solution that's more secure than SMS. [Unlike Google Authenticator](https://authy.com/blog/authy-vs-google-authenticator/), you can choose to back up your 2FA codes in case you lose or change your phone. (1Password offers 2FA functionality as well - but, you know, redundancies.)
+[Authy](https://authy.com/), from the folks over at [Twilio](https://www.twilio.com), provides a 2FA solution that's more secure than SMS. [Unlike Google Authenticator](https://www.twilio.com/en-us/blog/products/authy-vs-google-authenticator), you can choose to back up your 2FA codes in case you lose or change your phone. (1Password offers 2FA functionality as well - but, you know, redundancies.)
 
 With Authy, your back up is encrypted with your password, similarly to how 1Password works. This makes it the second password you can't forget, if you don't want to lose access to your codes. If you reset your account, they all go away. I can deal with remembering two passwords; I'll take that trade.
 
@@ -67,7 +68,7 @@ As a bonus, a [partnership between 1Password and Privacy.com](https://blog.priva
 
 By setting up a separate virtual card for each merchant, in the event that one of those merchants is compromised, you can simply pause or delete that card. None of your other accounts or actual bank details are caught up in the process. Cards can have time-based limits or be one-off burner numbers, making them ideal for setting up subscriptions.
 
-This is the sort of basic functionality that I hope, one day, becomes more prevalent from banks and credit cards. In the meantime, I'll keep using [Privacy.com](https://privacy.com/join/Q6V3V). That's my referral link; if you'd like to thank me by using it, we'll both get five bucks as a bonus.
+This is the sort of basic functionality that I hope, one day, becomes more prevalent from banks and credit cards. In the meantime, I'll keep using [Privacy.com](https://app.privacy.com/join/Q6V3V). That's my referral link; if you'd like to thank me by using it, we'll both get five bucks as a bonus.
 
 ## Outsource better security
 
@@ -75,7 +76,7 @@ All together, implementing these changes will probably take up an afternoon, dep
 
 - [1Password](https://1password.com/)
 - [Authy](https://authy.com/)
-- [Privacy.com](https://privacy.com/join/Q6V3V)
+- [Privacy.com](https://app.privacy.com/join/Q6V3V)
 
 We have the technology. Free up some brain cycles to focus on other things - or simply remove some unnecessary stress from your life by outsourcing the fiddly bits.
 

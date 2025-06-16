@@ -15,7 +15,7 @@ tags:
 draft: false
 ---
 
-I've written a fair bit in the past about the [whys of online privacy](/tags/privacy), and [a lot about staying safe online](/tags/cybersecurity). Chances are, if a search brought you here, you're well-past why. Let's go straight on to how.
+I've written a fair bit in the past about the [whys of online privacy](/tags/privacy), and [a lot about staying safe online](/tags/security). Chances are, if a search brought you here, you're well-past why. Let's go straight on to how.
 
 This guide will walk you through setting up [Pi-hole](https://pi-hole.net/) on an [AWS Lightsail](https://aws.amazon.com/lightsail/) instance that acts as your VPN thanks to [OpenVPN](https://openvpn.net/). It's a more succinct version of the [official Pi-hole docs for OpenVPN](https://docs.pi-hole.net/guides/vpn/openvpn/overview/), made specifically for Lightsail with a few tips and tricks added in, because you deserve it.
 

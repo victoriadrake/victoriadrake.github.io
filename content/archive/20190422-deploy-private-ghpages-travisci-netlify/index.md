@@ -4,6 +4,7 @@ date: 2019-04-22T10:05:15-04:00
 description: Keep your drafts out of the public eye by making use of continuous deployment tools to publish your public GitHub Pages site - from a separate private repository.
 aliases:
     - /verbose/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/
+    - /blog/two-ways-to-deploy-a-public-github-pages-site-from-a-private-hugo-repository/
 tags:
     - development
     - git

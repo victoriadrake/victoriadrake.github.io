@@ -6,6 +6,7 @@ aliases:
     - /verbose/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/
     - /verbose/free-custom-domain-website-https
     - /verbose/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/
+    - /blog/how-i-ditched-wordpress-and-set-up-my-custom-domain-https-site-for-almost-free/
 description: A guide (for the minimally tech-savvy) to setting up a website with HTTPS using Hugo, Cloudflare and GitHub Pages.
 tags:
     

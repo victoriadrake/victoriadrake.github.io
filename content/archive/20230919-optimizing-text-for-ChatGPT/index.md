@@ -5,6 +5,7 @@ description: Mastering text preprocessing to send more input to ChatGPT.
 categories: ["article"] 
 aliases:
     - /archive/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/
+    - /posts/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/
 tags:
     
     

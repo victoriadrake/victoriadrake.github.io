@@ -5,6 +5,7 @@ date: 2018-07-23T09:38:09-04:00
 aliases:
     - /verbose/interactive-pre-commit-hook-checklist
     - /verbose/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/
+    - /blog/an-automatic-interactive-pre-commit-checklist-in-the-style-of-infomercials/
 description: How to set up an interactive checklist using a Git pre-commit hook script.
 tags:
     - git

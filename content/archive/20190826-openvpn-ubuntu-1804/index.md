@@ -5,6 +5,7 @@ updated: true
 
 aliases:
     - /verbose/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/
+    - /blog/how-to-set-up-openvpn-on-aws-ec2-and-fix-dns-leaks-on-ubuntu-18.04-lts/
 description: A guide for setting up your own private VPN service, and understanding and fixing a DNS leak.
 tags:
     - cloud

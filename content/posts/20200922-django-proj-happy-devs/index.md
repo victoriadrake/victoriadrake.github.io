@@ -6,6 +6,7 @@ aliases:
     - /blog/my-django-project-best-practices-for-happy-developers/
     - /blog/django-project-best-practices-to-keep-your-developers-happy/
     - /archive/django-project-best-practices-to-keep-your-developers-happy/
+    - /posts/django-project-best-practices-to-keep-your-developers-happy/
 description: Want happier Django developers? Grab my personal blueprint for a genuinely enjoyable development workflow from set up to CI/CD.
 series:
 tags:

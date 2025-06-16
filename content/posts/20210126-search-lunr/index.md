@@ -54,7 +54,7 @@ For your search to be useful, you'll need a way to trigger one. You can create a
 
 Here's how to create a Hugo template file for a search page and get it to render.
 
-Create `layouts/search/list.html` with the following minimum markup, assuming you're [inheriting from a base template](https://gohugo.io/templates/base):
+Create `layouts/search/list.html` with the following minimum markup, assuming you're inheriting from a base template:
 
 ```html
 {{ define "main" }}

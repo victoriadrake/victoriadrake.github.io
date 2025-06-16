@@ -3,6 +3,7 @@ title: Go automate your GitHub profile README
 date: 2020-07-25T10:51:15-04:00
 aliases:
     - /archive/go-automate-your-github-profile-readme/
+    - /posts/go-automate-your-github-profile-readme/
 description: Create a dynamic Markdown file with Go and GitHub Actions
 tags:
     - development

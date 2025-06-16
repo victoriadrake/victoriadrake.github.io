@@ -3,6 +3,7 @@ title: Publishing GitHub event data with GitHub Actions and Pages
 date: 2019-11-04T09:13:23-04:00
 
 aliases:
+    - /blog/publishing-github-event-data-with-github-actions-and-pages/
 description: A guide to overcoming the GitHub event data horizon with a little command-line magic.
 tags:
     - data

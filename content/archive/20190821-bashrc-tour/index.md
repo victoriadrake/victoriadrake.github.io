@@ -4,6 +4,7 @@ date: 2019-08-21T09:17:02-04:00
 
 aliases:
     - /verbose/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/
+    - /blog/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/
 description: An overview of time-saving aliases, functions, and creating a useful Bash prompt.
 tags:
     

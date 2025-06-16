@@ -5,10 +5,9 @@ date: 2017-11-20T13:59:30-05:00
 aliases:
     - /verbose/renaming-images
     - /verbose/batch-renaming-images-including-image-resolution-with-awk
+    - /blog/batch-renaming-images-including-image-resolution-with-awk/
 description: How to batch rename images with custom values using file, awk, and rename - in rainbow colors!
 tags:
-    
-    
     - development
 image: renaming-rainbow.png
  

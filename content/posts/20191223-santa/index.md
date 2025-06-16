@@ -3,6 +3,7 @@ title: Concurrency, parallelism, and the many threads of Santa Claus 🎅
 date: 2019-12-23T19:29:01-05:00
 
 aliases:
+    - /blog/concurrency-parallelism-and-the-many-threads-of-santa-claus/
 description: A seasonal exploration of the difference between concurrent, parallel, and multithreaded processes.
 tags:
     - compsci

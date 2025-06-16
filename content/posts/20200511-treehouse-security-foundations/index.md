@@ -3,6 +3,7 @@ title: If you want to build a treehouse, start at the bottom
 date: 2020-05-11T05:46:47-04:00
 
 aliases:
+    - /blog/if-you-want-to-build-a-treehouse-start-at-the-bottom/
 description: How threat modeling and pushing left help create a stable foundation for secure software.
 series:
     - security-for-developers

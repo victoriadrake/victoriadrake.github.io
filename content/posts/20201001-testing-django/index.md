@@ -21,7 +21,7 @@ The Django framework in particular offers your team the opportunity to create an
 
 With comprehensive tests, developers have higher confidence when pushing changes. I've seen firsthand in my own teams that good tests can boost development velocity as a direct result of a better developer experience.
 
-In this article, I'll share my own experiences in building useful tests for Django applications, from the basics to the best possible execution. If you're using Django or building with it in your organization, you might like to read the rest of my [Django series](/tags/django/).
+In this article, I'll share my own experiences in building useful tests for Django applications, from the basics to the best possible execution.
 
 ## What to test
 
