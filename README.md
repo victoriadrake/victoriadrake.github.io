@@ -17,7 +17,7 @@ The site is automatically deployed with each update using GitHub Pages and GitHu
 
 ### Development Tools
 
-- **Link Checking**: I created [link-snitch](https://github.com/victoriadrake/link-snitch), a custom GitHub Action, to regular check for broken links across the site. It's powered by [Hydra](https://github.com/victoriadrake/hydra-link-checker), a multithreaded Python site-crawling link checker built with the standard library.
+- **Link Checking**: I created [link-snitch](https://github.com/victoriadrake/link-snitch), a custom GitHub Action, to regularly check for broken links across the site. It's powered by [Hydra](https://github.com/victoriadrake/hydra-link-checker), a multithreaded Python site-crawling link checker built with the standard library.
 - **Code Quality**: I use the [pre-commit framework](https://pre-commit.com/) with [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) to maintain content quality.
 - **Self-Documenting Makefile**: A [self-documenting Makefile](https://victoria.dev/posts/how-to-create-a-self-documenting-makefile/) helps streamline development workflows without having to remember command-line flags.
 
