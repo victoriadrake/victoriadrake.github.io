@@ -1,17 +1,17 @@
 ---
-title: Make your team more productive by literally doing one thing
+title: "Do One Thing: Mastering Prioritization for High-Performing Teams"
 date: 2020-12-07T15:01:25-06:00
 
 aliases:
     - /archive/priority/
     - /posts/priority/
     - /archive/how-a-single-priority-makes-your-tech-team-more-productive/
-description: Stop giving your development team too many things to do first.
+description: Want to boost your team's output and morale? A hands-on approach to prioritization and transparent task management that transforms how your engineering team works.
 tags:
     - leadership
     - development
 image: prioritize.png
- 
+featured: true
 draft: false
 categories: ["article"]
 ---

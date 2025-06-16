@@ -7,7 +7,7 @@ description: A guide to overcoming the GitHub event data horizon with a little c
 tags:
     - data
     - development
-    - api
+    
     - git
     
 image: cover.png

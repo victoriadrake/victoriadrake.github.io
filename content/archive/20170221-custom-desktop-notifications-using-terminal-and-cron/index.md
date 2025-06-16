@@ -9,7 +9,7 @@ aliases:
 description: How you can use tools your Linux system already has to create custom desktop notifications.
 tags:
     
-    - linux
+    
 image: dunstnotif.png
  
 draft: false

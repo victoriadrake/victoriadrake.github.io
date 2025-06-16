@@ -6,7 +6,7 @@ aliases:
 description: A handy toolbox for the terminal to help open source maintainers make their projects sparkle.
 tags:
     
-    - linux
+    
     - open-source
 image: cover.png
  

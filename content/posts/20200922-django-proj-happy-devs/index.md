@@ -1,18 +1,19 @@
 ---
-title: Django project best practices to keep your developers happy
+title: "Delightful Django Development: Setup, Hooks, and CI/CD"
 date: 2020-09-22T04:55:19-04:00
 
 aliases:
     - /blog/my-django-project-best-practices-for-happy-developers/
+    - /blog/django-project-best-practices-to-keep-your-developers-happy/
     - /archive/django-project-best-practices-to-keep-your-developers-happy/
-description: Using Makefiles, pre-commit, and GitHub Actions to help create a happy development team.
+description: Want happier Django developers? Grab my personal blueprint for a genuinely enjoyable development workflow from set up to CI/CD.
 series:
 tags:
-    - leadership
     - development
+    - leadership
     - python
 image: cover.png
- 
+featured: true
 draft: false
 categories: ["article"]
 ---

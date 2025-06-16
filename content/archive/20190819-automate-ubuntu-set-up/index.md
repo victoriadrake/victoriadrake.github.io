@@ -6,9 +6,9 @@ aliases:
     - /verbose/how-to-set-up-a-fresh-ubuntu-desktop-using-only-dotfiles-and-bash-scripts/
 description: Configure settings, install programs, and customize your desktop environment with a single bash command.
 tags:
-    - linux
     
-    - hardware
+    
+    
  
 draft: false
 categories: ["article"]

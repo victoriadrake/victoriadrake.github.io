@@ -8,9 +8,9 @@ description: Meet the new, better Apple. Here's how to choose your phone and set
 series:
 tags:
     - privacy
-    - linux
+    
     - open-source
-    - hardware
+    
 image: cover.jpg
  
 draft: false

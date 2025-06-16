@@ -2,6 +2,7 @@
 title: "I Spent $78 Learning Why Bash Still Matters in the AI Age"
 date: 2025-06-15T14:09:42Z
 categories:
+description: When AI tools cost 100x more than command line solutions.
 tags:
     - algorithms
     - ai

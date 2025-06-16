@@ -76,4 +76,6 @@ Like a still-rising sponge cake, descriptions of layers, better protocols, and n
 
 ![Cartoon of the full Internet layer cake, topped with Nyan Cat memes](cake.png)
 
-If you enjoyed learning from this post, there's a lot more where this came from! I write about computing, cybersecurity, and building great technical teams. [Subscribe](/) to see new articles first.
+If you enjoyed learning from this post, there's a lot more where this came from! I write about computing, cybersecurity, and building great technical teams. You can subscribe below to see new posts first.
+
+{{< subscribe >}}

@@ -7,7 +7,7 @@ aliases:
     - /verbose/a-remote-sync-solution-for-ios-and-linux-git-and-working-copy/
 description: How to set up a cross-platform solution for working with Git on iOS.
 tags:
-    - linux
+    
     - git
  
 draft: false
@@ -119,4 +119,6 @@ For a Git-based developer and work-anywhere-aholic like me, this set up couldn't
 
 I most recently used this set up to get some writing done while hanging out in the atrium of Washington DC's National Portrait Gallery, which is pleasantly photogenic.
 
-Happy working! If you enjoyed this post, there's a lot more where this came from! I write about computing, cybersecurity, and leading great technical teams. [You can subscribe](/) to see new articles first.
+Happy working! If you enjoyed this post, there's a lot more where this came from! I write about computing, cybersecurity, and leading great technical teams. You can subscribe below to see new posts first.
+
+{{< subscribe >}}

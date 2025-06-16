@@ -1,16 +1,14 @@
 ---
-title: Git branching for small teams
+title: "Mastering Git for Small Teams"
 date: 2022-02-28T06:37:48-06:00
 
 aliases:
-description: A Git version control branch management strategy for small teams.
-series:
-    - heres-a-doc-for-that
+description: Unlock a more productive Git workflow for your small team with an approach to branch management designed to reduce headaches and accelerate your path to deployment.
 tags:
     - leadership
     - git
 image: cover.png
- 
+featured: true
 draft: false
 ---
 
@@ -65,4 +63,6 @@ Some common pitfalls I've seen that can undermine this flow are:
 2. **Letting the issue branch live *just a little longer*.** This results in scope creep and huge, confusing PRs that take a lot of time and mental effort to review. Keep branches tightly scoped to the one issue they're meant to close.
 3. **Not deleting merged branches.** There's no reason to leave them about -- all the work is in `master`. Not removing branches that are stale or have already been merged can cause confusion and make it more difficult than necessary to differentiate new ones.
 
-If this sounds like a process you'd use, or if you have anything to add, [let me know via Webmention!](https://webmention.io/victoria.dev/webmention)
+Implementing a streamlined Git branching strategy is a game-changer for small teams. By adopting these practices, you'll not only reduce common development headaches but also foster a more efficient and collaborative environment. This approach, refined through my experience leading engineering teams, empowers developers to focus on building great software, not battling version control.
+
+If you enjoyed this post, there's a lot more where that came from! I write about developer ergonomics for high-performing teams and building beautiful, maintainable software in the age of AI. You can subscribe to see new articles first.

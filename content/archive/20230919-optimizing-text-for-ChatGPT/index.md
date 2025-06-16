@@ -6,9 +6,9 @@ categories: ["article"]
 aliases:
     - /archive/optimizing-text-for-chatgpt-nlp-and-text-pre-processing-techniques/
 tags:
-    - nlp
-    - chatgpt
-    - api
+    
+    
+    
     - algorithms
     
     - compsci

@@ -15,7 +15,6 @@ image: cover.png
  
 draft: false
 categories: ["article"]
-featured: true
 ---
 
 Software developers today are encouraged to focus on building, and that's a great thing. There's the benefit of maker culture, an attitude of "always be shipping," open source collaboration, and a bevy of apps that help you prioritize and execute with maximum efficiency. It's in an environment of constant creation, where both teams and solo entrepreneurs can be maximally productive.

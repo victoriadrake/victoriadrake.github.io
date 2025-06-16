@@ -1,10 +1,10 @@
 ---
-title: Do I raise or return errors in Python?
+title: Do I Raise or Return Errors in Python?
 date: 2021-02-09T05:34:48-05:00
 
 aliases:
     - /blog/do-i-raise-or-return-errors-in-python/
-description: An engineer's guide to building robust, debuggable Python applications that fail fast and fail loud.
+description: A principal engineer's guide to building robust, debuggable Python applications that fail fast and fail loud.
 tags:
     - leadership
     - compsci
@@ -228,7 +228,7 @@ For public APIs or shared libraries, explicitly document the errors that can be 
 
 Thorough testing includes validating error handling. Unit tests should verify that functions raise the correct exceptions or return the expected error values under various failure conditions. Integration tests should confirm that errors propagate correctly through system layers.
 
-## The most important part
+## The Most Important Part
 
 Silent failures create some of the most frustrating bugs to find and fix, especially at scale. As a senior engineer or leader, your responsibility extends beyond just writing functional code to designing systems that are resilient, observable, and easy to debug. By intentionally choosing between `raise` and `return`, defining custom exceptions, and implementing comprehensive logging, monitoring, and consistent architectural patterns, you **ensure that errors are handled explicitly and effectively in your Python code.**
 

@@ -6,7 +6,7 @@ aliases:
     - /verbose/how-to-do-twice-as-much-with-half-the-keystrokes-using-.bashrc/
 description: An overview of time-saving aliases, functions, and creating a useful Bash prompt.
 tags:
-    - linux
+    
     
     - git
 image: cover.png

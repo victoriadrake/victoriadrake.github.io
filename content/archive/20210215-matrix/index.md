@@ -7,8 +7,8 @@ aliases:
 description: A speed-run introduction to Matrix via Dendrite.
 tags:
     - privacy
-    - protocols
-    - linux
+    
+    
     - cloud
     - go
     

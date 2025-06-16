@@ -1,14 +1,14 @@
 ---
 date: 2024-08-27T13:55:47.820Z
-title: "Top 5 Tips for Effective Software Leadership"
+title: "The Director's Playbook: Top 5 Tips for Cultivating High-Performing Software Teams"
 datePublished: Sat Aug 24 2024 19:16:52 GMT+0000 (Coordinated Universal Time)
 cuid: cm08iuv6g000508jxex8jar9o
 slug: top-5-tips-for-effective-software-leadership
-description: "The more you advance towards leadership in your tech career, the less technical your focus becomes. Here are five essential tips for effective software leadership."
+description: Battle-tested tips from a Director of Engineering to empower your team, foster growth, and build a truly effective software organization.
 image: https://cdn.hashnode.com/res/hashnode/image/stock/unsplash/eUMEWE-7Ewg/upload/0a8e7d45d7aec8284c1c62428e160ca0.jpeg
 tags:
     - leadership
-
+featured: true
 ---
 
 The more you advance towards leadership in your tech career, the less technical your focus becomes.

@@ -6,7 +6,7 @@ aliases:
 description: How to interactively search-and-replace across many files with just two commands, thanks to Vim.
 tags:
     
-    - linux
+    
 image: cover.png
  
 draft: false

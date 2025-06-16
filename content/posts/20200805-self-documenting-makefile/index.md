@@ -13,7 +13,6 @@ image: cover.png
  
 draft: false
 categories: ["article"]
-featured: true
 ---
 
 My new favorite way to completely underuse a Makefile? Creating personalized, per-project repository workflow command aliases that you can check in.

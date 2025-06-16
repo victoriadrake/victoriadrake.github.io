@@ -6,9 +6,9 @@ categories: ["article"]
 aliases:
     - /blog/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/
 tags:
-    - chatgpt
-    - nlp
-    - api
+    
+    
+    
     - algorithms
     
     - compsci

@@ -9,7 +9,7 @@ description: A guide for setting up your own private VPN service, and understand
 tags:
     - cloud
     - security
-    - linux
+    
 image: cover.png
 showtoc: true
 draft: false
@@ -328,4 +328,6 @@ Finally, visit [the DNS leak test website](https://www.dnsleaktest.com/) and cli
 
 And we're done! Congratulations on rolling your very own VPN server and stopping DNS leaks with OpenVPN. Enjoy surfing in (relative) privacy. Now your only worry at the local coffeeshop is who's watching you surf from the seat behind you.
 
-If you enjoyed this post, there's a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. [Subscribe on victoria.dev](https://victoria.dev) to see new articles first.
+If you enjoyed this post, there's a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. You can subscribe below to see new posts first.
+
+{{< subscribe >}}

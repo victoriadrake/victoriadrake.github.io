@@ -91,4 +91,6 @@ _Why do I need HTTPS anyway?_ For one, it'll [give your site a little boost on G
 
 That's pretty much it! If you don't see changes right away, give all your services a lunch hour or so to propogate. Soon your site will be up and running at `https://yourname.com`.
 
-Thanks for reading! If you found this post helpful, there's a lot more where this came from. You can [subscribe to victoria.dev](/) to see new posts first!
+Thanks for reading! If you found this post helpful, there's a lot more where this came from. You can subscribe below to see new posts first.
+
+{{< subscribe >}}

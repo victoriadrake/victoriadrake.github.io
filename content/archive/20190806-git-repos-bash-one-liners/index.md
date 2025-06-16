@@ -9,7 +9,7 @@ aliases:
 description: Using xargs and awk in Bash to automate managing remote-hosted repositories.
 tags:
     
-    - linux
+    
     - git
     - data
  

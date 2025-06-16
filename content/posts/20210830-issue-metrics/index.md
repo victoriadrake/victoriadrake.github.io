@@ -1,16 +1,16 @@
 ---
-title: Measuring productivity with GitHub issues
+title: "Beyond Gut Feelings: How I Use Issue Metrics to Boost Engineering Velocity"
 date: 2021-08-30T05:35:02Z
 
 aliases:
-description: "Can a little Pandas help improve your development velocity?"
+description: Stop guessing and start optimizing. A practical method for using data science to analyze GitHub issues, helping you identify key metrics and drive significant improvements in your team's output.
 series:
 tags:
-    - data
     - leadership
+    - data
     - python
 image: plot.png
- 
+featured: true
 draft: false
 ---
 

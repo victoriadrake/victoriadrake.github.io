@@ -11,7 +11,6 @@ tags:
     - development
     - leadership
 image: cover_git-commit-art.png
- 
 draft: false
 categories: ["article"]
 ---
@@ -471,4 +470,6 @@ A little time invested in getting familiar with these tools and practices can ma
 
 Creating clean, useful, and responsible Git commits says a lot about you. Especially in remote work, Git commits may be a primary way that people interact with you over projects. With a little practice and effort, you can make your commit habits an even better reflection of your best work - work that is evidently created with care and pride.
 
-If you enjoyed this post, there's a lot more where it came from! I write about computing, cybersecurity, and leading great technical teams. [Subscribe on victoria.dev](https://victoria.dev) to see new articles first, and check out the ones below!
+If you enjoyed this post, there's a lot more where it came from! I write about developer ergonomics for high-performing teams and making maintainable software in the age of AI. You can subscribe below to see new posts first.
+
+{{< subscribe >}}

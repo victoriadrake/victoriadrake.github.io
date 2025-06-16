@@ -14,7 +14,6 @@ image: cover.png
  
 draft: false
 categories: ["article"]
-featured: true
 ---
 
 I recently developed a project that I called [Hydra](https://github.com/victoriadrake/hydra-link-checker): a multithreaded link checker written in Python. Unlike many Python site crawlers I found while researching, Hydra uses only standard libraries, with no external dependencies like BeautifulSoup. It's intended to be run as part of a CI/CD process, so part of its success depended on being fast.

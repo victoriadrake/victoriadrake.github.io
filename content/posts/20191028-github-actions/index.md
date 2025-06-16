@@ -9,7 +9,6 @@ tags:
     - development
     
 image: cover.png
- 
 draft: false
 categories: ["article"]
 ---

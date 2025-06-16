@@ -112,4 +112,6 @@ Well, usually. If you navigate to your new HTTPS domain and don't see your beaut
 4. Check CloudFront Default Root Object - clicking on the distribution name should take you to a details page that shows "Default Root Object" in the list with the value that you set, usually "index.html".
 5. Wait. Sometimes changes take up to 48hrs to propagate. ¯\\\_(ツ)_/¯
 
-I hope that helps you get set up with your new static site on AWS! If you found this post helpful, there's a lot more where this came from. You can [subscribe to victoria.dev](/) to see new posts first!
+I hope that helps you get set up with your new static site on AWS! If you found this post helpful, there's a lot more where this came from. You can subscribe below to see new posts first.
+
+{{< subscribe >}}

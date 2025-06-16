@@ -1,10 +1,10 @@
 ---
-title: How to write good documentation
+title: "How to Write Good Documentation"
 date: 2020-12-14T04:53:10-05:00
 
 aliases:
     - /archive/how-to-write-good-documentation/
-description: The secret to never forgetting how your project works, in three steps.
+description: A three-step process for writing documentation that saves time and ensures your projects are always understood, scalable, and easily maintained.
 tags:
     - development
     - leadership
@@ -33,7 +33,7 @@ As you work out ideas in code, ensure you don’t soon forget important details 
 
 Don't rely on inline comments that often fail to make sense once you've forgotten the context. Keep a document open alongside your code and write down things like commands, decisions, and sources you use. This can include:
 
- commands you typed in
+- Prompts or shell commands you used
 - Why you chose a particular method over another
 - Links you visited for help or *cough*copy-paste*cough* inspiration
 - The order in which you did things
@@ -68,4 +68,6 @@ The next time you catch yourself thinking, “I’m sure I’ll remember this pa
 
 Software projects are made up of a lot more than just their code. To best set up your future self for success, document all the things! Whether it’s a process you’ve established, Infrastructure as Code, or a fleeting future roadmap idea — write it down! Future you will thank you for it.
 
-If you enjoyed this post, there's a lot more where that came from! I write about computing, cybersecurity, and leading great technical teams. [You can subscribe](/) to see new articles first.
+If you enjoyed this post, there's a lot more where that came from! I write about developer ergonomics for high-performing teams and building beautiful, maintainable software in the age of AI. You can subscribe below to see new posts first.
+
+{{< subscribe >}}

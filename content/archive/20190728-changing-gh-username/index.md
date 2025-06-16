@@ -7,7 +7,7 @@ aliases:
 description: Some additional steps to consider after making a change to your username on GitHub.
 tags:
     
-    - linux
+    
     
 image: cover.png
  

@@ -1,9 +1,9 @@
 ---
-title: Breaking bottlenecks 🍾
+title: "Breaking Bottlenecks: Engineering for Performance and Productivity"
 date: 2020-02-25T12:50:29-05:00
 
 aliases:
-description: A talk on the benefits of non-blocking functions for programs, developers, and organizations.
+description: "A deep dive into solving critical performance bottlenecks for building efficient and scalable systems, improving developer efficiency, and reducing operational costs."
 tags:
     - compsci
     - development
@@ -12,7 +12,7 @@ tags:
     - python
     - leadership
 image: cover.png
- 
+featured: true
 draft: false
 categories: ["article"]
 ---

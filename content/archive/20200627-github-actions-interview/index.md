@@ -11,7 +11,7 @@ tags:
     
     
     
-    - api
+    
 image: cover.PNG
  
 draft: false

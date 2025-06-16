@@ -6,7 +6,7 @@ aliases:
 description: A tour of brace expansion, shell parameter expansions, and playing with substrings in Bash.
 tags:
     
-    - linux
+    
 image: cover.png
 draft: false
 categories: ["article"]

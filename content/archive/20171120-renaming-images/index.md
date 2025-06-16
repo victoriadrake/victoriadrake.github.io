@@ -8,7 +8,7 @@ aliases:
 description: How to batch rename images with custom values using file, awk, and rename - in rainbow colors!
 tags:
     
-    - linux
+    
     - development
 image: renaming-rainbow.png
  
