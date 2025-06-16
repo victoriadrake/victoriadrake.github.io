@@ -66,7 +66,7 @@ What's a scheduler have to do with backing up? By itself, not much. The simple b
 
 [The `rsync` utility](https://en.wikipedia.org/wiki/Rsync) is a classic choice, and can back up your files to an external hard drive or remote server while making intelligent determinations about which files to update. It uses file size and modification times to recognize file changes, and then only transfers changed files, saving time and bandwidth.
 
-The [`rsync` syntax](https://download.samba.org/pub/rsync/rsync.1) can be a little nuanced; for example, a trailing forward slash will copy just the contents of the directory, instead of the directory itself. I found examples to be helpful in understanding the usage and syntax.
+The `rsync` syntax can be a little nuanced; for example, a trailing forward slash will copy just the contents of the directory, instead of the directory itself. I found examples to be helpful in understanding the usage and syntax.
 
 Here's one for backing up a local directory to a local destination, such as an external hard drive:
 
