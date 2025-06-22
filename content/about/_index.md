@@ -1,7 +1,7 @@
 ---
 title: "About"
 outputs: HTML
-layout: page
+draft: true
 ---
 
 {{< hover-img src1="art-1.png" src2="art-2.png" alt="Art of Victoria typing on a laptop" width="50%" class="centered-image" >}}

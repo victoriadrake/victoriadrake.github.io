@@ -1,0 +1,43 @@
+{{ define "main" }}
+<div class="posts-page">
+    <!-- Page Header -->
+    <header class="page-header">
+        <h1>{{ .Title }}</h1>
+        <div class="posts-meta">
+            <div class="tag-count">
+                {{ $tagCount := len .Data.Terms }}
+                <span>{{ $tagCount }} tag{{ if ne $tagCount 1 }}s{{ end }} • {{ len .Pages }} post{{ if ne (len .Pages) 1 }}s{{ end }}</span>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Tags Grid -->
+    {{ if .Data.Terms }}
+    <section class="posts-grid" id="tags-grid">
+        {{ range $index, $tag := .Data.Terms.ByCount }}
+        {{ $tagName := $tag.Name }}
+        {{ $postCount := len $tag.Pages }}
+        <a href="{{ $tag.Page.RelPermalink }}" class="grid-post" data-tag="{{ $tagName | lower }}">
+            <div class="grid-post-header">
+                <span class="post-number">{{ printf "%03d" (add $index 1) }}</span>
+                <img src="/icons/tag.svg" alt="Tag" class="post-category-icon">
+            </div>
+            <h2 class="grid-post-title">{{ $tagName | title }}</h2>
+            <div class="grid-post-meta">
+                <span>{{ $postCount }} post{{ if ne $postCount 1 }}s{{ end }}</span>
+                <span class="read-time">{{ if eq $postCount 1 }}Single{{ else if lt $postCount 5 }}Few{{ else if lt $postCount 10 }}Several{{ else }}Many{{ end }} articles</span>
+            </div>
+        </a>
+        {{ end }}
+    </section>
+    {{ else }}
+    <!-- No Tags Message -->
+    <section class="posts-grid">
+        <div class="no-posts-message">
+            <p>No tags found.</p>
+        </div>
+    </section>
+    {{ end }}
+</div>
+
+{{ end }}

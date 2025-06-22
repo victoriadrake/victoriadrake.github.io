@@ -46,8 +46,6 @@ I've been fortunate to have wonderful experiences with open source so far. Based
 
 When unprompted strangers submit helpful comments, issues, and pull requests on your projects, it feels like Christmas. You can give the gift of helpfulness in your contributions as well.
 
-![Illustration of a Santa contributor helping to fix a typo](typo.png)
-
 Treat comments like a face-to-face conversation. Greet the person you're addressing. Use full sentences. Think about whether what you're writing will make someone's day better or worse, and be nice.
 
 When writing issues, include as much technical detail as possible. Screenshots, console logs, screenshots _of_ console logs, your operating system, browser, screen resolution -- all these can help maintainers quickly diagnose a root cause.
@@ -81,5 +79,3 @@ When open source participants act with conscientiousness, every day feels like C
 The humans of open source, by self selection, mostly consist of good people who want to help. If you build openly, share feedback generously, and try to do good in general, I think you fit in here.
 
 I hope you have a very happy holiday season and give many gifts that keep on giving!
-
-![An illustration of santa sitting on a pile of presents](presents.png)

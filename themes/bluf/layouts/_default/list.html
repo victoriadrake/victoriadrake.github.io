@@ -1,0 +1,215 @@
+{{ define "main" }}
+<div class="posts-page">
+    <!-- Page Header -->
+    <header class="page-header">
+        <h1>{{ .Title }}</h1>
+        <div class="posts-meta">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-tag="all">All</button>
+                <button class="filter-tab" data-tag="leadership">Leadership</button>
+                <button class="filter-tab" data-tag="development">Development</button>
+                <button class="filter-tab" data-tag="security">Security</button>
+                <button class="filter-tab" data-tag="ai">AI</button>
+                <button class="filter-tab" data-tag="career">Career</button>
+                <a href="/tags" class="filter-tab">More +</a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Posts Grid -->
+    <section class="posts-grid" id="posts-grid">
+        {{ range $index, $post := .Pages }}
+        {{ $firstTag := index $post.Params.tags 0 | default "post" }}
+        <a href="{{ $post.Permalink }}" class="grid-post" data-tag="{{ $firstTag | lower }}" data-all-tags="{{ range $post.Params.tags }}{{ . }} {{ end }}">
+            <div class="grid-post-header">
+                <span class="post-number">{{ printf "%03d" (add $index 1) }}</span>
+                <span class="post-category">{{ $firstTag | upper }}</span>
+            </div>
+            <h2 class="grid-post-title">{{ $post.Title }}</h2>
+            <div class="grid-post-meta">
+                <span>{{ $post.Date.Format "January 2006" }}</span>
+                <span class="read-time">{{ $post.ReadingTime | default 5 }} min</span>
+            </div>
+        </a>
+        {{ end }}
+    </section>
+    
+    <!-- Load More Section -->
+    <div class="load-more-section" style="display: none;">
+        <div class="load-status">
+                        <div class="post-count">
+                <span class="showing-count"><span id="showing">{{ len .Pages }}</span></span>/<span class="total-count">{{ len .Pages }}</span>
+            </div>
+            <span class="posts-remaining">More posts to explore</span>
+        </div>
+        <button class="load-more-btn" id="load-more">
+            <span class="btn-text">Load More Posts</span>
+        </button>
+    </div>
+</div>
+
+<!-- Generate JSON for dynamic loading -->
+<script>
+window.allPosts = [
+    {{ range $index, $post := .Pages }}
+    {
+        "index": {{ $index }},
+        "title": {{ $post.Title | jsonify }},
+        "permalink": {{ $post.Permalink | jsonify }},
+        "tags": {{ $post.Params.tags | jsonify }},
+        "firstTag": {{ index $post.Params.tags 0 | default "post" | jsonify }},
+        "date": {{ $post.Date.Format "January 2006" | jsonify }},
+        "readingTime": {{ $post.ReadingTime | default 5 }}
+    }{{ if ne $index (sub (len $.Pages) 1) }},{{ end }}
+    {{ end }}
+];
+
+// Posts page functionality with tag filtering
+document.addEventListener('DOMContentLoaded', function() {
+    let currentPage = 1;
+    const postsPerPage = 12;
+    let currentFilter = 'all';
+    let filteredPosts = window.allPosts || [];
+    let allPostsElements = document.querySelectorAll('.grid-post');
+    
+    // Initially hide posts beyond first page
+    if (allPostsElements.length > postsPerPage) {
+        allPostsElements.forEach((post, index) => {
+            if (index >= postsPerPage) {
+                post.style.display = 'none';
+            }
+        });
+        
+        // Show load more button
+        const loadMoreSection = document.querySelector('.load-more-section');
+        if (loadMoreSection) {
+            loadMoreSection.style.display = 'block';
+            updateLoadMoreButton();
+        }
+        
+        // Update initial count
+        document.getElementById('showing').textContent = postsPerPage;
+    }
+    
+    // Filter functionality
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Special handling for "More +" button
+            if (this.dataset.tag === 'more') {
+                alert('More filters coming soon! For now, use the tag links on individual posts.');
+                return;
+            }
+            
+            // Update active state
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter posts
+            currentFilter = this.dataset.tag;
+            filterPosts();
+        });
+    });
+    
+    function filterPosts() {
+        currentPage = 1;
+        
+        // Filter the posts
+        if (currentFilter === 'all') {
+            filteredPosts = window.allPosts;
+            allPostsElements.forEach((post, index) => {
+                if (index < postsPerPage) {
+                    post.style.display = '';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+        } else {
+            filteredPosts = window.allPosts.filter(post => 
+                post.tags && post.tags.includes(currentFilter)
+            );
+            
+            let shown = 0;
+            allPostsElements.forEach((post) => {
+                const postTags = post.dataset.allTags || '';
+                if (postTags.includes(currentFilter) && shown < postsPerPage) {
+                    post.style.display = '';
+                    shown++;
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+        }
+        
+        updateCounts();
+        updateLoadMoreButton();
+    }
+    
+    function updateCounts() {
+        const visiblePosts = document.querySelectorAll('.grid-post:not([style*="display: none"])').length;
+        document.getElementById('showing').textContent = visiblePosts;
+        document.querySelector('.total-count').textContent = filteredPosts.length;
+    }
+    
+    function updateLoadMoreButton() {
+        const loadMoreSection = document.querySelector('.load-more-section');
+        const visiblePosts = document.querySelectorAll('.grid-post:not([style*="display: none"])').length;
+        const hasMore = visiblePosts < filteredPosts.length;
+        
+        if (hasMore) {
+            const remaining = filteredPosts.length - visiblePosts;
+            loadMoreSection.style.display = 'block';
+            loadMoreSection.querySelector('.posts-remaining').textContent = 
+                `${remaining} more post${remaining === 1 ? '' : 's'} to explore`;
+        } else {
+            loadMoreSection.style.display = 'none';
+        }
+    }
+    
+    // Load more button
+    const loadMoreBtn = document.getElementById('load-more');
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+            this.classList.add('loading');
+            this.querySelector('.btn-text').textContent = 'Loading...';
+            
+            // Simulate network delay
+            setTimeout(() => {
+                currentPage++;
+                const start = (currentPage - 1) * postsPerPage;
+                const end = start + postsPerPage;
+                
+                if (currentFilter === 'all') {
+                    // Show next batch of all posts
+                    allPostsElements.forEach((post, index) => {
+                        if (index >= start && index < end) {
+                            post.style.display = '';
+                        }
+                    });
+                } else {
+                    // Show next batch of filtered posts
+                    let shown = 0;
+                    let counted = 0;
+                    allPostsElements.forEach((post) => {
+                        const postTags = post.dataset.allTags || '';
+                        if (postTags.includes(currentFilter)) {
+                            if (counted >= start && counted < end) {
+                                post.style.display = '';
+                                shown++;
+                            }
+                            counted++;
+                        }
+                    });
+                }
+                
+                updateCounts();
+                updateLoadMoreButton();
+                
+                this.classList.remove('loading');
+                this.querySelector('.btn-text').textContent = 'Load More Posts';
+            }, 300);
+        });
+    }
+});
+</script>
+{{ end }}

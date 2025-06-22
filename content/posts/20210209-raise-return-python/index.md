@@ -9,6 +9,7 @@ tags:
     - leadership
     - compsci
     - development
+    - python
 showtoc: true
 draft: false
 categories: ["article"]
@@ -234,6 +235,4 @@ Silent failures create some of the most frustrating bugs to find and fix, especi
 
 If you found some value in this post, there's more! I write about high-output development processes and building maintainable systems in the AI age. You can get my posts in your inbox by subscribing below.
 
-<div class="form-container centered" style="border:none; box-shadow: none; background-color:transparent !important;" id="subscribe">
-    <iframe src="https://victoriadrake.substack.com/embed" width="480" height="320" style="border:1px solid #EEE; background-color:transparent !important;" frameborder="0" scrolling="no"></iframe>
-</div>
+{{< subscribe >}}

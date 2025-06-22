@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode | default "en" }}">
+    <head>
+        {{- partial "head.html" . -}}
+    </head>
+    <body>
+        {{- partial "header.html" . -}}
+
+        <main>
+            {{- block "main" . }}{{- end }}
+        </main>
+
+        {{- partial "footer.html" . -}}
+
+        <!-- Search functionality -->
+        {{ if not .IsPage }}
+        {{ $lunr := resources.Get "js/lunr.min.js" | minify | fingerprint }}
+        <script src="{{ $lunr.Permalink }}"></script>
+        {{- partial "search-index.html" . -}}
+        {{ end }}
+
+        {{ $js := resources.Get "js/main.js" | minify | fingerprint }}
+        <script src="{{ $js.Permalink }}" defer></script>
+        {{ if hugo.IsDevelopment }}
+            <div style="position: fixed; bottom: 10px; right: 10px; background-color: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; z-index: 9999;">
+                Template: {{ .Layout }} (Kind: {{ .Kind }})
+            </div>
+        {{ end }}
+    </body>
+</html>

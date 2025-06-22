@@ -1,0 +1,86 @@
+{{ define "main" }}
+<div class="brutalist-home">
+    <header class="brutalist-header">
+        <h1>{{ .Site.Params.firstName | default "Victoria" }}<br>{{ .Site.Params.lastName | default "Drake" }}</h1>
+        <div class="info">
+            {{ if .Site.Params.Author.title }}<p><strong>{{ .Site.Params.Author.title }}</strong></p>{{ end }}
+                        {{ .Content }}
+
+        </div>
+    </header>
+    
+    <section class="brutalist-grid">
+        {{ $posts := where .Site.RegularPages "Type" "posts" }}
+        {{ $featured := where $posts "Params.featured" true }}
+        {{ $recent := first 1 $posts }}
+        {{ $recentPost := index $recent 0 }}
+        
+        <!-- Most Recent Post (always first, large) -->
+        {{ if $recentPost }}
+        {{ $recentTag := index $recentPost.Params.tags 0 | default "post" }}
+        <a href="{{ $recentPost.Permalink }}" class="grid-post grid-post-recent" data-tag="{{ $recentTag | lower }}">
+            <div class="grid-post-header">
+                <span class="post-number">LATEST</span>
+                <span class="post-category">{{ $recentTag | upper }}</span>
+            </div>
+            <h2 class="grid-post-title">{{ $recentPost.Title }}</h2>
+            {{ if $recentPost.Summary }}
+            <p class="grid-post-excerpt">{{ $recentPost.Summary | truncate 150 }}</p>
+            {{ end }}
+            <div class="grid-post-meta">
+                <span>{{ $recentPost.Date.Format "January 2006" }}</span>
+                <span class="read-time">{{ $recentPost.ReadingTime | default 5 }} min</span>
+            </div>
+        </a>
+        {{ end }}
+        
+        <!-- Featured Posts -->
+        {{ $postNumber := 1 }}
+        {{ range $featured }}
+            {{ if ne .Permalink $recentPost.Permalink }}
+            {{ $postNumber = add $postNumber 1 }}
+            {{ $firstTag := index .Params.tags 0 | default "post" }}
+            <a href="{{ .Permalink }}" class="grid-post{{ if .Params.featured }} grid-post-featured{{ end }}" data-tag="{{ $firstTag | lower }}">
+                <div class="grid-post-header">
+                    <span class="post-number">{{ printf "%03d" $postNumber }}</span>
+                    <span class="post-category">{{ $firstTag | upper }}</span>
+                </div>
+                <h2 class="grid-post-title">{{ .Title }}</h2>
+                <div class="grid-post-meta">
+                    <span>{{ .Date.Format "January 2006" }}</span>
+                    <span class="read-time">{{ .ReadingTime | default 5 }} min</span>
+                </div>
+            </a>
+            {{ end }}
+        {{ end }}
+        
+        <!-- If we need more posts to fill the grid, add recent non-featured posts -->
+        {{ $displayedCount := add (len $featured) 1 }}
+        {{ if lt $displayedCount 6 }}
+            {{ $needed := sub 6 $displayedCount }}
+            {{ range first $needed (after 1 $posts) }}
+                {{ if not .Params.featured }}
+                {{ $postNumber = add $postNumber 1 }}
+                {{ $firstTag := index .Params.tags 0 | default "post" }}
+                <a href="{{ .Permalink }}" class="grid-post" data-tag="{{ $firstTag | lower }}">
+                    <div class="grid-post-header">
+                        <span class="post-number">{{ printf "%03d" $postNumber }}</span>
+                        <span class="post-category">{{ $firstTag | upper }}</span>
+                    </div>
+                    <h2 class="grid-post-title">{{ .Title }}</h2>
+                    <div class="grid-post-meta">
+                        <span>{{ .Date.Format "January 2006" }}</span>
+                        <span class="read-time">{{ .ReadingTime | default 5 }} min</span>
+                    </div>
+                </a>
+                {{ end }}
+            {{ end }}
+        {{ end }}
+    </section>
+    
+    <!-- View All Posts Link -->
+    <div class="view-all">
+        <a href="/posts/" class="view-all-link">View All Posts →</a>
+    </div>
+</div>
+{{ end }}

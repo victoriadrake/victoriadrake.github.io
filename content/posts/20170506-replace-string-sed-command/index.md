@@ -151,6 +151,4 @@ The ability to efficiently manipulate text and code across a project is underrat
 
 If you found some value in this post, there's more! I write about high-output development processes and building maintainable systems in the AI age. You can get my posts in your inbox by subscribing below.
 
-<div class="form-container centered" id="subscribe">
-<iframe src="https://victoriadrake.substack.com/embed" width="100%" height="320" style="border:none;border-radius:10px;margin:0 auto;background:transparent !important;" frameborder="0" scrolling="no"></iframe>
-</div>
+{{< subscribe >}}

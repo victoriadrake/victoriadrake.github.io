@@ -58,3 +58,5 @@ In WAL mode, write transactions are performed faster than in the traditional rol
 ## The simplicity of SQLite
 
 For medium-sized read-heavy applications, SQLite may be a great choice. Using SQLite in WAL mode may make it an even better one. Benchmarks on the smallest EC2 instance, with no provisioned [IOPS](https://en.wikipedia.org/wiki/IOPS), put this little trooper at 400 write transactions per second, and thousands of reads. That's some perfectly adequate capability, in a perfectly compact package.
+
+{{< subscribe >}}

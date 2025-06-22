@@ -1,0 +1,117 @@
+{{ define "main" }}
+<article>
+    <!-- Hero -->
+    <header class="hero">
+        {{ if .Params.tags }}
+        {{ $firstTag := index .Params.tags 0 }}
+        <a href="{{ "/tags/" | relLangURL }}{{ $firstTag | urlize }}" class="category" data-tag="{{ $firstTag }}">
+            {{/* Icon mapping for common tags */}}
+            {{ if eq $firstTag "leadership" }}🧭
+            {{ else if or (eq $firstTag "development") (eq $firstTag "git") (eq $firstTag "python") (eq $firstTag "go") (eq $firstTag "algorithms") (eq $firstTag "data") }}⚡
+            {{ else if eq $firstTag "career" }}🚀
+            {{ else if eq $firstTag "security" }}🔒
+            {{ else if eq $firstTag "cloud" }}☁️
+            {{ else if eq $firstTag "ai" }}🤖
+            {{ else if eq $firstTag "open-source" }}💻
+            {{ else }}📝{{ end }}
+            {{ $firstTag | upper }}
+        </a>
+        {{ end }}
+        <h1>{{ .Title }}</h1>
+        <div class="post-date">{{ .Date.Format "January 2006" }}</div>
+        {{ if .Params.summary }}
+        <p class="subtitle">{{ .Params.summary }}</p>
+        {{ end }}
+    </header>
+
+    <!-- Quick Navigation / Key Points -->
+    {{ if .Params.keyPoints }}
+    <div class="quick-nav">
+        {{ range .Params.keyPoints }}
+        <div class="key-point">{{ . }}</div>
+        {{ end }}
+    </div>
+    {{ else if .Params.sections }}
+    <nav class="quick-nav">
+        {{ range $i, $section := .Params.sections }}
+        <a href="#section-{{ add $i 1 }}" class="nav-pill">{{ add $i 1 }}. {{ $section.title }}</a>
+        {{ end }}
+    </nav>
+    {{ end }}
+
+    <!-- Main Content -->
+    <div class="content-container">
+        {{ if and (.TableOfContents) (ne .TableOfContents "<nav id=\"TableOfContents\"></nav>") }}
+        <nav class="toc">
+            <div class="toc-title">Contents</div>
+            {{ .TableOfContents }}
+        </nav>
+        {{ end }}
+        
+        <div class="article">
+            {{ .Content }}
+            
+            <!-- Post Footer -->
+            <footer class="post-footer">
+                <!-- Tags -->
+                {{ if .Params.tags }}
+                <div class="post-tags">
+                    <span class="tags-label">Tags:</span>
+                    {{ range .Params.tags }}
+                    <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" class="tag-link">#{{ . }}</a>
+                    {{ end }}
+                </div>
+                {{ end }}
+                
+                <!-- Previous/Next Navigation -->
+                <nav class="post-navigation">
+                    {{ with .PrevInSection }}
+                    <a href="{{ .Permalink }}" class="post-nav-item post-nav-prev">
+                        <span class="nav-direction">← Previous</span>
+                        <span class="nav-title">{{ .Title }}</span>
+                    </a>
+                    {{ else }}
+                    <div class="post-nav-item post-nav-placeholder"></div>
+                    {{ end }}
+                    
+                    {{ with .NextInSection }}
+                    <a href="{{ .Permalink }}" class="post-nav-item post-nav-next">
+                        <span class="nav-direction">Next →</span>
+                        <span class="nav-title">{{ .Title }}</span>
+                    </a>
+                    {{ else }}
+                    <div class="post-nav-item post-nav-placeholder"></div>
+                    {{ end }}
+                </nav>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- Related Posts -->
+    {{ if .Params.tags }}
+    {{ $related := .Site.RegularPages.Related . | first 6 }}
+    {{ $nonArchive := where $related "Section" "ne" "archive" }}
+    {{ $filtered := where $nonArchive "Permalink" "ne" .Permalink | first 3 }}
+    {{ if $filtered }}
+    <section class="related-posts">
+        <h2 class="related-title">Related Posts</h2>
+        <div class="related-grid">
+            {{ range $filtered }}
+            <a href="{{ .Permalink }}" class="related-post">
+                {{ if .Params.tags }}
+                {{ $firstTag := index .Params.tags 0 }}
+                <span class="post-category">{{ $firstTag | upper }}</span>
+                {{ end }}
+                <h3 class="related-post-title">{{ .Title }}</h3>
+                <div class="related-meta">
+                    <span>{{ .Date.Format "January 2006" }}</span>
+                    <span class="read-time">{{ .ReadingTime | default 5 }} min</span>
+                </div>
+            </a>
+            {{ end }}
+        </div>
+    </section>
+    {{ end }}
+    {{ end }}
+</article>
+{{ end }}

@@ -214,7 +214,7 @@ Here's what `static/js/search.js` could look like in full.
 
 ```js
 {{% md %}}
-{{< readfile file="blog/20210126-search-lunr/search-example.js" >}}
+{{< readfile file="posts/20210126-search-lunr/search-example.js" >}}
 {{% /md %}}
 ```
 

@@ -7,7 +7,7 @@ tags:
     - algorithms
     - ai
     - compsci
-draft: true
+draft: false
 ---
 
 Here’s how a little laziness cost me $78.
@@ -26,7 +26,7 @@ Okay, *this* was untenable. Reading all this data into context was costly and sl
 
 Then the coffee started to kick in, I guess, because it dawned on me: why in the world was I using expensive API calls to do something a Bash one-liner could do?
 
-> Cline, write a Bash command that will recurse through the `data/` directory and obtain the content of all the files and copy it into a single new file.
+> "Cline, write a Bash command that will recurse through the `data/` directory and obtain the content of all the files and copy it into a single new file."
 
 Which produced:
 
@@ -53,7 +53,11 @@ My initial naive approach had accidentally created a perfect storm of computatio
 
 When Cline processed each file individually, it was making separate API calls for every single operation - reads, writes, the works. With about 100 files, that meant roughly 200+ API calls, each one spinning up its own network round-trip with all the latency that entails. Every time I saw that “API Request…” spinner, I was watching money float away into the ether.
 
-But here’s the kicker: large language models like Gemini charge based on token consumption. It’s not just the file content they’re charging for; **every single API call also included the entire conversation history, system prompts, and my instructions.** With a stateless API, that context has to be re-transmitted with every single request. If my average context was around 10,000 tokens and I made 200 calls, I burned through 2 million tokens (10,000 * 200) on overhead alone, before even counting the actual data.
+But here’s the kicker: large language models like Gemini charge based on token consumption.
+
+> It’s not just the file content they’re charging for; **every single API call also included the entire conversation history, system prompts, and my instructions.**
+
+With a stateless API, that context has to be re-transmitted with every single request. If my average context was around 10,000 tokens and I made 200 calls, I burned through 2 million tokens (10,000 * 200) on overhead alone, before even counting the actual data.
 
 Combining all the files with bash flipped this whole equation on its head. Instead of 200 API calls, I made exactly one. Instead of bearing the network latency for every file operation, combining the files locally on my machine meant the filesystem could actually optimize that work. What had taken almost an hour of network round-trips for Gemini to access all the data was reduced to a couple hundred milliseconds of local file operations.
 

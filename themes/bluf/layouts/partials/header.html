@@ -1,0 +1,28 @@
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="{{ .Site.BaseURL }}" class="logo">{{ .Site.Title }}</a>
+        <div class="nav-right">
+            {{ if .IsPage }}
+            <span class="read-time">{{ .ReadingTime | default 5 }} min read</span>
+            {{ else }}
+            <button class="search-toggle" id="search-toggle" aria-label="Toggle search">
+                <img src="/icons/search.svg" alt="Search" class="search-icon">
+            </button>
+            {{ end }}
+        </div>
+    </div>
+    
+    <!-- Search Box -->
+    {{ if not .IsPage }}
+    <div class="search-container" id="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" id="search-input" placeholder="Search articles..." autocomplete="off">
+            <div class="search-results" id="search-results"></div>
+        </div>
+    </div>
+    {{ end }}
+    
+    {{ if .IsPage }}
+    <div class="progress-bar" id="progress"></div>
+    {{ end }}
+</nav>
