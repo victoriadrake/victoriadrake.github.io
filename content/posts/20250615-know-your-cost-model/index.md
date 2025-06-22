@@ -4,8 +4,8 @@ date: 2025-06-15T14:09:42Z
 categories:
 description: When AI tools cost 100x more than command line solutions.
 tags:
-    - algorithms
     - ai
+    - algorithms
     - compsci
 draft: false
 ---
@@ -55,7 +55,7 @@ When Cline processed each file individually, it was making separate API calls fo
 
 But here’s the kicker: large language models like Gemini charge based on token consumption.
 
-> It’s not just the file content they’re charging for; **every single API call also included the entire conversation history, system prompts, and my instructions.**
+> It’s not just the file content they’re charging for; every single API call also included the entire conversation history, system prompts, and my instructions.
 
 With a stateless API, that context has to be re-transmitted with every single request. If my average context was around 10,000 tokens and I made 200 calls, I burned through 2 million tokens (10,000 * 200) on overhead alone, before even counting the actual data.
 
