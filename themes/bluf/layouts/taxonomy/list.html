@@ -5,7 +5,10 @@
         <h1>{{ .Title }}</h1>
         <div class="posts-meta">
             <div class="tag-count">
-                {{ $tagCount := len .Data.Terms }}
+                {{ $tagCount := 0 }}
+                {{ if .Data.Terms }}
+                    {{ $tagCount = len .Data.Terms }}
+                {{ end }}
                 <span>{{ $tagCount }} tag{{ if ne $tagCount 1 }}s{{ end }} • {{ len .Pages }} post{{ if ne (len .Pages) 1 }}s{{ end }}</span>
             </div>
         </div>
