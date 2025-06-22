@@ -1,11 +1,10 @@
 {{ define "main" }}
-<div class="brutalist-home">
-    <header class="brutalist-header">
-        <h1>{{ .Site.Params.firstName | default "Victoria" }}<br>{{ .Site.Params.lastName | default "Drake" }}</h1>
+<div class="brutalist-home h-feed">
+    <header class="brutalist-header h-card">
+        <h1 class="p-name">{{ .Site.Params.Author.name | default .Site.Title }}</h1>
         <div class="info">
-            {{ if .Site.Params.Author.title }}<p><strong>{{ .Site.Params.Author.title }}</strong></p>{{ end }}
-                        {{ .Content }}
-
+            {{ if .Site.Params.Author.title }}<p class="p-job-title"><strong>{{ .Site.Params.Author.title }}</strong></p>{{ end }}
+            <div class="p-note">{{ .Content }}</div>
         </div>
     </header>
     
@@ -18,20 +17,20 @@
         <!-- Most Recent Post (always first, large) -->
         {{ if $recentPost }}
         {{ $recentTag := index $recentPost.Params.tags 0 | default "post" }}
-        <a href="{{ $recentPost.Permalink }}" class="grid-post grid-post-recent" data-tag="{{ $recentTag | lower }}">
+        <article class="grid-post grid-post-recent h-entry" data-tag="{{ $recentTag | lower }}">
             <div class="grid-post-header">
                 <span class="post-number">LATEST</span>
-                <span class="post-category">{{ $recentTag | upper }}</span>
+                <span class="post-category p-category">{{ $recentTag | upper }}</span>
             </div>
-            <h2 class="grid-post-title">{{ $recentPost.Title }}</h2>
+            <h2 class="grid-post-title p-name"><a href="{{ $recentPost.Permalink }}" class="u-url">{{ $recentPost.Title }}</a></h2>
             {{ if $recentPost.Summary }}
-            <p class="grid-post-excerpt">{{ $recentPost.Summary | truncate 150 }}</p>
+            <p class="grid-post-excerpt p-summary">{{ $recentPost.Summary | truncate 150 }}</p>
             {{ end }}
             <div class="grid-post-meta">
-                <span>{{ $recentPost.Date.Format "January 2006" }}</span>
+                <time class="dt-published" datetime="{{ $recentPost.Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ $recentPost.Date.Format "January 2006" }}</time>
                 <span class="read-time">{{ $recentPost.ReadingTime | default 5 }} min</span>
             </div>
-        </a>
+        </article>
         {{ end }}
         
         <!-- Featured Posts -->
@@ -40,17 +39,17 @@
             {{ if ne .Permalink $recentPost.Permalink }}
             {{ $postNumber = add $postNumber 1 }}
             {{ $firstTag := index .Params.tags 0 | default "post" }}
-            <a href="{{ .Permalink }}" class="grid-post{{ if .Params.featured }} grid-post-featured{{ end }}" data-tag="{{ $firstTag | lower }}">
+            <article class="grid-post{{ if .Params.featured }} grid-post-featured{{ end }} h-entry" data-tag="{{ $firstTag | lower }}">
                 <div class="grid-post-header">
                     <span class="post-number">{{ printf "%03d" $postNumber }}</span>
-                    <span class="post-category">{{ $firstTag | upper }}</span>
+                    <span class="post-category p-category">{{ $firstTag | upper }}</span>
                 </div>
-                <h2 class="grid-post-title">{{ .Title }}</h2>
+                <h2 class="grid-post-title p-name"><a href="{{ .Permalink }}" class="u-url">{{ .Title }}</a></h2>
                 <div class="grid-post-meta">
-                    <span>{{ .Date.Format "January 2006" }}</span>
+                    <time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "January 2006" }}</time>
                     <span class="read-time">{{ .ReadingTime | default 5 }} min</span>
                 </div>
-            </a>
+            </article>
             {{ end }}
         {{ end }}
         
@@ -62,17 +61,17 @@
                 {{ if not .Params.featured }}
                 {{ $postNumber = add $postNumber 1 }}
                 {{ $firstTag := index .Params.tags 0 | default "post" }}
-                <a href="{{ .Permalink }}" class="grid-post" data-tag="{{ $firstTag | lower }}">
+                <article class="grid-post h-entry" data-tag="{{ $firstTag | lower }}">
                     <div class="grid-post-header">
                         <span class="post-number">{{ printf "%03d" $postNumber }}</span>
-                        <span class="post-category">{{ $firstTag | upper }}</span>
+                        <span class="post-category p-category">{{ $firstTag | upper }}</span>
                     </div>
-                    <h2 class="grid-post-title">{{ .Title }}</h2>
+                    <h2 class="grid-post-title p-name"><a href="{{ .Permalink }}" class="u-url">{{ .Title }}</a></h2>
                     <div class="grid-post-meta">
-                        <span>{{ .Date.Format "January 2006" }}</span>
+                        <time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "January 2006" }}</time>
                         <span class="read-time">{{ .ReadingTime | default 5 }} min</span>
                     </div>
-                </a>
+                </article>
                 {{ end }}
             {{ end }}
         {{ end }}

@@ -1,8 +1,8 @@
 {{ define "main" }}
-<div class="posts-page">
+<div class="posts-page h-feed">
     <!-- Page Header -->
     <header class="page-header">
-        <h1>{{ .Title }}</h1>
+        <h1 class="p-name">{{ .Title }}</h1>
         <div class="posts-meta">
             <div class="filter-tabs">
                 <button class="filter-tab active" data-tag="all">All</button>
@@ -20,17 +20,17 @@
     <section class="posts-grid" id="posts-grid">
         {{ range $index, $post := .Pages }}
         {{ $firstTag := index $post.Params.tags 0 | default "post" }}
-        <a href="{{ $post.Permalink }}" class="grid-post" data-tag="{{ $firstTag | lower }}" data-all-tags="{{ range $post.Params.tags }}{{ . }} {{ end }}">
+        <article class="grid-post h-entry" data-tag="{{ $firstTag | lower }}" data-all-tags="{{ range $post.Params.tags }}{{ . }} {{ end }}">
             <div class="grid-post-header">
                 <span class="post-number">{{ printf "%03d" (add $index 1) }}</span>
-                <span class="post-category">{{ $firstTag | upper }}</span>
+                <span class="post-category p-category">{{ $firstTag | upper }}</span>
             </div>
-            <h2 class="grid-post-title">{{ $post.Title }}</h2>
+            <h2 class="grid-post-title p-name"><a href="{{ $post.Permalink }}" class="u-url">{{ $post.Title }}</a></h2>
             <div class="grid-post-meta">
-                <span>{{ $post.Date.Format "January 2006" }}</span>
+                <time class="dt-published" datetime="{{ $post.Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ $post.Date.Format "January 2006" }}</time>
                 <span class="read-time">{{ $post.ReadingTime | default 5 }} min</span>
             </div>
-        </a>
+        </article>
         {{ end }}
     </section>
     

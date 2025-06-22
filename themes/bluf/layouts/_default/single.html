@@ -1,10 +1,10 @@
 {{ define "main" }}
-<article>
+<article class="h-entry">
     <!-- Hero -->
     <header class="hero">
         {{ if .Params.tags }}
         {{ $firstTag := index .Params.tags 0 }}
-        <a href="{{ "/tags/" | relLangURL }}{{ $firstTag | urlize }}" class="category" data-tag="{{ $firstTag }}">
+        <a href="{{ "/tags/" | relLangURL }}{{ $firstTag | urlize }}" class="category p-category" data-tag="{{ $firstTag }}">
             {{/* Icon mapping for common tags */}}
             {{ if eq $firstTag "leadership" }}🧭
             {{ else if or (eq $firstTag "development") (eq $firstTag "git") (eq $firstTag "python") (eq $firstTag "go") (eq $firstTag "algorithms") (eq $firstTag "data") }}⚡
@@ -17,11 +17,16 @@
             {{ $firstTag | upper }}
         </a>
         {{ end }}
-        <h1>{{ .Title }}</h1>
-        <div class="post-date">{{ .Date.Format "January 2006" }}</div>
+        <h1 class="p-name">{{ .Title }}</h1>
+        <time class="post-date dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "January 2, 2006" }}</time>
         {{ if .Params.summary }}
-        <p class="subtitle">{{ .Params.summary }}</p>
+        <p class="subtitle p-summary">{{ .Params.summary }}</p>
         {{ end }}
+        <a href="{{ .Permalink }}" class="u-url" style="display: none;">{{ .Title }}</a>
+        <div class="p-author h-card" style="display: none;">
+            <span class="p-name">{{ .Site.Params.author.name | default .Site.Title }}</span>
+            <a href="{{ .Site.Params.author.domain | default .Site.BaseURL }}" class="u-url">{{ .Site.Params.author.domain | default .Site.BaseURL }}</a>
+        </div>
     </header>
 
     <!-- Quick Navigation / Key Points -->
@@ -48,7 +53,7 @@
         </nav>
         {{ end }}
         
-        <div class="article">
+        <div class="article e-content">
             {{ .Content }}
             
             <!-- Post Footer -->
