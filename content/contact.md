@@ -17,4 +17,6 @@ Please note that I do not accept guest blog posts or requests for placing links 
 - [medium.com/@victoriadotdev](https://medium.com/@victoriadotdev)
 - [dev.to/victoria](https://dev.to/victoria)
 
-You can also [learn how I built this site](/site) or sign up for [my newsletter](https://victoriadrake.substack.com/).
+You can also [learn how I built this site](/site) or sign up for my newsletter below.
+
+{{< subscribe >}}

@@ -1,20 +1,119 @@
-{{ define "head" }}
-<link href="/css/bookshelf.css" rel="stylesheet"/>
-{{ end }}
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode | default "en" }}">
+    <head>
+        {{- partial "head.html" . -}}
+        <link href="/css/bookshelf.css" rel="stylesheet"/>
+    </head>
+    <body>
+        {{- partial "header.html" . -}}
 
-{{ define "main" }}
-<div class="page-container">
-    <header class="page-header">
-        <h1 class="page-title">{{ .Title }}</h1>
-        {{ with .Description }}
-            <p class="page-subtitle">{{ . }}</p>
-        {{ end }}
-    </header>
+        <main>
+            <article class="h-entry">
+                <!-- Hero -->
+                <header class="hero">
+                    {{ if .Params.tags }}
+                    {{ $firstTag := index .Params.tags 0 }}
+                    <a href="{{ "/tags/" | relLangURL }}{{ $firstTag | urlize }}" class="category p-category" data-tag="{{ $firstTag }}">
+                    {{/* Icon mapping for common tags */}}
+                    {{ if eq $firstTag "leadership" }}🧭
+                    {{ else if or (eq $firstTag "development") (eq $firstTag "git") (eq $firstTag "python") (eq $firstTag "go") (eq $firstTag "algorithms") (eq $firstTag "data") }}⚡
+                    {{ else if eq $firstTag "career" }}🚀
+                    {{ else if eq $firstTag "security" }}🔒
+                    {{ else if eq $firstTag "cloud" }}☁️
+                    {{ else if eq $firstTag "ai" }}🤖
+                    {{ else if eq $firstTag "open-source" }}💻
+                    {{ else }}📝{{ end }}
+                    {{ $firstTag | upper }}
+                    </a>
+                    {{ end }}
+                <h1 class="p-name">{{ .Title }}</h1>
+                <time class="post-date dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"></time>
+                {{ if .Params.summary }}
+                    <p class="subtitle p-summary">{{ .Params.summary }}</p>
+                {{ end }}
+                <a href="{{ .Permalink }}" class="u-url" style="display: none;">{{ .Title }}</a>
+                <div class="p-author h-card" style="display: none;">
+                    <span class="p-name">{{ .Site.Params.author.name | default .Site.Title }}</span>
+                    <a href="{{ .Site.Params.author.domain | default .Site.BaseURL }}" class="u-url">{{ .Site.Params.author.domain | default .Site.BaseURL }}</a>
+                </div>
+            </header>
 
-    <div class="page-content-wrapper">
-        <article class="page-content">
-            {{ .Content }}
+            <!-- Quick Navigation / Key Points -->
+            {{ if .Params.keyPoints }}
+                <div class="quick-nav">
+                    {{ range .Params.keyPoints }}
+                        <div class="key-point">{{ . }}</div>
+                    {{ end }}
+                </div>
+            {{ else if .Params.sections }}
+                <nav class="quick-nav">
+                    {{ range $i, $section := .Params.sections }}
+                        <a href="#section-{{ add $i 1 }}" class="nav-pill">{{ add $i 1 }}. {{ $section.title }}</a>
+                    {{ end }}
+                </nav>
+            {{ end }}
+
+            <!-- Main Content -->
+            {{ if and (.TableOfContents) (ne .TableOfContents "<nav id=\"TableOfContents\"></nav>") }}
+                <div class="content-container">
+                    <nav class="toc">
+                        <div class="toc-title">Contents</div>
+                        {{ .TableOfContents }}
+                    </nav>
+
+                    <div class="article e-content">
+                        {{ .Content }}
+
+                        <!-- Post Footer -->
+                        <footer class="post-footer">
+                            <!-- Tags -->
+                            {{ if .Params.tags }}
+                                <div class="post-tags">
+                                    <span class="tags-label">Tags:</span>
+                                    {{ range .Params.tags }}
+                                        <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" class="tag-link">#{{ . }}</a>
+                                    {{ end }}
+                                </div>
+                            {{ end }}
+                        </footer>
+                    </div>
+                </div>
+            {{ else }}
+                <!-- Simple full-width layout for pages without TOC -->
+                <div class="article e-content" style="max-width: var(--reading-width); margin: 0 auto; padding: 0 2rem 6rem;">
+                    {{ .Content }}
+
+                    <!-- Post Footer -->
+                    {{ if .Params.tags }}
+                        <footer class="post-footer">
+                            <div class="post-tags">
+                                <span class="tags-label">Tags:</span>
+                                {{ range .Params.tags }}
+                                    <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" class="tag-link">#{{ . }}</a>
+                                {{ end }}
+                            </div>
+                        </footer>
+                    {{ end }}
+                </div>
+            {{ end }}
         </article>
-    </div>
-</div>
-{{ end }}
+    </main>
+
+    {{- partial "footer.html" . -}}
+
+    <!-- Search functionality -->
+    {{ if not .IsPage }}
+        {{ $lunr := resources.Get "js/lunr.min.js" | minify | fingerprint }}
+        <script src="{{ $lunr.Permalink }}"></script>
+        {{- partial "search-index.html" . -}}
+    {{ end }}
+
+    {{ $js := resources.Get "js/main.js" | minify | fingerprint }}
+    <script src="{{ $js.Permalink }}" defer></script>
+    {{ if hugo.IsDevelopment }}
+        <div style="position: fixed; bottom: 10px; right: 10px; background-color: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; z-index: 9999;">
+                Template: {{ .Layout }} (Kind: {{ .Kind }})
+            </div>
+    {{ end }}
+</body>
+</html>

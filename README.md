@@ -4,18 +4,18 @@ Welcome to the repository for [victoria.dev](https://victoria.dev), a personal w
 
 Victoria.dev is built as a static site using [Hugo](https://gohugo.io/), a fast and flexible static site generator. The site is [open source](https://github.com/victoriadrake/victoriadrake.github.io), so feel free to explore how it works!
 
-### Technical Features
+## Technical Features
 
 - **Static Site Generation**: Built with [Hugo](https://gohugo.io/) for speed and flexibility.
 - **Search Functionality**: Implemented using `lunrjs`. [Learn how here](https://victoria.dev/posts/add-search-to-hugo-static-sites-with-lunr/).
 - **Illustrations**: I create all the illustrations and comics in my articles on my iPad.
 - **IndieWeb Integration**: I've implemented [microformats2](https://microformats.org/wiki/Main_Page) markup, making the site compatible with social readers and other IndieWeb sites.
 
-### Continuous Deployment
+## Continuous Deployment
 
 The site is automatically deployed with each update using GitHub Pages and GitHub Actions.
 
-### Development Tools
+## Development Tools
 
 - **Link Checking**: I created [link-snitch](https://github.com/victoriadrake/link-snitch), a custom GitHub Action, to regularly check for broken links across the site. It's powered by [Hydra](https://github.com/victoriadrake/hydra-link-checker), a multithreaded Python site-crawling link checker built with the standard library.
 - **Code Quality**: I use the [pre-commit framework](https://pre-commit.com/) with [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) to maintain content quality.

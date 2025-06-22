@@ -10,9 +10,6 @@ layout: bookshelf
 
 Books that have measurably contributed to my skill stack are shared here.
 
-- [Required reading for technology leaders](#required-reading-for-technology-leaders)
-- [Non-coding books for coders](#non-coding-books-for-coders)
-
 ## Required reading for technology leaders
 
 <div class="column book-list">
