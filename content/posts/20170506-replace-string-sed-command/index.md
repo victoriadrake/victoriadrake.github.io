@@ -3,6 +3,7 @@ title: How to Replace a String with sed in Current and Recursive Subdirectories
 date: 2017-05-06T20:04:53+08:00
 lastmod: 2025-06-23T20:04:53+08:00
 aliases:
+    - /how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/
     - /blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/
     - /posts/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/
     - /archive/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/
