@@ -7,6 +7,8 @@ slug: how-to-create-technical-documentation-using-chatgpt
 description: How to use ChatGPT to create effective and correct documentation for your project.
 canonical: https://victoria.dev/posts/how-to-create-technical-documentation-using-chatgpt
 image: https://cdn.hashnode.com/res/hashnode/image/upload/v1724610603073/dbed6199-8e9c-4858-b299-a8d84e280156.jpeg
+aliases:
+    - /how-to-create-technical-documentation-using-chatgpt/
 tags:
     - ai
     - development
