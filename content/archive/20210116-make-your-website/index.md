@@ -3,6 +3,7 @@ title: Make your own independent website
 date: 2021-01-16T08:41:27-05:00
 
 aliases:
+    - /make-your-own-independent-website/
     - /archive/make-your-own-independent-website/
     - /blog/make-your-own-independent-website/
     - /posts/make-your-own-independent-website/

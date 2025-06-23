@@ -1,8 +1,8 @@
 # What's All This?
 
-Welcome to the repository for [victoria.dev](https://victoria.dev), a personal website wholly created and owned by me, Victoria Drake. I've produced everything you see on the site—from research and writing to illustrations, design, code, and deployment.
+Welcome to [victoria.dev](https://victoria.dev), a personal website wholly created and owned by me, Victoria Drake. I've produced everything you see on the site—from research and writing to illustrations, design, code, and deployment.
 
-Victoria.dev is built as a static site using [Hugo](https://gohugo.io/), a fast and flexible static site generator. The site is [open source](https://github.com/victoriadrake/victoriadrake.github.io), so feel free to explore how it works!
+The site is [open source](https://github.com/victoriadrake/victoriadrake.github.io), so feel free to explore how it works!
 
 ## Technical Features
 
@@ -25,7 +25,7 @@ The site is automatically deployed with each update using GitHub Pages and GitHu
 
 If you find a mistake or bug, please open an issue so it can be fixed!
 
-**Note**: Guest blog posts or requests for placing links in posts are not accepted.
+I don't accept guest blog posts or requests for placing links in posts.
 
 ## License
 

@@ -5,6 +5,7 @@ description: A straightforward guide to sending large input to ChatGPT using Pyt
 categories: ["article"] 
 aliases:
     - /blog/how-to-send-long-text-input-to-chatgpt-using-the-openai-api/
+    - /how-to-send-long-text-input-to-chatgpt-using-the-openai-api/
 tags:
     
     

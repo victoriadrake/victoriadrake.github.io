@@ -3,6 +3,7 @@ title: Manipulating data with Django migrations
 date: 2020-09-14T02:12:57-04:00
 aliases:
     - /archive/manipulating-data-with-django-migrations/
+    - /manipulating-data-with-django-migrations/
 description: How to update Django models and manipulate existing data using migrations.
 series:
 tags:

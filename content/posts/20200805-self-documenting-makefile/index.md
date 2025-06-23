@@ -3,6 +3,7 @@ title: "How to create a self-documenting Makefile"
 date: 2020-08-05T08:55:19-04:00
 
 aliases:
+    - /how-to-create-a-self-documenting-makefile/
     - /blog/self-documenting-devops-make-it-better/
     - /archive/how-to-create-a-self-documenting-makefile/
 description: Accelerate your workflow and DevOps with command-line aliases you can check in

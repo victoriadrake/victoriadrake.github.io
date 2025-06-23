@@ -3,6 +3,7 @@ title: "Delightful Django Development: Setup, Hooks, and CI/CD"
 date: 2020-09-22T04:55:19-04:00
 
 aliases:
+    - /django-project-best-practices-to-keep-your-developers-happy/
     - /blog/my-django-project-best-practices-for-happy-developers/
     - /blog/django-project-best-practices-to-keep-your-developers-happy/
     - /archive/django-project-best-practices-to-keep-your-developers-happy/

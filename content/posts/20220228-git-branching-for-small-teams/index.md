@@ -3,6 +3,7 @@ title: "Mastering Git for Small Teams"
 date: 2022-02-28T06:37:48-06:00
 
 aliases:
+    - /git-branching-for-small-teams/
 description: Unlock a more productive Git workflow for your small team with an approach to branch management designed to reduce headaches and accelerate your path to deployment.
 tags:
     - leadership

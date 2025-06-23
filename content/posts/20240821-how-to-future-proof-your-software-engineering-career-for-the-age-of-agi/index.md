@@ -2,6 +2,8 @@
 title: How to Future-Proof Your Software Engineering Career for the Age of AGI
 date: '2024-08-21T13:30:24.744Z'
 draft: false
+aliases:
+  - /how-to-future-proof-your-software-engineering-career-for-the-age-of-agi/
 description: "Worried about AI taking your job? Strategic skills and approaches to not just survive, but thrive in the age of AGI."
 tags:
   - ai
