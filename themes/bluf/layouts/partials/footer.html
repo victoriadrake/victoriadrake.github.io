@@ -6,19 +6,23 @@
                 <p>
                     <strong class="p-name">{{ .Site.Params.author.name }}</strong>
                 </p>
-                <p class="footer-description p-note">
-                    {{ .Site.Params.description }}
-                </p>
+                {{ with .Site.Params.description }}
+                    <p class="footer-description p-note">
+                        {{ . | markdownify }}
+                    </p>
+                {{ end }}
                 <p>© {{ now.Format "2006" }} · All rights reserved</p>
             </div>
             <a href="{{ .Site.BaseURL }}" class="u-url" style="display: none;">{{ .Site.BaseURL }}</a>
         </div>
 
         <div class="footer-social">
-            {{ range .Site.Params.social }}
-                <a href="{{ .url }}" title="{{ .name }}" rel="me" class="u-url">
-                    <img src="{{ .icon }}" alt="{{ .name }}">
-                </a>
+            {{ with .Site.Params.social }}
+                {{ range . }}
+                    <a href="{{ .url }}" title="{{ .name }}" rel="me" class="u-url">
+                        <img src="/social/{{ .icon }}" alt="{{ .name }}">
+                    </a>
+                {{ end }}
             {{ end }}
         </div>
     </div>

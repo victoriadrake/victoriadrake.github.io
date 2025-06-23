@@ -625,6 +625,30 @@ a.category {
     border-top: 4px solid var(--black);
     border-bottom: 4px solid var(--black);
     border-left: none;
+    position: relative;
+}
+
+.article blockquote:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--black);
+}
+
+/* Quote attribution */
+.article blockquote cite,
+.article blockquote footer {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    color: var(--gray-600);
+    font-style: normal;
+}
+
+.article blockquote cite::before,
+.article blockquote footer::before {
+    content: "— ";
+    font-weight: 900;
 }
 
 /* Code - Base styles */
@@ -746,11 +770,370 @@ li {
     margin-bottom: 0.5rem;
 }
 
+/* Task Lists */
+.article ul li input[type="checkbox"] {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.75rem;
+    margin-top: 0.1rem;
+    appearance: none;
+    border: 3px solid var(--black);
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    position: relative;
+    vertical-align: top;
+}
+
+.article ul li input[type="checkbox"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--black);
+}
+
+.article ul li input[type="checkbox"]:checked {
+    background: var(--black);
+}
+
+.article ul li input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--white);
+    font-weight: 900;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Task list items with checkboxes */
+.article ul li:has(input[type="checkbox"]) {
+    list-style: none;
+    margin-left: -2rem;
+    padding-left: 0;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+/* Fallback for browsers that don't support :has() */
+.article ul li input[type="checkbox"] + * {
+    flex: 1;
+}
+
+/* Completed task styling */
+.article ul li input[type="checkbox"]:checked ~ * {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+/* Definition Lists */
+.article dl {
+    margin: 2rem 0;
+    border: 2px solid var(--black);
+    background: var(--white);
+}
+
+.article dt {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 1.25rem;
+    padding: 1rem 1.5rem 0.5rem;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    margin: 0;
+}
+
+.article dd {
+    padding: 1rem 1.5rem 1.5rem;
+    margin: 0;
+    border-bottom: 2px solid var(--gray-200);
+    line-height: 1.6;
+}
+
+.article dd:last-child {
+    border-bottom: none;
+}
+
+.article dt:hover {
+    background: var(--black);
+    color: var(--white);
+}
+
+/* Multiple definitions for same term */
+.article dd + dd {
+    border-top: 1px solid var(--gray-200);
+    padding-top: 1rem;
+}
+
+/* Footnotes */
+.article .footnotes {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    font-size: 0.95rem;
+}
+
+.article .footnotes h2,
+.article .footnotes .footnotes-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.article .footnotes hr {
+    border: 2px solid var(--black);
+    margin-bottom: 1rem;
+}
+
+/* Footnote backlinks */
+.article .footnotes .footnote-backref {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+    text-decoration: none;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-400);
+    padding: 0.2rem 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.article .footnotes .footnote-backref:hover {
+    background: var(--black);
+    color: var(--white);
+    border-color: var(--black);
+}
+
+/* Inline footnote references */
+.article a[href^="#fn:"],
+.article sup a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    background: var(--accent-technical);
+    color: var(--black);
+    padding: 0.2rem 0.4rem;
+    margin: 0 0.1rem;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    vertical-align: super;
+    line-height: 1;
+}
+
+.article a[href^="#fn:"]:hover,
+.article sup a:hover {
+    background: var(--black);
+    color: var(--white);
+    transform: translateY(-1px);
+}
+
+/* Inline footnotes (alternative style) */
+.article .footnote-inline {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    background: var(--gray-100);
+    border: 2px solid var(--gray-400);
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    position: relative;
+    border-left: 4px solid var(--accent-technical);
+}
+
+.article .footnote-inline::before {
+    content: "†";
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    background: var(--accent-technical);
+    color: var(--black);
+    font-weight: 900;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+}
+
+/* Inline footnote pattern ^[text] */
+.article p {
+    position: relative;
+}
+
+.article p:has-text("^[") {
+    position: relative;
+}
+
+/* Target inline footnote pattern with regex-like approach */
+.article *:contains("^[") {
+    position: relative;
+}
+
+/* Inline footnotes pattern: ^[text] - target the text that follows the caret */
+.article *:contains("^[") {
+    position: relative;
+}
+
+/* Target inline footnote specifically */
+.article p,
+.article span {
+    position: relative;
+}
+
+/* Pandoc-style inline footnotes */
+.article .footnote-inline,
+.article span.footnote {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    background: var(--gray-100);
+    border: 2px solid var(--gray-400);
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+    position: relative;
+    border-left: 3px solid var(--accent-technical);
+    display: inline-block;
+    cursor: help;
+    vertical-align: super;
+    line-height: 1;
+}
+
+.article .footnote-inline::before,
+.article span.footnote::before {
+    content: "†";
+    position: absolute;
+    left: -3px;
+    top: -2px;
+    background: var(--accent-technical);
+    color: var(--black);
+    font-weight: 900;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+/* Alternative inline footnote styling for Hugo's inline footnotes */
+.article .sidenote,
+.article .marginnote {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    background: var(--accent-technical);
+    color: var(--black);
+    padding: 0.4rem 0.6rem;
+    margin: 0 0.2rem;
+    border-radius: 3px;
+    font-weight: 600;
+    vertical-align: super;
+    line-height: 1;
+    cursor: help;
+}
+
+/* Abbreviations */
+.article abbr {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 2px dotted var(--gray-400);
+    cursor: help;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.article abbr:hover {
+    border-bottom-color: var(--accent-technical);
+    color: var(--accent-technical);
+}
+
+/* Tooltip for abbreviations */
+.article abbr[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--black);
+    color: var(--white);
+    padding: 0.5rem 0.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 1000;
+    border: 2px solid var(--black);
+    margin-bottom: 0.5rem;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.article abbr[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.25rem;
+    border: 4px solid transparent;
+    border-top-color: var(--black);
+    z-index: 1001;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Special styling for common abbreviations */
+.article abbr[title*="HTML"],
+.article abbr[title*="CSS"],
+.article abbr[title*="JavaScript"] {
+    color: var(--tag-technical);
+    border-bottom-color: var(--tag-technical);
+}
+
+.article abbr[title*="HTML"]:hover::after,
+.article abbr[title*="CSS"]:hover::after,
+.article abbr[title*="JavaScript"]:hover::after {
+    background: var(--tag-technical);
+    border-color: var(--tag-technical);
+}
+
+.article abbr[title*="HTML"]:hover::before,
+.article abbr[title*="CSS"]:hover::before,
+.article abbr[title*="JavaScript"]:hover::before {
+    border-top-color: var(--tag-technical);
+}
+
 /* Images */
 img {
     max-width: 100%;
     height: auto;
     margin: 2rem 0;
+}
+
+/* Figure captions */
+figcaption {
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-top: 0.5rem;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+figure {
+    margin: 2rem 0;
+    text-align: center;
+}
+
+figure img {
+    margin: 0 0 0.5rem 0;
 }
 
 /* Tables */
@@ -891,7 +1274,7 @@ th {
 
 .grid-post-recent .post-number {
     background: var(--black);
-    color: var(--white);
+    color: var(--white) !important;
     padding: 0.25rem 0.75rem;
     font-weight: 700;
 }
