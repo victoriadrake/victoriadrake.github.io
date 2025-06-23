@@ -1,6 +1,6 @@
 ---
 date: 2024-08-27T13:55:47.820Z
-title: "How to Create Technical Documentation Using ChatGPT"
+title: "How to Create Technical Documentation with AI"
 datePublished: Tue Aug 27 2024 13:55:32 GMT+0000 (Coordinated Universal Time)
 cuid: cm0chp6ka001309jwdjaxffnl
 slug: how-to-create-technical-documentation-using-chatgpt
@@ -8,6 +8,7 @@ description: How to use ChatGPT to create effective and correct documentation fo
 canonical: https://victoria.dev/posts/how-to-create-technical-documentation-using-chatgpt
 image: https://cdn.hashnode.com/res/hashnode/image/upload/v1724610603073/dbed6199-8e9c-4858-b299-a8d84e280156.jpeg
 aliases:
+    - /posts/how-to-create-technical-documentation-using-chatgpt/
     - /how-to-create-technical-documentation-using-chatgpt/
 tags:
     - ai
@@ -15,63 +16,78 @@ tags:
 
 ---
 
-{{< figure src="https://cdn.hashnode.com/res/hashnode/image/upload/v1724610603073/dbed6199-8e9c-4858-b299-a8d84e280156.jpeg" alt="Margaret Hamilton" caption="No need to print out stacks of code when conversational AI can summarize it for you. (Photo is Margaret Hamilton, a computer scientist who played a crucial role in developing the software for the Apollo space program at NASA, standing next to a towering stack of printed code that she and her team wrote for the Apollo Guidance Computer.)" >}}
+Documentation has always been one of those “we should do this” tasks that somehow never makes it to the top of the sprint. But what if creating comprehensive, useful documentation could be as straightforward as explaining your code to a colleague?
 
-I've maintained for years that good code isn't that great without good documentation. It's a shame that this area is so often overlooked. Good docs don't have to be hard to write and often help you organize your thoughts -- which makes the code better as well.
+Conversational AI has changed the game entirely. Instead of starting with a blank page and trying to remember every detail a new team member might need, you can have AI help you think through the process systematically. The result isn’t just better docs—it’s documentation that actually serves your team’s needs as you grow and evolve.
 
-Of course, I understand that some people much prefer writing code to writing docs. Here, conversational AI like ChatGPT can do most of the heavy lifting for you. Here are a few strategies for getting ChatGPT to write your docs.
+Here’s how to use AI to build documentation that scales with your team and genuinely improves how you work together.
 
-## Quality Code Basics
+## Documentation That Welcomes New Team Members
 
-If your code is ever going to be seen by people other than yourself, there's no excuse to not have a README and simple Getting Started guide. (Even if you're the only one to ever look at it, it's a near-guarantee that you'll forget how something works.)
+The best part about using AI for documentation is that it naturally thinks from an outsider’s perspective. While you and your team already understand your system’s quirks and design decisions, AI starts fresh every time—much like a new hire would.
 
-The ChatGPT web interface allows you to upload files. You can provide your code files and ask ChatGPT to create your docs with a prompt such as:
+Most conversational AI tools allow you to upload code files or paste code snippets. You can then use prompts that help surface the knowledge your team takes for granted:
 
-> Write a straightforward README for the repository that contains these files. Include a beginner-friendly Getting Started section that starts with cloning the repository and installing any necessary dependencies.
+> Write documentation for a new software engineer joining our team. Assume they’re experienced but know nothing about our specific domain, architecture decisions, or business logic. Include the “why” behind non-obvious technical choices and flag anything that might seem strange or unexpected to an outside developer.
 
-If you want ChatGPT to get as close as it can to a complete document that you can copy and paste into your git repository, you can also provide details such as:
+This approach reveals the implicit knowledge that experienced team members forget to document—why certain patterns exist, what alternatives were considered, and where the potential gotchas are. It transforms documentation from a chore into a useful onboarding tool that actually reduces the time senior developers spend answering questions.
 
-* The repo URL
-    
-* The license type, if any
-    
-* Instructions for potential contributors
-    
-* Ways to support the project financially
-    
-* Links to find you or your project on social media
-    
+To create comprehensive documentation you can use immediately, provide the AI with additional context such as:
 
-Now your job is as simple as giving the results a read-through and run-through to ensure it makes sense and that instructions are correct. For simple projects or established frameworks, I've found ChatGPT to be accurate and complete.
+- What the application does and who uses it
+- Key architectural decisions and their reasoning
+- Setup and deployment processes
+- Integration points with other systems
+- Common troubleshooting scenarios
 
-What if your project isn't simple? In this case, you might benefit from some more in-depth documentation.
+Your role becomes reviewing and refining rather than writing from scratch—which is often the difference between documentation that gets done and documentation that gets skipped.
 
-## In-Depth Documentation
+## Operational Documentation That Actually Helps
 
-More complicated projects or ones that don't use an established framework can benefit from in-depth documentation to guide new contributors or refresh the memories of their builders.
+One of the most valuable types of documentation is also the most overlooked: information organized for when things go wrong. During incidents, you need answers fast, not comprehensive explanations.
 
-ChatGPT can help you write in-depth documentation with a prompt such as:
+AI excels at creating focused, actionable documentation because you can specify exactly what situation you’re optimizing for:
 
-> Explain this code to me. Start with an overview of what it does in simple language, then detail how all the parts and functions connect in an in-depth technical manner. Describe anything I might need to know about adding to or modifying this code in the future.
+> Create incident response documentation for this codebase. Focus on: 1) How to quickly identify what component is failing, 2) Common failure modes and their symptoms, 3) Step-by-step debugging workflows, 4) Who to contact for different types of issues. Write this as if the person reading it is stressed, tired, and needs answers in under 5 minutes.
 
-Prompts like this are a great practice, whether or not you need the resulting docs. It's like having an always-available programming partner to look over your work and see if it makes sense to someone other than yourself.
+This type of documentation serves a completely different purpose than your standard README or API docs. It’s designed for when your most knowledgeable developers aren’t available and someone needs to resolve an issue quickly.
 
-Reading the results will help ensure they're correct, that the code you wrote does what you intended it to, and can even help highlight areas for further improvement.
+The beauty of AI-generated operational docs is that they’re naturally structured for scan-ability rather than linear reading—exactly what you need during high-pressure situations.
 
-## Inline Documentation
+## Capturing Institutional Knowledge
 
-Over years of working with many different teams, developers, and technical leaders, I've come to see that some folks just don't read anything outside of the code files. It's an unfortunate habit that I encourage changing -- reading your team's docs, forum threads, blog posts, etc. can save you time and energy and help inspire your own work.
+Here’s where AI really shines: helping you identify and document the knowledge that exists only in people’s heads. This institutional knowledge is often the difference between a change that takes 30 minutes and one that takes 3 hours of debugging.
 
-In the meantime, ChatGPT can still help by creating inline documentation. This can be language-specific (like `pydoc` docstrings, which have the added benefit of generating standalone documentation) or it could take the form of simple comments in the code file.
+You can surface these knowledge gaps by asking AI to analyze your code from a risk perspective:
 
-To generate inline docs, upload your files to ChatGPT and use a prompt such as:
+> Analyze this code and identify areas where domain knowledge or business context would be critical for modification. What would a developer need to know about our business, users, or regulatory requirements to safely change this code? What assumptions about data, timing, or external systems are embedded here?
 
-> Add inline documentation to this code file without changing any of the code. Add short explanations to each function that document what it does and its input and output.
+For inline documentation, you can focus on the business logic and integration points that aren’t obvious from the code itself:
 
-## A Few Tips
+> Add inline documentation to this code file without changing any of the code. Focus on documenting business logic, data assumptions, and integration points that wouldn’t be obvious to someone unfamiliar with our domain.
 
-If you find your results lacking, try providing more context about what the code does in plain language. When communicating (with software developers or ChatGPT) it helps to start by giving context about the general intent, goal, or desired end result. If you find it's difficult to explain, you may have highlighted some opportunities for improvement that would benefit both your docs and your code.
+This process often improves the code itself—explaining your logic to AI sometimes reveals opportunities for clearer naming, better structure, or simplified approaches.
 
-A note on execution: for very long code files, it can be cumbersome to copy and paste the results. ChatGPT can give you a zip of your updated file(s) if you add an instruction to do so, i.e. "...and give me the updated file to download."
+## Making Documentation a Team Superpower
 
-I hope I've given you some inspiration of how using ChatGPT for documentation can streamline the process and improve clarity. Whether it's in a README, detailed explanations, or found in inline comments, good documentation helps make your code more accessible. Now you can focus on coding while ensuring your project is well-documented and easier for others (and your future self) to understand and contribute to.
+The real opportunity here isn’t just better individual documentation—it’s democratizing the ability to create good documentation across your entire team. Developers who previously avoided writing docs because they didn’t know where to start now have a collaborative partner to help structure their thoughts.
+
+**Start with high-impact documentation**: Focus on onboarding guides and operational runbooks first. These provide immediate value and create positive momentum around documentation practices.
+
+**Use AI to improve existing docs**: You can ask AI to review and improve documentation you already have, suggesting missing information or better organization.
+
+**Make it iterative**: Documentation doesn’t need to be perfect on the first pass. Use AI to create initial drafts that you can refine based on team feedback and real usage patterns.
+
+**Leverage different formats**: AI can help create everything from README files to inline comments to architectural decision records, adapting the style and depth based on the audience and purpose.
+
+## Practical Tips for Better Results
+
+When working with AI to create documentation, providing context about the intended audience and use case dramatically improves the output. Explain not just what the code does, but who will be using the documentation and in what situations.
+
+For complex codebases, you might get better results by working with smaller sections and then asking AI to help you organize everything into a coherent structure. Many AI tools can also provide downloadable files if you specify that in your prompt, which saves time on longer documents.
+
+The goal isn’t to replace human judgment in documentation—it’s to remove the barriers that prevent good documentation from getting written in the first place. AI handles the initial structure and comprehensive coverage, while you focus on accuracy, team-specific context, and ensuring the documentation actually serves your workflows.
+
+Good documentation transforms how teams work together. It reduces interruptions, accelerates onboarding, and creates resilience when key team members aren’t available. With AI handling the heavy lifting of initial creation, maintaining comprehensive documentation becomes achievable rather than aspirational.
+
+Your future team members (and your future self during the next production incident) will definitely appreciate the investment.
