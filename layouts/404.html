@@ -1,13 +1,462 @@
-{{ define "main" }}
-<div class="page-container">
-    <header class="page-header">
-        <h1 class="page-title">{{ .Title }}</h1>
-    </header>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>404 - Page Not Found | victoria.dev</title>
+        <meta name="theme-color" content="#000000">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-    <div class="page-content-wrapper">
-        <article class="page-content">
-            {{ .Content }}
-        </article>
-    </div>
-</div>
-{{ end }}
+            body {
+                font-family: 'JetBrains Mono', monospace;
+                background: #FFFFFF;
+                color: #000000;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                position: relative;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                body {
+                    color: #3c3c3c;
+                    background: #111111;
+                }
+            }
+
+            /* Glitch container */
+            .glitch-wrapper {
+                position: relative;
+                margin-bottom: 2rem;
+            }
+
+            /* Main 404 */
+            .error-code {
+                font-family: 'Inter', sans-serif;
+                font-weight: 900;
+                font-size: clamp(8rem, 25vw, 20rem);
+                line-height: 0.8;
+                letter-spacing: -0.05em;
+                position: relative;
+            }
+
+            .error-code.glitching {
+                animation: glitch 2s infinite;
+            }
+
+            /* Glitch effect layers */
+            .error-code.glitching::after,
+            .error-code.glitching::before {
+                content: '404';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .error-code.glitching::before {
+                animation: glitch-1 0.5s infinite;
+                color: #00D4FF;
+                z-index: -1;
+            }
+
+            .error-code.glitching::after {
+                animation: glitch-2 0.5s infinite;
+                color: #FF0066;
+                z-index: -2;
+            }
+
+            /* Success state */
+            .error-code.success {
+                color: #00FF88;
+                animation: pulse 2s ease-in-out;
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+
+            @keyframes glitch {
+                0%,
+                100%,
+                90% {
+                    text-shadow: none;
+                }
+                95% {
+                    text-shadow: -2px 0 #00D4FF, 2px 0 #FF0066;
+                }
+            }
+
+            @keyframes glitch-1 {
+                0%,
+                100% {
+                    clip-path: inset(0 0 0 0);
+                    transform: translate(0);
+                }
+                20% {
+                    clip-path: inset(20% 0 60% 0);
+                    transform: translate(-2px, 2px);
+                }
+                40% {
+                    clip-path: inset(50% 0 20% 0);
+                    transform: translate(2px, -2px);
+                }
+                60% {
+                    clip-path: inset(80% 0 5% 0);
+                    transform: translate(-2px, 2px);
+                }
+                80% {
+                    clip-path: inset(10% 0 80% 0);
+                    transform: translate(2px, -2px);
+                }
+            }
+
+            @keyframes glitch-2 {
+                0%,
+                100% {
+                    clip-path: inset(0 0 0 0);
+                    transform: translate(0);
+                }
+                20% {
+                    clip-path: inset(80% 0 5% 0);
+                    transform: translate(2px, -2px);
+                }
+                40% {
+                    clip-path: inset(10% 0 80% 0);
+                    transform: translate(-2px, 2px);
+                }
+                60% {
+                    clip-path: inset(20% 0 60% 0);
+                    transform: translate(2px, 2px);
+                }
+                80% {
+                    clip-path: inset(50% 0 20% 0);
+                    transform: translate(-2px, -2px);
+                }
+            }
+
+            /* Message */
+            .message {
+                text-align: center;
+                max-width: 600px;
+                padding: 0 2rem;
+            }
+
+            .message h1 {
+                font-family: 'Inter', sans-serif;
+                font-weight: 900;
+                font-size: 2.5rem;
+                letter-spacing: -0.03em;
+                margin-bottom: 1rem;
+                text-transform: uppercase;
+            }
+
+            .message p {
+                font-size: 1.1rem;
+                line-height: 1.6;
+                margin-bottom: 2rem;
+                opacity: 0.8;
+            }
+
+            /* ASCII Art Box */
+            .ascii-box {
+                background: #000000;
+                color: #00FF88;
+                padding: 1.5rem 2rem;
+                margin: 2rem 0;
+                font-size: 0.875rem;
+                line-height: 1.4;
+                font-family: 'JetBrains Mono', monospace;
+                white-space: pre;
+                overflow-x: auto;
+                max-width: 90vw;
+                border: 4px solid #000000;
+                position: relative;
+                font-weight: 400;
+                letter-spacing: 0.05em;
+            }
+
+            .ascii-box::before {
+                content: 'SYSTEM ERROR';
+                position: absolute;
+                top: -1.5rem;
+                left: 1rem;
+                background: #FFFFFF;
+                padding: 0 0.5rem;
+                color: #000000;
+                font-size: 0.75rem;
+                letter-spacing: 0.1em;
+                font-weight: 700;
+            }
+
+            /* Buttons */
+            .actions {
+                display: flex;
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 3rem;
+            }
+
+            .btn {
+                font-family: 'Inter', sans-serif;
+                font-weight: 700;
+                font-size: 1rem;
+                padding: 1rem 2rem;
+                border: 3px solid #000000;
+                background: #FFFFFF;
+                color: #000000;
+                text-decoration: none;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                transition: all 0.2s ease;
+                cursor: pointer;
+            }
+
+            .btn:hover {
+                background: #000000;
+                color: #FFFFFF;
+                transform: translateY(-4px);
+                box-shadow: 0 8px 0 #000000;
+            }
+
+            .btn.primary {
+                background: #000000;
+                color: #FFFFFF;
+            }
+
+            .btn.primary:hover {
+                background: #00D4FF;
+                color: #000000;
+            }
+
+            /* Random blocks animation */
+            .block {
+                position: absolute;
+                background: #000000;
+                opacity: 0.05;
+                animation: float 20s infinite;
+            }
+
+            .block:nth-child(1) {
+                width: 80px;
+                height: 80px;
+                left: 10%;
+                top: 20%;
+                animation-duration: 25s;
+                animation-delay: 0s;
+            }
+
+            .block:nth-child(2) {
+                width: 120px;
+                height: 120px;
+                right: 15%;
+                top: 50%;
+                animation-duration: 30s;
+                animation-delay: 5s;
+            }
+
+            .block:nth-child(3) {
+                width: 60px;
+                height: 60px;
+                left: 70%;
+                bottom: 20%;
+                animation-duration: 20s;
+                animation-delay: 2s;
+            }
+
+            .block:nth-child(4) {
+                width: 100px;
+                height: 100px;
+                left: 20%;
+                bottom: 30%;
+                animation-duration: 35s;
+                animation-delay: 7s;
+            }
+
+            @keyframes float {
+                0%,
+                100% {
+                    transform: translateY(0) rotate(0deg);
+                }
+                25% {
+                    transform: translateY(-20px) rotate(90deg);
+                }
+                50% {
+                    transform: translateY(0) rotate(180deg);
+                }
+                75% {
+                    transform: translateY(20px) rotate(270deg);
+                }
+            }
+
+            /* Mobile adjustments */
+            @media (max-width: 640px) {
+                .error-code {
+                    font-size: clamp(6rem, 30vw, 10rem);
+                }
+
+                .message h1 {
+                    font-size: 1.75rem;
+                }
+
+                .ascii-box {
+                    font-size: 0.7rem;
+                    padding: 1rem;
+                }
+
+                .btn {
+                    font-size: 0.875rem;
+                    padding: 0.75rem 1.5rem;
+                }
+            }
+
+            /* Fun cursor */
+            body {
+                cursor: crosshair;
+            }
+
+            a,
+            button {
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Floating blocks -->
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+
+        <!-- Main content -->
+        <div class="glitch-wrapper">
+            <div class="error-code glitching">404</div>
+        </div>
+
+        <div class="message">
+            <h1>Page Not Found</h1>
+            <p>The page you're looking for has vanished into the digital void. It might have been moved, deleted, or perhaps it never existed at all.</p>
+        </div>
+
+        <div class="ascii-box">ERROR: REQUESTED_PAGE_NOT_FOUND
+STATUS: 404
+TIME: <span id="time"></span>
+PATH: <span id="path"></span>
+
+¯\_(ツ)_/¯</div>
+
+        <div class="actions">
+            <a href="/" class="btn primary">Go Home</a>
+            <a href="/posts" class="btn">View All Posts</a>
+            <button class="btn" onclick="history.back()">Go Back</button>
+        </div>
+
+        <script>
+            // Add current time
+            document
+                .getElementById('time')
+                .textContent = new Date()
+                .toISOString()
+                .split('T')[0];
+
+            // Add current path
+            const path = window.location.pathname;
+            const displayPath = path.length > 30
+                ? '...' + path.slice(-27)
+                : path;
+            document
+                .getElementById('path')
+                .textContent = displayPath;
+
+            // Fun console messages - fixed syntax
+            console.log('%c404', 'font-size: 100px; font-weight: 900; font-family: Inter, sans-serif;');
+            console.log('%cYou seem lost. Need help finding something?', 'font-size: 16px; font-family: monospace;');
+
+            // Add glitch effect on click
+            document.addEventListener('click', function (e) {
+                if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+                    const errorCode = document.querySelector('.error-code');
+                    if (errorCode.classList.contains('glitching')) {
+                        // Reset animation
+                        errorCode.style.animation = 'none';
+                        setTimeout(() => {
+                            errorCode.style.animation = '';
+                        }, 10);
+                    }
+                }
+            });
+
+            // Konami code easter egg
+            let konamiCode = [
+                'ArrowUp',
+                'ArrowUp',
+                'ArrowDown',
+                'ArrowDown',
+                'ArrowLeft',
+                'ArrowRight',
+                'ArrowLeft',
+                'ArrowRight',
+                'b',
+                'a'
+            ];
+            let konamiIndex = 0;
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === konamiCode[konamiIndex]) {
+                    konamiIndex++;
+                    if (konamiIndex === konamiCode.length) {
+                        // Stop glitch and change to success
+                        const errorCode = document.querySelector('.error-code');
+                        errorCode
+                            .classList
+                            .remove('glitching');
+                        errorCode
+                            .classList
+                            .add('success');
+                        errorCode.textContent = '200';
+
+                        document
+                            .querySelector('.message h1')
+                            .textContent = '200 Unlocked!';
+                        document
+                            .querySelector('.message p')
+                            .textContent = 'Maybe this is the page you were looking for all along.';
+
+                        // Update ASCII box
+                        document
+                            .querySelector('.ascii-box')
+                            .innerHTML = `STATUS: OK
+CODE: 200  
+TIME: ${new Date()
+                            .toISOString()
+                            .split('T')[0]}
+EFFECT: +200 LIVES
+
+(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧`;
+
+                        konamiIndex = 0;
+                    }
+                } else {
+                    konamiIndex = 0;
+                }
+            });
+        </script>
+    </body>
+</html>
