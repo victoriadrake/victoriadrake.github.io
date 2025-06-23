@@ -1,7 +1,7 @@
 ---
-title: How to replace a string with sed in current and recursive subdirectories
+title: How to Replace a String with sed in Current and Recursive Subdirectories
 date: 2017-05-06T20:04:53+08:00
-lastmod: 2020-11-22T20:04:53+08:00
+lastmod: 2025-06-23T20:04:53+08:00
 aliases:
     - /blog/how-to-replace-a-string-with-sed-in-current-and-recursive-subdirectories/
     - /posts/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command/
@@ -11,8 +11,7 @@ aliases:
     - /verbose/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command
 description: The power to update multiple files with a single command in your terminal.
 tags:
-    
-image: cover_sed.png
+    - development
  
 draft: false
 categories: ["article"]
@@ -22,24 +21,15 @@ wasfeatured:
 
 ---
 
-If you want to save time and money, efficiency and automation are paramount. The ability to quickly and accurately modify codebases, configuration files, or documentation across an entire project is a critical skill that scales with team size and project complexity. This is where `sed`, the stream editor, becomes an indispensable tool in your terminal arsenal.
+I’ve probably run some variation of “find and replace across multiple files” thousands of times in my career. It’s one of those operations that seems straightforward until you’re staring at a codebase with 500,000 lines spread across 2,000 files, and you need to rename a function that’s used everywhere. Get it wrong, and you’re looking at hours of manual cleanup—or worse, subtle bugs that only surface in production.
 
-While often underutilized, `sed` offers powerful capabilities for finding and replacing strings in files, making it a cornerstone for tasks ranging from simple text manipulation to large-scale refactoring and infrastructure automation.
+Here's the approach I use, why some methods work better than others, and some tips that can save you from that sinking feeling when you realize you just broke prod.
 
-## Strategic String Replacement with `sed`
+## Current Directory Only
 
-When approaching string replacement, consider the scope of your operation:
+You can use sed by itself to make changes to files in the current directory, ignoring subdirectories.
 
--   **Non-recursive:** Targeting files exclusively within the current directory.
--   **Recursive:** Extending the operation to include all subdirectories, ensuring comprehensive changes across a project.
-
-Let's explore the practical applications and underlying mechanics.
-
-## Current directory, non-recursive
-
-For localized changes, `sed` operates directly on files in the current directory, ignoring subdirectories.
-
-```text
+```sh
 .
 ├── index.html        # Change this file
 └── blog
@@ -47,107 +37,243 @@ For localized changes, `sed` operates directly on files in the current directory
     └── single.html   # these files
 ```
 
-To replace all occurrences of "foo" with "bar" in files within the current directory:
+To replace all occurrences of “foo” with “bar” in files within the current directory:
 
 ```sh
 sed -i -- 's/foo/bar/g' *
 ```
 
-Here's what each component of the command does:
+Here’s what each component of the command does:
 
-- `-i` will change the original, and stands for "in-place."
+- `-i` will change the original, and stands for “in-place.”
 - `s` is for substitute, so we can find and replace.
-- `foo` is the string we'll be taking away,
-- `bar` is the string we'll use instead today.
-- `g` as in "global" means "all occurrences, please."
+- `foo` is the string we’ll be taking away,
+- `bar` is the string we’ll use instead today.
+- `g` as in “global” means “all occurrences, please.”
 - `*` denotes all file types. (No more rhymes. What a tease.)
 
-You can limit the operation to one file type, such as `txt`, by using a matching pattern:
+You can limit the operation to one file type, such as Python files, by using a matching pattern:
 
 ```sh
-sed -i -- 's/foo/bar/g' *.txt
+sed -i -- 's/foo/bar/g' *.py
 ```
 
-## Current directory and subdirectories, recursive
+## The Performant Recursive Pattern
 
-For comprehensive, project-wide changes, combine `sed` with `find`. This extends the operation to all files within the current directory and its subdirectories, including hidden files.
+Here’s a performant command for making changes in the current directory and all subdirectories:
 
-```sh
-find . -type f -exec sed -i 's/foo/bar/g' {} +
+```bash
+find . -type f -name "*.py" -exec sed -i 's/old_function_name/new_function_name/g' {} +
 ```
 
-To exclude hidden files (e.g., `.git` directories or dotfiles), use the `-not -path` modifier:
+Let me break this down because each piece matters more than you might think:
 
-```sh
-find . -type f -not -path '*/\.*' -exec sed -i 's/foo/bar/g' {} +
+- `find .` starts from the current directory
+- `-type f` only matches files (not directories)
+- `-name "*.py"` filters to Python files (adjust the pattern for your needs)
+- `-exec sed -i 's/old/new/g' {} +` runs sed on batches of files
+
+That `+` at the end instead of `\;` is crucial for performance. It batches multiple files into each sed call instead of spawning a new process for every single file. When you’re dealing with thousands of files, this can be the difference between a 5-second operation and a 5-minute one.
+
+## The Safer Version I Actually Use
+
+But in the real world, it might not be best to run that command as-is. Here's a more accidentally-had-decaf-proof version:
+
+```bash
+# First, see what we're dealing with
+find . -type f -name "*.py" -exec grep -l "old_function_name" {} +
+
+# Test on a single file first
+find . -type f -name "*.py" -exec grep -l "old_function_name" {} + | head -1 | xargs sed -i.bak 's/old_function_name/new_function_name/g'
+
+# If that looks good, run on everything
+find . -type f -name "*.py" -exec sed -i.bak 's/old_function_name/new_function_name/g' {} +
 ```
 
-This command excludes any file whose path contains `/.`.
+That `.bak` extension creates backup files automatically. Yes, you should be using version control, but I’ve seen too many scenarios where someone needed to quickly revert a change and of course they hadn't started with a clean working tree. 
 
-To limit the operation to specific file extensions, such as Markdown files:
+The backup files are easy to clean up later:
 
-```sh
-find . -type f -name "*.md" -exec sed -i 's/foo/bar/g' {} +
+```bash
+find . -name "*.bak" -delete
 ```
 
-## Advanced `sed` Techniques and Best Practices
+## When GNU sed vs BSD sed Actually Matters
 
-Beyond basic string replacement, `sed` offers advanced capabilities crucial for robust automation.
+Here’s something you run into when you switch from Linux to macOS: sed behaves differently. BSD sed (default on macOS) requires an argument to `-i`, even if it’s empty:
 
-### Replacing URLs: Changing the Separator
+```bash
+# Linux (GNU sed)
+sed -i 's/old/new/g' file.txt
 
-When dealing with strings containing `/` (like URLs), escaping each slash can quickly become unreadable and error-prone:
+# macOS (BSD sed) - this breaks
+sed -i 's/old/new/g' file.txt
 
-```sh
-find . -type f -exec sed -i \
-'s/https:\/\/www.oldurl.com\/blog/https:\/\/www.newurl.com\/blog/g' {} +
+# macOS (BSD sed) - this works
+sed -i '' 's/old/new/g' file.txt
+# or with backup
+sed -i '.bak' 's/old/new/g' file.txt
 ```
 
-A best practice is to change the separator character. `sed` allows any character immediately following `s` to be the separator. Using a non-conflicting character like `,` or `_` significantly improves readability:
+You can also write portable versions:
 
-```sh
-find . -type f -exec sed -i \
-'s_https://www.oldurl.com/blog_https://www.newurl.com/blog_g' {} +
+```bash
+# Portable approach
+if sed --version 2>/dev/null | grep -q GNU; then
+    find . -type f -name "*.py" -exec sed -i 's/old/new/g' {} +
+else
+    find . -type f -name "*.py" -exec sed -i '' 's/old/new/g' {} +
+fi
 ```
 
-### Regular Expressions and Capture Groups
+Or use the backup approach everywhere since it works on both:
 
-`sed` supports full regular expressions, enabling complex pattern matching and manipulation using capture groups. This is invaluable for structured data transformations.
-
-Example: Swapping `firstName, lastName` to `lastName, firstName`
-
-```sh
-echo "John, Doe" | sed 's/\(.*\), \(.*\)/\2, \1/'
-# Output: Doe, John
+```bash
+find . -type f -name "*.py" -exec sed -i.bak 's/old/new/g' {} +
 ```
 
-Here, `\(.*\)` captures content into groups `\1` and `\2`, which are then reordered.
+## Handling Special Characters Without Losing Your Mind
 
-### Multi-line Replacements
+When your search string contains slashes, quotes, or regex metacharacters, things get interesting.
 
-While `sed` is primarily line-oriented, it can handle multi-line patterns using techniques like reading the next line (`N`) or branching. For complex multi-line operations, however, `awk` or scripting languages like Python might be more suitable.
+Instead of fighting with escaping, change the delimiter:
 
-### Idempotency and Safety
+```bash
+# Instead of this nightmare
+sed -i 's/https:\/\/old\.domain\.com\/api/https:\/\/new\.domain\.com\/api/g'
 
-When automating changes across a codebase, ensuring idempotency (running the command multiple times yields the same result as running it once) and safety is critical.
+# Use this
+sed -i 's|https://old.domain.com/api|https://new.domain.com/api|g'
+```
 
-*   **Test First:** Always test `sed` commands on a small, non-critical subset of files or in a temporary environment before applying them broadly.
-*   **Version Control:** Never run `sed -i` without a clean version control state. Commit your changes before and after the `sed` operation to easily revert if unintended consequences occur.
-*   **Backup:** For critical operations, create explicit backups of files before modification.
-*   **Review Diffs:** After running a `sed` command, always review the generated diffs (`git diff`) to ensure only intended changes were made.
+You can use almost any character as the delimiter. I usually go with `|` for URLs and `#` for file paths or when I’m dealing with email addresses (it's easier to differentiate from a lowercase L).
 
-## `sed` in a Leadership Context
+For really complex patterns, sometimes it’s easier to put the sed script in a file:
 
-Mastering tools like `sed` isn't just about personal productivity; it's about enabling team efficiency and maintaining system health at scale.
+```bash
+# In replace.sed
+s|https://old.domain.com/api|https://new.domain.com/api|g
+s/DEBUG = True/DEBUG = False/g
+s/old_secret_key/new_secret_key/g
 
-*   **Automated Refactoring:** `sed` can be integrated into scripts for large-scale code refactoring, ensuring consistency across a sprawling codebase.
-*   **CI/CD Pipelines:** Use `sed` to dynamically update configuration files, version numbers, or environment-specific variables within automated deployment pipelines.
-*   **Infrastructure as Code:** Automate modifications to configuration files for servers, containers, or cloud resources, ensuring consistency and reducing manual errors.
-*   **Knowledge Sharing:** Encourage your team to learn and utilize such powerful command-line tools. A team proficient in automation tools is a more productive and resilient team.
+# Use it
+find . -type f -name "*.py" -exec sed -i.bak -f replace.sed {} +
+```
 
-## The most important part
+This approach is also great for complex replacements that you’ll need to run multiple times or document for your team.
 
-The ability to efficiently manipulate text and code across a project is underrated skill that can save time and money. `sed` is a powerful, versatile tool that, when used judiciously and with an understanding of its implications, can significantly enhance productivity, facilitate large-scale changes, and contribute to the overall maintainability and reliability of software systems. As a leader, advocating for and demonstrating proficiency in foundational tools sets a high standard for technical excellence and operational efficiency within your team.
+## Performance Considerations That Actually Matter
+
+When you’re dealing with large codebases, performance starts to matter. Seemingly simple find-and-replace operations could take 20+ minutes on large repositories when done inefficiently.
+
+The biggest performance killer is usually file selection. Don’t do this:
+
+```bash
+# Slow—processes every file then filters
+find . -type f -exec grep -l "old_string" {} + | xargs sed -i 's/old/new/g'
+```
+
+Do this instead:
+
+```bash
+# Fast—filters files first
+find . -type f -name "*.py" -exec sed -i 's/old/new/g' {} +
+```
+
+If you need to be more selective about which files to process, use multiple find conditions:
+
+```bash
+# Only process Python files that aren't in virtual environments or build directories
+find . -type f -name "*.py" ! -path "./venv/*" ! -path "./build/*" ! -path "./.git/*" -exec sed -i.bak 's/old/new/g' {} +
+```
+
+## When sed Isn’t the Right Tool
+
+It's tempting to force sed to do things it’s not great at. Here’s when I reach for other tools:
+
+**For complex transformations**: Use a proper scripting language. A 50-line sed script could be 10 lines of Python and infinitely more readable.
+
+**For structured data**: If you’re modifying JSON, YAML, or XML, use tools that understand the format. sed doesn’t know about string escaping or nested structures.
+
+**For very large files**: sed loads the entire file into memory for each operation. For multi-gigabyte files, stream processing tools like awk might be better.
+
+**For interactive replacements**: Use your editor’s project-wide search and replace, or tools like `rg` (ripgrep) with interactive replacement.
+
+## The Nuclear Option: Parallel Processing
+
+If you're dealing with truly massive codebases (millions of lines), you might need to get aggressive about performance:
+
+```bash
+# Find all target files first
+find . -type f -name "*.py" ! -path "./venv/*" > /tmp/files_to_process
+
+# Process them in parallel
+cat /tmp/files_to_process | xargs -n 50 -P 8 sed -i.bak 's/old/new/g'
+```
+
+That `-P 8` runs up to 8 sed processes in parallel, and `-n 50` processes 50 files per batch. Adjust based on your CPU cores and I/O capacity.
+
+## Testing Before You Commit
+
+Here’s a thorough testing workflow for large replacements:
+
+```bash
+# 1. Count occurrences before
+find . -type f -name "*.py" -exec grep -c "old_string" {} + | awk -F: '{sum+=$2} END {print sum}'
+
+# 2. Run replacement with backups
+find . -type f -name "*.py" -exec sed -i.bak 's/old_string/new_string/g' {} +
+
+# 3. Count occurrences after (should be 0)
+find . -type f -name "*.py" -exec grep -c "new_string" {} + | awk -F: '{sum+=$2} END {print sum}'
+
+# 4. Spot check a few files
+find . -name "*.bak" | head -5 | while read backup; do
+    original="${backup%.bak}"
+    echo "=== $original ==="
+    diff "$backup" "$original"
+done
+
+# 5. Run tests
+make test  # or whatever your test command is
+
+# 6. If everything looks good, clean up backups
+find . -name "*.bak" -delete
+```
+
+## Using sed in Real-World Scenarios
+
+**API endpoint migration**: Moving from v1 to v2 API endpoints meant updating hundreds of URL references across multiple repositories. The key was being selective about file types and using exact matches to avoid accidentally changing documentation or comments that mentioned the old API.
+
+**Database migrations**: After a database refactor for a Django application, sed came in handy for making changes to complex Django migration files. I used different sed patterns for different contexts—from Python to raw SQL—because the replacement patterns were slightly different in each case.
+
+**Configuration key updates**: When our configuration format changed, I needed to update key names across config files, code references, and documentation. This one required multiple passes with different patterns because the same logical key appeared in different syntactic contexts.
+
+## The Debugging Workflow That Saves Time
+
+When a sed operation goes wrong (and it will), here’s how I debug:
+
+1. **Check what files were actually modified**:
+
+   ```bash
+   find . -name "*.bak" -exec sh -c 'diff -q "$1" "${1%.bak}"' _ {} \; | head -10
+   ```
+
+2. **Look for unintended matches**:
+   
+   ```bash
+   find . -name "*.bak" -exec sh -c 'diff "$1" "${1%.bak}"' _ {} \; | grep "^<" | sort | uniq -c | sort -nr
+   ```
+
+3. **Restore and try a more specific pattern**:
+   
+   ```bash
+   find . -name "*.bak" -exec sh -c 'mv "$1" "${1%.bak}"' _ {} \;
+   ```
+
+The pattern of creating backups, testing the results, and having a quick rollback strategy will save you countless hours. It’s especially important when you’re working on shared codebases where a mistake affects your entire team.
+
+While sed operations might seem like they're just for simple text processing, they can help with critical steps in deployments, migrations, and refactoring efforts that affect real systems and real users. Taking the time to do them safely and efficiently pays dividends when you’re not scrambling to fix broken builds or track down subtle bugs that only show up in production.
 
 If you found some value in this post, there's more! I write about high-output development processes and building maintainable systems in the AI age. You can get my posts in your inbox by subscribing below.
 
