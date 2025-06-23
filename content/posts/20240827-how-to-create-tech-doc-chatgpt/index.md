@@ -1,10 +1,10 @@
 ---
 date: 2024-08-27T13:55:47.820Z
-title: "How to Create Technical Documentation with AI"
+title: "Create Better Code Documentation 10x Faster with AI"
 datePublished: Tue Aug 27 2024 13:55:32 GMT+0000 (Coordinated Universal Time)
 cuid: cm0chp6ka001309jwdjaxffnl
 slug: how-to-create-technical-documentation-using-chatgpt
-description: How to use ChatGPT to create effective and correct documentation for your project.
+description: "Learn how AI transforms technical documentation from a chore into a team superpower. Practical prompts for better onboarding, incident response, and code docs."
 canonical: https://victoria.dev/posts/how-to-create-technical-documentation-using-chatgpt
 image: https://cdn.hashnode.com/res/hashnode/image/upload/v1724610603073/dbed6199-8e9c-4858-b299-a8d84e280156.jpeg
 aliases:
