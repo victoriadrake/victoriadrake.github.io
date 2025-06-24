@@ -31,6 +31,11 @@ dev: ## Run the local development server
 	git submodule update --init --recursive
 	hugo serve --enableGitInfo --disableFastRender --environment development
 
+TODAY := $(shell date +%Y%m%d)
+
+post: ## Create a new content/posts/ draft with TITLE=
+	hugo new content/posts/$(TODAY)-$(TITLE)/index.md
+
 future: ## Run the local development server in the future
 	hugo serve --enableGitInfo --buildFuture --disableFastRender --environment development
 
