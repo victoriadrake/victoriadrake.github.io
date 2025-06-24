@@ -25,7 +25,9 @@ The difference between assigning tasks and developing problem solvers is the dif
 
 Strategic delegation becomes about identifying problems that are slightly beyond someone’s current comfort zone—complex enough to require real thinking, but not so complex that they’ll get stuck without making progress. When we needed to optimize our database performance, instead of diving in myself, I paired our most eager junior backend engineer with our database expert and said, “Figure out why our queries are getting slower and what we should do about it.” (They did an excellent job and both learned new things in the process.)
 
-The key is providing enough context for good decision-making while resisting the urge to prescribe the solution. This means sharing the business constraints, the technical requirements, and the success criteria, then stepping back and letting them work through the problem-solving process. When they hit roadblocks, you guide them toward resources and approaches rather than answers.
+> The key is providing enough context for good decision-making while resisting the urge to prescribe the solution.
+
+This means sharing the business constraints, the technical requirements, and the success criteria, then stepping back and letting them work through the problem-solving process. When they hit roadblocks, you guide them toward resources and approaches rather than answers.
 
 What you’re really doing is teaching people to ask the right questions: What are we optimizing for? What are the constraints? What could go wrong? How will we know if it’s working? These thinking patterns transfer to every future problem they encounter.
 
@@ -43,7 +45,9 @@ The compound effect is remarkable. Teams that prioritize learning consistently p
 
 The goal of communication in leadership isn’t just clarity—it’s creating the conditions where people can make good decisions without constantly checking in with you. This means providing not just what was decided, but the reasoning behind decisions, the factors that were considered, and the principles that guide similar situations.
 
-When you share context richly, you’re teaching people to think through problems the way you would, but with their own insights and perspectives. Instead of saying “use Redis for caching,” explain why caching is needed, what alternatives were considered, what trade-offs matter, and how to evaluate whether it’s working. Now when similar performance problems arise, they have a framework for thinking through solutions.
+> When you share context richly, you’re teaching people to think through problems the way you would, but with their own insights and perspectives.
+
+Instead of saying “use Redis for caching,” explain why caching is needed, what alternatives were considered, what trade-offs matter, and how to evaluate whether it’s working. Now when similar performance problems arise, they have a framework for thinking through solutions.
 
 One-on-ones become especially valuable for developing problem-solving skills. These conversations are where you can understand how someone approaches challenges, what assumptions they’re making, and where their thinking might benefit from different perspectives. Often, the most helpful thing you can do is ask questions that help them think through problems more systematically.
 
@@ -65,7 +69,9 @@ Leadership development happens naturally when people get comfortable with their 
 
 The biggest barriers to developing problem solvers are often systemic rather than individual. People can’t develop good judgment if they don’t have access to the information they need to make decisions. They can’t learn from mistakes if the environment punishes experimentation. They can’t tackle complex problems if they’re constantly interrupted by urgent but low-value work.
 
-Your role becomes creating the conditions where problem-solving skills can develop naturally. This often means advocating upward for better tools, more reasonable deadlines, or clearer priorities. It means protecting your team’s focus time and ensuring they have access to the resources they need to dive deep into problems.
+> Your role becomes creating the conditions where problem-solving skills can develop naturally.
+
+This often means advocating upward for better tools, more reasonable deadlines, or clearer priorities. It means protecting your team’s focus time and ensuring they have access to the resources they need to dive deep into problems.
 
 Sometimes it’s about facilitating conversations between teams so your engineers can get the context they need to make good technical decisions. Sometimes it’s about negotiating for technical debt time so people can practice the long-term thinking that prevents problems rather than just solving them reactively.
 
@@ -79,6 +85,8 @@ When you develop someone’s problem-solving abilities, you’re not just helpin
 
 The ripple effects extend beyond your immediate team. Problem solvers become mentors. They raise the bar in technical discussions. They ask better questions in design reviews. They contribute to a culture where good technical decision-making is normal rather than exceptional.
 
-This is the ultimate lever in engineering leadership: instead of solving problems yourself, you create the conditions where great solutions emerge naturally from your team. Instead of being the bottleneck, you become the catalyst that makes everything else work better.
+> This is the ultimate lever in engineering leadership: instead of solving problems yourself, you create the conditions where great solutions emerge naturally from your team.
+
+Instead of being the bottleneck, you become the catalyst that makes everything else work better.
 
 The transition from solving problems to creating problem solvers is challenging because it requires patience and faith in other people’s potential. But when you see someone tackle a problem that would have stumped them six months ago, or when your team consistently delivers solutions that surprise you with their thoughtfulness, you realize you’ve built something much more valuable than any individual technical contribution: a system that continuously generates great technical work.

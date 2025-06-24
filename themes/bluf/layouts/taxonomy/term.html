@@ -10,7 +10,8 @@
     </header>
     
     <section class="posts-grid" id="posts-grid">
-        {{ range $index, $post := .Pages }}
+        {{ $nonArchive := where .Pages "Section" "ne" "archive" }}
+        {{ range $index, $post := $nonArchive }}
         {{ $firstTag := index $post.Params.tags 0 | default "post" }}
         <article class="grid-post h-entry" data-tag="{{ $firstTag | lower }}" data-all-tags="{{ range $post.Params.tags }}{{ . }} {{ end }}">
             <div class="grid-post-header">
