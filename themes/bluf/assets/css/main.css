@@ -657,8 +657,6 @@ pre {
     border: 1px solid var(--gray-800);
     padding: 1rem;
     overflow-x: auto;
-    overflow-wrap: anywhere;
-    word-break: normal;
     margin: 2rem 0;
     font-family: 'JetBrains Mono', monospace;
     font-size: 1rem;
@@ -679,8 +677,6 @@ pre code {
     background: none;
     display: block;
     overflow-x: auto;
-    overflow-wrap: anywhere;
-    word-break: normal;
 }
 
 /* Mobile-specific code improvements */
@@ -698,15 +694,15 @@ pre code {
         line-height: 1.5;
         /* Enable line wrapping on mobile */
         white-space: pre-wrap;
-        overflow-wrap: anywhere;
-        word-break: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
         overflow-x: hidden;
     }
 
     pre code {
         white-space: pre-wrap;
-        overflow-wrap: anywhere;
-        word-break: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     /* Inline code */
@@ -2162,6 +2158,406 @@ a.filter-tab {
     .subscribe-button {
         font-size: 1rem;
         padding: 0.875rem 1.5rem;
+    }
+}
+
+/* Form Elements */
+form {
+    margin: 2rem 0;
+}
+
+fieldset {
+    border: 3px solid var(--black);
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--white);
+}
+
+legend {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 1.25rem;
+    padding: 0.5rem 1rem;
+    background: var(--black);
+    color: var(--white);
+    border: none;
+    margin-left: -1rem;
+}
+
+label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    margin-top: 1.5rem;
+    color: var(--black);
+}
+
+label:first-child {
+    margin-top: 0;
+}
+
+/* Text inputs, email, password, etc. */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+    width: 100%;
+    padding: 1rem;
+    font-family: 'Source Serif 4', serif;
+    font-size: 1rem;
+    border: 3px solid var(--black);
+    background: var(--white);
+    color: var(--black);
+    outline: none;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="datetime-local"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--black);
+    box-shadow: 0 0 0 3px rgba(255, 0, 85, 0.1);
+    transform: translateY(-2px);
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="url"]:hover,
+input[type="tel"]:hover,
+input[type="number"]:hover,
+input[type="search"]:hover,
+input[type="date"]:hover,
+input[type="time"]:hover,
+input[type="datetime-local"]:hover,
+textarea:hover,
+select:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 0 var(--black);
+}
+
+/* Textarea specific */
+textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-family: 'Source Serif 4', serif;
+    line-height: 1.6;
+}
+
+/* Select dropdown */
+select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem;
+    padding-right: 3rem;
+    appearance: none;
+}
+
+/* Checkboxes and Radio buttons */
+input[type="checkbox"],
+input[type="radio"] {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.75rem;
+    margin-top: 0.1rem;
+    appearance: none;
+    border: 3px solid var(--black);
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    position: relative;
+    vertical-align: top;
+}
+
+input[type="radio"] {
+    border-radius: 50%;
+}
+
+input[type="checkbox"]:hover,
+input[type="radio"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--black);
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    background: var(--black);
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--white);
+    font-weight: 900;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--white);
+    border-radius: 50%;
+}
+
+/* Checkbox and radio labels */
+label:has(input[type="checkbox"]),
+label:has(input[type="radio"]) {
+    display: flex;
+    align-items: flex-start;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+/* Fallback for browsers that don't support :has() */
+.checkbox-label,
+.radio-label {
+    display: flex;
+    align-items: flex-start;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+/* Form buttons */
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 1rem 2rem;
+    border: 3px solid var(--black);
+    background: var(--white);
+    color: var(--black);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0.5rem 0.5rem 0.5rem 0;
+    display: inline-block;
+}
+
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover {
+    background: var(--black);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--gray-800);
+}
+
+button:active,
+input[type="submit"]:active,
+input[type="reset"]:active,
+input[type="button"]:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 0 var(--gray-800);
+}
+
+/* Primary button variant */
+.btn-primary,
+button[type="submit"],
+input[type="submit"] {
+    background: var(--accent-technical);
+    color: var(--black);
+    border-color: var(--accent-technical);
+}
+
+.btn-primary:hover,
+button[type="submit"]:hover,
+input[type="submit"]:hover {
+    background: var(--black);
+    color: var(--white);
+    border-color: var(--black);
+}
+
+/* Secondary button variant */
+.btn-secondary {
+    background: var(--gray-100);
+    color: var(--black);
+    border-color: var(--gray-400);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-400);
+    color: var(--black);
+    border-color: var(--gray-400);
+}
+
+/* Disabled form elements */
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled {
+    background: var(--gray-100);
+    color: var(--gray-400);
+    border-color: var(--gray-200);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+input:disabled:hover,
+textarea:disabled:hover,
+select:disabled:hover,
+button:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Form groups and layout */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Required field indicator */
+.required::after {
+    content: ' *';
+    color: lightcoral;
+    font-weight: 900;
+}
+
+/* Help text */
+.help-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+/* Error messages */
+.error-message {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    color: lightcoral;
+    background: rgba(255, 107, 107, 0.1);
+    border: 2px solid lightcoral;
+    padding: 0.5rem 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Success messages */
+.success-message {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    color: lightgreen;
+    background: rgba(46, 204, 113, 0.1);
+    border: 2px solid lightgreen;
+    padding: 0.5rem 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Form in dark mode */
+@media (prefers-color-scheme: dark) {
+    fieldset {
+        border-color: var(--gray-400);
+        background: var(--gray-50);
+    }
+    
+    legend {
+        background: var(--gray-400);
+        color: var(--black);
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    textarea,
+    select {
+        background: var(--gray-50);
+        border-color: var(--gray-400);
+        color: var(--black);
+    }
+    
+    input[type="checkbox"],
+    input[type="radio"] {
+        border-color: var(--gray-400);
+        background: var(--gray-50);
+    }
+    
+    input[type="checkbox"]:checked,
+    input[type="radio"]:checked {
+        background: var(--gray-400);
+    }
+    
+    input[type="checkbox"]:checked::after {
+        color: var(--black);
+    }
+    
+    input[type="radio"]:checked::after {
+        background: var(--black);
+    }
+    
+    button,
+    input[type="submit"],
+    input[type="reset"],
+    input[type="button"] {
+        background: var(--gray-50);
+        border-color: var(--gray-400);
+        color: var(--black) !important;
+    }
+    
+    button:hover,
+    input[type="submit"]:hover,
+    input[type="reset"]:hover,
+    input[type="button"]:hover {
+        background: var(--gray-400);
+        color: var(--black);
+        box-shadow: 0 4px 0 var(--gray-600);
     }
 }
 
