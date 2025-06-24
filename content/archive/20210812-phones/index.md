@@ -91,7 +91,7 @@ Just like any open source software, it's up to the user (you) to ensure that you
 
 You can find an app for pretty much anything here: from your general-store type functions such as to-do lists, music players, and maps; to specific niche security applications, and even a tea timer. Here are some well-known choices I can easily recommend:
 
-- [Standard Notes](https://f-droid.org/en/packages/com.standardnotes/) (https://standardnotes.org/)
+- [Standard Notes](https://f-droid.org/en/packages/com.standardnotes/) (https://standardnotes.com)
 - [Element for Matrix](https://f-droid.org/en/packages/im.vector.app/) (https://element.io/)
 - [Tutanota](https://f-droid.org/en/packages/de.tutao.tutanota/) (https://tutanota.com)
 
