@@ -1,11 +1,10 @@
 ---
-title: Leading with a cybersecurity mindset
+title: "How to Think Like a Hacker (And Why Your Team Should Too)"
 date: 2021-07-27T04:26:26-04:00
 
 aliases:
-description: Systems for considering software development from a security standpoint.
-series:
-    - security-for-developers
+    - /posts/leading-with-a-cybersecurity-mindset/
+description: "How systematic skepticism helps teams write more secure code. Real strategies for building security-conscious engineering culture through questioning assumptions."
 tags:
     - security
     - leadership
@@ -15,72 +14,50 @@ draft: false
 featured: false
 ---
 
-Times and technologies change, but a few good ideas are still the same. With consistent application, a handful of wise practices can help deter a slew of cybersecurity attacks. While implementation differs across applications, learning to lead development teams with a cybersecurity mindset boils down to a few fundamental concepts:
+The most effective security-minded developers I know share one trait: they’re professionally suspicious of their own assumptions. They look at a form field and wonder what happens if someone tries to enter something unexpected. They design an API endpoint and ask how someone might misuse it. They have a systematic curiosity about how systems behave versus how they’re supposed to behave.
 
-- Be a bad guy
-- Fail secure
-- Practice software minimalism
+I saw this firsthand while working with a team where questioning assumptions became a regular part of our code review process. We’d look at every new feature and ask “How might someone abuse this?” I developed a particular talent for finding injection attacks on forms—apparently I have a knack for thinking of creative ways to sneak SQL queries into text fields. After the third or fourth time I caught these vulnerabilities during review, we added validation middleware to eliminate that entire class of problems.
 
-A slight change in thinking can create a sea change in security. Let's examine how.
+But the real breakthrough was watching how the team’s thinking evolved. Once developers got used to questioning their assumptions about user behavior, they started writing more robust solutions from the start. Security thinking became a starting point rather than something bolted on afterward.
 
-## Let's be bad guys
+## Designing for Reality, Not Just Intent
 
-When it comes to cybersecurity, I take a pragmatic approach. There aren't enough sheaves of NIST recommendations in the world to help you if you aren't accustomed to thinking like the bad guy. To best lead your team to defend against hacking, first know how to hack yourself.
+One of the most effective practices we developed was specifying both the “happy path” and the “unhappy path” during our design process. The happy path was straightforward—everything happens in the way and sequence we intended. But the unhappy paths were where we learned the most: what happens when steps occur out of order? When data is missing or provided in an unexpected format? When external systems fail at exactly the wrong moment?
 
-A perusal of the resources linked at the end of this article can help you with a starting point, as will general consideration of your application through the lens of an outsider. Are there potentially vulnerable forms or endpoints you might examine first? Is there someone at your company you could call on the phone and surreptitiously get helpful information from? Defense is a difficult position to hold in any battle. If you aren't the first person to consider how your application might be attacked, you've already lost.
+This dual-path thinking transformed how we approached every feature. Instead of just asking “How should this work?” we started asking “How will this actually be used?” and “What should happen when reality doesn’t match our expectations?” It sounds pessimistic, but it actually made development more fun. It caused us to think about our application from all angles rather than just implementing obvious functionality.
 
-Develop your sense of how to be the bad guy. Every component of software, every interaction, every bit of data, can be useful to the bad guy. The more you hone your ability to consider how a thing can be used for ill, the better able you'll be to protect it.
+The unhappy path exercise revealed assumptions we didn’t even know we were making. We’d design a user registration flow assuming people would fill out forms completely and submit them once. Then we’d consider reality: What if someone submits the form multiple times? What if they navigate away and come back? What if they fill out the form, wait an hour, then submit it after their session expires?
 
-When looking at information, ask, "How can I use this information to gain access to more important information?" When considering a user story, ask, "What happens if I do something unexpected?"
+Each unhappy path scenario led to better design decisions. Race condition handling. Idempotent endpoints. Graceful degradation when external services are unavailable. The code that protected against malicious users also handled legitimate users experiencing network glitches or browser crashes.
 
-In all things, channel your inner four-year-old. Push all the buttons.
+## Systematic Questioning as a Superpower
 
-Playing offense on your own application lets you fix vulnerabilities before they happen. That's a luxury you won't get from the real bad guys.
+There’s a particular mindset that effective security thinking requires—call it systematic skepticism. It’s the ability to look at any system and ask “What assumptions is this making?” and “What happens when those assumptions are wrong?” This kind of thinking makes your software more robust.
 
-## Fail secure
+Sometimes this means channeling your inner four-year-old—pushing every button, ignoring all instructions, using things in ways their makers never intended. But rather than random exploration, you develop structured ways of challenging system boundaries, finding edge cases, and being creative about the ways that software can be used beyond its intended purpose.
 
-Every part of a system will fail with 100% certainty on a long enough timescale. Thinking a step ahead can help to ensure that when it does, the one failure doesn't leave your application wide open to others.
+This systematic questioning makes you better at every aspect of development. When you’re used to thinking about edge cases and unexpected inputs, you write more defensive code naturally. When you habitually consider what could go wrong, you build better (more useful) error handling. When you assume users will do unexpected things, you design more intuitive interfaces.
 
-To fail secure means that when a system or code fails to perform or does something unexpected, any follow-on effects are halted rather than permitted. This likely takes many forms in many areas of your application, so here are the more common ones I see.
+I’ve noticed that developers who adopt this questioning mindset become significantly better at debugging production issues too. Instead of being surprised when something breaks, they’re already thinking “What unexpected condition triggered this?” They approach problems with methodical curiosity rather than frustrated confusion.
 
-### Permissions
+## Building a Culture of Constructive Skepticism
 
-When gating access, deny by default. This most often takes the form of whitelisting, or colloquially, "no one is allowed, except for the people on this list." In terms of code flow, everything should be denied first. Only allow any particular action after proper credentials are verified.
+The key to building security-conscious teams isn’t teaching people to be afraid of attackers—it’s helping them develop genuine curiosity about system behavior under stress. When questioning assumptions becomes intellectually interesting rather than anxiety-inducing, your team will start doing it automatically.
 
-### Automation
+Code reviews become more engaging when everyone is looking for unspoken assumptions about user behavior. Feature planning gets more thorough when “What are the unhappy paths?” is a standard question alongside “What should it do?” Architecture discussions become more robust when you’re considering not just how systems should work together, but how they should behave when dependencies are slow, unavailable, or returning unexpected data.
 
-For automated workflows such as deployments, ensure each step is dependent on the last. Don't make the (rather common) mistake of connecting actions to triggers that can kick off a workflow before all the necessary pieces are in place. With the smorgasbord of cloud and CI tools available, failure events may not be obvious or noisy.
+The practical implementation is surprisingly straightforward. During development, encourage your team to spend time being deliberately unreasonable with whatever they’re building. During design reviews, spend equal time on happy and unhappy paths. During testing, encourage your team to think like someone who’s never seen your application before and doesn’t understand the rules.
 
-Be careful to avoid running flows on timed triggers unless they are completely self-contained. Workflows that unpredictably run faster or slower than expected can throw a whole series of events into disarray, leaving processes half-run and states insecure.
+What emerges is a team that builds more resilient systems without extra effort. When you’re accustomed to thinking about failure modes, you naturally design systems that handle them gracefully. When you expect users to ignore instructions, you build interfaces that guide them toward success even when they’re not following the intended flow.
 
-### Exception handling
+## Security as Engineering Excellence
 
-Errors are a frequent gold mine for attackers. Ensure your team's code returns "pretty" errors with content that you can control. "Ugly" errors, returned by default by databases, frameworks, etc, try to be helpful by providing lots of debugging information that can be extremely helpful to a hacker.
+What I’ve learned is that security thinking is really just rigorous engineering thinking with a creative twist. It’s the same mental process you use when debugging complex issues or designing APIs that won’t confuse future developers. You’re considering multiple perspectives, anticipating edge cases, and designing for resilience rather than just functionality.
 
-## Software minimalism
+The most successful security-conscious teams I’ve worked with don’t have dedicated security experts who review everything after the fact—they have developers who think about security implications as naturally as they think about performance or usability. This happens through cultural reinforcement and consistent practice, not through mandates or compliance checklists.
 
-If your development team doesn't currently have one central source of information when it comes to keeping track of all your application components, here's a tip you really need. In software security, less is more (secure).
+The payoff extends far beyond security. Teams that think about unhappy paths build more reliable software. Developers who consider malicious inputs write better input validation for legitimate users. Engineers who design for system failures create more robust integrations. The skills reinforce each other in ways that make everyone more effective.
 
-The more modular an application is, the better its various components can be isolated, protected, or changed out. With a central source of truth for what all those components are (and preferably one that doesn't rely on manual updates), it's easier to ensure that your application is appropriately minimalist. Dependency managers, such as Pipenv, are a great example.
+Most importantly, this approach makes engineering work more intellectually satisfying. There’s something deeply rewarding about anticipating problems and solving them before they happen. When your team develops the habit of systematically questioning their assumptions, they’ll approach every problem with the kind of methodical curiosity that leads to truly robust solutions.
 
-Few industries besides technology seem to have produced as many acronyms. Philosophies like Don't Repeat Yourself (DRY), Keep It Simple Stupid (KISS), You Aren't Going to Need It (YAGNI), and countless other methodologies all build upon one very basic principle: minimalism. It's a principle that warrants incorporation in every aspect of an application.
-
-There's a reason it takes little skill to shoot the broad side of a barn: barns are rather large, and there's quite a lot of one to hit. Applications bloated by excessive third-party components, repeated code, and unnecessary assets make similarly large targets. The more there is to maintain and protect, the easier it is to hit.
-
-Like Marie Kondo's method for dispatching the inevitable creep of household clutter, you can reduce your application's attack surface by considering each component and asking whether it brings you joy. Do all of this component's functions benefit your application? Is there unnecessary redundancy here? Assess each component and decide how integral it is to the application. Every component is a risk; your job is to decide if it's a worthwhile risk.
-
-## Bonus: your personal Yodas
-
-With the basic principles of learning to think like the bad guy, failing securely, and practicing software minimalism, you're now ready to steep in the specifics. Keeping the fundamentals in mind can help you lead your team to focus your cybersecurity efforts where it matters most.
-
-No Jedi succeeds without a little help from friends. Whether you're a beginner in the battle against the dark side or a twice-returned-home Jedi Master, these resources provide continuing training and guidance.
-
-- [Open Web Application Security Project](https://owasp.org/www-project-web-security-testing-guide/)
-- [National Institute of Standards and Technology (NIST): Cybersecurity](https://www.nist.gov/cybersecurity)
-- [OWASP Proactive Controls](https://owasp.org/www-project-proactive-controls/)
-- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)
-- [OWASP Web Security Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
-- [NIST Special Publication 800-30: Guide for conducting risk assessments](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-30r1.pdf)
-- [NSA’S Cybersecurity Advisories & Technical Guidance](https://www.nsa.gov/Press-Room/Cybersecurity-Advisories-Guidance/)
-
-I hope you find these thought systems helpful! If you find your interest piqued as well, you can read more of what [I've written about cybersecurity here](/tags/security).
+You can help your team become professionally curious about system boundaries, failure modes, and the gap between how software is supposed to work and how it actually gets used. Once they develop that mindset, they’ll write more secure code naturally, because they’ll view software the same way attackers do—as systems that can fail when someone does something unexpected.
