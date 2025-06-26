@@ -4,6 +4,7 @@ date: 2021-01-26T09:25:17-05:00
 
 aliases:
     - /blog/add-search-to-hugo-with-lunr
+    - /posts/add-search-to-hugo-static-sites-with-lunr/
     - /archive/add-search-to-hugo-static-sites-with-lunr/
 description: Make your static site searchable with a client-side search index.
 tags:
