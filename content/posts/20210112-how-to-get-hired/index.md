@@ -1,81 +1,77 @@
 ---
-title: How to get hired as a software developer
+title: How to Choose a Great Tech Hire
 date: 2021-01-12T05:50:53-05:00
 
 aliases:
-description: What to know before applying for a software developer job.
+    - /posts/how-to-get-hired-as-a-software-developer/
+description: "How to identify engineers who will succeed and stay on your team. Why traditional hiring processes miss what really matters for long-term success."
 tags:
-    - career
+    - leadership
 draft: false
-categories: ["article"]
 ---
 
-I'm asked this question a lot, so let me be the first to give you the good news: there's no one right answer. As general tech-literacy increases, the culture of the coding industry is steadily, thankfully, moving away from a checklist approach. Instead of degrees and pre-requisites when it comes to deciding whether you're qualified to be hired as a software developer, companies (including my own) are far more concerned with just one question. **What can you do?**
+I’ve seen too many hiring processes that focus on the wrong things. Teams spend hours on algorithm puzzles and whiteboard exercises, then hire someone who can’t write readable code or collaborate effectively with colleagues. Six months later, they’re dealing with either a performance issue or an unexpected resignation from someone who never felt like they fit the team.
 
-There are some general best practices that will make you a far more attractive hire than the majority of applicants, and I'll discuss those in this post. For the most part, however, demonstrating what you're capable of is the best way to increase your chances of getting to the interview and beyond. Here's how to get hired as a software developer.
+These candidates don't lack technical ability. The problem is that traditional hiring processes don’t predict who will actually succeed and stay on your team. After years of hiring engineers and watching some thrive while others struggle, I’ve learned that the best predictors of long-term success are often the things most interviews completely miss.
 
-## First, build projects
+Here’s what I actually look for when hiring engineers, and why these signals matter more than most technical assessments.
 
-Companies who are primarily focused on getting products built want to see that you've built products. They don't need to be flashy or for-profit, but they do need to work. I'm far more likely to consider a candidate with a colorful bouquet of working code in their GitHub or GitLab or CodePen portfolio. Here are some basic ideas to get you started:
+## Look for Builders, Not Just Coders
 
-- Command line utilities that help with tedious tasks, like [renaming image files](/blog/batch-renaming-images-including-image-resolution-with-awk/)
-- [Themes](/blog/hugo-vs-jekyll-an-epic-battle-of-static-site-generator-themes/) for static site generators like Hugo or Jekyll
-- Automation tools, such as for [GitHub Actions](/posts/go-automate-your-github-profile-readme/)
+The question that matters most isn’t “Can they solve algorithm problems?” It’s “Can they build things that solve problems?” There’s a fundamental difference between someone who can write code and someone who can deliver working software that serves a purpose.
 
-The best projects you could showcase are ones directly related to the specialty you want to apply for. Show that you have competency with the fundamentals. For instance, if you see yourself focusing on front end, demonstrate that you can build interactive web pages with no fancier tools than HTML, CSS, and vanilla JS. For back end focused developers, show that you know how to create a fundamental tool like an API for a service on a local server. Want to be well-rounded? Create an API with a web page UI.
+When I review candidates, I’m looking for evidence that they’ve built complete projects from start to finish. Not just coding exercises or tutorial follow-alongs, but actual working software that solves real problems. This could be command-line utilities, web applications, automation tools, or contributions to open source projects—the complexity matters less than the completeness.
 
-Spend some time creating a good README. Use screenshots, highlight code snippets, include well-written instructions for local set up. Show that you care about and fully understand your own work.
+What I’m really evaluating is their ability to navigate the full software development lifecycle. Can they scope a problem, make technical decisions, handle edge cases, write documentation, and ship something that actually works? These are the skills that translate directly to success on your team, regardless of whether they learned them in a computer science program or taught themselves on weekends.
 
-Explore specific frameworks and libraries if they interest you, but keep in mind that those won't be interesting to a company unless the company already wants to use that framework.
+The best candidates can walk you through their projects and explain not just how they built something, but why they made specific technical choices. They understand the trade-offs they made and can articulate what they learned from the experience. This kind of thinking is what distinguishes engineers who will contribute meaningfully to your team from those who will struggle to move beyond assigned tasks.
 
-You maximize your chances of getting hired by demonstrating that you already have the ability to learn on your own, build, and then present projects to the world. Out of everything else in this article, this is the one fundamental trait that a company won't want to have to teach you.
+## Evaluate Systems Thinking Over Syntax Knowledge
 
-## Next, stand out
+Most technical interviews focus on whether someone knows specific syntax or can solve isolated problems. But the engineers who succeed on teams are the ones who understand how their code fits into larger systems and affects other people’s work.
 
-Familiarity with the following topics, along with demonstrating that understanding in your own code, will put you miles ahead of most applicants.
+I look for candidates who demonstrate awareness of follow-on effects. When they describe a project, do they consider performance implications? Do they think about maintainability? Can they explain how their technical decisions might impact other developers or users?
 
-### Reusable code
+Understanding concepts like mutability, thread safety, and code reusability shows technical competence as well as thinking systematically about software as something that exists in a larger context. Engineers who grasp these concepts naturally write code that’s easier to debug, extend, and maintain. They consider the total cost of ownership, not just the immediate implementation.
 
-Companies that build products are concerned with getting the most bang for their buck. This is the same idea as wanting to save yourself time when you're creating something individually. If you put a week of effort into building something, it would be nice if you could keep easily using it for a long time afterwards. How can you maximize the return on your efforts?
+During interviews, I ask candidates to explain technical trade-offs they’ve made in their projects. The specific technologies matter less than their ability to reason about complexity, performance, and maintainability. Engineers who think this way will continue learning and adapting as your company's tech stack evolves.
 
-Be familiar with DRY code. Avoid creating highly customized pieces that only fit a particular use case, peppered with hard-coded variables and dependent on a particular input structure. Avoid writing code that is hard to update in the future. Recognize when you're writing a script or library that could apply in many different situations, and understand how to turn it into a reusable module.
+## Assess Communication Skills Through Real Examples
 
-### Types and mutability
+Communication skills aren’t just a “nice to have” for engineers—they’re essential for team effectiveness. But most hiring processes assess communication through artificial interview scenarios rather than looking at how candidates actually communicate about technical topics.
 
-Besides building projects, debugging them can be a company's most expensive task. It takes a lot of time to hunt down and fix bugs, but you can help reduce that cost by understanding the subtler ways that a lot of bugs occur. Understanding types and mutability -- whether and how an object can be changed -- can help open the door to even greater technical proficiency.
+I spend significant time reviewing candidates’ written communication. How do they explain their projects in README files? How do they participate in open source discussions? Can they write clear, helpful documentation? These examples reveal how they’ll communicate with your team when explaining technical decisions, documenting systems, or participating in code reviews.
 
-Get familiar with at least one type system. If there's a linter available for your language, use it. Understand how immutable and mutable objects work in the language you use. Be able to describe specific use cases for either one. Understand at a general level how mutability impacts system resources, the difference between referencing and copying, and what it means to be thread-safe.
+Pay attention to how candidates describe complex technical concepts during interviews. Can they adjust their explanation based on their audience’s technical background? Do they provide context and examples? Can they acknowledge when they don’t know something without becoming defensive?
 
-### Follow-on effects
+The engineers who succeed long-term are those who can collaborate effectively across different skill levels and backgrounds. They can explain technical concepts to non-technical stakeholders, provide helpful code review feedback, and contribute to architectural discussions. These collaborative skills are often better predictors of success than pure technical ability.
 
-Keep in mind that organizations are made up of people. When you work together with colleagues, your work has an effect on someone else's. Being aware of these effects and demonstrating conscientiousness in this area will help show potential employers that you'd benefit the team as a whole.
+## Identify Team Players Through Contribution Patterns
 
-Consider the second and third-order effects of code you write. Avoid writing code that will unnecessarily slow down a larger system. Understand what blocking means and how to use concurrency or parallelism in your project. Include your thoughts on follow-on effects in your READMEs. Show that you always have the larger project, effort, costs, or organization in mind.
+The best predictor of how someone will behave on your team is how they’ve behaved on other teams. Rather than asking hypothetical questions about teamwork, look at concrete examples of how candidates have collaborated with others.
 
-## Other nice-to-haves
+Open source contributions provide excellent insight into someone’s collaborative style. How do they handle feedback on their code? Do they contribute thoughtfully to discussions? Can they work within existing conventions and standards? Do they help other contributors or just focus on their own work?
 
-If you've fully taken advantage of the points above, you're most of the way to getting hired already. Seal the deal with these easy wins.
+For candidates without extensive open source history, look at how they talk about past team experiences. Do they credit others for successes? Can they describe situations where they helped colleagues or learned from feedback? How do they handle disagreement or conflict?
 
-### Be a friendly open source participant
+I’m particularly interested in candidates who show evidence of helping others grow. Engineers who mentor junior developers, contribute to team documentation, or improve development processes tend to have a positive impact that extends far beyond their individual contributions.
 
-There's no better way to show a potential employer you can work well on a team than by providing plenty of examples. Get involved with open source projects, contribute features and fixes, and interact with contributors and maintainers. Create a real-life simulation for your future colleagues that leaves no doubt about what you'd be like to work with. The further back this history goes, the better, so start right away.
+## Evaluate Learning Ability Over Current Knowledge
 
-### Communicate with care
+Technology changes rapidly, which means the specific skills someone has today matter less than their ability to acquire new skills as needed. The engineers who thrive long-term are those who stay curious and adapt effectively to new challenges.
 
-If you're participating in open source or working remotely, most of your communication with your colleagues is going to take place online in text. Without facial expressions, tone or inflection, this form of communication leaves a lot to be desired. Some extra care on your part can help make sure your message always comes across as intended.
+During interviews, I ask candidates about times they had to learn something completely new for a project. How did they approach unfamiliar technologies? What resources did they use? How did they validate their understanding? The process they describe reveals more about their potential than any specific technology they currently know.
 
-Get into a habit of drafting most everything you write, especially for long-form communication. Putting yourself in the mindset of creating a draft first lets you take all the time you need to craft your message. You can make sure you're choosing appropriate words and coming across with the emotions you intend to convey. Feeling hurried? Remember the golden rule of online communication: you _never_ need to reply right away. Take a breath, then take your time.
+I also look for evidence of intellectual humility. Can candidates acknowledge the limits of their knowledge? Do they ask thoughtful questions? Are they excited about learning from more experienced team members? Engineers who combine confidence in their abilities with openness to learning tend to grow quickly and integrate well with existing teams.
 
-## Finally, use your imagination
+## What This Means for Your Hiring Process
 
-Software developers are creative people by necessity. Before you can write code, build a project, or design a page, you first have to be able to imagine it! So put that skill to good use.
+Identifying these qualities requires a different approach than traditional technical interviews. Instead of algorithm problems, focus on discussing real projects and technical decisions. Instead of whiteboard coding, review actual code they’ve written and ask them to explain their thinking.
 
-In every application, every email, every chat message with your potential employer, imagine yourself in their position. What do they care about right now? What current goals does the company have? What information about yourself can you share that would make them feel comfortable hiring you?
+Spend time on behavioral questions that reveal collaborative patterns and learning ability. Make time for informal conversation about what kind of work environment they thrive in and what they’re excited to learn next.
 
-Take your best guess, and then ask if you got it right. "I think the company is looking for someone to [insert guess here], is that accurate?" Show that you have both the capability to anticipate future needs and the desire to identify and solve them.
+Most importantly, involve your team in the hiring process. The people who will work directly with your new hire are often better at assessing team fit than individual interviewers making isolated decisions.
 
-## Get yourself hired
+Remember that hiring is ultimately about predicting future success, not just evaluating current abilities. The candidates who can build complete projects, think systematically about technical decisions, communicate effectively, and continue learning will contribute more to your team’s long-term success than those who simply perform well on coding tests.
 
-Admittedly, this post is my own wishlist. Good candidates for software development positions are hard to come by, and people who can rightly say they do everything above are rare. I don't think the discrepancy is due to a lack of ability; perhaps just a lack of information.
-
-I've seen both sides of the virtual interview table, and this post is a result of me figuring things out the long and circuitous way. I hope this helps you to take a more direct route to getting yourself hired as a software developer.
+Your perfect candidate isn't necessarily the most technically skilled or the most knowledgeable about your domain. It's the person who will grow with your team and contribute to the kind of collaborative, effective engineering culture that retains great people and delivers great software.
