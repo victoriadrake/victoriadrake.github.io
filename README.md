@@ -7,7 +7,7 @@ The site is [open source](https://github.com/victoriadrake/victoriadrake.github.
 ## Technical Features
 
 - **Static Site Generation**: Built with [Hugo](https://gohugo.io/) for speed and flexibility.
-- **Search Functionality**: Implemented using `lunrjs`. [Learn how here](https://victoria.dev/posts/add-search-to-hugo-static-sites-with-lunr/).
+- **Search Functionality**: Implemented using [Lunr.js](https://lunrjs.com).
 - **Illustrations**: I create all the illustrations and comics in my articles on my iPad.
 - **IndieWeb Integration**: I've implemented [microformats2](https://microformats.org/wiki/Main_Page) markup, making the site compatible with social readers and other IndieWeb sites.
 
