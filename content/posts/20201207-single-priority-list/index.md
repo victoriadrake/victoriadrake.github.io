@@ -6,7 +6,7 @@ aliases:
     - /archive/priority/
     - /posts/priority/
     - /archive/how-a-single-priority-makes-your-tech-team-more-productive/
-description: Want to boost your team's output and morale? A hands-on approach to prioritization and transparent task management that transforms how your engineering team works.
+description: "Learn how single-priority focus transforms engineering team performance. Why ‘priority’ has no plural and how to build autonomous, high-velocity teams."
 tags:
     - leadership
     - development
@@ -16,56 +16,64 @@ draft: false
 categories: ["article"]
 ---
 
-In the tech teams I lead, "priority" has no plural form.
+In the engineering teams I lead, “priority” has no plural form. This drives some people slightly crazy, especially those who like to hedge their bets with phrases like “top priorities” or “critical priorities.” But I’ve learned that the moment you allow multiple top priorities, you’ve essentially created zero priorities.
 
-Whether you're leading a team of people or leading yourself, it's important to take account of all the important things that need doing in your organization. This does not mean that everything can be equally important.
+I discovered this the hard way while working with a team that was constantly context-switching between “urgent” projects. Everyone was busy, morale was decent, but we weren’t actually shipping much of value. During one particularly frustrating week, I counted seventeen different tasks that had been labeled as “high priority” by various stakeholders. Our standups felt like disaster reports, and I realized we’d created a system where being busy had become more important than being effective.
 
-Logically, everything can't be. Tasks are typically interdependent, and there's always one task on which another depends. Tasks can be time-sensitive. Certain tasks might block a logical path towards a goal.
+The solution turned out to be surprisingly simple, though not easy to implement: put everything into a single, ordered list where only one thing can be most important at any given time.
 
-It's the duty of a leader to make hard calls and decide which tasks are most important out of everything that needs doing. This necessitates comparing one to another, which is much easier to do with a centralized to-do list.
+## The Radical Transparency of a Central List
 
-Here's how this one simple change to your perspective on to-do lists can help to build happier and more productive teams.
+Most teams I’ve encountered operate like a collection of individual to-do lists with some coordination meetings sprinkled on top. Engineering works on technical debt, product pushes for new features, leadership wants infrastructure improvements, and everyone optimizes their own piece of the puzzle. The result is a lot of activity that doesn’t add up to meaningful progress.
 
-## Keep a central prioritized to-do list
+![A cartoon of a stick figure swinging on a rope to plant a post-it note](prioritize.png)
 
-![A cartoon of a stick figure swinging on a rope ro plant a post-it note](prioritize.png)
+A single, centralized, prioritized list changes the entire dynamic. Everyone can see what’s actually being worked on, what’s coming next, and most importantly, what’s not getting done and why. This visibility creates natural conversations about trade-offs that simply don’t happen when work is siloed.
 
-Avoid working in silos. A single centralized list can make it easier for you and your team members to see what's being worked on. With all tasks out in the open, it's easier for people to spot opportunities for helping each other out and where they can contribute.
+I’ve watched teams discover they were working on competing solutions to the same problem, simply because no one had a complete view of active work. Others realized they were delaying important projects because someone assumed “someone else” was handling the dependency. When everything is visible and ordered, these coordination problems become obvious and fixable.
 
-Encouraging a culture of openness can help people feel more comfortable asking questions, asking for help, and proposing ideas and improvements. Tracking work in the open also means that no one is left wondering what status a task is currently in.
+The transparency also creates a different kind of accountability. When priorities are public and explicit, it becomes much harder to justify working on pet projects or avoiding difficult tasks. The list becomes a shared source of truth that guides decisions rather than each person interpreting priorities through their own lens.
 
-For team leaders, a single list makes it easier to compare and prioritize tasks. This benefits team members by providing a completely unambiguous and transparent accounting of what needs doing next. Whichever task is most important, for the whole organization, is on top.
+## Autonomy Within Structure
 
-## Priorities with autonomy
-
-A single priority doesn't necessarily pigeonhole someone into doing a task they don't feel cut out for. Each member of your team has different strengths, skill sets, and diverse ways of thinking. You can take full advantage of this by encouraging autonomy in task selection.
+One concern I hear frequently is that a single priority list will turn people into order-takers rather than creative problem-solvers. In practice, I’ve found exactly the opposite happens when you implement it correctly.
 
 ![A cartoon of a stick figure climbing a ladder to reach a post-it note](task-selection.png)
 
-Have people choose whichever task is nearest to the top that they'd like to tackle. They might pick the highest priority task that's in their wheelhouse, or experiment with a higher one that's in a domain they'd like to improve their skills at.
+The key is encouraging people to choose the highest-priority task they can effectively tackle rather than assigning specific tasks to specific people. Someone might skip over the absolute top item because it requires domain knowledge they don’t have, but they can pick up the second or third item that lets them contribute meaningfully while learning something new.
 
-Embrace opportunities for cross-training. If tasks high up on the list fall in a category that only one or a few people on your team are experts in, have your experts partner up with another team member who's taking on the task. By pooling your resources to cross-train across domains, you multiply the capabilities of each team member and your team as a result.
+This approach leverages the fact that your team members understand their own capabilities and growth goals better than you do. A senior engineer might choose to mentor a junior developer on a complex task. A frontend specialist might want to tackle a backend task to broaden their skills. These decisions create better outcomes in the long term than top-down task assignment while still maintaining focus on organizational priorities.
 
-When a task is especially time-sensitive, have several team members swarm on it and distribute the work according to their interests or strengths.
+The autonomy comes from trusting people to make good decisions about how to contribute most effectively, while the structure comes from ensuring those contributions align with actual business needs.
 
-## Make yourself redundant
+## The Art of Making Yourself Redundant
 
-Working off a single prioritized to-do list works best when your team members can take on tasks as independently as possible. This is especially important in remote teams where people work asynchronously.
-
-If you're a leader and find that your team members frequently ask you what they should do next, you could be making your team dependent on you. Ask yourself if you're unnecessarily gatekeeping information that would let your team be more autonomous.
-
-A team that overly depends on their leader is not an efficient one. Individual people, such as yourself, don't scale. Don't become a bottleneck to your team's productivity. A successful leader should be able to take several days off on short notice without productivity grinding to a halt.
+If your team frequently asks you what they should work on next, you’ve accidentally created a bottleneck—and it's you. This is one of the most common scaling problems I see with engineering leaders who transition from individual contributor roles.
 
 ![A cartoon of a stick figure carrying books to a wall of post-it notes](add-resources.png)
 
-To support your team's ability to work without you, make your team, product, and company goals _painfully_ available. Put them where people hang out -- your team's message board, chat channel, or document repository, for example. No one should be at a loss when asked what the team wants to achieve next, and why.
+The goal is building a system where intelligent people can make good decisions without constant input from leadership. This requires making context painfully available—team goals, product strategy, architectural decisions, customer feedback, and anything else that influences prioritization should be accessible and current.
 
-Make any applicable resources, style guides, product documents, or links to external documentation painfully available as well. If your team makes a decision about how something should be done, write it down. Don't rely on yours or anyone else's meat brain to remember an important decision, nor make yourself the only resource for recalling it.
+I’ve found that the difference between teams that scale smoothly and teams that hit velocity walls usually comes down to how well they’ve documented the reasoning behind decisions. When someone can understand not just what to build but why it matters and how it fits into the larger strategy, they can make smart trade-offs independently.
 
-Make yourself redundant when it comes to day-to-day work. Doing so empowers your team members to do work without you, think through solutions on their own, and propose paths of action that you probably wouldn't have thought of yourself.
+This redundancy becomes especially critical during high-pressure situations. When systems are down or deadlines are looming, you don’t want your team waiting for permission to take action. Teams that have practiced autonomous decision-making within clear constraints can respond quickly and effectively without requiring heroic coordination efforts.
 
-## Build happier and more productive teams
+## The Cultural Transformation
 
-From first-hand experience as both a team member and leader, I've seen how encouraging a culture of openness, cross-training, and autonomy makes for happier team members and more productive teams. A single prioritized to-do list, coupled with available documentation and resources, opens the gates to let your technical team be maximally productive.
+What surprises most leaders is how much this simple change affects team culture. When priorities are clear and transparent, several things happen that go far beyond improved task management.
 
-By removing bottlenecks, you allow people to make more decisions on their own and take ownership of their work. That's a technical team I'd be proud to lead.
+First, political conversations about priority disappear. There’s no point in lobbying for your favorite project when the criteria for prioritization are explicit and the current order is visible to everyone. Energy that was spent on organizational maneuvering gets redirected toward actual work.
+
+Second, people start thinking about their contributions differently. Instead of optimizing for individual productivity, they begin considering how their work fits into team objectives. This naturally leads to better collaboration and knowledge sharing.
+
+Third, the team develops a shared sense of progress and momentum. When everyone can see important work getting completed in priority order, it creates a satisfying rhythm that isolated individual achievements can’t match.
+
+## Implementation Reality
+
+The biggest challenge isn’t creating the list—it’s maintaining the discipline to use it consistently. Teams often start strong but gradually drift back to multiple priority tracks when pressure increases or when compelling new opportunities arise.
+
+I’ve learned to treat priority discipline like any other technical practice that requires ongoing attention. Schedule regular review sessions to reorder the list, have explicit discussions about what we’re choosing not to do, and consistently communicate why keeping a single-priority focus helps maintain development velocity.
+
+The payoff: teams that ship more valuable work with less stress and confusion. When everyone understands what matters most and feels empowered to contribute effectively, both productivity and job satisfaction improve dramatically.
+
+Most importantly, single-priority focus creates sustainable high performance rather than the boom-and-bust cycles that come from constantly shifting between competing urgent demands. Teams learn to work steadily toward important goals rather than reacting to whatever feels most pressing in the moment.
