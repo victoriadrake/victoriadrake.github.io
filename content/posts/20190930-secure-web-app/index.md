@@ -1,103 +1,122 @@
 ---
-title: "Secure application architecture basics: separation, configuration, and access"
+title: "How Engineering Leaders Build Security Culture Through Architecture Decisions"
 date: 2019-09-30T08:03:12-04:00
 
 aliases:
-description: A starting point for building secure application architecture, for busy developers.
-series:
-    - security-for-developers
-series_weight: 1
+    - /posts/secure-application-architecture-basics-separation-configuration-and-access/
+description: How engineering leaders can transform security from an afterthought into a strategic advantage through architectural decisions that build security-conscious teams.
 tags:
     - security
+    - leadership
     - architecture
-    - data
 image: cover.png
  
 draft: false
 categories: ["article"]
 ---
 
-Software developers today are encouraged to focus on building, and that's a great thing. There's the benefit of maker culture, an attitude of "always be shipping," open source collaboration, and a bevy of apps that help you prioritize and execute with maximum efficiency. It's in an environment of constant creation, where both teams and solo entrepreneurs can be maximally productive.
+Leading engineering teams means constantly balancing several goals: speed to market, feature development, technical debt, and security. When I've seen teams struggle with security, it's rarely because they lack technical knowledge. The real challenge is creating an organizational culture where security decisions are prioritized, even under pressure.
 
-Sometimes, this breakneck-speed productivity shows its downsides.
+The "we can do security later" mindset creates what I call security debt—technical decisions that make it exponentially harder to secure applications as they scale. Unlike other forms of technical debt, security debt compounds in immediately dangerous ways. A rushed architectural decision made to meet a deadline can become a persistent vulnerability that affects every feature built on top of it.
 
-A lack of awareness of security seems to lead to a lack of prioritization of tasks that don't directly support bringing the product to launch. The market seems to have made it more important to launch a usable product than a secure one, with the prevailing attitude being, "we can do the security stuff later."
+As engineering leaders, we have a unique opportunity to shape how our teams think about security. The architectural decisions we make and the frameworks we establish don't just affect our current codebase—they define the security culture that will carry our teams through future challenges.
 
-Cobbling together a foundation based more on expediency than longevity is a bad way to build applications and a great way to build security debt. Security debt, like technical debt, amasses when developers make decisions that can make it more difficult to secure the application later on. If you're familiar with the concept of "pushing left" (or if you read my [article about sensitive data exposure](/blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/)), you'll know that when it comes to security, sometimes there isn't a version of "later" that isn't _too_ late. It's a shame, especially since following some basic security practices with high benefit yield early on in the development process doesn't take significantly more time than _not_ following them. Often, it comes down to having some basic but important knowledge that enables making the more secure decision.
+> I've found that the most effective approach isn't to mandate security practices after the fact, but to build security thinking into the fundamental architectural decisions that guide daily development work.
 
-While application architecture specifics vary, there are a few basic principles you can commonly apply. This article will provide a high-level overview of areas that I hope will help point developers in the right direction.
+When teams understand why certain architectural patterns prevent entire classes of vulnerabilities, they start making secure choices naturally.
 
-There must be a reason you call it application "architecture." I like to think it's because the architecture of software is similar in some basic ways to the architecture of a building. (Or at least, in my absolute zero building-building expertise, how I imagine a building to be built.) Here's how I like to summarize three basic points of secure application architecture:
+## The Leadership Challenge: Building Security Culture Through Architecture
 
-1. Separated storage
-2. Customized configuration
-3. Controlled access and user scope
+The difference between teams that build secure applications and those that struggle with security incidents comes down to how engineering leaders approach architectural decision-making. Security-conscious teams don't just follow security checklists—they've internalized security principles that guide their architectural choices.
 
-This is only a jumping-off point meant to get you started on the right foot; a complete picture of a fully-realized application's security posture includes areas outside the scope of this article, including authentication, logging and monitoring, testing, and perhaps meeting compliance standards.
+This cultural shift happens when engineering leaders consistently demonstrate how security considerations influence technical decisions. When your team sees you weighing security implications during architecture reviews, evaluating third-party libraries through a security lens, and making trade-offs that prioritize long-term security over short-term convenience, they learn to apply the same thinking to their own work.
 
-## 1. Separated storage
+The framework I've developed focuses on three architectural principles that, when consistently applied, create a foundation for security-conscious engineering culture:
 
-From a security standpoint, the concept of separation refers to storing files that serve different purposes in different places. When you're constructing your building and deciding where all the rooms go, you similarly create the lobby on the ground floor and place administrative offices on higher floors, perhaps off the main path. While both are rooms, you understand that they serve different purposes, have different functional needs, and possibly very different security requirements.
+1. **Strategic Separation**: Designing systems that isolate different types of data and functionality
+2. **Intentional Configuration**: Making deliberate choices about system defaults and access patterns  
+3. **Controlled Access**: Building authorization thinking into system design from the start
 
-![Separation of building floors](separation.png)
+These are are both technical guidelines and leadership tools for building teams that make decisions that promote built-in security by default.
 
-When it comes to your files, the benefit is perhaps easiest to understand if you consider a simple file structure:
+## Strategic Separation: Teaching Teams to Think in Security Boundaries
 
-```txt
-application/
- ├───html/
- │   └───index.html
- ├───assets/
- │   ├───images/
- │   │   ├───rainbows.jpg
- │   │   └───unicorns.jpg
- │   └───style.css
- └───super-secret-configurations/
-     └───master-keys.txt
-```
+The most effective security-conscious engineering teams I've worked with share a common trait: they instinctively think in terms of security boundaries. This isn't something that happens overnight—it's a cultural shift that engineering leaders must deliberately cultivate through architectural decisions and team education.
 
-In this simplified example, let's say that all your application's images are stored in the `application/assets/images/` directory. When one of your users creates a profile and uploads their picture to it, this picture is also stored in this folder. Makes sense, right? It's an image, and that's where the images go. What's the issue?
+When I talk about strategic separation, I mean designing systems that isolate different types of data and functionality based on their security requirements and organizational impact. The goal isn't just to prevent specific vulnerabilities, but to create architectural patterns that make it obvious to your team when they're crossing security boundaries.
 
-If you're familiar with navigating a file structure in a terminal, you may have seen this syntax before: `../../`. The two dots are a handy way of saying, "go up one directory." If you execute the command `cd ../../` in the `images/` directory of the simple file structure above, you'd go up into `assets/`, then up again to the root directory, `application/`. This is a problem because of a wee little vulnerability dubbed [path traversal](https://cwe.mitre.org/data/definitions/22.html).
+Consider a common scenario that exposes how teams think about security:
 
-While the dot syntax saves you some typing, it also introduces the interesting advantage of not actually needing to know what the parent directory is called in order to go to it. Consider an attack payload script, delivered into the `images/` folder of your insecure application via an uploaded file, that went up one directory using `cd ../` and then sent everything it found to the attacker, on repeat. Eventually, it would reach the root application directory and access the `super-secret-configurations/` folder. Not good.
+Your team is building a user profile feature that includes photo uploads. The natural instinct is to store user photos alongside other application assets. After all, they're both images. But this decision reveals whether your team thinks in terms of security boundaries.
 
-While other measures should be in place to prevent path traversal and related user upload vulnerabilities, the simplest prevention by far is a separation of storage. Core application files and assets should not be combined with other data, and especially not with [user input](/blog/sql-injection-and-xss-what-white-hat-hackers-know-about-trusting-user-input/). It's best to keep user-uploaded files and activity logs (which may contain juicy data and can be vulnerable to injection attacks) separate from the main application.
+A security-conscious team immediately recognizes that user-uploaded content and application assets have fundamentally different security requirements. Application assets are controlled, vetted, and part of your deployment process. User uploads are untrusted input that could contain malicious content or exploit path traversal vulnerabilities to access sensitive configuration files.
 
-Separation can be achieved in a few ways, such as by using a different server, different instance, separate IP range, or separate domain.
+The architectural decision here can prevent path traversal attacks, but it also establishes a pattern that helps your team understand the security implications of data boundary decisions.
 
-## 2. Customized configuration
+> When you consistently demonstrate that different types of data require different security approaches, your team starts applying this thinking to database design, API endpoints, and service architecture.
 
-[Security misconfiguration](https://github.com/OWASP/Top10/blob/cb5f8967bba106e14a350761ac4f93b8aec7f8fa/2017/en/0xa6-security-misconfiguration.md) is listed in the OWASP Top 10. A surprising number of very preventable security incidents occur because a server, firewall, or administrative account is running in production with default settings. Upon the opening of your new building, you'd hopefully be more careful to ensure you haven't left any keys in the locks.
+This is where engineering leadership becomes crucial. The technical solution is straightforward: separate user-uploaded content from application assets using different storage systems, domains, or security contexts. But the leadership challenge is helping your team understand why this separation matters and how to apply the same thinking to future architectural decisions.
 
-![Three keys](defaultkey.png)
+I've found that the most effective approach is to make security boundaries visible in your architecture discussions. When reviewing designs, ask questions like: "What happens if this data is compromised or malicious?” and "How would we contain an attack that starts here?" These questions help teams internalize security thinking rather than just following rules.
 
-Usually, the victims of attacks related to default settings aren't specifically targeted. Rather, they are found by automated scanning tools that attackers run over many possible targets, effectively prodding at many different systems to see if any roll over and expose some useful exploit. The automated nature of this attack means that it's important for you to review settings for every piece of your architecture. Even if an individual piece doesn't seem significant, it may provide a vulnerability that allows an attacker to use it as a gateway to your larger application.
+The goal is creating teams that instinctively separate concerns based on security requirements, not just functional requirements. When your team starts proposing separated architectures without being prompted, you know the culture shift is working.
 
-In particular, examine architecture components for unattended areas such as:
+## Intentional Configuration: Building Security-Conscious Deployment Culture
 
-- Default accounts, especially with default passwords, left in service;
-- Example web pages, tutorial applications, or sample data left in the application;
-- Unnecessary ports left in service, or ports left open to the Internet;
-- Unrestricted permitted HTTP methods;
-- Sensitive information stored in automated logs;
-- Default configured permissions in managed services; and,
-- Directory listings, or sensitive file types, left accessible by default.
+Security misconfiguration represents one of the most persistent challenges in engineering leadership because it reveals gaps in team processes and organizational culture. The problem isn't that engineers don't understand security—it's that deployment processes often prioritize speed over security verification.
 
-This list isn't exhaustive. Specific architecture components, such as cloud storage or web servers, will have other configurable features that should be reviewed. In general, reduce the application's attack surface by using minimal architecture components. If you use fewer components or don't install modules you don't need, you'll have fewer possible attack entry points to configure and safeguard.
+I've seen engineering teams that had excellent security knowledge but still suffered issues because their deployment culture didn't include security configuration validation. The issue compounds when teams are under pressure to ship features quickly, making it easy to rationalize skipping security configuration reviews.
 
-## 3. Controlled access and user scope
+The solution isn't just better checklists or automated scanners, though those help. The real challenge is building a deployment culture where security configuration becomes as automatic as running tests. This requires engineering leaders to demonstrate that security configuration is a fundamental part of professional software deployment, not an optional extra.
 
-One of the more difficult security problems to test in an application is misconfigured access control. Automated testing tools have limited capability to find areas of an application that one user shouldn't be able to access. Thus, this is often left to manual testing or source code review to discover. By considering this vulnerability early on in the software development lifecycle when architectural decisions are being made, you reduce the risk that it becomes a problem that's harder to fix later. After all, you wouldn't simply leave your master keys out of reach on a high ledge and hope no one comes along with a ladder.
+When I work with teams on configuration security, I focus on three organizational patterns that prevent security misconfiguration:
 
-![A cartoon of a user attempting to elevate privilege](access.png)
+1. **Configuration as Code**: Teams that treat configuration with the same rigor as application code naturally apply security thinking to deployment settings. When configuration changes require code review, security considerations become part of the discussion.
+2. **Default-Secure Patterns**: Rather than relying on engineers to remember security settings, establish organizational patterns where secure configuration is the default. This might mean custom deployment templates, infrastructure as code patterns, or automated validation that catches insecure defaults.
+3. **Security Configuration Reviews**: Just as you wouldn't deploy code without reviewing it, security configuration should be part of your regular architecture review process. This creates opportunities for knowledge sharing and continuous improvement.
 
-[Broken access control](https://github.com/OWASP/Top10/blob/master/2017/en/0xa5-broken-access-control.md) is listed in the OWASP Top 10, which goes into more detail on its various forms. As a simple example, consider an application with two levels of access: administrators and users. You want to build a new feature - the ability to moderate or ban users - with the intention that only administrators would be allowed to use it.
+Security configuration problems are usually process problems disguised as technical problems.
 
-If you're aware of the possibility of access control misconfigurations or exploits, you may decide to build the moderation feature in a completely separate area from the user-accessible space, such as on a different domain, or as part of a model that users don't share. This greatly reduces the risk that an access control misconfiguration or elevation of privilege vulnerability might allow a user to improperly access the moderation feature later on.
+> When teams consistently deploy with insecure configurations, it's often because their deployment process doesn't include security validation points, not because they lack security knowledge.
 
-Of course, robust access control in your application needs more support to be effective. Consider factors such as sensitive tokens, or keys passed as URL parameters, or whether a control fails securely or insecurely. Nevertheless, by considering authorization at the architectural stage, you can set yourself up to make further reinforcements easier to implement.
+Engineering leaders can transform this by making security configuration visible in deployment workflows. When your team sees you reviewing security settings during deployment reviews, asking questions about default configurations, and prioritizing security hardening alongside feature development, they learn to apply the same standards to their own work.
 
-## Security basics for maximum benefit
+The goal is creating teams that instinctively question defaults and validate security configurations, not just when prompted by checklists, but because secure configuration has become part of their professional identity as engineers.
 
-Similar to avoiding racking up technical debt by choosing a well-vetted framework, developers can avoid security debt by becoming more aware of common vulnerabilities and the simple architectural decisions you can make to help mitigate them. For a much more detailed resource on how to bake security into your applications from the start, the [OWASP Application Security Verification Standard](https://github.com/OWASP/ASVS) is a robust guide.
+## Controlled Access: Designing Authorization into Team Thinking
+
+Access control failures represent a particularly insidious class of security vulnerabilities because they're often invisible until it's too late. Unlike other security issues that can be caught by automated tools, access control problems require human understanding of business logic and user relationships. This makes them a perfect example of how security culture directly impacts security outcomes.
+
+The challenge for engineering leaders is that beyond being a technical problem, access control is a design thinking problem. Teams that build secure access controls don't just implement authorization checks; they also think systematically about user relationships, privilege boundaries, and failure modes during the design phase.
+
+> I've observed that teams struggling with access control issues often share a common pattern: they build features first and add authorization as an afterthought.
+
+This approach creates security debt that compounds over time, making it harder to reason about who should have access to what functionality.
+
+The solution requires a shift in how teams approach feature development. Instead of thinking about authorization as something you add to features, security-conscious teams think about authorization as a fundamental constraint that shapes feature design.
+
+Consider the difference between these two approaches when building an admin moderation feature:
+
+**Traditional Approach**: Build the moderation interface, then add permission checks to prevent unauthorized access.
+
+**Security-First Approach**: Design the moderation feature as a completely separate system with its own authentication context, making unauthorized access architecturally impossible.
+
+The second approach requires more upfront planning, but it creates systems that are secure by design rather than secure by careful (and slower, and more costly) implementation. More importantly, it teaches teams to think about authorization as a design constraint, not just a technical requirement.
+
+This shift in thinking has organizational implications beyond just security. When teams consistently design features with authorization constraints in mind, they develop better intuition about user workflows, system boundaries, and API design. The security thinking improves overall system design.
+
+> The goal is creating teams that instinctively design authorization into features rather than retrofitting it after implementation.
+
+As engineering leaders, we can foster this thinking by making authorization design visible in architecture discussions. When reviewing feature proposals, ask questions like: "Who needs access to this?" and "How would we prevent privilege escalation?" These questions help teams internalize authorization thinking as part of their design process.
+
+## From Architecture to Culture: The Leadership Impact
+
+The three architectural principles I've outlined—strategic separation, intentional configuration, and controlled access—represent more than just technical best practices. They're tools for building engineering cultures that make security decisions instinctively rather than reactively.
+
+The transformation happens when engineering leaders consistently demonstrate that security considerations are integral to professional software development. When your team sees you making architectural decisions that prioritize security boundaries, questioning configuration defaults, and designing authorization into features from the start, they learn to apply the same thinking to their own work.
+
+> This cultural shift has organizational benefits that extend far beyond security. Teams that think systematically about security boundaries also design better APIs, create more maintainable systems, and build more robust software overall. This security thinking improves engineering decision-making across the board.
+
+Security thinking isn't something you can successfully mandate through policies or checklists, though I’ve seen many organizations try. It emerges from the accumulated architectural decisions your team makes and the frameworks they internalize for thinking about system design. When security considerations become part of how your team naturally approaches technical problems, you've created something much more valuable than just secure applications—you've built a team that can adapt to new security challenges as they (constantly) emerge.
+
+As engineering leaders, our role isn't just to ensure our current systems are secure, but to build teams that will continue making security-conscious decisions as they face new challenges, technologies, and organizational pressures. The architectural principles we establish today define the security culture that will guide our teams through future unknowns.

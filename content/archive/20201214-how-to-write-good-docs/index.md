@@ -3,7 +3,7 @@ title: "How to Write Good Documentation"
 date: 2020-12-14T04:53:10-05:00
 
 aliases:
-    - /archive/how-to-write-good-documentation/
+    - /posts/how-to-write-good-documentation/
 description: A three-step process for writing documentation that saves time and ensures your projects are always understood, scalable, and easily maintained.
 tags:
     - development

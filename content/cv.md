@@ -2,6 +2,8 @@
 title: "Victoria Drake"
 outputs: HTML
 layout: page
+aliases:
+    - /about/cv
 ---
 
 ## Engineering Director and Principal Software Engineer
