@@ -1,5 +1,5 @@
 ---
-title: On doing great things
+title: On Doing Great Things
 date: 2019-03-08T18:36:15-05:00
 
 aliases:
@@ -38,6 +38,6 @@ I think that on the infrequent occasions when we encounter these people, we shou
 
 When I present myself, I don't point out that I'm a woman. I don't align myself with "women in tech" or seek to represent them. I don't go to women-only meetings or support organizations that discriminate against men, or anyone at all. It's not because I'm insecure as a woman, or ashamed that I'm a woman, or some other inflammatory adjective that lately shows up in conjunction with being female. It's because I've no reason to point out my gender, any more than needing to point out that my hair is black, or that I'm short. It's obvious and simultaneously irrelevant.
 
-When I identify with a group, I talk about the go-getters who wake up at 0500 every day and go work out - no matter the weather, or whether they feel like it. I tell stories about the people I met in different countries around the world, who left home, struck out on their own, and had an adventure, because they saw value in the experience. I identify with people who constantly build things, try things, design and make things, and then share those things with the world, because they love to do so. This is how I see myself. This is what matters to me.
+When I identify with a group, I talk about the go-getters who wake up at 0500 every day and go work out—no matter the weather, or whether they feel like it. I tell stories about the people I've met in different countries around the world, who left home, struck out on their own, and had an adventure, because they saw value in the experience. I identify with people who constantly build things, try things, design and make things, and then share those things with the world, because they love to do so. This is how I see myself. This is what matters to me.
 
 Like the unassuming park named after an amazing woman, when truly great things are done, they are done relatively quietly. Not done for the fanfare of announcing them to the world, but for the love of the thing itself. So go do great things, please. The world still needs them.
