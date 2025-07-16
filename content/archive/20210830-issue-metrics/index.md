@@ -10,7 +10,7 @@ tags:
     - data
     - python
 image: plot.png
-featured: true
+
 draft: false
 ---
 

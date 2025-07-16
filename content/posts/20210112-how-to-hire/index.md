@@ -8,6 +8,7 @@ description: "How to identify engineers who will succeed and stay on your team. 
 tags:
     - leadership
 draft: false
+featured: true
 ---
 
 I’ve seen too many hiring processes that focus on the wrong things. Teams spend hours on algorithm puzzles and whiteboard exercises, then hire someone who can’t write readable code or collaborate effectively with colleagues. Six months later, they’re dealing with either a performance issue or an unexpected resignation from someone who never felt like they fit the team.

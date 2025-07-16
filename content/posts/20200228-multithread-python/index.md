@@ -12,7 +12,7 @@ tags:
     - data
     - open-source
 image: cover.png
- 
+featured: true
 draft: false
 categories: ["article"]
 ---

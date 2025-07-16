@@ -12,7 +12,7 @@ image: cover.png
  
 draft: false
 categories: ["article"]
-featured: true
+
 ---
 
 If you've ever half-written a software project before taking a few days off, this is the article you'll discover you needed when you reopen that IDE.

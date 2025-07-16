@@ -9,6 +9,7 @@ tags:
 draft: false
 aliases:
     - /posts/the-directors-playbook-top-5-tips-for-cultivating-high-performing-software-teams/
+featured: true
 ---
 
 The question that changed everything for me was simple: “What if instead of being the person who solves problems, I became the person who creates problem solvers?” It sounds obvious in retrospect, but the shift from solving to enabling requires completely rewiring how you think about getting work done.

@@ -8,7 +8,7 @@ description: "Learn how effective leaders prepare for time off. Why vacation pla
 tags:
     - leadership
 image: cover.png
- 
+featured: true
 draft: false
 ---
 

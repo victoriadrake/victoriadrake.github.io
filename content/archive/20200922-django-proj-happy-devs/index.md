@@ -15,7 +15,7 @@ tags:
     - leadership
     - python
 image: cover.png
-featured: true
+
 draft: false
 categories: ["article"]
 ---

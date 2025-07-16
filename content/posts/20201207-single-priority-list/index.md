@@ -11,9 +11,10 @@ tags:
     - leadership
     - development
 image: prioritize.png
-featured: true
+
 draft: false
 categories: ["article"]
+featured: true
 ---
 
 In the engineering teams I lead, “priority” has no plural form. This drives some people slightly crazy, especially those who like to hedge their bets with phrases like “top priorities” or “critical priorities.” But I’ve learned that the moment you allow multiple top priorities, you’ve essentially created zero priorities.

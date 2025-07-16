@@ -11,7 +11,7 @@ tags:
 image: cover.png
  
 draft: false
-featured: true
+
 categories: ["article"]
 ---
 

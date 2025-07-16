@@ -17,7 +17,7 @@ image: cover_feedback-pbjreview.png
  
 draft: false
 categories: ["article"]
-
+featured: true
 wasfeatured:
     - The 7 Most Popular DEV Posts from the Past Week : https://dev.to/devteam/the-7-most-popular-dev-posts-from-the-past-week-1jg4
     - freeCodeCamp : https://medium.freecodecamp.org/how-to-set-up-a-short-feedback-loop-as-a-solo-coder-67709cba21e0
