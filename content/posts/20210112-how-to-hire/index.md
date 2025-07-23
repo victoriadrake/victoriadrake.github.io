@@ -4,7 +4,7 @@ date: 2021-01-12T05:50:53-05:00
 
 aliases:
     - /posts/how-to-get-hired-as-a-software-developer/
-description: "How to identify engineers who will succeed and stay on your team. Why traditional hiring processes miss what really matters for long-term success."
+description: "Hire engineers who thrive: Look beyond algorithms to find builders. Engineering leaders' guide to identifying talent that stays and delivers real value."
 tags:
     - leadership
 draft: false

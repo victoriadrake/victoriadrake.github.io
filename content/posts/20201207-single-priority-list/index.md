@@ -6,7 +6,7 @@ aliases:
     - /archive/priority/
     - /posts/priority/
     - /archive/how-a-single-priority-makes-your-tech-team-more-productive/
-description: "Learn how single-priority focus transforms engineering team performance. Why ‘priority’ has no plural and how to build autonomous, high-velocity teams."
+description: "Transform team velocity with single-priority focus. How engineering leaders build autonomous teams that ship faster by doing one thing at a time."
 tags:
     - leadership
     - development

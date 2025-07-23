@@ -4,7 +4,7 @@ date: 2019-03-08T18:36:15-05:00
 
 aliases:
     - /verbose/on-doing-great-things/
-description: Some thoughts inspired by International Women's Day, Grace Hopper, and making contributions to the world of tech.
+description: "Lessons from Grace Hopper on doing meaningful work in tech. Why focusing on contribution over recognition creates lasting impact in engineering leadership."
 tags:
     
 image: grace-murray-hopper-park.jpeg

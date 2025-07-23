@@ -4,7 +4,7 @@ date: 2021-08-09T03:17:49Z
 
 aliases:
     - /posts/building-in-context/
-description: "Why software projects fail when built in isolation. Practical strategies for building in context, avoiding the planning fallacy, and shipping features that actually work."
+description: "Why building in isolation guarantees failure. Engineering leaders' guide to iterative development that ships working features by staying connected to context."
 series:
 tags:
     - leadership

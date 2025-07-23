@@ -4,7 +4,7 @@ date: 2020-03-05T10:14:43-05:00
 
 aliases:
     - /blog/sqlite-in-production-with-wal/
-description: "When does SQLite with WAL mode fit production needs? Here's how engineering leaders can guide technology decisions based on actual requirements rather than industry hype."
+description: "SQLite with WAL mode in production: When simple beats complex. Engineering leaders' guide to choosing databases based on actual needs, not industry hype."
 tags:
     - compsci
     - data

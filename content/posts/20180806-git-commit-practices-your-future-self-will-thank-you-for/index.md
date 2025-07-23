@@ -5,7 +5,7 @@ date: 2018-08-06T08:54:56-04:00
 aliases:
     - /verbose/git-commit-practices-your-future-self-will-thank-you-for
     - /posts/git-commit-practices-your-future-self-will-thank-you-for/
-description: How engineering leaders can establish team commit standards that improve code quality, collaboration, and knowledge transfer.
+description: "Transform your team's engineering culture with structured Git commit standards. Learn how clear commit messages drive code quality and team collaboration."
 tags:
     - leadership
     - development

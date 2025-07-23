@@ -7,7 +7,7 @@ aliases:
     - /verbose/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/
     - /blog/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/
     - /posts/hackers-are-googling-your-plain-text-passwords-preventing-sensitive-data-exposure/
-description: How engineering leaders can transform data protection from a technical problem into a sustainable organizational capability through culture and process design.
+description: "Prevent data breaches by building security-conscious teams. Engineering leaders' guide to creating culture where secure data handling becomes second nature."
 tags:
     - security
     - leadership

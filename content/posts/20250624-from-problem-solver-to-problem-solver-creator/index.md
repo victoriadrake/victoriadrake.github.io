@@ -2,7 +2,7 @@
 title: "From Problem Solver to Problem Solver Creator"
 date: 2025-06-24T13:06:44Z
 categories:
-description: "How engineering leaders can multiply team impact by developing problem-solving skills in others. Practical strategies for building independent, capable engineering teams."
+description: "Multiply your impact: Transform from solving problems to creating problem solvers. Engineering leaders' guide to building autonomous, capable teams."
 tags:
     - leadership
     - career

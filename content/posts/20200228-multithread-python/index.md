@@ -4,7 +4,7 @@ date: 2020-02-28T09:31:02-05:00
 
 aliases:
     - /posts/multithreaded-python-slithering-through-an-i/o-bottleneck/
-description: "Engineering leadership lessons from Python performance optimization. How to identify real bottlenecks, work within technical constraints, and guide teams toward effective optimization decisions that deliver measurable results."
+description: "60x Python performance gains through smart multithreading. Engineering leaders' guide to identifying real bottlenecks and optimizing what actually matters."
 tags:
     - python
     - compsci

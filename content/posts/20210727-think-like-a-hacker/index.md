@@ -4,7 +4,7 @@ date: 2021-07-27T04:26:26-04:00
 
 aliases:
     - /posts/leading-with-a-cybersecurity-mindset/
-description: "How systematic skepticism helps teams write more secure code. Real strategies for building security-conscious engineering culture through questioning assumptions."
+description: "Build security-conscious teams by thinking like hackers. Engineering leaders' guide to systematic skepticism that prevents vulnerabilities before they exist."
 tags:
     - security
     - leadership

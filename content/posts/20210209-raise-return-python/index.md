@@ -4,7 +4,7 @@ date: 2021-02-09T05:34:48-05:00
 
 aliases:
     - /blog/do-i-raise-or-return-errors-in-python/
-description: A principal engineer's guide to building robust, debuggable Python applications that fail fast and fail loud.
+description: "Python error handling: When to raise exceptions vs return errors. Principal engineer's guide to building debuggable applications that fail predictably."
 tags:
     - leadership
     - compsci

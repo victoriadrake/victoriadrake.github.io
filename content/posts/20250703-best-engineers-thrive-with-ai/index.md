@@ -2,6 +2,7 @@
 title: "Why the Best Engineers Will Thrive Alongside AI"
 date: 2025-07-03T04:04:18-05:00
 categories:
+description: "AI won't replace great engineers—it will amplify them. How to position yourself as an engineering leader who thrives in an AI-augmented development world."
 tags:
     - ai
     - career

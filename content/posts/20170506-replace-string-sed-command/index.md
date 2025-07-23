@@ -10,7 +10,7 @@ aliases:
     - /verbose/replace-string-sed-command
     - /verbose/when-stackoverflow-sed-saves-30mins
     - /verbose/how-to-replace-a-string-in-a-dozen-old-blog-posts-with-one-sed-terminal-command
-description: The power to update multiple files with a single command in your terminal.
+description: "Master sed command-line tool to find and replace text across multiple files. Learn practical regex patterns for efficient bulk code refactoring in Linux/Unix."
 tags:
     - development
  

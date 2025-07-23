@@ -4,7 +4,7 @@ date: 2021-02-01T04:02:54-06:00
 
 aliases:
     - /posts/what-tech-leaders-do-before-going-on-vacation/
-description: "Learn how effective leaders prepare for time off. Why vacation planning is really about team development, delegation, and building organizational resilience."
+description: "Engineering leaders' vacation prep checklist: Build team autonomy before you go. Turn time off into opportunities for delegation and team development."
 tags:
     - leadership
 image: cover.png

@@ -3,7 +3,7 @@ title: The Descent Is Harder Than the Climb
 date: 2020-08-02T06:35:45-04:00
 aliases:
     - /posts/climbing-mt.-fuji/
-description: "Why maintaining success is harder than achieving it. Leadership lessons from Mt. Fuji about preparing for post-achievement challenges and scaling through uncertainty."
+description: "Why sustaining success is harder than achieving it. Engineering leadership lessons on preparing teams for the challenges that come after reaching goals."
 tags:
     - leadership
     - career
