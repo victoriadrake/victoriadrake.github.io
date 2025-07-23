@@ -131,13 +131,13 @@ If you examine our code above, you'll see that `flatten()` appears twice. The fi
 We'll break it down line-by-line for clarity:
 
 1. `function flatten(arr) {` - we name our overall function and specify that it will take an argument, `arr`.
-2. `if (Array.isArray(arr)) {we examine the provided "arrgument" (I know, I'm very funny) to determine if it is an array.
-3. `return arr.reduce(function(done,curr){if the previous line is true and the argument is an array, we want to reduce it. This is our recursive case. We'll apply the following function to each array item...
-4. `return done.concat(flatten(curr));nexpected plot twist appears! The function we want to apply is the very function we're in. Colloquially: take it from the top.
-5. `}, []);ell our reduce function to start with an empty accumulator (`done`), and wrap it up.
-6. `} else {this resolves our if statement at line 2. If the provided argument isn't an array...
-7. `return arr;rn whatever the`arr` is. (Hopefully a cute apple.) This is our base case that breaks us out of recursion.
-8. `}end the else statement.
+2. `if (Array.isArray(arr)) {` - we examine the provided "arrgument" (I know, I'm very funny) to determine if it is an array.
+3. `return arr.reduce(function(done,curr){` - if the previous line is true and the argument is an array, we want to reduce it. This is our recursive case. We'll apply the following function to each array item...
+4. `return done.concat(flatten(curr));` - an unexpected plot twist appears! The function we want to apply is the very function we're in. Colloquially: take it from the top.
+5. `}, []);` - we tell our reduce function to start with an empty accumulator (`done`), and wrap it up.
+6. `} else {` - this resolves our if statement at line 2. If the provided argument isn't an array...
+7. `return arr;` - return whatever the `arr` is. (Hopefully a cute apple.) This is our base case that breaks us out of recursion.
+8. `}` - end the else statement.
 9. `}` - end the overall function.
 
 And we're done! We've gone from our 24 line, 4-layers-deep nested `for` loop solution to a much more concise, 9 line recursive reduce solution. Reduce and recursion can seem a little impenetrable at first, but they're valuable tools that will save you lots of future effort once you grasp them.
