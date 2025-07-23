@@ -33,7 +33,7 @@ Building this kind of culture requires engineering leaders to think beyond techn
 
 Before diving into solutions, it's worth understanding just how pervasive data exposure has become. The reality is that sensitive data from organizations of all sizes is readily discoverable through simple search techniques. A quick search for `site:pastebin.com "api_key"` or `site:github.com "password"` reveals thousands of exposed credentials, database connections, and API keys from companies around the world.
 
-This isn't theoretical—it's happening to teams just like yours, right now. The [Google Hacking Database](~https://www.exploit-db.com/google-hacking-database~) catalogs thousands of search queries that can expose sensitive data, and security researchers regularly discover new leaked credentials on platforms like Pastebin, GitHub, and even internal Slack channels that have been accidentally made public.
+This isn't theoretical—it's happening to teams just like yours, right now. The [Google Hacking Database](https://www.exploit-db.com/google-hacking-database) catalogs thousands of search queries that can expose sensitive data, and security researchers regularly discover new leaked credentials on platforms like Pastebin, GitHub, and even internal Slack channels that have been accidentally made public.
 
 {{< figure alt="A screenshot of exposed api key in Google search" src="pastebin_apikey.png" class="screenshot" caption="API keys exposed through public paste services—a common data exposure pattern." >}}
 
