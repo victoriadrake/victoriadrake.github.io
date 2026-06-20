@@ -21,7 +21,7 @@ categories: ["article"]
 
 The most frustrating security incidents I've dealt with as an engineering leader weren't caused by sophisticated attacks or zero-day vulnerabilities. They were caused by well-intentioned team members who accidentally exposed sensitive data through everyday tools and processes. A developer pasting API keys into a public Slack channel. A support engineer sharing database credentials through an unsecured text-sharing service. A product manager including real customer data in a publicly accessible report.
 
-These incidents reveal a fundamental truth about data protection: it's not primarily a technical problem—it's an organizational one. The security of our applications depends as much on how our teams handle sensitive data in their daily workflows as it does on our encryption algorithms or access controls.
+These incidents reveal a fundamental truth about data protection: it's not primarily a technical problem—it's an organizational one. The security of our applications depends as much on how our teams handle sensitive data in their daily workflows as it does on our encryption algorithms or access controls. (The flip side of culture is the architecture that encodes it—see [how engineering leaders build security culture through architecture decisions](/posts/how-engineering-leaders-build-security-culture-through-architecture-decisions/).)
 
 The challenge for engineering leaders is that traditional security approaches focus on technical controls while overlooking the human systems that determine how data actually flows through our organizations. When we treat data protection as purely a technical problem, we create a gap between our security policies and the reality of how our teams work.
 

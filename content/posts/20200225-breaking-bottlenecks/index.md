@@ -116,7 +116,7 @@ The decision matrix looked like this:
 - ****Maintainability****: We needed something contributors could debug and extend
 - ****Long-term scalability****: The solution needed to handle growing content without constant optimization
 
-I chose to prototype the link checker in both languages. I built a multithreaded Python version that I dubbed [Hydra](https://github.com/victoriadrake/hydra-link-checker), and a Go version that took advantage of goroutines. This gave us concrete data to inform the decision rather than relying on assumptions. This approach—building multiple solutions to validate architectural choices—is something I've found invaluable for critical infrastructure decisions.
+I chose to prototype the link checker in both languages. I built a multithreaded Python version that I dubbed [Hydra](https://github.com/victoriadrake/hydra-link-checker), and a Go version that took advantage of goroutines. This gave us concrete data to inform the decision rather than relying on assumptions. This approach—building multiple solutions to validate architectural choices—is something I've found invaluable for critical infrastructure decisions. (For the technical deep dive on how Hydra's multithreading actually achieved its speedup, see [17 Minutes to 16 Seconds](/posts/17-minutes-to-16-seconds-a-60x-performance-improvement-from-python/).)
 
 ## Designing Solutions That Scale With Your Team
 
