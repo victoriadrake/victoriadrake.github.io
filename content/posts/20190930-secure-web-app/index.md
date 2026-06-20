@@ -19,7 +19,7 @@ Leading engineering teams means constantly balancing several goals: speed to mar
 
 The "we can do security later" mindset creates what I call security debt—technical decisions that make it exponentially harder to secure applications as they scale. Unlike other forms of technical debt, security debt compounds in immediately dangerous ways. A rushed architectural decision made to meet a deadline can become a persistent vulnerability that affects every feature built on top of it.
 
-As engineering leaders, we have a unique opportunity to shape how our teams think about security. The architectural decisions we make and the frameworks we establish don't just affect our current codebase—they define the security culture that will carry our teams through future challenges.
+As engineering leaders, we have a unique opportunity to shape how our teams think about security. The architectural decisions we make and the frameworks we establish don't just affect our current codebase—they define the security culture that will carry our teams through future challenges. That culture takes hold when your whole team learns to [think like a hacker](/posts/how-to-think-like-a-hacker-and-why-your-team-should-too/) and a [data protection mindset](/posts/building-data-protection-culture-why-engineering-leaders-must-address-the-human-side-of-security/) becomes second nature.
 
 > I've found that the most effective approach isn't to mandate security practices after the fact, but to build security thinking into the fundamental architectural decisions that guide daily development work.
 

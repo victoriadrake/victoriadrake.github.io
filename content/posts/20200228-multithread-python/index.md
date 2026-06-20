@@ -160,6 +160,6 @@ Most importantly, it means recognizing that performance optimization is a techni
 
 ## The Real Lesson
 
-Hydra’s performance gains from 17 minutes to 16 seconds teaches a lesson that applies far beyond Python: measure first, optimize second, and always focus on the constraint that’s actually limiting your system. Whether you’re debugging performance bottlenecks or organizational inefficiencies, the biggest wins come from addressing the right problem rather than optimizing the wrong one exceptionally well.
+Hydra’s performance gains from 17 minutes to 16 seconds teaches a lesson that applies far beyond Python: measure first, optimize second, and always focus on the constraint that’s actually limiting your system. Whether you’re debugging performance bottlenecks or organizational inefficiencies, the biggest wins come from addressing the right problem rather than optimizing the wrong one exceptionally well. For the leadership side of this story—how breaking this bottleneck reshaped an entire team's workflow—see [From 17 Minutes to 8 Seconds](/posts/from-17-minutes-to-8-seconds-strategic-performance-optimization-for-engineering-teams/).
 
 The next time your team debates whether to rewrite everything in Go for performance, remember Hydra's 60x improvement using standard Python libraries. Sometimes the most effective optimization is the one you can implement this week rather than the solution you'll build next quarter… or the quarter after that.
