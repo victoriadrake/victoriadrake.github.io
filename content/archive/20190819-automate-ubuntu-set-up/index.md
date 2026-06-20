@@ -39,7 +39,7 @@ Dotfiles are what most Linux enthusiasts call configuration files. They typicall
 
 The `.bashrc` file is a list of commands executed at startup by interactive, non-login shells. [Interactive vs non-interactive shells](https://www.tldp.org/LDP/abs/html/intandnonint.html) can be a little confusing, but aren't necessary for us to worry about here. For our purposes, any time you open a new terminal, see a prompt, and can type commands into it, your `.bashrc` was executed.
 
-Lines in this file can help improve your workflow by creating aliases that reduce keystrokes, or by displaying a helpful prompt with useful information. It can even run user-created programs, like [Eddie](https://github.com/victoriadrake/eddie-terminal). For more ideas, you can have a look at [my `.bashrc` file on GitHub](https://github.com/victoriadrake/dotfiles/blob/ubuntu-19.10/.bashrc).
+Lines in this file can help improve your workflow by creating aliases that reduce keystrokes, or by displaying a helpful prompt with useful information. It can even run user-created programs. For more ideas, you can have a look at [my `.bashrc` file on GitHub](https://github.com/victoriadrake/dotfiles/blob/ubuntu-19.10/.bashrc).
 
 ### `.vimrc`
 
